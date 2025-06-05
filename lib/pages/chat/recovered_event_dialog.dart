@@ -1,0 +1,67 @@
+import 'package:fluffychat/config/themes.dart';
+import 'package:fluffychat/pages/chat/events/message.dart';
+import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:flutter/material.dart';
+import 'package:matrix/matrix.dart';
+
+import 'package:fluffychat/generated/l10n/l10n.dart';
+
+class RecoveredEventDialog extends StatefulWidget {
+  final Event event;
+  final Timeline timeline;
+
+  const RecoveredEventDialog({
+    required this.event,
+    required this.timeline,
+    super.key,
+  });
+
+  @override
+  RecoveredEventDialogState createState() =>
+      RecoveredEventDialogState(event, timeline);
+}
+
+class RecoveredEventDialogState extends State<RecoveredEventDialog> {
+  final Event event;
+  final Timeline timeline;
+  RecoveredEventDialogState(this.event, this.timeline);
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final colors = [
+      theme.secondaryBubbleColor,
+      theme.bubbleColor,
+    ];
+
+	final message = Message(
+                        event,
+                        colors: colors,
+                        onInfoTab: (Event ev) => {},
+                        onMention: () => {},
+                        onSelect: (Event ev) => {},
+                        onSwipe: () => {},
+                        scrollToEventId: (String p0) => {},
+                        timeline: timeline,
+                        animateIn: false,
+                        displayReadMarker: false,
+                        highlightMarker: false,
+                        longPressSelect: false,
+                        selected: false,
+                        wallpaperMode: false,
+                      );
+
+    return Scaffold(
+		appBar: AppBar(
+			title: Text(L10n.of(context).recoveredMessage)
+		),
+		body: Container(
+			child: Column(
+				children: [
+					message,
+				],
+			),
+		),
+	);
+  }
+}
