@@ -63,7 +63,7 @@ Future<DatabaseApi> flutterMatrixSdkDatabaseBuilder(Client client) async {
 Future<MatrixSdkDatabase> _constructDatabase(Client client) async {
   if (kIsWeb) {
     html.window.navigator.storage?.persist();
-    return MatrixSdkDatabase(client.clientName);
+    return MatrixSdkDatabase.init(client.clientName);
   }
 
   final cipher = await getDatabaseCipher();
@@ -113,7 +113,7 @@ Future<MatrixSdkDatabase> _constructDatabase(Client client) async {
     ),
   );
 
-  return MatrixSdkDatabase(
+  return MatrixSdkDatabase.init(
     client.clientName,
     database: database,
     maxFileSize: 1000 * 1000 * 10,

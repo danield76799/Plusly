@@ -62,7 +62,10 @@ dependencies:
   latlong2: ^0.9.1
   linkify: ^5.0.0
   material: ^1.0.0+2
-  matrix: 0.40.0
+  matrix:
+    git:
+      url: https://git.extera.xyz/OfficialDakari/MatrixDartSdk.git
+      ref: main
   mime: ^1.0.6
   native_imaging: ^0.2.0
   opus_caf_converter_dart: ^1.0.1

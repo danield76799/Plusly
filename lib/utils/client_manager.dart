@@ -117,8 +117,8 @@ abstract class ClientManager {
         'im.ponies.room_emotes',
       },
       logLevel: kReleaseMode ? Level.warning : Level.verbose,
-      databaseBuilder: flutterMatrixSdkDatabaseBuilder,
-      //legacyDatabaseBuilder: FlutterHiveCollectionsDatabase.databaseBuilder,
+      //database: flutterMatrixSdkDatabaseBuilder(client),
+      legacyDatabaseBuilder: flutterMatrixSdkDatabaseBuilder,
       supportedLoginTypes: {
         AuthenticationTypes.password,
         AuthenticationTypes.sso,

@@ -1153,10 +1153,11 @@ packages:
   matrix:
     dependency: "direct main"
     description:
-      name: matrix
-      sha256: "7d15fdbc760be7e40c58bb65e03baa8241b1e31db2bc67dab61883aabc083a85"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: main
+      resolved-ref: "6f3bdad65c079a3784ce487f320195f93a8708a8"
+      url: "https://git.extera.xyz/OfficialDakari/MatrixDartSdk.git"
+    source: git
     version: "0.40.0"
   meta:
     dependency: transitive
