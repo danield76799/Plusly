@@ -11,7 +11,6 @@ class AddWidgetTileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     return ExpansionTile(
       title: Text(L10n.of(context).addWidget),
       leading: const Icon(Icons.add),
