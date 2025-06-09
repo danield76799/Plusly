@@ -286,9 +286,9 @@ class EmotesSettingsController extends State<EmotesSettings> {
 
         if (result.isEmpty) return null;
 
-        final buffer = InputStream(await result.first.readAsBytes());
+        final buffer = await result.first.readAsBytes();
 
-        final archive = ZipDecoder().decodeBuffer(buffer);
+        final archive = ZipDecoder().decodeBytes(buffer);
 
         return archive;
       },

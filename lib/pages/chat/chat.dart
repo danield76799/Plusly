@@ -136,6 +136,7 @@ class ChatController extends State<ChatPageWithRoom>
       builder: (c) => SendFileDialog(
         files: details.files,
         room: room,
+        replyEvent: replyEvent,
         outerContext: context,
       ),
     );
@@ -273,10 +274,11 @@ class ChatController extends State<ChatPageWithRoom>
     showAdaptiveDialog(
       context: context,
       builder: (c) => SendFileDialog(
-          files: files,
-          room: room,
-          outerContext: context,
-          replyEvent: replyEvent),
+        files: files,
+        room: room,
+        outerContext: context,
+        replyEvent: replyEvent,
+      ),
     );
   }
 
@@ -554,7 +556,10 @@ class ChatController extends State<ChatPageWithRoom>
       allowMultiple: true,
       type: type,
     );
-    if (files.isEmpty) return;
+    if (files.isEmpty) {
+      Logs().v("Returning in sendFileAction, bc files.isEmpty==true");
+      return;
+    }
     await showAdaptiveDialog(
       context: context,
       builder: (c) => SendFileDialog(
@@ -764,9 +769,10 @@ class ChatController extends State<ChatPageWithRoom>
       );
       return;
     }
-	var content = {...event.content};
+    var content = {...event.content};
     try {
-      text = await Translator.translate(text, PlatformDispatcher.instance.locale.languageCode);
+      text = await Translator.translate(
+          text, PlatformDispatcher.instance.locale.languageCode);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(L10n.of(context).errorTranslatingMessage)),
@@ -782,7 +788,14 @@ class ChatController extends State<ChatPageWithRoom>
     Navigator.of(context).push(new MaterialPageRoute(
         builder: (BuildContext ctx) {
           return TranslatedEventDialog(
-              event: new Event(content: content, type: 'm.room.message', eventId: event.eventId, senderId: event.senderId, originServerTs: event.originServerTs, room: room), timeline: timeline!);
+              event: new Event(
+                  content: content,
+                  type: 'm.room.message',
+                  eventId: event.eventId,
+                  senderId: event.senderId,
+                  originServerTs: event.originServerTs,
+                  room: room),
+              timeline: timeline!);
         },
         fullscreenDialog: true));
   }

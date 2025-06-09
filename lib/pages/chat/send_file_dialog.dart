@@ -243,82 +243,82 @@ class SendFileDialogState extends State<SendFileDialog> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 12),
-                  if (uniqueFileType == 'image')
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: SizedBox(
-                        height: 256,
-                        child: Center(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: widget.files.length,
-                            scrollDirection: Axis.horizontal,
-                            itemBuilder: (context, i) => Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: Material(
-                                borderRadius: BorderRadius.circular(
-                                  AppConfig.borderRadius / 2,
-                                ),
-                                color: Colors.black,
-                                clipBehavior: Clip.hardEdge,
-                                child: FutureBuilder(
-                                  future: widget.files[i].readAsBytes(),
-                                  builder: (context, snapshot) {
-                                    final bytes = snapshot.data;
-                                    if (bytes == null) {
-                                      return const Center(
-                                        child: CircularProgressIndicator
-                                            .adaptive(),
-                                      );
-                                    }
-                                    if (snapshot.error != null) {
-                                      Logs().w(
-                                        'Unable to preview image',
-                                        snapshot.error,
-                                        snapshot.stackTrace,
-                                      );
-                                      return const Center(
-                                        child: SizedBox(
-                                          width: 256,
-                                          height: 256,
-                                          child: Icon(
-                                            Icons.broken_image_outlined,
-                                            size: 64,
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                    return Image.memory(
-                                      bytes,
-                                      height: 256,
-                                      width: widget.files.length == 1
-                                          ? 256 - 36
-                                          : null,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, e, s) {
-                                        Logs()
-                                            .w('Unable to preview image', e, s);
-                                        return const Center(
-                                          child: SizedBox(
-                                            width: 256,
-                                            height: 256,
-                                            child: Icon(
-                                              Icons.broken_image_outlined,
-                                              size: 64,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  if (uniqueFileType != 'image')
+                  // if (uniqueFileType == 'image')
+                  //   Padding(
+                  //     padding: const EdgeInsets.only(bottom: 16.0),
+                  //     child: SizedBox(
+                  //       height: 256,
+                  //       child: Center(
+                  //         child: ListView.builder(
+                  //           shrinkWrap: true,
+                  //           itemCount: widget.files.length,
+                  //           scrollDirection: Axis.horizontal,
+                  //           itemBuilder: (context, i) => Padding(
+                  //             padding: const EdgeInsets.only(right: 8.0),
+                  //             child: Material(
+                  //               borderRadius: BorderRadius.circular(
+                  //                 AppConfig.borderRadius / 2,
+                  //               ),
+                  //               color: Colors.black,
+                  //               clipBehavior: Clip.hardEdge,
+                  //               child: FutureBuilder(
+                  //                 future: widget.files[i].readAsBytes(),
+                  //                 builder: (context, snapshot) {
+                  //                   final bytes = snapshot.data;
+                  //                   if (bytes == null) {
+                  //                     return const Center(
+                  //                       child: CircularProgressIndicator
+                  //                           .adaptive(),
+                  //                     );
+                  //                   }
+                  //                   if (snapshot.error != null) {
+                  //                     Logs().w(
+                  //                       'Unable to preview image',
+                  //                       snapshot.error,
+                  //                       snapshot.stackTrace,
+                  //                     );
+                  //                     return const Center(
+                  //                       child: SizedBox(
+                  //                         width: 256,
+                  //                         height: 256,
+                  //                         child: Icon(
+                  //                           Icons.broken_image_outlined,
+                  //                           size: 64,
+                  //                         ),
+                  //                       ),
+                  //                     );
+                  //                   }
+                  //                   return Image.memory(
+                  //                     bytes,
+                  //                     height: 256,
+                  //                     width: widget.files.length == 1
+                  //                         ? 256 - 36
+                  //                         : null,
+                  //                     fit: BoxFit.contain,
+                  //                     errorBuilder: (context, e, s) {
+                  //                       Logs()
+                  //                           .w('Unable to preview image', e, s);
+                  //                       return const Center(
+                  //                         child: SizedBox(
+                  //                           width: 256,
+                  //                           height: 256,
+                  //                           child: Icon(
+                  //                             Icons.broken_image_outlined,
+                  //                             size: 64,
+                  //                           ),
+                  //                         ),
+                  //                       );
+                  //                     },
+                  //                   );
+                  //                 },
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // if (uniqueFileType != 'image')
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Row(

@@ -118,7 +118,7 @@ abstract class ClientManager {
       },
       logLevel: kReleaseMode ? Level.warning : Level.verbose,
       //database: flutterMatrixSdkDatabaseBuilder(client),
-      legacyDatabaseBuilder: flutterMatrixSdkDatabaseBuilder,
+      databaseBuilder: flutterMatrixSdkDatabaseBuilder,
       supportedLoginTypes: {
         AuthenticationTypes.password,
         AuthenticationTypes.sso,
