@@ -34,6 +34,9 @@ class L10nKo extends L10n {
   String get normalUser => 'Normal user';
 
   @override
+  String get pinCode => 'PIN code';
+
+  @override
   String get remove => '지우기';
 
   @override

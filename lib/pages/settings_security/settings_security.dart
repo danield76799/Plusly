@@ -83,7 +83,8 @@ class SettingsSecurityController extends State<SettingsSecurity> {
       cancelLabel: L10n.of(context).cancel,
       isDestructive: true,
       obscureText: true,
-      hintText: '******',
+      keyboardType: TextInputType.visiblePassword,
+      hintText: L10n.of(context).password,
       minLines: 1,
       maxLines: 1,
     );

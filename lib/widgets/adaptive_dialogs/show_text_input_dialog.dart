@@ -73,6 +73,7 @@ Future<String?> showTextInputDialog({
                       maxLines: maxLines,
                       maxLength: maxLength,
                       keyboardType: keyboardType,
+                      obscureText: obscureText,
                     );
                   },
                 ),

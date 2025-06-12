@@ -34,6 +34,9 @@ class L10nTa extends L10n {
   String get normalUser => 'Normal user';
 
   @override
+  String get pinCode => 'PIN code';
+
+  @override
   String get remove => 'அகற்று';
 
   @override

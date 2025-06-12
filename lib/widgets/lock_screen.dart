@@ -77,12 +77,6 @@ class _LockScreenState extends State<LockScreen> {
             child: ListView(
               shrinkWrap: true,
               children: [
-                Center(
-                  child: Image.asset(
-                    'assets/info-logo.png',
-                    width: 256,
-                  ),
-                ),
                 TextField(
                   controller: _textEditingController,
                   textInputAction: TextInputAction.done,
@@ -99,7 +93,7 @@ class _LockScreenState extends State<LockScreen> {
                   ],
                   decoration: InputDecoration(
                     errorText: _errorText,
-                    hintText: '****',
+                    hintText: L10n.of(context).pinCode,
                     suffix: IconButton(
                       icon: const Icon(Icons.lock_open_outlined),
                       onPressed: () => tryUnlock(_textEditingController.text),

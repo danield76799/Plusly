@@ -34,6 +34,9 @@ class L10nAr extends L10n {
   String get normalUser => 'Normal user';
 
   @override
+  String get pinCode => 'PIN code';
+
+  @override
   String get remove => 'أزِل';
 
   @override

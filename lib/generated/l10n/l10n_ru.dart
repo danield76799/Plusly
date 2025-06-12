@@ -34,6 +34,9 @@ class L10nRu extends L10n {
   String get normalUser => 'Участник';
 
   @override
+  String get pinCode => 'PIN-код';
+
+  @override
   String get remove => 'Удалить';
 
   @override
@@ -1135,7 +1138,7 @@ class L10nRu extends L10n {
 
   @override
   String get pleaseEnter4Digits =>
-      'Введите 4 цифры, или оставьте поле пустым, чтобы отключить блокировку приложения.';
+      'Введите PIN-код. Оставьте поле пустым, чтобы отключить блокировку приложения.';
 
   @override
   String get pleaseEnterRecoveryKey => 'Введите ключ восстановления:';

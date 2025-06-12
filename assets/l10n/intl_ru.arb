@@ -1623,11 +1623,12 @@
 		"type": "String",
 		"placeholders": {}
 	},
-	"pleaseEnter4Digits": "Введите 4 цифры, или оставьте поле пустым, чтобы отключить блокировку приложения.",
+	"pleaseEnter4Digits": "Введите PIN-код. Оставьте поле пустым, чтобы отключить блокировку приложения.",
 	"@pleaseEnter4Digits": {
 		"type": "String",
 		"placeholders": {}
 	},
+    "pinCode": "PIN-код",
 	"pleaseEnterRecoveryKey": "Введите ключ восстановления:",
 	"@pleaseEnterRecoveryKey": {},
 	"pleaseEnterYourPassword": "Пожалуйста, введите ваш пароль",

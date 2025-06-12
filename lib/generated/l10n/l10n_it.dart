@@ -34,6 +34,9 @@ class L10nIt extends L10n {
   String get normalUser => 'Normal user';
 
   @override
+  String get pinCode => 'PIN code';
+
+  @override
   String get remove => 'Rimuovi';
 
   @override

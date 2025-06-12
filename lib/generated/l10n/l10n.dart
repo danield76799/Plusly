@@ -241,6 +241,12 @@ abstract class L10n {
   /// **'Normal user'**
   String get normalUser;
 
+  /// No description provided for @pinCode.
+  ///
+  /// In en, this message translates to:
+  /// **'PIN code'**
+  String get pinCode;
+
   /// No description provided for @remove.
   ///
   /// In en, this message translates to:

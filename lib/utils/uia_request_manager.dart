@@ -34,7 +34,7 @@ extension UiaRequestManager on MatrixState {
                 minLines: 1,
                 maxLines: 1,
                 obscureText: true,
-                hintText: '******',
+                hintText: l10n.password,
               ));
           if (input == null || input.isEmpty) {
             return uiaRequest.cancel();

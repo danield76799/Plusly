@@ -15,6 +15,7 @@
   "setPermissionsLevelDescription": "Please choose a predefined role below or enter a custom permission level between 0 and 100.",
   "ignoreUser": "Ignore user",
   "normalUser": "Normal user",
+  "pinCode": "PIN code",
   "remove": "Remove",
   "@remove": {
     "type": "String",
