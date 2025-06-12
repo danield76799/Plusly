@@ -37,6 +37,7 @@ import 'package:fluffychat/widgets/layouts/two_column_layout.dart';
 import 'package:fluffychat/widgets/log_view.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 import 'package:fluffychat/widgets/share_scaffold_dialog.dart';
+import 'package:matrix/matrix.dart';
 
 abstract class AppRoutes {
   static FutureOr<String?> loggedInRedirect(
@@ -73,7 +74,7 @@ abstract class AppRoutes {
           pageBuilder: (context, state) => defaultPageBuilder(
             context,
             state,
-            const Login(),
+            Login(client: state.extra as Client),
           ),
           redirect: loggedInRedirect,
         ),
@@ -260,7 +261,9 @@ abstract class AppRoutes {
                           pageBuilder: (context, state) => defaultPageBuilder(
                             context,
                             state,
-                            const Login(),
+                            Login(
+                              client: state.extra as Client,
+                            ),
                           ),
                           redirect: loggedOutRedirect,
                         ),

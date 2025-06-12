@@ -11,6 +11,8 @@ abstract class AppConfig {
   static String? get applicationWelcomeMessage => _applicationWelcomeMessage;
   static String _defaultHomeserver = 'extera.xyz';
 
+  static bool displayNavigationRail = true;
+
   static String get defaultHomeserver => _defaultHomeserver;
   static double fontSizeFactor = 1;
   static const Color chatColor = primaryColor;

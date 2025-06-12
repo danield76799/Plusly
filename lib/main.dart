@@ -5,6 +5,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
+
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/utils/client_manager.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
@@ -20,6 +22,8 @@ void main() async {
   // To make sure that the parts of flutter needed are started up already, we need to ensure that the
   // widget bindings are initialized already.
   WidgetsFlutterBinding.ensureInitialized();
+
+  await vod.init(wasmPath: './assets/assets/vodozemac/');
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final store = await SharedPreferences.getInstance();

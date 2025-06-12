@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SettingKeys {
+  static const String displayNavigationRail = 'chat.fluffy.displayNavigationRail';
   static const String hideAvatarsInInvites = 'xyz.extera.next.hideAvatarsInInvites';
   static const String pureBlack = 'xyz.extera.next.pureBlack';
   static const String renderHtml = 'chat.fluffy.renderHtml';
@@ -43,6 +44,7 @@ enum AppSettings<T> {
   audioRecordingNoiseSuppress<bool>('audioRecordingNoiseSuppress', true),
   audioRecordingBitRate<int>('audioRecordingBitRate', 64000),
   audioRecordingSamplingRate<int>('audioRecordingSamplingRate', 44100),
+  enableSoftLogout<bool>('enableSoftLogout', true),
   pushNotificationsGatewayUrl<String>(
     'pushNotificationsGatewayUrl',
     'https://push.fluffychat.im/_matrix/push/v1/notify',
