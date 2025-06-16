@@ -77,6 +77,7 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   await firstClient?.accountDataLoading;
 
   ErrorWidget.builder = (details) => FluffyChatErrorWidget(details);
+  Logs().w("${clients.length} clients");
   runApp(FluffyChatApp(clients: clients, pincode: pin, store: store));
 }
 

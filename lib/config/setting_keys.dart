@@ -44,7 +44,7 @@ enum AppSettings<T> {
   audioRecordingNoiseSuppress<bool>('audioRecordingNoiseSuppress', true),
   audioRecordingBitRate<int>('audioRecordingBitRate', 64000),
   audioRecordingSamplingRate<int>('audioRecordingSamplingRate', 44100),
-  enableSoftLogout<bool>('enableSoftLogout', true),
+  enableSoftLogout<bool>('enableSoftLogout', false),
   pushNotificationsGatewayUrl<String>(
     'pushNotificationsGatewayUrl',
     'https://push.fluffychat.im/_matrix/push/v1/notify',
