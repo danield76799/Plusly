@@ -247,6 +247,24 @@ abstract class L10n {
   /// **'PIN code'**
   String get pinCode;
 
+  /// No description provided for @displayNavigationRail.
+  ///
+  /// In en, this message translates to:
+  /// **'Display navigation rail on mobile'**
+  String get displayNavigationRail;
+
+  /// No description provided for @enableGradient.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable bubble background gradient'**
+  String get enableGradient;
+
+  /// No description provided for @translationDisabledInE2e.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud translation is disabled in encrypted rooms to preserve privacy. Select specific words and use system context menu to translate with apps that support it.'**
+  String get translationDisabledInE2e;
+
   /// No description provided for @remove.
   ///
   /// In en, this message translates to:

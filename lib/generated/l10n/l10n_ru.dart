@@ -37,6 +37,16 @@ class L10nRu extends L10n {
   String get pinCode => 'PIN-код';
 
   @override
+  String get displayNavigationRail => 'Всегда показывать боковую панель';
+
+  @override
+  String get enableGradient => 'Фоновый градиент для сообщений';
+
+  @override
+  String get translationDisabledInE2e =>
+      'Облачные переводы недоступны в зашифрованных комнатах для защиты конфиденциальности. Выбирайте отдельные слова и переводите их через другие приложения.';
+
+  @override
   String get remove => 'Удалить';
 
   @override

@@ -37,6 +37,16 @@ class L10nIe extends L10n {
   String get pinCode => 'PIN code';
 
   @override
+  String get displayNavigationRail => 'Display navigation rail on mobile';
+
+  @override
+  String get enableGradient => 'Enable bubble background gradient';
+
+  @override
+  String get translationDisabledInE2e =>
+      'Cloud translation is disabled in encrypted rooms to preserve privacy. Select specific words and use system context menu to translate with apps that support it.';
+
+  @override
   String get remove => 'Remover';
 
   @override
