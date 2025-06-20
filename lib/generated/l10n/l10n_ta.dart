@@ -2299,6 +2299,9 @@ class L10nTa extends L10n {
   }
 
   @override
+  String get customReaction => 'Add reaction';
+
+  @override
   String canceledKeyVerification(String sender) {
     return '$sender ரத்து செய்யப்பட்ட விசை சரிபார்ப்பு';
   }

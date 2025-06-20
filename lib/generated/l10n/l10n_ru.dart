@@ -2275,6 +2275,9 @@ class L10nRu extends L10n {
   }
 
   @override
+  String get customReaction => 'Добавить реакцию';
+
+  @override
   String canceledKeyVerification(String sender) {
     return '$sender отклонил(а) подтверждение ключей';
   }

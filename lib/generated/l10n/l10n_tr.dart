@@ -2279,6 +2279,9 @@ class L10nTr extends L10n {
   }
 
   @override
+  String get customReaction => 'Add reaction';
+
+  @override
   String canceledKeyVerification(String sender) {
     return '$sender anahtar doğrulamayı iptal etti';
   }

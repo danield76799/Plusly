@@ -2278,6 +2278,9 @@ class L10nHr extends L10n {
   }
 
   @override
+  String get customReaction => 'Add reaction';
+
+  @override
   String canceledKeyVerification(String sender) {
     return '$sender je prekinuo/la potvrđivanje ključa';
   }

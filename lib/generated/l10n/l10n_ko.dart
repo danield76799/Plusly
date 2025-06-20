@@ -2222,6 +2222,9 @@ class L10nKo extends L10n {
   }
 
   @override
+  String get customReaction => 'Add reaction';
+
+  @override
   String canceledKeyVerification(String sender) {
     return '$sender가 키 검증을 취소함';
   }

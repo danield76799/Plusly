@@ -373,7 +373,7 @@ class ChatView extends StatelessWidget {
                                     : Column(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          ReactionsPicker(controller),
+                                          // ReactionsPicker(controller),
                                           ReplyDisplay(controller),
                                           ChatInputRow(controller),
                                           ChatEmojiPicker(controller),

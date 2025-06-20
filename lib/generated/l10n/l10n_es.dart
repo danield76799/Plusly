@@ -2293,6 +2293,9 @@ class L10nEs extends L10n {
   }
 
   @override
+  String get customReaction => 'Add reaction';
+
+  @override
   String canceledKeyVerification(String sender) {
     return '$sender canceló la verificación de clave';
   }

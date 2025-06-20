@@ -78,6 +78,7 @@ abstract class AppConfig {
     host: 'servers.joinmatrix.org',
     path: 'servers.json',
   );
+  static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
 
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {

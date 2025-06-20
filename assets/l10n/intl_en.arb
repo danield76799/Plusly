@@ -20,6 +20,7 @@
   "enableGradient": "Enable bubble background gradient",
   "translationDisabledInE2e": "Cloud translation is disabled in encrypted rooms to preserve privacy. Select specific words and use system context menu to translate with apps that support it.",
   "remove": "Remove",
+
   "@remove": {
     "type": "String",
     "placeholders": {}
@@ -3003,6 +3004,7 @@
       }
     }
   },
+  "customReaction": "Add reaction",
   "canceledKeyVerification": "{sender} canceled key verification",
   "@canceledKeyVerification": {
     "type": "String",

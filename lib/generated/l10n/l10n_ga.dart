@@ -2298,6 +2298,9 @@ class L10nGa extends L10n {
   }
 
   @override
+  String get customReaction => 'Add reaction';
+
+  @override
   String canceledKeyVerification(String sender) {
     return '$sender cealaithe fíorú eochrach';
   }

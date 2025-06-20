@@ -2196,6 +2196,9 @@ class L10nZh extends L10n {
   }
 
   @override
+  String get customReaction => 'Add reaction';
+
+  @override
   String canceledKeyVerification(String sender) {
     return '$sender 取消了密钥验证';
   }

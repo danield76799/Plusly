@@ -4095,6 +4095,12 @@ abstract class L10n {
   /// **'{sender} accepted key verification'**
   String acceptedKeyVerification(String sender);
 
+  /// No description provided for @customReaction.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reaction'**
+  String get customReaction;
+
   /// No description provided for @canceledKeyVerification.
   ///
   /// In en, this message translates to:
