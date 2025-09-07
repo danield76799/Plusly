@@ -1,8 +1,10 @@
+import 'package:extera_next/pages/download_manager/download_manager.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:extera_next/config/routes.dart';
@@ -42,12 +44,14 @@ class FluffyChatApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ThemeBuilder(
-      builder: (context, themeMode, primaryColor, pureBlack) => MaterialApp.router(
+      builder: (context, themeMode, primaryColor, pureBlack) =>
+          MaterialApp.router(
         title: AppConfig.applicationName,
         themeMode: themeMode,
-        theme: FluffyThemes.buildTheme(context, Brightness.light, primaryColor, pureBlack),
-        darkTheme:
-            FluffyThemes.buildTheme(context, Brightness.dark, primaryColor, pureBlack),
+        theme: FluffyThemes.buildTheme(
+            context, Brightness.light, primaryColor, pureBlack),
+        darkTheme: FluffyThemes.buildTheme(
+            context, Brightness.dark, primaryColor, pureBlack),
         scrollBehavior: CustomScrollBehavior(),
         localizationsDelegates: L10n.localizationsDelegates,
         supportedLocales: L10n.supportedLocales,
@@ -57,10 +61,13 @@ class FluffyChatApp extends StatelessWidget {
           clients: clients,
           // Need a navigator above the Matrix widget for
           // displaying dialogs
-          child: Matrix(
-            clients: clients,
-            store: store,
-            child: testWidget ?? child,
+          child: ChangeNotifierProvider(
+            create: (context) => DownloadManagerController(),
+            child: Matrix(
+              clients: clients,
+              store: store,
+              child: testWidget ?? child,
+            ),
           ),
         ),
       ),
