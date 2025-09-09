@@ -69,4 +69,9 @@ class DownloadManagerController extends State<DownloadManager>
   Widget build(BuildContext context) => DownloadManagerView(this);
 
   final List<Download> downloads = [];
+  void download(BuildContext context, String name, String url) async {
+    final dl = Download(context, url, name);
+    downloads.add(dl);
+    dl.start();
+  }
 }
