@@ -1093,6 +1093,9 @@ class L10nFa extends L10n {
   String get password => 'رمز عبور';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'رمز عبور را فراموش کرده‌ام';
 
   @override

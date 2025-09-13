@@ -1564,6 +1564,11 @@
     "type": "String",
     "placeholders": {}
   },
+  "downloads": "Downloads",
+  "@downloads": {
+    "type": "String",
+    "placeholders": {}
+  },
   "passwordForgotten": "Forgot password",
   "@passwordForgotten": {
     "type": "String",

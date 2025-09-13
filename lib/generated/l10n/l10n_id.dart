@@ -1101,6 +1101,9 @@ class L10nId extends L10n {
   String get password => 'Kata sandi';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Lupa kata sandi';
 
   @override

@@ -1092,6 +1092,9 @@ class L10nIe extends L10n {
   String get password => 'Contrasigne';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Li contrasigne esset obliviat';
 
   @override

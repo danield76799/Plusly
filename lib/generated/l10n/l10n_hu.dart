@@ -1097,6 +1097,9 @@ class L10nHu extends L10n {
   String get password => 'Jelszó';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Elfelejtett jelszó';
 
   @override

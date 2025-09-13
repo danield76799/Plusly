@@ -1097,6 +1097,9 @@ class L10nPl extends L10n {
   String get password => 'Hasło';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Nie pamiętam hasła';
 
   @override

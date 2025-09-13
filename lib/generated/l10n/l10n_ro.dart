@@ -1100,6 +1100,9 @@ class L10nRo extends L10n {
   String get password => 'Parolă';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Parola uitată';
 
   @override

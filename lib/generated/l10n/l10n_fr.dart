@@ -1111,6 +1111,9 @@ class L10nFr extends L10n {
   String get password => 'Mot de passe';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Mot de passe oublié';
 
   @override

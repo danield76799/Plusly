@@ -1089,6 +1089,9 @@ class L10nHe extends L10n {
   String get password => 'סיסמה';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'שכחתי סיסמה';
 
   @override

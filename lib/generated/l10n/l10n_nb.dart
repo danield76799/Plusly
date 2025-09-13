@@ -1096,6 +1096,9 @@ class L10nNb extends L10n {
   String get password => 'Passord';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Passord glemt';
 
   @override

@@ -1055,6 +1055,9 @@ class L10nZh extends L10n {
   String get password => '密码';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => '忘记密码';
 
   @override

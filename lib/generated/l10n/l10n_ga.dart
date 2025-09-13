@@ -1107,6 +1107,9 @@ class L10nGa extends L10n {
   String get password => 'Pasfhocal';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Pasfhocal dearmadta';
 
   @override

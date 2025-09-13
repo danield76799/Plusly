@@ -2073,6 +2073,12 @@ abstract class L10n {
   /// **'Password'**
   String get password;
 
+  /// No description provided for @downloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get downloads;
+
   /// No description provided for @passwordForgotten.
   ///
   /// In en, this message translates to:

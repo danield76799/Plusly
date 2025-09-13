@@ -1094,6 +1094,9 @@ class L10nSv extends L10n {
   String get password => 'Lösenord';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Glömt lösenord';
 
   @override

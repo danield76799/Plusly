@@ -1093,6 +1093,9 @@ class L10nSr extends L10n {
   String get password => 'Лозинка';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Заборављена лозинка';
 
   @override

@@ -1109,6 +1109,9 @@ class L10nTa extends L10n {
   String get password => 'கடவுச்சொல்';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'கடவுச்சொல் மறந்துவிட்டது';
 
   @override

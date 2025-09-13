@@ -1085,6 +1085,9 @@ class L10nAr extends L10n {
   String get password => 'كلمة السر';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'نسيتَ كلمة السر';
 
   @override

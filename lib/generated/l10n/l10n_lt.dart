@@ -1098,6 +1098,9 @@ class L10nLt extends L10n {
   String get password => 'Slaptažodis';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Slaptažodis užmirštas';
 
   @override

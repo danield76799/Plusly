@@ -1099,6 +1099,9 @@ class L10nFil extends L10n {
   String get password => 'Password';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Forgot password';
 
   @override

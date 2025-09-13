@@ -63,7 +63,7 @@ class ClientChooserButton extends StatelessWidget {
           children: [
             Icon(Icons.download_outlined),
             const SizedBox(width: 18),
-            Text("Downloads"),
+            Text(L10n.of(context).downloads),
           ],
         ),
       ),

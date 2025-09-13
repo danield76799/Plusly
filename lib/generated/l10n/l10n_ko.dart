@@ -1067,6 +1067,9 @@ class L10nKo extends L10n {
   String get password => '비밀번호';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => '비밀번호 까먹음';
 
   @override

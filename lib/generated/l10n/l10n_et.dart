@@ -1100,6 +1100,9 @@ class L10nEt extends L10n {
   String get password => 'Salasõna';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Salasõna on ununenud';
 
   @override

@@ -1105,6 +1105,9 @@ class L10nEs extends L10n {
   String get password => 'Contraseña';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Contraseña olvidada';
 
   @override

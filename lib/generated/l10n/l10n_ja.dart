@@ -1075,6 +1075,9 @@ class L10nJa extends L10n {
   String get password => 'パスワード';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'パスワードを忘れた';
 
   @override

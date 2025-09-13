@@ -1099,6 +1099,9 @@ class L10nGl extends L10n {
   String get password => 'Contrasinal';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Contrasinal esquecido';
 
   @override

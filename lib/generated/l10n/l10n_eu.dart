@@ -1099,6 +1099,9 @@ class L10nEu extends L10n {
   String get password => 'Pasahitza';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Pasahitza ahaztu dut';
 
   @override

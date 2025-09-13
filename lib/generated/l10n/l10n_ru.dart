@@ -1097,6 +1097,9 @@ class L10nRu extends L10n {
   String get password => 'Пароль';
 
   @override
+  String get downloads => 'Загрузки';
+
+  @override
   String get passwordForgotten => 'Забыли пароль';
 
   @override

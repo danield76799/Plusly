@@ -1099,6 +1099,9 @@ class L10nTr extends L10n {
   String get password => 'Parola';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Parola unutuldu';
 
   @override

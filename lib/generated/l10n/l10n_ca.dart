@@ -1103,6 +1103,9 @@ class L10nCa extends L10n {
   String get password => 'Contrasenya';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Contrasenya oblidada';
 
   @override

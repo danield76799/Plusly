@@ -6,6 +6,7 @@ import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -17,23 +18,29 @@ class Download {
   late int receivedBytes = 0;
   late int totalBytes = 1;
   late double progress = 0;
+  late String httpUrl;
+  late String downloadPath;
+  late CancelToken ct;
   Download(this.context, this.url, this.name);
 
   void start() async {
     try {
       final mx = Matrix.of(context).client;
-      final directory = await getExternalStorageDirectory();
-      final downloadPath =
-          directory != null ? "${directory.path}/Download" : null;
+      // final directory = await getDownloadsDirectory();
+      downloadPath =
+          "/sdcard/Download/Extera";
+
+      httpUrl = (await Uri.parse(url).getDownloadUri(mx)).toString();
 
       if (downloadPath != null) {
         // Create Dio instance
         final dio = Dio();
-        // Progress status variables
+        
+        ct = CancelToken();
 
         // Download the file
         response = dio.download(
-          url,
+          httpUrl,
           "$downloadPath/$name",
           onReceiveProgress: (received, total) {
             receivedBytes = received;
@@ -43,13 +50,19 @@ class Download {
           },
           options: Options(
               responseType: ResponseType.bytes,
-              headers: {'authorization': "Bearer ${mx.accessToken}"}),
+              headers: {'authorization': "Bearer ${mx.accessToken}"}
+              ),
+            cancelToken: ct
         );
         print("Download completed and saved to $downloadPath/$name");
       }
     } catch (e) {
       print("Error during download: $e");
     }
+  }
+
+  void cancel() async {
+    ct.cancel();
   }
 }
 

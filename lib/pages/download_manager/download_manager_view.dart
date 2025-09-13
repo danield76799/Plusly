@@ -1,3 +1,4 @@
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/download_manager/download_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,7 +19,7 @@ class DownloadManagerView extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog.adaptive(
       content: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 256, maxWidth: 256),
+        constraints: const BoxConstraints(maxHeight: 256, maxWidth: 512),
         child: ListView.builder(
           itemCount: controller.downloads.length,
           itemBuilder: (context, index) {
@@ -26,15 +27,15 @@ class DownloadManagerView extends StatelessWidget {
             return ListTile(
               title: Text(download.name),
               subtitle: LinearProgressIndicator(
-                value: download.progress,
+                value: download.progress / 100,
                 backgroundColor: Colors.grey[200],
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
               ),
               trailing: ElevatedButton(
                 onPressed: () {
-                  // "Cancel" button action can be added here
+                  download.cancel();
                 },
-                child: Text("Cancel"),
+                child: Text(L10n.of(context).cancel),
               ),
             );
           },

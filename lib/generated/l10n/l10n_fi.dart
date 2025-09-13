@@ -1098,6 +1098,9 @@ class L10nFi extends L10n {
   String get password => 'Salasana';
 
   @override
+  String get downloads => 'Downloads';
+
+  @override
   String get passwordForgotten => 'Salasana unohtunut';
 
   @override
