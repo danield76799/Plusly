@@ -40,7 +40,7 @@ abstract class FluffyThemes {
     BuildContext context,
     Brightness brightness, [
     Color? seed,
-	bool? pureBlack,
+    bool? pureBlack,
   ]) {
     final extraDarkColors = (brightness == Brightness.dark && pureBlack == true)
         ? {
@@ -118,6 +118,8 @@ abstract class FluffyThemes {
             isColumnMode ? colorScheme.surfaceContainer.withAlpha(128) : null,
         surfaceTintColor: isColumnMode ? colorScheme.surface : null,
         backgroundColor: isColumnMode ? colorScheme.surface : null,
+        actionsPadding:
+            isColumnMode ? const EdgeInsets.symmetric(horizontal: 16.0) : null,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: brightness.reversed,
@@ -140,6 +142,7 @@ abstract class FluffyThemes {
       ),
       snackBarTheme: isColumnMode
           ? const SnackBarThemeData(
+              showCloseIcon: true,
               behavior: SnackBarBehavior.floating,
               width: FluffyThemes.columnWidth * 1.5,
             )
