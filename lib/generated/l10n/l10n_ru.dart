@@ -25,6 +25,59 @@ class L10nRu extends L10n {
   String get resume => 'Продолжить';
 
   @override
+  String get anonymousPoll => 'Анонимный';
+
+  @override
+  String get publicPoll => 'Открытый';
+
+  @override
+  String get endedPoll => 'Окончен';
+
+  @override
+  String get activePoll => 'Активный';
+
+  @override
+  String get singleChoice => 'Один ответ';
+
+  @override
+  String get multipleChoice => 'Несколько ответов';
+
+  @override
+  String get vote => 'Голосовать';
+
+  @override
+  String get changeVote => 'Изменить ответ';
+
+  @override
+  String choicesSelected(int selected, int max) {
+    return 'Выбрано $selected из $max';
+  }
+
+  @override
+  String get pollType => 'Тип опроса';
+
+  @override
+  String get question => 'Вопрос';
+
+  @override
+  String get answer => 'Ответ';
+
+  @override
+  String get addAnswer => 'Добавить ответ';
+
+  @override
+  String get pleaseEnterQuestion => 'Введите вопрос';
+
+  @override
+  String get atLeastTwoAnswersRequired => 'Требуется хотя бы 2 ответа';
+
+  @override
+  String get maxSelections => 'Количество ответов';
+
+  @override
+  String get createPoll => 'Создать опрос';
+
+  @override
   String get alwaysUse24HourFormat => 'нет';
 
   @override

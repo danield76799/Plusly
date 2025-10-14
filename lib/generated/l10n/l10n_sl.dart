@@ -25,6 +25,59 @@ class L10nSl extends L10n {
   String get resume => 'Resume';
 
   @override
+  String get anonymousPoll => 'Anonymous';
+
+  @override
+  String get publicPoll => 'Public';
+
+  @override
+  String get endedPoll => 'Ended';
+
+  @override
+  String get activePoll => 'Active';
+
+  @override
+  String get singleChoice => 'Single choice';
+
+  @override
+  String get multipleChoice => 'Multiple choice';
+
+  @override
+  String get vote => 'Vote';
+
+  @override
+  String get changeVote => 'Re-vote';
+
+  @override
+  String choicesSelected(int selected, int max) {
+    return '$selected of $max selected';
+  }
+
+  @override
+  String get pollType => 'Poll type';
+
+  @override
+  String get question => 'Question';
+
+  @override
+  String get answer => 'Answer';
+
+  @override
+  String get addAnswer => 'Add answer';
+
+  @override
+  String get pleaseEnterQuestion => 'Please enter a question';
+
+  @override
+  String get atLeastTwoAnswersRequired => 'At least two answers are required';
+
+  @override
+  String get maxSelections => 'Max selections';
+
+  @override
+  String get createPoll => 'Create poll';
+
+  @override
   String get alwaysUse24HourFormat => 'false';
 
   @override

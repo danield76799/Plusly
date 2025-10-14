@@ -7,6 +7,30 @@
   "longPressToRecordVoiceMessage": "Зажмите, чтобы записать голосовое сообщение.",
   "pause": "Пауза",
   "resume": "Продолжить",
+  "anonymousPoll": "Анонимный",
+  "publicPoll": "Открытый",
+  "endedPoll": "Окончен",
+  "activePoll": "Активный",
+  "singleChoice": "Один ответ",
+  "multipleChoice": "Несколько ответов",
+  "vote": "Голосовать",
+  "changeVote": "Изменить ответ",
+  "choicesSelected": "Выбрано {selected} из {max}",
+  "@choicesSelected": {
+    "type": "String",
+    "placeholders": {
+        "selected": { "type": "int" },
+        "max": { "type": "int" }
+    }
+  },
+  "pollType": "Тип опроса",
+  "question": "Вопрос",
+  "answer": "Ответ",
+  "addAnswer": "Добавить ответ",
+  "pleaseEnterQuestion": "Введите вопрос",
+  "atLeastTwoAnswersRequired": "Требуется хотя бы 2 ответа",
+  "maxSelections": "Количество ответов",
+  "createPoll": "Создать опрос",
 	"alwaysUse24HourFormat": "нет",
 	"@alwaysUse24HourFormat": {
 		"description": "Set to true to always display time of day in 24 hour format."

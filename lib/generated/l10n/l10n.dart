@@ -223,6 +223,108 @@ abstract class L10n {
   /// **'Resume'**
   String get resume;
 
+  /// No description provided for @anonymousPoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous'**
+  String get anonymousPoll;
+
+  /// No description provided for @publicPoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Public'**
+  String get publicPoll;
+
+  /// No description provided for @endedPoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get endedPoll;
+
+  /// No description provided for @activePoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activePoll;
+
+  /// No description provided for @singleChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Single choice'**
+  String get singleChoice;
+
+  /// No description provided for @multipleChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple choice'**
+  String get multipleChoice;
+
+  /// No description provided for @vote.
+  ///
+  /// In en, this message translates to:
+  /// **'Vote'**
+  String get vote;
+
+  /// No description provided for @changeVote.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-vote'**
+  String get changeVote;
+
+  /// No description provided for @choicesSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected} of {max} selected'**
+  String choicesSelected(int selected, int max);
+
+  /// No description provided for @pollType.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll type'**
+  String get pollType;
+
+  /// No description provided for @question.
+  ///
+  /// In en, this message translates to:
+  /// **'Question'**
+  String get question;
+
+  /// No description provided for @answer.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get answer;
+
+  /// No description provided for @addAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add answer'**
+  String get addAnswer;
+
+  /// No description provided for @pleaseEnterQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a question'**
+  String get pleaseEnterQuestion;
+
+  /// No description provided for @atLeastTwoAnswersRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'At least two answers are required'**
+  String get atLeastTwoAnswersRequired;
+
+  /// No description provided for @maxSelections.
+  ///
+  /// In en, this message translates to:
+  /// **'Max selections'**
+  String get maxSelections;
+
+  /// No description provided for @createPoll.
+  ///
+  /// In en, this message translates to:
+  /// **'Create poll'**
+  String get createPoll;
+
   /// Set to true to always display time of day in 24 hour format.
   ///
   /// In en, this message translates to:

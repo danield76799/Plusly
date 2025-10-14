@@ -1,3 +1,4 @@
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/utils/poll_events.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -363,16 +364,16 @@ class PollWidgetState extends State<PollWidget> {
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Text(hasVoted ? 'Change Vote' : 'Vote'),
+                        : Text(hasVoted ? L10n.of(context).changeVote : L10n.of(context).vote),
                   ),
 
               const Spacer(),
 
               // Poll info
               Text(
-                '${maxSelections == 1 ? 'Single' : 'Multiple'} choice • '
-                '${kind?.contains('undisclosed') == true ? 'Anonymous' : 'Public'} • '
-                '${isEnded ? 'Ended' : 'Active'}',
+                '${maxSelections == 1 ? L10n.of(context).singleChoice : L10n.of(context).multipleChoice} • '
+                '${kind == 'org.matrix.msc3381.undisclosed' ? L10n.of(context).anonymousPoll : L10n.of(context).publicPoll} • '
+                '${isEnded ? L10n.of(context).endedPoll : L10n.of(context).activePoll}',
                 style: TextStyle(
                   fontSize: widget.fontSize - 2,
                   color: widget.color.withOpacity(0.6),
@@ -385,7 +386,7 @@ class PollWidgetState extends State<PollWidget> {
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                '${selectedAnswers.length} of $maxSelections selected',
+                L10n.of(context).choicesSelected(selectedAnswers.length, maxSelections),
                 style: TextStyle(
                   fontSize: widget.fontSize - 2,
                   color: widget.color.withOpacity(0.6),

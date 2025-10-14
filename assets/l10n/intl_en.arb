@@ -6,6 +6,30 @@
   "longPressToRecordVoiceMessage": "Long press to record voice message.",
   "pause": "Pause",
   "resume": "Resume",
+  "anonymousPoll": "Anonymous",
+  "publicPoll": "Public",
+  "endedPoll": "Ended",
+  "activePoll": "Active",
+  "singleChoice": "Single choice",
+  "multipleChoice": "Multiple choice",
+  "vote": "Vote",
+  "changeVote": "Re-vote",
+  "choicesSelected": "{selected} of {max} selected",
+  "@choicesSelected": {
+    "type": "String",
+    "placeholders": {
+        "selected": { "type": "int" },
+        "max": { "type": "int" }
+    }
+  },
+  "pollType": "Poll type",
+  "question": "Question",
+  "answer": "Answer",
+  "addAnswer": "Add answer",
+  "pleaseEnterQuestion": "Please enter a question",
+  "atLeastTwoAnswersRequired": "At least two answers are required",
+  "maxSelections": "Max selections",
+  "createPoll": "Create poll",
   "@noSendPermission": {},
   "alwaysUse24HourFormat": "false",
   "@alwaysUse24HourFormat": {

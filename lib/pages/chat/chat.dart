@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:extera_next/pages/chat/recovered_event_dialog.dart';
+import 'package:extera_next/pages/chat/send_poll_dialog.dart';
 import 'package:extera_next/pages/chat/translated_event_dialog.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/synapse_admin_extension.dart';
 import 'package:extera_next/utils/translator.dart';
@@ -545,6 +546,14 @@ class ChatController extends State<ChatPageWithRoom>
       editEvent = null;
       pendingText = '';
     });
+  }
+
+  void sendPollAction() async {
+    await showAdaptiveDialog(
+        context: context,
+        builder: (c) => SendPollDialog(room: room, outerContext: context)
+    );
+    replyEvent = null;
   }
 
   void sendFileAction({FileSelectorType type = FileSelectorType.any}) async {
@@ -1208,6 +1217,9 @@ class ChatController extends State<ChatPageWithRoom>
   void onAddPopupMenuButtonSelected(String choice) {
     if (choice == 'file') {
       sendFileAction();
+    }
+    if (choice == 'poll') {
+      sendPollAction();
     }
     if (choice == 'camera') {
       openCameraAction();

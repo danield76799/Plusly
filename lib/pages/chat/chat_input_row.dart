@@ -170,6 +170,20 @@ class ChatInputRow extends StatelessWidget {
                         //   ),
                         // ),
                         PopupMenuItem<String>(
+                          value: 'poll',
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor:
+                                  theme.colorScheme.onPrimaryContainer,
+                              foregroundColor:
+                                  theme.colorScheme.primaryContainer,
+                              child: const Icon(Icons.poll_outlined),
+                            ),
+                            title: Text(L10n.of(context).createPoll),
+                            contentPadding: const EdgeInsets.all(0),
+                          ),
+                        ),
+                        PopupMenuItem<String>(
                           value: 'file',
                           child: ListTile(
                             leading: CircleAvatar(
