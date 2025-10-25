@@ -37,7 +37,7 @@ class ChatEventList extends StatelessWidget {
 
     final horizontalPadding = FluffyThemes.isColumnMode(context) ? 8.0 : 0.0;
 	
-    final events = timeline.events.filterByVisibleInGui().filterByThreaded(false);
+    final events = timeline.events.filterByVisibleInGui().filterByThreaded(controller.thread != null);
     final animateInEventIndex = controller.animateInEventIndex;
 
     // create a map of eventId --> index to greatly improve performance of

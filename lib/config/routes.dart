@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:extera_next/pages/thread/thread.dart';
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
@@ -148,6 +149,21 @@ abstract class AppRoutes {
                     ),
                   ),
                   redirect: loggedOutRedirect,
+                  routes: [
+                    GoRoute(
+                      path: ':threadroot',
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        ThreadPage(
+                          roomId: state.pathParameters['roomid']!,
+                          threadRootEventId:
+                              state.pathParameters['threadroot']!,
+                          eventId: state.uri.queryParameters['event'],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
               redirect: loggedOutRedirect,
@@ -352,6 +368,18 @@ abstract class AppRoutes {
               },
               redirect: loggedOutRedirect,
               routes: [
+                GoRoute(
+                  path: ':threadroot',
+                  pageBuilder: (context, state) => defaultPageBuilder(
+                    context,
+                    state,
+                    ThreadPage(
+                      roomId: state.pathParameters['roomid']!,
+                      threadRootEventId: state.pathParameters['threadroot']!,
+                      eventId: state.uri.queryParameters['event'],
+                    ),
+                  ),
+                ),
                 GoRoute(
                   path: 'search',
                   pageBuilder: (context, state) => defaultPageBuilder(

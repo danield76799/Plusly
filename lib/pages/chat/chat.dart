@@ -85,12 +85,14 @@ class ChatPage extends StatelessWidget {
 
 class ChatPageWithRoom extends StatefulWidget {
   final Room room;
+  final Thread? thread;
   final List<ShareItem>? shareItems;
   final String? eventId;
 
   const ChatPageWithRoom({
     super.key,
     required this.room,
+    this.thread,
     this.shareItems,
     this.eventId,
   });
@@ -102,14 +104,18 @@ class ChatPageWithRoom extends StatefulWidget {
 class ChatController extends State<ChatPageWithRoom>
     with WidgetsBindingObserver {
   Room get room => sendingClient.getRoomById(roomId) ?? widget.room;
+  Thread? get thread =>
+      sendingClient.getRoomById(roomId)?.threads[threadRootEventId] ??
+      widget.room.threads[threadRootEventId];
 
   late Client sendingClient;
 
-  RoomTimeline? timeline;
+  Timeline? timeline;
 
   late final String readMarkerEventId;
 
   String get roomId => widget.room.id;
+  String? get threadRootEventId => widget.thread?.rootEvent.eventId;
 
   final AutoScrollController scrollController = AutoScrollController();
 
@@ -134,6 +140,7 @@ class ChatController extends State<ChatPageWithRoom>
       builder: (c) => SendFileDialog(
         files: details.files,
         room: room,
+        thread: thread,
         replyEvent: replyEvent,
         outerContext: context,
       ),
@@ -274,6 +281,7 @@ class ChatController extends State<ChatPageWithRoom>
       builder: (c) => SendFileDialog(
         files: files,
         room: room,
+        thread: thread,
         outerContext: context,
         replyEvent: replyEvent,
       ),
@@ -324,6 +332,7 @@ class ChatController extends State<ChatPageWithRoom>
   void _tryLoadTimeline() async {
     final initialEventId = widget.eventId;
     loadTimelineFuture = _getTimeline();
+    Logs().v("Trying to load timeline...");
     try {
       await loadTimelineFuture;
       if (initialEventId != null) scrollToEventId(initialEventId);
@@ -387,15 +396,7 @@ class ChatController extends State<ChatPageWithRoom>
     animateInEventIndex = i;
   }
 
-  Future<void> _getTimeline({
-    String? eventContextId,
-  }) async {
-    await Matrix.of(context).client.roomsLoading;
-    await Matrix.of(context).client.accountDataLoading;
-    if (eventContextId != null &&
-        (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
-      eventContextId = null;
-    }
+  Future<void> _loadRoomTimeline({String? eventContextId}) async {
     try {
       timeline?.cancelSubscriptions();
       timeline = await room.getTimeline(
@@ -414,6 +415,56 @@ class ChatController extends State<ChatPageWithRoom>
       if (e is TimeoutException || e is IOException) {
         _showScrollUpMaterialBanner(eventContextId!);
       }
+    }
+  }
+
+  Future<void> _loadThreadTimeline({String? eventContextId}) async {
+    if (thread == null) {
+      throw Exception(
+        "_loadThreadTimeline should not be called, thread == null",
+      );
+    }
+    try {
+      timeline?.cancelSubscriptions();
+      timeline = await thread!.getTimeline(
+        onUpdate: updateView,
+        eventContextId: eventContextId,
+        onInsert: onInsert,
+      );
+      if (timeline is ThreadTimeline) {
+        (timeline as ThreadTimeline).getThreadEvents();
+      }
+      Logs().v("Thread timeline loaded");
+    } catch (e, s) {
+      Logs().w(
+          'Unable to load timeline on event ID $eventContextId (in thread)',
+          e,
+          s);
+      if (!mounted) return;
+      timeline = await thread!.getTimeline(
+        onUpdate: updateView,
+        onInsert: onInsert,
+      );
+      if (!mounted) return;
+      if (e is TimeoutException || e is IOException) {
+        _showScrollUpMaterialBanner(eventContextId!);
+      }
+    }
+  }
+
+  Future<void> _getTimeline({
+    String? eventContextId,
+  }) async {
+    await Matrix.of(context).client.roomsLoading;
+    await Matrix.of(context).client.accountDataLoading;
+    if (eventContextId != null &&
+        (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
+      eventContextId = null;
+    }
+    if (thread == null) {
+      await _loadRoomTimeline(eventContextId: eventContextId);
+    } else {
+      await _loadThreadTimeline(eventContextId: eventContextId);
     }
     timeline!.requestKeys(onlineKeyBackupOnly: false);
     if (room.markedUnread) room.markUnread(false);
@@ -471,9 +522,13 @@ class ChatController extends State<ChatPageWithRoom>
         .then((_) {
       _setReadMarkerFuture = null;
     });
-    if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
-      Matrix.of(context).backgroundPush?.cancelNotification(roomId);
+
+    if (timeline is RoomTimeline) {
+      if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
+        Matrix.of(context).backgroundPush?.cancelNotification(roomId);
+      }
     }
+    // TODO same for Threads
   }
 
   @override
@@ -540,12 +595,13 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     // ignore: unawaited_futures
-    room.sendTextEvent(
-      sendController.text,
-      inReplyTo: replyEvent,
-      editEventId: editEvent?.eventId,
-      parseCommands: parseCommands,
-    );
+    room.sendTextEvent(sendController.text,
+        inReplyTo: replyEvent,
+        editEventId: editEvent?.eventId,
+        parseCommands: parseCommands,
+        threadRootEventId: thread?.rootEvent.eventId,
+        threadLastEventId:
+            thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId);
     sendController.value = TextEditingValue(
       text: pendingText,
       selection: const TextSelection.collapsed(offset: 0),
@@ -562,8 +618,13 @@ class ChatController extends State<ChatPageWithRoom>
 
   void sendPollAction() async {
     await showAdaptiveDialog(
-        context: context,
-        builder: (c) => SendPollDialog(room: room, outerContext: context));
+      context: context,
+      builder: (c) => SendPollDialog(
+        room: room,
+        thread: thread,
+        outerContext: context,
+      ),
+    );
     replyEvent = null;
   }
 
@@ -582,6 +643,7 @@ class ChatController extends State<ChatPageWithRoom>
       builder: (c) => SendFileDialog(
         files: files,
         room: room,
+        thread: thread,
         outerContext: context,
         replyEvent: replyEvent,
       ),
@@ -596,6 +658,7 @@ class ChatController extends State<ChatPageWithRoom>
       builder: (c) => SendFileDialog(
         files: [XFile.fromData(image)],
         room: room,
+        thread: thread,
         outerContext: context,
       ),
     );
@@ -612,6 +675,7 @@ class ChatController extends State<ChatPageWithRoom>
       builder: (c) => SendFileDialog(
         files: [file],
         room: room,
+        thread: thread,
         outerContext: context,
       ),
     );
@@ -631,6 +695,7 @@ class ChatController extends State<ChatPageWithRoom>
       builder: (c) => SendFileDialog(
         files: [file],
         room: room,
+        thread: thread,
         outerContext: context,
       ),
     );
