@@ -703,7 +703,7 @@ class Message extends StatelessWidget {
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Icon(
-                                                Icons.chat_bubble_outline,
+                                                (thread?.hasNewMessages ?? false) ? Icons.mark_chat_unread_outlined : Icons.chat_bubble_outline,
                                                 color: Colors.grey[200],
                                                 size: 20,
                                               ),
@@ -738,7 +738,7 @@ class Message extends StatelessWidget {
                                             ],
                                           ),
                                           onTap: () => context.go(
-                                            '/rooms/${event.roomId}/${event.eventId}',
+                                            '/rooms/${event.roomId}/threads/${event.eventId}',
                                           ),
                                         ),
                                       ),

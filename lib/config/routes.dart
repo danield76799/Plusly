@@ -151,17 +151,23 @@ abstract class AppRoutes {
                   redirect: loggedOutRedirect,
                   routes: [
                     GoRoute(
-                      path: ':threadroot',
-                      pageBuilder: (context, state) => defaultPageBuilder(
-                        context,
-                        state,
-                        ThreadPage(
-                          roomId: state.pathParameters['roomid']!,
-                          threadRootEventId:
-                              state.pathParameters['threadroot']!,
-                          eventId: state.uri.queryParameters['event'],
+                      path: 'threads',
+                      redirect: loggedOutRedirect,
+                      routes: [
+                        GoRoute(
+                          path: ':threadroot',
+                          pageBuilder: (context, state) => defaultPageBuilder(
+                            context,
+                            state,
+                            ThreadPage(
+                              roomId: state.pathParameters['roomid']!,
+                              threadRootEventId:
+                                  state.pathParameters['threadroot']!,
+                              eventId: state.uri.queryParameters['event'],
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -369,16 +375,23 @@ abstract class AppRoutes {
               redirect: loggedOutRedirect,
               routes: [
                 GoRoute(
-                  path: ':threadroot',
-                  pageBuilder: (context, state) => defaultPageBuilder(
-                    context,
-                    state,
-                    ThreadPage(
-                      roomId: state.pathParameters['roomid']!,
-                      threadRootEventId: state.pathParameters['threadroot']!,
-                      eventId: state.uri.queryParameters['event'],
+                  path: 'threads',
+                  redirect: loggedOutRedirect,
+                  routes: [
+                    GoRoute(
+                      path: ':threadroot',
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        ThreadPage(
+                          roomId: state.pathParameters['roomid']!,
+                          threadRootEventId:
+                              state.pathParameters['threadroot']!,
+                          eventId: state.uri.queryParameters['event'],
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
                 GoRoute(
                   path: 'search',

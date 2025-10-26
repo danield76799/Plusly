@@ -957,10 +957,12 @@ class ChatController extends State<ChatPageWithRoom>
         client: room.client,
         currentUserParticipated: false,
         count: 0,
+        highlightCount: 0,
+        notificationCount: 0,
       );
     }
 
-    context.go('/rooms/$roomId/${event.eventId}');
+    context.go('/rooms/$roomId/threads/${event.eventId}');
     selectedEvents.clear();
   }
 
