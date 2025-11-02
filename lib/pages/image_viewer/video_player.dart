@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:extera_next/pages/image_viewer/image_viewer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -18,9 +19,11 @@ import '../../widgets/mxc_image.dart';
 
 class EventVideoPlayer extends StatefulWidget {
   final Event event;
+  final ImageViewerController ivController;
 
   const EventVideoPlayer(
-    this.event, {
+    this.event,
+    this.ivController, {
     super.key,
   });
 
@@ -68,6 +71,11 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
       _videoPlayerController = videoPlayerController;
 
       await videoPlayerController.initialize();
+
+      if (widget.ivController.currentEvent.eventId != widget.event.eventId) {
+        dispose();
+        return;
+      }
 
       // Create a ChewieController on top.
       setState(() {

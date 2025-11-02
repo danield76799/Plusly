@@ -1,28 +1,17 @@
-import 'dart:io';
-
 import 'package:extera_next/pages/chat/events/html_message.dart';
 import 'package:extera_next/pages/image_viewer/image_viewer.dart';
 import 'package:extera_next/widgets/mxc_image.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:chewie/chewie.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:universal_html/html.dart' as html;
-import 'package:video_player/video_player.dart';
 
 import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/pages/chat/events/image_bubble.dart';
 import 'package:extera_next/utils/file_description.dart';
-import 'package:extera_next/utils/localized_exception_extension.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/utils/url_launcher.dart';
 import 'package:extera_next/widgets/blur_hash.dart';
-import '../../../utils/error_reporter.dart';
 
 class EventVideoPlayer extends StatelessWidget {
   final Event event;
@@ -128,8 +117,6 @@ class EventVideoPlayer extends StatelessWidget {
           ),
         ),
         if (fileDescription != null &&
-            textColor != null &&
-            linkColor != null &&
             !event.isRichFileDescription)
           SizedBox(
             width: width,
@@ -159,8 +146,6 @@ class EventVideoPlayer extends StatelessWidget {
             ),
           ),
         if (fileDescription != null &&
-            textColor != null &&
-            linkColor != null &&
             event.isRichFileDescription)
           SizedBox(
             width: width,
