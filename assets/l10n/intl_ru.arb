@@ -3154,6 +3154,24 @@
 		"space": {}
 	},
 	"markAsUnread": "Отметить как непрочитанное",
+
+  "spaceMemberOf": "Участники пространства {spaces}",
+  "@spaceMemberOf": {
+    "type": "String",
+    "placeholders": {
+      "spaces": {
+        "type": "String"
+      }
+    }
+  },
+  "spaceMemberOfCanKnock": "Участники пространства {spaces} (по запросу)",
+  "@spaceMemberOfCanKnock": {
+    "type": "String",
+    "placeholders": {
+      "spaces": {
+        "type": "String"
+      }
+    },
 	"userLevel": "{level} - Пользователь",
 	"@userLevel": {
 		"type": "String",

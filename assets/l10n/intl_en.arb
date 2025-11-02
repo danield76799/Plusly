@@ -3154,6 +3154,24 @@
   },
   "restricted": "Restricted",
   "@restricted": {},
+  },
+  "spaceMemberOf": "Space member of {spaces}",
+  "@spaceMemberOf": {
+    "type": "String",
+    "placeholders": {
+      "spaces": {
+        "type": "String"
+      }
+    }
+  },
+  "spaceMemberOfCanKnock": "Space member of {spaces} can knock",
+  "@spaceMemberOfCanKnock": {
+    "type": "String",
+    "placeholders": {
+      "spaces": {
+        "type": "String"
+      }
+    },
   "knockRestricted": "Knock restricted",
   "@knockRestricted": {},
   "goToSpace": "Go to space: {space}",

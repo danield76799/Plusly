@@ -45,19 +45,27 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                     ),
                   ),
                 ),
-                for (final historyVisibility in HistoryVisibility.values)
-                  RadioListTile<HistoryVisibility>.adaptive(
-                    title: Text(
-                      historyVisibility
-                          .getLocalizedString(MatrixLocals(L10n.of(context))),
-                    ),
-                    value: historyVisibility,
-                    groupValue: room.historyVisibility,
-                    onChanged: controller.historyVisibilityLoading ||
-                            !room.canChangeHistoryVisibility
-                        ? null
-                        : controller.setHistoryVisibility,
+                RadioGroup<HistoryVisibility>(
+                  groupValue: room.historyVisibility,
+                  onChanged: controller.historyVisibilityLoading ||
+                          !room.canChangeHistoryVisibility
+                      ? (_) {}
+                      : controller.setHistoryVisibility,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (final historyVisibility in HistoryVisibility.values)
+                        RadioListTile<HistoryVisibility>.adaptive(
+                          title: Text(
+                            historyVisibility.getLocalizedString(
+                              MatrixLocals(L10n.of(context)),
+                            ),
+                          ),
+                          value: historyVisibility,
+                        ),
+                    ],
                   ),
+                ),
                 Divider(color: theme.dividerColor),
                 ListTile(
                   title: Text(
@@ -68,19 +76,28 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                     ),
                   ),
                 ),
-                for (final joinRule in controller.availableJoinRules)
-                  if (joinRule != JoinRules.private)
-                    RadioListTile<JoinRules>.adaptive(
-                      title: Text(
-                        joinRule.localizedString(L10n.of(context)),
-                      ),
-                      value: joinRule,
-                      groupValue: room.joinRules,
-                      onChanged: controller.joinRulesLoading ||
-                              !room.canChangeJoinRules
-                          ? null
-                          : controller.setJoinRule,
-                    ),
+                RadioGroup(
+                  groupValue: room.joinRules,
+                  onChanged: controller.setJoinRule,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (final joinRule in controller.availableJoinRules)
+                        if (joinRule != JoinRules.private)
+                          RadioListTile<JoinRules>.adaptive(
+                            enabled: !controller.joinRulesLoading &&
+                                room.canChangeJoinRules,
+                            title: Text(
+                              joinRule.localizedString(
+                                L10n.of(context),
+                                controller.knownSpaceParents,
+                              ),
+                            ),
+                            value: joinRule,
+                          ),
+                    ],
+                  ),
+                ),
                 Divider(color: theme.dividerColor),
                 if ({JoinRules.public, JoinRules.knock}
                     .contains(room.joinRules)) ...[
@@ -93,20 +110,26 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  for (final guestAccess in GuestAccess.values)
-                    RadioListTile<GuestAccess>.adaptive(
-                      title: Text(
-                        guestAccess.getLocalizedString(
-                          MatrixLocals(L10n.of(context)),
-                        ),
-                      ),
-                      value: guestAccess,
-                      groupValue: room.guestAccess,
-                      onChanged: controller.guestAccessLoading ||
-                              !room.canChangeGuestAccess
-                          ? null
-                          : controller.setGuestAccess,
+                  RadioGroup(
+                    groupValue: room.guestAccess,
+                    onChanged: controller.setGuestAccess,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (final guestAccess in GuestAccess.values)
+                          RadioListTile<GuestAccess>.adaptive(
+                            enabled: !controller.guestAccessLoading &&
+                                room.canChangeGuestAccess,
+                            title: Text(
+                              guestAccess.getLocalizedString(
+                                MatrixLocals(L10n.of(context)),
+                              ),
+                            ),
+                            value: guestAccess,
+                          ),
+                      ],
                     ),
+                  ),
                   Divider(color: theme.dividerColor),
                   ListTile(
                     title: Text(
@@ -260,7 +283,7 @@ class _AliasListTile extends StatelessWidget {
 }
 
 extension JoinRulesDisplayString on JoinRules {
-  String localizedString(L10n l10n) {
+  String localizedString(L10n l10n, Set<Room> spaceParents) {
     switch (this) {
       case JoinRules.public:
         return l10n.anyoneCanJoin;
@@ -271,9 +294,17 @@ extension JoinRulesDisplayString on JoinRules {
       case JoinRules.private:
         return l10n.noOneCanJoin;
       case JoinRules.restricted:
-        return l10n.restricted;
+        return l10n.spaceMemberOf(
+          spaceParents
+              .map((space) => space.getLocalizedDisplayname(MatrixLocals(l10n)))
+              .join(', '),
+        );
       case JoinRules.knockRestricted:
-        return l10n.knockRestricted;
+        return l10n.spaceMemberOfCanKnock(
+          spaceParents
+              .map((space) => space.getLocalizedDisplayname(MatrixLocals(l10n)))
+              .join(', '),
+        );
     }
   }
 }
