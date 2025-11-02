@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SettingKeys {
+  static const String httpProxy = 'xyz.extera.next.httpProxy';
   static const String cleanExif = 'xyz.extera.next.cleanExif';
   static const String displayNavigationRail = 'chat.fluffy.displayNavigationRail';
   static const String hideAvatarsInInvites = 'xyz.extera.next.hideAvatarsInInvites';

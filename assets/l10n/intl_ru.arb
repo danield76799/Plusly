@@ -42,7 +42,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "cleanExifDescription": "Удалять метаданные EXIF (модель камеры, геолокация, время) из изображений еред отправкой.",
+  "cleanExifDescription": "Удалять метаданные EXIF (модель камеры, геолокация, время) из изображений перед отправкой.",
   "@cleanExifDescription": {
     "type": "String",
     "placeholders": {}

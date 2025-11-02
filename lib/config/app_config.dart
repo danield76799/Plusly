@@ -15,6 +15,8 @@ abstract class AppConfig {
   static bool enableGradient = true;
   static bool cleanExif = true;
 
+
+  static String? httpProxy;
   static String get defaultHomeserver => _defaultHomeserver;
   static double fontSizeFactor = 1;
   static const Color chatColor = primaryColor;
