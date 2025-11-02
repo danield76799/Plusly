@@ -3154,7 +3154,6 @@
   },
   "restricted": "Restricted",
   "@restricted": {},
-  },
   "spaceMemberOf": "Space member of {spaces}",
   "@spaceMemberOf": {
     "type": "String",

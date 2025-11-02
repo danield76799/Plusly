@@ -5,5 +5,4 @@ output-class: L10n
 preferred-supported-locales: ["en"]
 use-deferred-loading: true
 nullable-getter: false
-synthetic-package: false
 output-dir: lib/generated/l10n
