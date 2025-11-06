@@ -253,10 +253,10 @@ packages:
     dependency: "direct main"
     description:
       name: cross_file
-      sha256: "7caf6a750a0c04effbb52a676dce9a4a592e10ad35c34d6d2d0e4811160d5670"
+      sha256: "942a4791cd385a68ccb3b32c71c427aba508a1bb949b86dff2adbe4049f16239"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.4+2"
+    version: "0.3.5"
   crypto:
     dependency: transitive
     description:
@@ -730,10 +730,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_vodozemac
-      sha256: "54cd3790b6dfdc1afce928f8c46f7eeea9e4f8326f077400894935926f202057"
+      sha256: "16d4b44dd338689441fe42a80d0184e5c864e9563823de9e7e6371620d2c0590"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.1"
   flutter_web_auth_2:
     dependency: "direct main"
     description:
@@ -1203,10 +1203,10 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: f678376e3a4825a6e1a00d89585d6bae0843950c
+      resolved-ref: "8272294736361eae8f3c81d220aaffcf30f38fb1"
       url: "https://git.extera.xyz/OfficialDakari/matrix-dart-sdk.git"
     source: git
-    version: "3.0.1"
+    version: "3.0.2"
   meta:
     dependency: transitive
     description:
@@ -1563,10 +1563,10 @@ packages:
     dependency: "direct main"
     description:
       name: qr_code_scanner_plus
-      sha256: a0f1ac8e13299b3db2646635f252fe2ec67222b848b24ed34d11052faf080bfa
+      sha256: b764e5004251c58d9dee0c295e6006e05bd8d249e78ac3383abdb5afe0a996cd
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.12"
+    version: "2.0.14"
   qr_image:
     dependency: "direct main"
     description:
@@ -2248,10 +2248,10 @@ packages:
     dependency: "direct main"
     description:
       name: vodozemac
-      sha256: "95cac62ffab94db99e134c8f9aac198f8131a4eed0bed76a6cfc9c72add229b9"
+      sha256: "39144e20740807731871c9248d811ed5a037b21d0aa9ffcfa630954de74139d9"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.0"
   wakelock_plus:
     dependency: "direct main"
     description:

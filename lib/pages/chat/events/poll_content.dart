@@ -254,7 +254,7 @@ class PollWidgetState extends State<PollWidget> {
     final event = widget.event;
     final content =
         event.content[PollEvents.PollStart] as Map<String, dynamic?>;
-    final question = content?['question']?['m.text'] as String? ?? 'Poll';
+    final question = content?['question']?['m.text'] as String? ?? content?['question']?['org.matrix.msc1767.text'] as String? ?? 'Poll';
     final List<dynamic> answers = content?['answers'] ?? [];
     final maxSelections = content?['max_selections'] as int? ?? 1;
     final kind = content?['kind'] as String?;

@@ -7,6 +7,8 @@ class MatrixLocals extends MatrixLocalizations {
 
   MatrixLocals(this.l10n);
 
+  
+
   @override
   String voiceMessage(String senderName, Duration? duration) {
     return l10n.voiceMessage;
@@ -358,4 +360,17 @@ class MatrixLocals extends MatrixLocalizations {
 
   @override
   String get cancelledSend => l10n.sendCanceled;
+  
+  @override
+  // TODO: implement pollHasBeenEnded
+  String get pollHasBeenEnded => throw UnimplementedError();
+  
+  @override
+  String startedAPoll(String senderName) {
+    // TODO: implement startedAPoll
+    throw UnimplementedError();
+  }
+
+  // This is currently not used, just to keep up with matrix-dart-sdk upstream.
+  // I will reimplement polls to match fluffychat's, I don't know when...
 }

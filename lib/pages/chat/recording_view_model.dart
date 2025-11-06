@@ -34,7 +34,6 @@ class RecordingViewModelState extends State<RecordingViewModel> {
   Timer? _recorderSubscription;
   Duration duration = Duration.zero;
 
-  bool error = false;
   bool isSending = false;
 
   bool get isRecording => _audioRecorder != null;
@@ -88,7 +87,11 @@ class RecordingViewModelState extends State<RecordingViewModel> {
 
       final result = await audioRecorder.hasPermission();
       if (result != true) {
-        setState(() => error = true);
+        showOkAlertDialog(
+          context: context,
+          title: L10n.of(context).oopsSomethingWentWrong,
+          message: L10n.of(context).noPermission,
+        );
         return;
       }
       await WakelockPlus.enable();
@@ -107,9 +110,14 @@ class RecordingViewModelState extends State<RecordingViewModel> {
       );
       setState(() => duration = Duration.zero);
       _subscribe();
-    } catch (_) {
-      setState(() => error = true);
-      rethrow;
+    } catch (e, s) {
+      Logs().w('Unable to start voice message recording', e, s);
+      showOkAlertDialog(
+        context: context,
+        title: L10n.of(context).oopsSomethingWentWrong,
+        message: e.toString(),
+      );
+      setState(_reset);
     }
   }
 
@@ -139,7 +147,6 @@ class RecordingViewModelState extends State<RecordingViewModel> {
     _audioRecorder?.stop();
     _audioRecorder = null;
     isSending = false;
-    error = false;
     fileName = null;
     duration = Duration.zero;
     amplitudeTimeline.clear();
