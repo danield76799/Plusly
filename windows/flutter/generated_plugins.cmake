@@ -14,9 +14,12 @@ list(APPEND FLUTTER_PLUGIN_LIST
   pasteboard
   permission_handler_windows
   record_windows
+  screen_retriever_windows
   share_plus
   sqlcipher_flutter_libs
   url_launcher_windows
+  webcrypto
+  window_manager
   window_to_front
 )
 

@@ -139,7 +139,7 @@ class BackgroundPush {
       if (Platform.isAndroid) {
         await UnifiedPush.initialize(
           onNewEndpoint: _newUpEndpoint,
-          onRegistrationFailed: _upUnregistered,
+          onRegistrationFailed: (_, i) => _upUnregistered(i),
           onUnregistered: _upUnregistered,
           onMessage: _onUpMessage,
         );
@@ -374,11 +374,17 @@ class BackgroundPush {
   }
 
   Future<void> setupUp() async {
-    await UnifiedPushUi(matrix!.context, ["default"], UPFunctions())
-        .registerAppWithDialog();
+    await UnifiedPushUi(
+      context: matrix!.context,
+      instances: ["default"],
+      unifiedPushFunctions: UPFunctions(),
+      showNoDistribDialog: false,
+      onNoDistribDialogDismissed: () {}, // TODO: Implement me
+    ).registerAppWithDialog();
   }
 
-  Future<void> _newUpEndpoint(String newEndpoint, String i) async {
+  Future<void> _newUpEndpoint(PushEndpoint newPushEndpoint, String i) async {
+    final newEndpoint = newPushEndpoint.url;
     upAction = true;
     if (newEndpoint.isEmpty) {
       await _upUnregistered(i);
@@ -438,8 +444,9 @@ class BackgroundPush {
     }
   }
 
-  Future<void> _onUpMessage(Uint8List message, String i) async {
+  Future<void> _onUpMessage(PushMessage pushMessage, String i) async {
     upAction = true;
+    final message = pushMessage.content;
     final data = Map<String, dynamic>.from(
       json.decode(utf8.decode(message))['notification'],
     );
