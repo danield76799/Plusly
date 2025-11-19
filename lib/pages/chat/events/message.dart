@@ -390,8 +390,9 @@ class Message extends StatelessWidget {
                                                   ) !=
                                                   null)
                                                 FutureBuilder<Event?>(
-                                                  future: event
-                                                      .getReplyEvent(timeline),
+                                                  future: event.getReplyEvent(
+                                                    timeline,
+                                                  ),
                                                   builder: (
                                                     BuildContext context,
                                                     snapshot,
@@ -401,7 +402,8 @@ class Message extends StatelessWidget {
                                                         ? snapshot.data!
                                                         : Event(
                                                             eventId: event
-                                                                .relationshipEventId!,
+                                                                    .inReplyToEventId() ??
+                                                                '\$fake_event_id',
                                                             content: {
                                                               'msgtype':
                                                                   'm.text',
