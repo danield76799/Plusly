@@ -1203,10 +1203,10 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: "8272294736361eae8f3c81d220aaffcf30f38fb1"
+      resolved-ref: "8a1070a9e3009d82d23b8468372f38320932c997"
       url: "https://git.extera.xyz/OfficialDakari/matrix-dart-sdk.git"
     source: git
-    version: "3.0.2"
+    version: "4.0.0"
   meta:
     dependency: transitive
     description:
