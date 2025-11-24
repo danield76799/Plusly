@@ -17,6 +17,7 @@ abstract class AppConfig {
   static bool displayNavigationRail = true;
   static bool enableGradient = true;
   static bool cleanExif = true;
+  static bool doNotSendIfCantClean = true;
 
 
   static String? httpProxy;

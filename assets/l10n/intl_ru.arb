@@ -52,6 +52,8 @@
     "type": "String",
     "placeholders": {}
   },
+  "doNotSendIfCantClean": "Не отправлять неочищенные картинки",
+  "doNotSendIfCantCleanDescription": "Не отправлять картинку, если не удаётся удалить метаданные EXIF",
 	"repeatPassword": "Повторите пароль",
 	"@repeatPassword": {},
 	"notAnImage": "Это не картинка.",

@@ -85,6 +85,14 @@ class SettingsSecurityView extends StatelessWidget {
                     defaultValue: AppConfig.cleanExif,
                   ),
                   SettingsSwitchListTile.adaptive(
+                    title: L10n.of(context).doNotSendIfCantClean,
+                    subtitle:
+                        L10n.of(context).doNotSendIfCantCleanDescription,
+                    onChanged: (b) => AppConfig.doNotSendIfCantClean = b,
+                    storeKey: SettingKeys.doNotSendIfCantClean,
+                    defaultValue: AppConfig.doNotSendIfCantClean,
+                  ),
+                  SettingsSwitchListTile.adaptive(
                     title: L10n.of(context).sendTypingNotifications,
                     subtitle:
                         L10n.of(context).sendTypingNotificationsDescription,

@@ -52,6 +52,8 @@
     "type": "String",
     "placeholders": {}
   },
+  "doNotSendIfCantClean": "Strictly no EXIF",
+  "doNotSendIfCantCleanDescription": "Do not send the image if there was an error cleaning EXIF metadata",
   "repeatPassword": "Repeat password",
   "@repeatPassword": {},
   "notAnImage": "Not an image file.",

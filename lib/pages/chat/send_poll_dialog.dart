@@ -73,6 +73,7 @@ class SendPollDialogState extends State<SendPollDialog> {
         'question': {
           'org.matrix.msc1767.text': question,
           'm.text': question,
+          'body': question,
         },
         'answers': answers
             .map(
@@ -117,21 +118,33 @@ class SendPollDialogState extends State<SendPollDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+    // Ensure max slider value is at least 1 to prevent division by zero errors
+    final double maxAnswers = _answerControllers.isNotEmpty
+        ? _answerControllers.length.toDouble()
+        : 1.0;
+
     return AlertDialog(
-      title: Text(L10n.of(context).createPoll),
+      title: Text(l10n.createPoll),
+      // In M3, the surface tint color is often used, but we keep default styling here
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // --- Question Input ---
             TextField(
               controller: _questionController,
               decoration: InputDecoration(
-                labelText: L10n.of(context).question,
+                labelText: l10n.question,
                 border: const OutlineInputBorder(),
+                alignLabelWithHint: true,
               ),
               maxLines: 2,
             ),
             const SizedBox(height: 16),
+
+            // --- Answer Inputs ---
             ..._answerControllers.asMap().entries.map((entry) {
               final index = entry.key;
               final controller = entry.value;
@@ -143,58 +156,102 @@ class SendPollDialogState extends State<SendPollDialog> {
                       child: TextField(
                         controller: controller,
                         decoration: InputDecoration(
-                          labelText: '${L10n.of(context).answer} ${index + 1}',
+                          labelText: '${l10n.answer} ${index + 1}',
                           border: const OutlineInputBorder(),
                         ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     IconButton(
-                      icon: const Icon(Icons.remove_circle),
+                      // M3 uses standard variant colors for destructive actions
+                      icon: const Icon(Icons.remove_circle_outline),
                       onPressed: () => _removeAnswer(index),
                     ),
                   ],
                 ),
               );
             }),
+
             const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: _addAnswer,
-              child: Text(L10n.of(context).addAnswer),
+
+            // Add Answer Button
+            Center(
+              child: OutlinedButton.icon(
+                onPressed: _addAnswer,
+                icon: const Icon(Icons.add),
+                label: Text(l10n.addAnswer),
+              ),
             ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<int>(
-              initialValue: _maxSelections,
-              decoration: InputDecoration(
-                labelText: L10n.of(context).maxSelections,
-                border: const OutlineInputBorder(),
+
+            const Divider(height: 32),
+
+            // --- Max Selections (Slider) ---
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.maxSelections,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  Text(
+                    '$_maxSelections',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                  ),
+                ],
               ),
-              items: List.generate(
-                _answerControllers.length,
-                (i) => DropdownMenuItem(
-                  value: i + 1,
-                  child: Text('${i + 1}'),
-                ),
-              ),
-              onChanged: (value) => setState(() => _maxSelections = value!),
             ),
+            Slider(
+              value: _maxSelections.toDouble().clamp(1.0, maxAnswers),
+              min: 1,
+              max: maxAnswers,
+              divisions: (maxAnswers > 1) ? (maxAnswers - 1).toInt() : 1,
+              label: '$_maxSelections',
+              onChanged: (value) {
+                setState(() {
+                  _maxSelections = value.toInt();
+                });
+              },
+            ),
+
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              initialValue: _kind,
-              decoration: InputDecoration(
-                labelText: L10n.of(context).pollType,
-                border: const OutlineInputBorder(),
+
+            // --- Poll Type (Segmented Button) ---
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8.0, left: 8.0),
+              child: Text(
+                l10n.pollType,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
-              items: [
-                DropdownMenuItem(
-                  value: 'org.matrix.msc3381.disclosed',
-                  child: Text(L10n.of(context).publicPoll),
-                ),
-                DropdownMenuItem(
-                  value: 'org.matrix.msc3381.undisclosed',
-                  child: Text(L10n.of(context).anonymousPoll),
-                ),
-              ],
-              onChanged: (value) => setState(() => _kind = value!),
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<String>(
+                showSelectedIcon: false, // Cleaner look for text-only segments
+                segments: [
+                  ButtonSegment<String>(
+                    value: 'org.matrix.msc3381.disclosed',
+                    label: Text(l10n.publicPoll),
+                    icon: const Icon(Icons.visibility_outlined),
+                  ),
+                  ButtonSegment<String>(
+                    value: 'org.matrix.msc3381.undisclosed',
+                    label: Text(l10n.anonymousPoll),
+                    icon: const Icon(Icons.visibility_off_outlined),
+                  ),
+                ],
+                selected: {_kind},
+                onSelectionChanged: (Set<String> newSelection) {
+                  setState(() {
+                    // SegmentedButton returns a Set, we just need the first (only) value
+                    _kind = newSelection.first;
+                  });
+                },
+              ),
             ),
           ],
         ),
@@ -202,11 +259,11 @@ class SendPollDialogState extends State<SendPollDialog> {
       actions: [
         TextButton(
           onPressed: Navigator.of(context).pop,
-          child: Text(L10n.of(context).cancel),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: _sendPoll,
-          child: Text(L10n.of(context).send),
+          child: Text(l10n.send),
         ),
       ],
     );

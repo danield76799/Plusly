@@ -1,13 +1,18 @@
 import 'dart:typed_data';
+import 'package:extera_next/config/app_config.dart';
 import 'package:image/image.dart';
 
 class ExifCleaner {
   static List<int> removeExifData(List<int> imageBytes) {
       // Decode the image (this strips EXIF data)
-      final Image? image = decodeImage(Uint8List.fromList(imageBytes));
+      final image = decodeImage(Uint8List.fromList(imageBytes));
 
       if (image == null) {
-        throw Exception('Failed to decode image');
+        if (AppConfig.doNotSendIfCantClean) {
+          throw Exception('Failed to decode image');
+        } else {
+          return imageBytes;
+        }
       }
 
       // Encode back to bytes without EXIF based on detected format

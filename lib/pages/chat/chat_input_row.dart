@@ -140,46 +140,32 @@ class ChatInputRow extends StatelessWidget {
                               contentPadding: const EdgeInsets.all(0),
                             ),
                           ),
-                        // PopupMenuItem<String>(
-                        //   value: 'image',
-                        //   child: ListTile(
-                        //     leading: CircleAvatar(
-                        //       backgroundColor:
-                        //           theme.colorScheme.onPrimaryContainer,
-                        //       foregroundColor:
-                        //           theme.colorScheme.primaryContainer,
-                        //       child: const Icon(Icons.photo_outlined),
-                        //     ),
-                        //     title: Text(L10n.of(context).sendImage),
-                        //     contentPadding: const EdgeInsets.all(0),
-                        //   ),
-                        // ),
-                        // PopupMenuItem<String>(
-                        //   value: 'video',
-                        //   child: ListTile(
-                        //     leading: CircleAvatar(
-                        //       backgroundColor:
-                        //           theme.colorScheme.onPrimaryContainer,
-                        //       foregroundColor:
-                        //           theme.colorScheme.primaryContainer,
-                        //       child:
-                        //           const Icon(Icons.video_camera_back_outlined),
-                        //     ),
-                        //     title: Text(L10n.of(context).sendVideo),
-                        //     contentPadding: const EdgeInsets.all(0),
-                        //   ),
-                        // ),
                         PopupMenuItem<String>(
-                          value: 'poll',
+                          value: 'image',
                           child: ListTile(
                             leading: CircleAvatar(
                               backgroundColor:
                                   theme.colorScheme.onPrimaryContainer,
                               foregroundColor:
                                   theme.colorScheme.primaryContainer,
-                              child: const Icon(Icons.poll_outlined),
+                              child: const Icon(Icons.photo_outlined),
                             ),
-                            title: Text(L10n.of(context).createPoll),
+                            title: Text(L10n.of(context).sendImage),
+                            contentPadding: const EdgeInsets.all(0),
+                          ),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'video',
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor:
+                                  theme.colorScheme.onPrimaryContainer,
+                              foregroundColor:
+                                  theme.colorScheme.primaryContainer,
+                              child:
+                                  const Icon(Icons.video_camera_back_outlined),
+                            ),
+                            title: Text(L10n.of(context).sendVideo),
                             contentPadding: const EdgeInsets.all(0),
                           ),
                         ),
@@ -194,6 +180,20 @@ class ChatInputRow extends StatelessWidget {
                               child: const Icon(Icons.attachment_outlined),
                             ),
                             title: Text(L10n.of(context).sendFile),
+                            contentPadding: const EdgeInsets.all(0),
+                          ),
+                        ),
+                        PopupMenuItem<String>(
+                          value: 'poll',
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor:
+                                  theme.colorScheme.onPrimaryContainer,
+                              foregroundColor:
+                                  theme.colorScheme.primaryContainer,
+                              child: const Icon(Icons.poll_outlined),
+                            ),
+                            title: Text(L10n.of(context).createPoll),
                             contentPadding: const EdgeInsets.all(0),
                           ),
                         ),
