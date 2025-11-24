@@ -385,11 +385,14 @@ class Message extends StatelessWidget {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
-                                              if (event.relationshipType ==
-                                                  RelationshipTypes.reply)
+                                              if (event.inReplyToEventId(
+                                                    includingFallback: false,
+                                                  ) !=
+                                                  null)
                                                 FutureBuilder<Event?>(
-                                                  future: event
-                                                      .getReplyEvent(timeline),
+                                                  future: event.getReplyEvent(
+                                                    timeline,
+                                                  ),
                                                   builder: (
                                                     BuildContext context,
                                                     snapshot,
@@ -399,7 +402,8 @@ class Message extends StatelessWidget {
                                                         ? snapshot.data!
                                                         : Event(
                                                             eventId: event
-                                                                .relationshipEventId!,
+                                                                    .inReplyToEventId() ??
+                                                                '\$fake_event_id',
                                                             content: {
                                                               'msgtype':
                                                                   'm.text',
@@ -703,7 +707,11 @@ class Message extends StatelessWidget {
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Icon(
-                                                (thread?.hasNewMessages ?? false) ? Icons.mark_chat_unread_outlined : Icons.chat_bubble_outline,
+                                                (thread?.hasNewMessages ??
+                                                        false)
+                                                    ? Icons
+                                                        .mark_chat_unread_outlined
+                                                    : Icons.chat_bubble_outline,
                                                 color: Colors.grey[200],
                                                 size: 20,
                                               ),

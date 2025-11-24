@@ -15,8 +15,7 @@ class L10nUk extends L10n {
   String get noMessagesYet => 'No messages yet';
 
   @override
-  String get longPressToRecordVoiceMessage =>
-      'Long press to record voice message.';
+  String get longPressToRecordVoiceMessage => 'Long press to record voice message.';
 
   @override
   String get pause => 'Pause';
@@ -37,8 +36,7 @@ class L10nUk extends L10n {
   String get moveDown => 'Move down';
 
   @override
-  String get removeFromSpaceDescription =>
-      'The chat will be removed from the space but still appear in your chat list.';
+  String get removeFromSpaceDescription => 'The chat will be removed from the space but still appear in your chat list.';
 
   @override
   String get endPoll => 'End poll';
@@ -106,8 +104,13 @@ class L10nUk extends L10n {
   String get cleanExif => 'Clean EXIF metadata';
 
   @override
-  String get cleanExifDescription =>
-      'Remove EXIF metadata (camera model, geolocation, time) when sending a photo.';
+  String get cleanExifDescription => 'Remove EXIF metadata (camera model, geolocation, time) when sending a photo.';
+
+  @override
+  String get doNotSendIfCantClean => 'Strictly no EXIF';
+
+  @override
+  String get doNotSendIfCantCleanDescription => 'Do not send the image if there was an error cleaning EXIF metadata';
 
   @override
   String get repeatPassword => 'Повторіть пароль';
@@ -119,8 +122,7 @@ class L10nUk extends L10n {
   String get setCustomPermissionLevel => 'Set custom permission level';
 
   @override
-  String get setPermissionsLevelDescription =>
-      'Please choose a predefined role below or enter a custom permission level between 0 and 100.';
+  String get setPermissionsLevelDescription => 'Please choose a predefined role below or enter a custom permission level between 0 and 100.';
 
   @override
   String get ignoreUser => 'Ignore user';
@@ -138,8 +140,7 @@ class L10nUk extends L10n {
   String get enableGradient => 'Enable bubble background gradient';
 
   @override
-  String get translationDisabledInE2e =>
-      'Cloud translation is disabled in encrypted rooms to preserve privacy. Select specific words and use system context menu to translate with apps that support it.';
+  String get translationDisabledInE2e => 'Cloud translation is disabled in encrypted rooms to preserve privacy. Select specific words and use system context menu to translate with apps that support it.';
 
   @override
   String get remove => 'Вилучити';
@@ -187,8 +188,7 @@ class L10nUk extends L10n {
   String get addEmail => 'Додати е-пошту';
 
   @override
-  String get confirmMatrixId =>
-      'Підтвердьте свій Matrix ID, щоб видалити свій обліковий запис.';
+  String get confirmMatrixId => 'Підтвердьте свій Matrix ID, щоб видалити свій обліковий запис.';
 
   @override
   String supposedMxid(String mxid) {
@@ -214,8 +214,7 @@ class L10nUk extends L10n {
   String get allChats => 'Усі бесіди';
 
   @override
-  String get commandHint_roomupgrade =>
-      'Оновити цю кімнату до версії даної кімнати';
+  String get commandHint_roomupgrade => 'Оновити цю кімнату до версії даної кімнати';
 
   @override
   String get commandHint_googly => 'Надіслати кілька гугл-очей';
@@ -253,8 +252,7 @@ class L10nUk extends L10n {
   String get appLock => 'Блокування застосунку';
 
   @override
-  String get appLockDescription =>
-      'Блокувати застосунок, коли не використовується ПІН-код';
+  String get appLockDescription => 'Блокувати застосунок, коли не використовується ПІН-код';
 
   @override
   String get archive => 'Архів';
@@ -269,8 +267,7 @@ class L10nUk extends L10n {
   String get areYouSureYouWantToLogout => 'Ви впевнені, що хочете вийти?';
 
   @override
-  String get askSSSSSign =>
-      'Для підпису ключа іншого користувача введіть свою парольну фразу або ключ відновлення.';
+  String get askSSSSSign => 'Для підпису ключа іншого користувача введіть свою парольну фразу або ключ відновлення.';
 
   @override
   String askVerificationRequest(String username) {
@@ -278,12 +275,10 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get autoplayImages =>
-      'Автоматично відтворювати анімовані наліпки та емоджі';
+  String get autoplayImages => 'Автоматично відтворювати анімовані наліпки та емоджі';
 
   @override
-  String badServerLoginTypesException(String serverVersions,
-      String supportedVersions, Object suportedVersions) {
+  String badServerLoginTypesException(String serverVersions, String supportedVersions, Object suportedVersions) {
     return 'Домашній сервер підтримує такі типи входу:\n$serverVersions\nАле цей застосунок підтримує лише:\n$supportedVersions';
   }
 
@@ -291,15 +286,13 @@ class L10nUk extends L10n {
   String get sendTypingNotifications => 'Надсилати сповіщення про ввід тексту';
 
   @override
-  String get swipeRightToLeftToReply =>
-      'Посунути праворуч або ліворуч, щоб відповісти';
+  String get swipeRightToLeftToReply => 'Посунути праворуч або ліворуч, щоб відповісти';
 
   @override
   String get sendOnEnter => 'Надсилати натисканням Enter';
 
   @override
-  String badServerVersionsException(String serverVersions,
-      String supportedVersions, Object serverVerions, Object suportedVersions) {
+  String badServerVersionsException(String serverVersions, String supportedVersions, Object serverVerions, Object suportedVersions) {
     return 'Домашній сервер підтримує такі версії специфікацій:\n$serverVersions\nАле цей застосунок підтримує лише $supportedVersions';
   }
 
@@ -312,8 +305,7 @@ class L10nUk extends L10n {
   String get noMoreChatsFound => 'Більше чатів не знайдено...';
 
   @override
-  String get noChatsFoundHere =>
-      'Бесід ще немає. Розпочніть спілкування натиснувши кнопку нижче. ⤵️';
+  String get noChatsFoundHere => 'Бесід ще немає. Розпочніть спілкування натиснувши кнопку нижче. ⤵️';
 
   @override
   String get joinedChats => 'Приєднані чати';
@@ -456,8 +448,7 @@ class L10nUk extends L10n {
   String get chatBackup => 'Резервне копіювання бесіди';
 
   @override
-  String get chatBackupDescription =>
-      'Ваші старі повідомлення захищені ключем відновлення. Переконайтеся, що ви не втратите його.';
+  String get chatBackupDescription => 'Ваші старі повідомлення захищені ключем відновлення. Переконайтеся, що ви не втратите його.';
 
   @override
   String get chatDetails => 'Подробиці бесіди';
@@ -478,8 +469,7 @@ class L10nUk extends L10n {
   String get close => 'Закрити';
 
   @override
-  String get commandHint_markasdm =>
-      'Позначити кімнатою особистого спілкування для надання Matrix ID';
+  String get commandHint_markasdm => 'Позначити кімнатою особистого спілкування для надання Matrix ID';
 
   @override
   String get commandHint_markasgroup => 'Позначити групою';
@@ -491,22 +481,19 @@ class L10nUk extends L10n {
   String get commandHint_clearcache => 'Очистити кеш';
 
   @override
-  String get commandHint_create =>
-      'Створіть порожню групову бесіду\nВикористовуйте --no-encryption, щоб вимкнути шифрування';
+  String get commandHint_create => 'Створіть порожню групову бесіду\nВикористовуйте --no-encryption, щоб вимкнути шифрування';
 
   @override
   String get commandHint_discardsession => 'Відкинути сеанс';
 
   @override
-  String get commandHint_dm =>
-      'Початок особистої бесіди\nВикористовуйте --no-encryption, що вимкнути шифрування';
+  String get commandHint_dm => 'Початок особистої бесіди\nВикористовуйте --no-encryption, що вимкнути шифрування';
 
   @override
   String get commandHint_html => 'Надіслати текст у форматі HTML';
 
   @override
-  String get commandHint_invite =>
-      'Запросіть цього користувача до цієї кімнати';
+  String get commandHint_invite => 'Запросіть цього користувача до цієї кімнати';
 
   @override
   String get commandHint_join => 'Приєднатися до цієї кімнати';
@@ -521,16 +508,13 @@ class L10nUk extends L10n {
   String get commandHint_me => 'Опишіть себе';
 
   @override
-  String get commandHint_myroomavatar =>
-      'Встановіть зображення для цієї кімнати (від mxc-uri)';
+  String get commandHint_myroomavatar => 'Встановіть зображення для цієї кімнати (від mxc-uri)';
 
   @override
-  String get commandHint_myroomnick =>
-      'Укажіть показуване ім\'я для цієї кімнати';
+  String get commandHint_myroomnick => 'Укажіть показуване ім\'я для цієї кімнати';
 
   @override
-  String get commandHint_op =>
-      'Укажіть рівень повноважень цього користувача (типово: 50)';
+  String get commandHint_op => 'Укажіть рівень повноважень цього користувача (типово: 50)';
 
   @override
   String get commandHint_plain => 'Надіслати неформатований текст';
@@ -542,8 +526,7 @@ class L10nUk extends L10n {
   String get commandHint_send => 'Надіслати текст';
 
   @override
-  String get commandHint_unban =>
-      'Розблокувати цього користувача у цій кімнаті';
+  String get commandHint_unban => 'Розблокувати цього користувача у цій кімнаті';
 
   @override
   String get commandInvalid => 'Неприпустима команда';
@@ -569,8 +552,7 @@ class L10nUk extends L10n {
   String get connect => 'Під\'єднатись';
 
   @override
-  String get contactHasBeenInvitedToTheGroup =>
-      'Контакт був запрошений в групу';
+  String get contactHasBeenInvitedToTheGroup => 'Контакт був запрошений в групу';
 
   @override
   String get containsDisplayName => 'Містить показуване ім’я';
@@ -579,8 +561,7 @@ class L10nUk extends L10n {
   String get containsUserName => 'Містить ім’я користувача';
 
   @override
-  String get contentHasBeenReported =>
-      'Скаргу на вміст надіслано адміністраторам сервера';
+  String get contentHasBeenReported => 'Скаргу на вміст надіслано адміністраторам сервера';
 
   @override
   String get copiedToClipboard => 'Скопійовано в буфер обміну';
@@ -637,12 +618,10 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get deactivateAccountWarning =>
-      'Це деактивує ваш обліковий запис. Це неможливо скасувати! Ви впевнені?';
+  String get deactivateAccountWarning => 'Це деактивує ваш обліковий запис. Це неможливо скасувати! Ви впевнені?';
 
   @override
-  String get defaultPermissionLevel =>
-      'Типовий рівень дозволів для нових користувачів';
+  String get defaultPermissionLevel => 'Типовий рівень дозволів для нових користувачів';
 
   @override
   String get delete => 'Видалити';
@@ -705,8 +684,7 @@ class L10nUk extends L10n {
   String get emoteInvalid => 'Неприпустимий короткий код емодзі!';
 
   @override
-  String get emoteKeyboardNoRecents =>
-      'Тут з\'являться нещодавно використані смайлики...';
+  String get emoteKeyboardNoRecents => 'Тут з\'являться нещодавно використані смайлики...';
 
   @override
   String get emotePacks => 'Набори емоджі для кімнати';
@@ -721,8 +699,7 @@ class L10nUk extends L10n {
   String get accessAndVisibility => 'Доступ і видимість';
 
   @override
-  String get accessAndVisibilityDescription =>
-      'Хто може приєднатися до цієї бесіди і як її можна знайти.';
+  String get accessAndVisibilityDescription => 'Хто може приєднатися до цієї бесіди і як її можна знайти.';
 
   @override
   String get calls => 'Виклики';
@@ -731,15 +708,13 @@ class L10nUk extends L10n {
   String get customEmojisAndStickers => 'Власні емоджі та наліпки';
 
   @override
-  String get customEmojisAndStickersBody =>
-      'Додавайте або діліться власними емоджі або наліпками, які можна використовувати в будь-якій бесіді.';
+  String get customEmojisAndStickersBody => 'Додавайте або діліться власними емоджі або наліпками, які можна використовувати в будь-якій бесіді.';
 
   @override
   String get emoteShortcode => 'Короткий код для емодзі';
 
   @override
-  String get emoteWarnNeedToPick =>
-      'Укажіть короткий код емодзі та зображення!';
+  String get emoteWarnNeedToPick => 'Укажіть короткий код емодзі та зображення!';
 
   @override
   String get emptyChat => 'Порожня бесіда';
@@ -751,8 +726,7 @@ class L10nUk extends L10n {
   String get enableEncryption => 'Увімкнути шифрування';
 
   @override
-  String get enableEncryptionWarning =>
-      'Ви більше не зможете вимкнути шифрування. Ви впевнені?';
+  String get enableEncryptionWarning => 'Ви більше не зможете вимкнути шифрування. Ви впевнені?';
 
   @override
   String get encrypted => 'Зашифровано';
@@ -850,12 +824,10 @@ class L10nUk extends L10n {
   String get hideRedactedMessages => 'Сховати змінені повідомлення';
 
   @override
-  String get hideRedactedMessagesBody =>
-      'Якщо хтось змінить повідомлення, його більше не буде видно в бесіді.';
+  String get hideRedactedMessagesBody => 'Якщо хтось змінить повідомлення, його більше не буде видно в бесіді.';
 
   @override
-  String get hideInvalidOrUnknownMessageFormats =>
-      'Сховати недійсні або невідомі формати повідомлень';
+  String get hideInvalidOrUnknownMessageFormats => 'Сховати недійсні або невідомі формати повідомлень';
 
   @override
   String get howOffensiveIsThisContent => 'Наскільки образливий цей вміст?';
@@ -873,8 +845,7 @@ class L10nUk extends L10n {
   String get blockedUsers => 'Заблоковані користувачі';
 
   @override
-  String get blockListDescription =>
-      'Ви можете заблокувати користувачів, які вас турбують. Ви не зможете отримувати жодних повідомлень або запрошень до кімнати від користувачів з вашого персонального списку блокування.';
+  String get blockListDescription => 'Ви можете заблокувати користувачів, які вас турбують. Ви не зможете отримувати жодних повідомлень або запрошень до кімнати від користувачів з вашого персонального списку блокування.';
 
   @override
   String get blockUsername => 'Ігнорувати ім\'я користувача';
@@ -883,8 +854,7 @@ class L10nUk extends L10n {
   String get iHaveClickedOnLink => 'Мною виконано перехід за посиланням';
 
   @override
-  String get incorrectPassphraseOrKey =>
-      'Неправильна парольна фраза або ключ відновлення';
+  String get incorrectPassphraseOrKey => 'Неправильна парольна фраза або ключ відновлення';
 
   @override
   String get inoffensive => 'Необразливий';
@@ -915,12 +885,10 @@ class L10nUk extends L10n {
   String get invited => 'Запрошено';
 
   @override
-  String get redactMessageDescription =>
-      'Повідомлення буде відредаговано для всіх учасників цієї розмови. Це не можна скасувати.';
+  String get redactMessageDescription => 'Повідомлення буде відредаговано для всіх учасників цієї розмови. Це не можна скасувати.';
 
   @override
-  String get optionalRedactReason =>
-      '(Необов\'язково) Причина редагування цього повідомлення...';
+  String get optionalRedactReason => '(Необов\'язково) Причина редагування цього повідомлення...';
 
   @override
   String invitedUser(String username, String targetName) {
@@ -988,22 +956,19 @@ class L10nUk extends L10n {
   String get dehydrate => 'Експортувати сеанс та очистити пристрій';
 
   @override
-  String get dehydrateWarning =>
-      'Цю дію не можна скасувати. Переконайтеся, що ви безпечно зберігаєте файл резервної копії.';
+  String get dehydrateWarning => 'Цю дію не можна скасувати. Переконайтеся, що ви безпечно зберігаєте файл резервної копії.';
 
   @override
   String get dehydrateTor => 'Користувачі TOR: експорт сеансу';
 
   @override
-  String get dehydrateTorLong =>
-      'Для користувачів TOR рекомендується експортувати сеанс перед закриттям вікна.';
+  String get dehydrateTorLong => 'Для користувачів TOR рекомендується експортувати сеанс перед закриттям вікна.';
 
   @override
   String get hydrateTor => 'Користувачі TOR: імпорт експортованого сеансу';
 
   @override
-  String get hydrateTorLong =>
-      'Минулого разу ви експортували свій сеанс із TOR? Швидко імпортуйте його та продовжуйте спілкування.';
+  String get hydrateTorLong => 'Минулого разу ви експортували свій сеанс із TOR? Швидко імпортуйте його та продовжуйте спілкування.';
 
   @override
   String get hydrate => 'Відновлення з файлу резервної копії';
@@ -1015,12 +980,10 @@ class L10nUk extends L10n {
   String get loadMore => 'Завантажити ще…';
 
   @override
-  String get locationDisabledNotice =>
-      'Служби визначення розташування вимкнені. Увімкніть їх, щоб мати змогу ділитися своїм розташуванням.';
+  String get locationDisabledNotice => 'Служби визначення розташування вимкнені. Увімкніть їх, щоб мати змогу ділитися своїм розташуванням.';
 
   @override
-  String get locationPermissionDeniedNotice =>
-      'Дозвіл на розташування відхилено. Надайте можливість ділитися своїм розташуванням.';
+  String get locationPermissionDeniedNotice => 'Дозвіл на розташування відхилено. Надайте можливість ділитися своїм розташуванням.';
 
   @override
   String get login => 'Увійти';
@@ -1052,8 +1015,7 @@ class L10nUk extends L10n {
   String get muteChat => 'Вимкнути сповіщення';
 
   @override
-  String get needPantalaimonWarning =>
-      'Майте на увазі, що на цей час вам потрібен Pantalaimon, щоб використовувати наскрізне шифрування.';
+  String get needPantalaimonWarning => 'Майте на увазі, що на цей час вам потрібен Pantalaimon, щоб використовувати наскрізне шифрування.';
 
   @override
   String get newChat => 'Нова бесіда';
@@ -1077,12 +1039,10 @@ class L10nUk extends L10n {
   String get noEmotesFound => 'Емоджі не знайдено. 😕';
 
   @override
-  String get noEncryptionForPublicRooms =>
-      'Активувати шифрування можна лише тоді, коли кімната більше не буде загальнодоступною.';
+  String get noEncryptionForPublicRooms => 'Активувати шифрування можна лише тоді, коли кімната більше не буде загальнодоступною.';
 
   @override
-  String get noGoogleServicesWarning =>
-      'Схоже, Firebase Cloud Messaging недоступна на вашому пристрої. Щоб отримувати push-сповіщення, радимо встановити ntfy. За допомогою ntfy або іншого постачальника Unified Push ви можете отримувати push-сповіщення у безпечний спосіб. Ви можете завантажити ntfy з PlayStore або з F-Droid.';
+  String get noGoogleServicesWarning => 'Схоже, Firebase Cloud Messaging недоступна на вашому пристрої. Щоб отримувати push-сповіщення, радимо встановити ntfy. За допомогою ntfy або іншого постачальника Unified Push ви можете отримувати push-сповіщення у безпечний спосіб. Ви можете завантажити ntfy з PlayStore або з F-Droid.';
 
   @override
   String noMatrixServer(String server1, String server2) {
@@ -1099,8 +1059,7 @@ class L10nUk extends L10n {
   String get none => 'Нічого';
 
   @override
-  String get noPasswordRecoveryDescription =>
-      'Ви ще не додали спосіб відновлення пароля.';
+  String get noPasswordRecoveryDescription => 'Ви ще не додали спосіб відновлення пароля.';
 
   @override
   String get noPermission => 'Немає прав доступу';
@@ -1112,8 +1071,7 @@ class L10nUk extends L10n {
   String get notifications => 'Сповіщення';
 
   @override
-  String get notificationsEnabledForThisAccount =>
-      'Сповіщення ввімкнені для цього облікового запису';
+  String get notificationsEnabledForThisAccount => 'Сповіщення ввімкнені для цього облікового запису';
 
   @override
   String numUsersTyping(int count) {
@@ -1136,19 +1094,16 @@ class L10nUk extends L10n {
   String get online => 'Онлайн';
 
   @override
-  String get onlineKeyBackupEnabled =>
-      'Резервне онлайн-копіювання ключів увімкнено';
+  String get onlineKeyBackupEnabled => 'Резервне онлайн-копіювання ключів увімкнено';
 
   @override
-  String get oopsPushError =>
-      'Дідько! На жаль, сталася помилка під час налаштування push-сповіщень.';
+  String get oopsPushError => 'Дідько! На жаль, сталася помилка під час налаштування push-сповіщень.';
 
   @override
   String get oopsSomethingWentWrong => 'Халепа, щось пішло не так…';
 
   @override
-  String get openAppToReadMessages =>
-      'Відкрийте застосунок читання повідомлень';
+  String get openAppToReadMessages => 'Відкрийте застосунок читання повідомлень';
 
   @override
   String get openCamera => 'Відкрити камеру';
@@ -1157,15 +1112,13 @@ class L10nUk extends L10n {
   String get openVideoCamera => 'Відкрити камеру для відео';
 
   @override
-  String get oneClientLoggedOut =>
-      'На одному з ваших клієнтів виконано вихід із системи';
+  String get oneClientLoggedOut => 'На одному з ваших клієнтів виконано вихід із системи';
 
   @override
   String get addAccount => 'Додати обліковий запис';
 
   @override
-  String get editBundlesForAccount =>
-      'Змінити вузол для цього облікового запису';
+  String get editBundlesForAccount => 'Змінити вузол для цього облікового запису';
 
   @override
   String get addToBundle => 'Додати до вузлів';
@@ -1177,8 +1130,7 @@ class L10nUk extends L10n {
   String get bundleName => 'Назва вузла';
 
   @override
-  String get enableMultiAccounts =>
-      '(БЕТА) Увімкнути кілька облікових записів на цьому пристрої';
+  String get enableMultiAccounts => '(БЕТА) Увімкнути кілька облікових записів на цьому пристрої';
 
   @override
   String get openInMaps => 'Відкрити в картах';
@@ -1187,8 +1139,7 @@ class L10nUk extends L10n {
   String get link => 'Посилання';
 
   @override
-  String get serverRequiresEmail =>
-      'Цей сервер потребує перевірки вашої адресу е-пошти для реєстрації.';
+  String get serverRequiresEmail => 'Цей сервер потребує перевірки вашої адресу е-пошти для реєстрації.';
 
   @override
   String get or => 'Або';
@@ -1212,12 +1163,10 @@ class L10nUk extends L10n {
   String get passwordHasBeenChanged => 'Пароль змінено';
 
   @override
-  String get hideMemberChangesInPublicChats =>
-      'Сховати зміни користувачів у загальнодоступних бесідах';
+  String get hideMemberChangesInPublicChats => 'Сховати зміни користувачів у загальнодоступних бесідах';
 
   @override
-  String get hideMemberChangesInPublicChatsBody =>
-      'Не показувати в хронології бесіди, якщо хтось приєднується до загальнодоступної бесіди або виходить з неї, щоб покращити її читабельність.';
+  String get hideMemberChangesInPublicChatsBody => 'Не показувати в хронології бесіди, якщо хтось приєднується до загальнодоступної бесіди або виходить з неї, щоб покращити її читабельність.';
 
   @override
   String get overview => 'Огляд';
@@ -1252,12 +1201,10 @@ class L10nUk extends L10n {
   String get pleaseChooseAPasscode => 'Виберіть код доступу';
 
   @override
-  String get pleaseClickOnLink =>
-      'Натисніть на посилання в електронному листі, а потім продовжуйте.';
+  String get pleaseClickOnLink => 'Натисніть на посилання в електронному листі, а потім продовжуйте.';
 
   @override
-  String get pleaseEnter4Digits =>
-      'Введіть 4 цифри або залиште порожнім, щоб вимкнути блокування застосунку.';
+  String get pleaseEnter4Digits => 'Введіть 4 цифри або залиште порожнім, щоб вимкнути блокування застосунку.';
 
   @override
   String get pleaseEnterRecoveryKey => 'Введіть ключ відновлення:';
@@ -1272,8 +1219,7 @@ class L10nUk extends L10n {
   String get pleaseEnterYourUsername => 'Введіть своє ім\'я користувача';
 
   @override
-  String get pleaseFollowInstructionsOnWeb =>
-      'Виконайте вказівки вебсайту та торкніться далі.';
+  String get pleaseFollowInstructionsOnWeb => 'Виконайте вказівки вебсайту та торкніться далі.';
 
   @override
   String get privacy => 'Приватність';
@@ -1358,8 +1304,7 @@ class L10nUk extends L10n {
   String get translatedMessage => 'Translated message';
 
   @override
-  String get errorTranslatingMessage =>
-      'An error has occured while translating the message.';
+  String get errorTranslatingMessage => 'An error has occured while translating the message.';
 
   @override
   String get recoverMessage => 'Recover message';
@@ -1368,12 +1313,10 @@ class L10nUk extends L10n {
   String get recoveredMessage => 'Recovered message';
 
   @override
-  String get errorRecoveringMessage =>
-      'An error has occured while recovering the message.';
+  String get errorRecoveringMessage => 'An error has occured while recovering the message.';
 
   @override
-  String get errorRecoveringMessageNoAdmin =>
-      'This feature is available on Synapse homeservers only for adminstrators.';
+  String get errorRecoveringMessageNoAdmin => 'This feature is available on Synapse homeservers only for adminstrators.';
 
   @override
   String get requestPermission => 'Запит дозволу';
@@ -1517,12 +1460,10 @@ class L10nUk extends L10n {
   String get hideAvatarsInInvites => 'Hide avatars in invites';
 
   @override
-  String get hideAvatarsInInvitesDescription =>
-      'Do not show room avatars in invites';
+  String get hideAvatarsInInvitesDescription => 'Do not show room avatars in invites';
 
   @override
-  String get presencesToggle =>
-      'Показувати повідомлення про стан від інших користувачів';
+  String get presencesToggle => 'Показувати повідомлення про стан від інших користувачів';
 
   @override
   String get pureBlackToggle => 'Pure Black';
@@ -1700,8 +1641,7 @@ class L10nUk extends L10n {
   String get voiceMessage => 'Голосове повідомлення';
 
   @override
-  String get waitingPartnerAcceptRequest =>
-      'Очікування прийняття запиту партнером…';
+  String get waitingPartnerAcceptRequest => 'Очікування прийняття запиту партнером…';
 
   @override
   String get waitingPartnerEmoji => 'Очікування прийняття емоджі партнером…';
@@ -1722,19 +1662,16 @@ class L10nUk extends L10n {
   String get whoCanPerformWhichAction => 'Хто і яку дію може виконувати';
 
   @override
-  String get whoIsAllowedToJoinThisGroup =>
-      'Кому дозволено приєднуватися до цієї групи';
+  String get whoIsAllowedToJoinThisGroup => 'Кому дозволено приєднуватися до цієї групи';
 
   @override
   String get whyDoYouWantToReportThis => 'Чому ви хочете поскаржитися?';
 
   @override
-  String get wipeChatBackup =>
-      'Стерти резервну копію бесіди, щоб створити новий ключ відновлення?';
+  String get wipeChatBackup => 'Стерти резервну копію бесіди, щоб створити новий ключ відновлення?';
 
   @override
-  String get withTheseAddressesRecoveryDescription =>
-      'За допомогою цих адрес ви можете відновити свій пароль.';
+  String get withTheseAddressesRecoveryDescription => 'За допомогою цих адрес ви можете відновити свій пароль.';
 
   @override
   String get writeAMessage => 'Написати повідомлення…';
@@ -1746,12 +1683,10 @@ class L10nUk extends L10n {
   String get you => 'Ви';
 
   @override
-  String get youAreNoLongerParticipatingInThisChat =>
-      'Ви більше не берете участь у цій бесіді';
+  String get youAreNoLongerParticipatingInThisChat => 'Ви більше не берете участь у цій бесіді';
 
   @override
-  String get youHaveBeenBannedFromThisChat =>
-      'Ви були заблоковані у цій бесіді';
+  String get youHaveBeenBannedFromThisChat => 'Ви були заблоковані у цій бесіді';
 
   @override
   String get yourPublicKey => 'Ваш відкритий ключ';
@@ -1775,15 +1710,13 @@ class L10nUk extends L10n {
   String get removeFromSpace => 'Вилучити з простору';
 
   @override
-  String get addToSpaceDescription =>
-      'Виберіть простір, щоб додати до нього цю бесіду.';
+  String get addToSpaceDescription => 'Виберіть простір, щоб додати до нього цю бесіду.';
 
   @override
   String get start => 'Почати';
 
   @override
-  String get pleaseEnterRecoveryKeyDescription =>
-      'Щоб розблокувати старі повідомлення, введіть ключ відновлення, згенерований у попередньому сеансі. Ваш ключ відновлення це НЕ ваш пароль.';
+  String get pleaseEnterRecoveryKeyDescription => 'Щоб розблокувати старі повідомлення, введіть ключ відновлення, згенерований у попередньому сеансі. Ваш ключ відновлення це НЕ ваш пароль.';
 
   @override
   String get publish => 'Опублікувати';
@@ -1814,8 +1747,7 @@ class L10nUk extends L10n {
   String get pinMessage => 'Прикріпити в кімнаті';
 
   @override
-  String get confirmEventUnpin =>
-      'Ви впевнені, що бажаєте назавжди відкріпите подію?';
+  String get confirmEventUnpin => 'Ви впевнені, що бажаєте назавжди відкріпите подію?';
 
   @override
   String get emojis => 'Емоджі';
@@ -1830,12 +1762,10 @@ class L10nUk extends L10n {
   String get unsupportedAndroidVersion => 'Непідтримувана версія Android';
 
   @override
-  String get unsupportedAndroidVersionLong =>
-      'Для цієї функції потрібна новіша версія Android. Перевірте наявність оновлень або підтримку Lineage OS.';
+  String get unsupportedAndroidVersionLong => 'Для цієї функції потрібна новіша версія Android. Перевірте наявність оновлень або підтримку Lineage OS.';
 
   @override
-  String get videoCallsBetaWarning =>
-      'Зауважте, що відеовиклики на ранньому етапі розробки. Вони можуть працювати не так, як очікувалося, або взагалі не працювати на всіх платформах.';
+  String get videoCallsBetaWarning => 'Зауважте, що відеовиклики на ранньому етапі розробки. Вони можуть працювати не так, як очікувалося, або взагалі не працювати на всіх платформах.';
 
   @override
   String get experimentalVideoCalls => 'Експериментальні відеовиклики';
@@ -1847,8 +1777,7 @@ class L10nUk extends L10n {
   String get indexedDbErrorTitle => 'Проблеми приватного режиму';
 
   @override
-  String get indexedDbErrorLong =>
-      'На жаль, сховище повідомлень не ввімкнуто у приватному режимі типово.\nВідкрийте\n - about:config\n - установіть для dom.indexedDB.privateBrowsing.enabled значення true\nІнакше запустити FluffyChat буде неможливо.';
+  String get indexedDbErrorLong => 'На жаль, сховище повідомлень не ввімкнуто у приватному режимі типово.\nВідкрийте\n - about:config\n - установіть для dom.indexedDB.privateBrowsing.enabled значення true\nІнакше запустити FluffyChat буде неможливо.';
 
   @override
   String switchToAccount(String number) {
@@ -1959,8 +1888,7 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get noPublicLinkHasBeenCreatedYet =>
-      'Загальнодоступне посилання ще не створено';
+  String get noPublicLinkHasBeenCreatedYet => 'Загальнодоступне посилання ще не створено';
 
   @override
   String get knock => 'Постукатись';
@@ -1972,12 +1900,10 @@ class L10nUk extends L10n {
   String get unlockOldMessages => 'Розблокувати старі повідомлення';
 
   @override
-  String get storeInSecureStorageDescription =>
-      'Збережіть ключ відновлення в безпечному сховищі цього пристрою.';
+  String get storeInSecureStorageDescription => 'Збережіть ключ відновлення в безпечному сховищі цього пристрою.';
 
   @override
-  String get saveKeyManuallyDescription =>
-      'Збережіть цей ключ вручну, запустивши діалогове вікно спільного доступу до системи або буфер обміну.';
+  String get saveKeyManuallyDescription => 'Збережіть цей ключ вручну, запустивши діалогове вікно спільного доступу до системи або буфер обміну.';
 
   @override
   String get storeInAndroidKeystore => 'Зберегти в Android KeyStore';
@@ -2000,8 +1926,7 @@ class L10nUk extends L10n {
   String get custom => 'Користувацький';
 
   @override
-  String get foregroundServiceRunning =>
-      'Це сповіщення з\'являється під час роботи основної служби.';
+  String get foregroundServiceRunning => 'Це сповіщення з\'являється під час роботи основної служби.';
 
   @override
   String get screenSharingTitle => 'спільний доступ до екрана';
@@ -2016,26 +1941,22 @@ class L10nUk extends L10n {
   String get callingAccount => 'Обліковий запис для виклику';
 
   @override
-  String get callingAccountDetails =>
-      'Дозволяє FluffyChat використовувати основний застосунок Android для набору номера.';
+  String get callingAccountDetails => 'Дозволяє FluffyChat використовувати основний застосунок Android для набору номера.';
 
   @override
   String get appearOnTop => 'З\'являтися зверху';
 
   @override
-  String get appearOnTopDetails =>
-      'Дозволяє застосунку показуватися зверху (не потрібно, якщо Fluffychat вже налаштований обліковим записом для викликів)';
+  String get appearOnTopDetails => 'Дозволяє застосунку показуватися зверху (не потрібно, якщо Fluffychat вже налаштований обліковим записом для викликів)';
 
   @override
-  String get otherCallingPermissions =>
-      'Мікрофон, камера та інші дозволи FluffyChat';
+  String get otherCallingPermissions => 'Мікрофон, камера та інші дозволи FluffyChat';
 
   @override
   String get whyIsThisMessageEncrypted => 'Чому це повідомлення нечитабельне?';
 
   @override
-  String get noKeyForThisMessage =>
-      'Це може статися, якщо повідомлення було надіслано до того, як ви ввійшли у свій обліковий запис на цьому пристрої.\n\nТакож можливо, що відправник заблокував ваш пристрій або щось пішло не так з під\'єднанням до інтернету.\n\nЧи можете ви прочитати повідомлення на іншому сеансі? Тоді ви зможете перенести повідомлення з нього! Перейдіть до Налаштування > Пристрої та переконайтеся, що ваші пристрої перевірили один одного. Коли ви відкриєте кімнату наступного разу й обидва сеанси будуть на активні, ключі будуть передані автоматично.\n\nВи ж не хочете втрачати ключі після виходу або зміни пристроїв? Переконайтеся, що ви ввімкнули резервне копіювання бесід у налаштуваннях.';
+  String get noKeyForThisMessage => 'Це може статися, якщо повідомлення було надіслано до того, як ви ввійшли у свій обліковий запис на цьому пристрої.\n\nТакож можливо, що відправник заблокував ваш пристрій або щось пішло не так з під\'єднанням до інтернету.\n\nЧи можете ви прочитати повідомлення на іншому сеансі? Тоді ви зможете перенести повідомлення з нього! Перейдіть до Налаштування > Пристрої та переконайтеся, що ваші пристрої перевірили один одного. Коли ви відкриєте кімнату наступного разу й обидва сеанси будуть на активні, ключі будуть передані автоматично.\n\nВи ж не хочете втрачати ключі після виходу або зміни пристроїв? Переконайтеся, що ви ввімкнули резервне копіювання бесід у налаштуваннях.';
 
   @override
   String get newGroup => 'Нова група';
@@ -2072,15 +1993,13 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get newSpaceDescription =>
-      'Простори дозволяють об\'єднувати ваші бесіди та створювати приватні або загальнодоступні спільноти.';
+  String get newSpaceDescription => 'Простори дозволяють об\'єднувати ваші бесіди та створювати приватні або загальнодоступні спільноти.';
 
   @override
   String get encryptThisChat => 'Зашифрувати цю бесіду';
 
   @override
-  String get disableEncryptionWarning =>
-      'З міркувань безпеки ви не можете вимкнути шифрування в бесіді, ув якій воно було ввімкнене раніше.';
+  String get disableEncryptionWarning => 'З міркувань безпеки ви не можете вимкнути шифрування в бесіді, ув якій воно було ввімкнене раніше.';
 
   @override
   String get sorryThatsNotPossible => 'Вибачте... це неможливо';
@@ -2092,8 +2011,7 @@ class L10nUk extends L10n {
   String get reopenChat => 'Відновити бесіду';
 
   @override
-  String get noBackupWarning =>
-      'Увага! Якщо ви не ввімкнете резервне копіювання бесіди, ви втратите доступ до своїх зашифрованих повідомлень. Наполегливо радимо ввімкнути резервне копіювання бесіди перед виходом.';
+  String get noBackupWarning => 'Увага! Якщо ви не ввімкнете резервне копіювання бесіди, ви втратите доступ до своїх зашифрованих повідомлень. Наполегливо радимо ввімкнути резервне копіювання бесіди перед виходом.';
 
   @override
   String get noOtherDevicesFound => 'Інших пристроїв не знайдено';
@@ -2109,8 +2027,7 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get jumpToLastReadMessage =>
-      'Перейти до останнього прочитаного повідомлення';
+  String get jumpToLastReadMessage => 'Перейти до останнього прочитаного повідомлення';
 
   @override
   String get readUpToHere => 'Читати тут';
@@ -2122,8 +2039,7 @@ class L10nUk extends L10n {
   String get openLinkInBrowser => 'Відкрити посилання у браузері';
 
   @override
-  String get reportErrorDescription =>
-      'О, ні. Щось пішло не так. Якщо хочете, можете повідомити про помилку розробникам.';
+  String get reportErrorDescription => 'О, ні. Щось пішло не так. Якщо хочете, можете повідомити про помилку розробникам.';
 
   @override
   String get report => 'повідомити';
@@ -2132,8 +2048,7 @@ class L10nUk extends L10n {
   String get signInWithPassword => 'Увійти за допомогою пароля';
 
   @override
-  String get pleaseTryAgainLaterOrChooseDifferentServer =>
-      'Спробуйте пізніше або виберіть інший сервер.';
+  String get pleaseTryAgainLaterOrChooseDifferentServer => 'Спробуйте пізніше або виберіть інший сервер.';
 
   @override
   String signInWith(String provider) {
@@ -2141,8 +2056,7 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get profileNotFound =>
-      'Не вдалося знайти користувача на сервері. Можливо, проблема зі з\'єднанням або користувач не існує.';
+  String get profileNotFound => 'Не вдалося знайти користувача на сервері. Можливо, проблема зі з\'єднанням або користувач не існує.';
 
   @override
   String get setTheme => 'Налаштувати тему:';
@@ -2171,24 +2085,19 @@ class L10nUk extends L10n {
   String get pleaseEnterANumber => 'Введіть число більше ніж 0';
 
   @override
-  String get archiveRoomDescription =>
-      'Бесіду буде переміщено до архіву. Інші користувачі зможуть побачити, що ви вийшли з неї.';
+  String get archiveRoomDescription => 'Бесіду буде переміщено до архіву. Інші користувачі зможуть побачити, що ви вийшли з неї.';
 
   @override
-  String get roomUpgradeDescription =>
-      'Після цього бесіду буде відтворено з новою версією кімнати. Усі учасники отримають сповіщення, що їм потрібно перейти до нової бесіди. Ви можете дізнатися більше про версії кімнат на https://spec.matrix.org/latest/rooms/';
+  String get roomUpgradeDescription => 'Після цього бесіду буде відтворено з новою версією кімнати. Усі учасники отримають сповіщення, що їм потрібно перейти до нової бесіди. Ви можете дізнатися більше про версії кімнат на https://spec.matrix.org/latest/rooms/';
 
   @override
-  String get removeDevicesDescription =>
-      'Ви вийдете з цього пристрою і більше не зможете отримувати повідомлення.';
+  String get removeDevicesDescription => 'Ви вийдете з цього пристрою і більше не зможете отримувати повідомлення.';
 
   @override
-  String get banUserDescription =>
-      'Користувача буде заблоковано в бесіді, і він не зможе знову увійти в неї, поки його не буде розблоковано.';
+  String get banUserDescription => 'Користувача буде заблоковано в бесіді, і він не зможе знову увійти в неї, поки його не буде розблоковано.';
 
   @override
-  String get unbanUserDescription =>
-      'Користувач зможе знову увійти в бесіду, якщо спробує.';
+  String get unbanUserDescription => 'Користувач зможе знову увійти в бесіду, якщо спробує.';
 
   @override
   String doYouWantToKick(String user) {
@@ -2201,12 +2110,10 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get kickUserDescription =>
-      'Користувача вигнали з бесіди, але не заблокували. До загальнодоступних бесід користувач може приєднатися будь-коли.';
+  String get kickUserDescription => 'Користувача вигнали з бесіди, але не заблокували. До загальнодоступних бесід користувач може приєднатися будь-коли.';
 
   @override
-  String get makeAdminDescription =>
-      'Після того, як ви зробите цього користувача адміністратором, ви, можливо, не зможете це скасувати, оскільки він матиме ті самі права, що й ви.';
+  String get makeAdminDescription => 'Після того, як ви зробите цього користувача адміністратором, ви, можливо, не зможете це скасувати, оскільки він матиме ті самі права, що й ви.';
 
   @override
   String get pushNotificationsNotAvailable => 'Push-сповіщення недоступні';
@@ -2240,15 +2147,13 @@ class L10nUk extends L10n {
   String get groupName => 'Назва групи';
 
   @override
-  String get createGroupAndInviteUsers =>
-      'Створити групу та запросити користувачів';
+  String get createGroupAndInviteUsers => 'Створити групу та запросити користувачів';
 
   @override
   String get groupCanBeFoundViaSearch => 'Групу можна знайти через пошук';
 
   @override
-  String get wrongRecoveryKey =>
-      'Вибачте... схоже, це неправильний ключ відновлення.';
+  String get wrongRecoveryKey => 'Вибачте... схоже, це неправильний ключ відновлення.';
 
   @override
   String get startConversation => 'Розпочати розмову';
@@ -2260,8 +2165,7 @@ class L10nUk extends L10n {
   String get databaseMigrationTitle => 'Базу даних оптимізовано';
 
   @override
-  String get databaseMigrationBody =>
-      'Зачекайте, будь ласка. Це може тривати деякий час.';
+  String get databaseMigrationBody => 'Зачекайте, будь ласка. Це може тривати деякий час.';
 
   @override
   String get leaveEmptyToClearStatus => 'Лишіть порожнім, щоб оновити статус.';
@@ -2363,33 +2267,28 @@ class L10nUk extends L10n {
   String get sendReadReceipts => 'Надіслати підтвердження прочитання';
 
   @override
-  String get sendTypingNotificationsDescription =>
-      'Інші учасники бесіди бачитимуть, коли ви набираєте нове повідомлення.';
+  String get sendTypingNotificationsDescription => 'Інші учасники бесіди бачитимуть, коли ви набираєте нове повідомлення.';
 
   @override
-  String get sendReadReceiptsDescription =>
-      'Інші учасники бесіди бачитимуть, що ви прочитали повідомлення.';
+  String get sendReadReceiptsDescription => 'Інші учасники бесіди бачитимуть, що ви прочитали повідомлення.';
 
   @override
   String get formattedMessages => 'Форматовані повідомлення';
 
   @override
-  String get formattedMessagesDescription =>
-      'Показувати розширений вміст повідомлень, наприклад, жирний текст, використовуючи markdown.';
+  String get formattedMessagesDescription => 'Показувати розширений вміст повідомлень, наприклад, жирний текст, використовуючи markdown.';
 
   @override
   String get verifyOtherUser => '🔐 Звірити іншого користувача';
 
   @override
-  String get verifyOtherUserDescription =>
-      'Якщо ви звіряєте іншого користувача, ви можете бути впевнені, що знаєте, кому ви насправді пишете. 💪\n\nКоли ви почнете звірення, ви та інший користувач побачите спливне вікно в застосунку. Там ви побачите набір смайликів або чисел, які вам потрібно буде порівняти між собою.\n\nНайкращий спосіб зробити це — зустрітися або розпочати відеовиклик. 👭';
+  String get verifyOtherUserDescription => 'Якщо ви звіряєте іншого користувача, ви можете бути впевнені, що знаєте, кому ви насправді пишете. 💪\n\nКоли ви почнете звірення, ви та інший користувач побачите спливне вікно в застосунку. Там ви побачите набір смайликів або чисел, які вам потрібно буде порівняти між собою.\n\nНайкращий спосіб зробити це — зустрітися або розпочати відеовиклик. 👭';
 
   @override
   String get verifyOtherDevice => '🔐 Звірити інший пристрій';
 
   @override
-  String get verifyOtherDeviceDescription =>
-      'Коли ви звіряєте інший пристрій, ці пристрої можуть обмінюватися ключами, підвищуючи вашу загальну безпеку. 💪 Коли ви розпочнете звірення, в застосунку на обох пристроях з\'явиться спливне вікно. Там ви побачите набір смайликів або чисел, які вам потрібно буде порівняти між собою. Найкраще мати обидва пристрої під рукою перед початком звірення. 🤳';
+  String get verifyOtherDeviceDescription => 'Коли ви звіряєте інший пристрій, ці пристрої можуть обмінюватися ключами, підвищуючи вашу загальну безпеку. 💪 Коли ви розпочнете звірення, в застосунку на обох пристроях з\'явиться спливне вікно. Там ви побачите набір смайликів або чисел, які вам потрібно буде порівняти між собою. Найкраще мати обидва пристрої під рукою перед початком звірення. 🤳';
 
   @override
   String acceptedKeyVerification(String sender) {
@@ -2448,8 +2347,7 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get noDatabaseEncryption =>
-      'Шифрування бази даних не підтримується на цій платформі';
+  String get noDatabaseEncryption => 'Шифрування бази даних не підтримується на цій платформі';
 
   @override
   String thereAreCountUsersBlocked(Object count) {
@@ -2505,12 +2403,10 @@ class L10nUk extends L10n {
   String get changeTheChatPermissions => 'Змінити права доступу до чату';
 
   @override
-  String get changeTheVisibilityOfChatHistory =>
-      'Змінити видимість історії чату';
+  String get changeTheVisibilityOfChatHistory => 'Змінити видимість історії чату';
 
   @override
-  String get changeTheCanonicalRoomAlias =>
-      'Змінити основну адресу загальнодоступного чату';
+  String get changeTheCanonicalRoomAlias => 'Змінити основну адресу загальнодоступного чату';
 
   @override
   String get sendRoomNotifications => 'Надсилати сповіщення @room';
@@ -2519,8 +2415,7 @@ class L10nUk extends L10n {
   String get changeTheDescriptionOfTheGroup => 'Змінити опис чату';
 
   @override
-  String get chatPermissionsDescription =>
-      'Визначте, який рівень повноважень необхідний для певних дій у цьому чаті. Рівні повноважень 0, 50 і 100 зазвичай представляють користувачів, модераторів та адміністраторів, але можливі будь-які градації.';
+  String get chatPermissionsDescription => 'Визначте, який рівень повноважень необхідний для певних дій у цьому чаті. Рівні повноважень 0, 50 і 100 зазвичай представляють користувачів, модераторів та адміністраторів, але можливі будь-які градації.';
 
   @override
   String updateInstalled(String version) {
@@ -2543,19 +2438,16 @@ class L10nUk extends L10n {
   String get whatIsAHomeserver => 'Що таке домашній сервер?';
 
   @override
-  String get homeserverDescription =>
-      'Усі ваші дані зберігаються на домашньому сервері, так само як у постачальника послуг електронної пошти. Ви можете вибрати, який домашній сервер ви хочете використовувати, водночас ви можете спілкуватися з усіма. Докладніше на https://matrix.org.';
+  String get homeserverDescription => 'Усі ваші дані зберігаються на домашньому сервері, так само як у постачальника послуг електронної пошти. Ви можете вибрати, який домашній сервер ви хочете використовувати, водночас ви можете спілкуватися з усіма. Докладніше на https://matrix.org.';
 
   @override
-  String get doesNotSeemToBeAValidHomeserver =>
-      'Здається, це несумісний домашній сервер. Неправильна URL-адреса?';
+  String get doesNotSeemToBeAValidHomeserver => 'Здається, це несумісний домашній сервер. Неправильна URL-адреса?';
 
   @override
   String get calculatingFileSize => 'Обчислення розміру файлу...';
 
   @override
-  String get prepareSendingAttachment =>
-      'Підготовка до надсилання вкладення...';
+  String get prepareSendingAttachment => 'Підготовка до надсилання вкладення...';
 
   @override
   String get sendingAttachment => 'Надсилання вкладення...';
@@ -2577,19 +2469,16 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get oneOfYourDevicesIsNotVerified =>
-      'Один із ваших пристроїв не верифікований';
+  String get oneOfYourDevicesIsNotVerified => 'Один із ваших пристроїв не верифікований';
 
   @override
-  String get noticeChatBackupDeviceVerification =>
-      'Примітка: Коли ви під\'єднуєте всі свої пристрої до резервної копії бесіди, вони автоматично верифікуються.';
+  String get noticeChatBackupDeviceVerification => 'Примітка: Коли ви під\'єднуєте всі свої пристрої до резервної копії бесіди, вони автоматично верифікуються.';
 
   @override
   String get continueText => 'Продовжити';
 
   @override
-  String get welcomeText =>
-      'Привіт-привіт 👋 Це FluffyChat. Ви можете увійти на будь-який сервер, сумісний із https://matrix.org. А потім спілкуватися з будь-ким. Це величезна децентралізована мережа для обміну повідомленнями!';
+  String get welcomeText => 'Привіт-привіт 👋 Це FluffyChat. Ви можете увійти на будь-який сервер, сумісний із https://matrix.org. А потім спілкуватися з будь-ким. Це величезна децентралізована мережа для обміну повідомленнями!';
 
   @override
   String get blur => 'Розмиття:';
@@ -2604,8 +2493,7 @@ class L10nUk extends L10n {
   String get manageAccount => 'Керувати обліковим записом';
 
   @override
-  String get noContactInformationProvided =>
-      'Сервер не надає жодної дійсної контактної інформації';
+  String get noContactInformationProvided => 'Сервер не надає жодної дійсної контактної інформації';
 
   @override
   String get contactServerAdmin => 'Зв’язатися з адміністратором сервера';
@@ -2650,15 +2538,13 @@ class L10nUk extends L10n {
   String get addLink => 'Додати посилання';
 
   @override
-  String get unableToJoinChat =>
-      'Неможливо приєднатися до бесіди. Можливо, інша сторона вже закрила розмову.';
+  String get unableToJoinChat => 'Неможливо приєднатися до бесіди. Можливо, інша сторона вже закрила розмову.';
 
   @override
   String get previous => 'Попередній';
 
   @override
-  String get otherPartyNotLoggedIn =>
-      'Інша сторона наразі не увійшла в систему, тому не може отримувати повідомлення!';
+  String get otherPartyNotLoggedIn => 'Інша сторона наразі не увійшла в систему, тому не може отримувати повідомлення!';
 
   @override
   String appWantsToUseForLogin(String server) {
@@ -2666,8 +2552,7 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get appWantsToUseForLoginDescription =>
-      'Цим ви дозволяєте застосунку та вебсайту ділитися інформацією про вас.';
+  String get appWantsToUseForLoginDescription => 'Цим ви дозволяєте застосунку та вебсайту ділитися інформацією про вас.';
 
   @override
   String get open => 'Відкрити';
@@ -2676,8 +2561,7 @@ class L10nUk extends L10n {
   String get waitingForServer => 'Очікування сервера...';
 
   @override
-  String get appIntroduction =>
-      'FluffyChat дає змогу спілкуватися з друзями у різних месенджерах. Дізнайтеся більше на https://matrix.org або просто натисніть *Продовжити*.';
+  String get appIntroduction => 'FluffyChat дає змогу спілкуватися з друзями у різних месенджерах. Дізнайтеся більше на https://matrix.org або просто натисніть *Продовжити*.';
 
   @override
   String get newChatRequest => '📩 Новий запит на спілкування';
@@ -2692,8 +2576,7 @@ class L10nUk extends L10n {
   String get roomNotificationSettings => 'Налаштування сповіщень кімнати';
 
   @override
-  String get userSpecificNotificationSettings =>
-      'Налаштування сповіщень для користувача';
+  String get userSpecificNotificationSettings => 'Налаштування сповіщень для користувача';
 
   @override
   String get otherNotificationSettings => 'Інші налаштування сповіщень';
@@ -2702,143 +2585,121 @@ class L10nUk extends L10n {
   String get notificationRuleContainsUserName => 'Містить ім\'я користувача';
 
   @override
-  String get notificationRuleContainsUserNameDescription =>
-      'Сповіщає користувача, коли повідомлення містить його ім\'я користувача.';
+  String get notificationRuleContainsUserNameDescription => 'Сповіщає користувача, коли повідомлення містить його ім\'я користувача.';
 
   @override
   String get notificationRuleMaster => 'Вимкнути всі сповіщення';
 
   @override
-  String get notificationRuleMasterDescription =>
-      'Перевизначає всі інші правила і вимикає всі сповіщення.';
+  String get notificationRuleMasterDescription => 'Перевизначає всі інші правила і вимикає всі сповіщення.';
 
   @override
-  String get notificationRuleSuppressNotices =>
-      'Заборонити автоматичні повідомлення';
+  String get notificationRuleSuppressNotices => 'Заборонити автоматичні повідомлення';
 
   @override
-  String get notificationRuleSuppressNoticesDescription =>
-      'Забороняє сповіщення від автоматизованих клієнтів, таких як боти.';
+  String get notificationRuleSuppressNoticesDescription => 'Забороняє сповіщення від автоматизованих клієнтів, таких як боти.';
 
   @override
   String get notificationRuleInviteForMe => 'Запрошення мене';
 
   @override
-  String get notificationRuleInviteForMeDescription =>
-      'Сповіщає користувача, коли його запрошують до кімнати.';
+  String get notificationRuleInviteForMeDescription => 'Сповіщає користувача, коли його запрошують до кімнати.';
 
   @override
   String get notificationRuleMemberEvent => 'Події участі';
 
   @override
-  String get notificationRuleMemberEventDescription =>
-      'Забороняє сповіщення про події учасників.';
+  String get notificationRuleMemberEventDescription => 'Забороняє сповіщення про події учасників.';
 
   @override
   String get notificationRuleIsUserMention => 'Згадки користувачів';
 
   @override
-  String get notificationRuleIsUserMentionDescription =>
-      'Сповіщає користувачів, коли безпосередньо їх згадують у повідомленні.';
+  String get notificationRuleIsUserMentionDescription => 'Сповіщає користувачів, коли безпосередньо їх згадують у повідомленні.';
 
   @override
   String get notificationRuleContainsDisplayName => 'Містить показуване ім’я';
 
   @override
-  String get notificationRuleContainsDisplayNameDescription =>
-      'Сповіщає користувача, коли повідомлення містить показуване ім\'я.';
+  String get notificationRuleContainsDisplayNameDescription => 'Сповіщає користувача, коли повідомлення містить показуване ім\'я.';
 
   @override
   String get notificationRuleIsRoomMention => 'Згадки кімнати';
 
   @override
-  String get notificationRuleIsRoomMentionDescription =>
-      'Сповіщає користувача, коли є згадка всієї кімнати.';
+  String get notificationRuleIsRoomMentionDescription => 'Сповіщає користувача, коли є згадка всієї кімнати.';
 
   @override
   String get notificationRuleRoomnotif => 'Сповіщення кімнати';
 
   @override
-  String get notificationRuleRoomnotifDescription =>
-      'Сповіщає користувача, коли повідомлення містить \'@room\'.';
+  String get notificationRuleRoomnotifDescription => 'Сповіщає користувача, коли повідомлення містить \'@room\'.';
 
   @override
   String get notificationRuleTombstone => 'Tombstone';
 
   @override
-  String get notificationRuleTombstoneDescription =>
-      'Notifies the user about room deactivation messages.';
+  String get notificationRuleTombstoneDescription => 'Notifies the user about room deactivation messages.';
 
   @override
   String get notificationRuleReaction => 'Reaction';
 
   @override
-  String get notificationRuleReactionDescription =>
-      'Suppresses notifications for reactions.';
+  String get notificationRuleReactionDescription => 'Suppresses notifications for reactions.';
 
   @override
   String get notificationRuleRoomServerAcl => 'Room Server ACL';
 
   @override
-  String get notificationRuleRoomServerAclDescription =>
-      'Suppresses notifications for room server access control lists (ACL).';
+  String get notificationRuleRoomServerAclDescription => 'Suppresses notifications for room server access control lists (ACL).';
 
   @override
   String get notificationRuleSuppressEdits => 'Suppress Edits';
 
   @override
-  String get notificationRuleSuppressEditsDescription =>
-      'Suppresses notifications for edited messages.';
+  String get notificationRuleSuppressEditsDescription => 'Suppresses notifications for edited messages.';
 
   @override
   String get notificationRuleCall => 'Call';
 
   @override
-  String get notificationRuleCallDescription =>
-      'Notifies the user about calls.';
+  String get notificationRuleCallDescription => 'Notifies the user about calls.';
 
   @override
-  String get notificationRuleEncryptedRoomOneToOne =>
-      'Encrypted Room One-to-One';
+  String get notificationRuleEncryptedRoomOneToOne => 'Encrypted Room One-to-One';
 
   @override
-  String get notificationRuleEncryptedRoomOneToOneDescription =>
-      'Notifies the user about messages in encrypted one-to-one rooms.';
+  String get notificationRuleEncryptedRoomOneToOneDescription => 'Notifies the user about messages in encrypted one-to-one rooms.';
 
   @override
   String get notificationRuleRoomOneToOne => 'Room One-to-One';
 
   @override
-  String get notificationRuleRoomOneToOneDescription =>
-      'Notifies the user about messages in one-to-one rooms.';
+  String get notificationRuleRoomOneToOneDescription => 'Notifies the user about messages in one-to-one rooms.';
 
   @override
   String get notificationRuleMessage => 'Message';
 
   @override
-  String get notificationRuleMessageDescription =>
-      'Notifies the user about general messages.';
+  String get notificationRuleMessageDescription => 'Notifies the user about general messages.';
 
   @override
   String get notificationRuleEncrypted => 'Encrypted';
 
   @override
-  String get notificationRuleEncryptedDescription =>
-      'Notifies the user about messages in encrypted rooms.';
+  String get notificationRuleEncryptedDescription => 'Notifies the user about messages in encrypted rooms.';
 
   @override
   String get notificationRuleJitsi => 'Jitsi';
 
   @override
-  String get notificationRuleJitsiDescription =>
-      'Notifies the user about Jitsi widget events.';
+  String get notificationRuleJitsiDescription => 'Notifies the user about Jitsi widget events.';
 
   @override
   String get notificationRuleServerAcl => 'Suppress Server ACL Events';
 
   @override
-  String get notificationRuleServerAclDescription =>
-      'Suppresses notifications for Server ACL events.';
+  String get notificationRuleServerAclDescription => 'Suppresses notifications for Server ACL events.';
 
   @override
   String unknownPushRule(String rule) {
@@ -2846,8 +2707,7 @@ class L10nUk extends L10n {
   }
 
   @override
-  String get deletePushRuleCanNotBeUndone =>
-      'If you delete this notification setting, this can not be undone.';
+  String get deletePushRuleCanNotBeUndone => 'If you delete this notification setting, this can not be undone.';
 
   @override
   String get more => 'More';
@@ -2856,15 +2716,13 @@ class L10nUk extends L10n {
   String get shareKeysWith => 'Share keys with...';
 
   @override
-  String get shareKeysWithDescription =>
-      'Яким пристроям довіряти, щоб вони могли читати ваші повідомлення в зашифрованих бесідах?';
+  String get shareKeysWithDescription => 'Яким пристроям довіряти, щоб вони могли читати ваші повідомлення в зашифрованих бесідах?';
 
   @override
   String get allDevices => 'Усім пристроям';
 
   @override
-  String get crossVerifiedDevicesIfEnabled =>
-      'З перехресною верифікацією пристроїв, якщо ввімкнено';
+  String get crossVerifiedDevicesIfEnabled => 'З перехресною верифікацією пристроїв, якщо ввімкнено';
 
   @override
   String get crossVerifiedDevices => 'З перехресною верифікацією пристроїв';
@@ -2894,6 +2752,5 @@ class L10nUk extends L10n {
   String get youHaveKnocked => 'You have knocked';
 
   @override
-  String get pleaseWaitUntilInvited =>
-      'Please wait now, until someone from the room invites you.';
+  String get pleaseWaitUntilInvited => 'Please wait now, until someone from the room invites you.';
 }

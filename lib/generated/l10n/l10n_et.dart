@@ -110,6 +110,13 @@ class L10nEt extends L10n {
       'Remove EXIF metadata (camera model, geolocation, time) when sending a photo.';
 
   @override
+  String get doNotSendIfCantClean => 'Strictly no EXIF';
+
+  @override
+  String get doNotSendIfCantCleanDescription =>
+      'Do not send the image if there was an error cleaning EXIF metadata';
+
+  @override
   String get repeatPassword => 'Korda salasõna';
 
   @override
