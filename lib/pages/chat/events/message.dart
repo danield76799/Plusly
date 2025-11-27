@@ -716,7 +716,10 @@ class Message extends StatelessWidget {
                                                 size: 20,
                                               ),
                                               const SizedBox(width: 16),
-                                              thread!.lastEvent != null
+                                              thread!.lastEvent != null &&
+                                                      thread!.lastEvent!
+                                                              .relationshipEventId ==
+                                                          event.eventId
                                                   ? FutureBuilder<User?>(
                                                       future: thread!.lastEvent!
                                                           .fetchSenderUser(),
@@ -740,7 +743,12 @@ class Message extends StatelessWidget {
                                               const SizedBox(width: 6),
                                               thread!.lastEvent != null
                                                   ? Text(
-                                                      thread!.lastEvent!.text,
+                                                      thread!.lastEvent!.text
+                                                                  .length >
+                                                              32
+                                                          ? "${thread!.lastEvent!.text.substring(0, 32)}..."
+                                                          : thread!
+                                                              .lastEvent!.text,
                                                     )
                                                   : const Text('Thread'),
                                             ],
