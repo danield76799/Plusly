@@ -1531,6 +1531,14 @@ class L10nAr extends L10n {
   String get spaceName => 'اسم المساحة';
 
   @override
+  String get pollHasBeenEnded => 'Poll has been ended';
+
+  @override
+  String startedAPoll(String senderName) {
+    return '$senderName started a poll';
+  }
+
+  @override
   String startedACall(String senderName) {
     return 'بدأ $senderName مكالمة';
   }

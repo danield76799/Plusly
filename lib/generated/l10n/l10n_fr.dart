@@ -1564,6 +1564,14 @@ class L10nFr extends L10n {
   String get spaceName => 'Nom de l\'espace';
 
   @override
+  String get pollHasBeenEnded => 'Poll has been ended';
+
+  @override
+  String startedAPoll(String senderName) {
+    return '$senderName started a poll';
+  }
+
+  @override
   String startedACall(String senderName) {
     return '$senderName a démarré un appel';
   }

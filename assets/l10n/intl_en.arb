@@ -2146,6 +2146,16 @@
     "type": "String",
     "placeholders": {}
   },
+  "pollHasBeenEnded": "Poll has been ended",
+  "startedAPoll": "{senderName} started a poll",
+  "@startedAPoll": {
+    "type": "String",
+    "placeholders": {
+      "senderName": {
+        "type": "String"
+      }
+    }
+  },
   "startedACall": "{senderName} started a call",
   "@startedACall": {
     "type": "String",

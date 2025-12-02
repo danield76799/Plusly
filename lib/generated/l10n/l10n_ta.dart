@@ -1557,6 +1557,14 @@ class L10nTa extends L10n {
   String get spaceName => 'விண்வெளி பெயர்';
 
   @override
+  String get pollHasBeenEnded => 'Poll has been ended';
+
+  @override
+  String startedAPoll(String senderName) {
+    return '$senderName started a poll';
+  }
+
+  @override
   String startedACall(String senderName) {
     return '$senderName அழைப்பைத் தொடங்கினார்';
   }

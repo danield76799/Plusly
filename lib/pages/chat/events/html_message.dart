@@ -140,7 +140,7 @@ class HtmlMessage extends StatelessWidget {
     if (depth >= 100) return const TextSpan();
 
     // This is a text node, so we render it as text:
-    if (node is! dom.Element) {
+    if (node is! dom.Element || !allowedHtmlTags.contains(node.localName)) {
       var text = node.text ?? '';
       // Single linebreak nodes between Elements are ignored:
       if (text == '\n') text = '';
@@ -152,9 +152,6 @@ class HtmlMessage extends StatelessWidget {
         onOpen: onOpen,
       );
     }
-
-    // We must not render tags which are not in the allow list:
-    if (!allowedHtmlTags.contains(node.localName)) return const TextSpan();
 
     switch (node.localName) {
       case 'br':

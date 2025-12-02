@@ -1498,6 +1498,14 @@ class L10nZh extends L10n {
   String get spaceName => '空间名称';
 
   @override
+  String get pollHasBeenEnded => 'Poll has been ended';
+
+  @override
+  String startedAPoll(String senderName) {
+    return '$senderName started a poll';
+  }
+
+  @override
   String startedACall(String senderName) {
     return '$senderName 开始了通话';
   }

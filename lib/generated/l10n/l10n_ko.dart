@@ -1510,6 +1510,14 @@ class L10nKo extends L10n {
   String get spaceName => '스페이스 이름';
 
   @override
+  String get pollHasBeenEnded => 'Poll has been ended';
+
+  @override
+  String startedAPoll(String senderName) {
+    return '$senderName started a poll';
+  }
+
+  @override
   String startedACall(String senderName) {
     return '$senderName 가 통화 시작함';
   }

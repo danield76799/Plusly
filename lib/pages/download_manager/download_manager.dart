@@ -38,22 +38,25 @@ class Download {
         ct = CancelToken();
 
         // Download the file
-        response = dio.download(httpUrl, "$downloadPath/$name",
-            onReceiveProgress: (received, total) {
-          receivedBytes = received;
-          totalBytes = total;
-          progress = (receivedBytes / totalBytes) * 100;
-          if (progress == 100) {
-            Provider.of<DownloadManagerController>(context)
-                .downloads
-                .remove(this);
-          }
-          print("Download progress: $progress%");
-        },
-            options: Options(
-                responseType: ResponseType.bytes,
-                headers: {'authorization': "Bearer ${mx.accessToken}"}),
-            cancelToken: ct);
+        response = dio.download(
+          httpUrl,
+          "$downloadPath/$name",
+          onReceiveProgress: (received, total) {
+            receivedBytes = received;
+            totalBytes = total;
+            progress = (receivedBytes / totalBytes) * 100;
+            if (progress == 100) {
+              Provider.of<DownloadManagerController>(context)
+                  .downloads
+                  .remove(this);
+            }
+            print("Download progress: $progress%");
+          },
+          options: Options(
+              responseType: ResponseType.bytes,
+              headers: {'authorization': "Bearer ${mx.accessToken}"}),
+          cancelToken: ct,
+        );
         print("Download completed and saved to $downloadPath/$name");
       }
     } catch (e) {

@@ -2877,6 +2877,18 @@ abstract class L10n {
   /// **'Space name'**
   String get spaceName;
 
+  /// No description provided for @pollHasBeenEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Poll has been ended'**
+  String get pollHasBeenEnded;
+
+  /// No description provided for @startedAPoll.
+  ///
+  /// In en, this message translates to:
+  /// **'{senderName} started a poll'**
+  String startedAPoll(String senderName);
+
   /// No description provided for @startedACall.
   ///
   /// In en, this message translates to:

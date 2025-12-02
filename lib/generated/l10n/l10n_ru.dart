@@ -1544,6 +1544,14 @@ class L10nRu extends L10n {
   String get spaceName => 'Название пространства';
 
   @override
+  String get pollHasBeenEnded => 'Опрос окончен';
+
+  @override
+  String startedAPoll(String senderName) {
+    return '$senderName создал(-а) опрос';
+  }
+
+  @override
   String startedACall(String senderName) {
     return '$senderName начал(а) звонок';
   }

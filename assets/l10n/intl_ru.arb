@@ -42,6 +42,16 @@
 	"@alwaysUse24HourFormat": {
 		"description": "Set to true to always display time of day in 24 hour format."
 	},
+  "pollHasBeenEnded": "Опрос окончен",
+  "startedAPoll": "{senderName} создал(-а) опрос",
+  "@startedAPoll": {
+    "type": "String",
+    "placeholders": {
+      "senderName": {
+        "type": "String"
+      }
+    }
+  },
   "cleanExif": "Очищать EXIF",
   "@cleanExif": {
     "type": "String",

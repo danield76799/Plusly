@@ -108,16 +108,26 @@ class MessageContent extends StatelessWidget {
     final fontSize = AppConfig.messageFontSize * AppConfig.fontSizeFactor;
     final buttonTextColor = textColor;
     switch (event.type) {
-      case PollEvents.PollStart:
-        return PollWidget(event, color: textColor, linkColor: linkColor, fontSize: fontSize, timeline: timeline);
       case EventTypes.Message:
       case EventTypes.Encrypted:
       case EventTypes.Sticker:
+      case PollEvents.PollStart:
+        // temporary solution
+        if (event.type == PollEvents.PollStart) {
+          return PollWidget(
+            event,
+            color: textColor,
+            linkColor: linkColor,
+            fontSize: fontSize,
+            timeline: timeline,
+          );
+        }
         switch (event.messageType) {
           case MessageTypes.Image:
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
-            final maxSize = event.messageType == MessageTypes.Image ? 512.0 : 256.0;
+            final maxSize =
+                event.messageType == MessageTypes.Image ? 512.0 : 256.0;
             final w = event.content
                 .tryGetMap<String, Object?>('info')
                 ?.tryGet<int>('w');
@@ -152,11 +162,10 @@ class MessageContent extends StatelessWidget {
             return CuteContent(event);
           case MessageTypes.Audio:
             if (PlatformInfos.isMobile ||
-                    PlatformInfos.isMacOS ||
-                    PlatformInfos.isWeb || 
-                    // Extera Next is not being built for snap, so enable this.
-                    PlatformInfos.isLinux
-                ) {
+                PlatformInfos.isMacOS ||
+                PlatformInfos.isWeb ||
+                // Extera Next is not being built for snap, so enable this.
+                PlatformInfos.isLinux) {
               return AudioPlayerWidget(
                 event,
                 color: textColor,
@@ -170,7 +179,12 @@ class MessageContent extends StatelessWidget {
               linkColor: linkColor,
             );
           case MessageTypes.Video:
-            return EventVideoPlayer(event, textColor, linkColor, timeline: timeline,);
+            return EventVideoPlayer(
+              event,
+              textColor,
+              linkColor,
+              timeline: timeline,
+            );
           case MessageTypes.File:
             return MessageDownloadContent(
               event,
@@ -184,7 +198,9 @@ class MessageContent extends StatelessWidget {
             if (AppConfig.renderHtml &&
                 !event.redacted &&
                 event.isRichMessage) {
-              var html = event.formattedText;
+              var html = AppConfig.renderHtml && event.isRichMessage
+                ? event.formattedText
+                : event.text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
               if (event.messageType == MessageTypes.Emote) {
                 html = '* $html';
               }

@@ -1558,6 +1558,14 @@ class L10nGa extends L10n {
   String get spaceName => 'Ainm an spáis';
 
   @override
+  String get pollHasBeenEnded => 'Poll has been ended';
+
+  @override
+  String startedAPoll(String senderName) {
+    return '$senderName started a poll';
+  }
+
+  @override
   String startedACall(String senderName) {
     return 'Thosaigh $senderName glao';
   }
