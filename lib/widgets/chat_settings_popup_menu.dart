@@ -33,13 +33,7 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
 
   void goToEmoteSettings() async {
     final room = widget.room;
-    if ((room.states['im.ponies.room_emotes'] ?? <String, Event>{})
-        .keys
-        .any((String s) => s.isNotEmpty)) {
-      context.push('/rooms/${room.id}/details/multiple_emotes');
-    } else {
-      context.push('/rooms/${room.id}/details/emotes');
-    }
+    context.push('/rooms/${room.id}/details/emotes');
   }
 
   @override

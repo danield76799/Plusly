@@ -2904,30 +2904,30 @@ class L10nRu extends L10n {
       'Пожалуйста, подождите когда администраторы примут Ваш запрос.';
 
   @override
-  String get backToMainChat => 'Back to main chat';
+  String get backToMainChat => 'Вернуться в главный чат';
 
   @override
-  String get saveChanges => 'Save changes';
+  String get saveChanges => 'Сохранить';
 
   @override
-  String get createSticker => 'Create sticker or emoji';
+  String get createSticker => 'Создать стикер или эмодзи';
 
   @override
-  String get newStickerPack => 'New sticker pack';
+  String get newStickerPack => 'Новый набор стикеров';
 
   @override
   String get stickerPackNameAlreadyExists =>
-      'A sticker pack with that name already exists';
+      'Набор стикеров с таким названием уже существует';
 
   @override
-  String get stickerPackName => 'Sticker pack name';
+  String get stickerPackName => 'Название набора стикеров';
 
   @override
-  String get attribution => 'Attribution';
+  String get attribution => 'Авторство';
 
   @override
-  String get useAsSticker => 'Sticker';
+  String get useAsSticker => 'Стикер';
 
   @override
-  String get useAsEmoji => 'Emoji';
+  String get useAsEmoji => 'Эмодзи';
 }

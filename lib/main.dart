@@ -1,6 +1,7 @@
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:extera_next/utils/notification_background_handler.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -25,11 +26,12 @@ void main() async {
 
   if (PlatformInfos.isAndroid) {
     final port = mainIsolateReceivePort = ReceivePort();
-    IsolateNameServer.removePortNameMapping('main_isolate');
+    IsolateNameServer.removePortNameMapping(AppConfig.mainIsolatePortName);
     IsolateNameServer.registerPortWithName(
       port.sendPort,
-      'main_isolate',
+      AppConfig.mainIsolatePortName,
     );
+    await waitForPushIsolateDone();
   }
 
   // Our background push shared isolate accesses flutter-internal things very early in the startup proccess

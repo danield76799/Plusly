@@ -83,6 +83,10 @@ class HtmlMessage extends StatelessWidget {
     'tg-forward',
   };
 
+  static const Set<String> blockedHtmlTags = {
+    'mx-reply'
+  };
+
   /// We add line breaks before these tags:
   static const Set<String> blockHtmlTags = {
     'p',
@@ -138,6 +142,10 @@ class HtmlMessage extends StatelessWidget {
   }) {
     // We must not render elements nested more than 100 elements deep:
     if (depth >= 100) return const TextSpan();
+
+    if (node is dom.Element && blockedHtmlTags.contains(node.localName)) {
+      return const TextSpan();
+    }
 
     // This is a text node, so we render it as text:
     if (node is! dom.Element || !allowedHtmlTags.contains(node.localName)) {

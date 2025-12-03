@@ -3482,5 +3482,14 @@
 	"@open": {},
 	"@waitingForServer": {},
 	"@appIntroduction": {},
-	"@previous": {}
+	"@previous": {},
+  "backToMainChat": "Вернуться в главный чат",
+  "saveChanges": "Сохранить",
+  "createSticker": "Создать стикер или эмодзи",
+  "newStickerPack": "Новый набор стикеров",
+  "stickerPackNameAlreadyExists": "Набор стикеров с таким названием уже существует",
+  "stickerPackName": "Название набора стикеров",
+  "attribution": "Авторство",
+  "useAsSticker": "Стикер",
+  "useAsEmoji": "Эмодзи"
 }

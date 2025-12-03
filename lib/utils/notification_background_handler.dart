@@ -1,38 +1,41 @@
 import 'dart:convert';
+import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/client_download_content_extension.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/push_helper.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:extera_next/utils/client_download_content_extension.dart';
 import 'package:extera_next/utils/client_manager.dart';
+import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:extera_next/utils/platform_infos.dart';
+import 'package:extera_next/utils/push_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../config/app_config.dart';
+import '../config/setting_keys.dart';
 
 bool _vodInitialized = false;
 
 extension NotificationResponseJson on NotificationResponse {
   String toJsonString() => jsonEncode({
-        'type': notificationResponseType.name,
-        'id': id,
-        'actionId': actionId,
-        'input': input,
-        'payload': payload,
-        'data': data,
-      });
+    'type': notificationResponseType.name,
+    'id': id,
+    'actionId': actionId,
+    'input': input,
+    'payload': payload,
+    'data': data,
+  });
 
   static NotificationResponse fromJsonString(String jsonString) {
     final json = jsonDecode(jsonString) as Map<String, Object?>;
     return NotificationResponse(
-      notificationResponseType: NotificationResponseType.values
-          .singleWhere((t) => t.name == json['type']),
+      notificationResponseType: NotificationResponseType.values.singleWhere(
+        (t) => t.name == json['type'],
+      ),
       id: json['id'] as int?,
       actionId: json['actionId'] as String?,
       input: json['input'] as String?,
@@ -42,16 +45,35 @@ extension NotificationResponseJson on NotificationResponse {
   }
 }
 
+Future<void> waitForPushIsolateDone() async {
+  if (IsolateNameServer.lookupPortByName(AppConfig.pushIsolatePortName) !=
+      null) {
+    Logs().i('Wait for Push Isolate to be done...');
+    await Future.delayed(const Duration(milliseconds: 300));
+  }
+}
+
 @pragma('vm:entry-point')
 void notificationTapBackground(
   NotificationResponse notificationResponse,
 ) async {
-  final sendPort = IsolateNameServer.lookupPortByName(AppConfig.mainIsolatePortName);
+  final sendPort = IsolateNameServer.lookupPortByName(
+    AppConfig.mainIsolatePortName,
+  );
   if (sendPort != null) {
     sendPort.send(notificationResponse.toJsonString());
-    Logs().i('Notification tap sent to main isolate');
+    Logs().i('Notification tap sent to main isolate!');
     return;
   }
+  Logs().i(
+    'Main isolate no up - Create temporary client for notification tap intend!',
+  );
+
+  final pushIsolateReceivePort = ReceivePort();
+  IsolateNameServer.registerPortWithName(
+    pushIsolateReceivePort.sendPort,
+    AppConfig.pushIsolatePortName,
+  );
 
   if (!_vodInitialized) {
     await vod.init();
@@ -61,14 +83,13 @@ void notificationTapBackground(
   final client = (await ClientManager.getClients(
     initialize: false,
     store: store,
-  ))
-      .first;
-
+  )).first;
   await client.abortSync();
   await client.init(
     waitForFirstSync: false,
     waitUntilLoadCompletedLoaded: false,
   );
+
   if (!client.isLogged()) {
     throw Exception('Notification tab in background but not logged in!');
   }
@@ -76,6 +97,8 @@ void notificationTapBackground(
     await notificationTap(notificationResponse, client: client);
   } finally {
     await client.dispose(closeDatabase: false);
+    pushIsolateReceivePort.sendPort.send('DONE');
+    IsolateNameServer.removePortNameMapping(AppConfig.pushIsolatePortName);
   }
   return;
 }
@@ -83,15 +106,16 @@ void notificationTapBackground(
 Future<void> notificationTap(
   NotificationResponse notificationResponse, {
   GoRouter? router,
-  L10n? l10n,
   required Client client,
+  L10n? l10n,
 }) async {
   Logs().d(
     'Notification action handler started',
     notificationResponse.notificationResponseType.name,
   );
-  final payload =
-      NotificationPushPayload.fromString(notificationResponse.payload ?? '');
+  final payload = NotificationPushPayload.fromString(
+    notificationResponse.payload ?? '',
+  );
   switch (notificationResponse.notificationResponseType) {
     case NotificationResponseType.selectedNotification:
       final roomId = payload.roomId;
@@ -121,7 +145,7 @@ Future<void> notificationTap(
       if (actionType == null) {
         throw Exception('Selected notification with action but no action ID');
       }
-      final roomId = notificationResponse.payload;
+      final roomId = payload.roomId;
       if (roomId == null) {
         throw Exception('Selected notification with action but no payload');
       }
@@ -137,10 +161,9 @@ Future<void> notificationTap(
       switch (actionType) {
         case FluffyChatNotificationActions.markAsRead:
           await room.setReadMarker(
-            payload!.eventId,
-            mRead: payload!.eventId,
-            public:
-                AppConfig.sendPublicReadReceipts, // TODO: Load preference here
+            payload.eventId ?? room.lastEvent!.eventId,
+            mRead: payload.eventId ?? room.lastEvent!.eventId,
+            public: AppConfig.sendPublicReadReceipts,
           );
         case FluffyChatNotificationActions.reply:
           final input = notificationResponse.input;
@@ -149,25 +172,29 @@ Future<void> notificationTap(
               'Selected notification with reply action but without input',
             );
           }
-          final eventId = await room.sendTextEvent(input, parseCommands: false);
+
+          final eventId = await room.sendTextEvent(
+            input,
+            parseCommands: false,
+            displayPendingEvent: false,
+          );
 
           if (PlatformInfos.isAndroid) {
             final ownProfile = await room.client.fetchOwnProfile();
-
             final avatar = ownProfile.avatarUrl;
             final avatarFile = avatar == null
                 ? null
                 : await client
-                    .downloadMxcCached(
-                      avatar,
-                      thumbnailMethod: ThumbnailMethod.scale,
-                      width: notificationAvatarDimension,
-                      height: notificationAvatarDimension,
-                      animated: false,
-                      isThumbnail: true,
-                      rounded: true,
-                    )
-                    .timeout(const Duration(seconds: 3));
+                      .downloadMxcCached(
+                        avatar,
+                        thumbnailMethod: ThumbnailMethod.crop,
+                        width: notificationAvatarDimension,
+                        height: notificationAvatarDimension,
+                        animated: false,
+                        isThumbnail: true,
+                        rounded: true,
+                      )
+                      .timeout(const Duration(seconds: 3));
             final messagingStyleInformation =
                 await AndroidFlutterLocalNotificationsPlugin()
                     .getActiveNotificationMessagingStyle(room.id.hashCode);
