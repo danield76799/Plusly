@@ -91,7 +91,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     final theme = Theme.of(context);
     _wipe ??= widget.wipe;
     final buttons = <Widget>[];
-    Widget body = const CircularProgressIndicator.adaptive();
+    Widget body = const LinearProgressIndicator();
     titleText = L10n.of(context).loadingPleaseWait;
 
     if (bootstrap.newSsssKey?.recoveryKey != null &&
