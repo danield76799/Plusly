@@ -51,7 +51,7 @@ class SettingsController extends State<Settings> {
       future: () => matrix.client.setProfileField(
         matrix.client.userID!,
         'displayname',
-        { 'displayname': input }
+        { 'displayname': input },
       ),
     );
     if (success.error == null) {

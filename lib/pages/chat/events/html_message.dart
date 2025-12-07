@@ -84,7 +84,7 @@ class HtmlMessage extends StatelessWidget {
   };
 
   static const Set<String> blockedHtmlTags = {
-    'mx-reply'
+    'mx-reply',
   };
 
   /// We add line breaks before these tags:
@@ -295,7 +295,7 @@ class HtmlMessage extends StatelessWidget {
                   language: node.className
                           .split(' ')
                           .singleWhereOrNull(
-                              (className) => className.startsWith('language-'))
+                              (className) => className.startsWith('language-'),)
                           ?.split('language-')
                           .last ??
                       'md',

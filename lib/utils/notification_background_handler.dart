@@ -16,7 +16,6 @@ import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/utils/push_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
-import '../config/setting_keys.dart';
 
 bool _vodInitialized = false;
 

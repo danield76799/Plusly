@@ -124,7 +124,7 @@ class ChatView extends StatelessWidget {
                     const Icon(Icons.redo),
                     const SizedBox(width: 12),
                     Text(L10n.of(context).recoverMessage),
-                  ]),
+                  ],),
                 ),
               if (controller.selectedEvents.single.type ==
                       'org.matrix.msc3381.poll.start' &&

@@ -46,7 +46,7 @@ extension SynapseAdmin on matrix.Client {
       eventId: json['event_id'],
       senderId: json['sender'],
       originServerTs: DateTime.fromMillisecondsSinceEpoch(
-          json['event_json']['origin_server_ts']),
+          json['event_json']['origin_server_ts'],),
       room: room,
     );
   }

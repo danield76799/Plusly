@@ -52,7 +52,7 @@ class RecoveredEventDialogState extends State<RecoveredEventDialog> {
 
     return Scaffold(
 		appBar: AppBar(
-			title: Text(L10n.of(context).recoveredMessage)
+			title: Text(L10n.of(context).recoveredMessage),
 		),
 		body: Container(
 			child: Column(

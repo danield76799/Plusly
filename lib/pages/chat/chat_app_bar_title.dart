@@ -74,7 +74,7 @@ class ChatAppBarTitle extends StatelessWidget {
                 Text(
                   controller.thread == null
                       ? room.getLocalizedDisplayname(
-                          MatrixLocals(L10n.of(context)))
+                          MatrixLocals(L10n.of(context)),)
                       : '${controller.thread!.rootEvent.senderFromMemoryOrFallback.displayName ?? controller.thread!.rootEvent.senderId}: ${controller.thread!.rootEvent.text}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

@@ -70,5 +70,5 @@ extension IsStateExtension on Event {
       relationshipEventId != null &&
       relationshipType == RelationshipTypes.thread;
 
-  bool get isState => this.stateKey != null;
+  bool get isState => stateKey != null;
 }

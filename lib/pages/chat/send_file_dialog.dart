@@ -154,7 +154,7 @@ class SendFileDialogState extends State<SendFileDialog> {
             shrinkImageMaxDimension: compress ? 1600 : null,
             extraContent: extraContent,
             threadLastEventId: widget.thread?.lastEvent?.eventId ?? widget.thread?.rootEvent.eventId,
-            threadRootEventId: widget.thread?.rootEvent.eventId
+            threadRootEventId: widget.thread?.rootEvent.eventId,
           );
         } on MatrixException catch (e) {
           final retryAfterMs = e.retryAfterMs;

@@ -46,7 +46,7 @@ class MessageDownloadContent extends StatelessWidget {
               if (event.canDownloadInBackground)
                 event.downloadInBackground(context)
               else
-                event.saveFile(context)
+                event.saveFile(context),
             },
             child: Container(
               width: 400,

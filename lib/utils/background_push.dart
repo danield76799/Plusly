@@ -121,7 +121,7 @@ class BackgroundPush {
             response,
             client: client,
             router: FluffyChatApp.router,
-            l10n: l10n),
+            l10n: l10n,),
         onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
       );
       Logs().v('Flutter Local Notifications initialized');
@@ -327,7 +327,7 @@ class BackgroundPush {
 
       if (response != null) {
         notificationTap(response,
-            client: client, router: FluffyChatApp.router, l10n: l10n);
+            client: client, router: FluffyChatApp.router, l10n: l10n,);
       }
     });
   }

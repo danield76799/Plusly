@@ -123,6 +123,7 @@ class HomeserverPickerView extends StatelessWidget {
                       child: Text(
                         L10n.of(context).welcome,
                         textAlign: TextAlign.center,
+                        textScaler: const TextScaler.linear(1.6),
                       ),
                     ),
                     Padding(

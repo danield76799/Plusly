@@ -229,12 +229,12 @@ void showMemberActionsPopupMenu({
             cancelLabel: L10n.of(context).no,
             message: L10n.of(context).kickUserDescription,
             hintText: L10n.of(context).reason,
-            isDestructive: true
+            isDestructive: true,
           );
       if (reason != null) {
         await showFutureLoadingDialog(
           context: context,
-          future: () => mx.client.kick(user.room.id, user.id, reason: reason)
+          future: () => mx.client.kick(user.room.id, user.id, reason: reason),
         );
       }
       return;
@@ -246,12 +246,12 @@ void showMemberActionsPopupMenu({
             cancelLabel: L10n.of(context).no,
             message: L10n.of(context).banUserDescription,
             hintText: L10n.of(context).reason,
-            isDestructive: true
+            isDestructive: true,
           );
       if (reason != null) {
         await showFutureLoadingDialog(
           context: context,
-          future: () => mx.client.ban(user.room.id, user.id, reason: reason)
+          future: () => mx.client.ban(user.room.id, user.id, reason: reason),
         );
       }
       return;

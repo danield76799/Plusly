@@ -74,7 +74,7 @@ class PollWidgetState extends State<PollWidget> {
         final responseContent =
             response.content['org.matrix.msc3381.poll.response']
                 as Map<String, dynamic>;
-        if (responseContent != null && response.senderId == currentUserId) {
+        if (response.senderId == currentUserId) {
           final List<dynamic> answers = responseContent['answers'];
           setState(() {
             selectedAnswers = answers.cast<String>();
@@ -108,13 +108,11 @@ class PollWidgetState extends State<PollWidget> {
     for (final response in responses) {
       final responseContent = response
           .content['org.matrix.msc3381.poll.response'] as Map<String, dynamic>;
-      if (responseContent != null) {
-        final List<dynamic> answers = responseContent['answers'];
-        for (final answer in answers.cast<String>()) {
-          results[answer] = (results[answer] ?? 0) + 1;
-        }
+      final List<dynamic> answers = responseContent['answers'];
+      for (final answer in answers.cast<String>()) {
+        results[answer] = (results[answer] ?? 0) + 1;
       }
-    }
+        }
 
     setState(() {
       pollResults = results;
@@ -154,7 +152,7 @@ class PollWidgetState extends State<PollWidget> {
 
       // Recalculate results for disclosed polls
       final content =
-          widget.event.content[PollEvents.PollStart] as Map<String, dynamic?>;
+          widget.event.content[PollEvents.PollStart] as Map<String, dynamic>;
       final kind = content['kind'] as String?;
       if (kind == 'org.matrix.msc3381.disclosed') {
         _calculateResults();
@@ -177,7 +175,7 @@ class PollWidgetState extends State<PollWidget> {
 
   void _onAnswerSelected(String answerId, bool selected) {
     final content =
-        widget.event.content[PollEvents.PollStart] as Map<String, dynamic?>;
+        widget.event.content[PollEvents.PollStart] as Map<String, dynamic>;
     final maxSelections = content['max_selections'] as int? ?? 1;
     final List<dynamic> answers = content['answers'];
 
@@ -200,9 +198,8 @@ class PollWidgetState extends State<PollWidget> {
 
   bool _isPollEnded() {
     final room = widget.event.room;
-    if (widget.timeline == null) return false;
     // Check if there's an end event for this poll
-    final endEvents = widget.timeline!.events.where((e) {
+    final endEvents = widget.timeline.events.where((e) {
       return e.type == 'org.matrix.msc3381.poll.end' &&
           e.senderId == widget.event.senderId &&
           e.relationshipEventId == widget.event.eventId;
@@ -212,7 +209,7 @@ class PollWidgetState extends State<PollWidget> {
 
   bool _shouldShowResults() {
     final content =
-        widget.event.content[PollEvents.PollStart] as Map<String, dynamic?>;
+        widget.event.content[PollEvents.PollStart] as Map<String, dynamic>;
     final kind = content['kind'] as String?;
     final isDisclosed = kind == 'org.matrix.msc3381.disclosed';
     final isEnded = _isPollEnded();
@@ -242,7 +239,7 @@ class PollWidgetState extends State<PollWidget> {
     final sortedSelected = List.from(selectedAnswers)..sort();
     final sortedOriginal = List.from(originalVote)..sort();
 
-    for (int i = 0; i < sortedSelected.length; i++) {
+    for (var i = 0; i < sortedSelected.length; i++) {
       if (sortedSelected[i] != sortedOriginal[i]) return true;
     }
 
@@ -253,11 +250,11 @@ class PollWidgetState extends State<PollWidget> {
   Widget build(BuildContext context) {
     final event = widget.event;
     final content =
-        event.content[PollEvents.PollStart] as Map<String, dynamic?>;
-    final question = content?['question']?['m.text'] as String? ?? content?['question']?['org.matrix.msc1767.text'] as String? ?? content?['question']?['body'] as String? ?? 'Poll';
-    final List<dynamic> answers = content?['answers'] ?? [];
-    final maxSelections = content?['max_selections'] as int? ?? 1;
-    final kind = content?['kind'] as String?;
+        event.content[PollEvents.PollStart] as Map<String, dynamic>;
+    final question = content['question']?['m.text'] as String? ?? content['question']?['org.matrix.msc1767.text'] as String? ?? content['question']?['body'] as String? ?? 'Poll';
+    final List<dynamic> answers = content['answers'] ?? [];
+    final maxSelections = content['max_selections'] as int? ?? 1;
+    final kind = content['kind'] as String?;
 
     final shouldShowResults = _shouldShowResults();
     final isEnded = _isPollEnded();
@@ -316,7 +313,7 @@ class PollWidgetState extends State<PollWidget> {
                                 _onAnswerSelected(answerId, !isSelected),
                           ),
                       ] else if (isSelected)
-                        Icon(Icons.check, color: Colors.green, size: 20),
+                        const Icon(Icons.check, color: Colors.green, size: 20),
 
                       Expanded(
                         child: GestureDetector(

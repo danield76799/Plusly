@@ -150,9 +150,9 @@ class ChatMembersView extends StatelessWidget {
                                                   controller.members
                                                       ?.where((member) =>
                                                           member.membership ==
-                                                          Membership.join)
+                                                          Membership.join,)
                                                       .length ??
-                                                  0),
+                                                  0,),
                                           Membership.knock =>
                                             L10n.of(context).knocking,
                                           Membership.leave =>

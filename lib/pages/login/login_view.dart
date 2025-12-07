@@ -50,6 +50,7 @@ class LoginView extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               children: <Widget>[
+                const SizedBox(height: 32),
                 const Hero(
                   tag: 'info-logo',
                   child: Icon(Icons.lock_outline),
@@ -119,7 +120,7 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Spacer(),
+                const SizedBox(height: 16),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: ElevatedButton(

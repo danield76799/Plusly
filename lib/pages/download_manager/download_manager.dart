@@ -31,35 +31,33 @@ class Download {
 
       httpUrl = (await Uri.parse(url).getDownloadUri(mx)).toString();
 
-      if (downloadPath != null) {
-        // Create Dio instance
-        final dio = Dio();
+      // Create Dio instance
+      final dio = Dio();
 
-        ct = CancelToken();
+      ct = CancelToken();
 
-        // Download the file
-        response = dio.download(
-          httpUrl,
-          "$downloadPath/$name",
-          onReceiveProgress: (received, total) {
-            receivedBytes = received;
-            totalBytes = total;
-            progress = (receivedBytes / totalBytes) * 100;
-            if (progress == 100) {
-              Provider.of<DownloadManagerController>(context)
-                  .downloads
-                  .remove(this);
-            }
-            print("Download progress: $progress%");
-          },
-          options: Options(
-              responseType: ResponseType.bytes,
-              headers: {'authorization': "Bearer ${mx.accessToken}"}),
-          cancelToken: ct,
-        );
-        print("Download completed and saved to $downloadPath/$name");
-      }
-    } catch (e) {
+      // Download the file
+      response = dio.download(
+        httpUrl,
+        "$downloadPath/$name",
+        onReceiveProgress: (received, total) {
+          receivedBytes = received;
+          totalBytes = total;
+          progress = (receivedBytes / totalBytes) * 100;
+          if (progress == 100) {
+            Provider.of<DownloadManagerController>(context)
+                .downloads
+                .remove(this);
+          }
+          print("Download progress: $progress%");
+        },
+        options: Options(
+            responseType: ResponseType.bytes,
+            headers: {'authorization': "Bearer ${mx.accessToken}"}),
+        cancelToken: ct,
+      );
+      print("Download completed and saved to $downloadPath/$name");
+        } catch (e) {
       print("Error during download: $e");
     }
   }
@@ -73,11 +71,11 @@ class Download {
 class DownloadManager extends StatefulWidget {
   final BuildContext context;
 
-  const DownloadManager(this.context);
+  const DownloadManager(this.context, {super.key});
 
   @override
   State<StatefulWidget> createState() =>
-      Provider.of<DownloadManagerController>(this.context);
+      Provider.of<DownloadManagerController>(context);
 }
 
 class DownloadManagerController extends State<DownloadManager>

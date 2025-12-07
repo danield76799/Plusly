@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_selector/file_selector.dart';
 
-import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/widgets/app_lock.dart';
 import 'package:extera_next/widgets/future_loading_dialog.dart';
 

@@ -61,7 +61,7 @@ class ClientChooserButton extends StatelessWidget {
         value: SettingsAction.downloads,
         child: Row(
           children: [
-            Icon(Icons.download_outlined),
+            const Icon(Icons.download_outlined),
             const SizedBox(width: 18),
             Text(L10n.of(context).downloads),
           ],
