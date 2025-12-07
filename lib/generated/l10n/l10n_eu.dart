@@ -2151,6 +2151,9 @@ class L10nEu extends L10n {
   }
 
   @override
+  String get signInWithLabel => 'Sign in with';
+
+  @override
   String get profileNotFound =>
       'Ezin izan da erabiltzailea zerbitzarian aurkitu. Agian arazo bat dago konexioarekin edo erabiltzailea ez da existitzen.';
 
@@ -2686,6 +2689,13 @@ class L10nEu extends L10n {
 
   @override
   String get waitingForServer => 'Zerbitzariaren zain…';
+
+  @override
+  String get welcome => 'Welcome!';
+
+  @override
+  String get logInToYourAccount =>
+      'Log in to your Matrix account to start chatting.';
 
   @override
   String get appIntroduction =>

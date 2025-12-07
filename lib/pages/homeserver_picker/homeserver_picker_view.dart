@@ -120,6 +120,13 @@ class HomeserverPickerView extends StatelessWidget {
                     const SizedBox(height: 32),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                      child: Text(
+                        L10n.of(context).welcome,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
                       child: SelectableLinkify(
                         text: L10n.of(context).appIntroduction,
                         textScaleFactor:
@@ -157,7 +164,7 @@ class HomeserverPickerView extends StatelessWidget {
                               hintStyle: TextStyle(
                                 color: theme.colorScheme.surfaceTint,
                               ),
-                              labelText: 'Sign in with:',
+                              labelText: L10n.of(context).signInWithLabel,
                               errorText: controller.error,
                               errorMaxLines: 4,
                               suffixIcon: IconButton(

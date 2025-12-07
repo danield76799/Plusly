@@ -2082,6 +2082,9 @@ class L10nZh extends L10n {
   }
 
   @override
+  String get signInWithLabel => 'Sign in with';
+
+  @override
   String get profileNotFound => '服务器上找不到此用户。可能是连接有问题或者用户不存在。';
 
   @override
@@ -2592,6 +2595,13 @@ class L10nZh extends L10n {
 
   @override
   String get waitingForServer => '正在等待服务器…';
+
+  @override
+  String get welcome => 'Welcome!';
+
+  @override
+  String get logInToYourAccount =>
+      'Log in to your Matrix account to start chatting.';
 
   @override
   String get appIntroduction =>

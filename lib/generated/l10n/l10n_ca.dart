@@ -2163,6 +2163,9 @@ class L10nCa extends L10n {
   }
 
   @override
+  String get signInWithLabel => 'Sign in with';
+
+  @override
   String get profileNotFound =>
       'No s\'ha trobat el compte en aquest servidor. Pot ser un error de connexió, o que realment no existeixi.';
 
@@ -2702,6 +2705,13 @@ class L10nCa extends L10n {
 
   @override
   String get waitingForServer => 'S\'està esperant el servidor...';
+
+  @override
+  String get welcome => 'Welcome!';
+
+  @override
+  String get logInToYourAccount =>
+      'Log in to your Matrix account to start chatting.';
 
   @override
   String get appIntroduction =>

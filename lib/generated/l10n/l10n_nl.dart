@@ -2149,6 +2149,9 @@ class L10nNl extends L10n {
   }
 
   @override
+  String get signInWithLabel => 'Sign in with';
+
+  @override
   String get profileNotFound =>
       'De persoon kan niet gevonden worden op de server. Misschien is er een verbindingsprobleem of de persoon bestaat niet.';
 
@@ -2681,6 +2684,13 @@ class L10nNl extends L10n {
 
   @override
   String get waitingForServer => 'Wachten op server...';
+
+  @override
+  String get welcome => 'Welcome!';
+
+  @override
+  String get logInToYourAccount =>
+      'Log in to your Matrix account to start chatting.';
 
   @override
   String get appIntroduction =>

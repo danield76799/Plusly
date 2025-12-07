@@ -3300,7 +3300,9 @@
 	"appWantsToUseForLoginDescription": "Вы позволяете приложению и веб-сайту делиться информацией о Вас.",
 	"open": "Открыть",
 	"waitingForServer": "Ожидание сервера...",
-	"appIntroduction": "Extera позволяет Вам присоединяться к другим мессенджерам. Узнайте больше на https://matrix.org или просто нажмите *Продолжить*.",
+    "welcome": "Добро пожаловать!",
+  "logInToYourAccount": "Войдите в Ваш аккаунт Matrix, чтобы начать общаться.",
+	"appIntroduction": "Extera - это клиент для чат-сети Matrix. Узнайте больше на https://matrix.org или просто нажмите *Продолжить*.",
 	"newChatRequest": "📩 Запрос нового чата",
 	"contentNotificationSettings": "Настройки уведомлений по тексту",
 	"generalNotificationSettings": "Общие настройки уведомлений",
@@ -3491,5 +3493,6 @@
   "stickerPackName": "Название набора стикеров",
   "attribution": "Авторство",
   "useAsSticker": "Стикер",
-  "useAsEmoji": "Эмодзи"
+  "useAsEmoji": "Эмодзи",
+  "signInWithLabel": "Войти в:"
 }

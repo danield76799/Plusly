@@ -2850,6 +2850,7 @@
       }
     }
   },
+  "signInWithLabel": "Sign in with",
   "profileNotFound": "The user could not be found on the server. Maybe there is a connection problem or the user doesn't exist.",
   "@profileNotFound": {},
   "setTheme": "Set theme:",
@@ -3307,7 +3308,9 @@
   "appWantsToUseForLoginDescription": "You hereby allow the app and website to share information about you.",
   "open": "Open",
   "waitingForServer": "Waiting for server...",
-  "appIntroduction": "Extera lets you chat with your friends across different messengers. Learn more at https://matrix.org or just tap *Continue*.",
+  "welcome": "Welcome!",
+  "logInToYourAccount": "Log in to your Matrix account to start chatting.",
+  "appIntroduction": "Extera is a client for the Matrix network. Learn more at https://matrix.org or just tap *Continue*.",
   "newChatRequest": "📩 New chat request",
   "contentNotificationSettings": "Content notification settings",
   "generalNotificationSettings": "General notification settings",

@@ -2157,6 +2157,9 @@ class L10nLv extends L10n {
   }
 
   @override
+  String get signInWithLabel => 'Sign in with';
+
+  @override
   String get profileNotFound =>
       'Lietotāju serverī nevarēja atrast. Varbūt ir nebūšanas ar savienojumu vai lietotājs nepastāv.';
 
@@ -2694,6 +2697,13 @@ class L10nLv extends L10n {
 
   @override
   String get waitingForServer => 'Gaida serveri...';
+
+  @override
+  String get welcome => 'Welcome!';
+
+  @override
+  String get logInToYourAccount =>
+      'Log in to your Matrix account to start chatting.';
 
   @override
   String get appIntroduction =>

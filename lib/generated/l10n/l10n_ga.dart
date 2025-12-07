@@ -2169,6 +2169,9 @@ class L10nGa extends L10n {
   }
 
   @override
+  String get signInWithLabel => 'Sign in with';
+
+  @override
   String get profileNotFound =>
       'Níorbh fhéidir an t-úsáideoir a aimsiú ar an bhfreastalaí. B\'fhéidir go bhfuil fadhb nasctha ann nó nach bhfuil an t-úsáideoir ann.';
 
@@ -2708,6 +2711,13 @@ class L10nGa extends L10n {
 
   @override
   String get waitingForServer => 'Ag fanacht leis an bhfreastalaí...';
+
+  @override
+  String get welcome => 'Welcome!';
+
+  @override
+  String get logInToYourAccount =>
+      'Log in to your Matrix account to start chatting.';
 
   @override
   String get appIntroduction =>

@@ -2101,6 +2101,9 @@ class L10nKo extends L10n {
   }
 
   @override
+  String get signInWithLabel => 'Sign in with';
+
+  @override
   String get profileNotFound =>
       '유저를 서버에서 찾을 수 있습니다. 연결 문제가 있거나 유저가 존재하지 않을 수 있습니다.';
 
@@ -2619,6 +2622,13 @@ class L10nKo extends L10n {
 
   @override
   String get waitingForServer => '서버를 기다리는중...';
+
+  @override
+  String get welcome => 'Welcome!';
+
+  @override
+  String get logInToYourAccount =>
+      'Log in to your Matrix account to start chatting.';
 
   @override
   String get appIntroduction =>

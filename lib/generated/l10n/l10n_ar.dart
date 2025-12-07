@@ -2130,6 +2130,9 @@ class L10nAr extends L10n {
   }
 
   @override
+  String get signInWithLabel => 'Sign in with';
+
+  @override
   String get profileNotFound =>
       'لا يمكن العثور على المستخدم على الخادم. ربما هناك مشكلة في الاتصال أو المستخدم غير موجود.';
 
@@ -2660,8 +2663,15 @@ class L10nAr extends L10n {
   String get waitingForServer => 'Waiting for server...';
 
   @override
+  String get welcome => 'Welcome!';
+
+  @override
+  String get logInToYourAccount =>
+      'Log in to your Matrix account to start chatting.';
+
+  @override
   String get appIntroduction =>
-      'Extera lets you chat with your friends across different messengers. Learn more at https://matrix.org or just tap *Continue*.';
+      'Extera is a client for the Matrix network. Learn more at https://matrix.org or just tap *Continue*.';
 
   @override
   String get newChatRequest => '📩 New chat request';

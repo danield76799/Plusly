@@ -2143,6 +2143,9 @@ class L10nBn extends L10n {
   }
 
   @override
+  String get signInWithLabel => 'Sign in with';
+
+  @override
   String get profileNotFound =>
       'The user could not be found on the server. Maybe there is a connection problem or the user doesn\'t exist.';
 
@@ -2678,8 +2681,15 @@ class L10nBn extends L10n {
   String get waitingForServer => 'Waiting for server...';
 
   @override
+  String get welcome => 'Welcome!';
+
+  @override
+  String get logInToYourAccount =>
+      'Log in to your Matrix account to start chatting.';
+
+  @override
   String get appIntroduction =>
-      'Extera lets you chat with your friends across different messengers. Learn more at https://matrix.org or just tap *Continue*.';
+      'Extera is a client for the Matrix network. Learn more at https://matrix.org or just tap *Continue*.';
 
   @override
   String get newChatRequest => '📩 New chat request';

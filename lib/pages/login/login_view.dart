@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/widgets/layouts/login_scaffold.dart';
 import 'package:extera_next/widgets/matrix.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'login.dart';
 
 class LoginView extends StatelessWidget {
@@ -27,6 +29,7 @@ class LoginView extends StatelessWidget {
         leading: controller.loading ? null : const Center(child: BackButton()),
         automaticallyImplyLeading: !controller.loading,
         titleSpacing: !controller.loading ? 0 : null,
+        centerTitle: true,
         title: Text.rich(
           TextSpan(
             children: [
@@ -47,9 +50,23 @@ class LoginView extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               children: <Widget>[
-                Hero(
+                const Hero(
                   tag: 'info-logo',
-                  child: Image.asset('assets/banner_transparent.png'),
+                  child: Icon(Icons.lock_outline),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: SelectableLinkify(
+                    text: L10n.of(context).logInToYourAccount,
+                    textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+                    textAlign: TextAlign.center,
+                    linkStyle: TextStyle(
+                      color: theme.colorScheme.secondary,
+                      decorationColor: theme.colorScheme.secondary,
+                    ),
+                    onOpen: (link) => launchUrlString(link.url),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Padding(
@@ -95,7 +112,6 @@ class LoginView extends StatelessWidget {
                           controller.showPassword
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: Colors.black,
                         ),
                       ),
                       hintText: '******',
@@ -103,7 +119,7 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                const Spacer(),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: ElevatedButton(

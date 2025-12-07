@@ -3897,6 +3897,12 @@ abstract class L10n {
   /// **'Sign in with {provider}'**
   String signInWith(String provider);
 
+  /// No description provided for @signInWithLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with'**
+  String get signInWithLabel;
+
   /// No description provided for @profileNotFound.
   ///
   /// In en, this message translates to:
@@ -4791,10 +4797,22 @@ abstract class L10n {
   /// **'Waiting for server...'**
   String get waitingForServer;
 
+  /// No description provided for @welcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome!'**
+  String get welcome;
+
+  /// No description provided for @logInToYourAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Log in to your Matrix account to start chatting.'**
+  String get logInToYourAccount;
+
   /// No description provided for @appIntroduction.
   ///
   /// In en, this message translates to:
-  /// **'Extera lets you chat with your friends across different messengers. Learn more at https://matrix.org or just tap *Continue*.'**
+  /// **'Extera is a client for the Matrix network. Learn more at https://matrix.org or just tap *Continue*.'**
   String get appIntroduction;
 
   /// No description provided for @newChatRequest.

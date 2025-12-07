@@ -2147,6 +2147,9 @@ class L10nRu extends L10n {
   }
 
   @override
+  String get signInWithLabel => 'Войти в:';
+
+  @override
   String get profileNotFound =>
       'Пользователь не найден на сервере. Это может быть проблемой подключения или пользователь не существует.';
 
@@ -2682,8 +2685,15 @@ class L10nRu extends L10n {
   String get waitingForServer => 'Ожидание сервера...';
 
   @override
+  String get welcome => 'Добро пожаловать!';
+
+  @override
+  String get logInToYourAccount =>
+      'Войдите в Ваш аккаунт Matrix, чтобы начать общаться.';
+
+  @override
   String get appIntroduction =>
-      'Extera позволяет Вам присоединяться к другим мессенджерам. Узнайте больше на https://matrix.org или просто нажмите *Продолжить*.';
+      'Extera - это клиент для чат-сети Matrix. Узнайте больше на https://matrix.org или просто нажмите *Продолжить*.';
 
   @override
   String get newChatRequest => '📩 Запрос нового чата';
