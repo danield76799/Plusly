@@ -1,6 +1,5 @@
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -29,7 +28,7 @@ class ChatEventList extends StatelessWidget {
     final timeline = controller.timeline;
 
     if (timeline == null) {
-      return const Center(child: CupertinoActivityIndicator());
+      return const Center(child: CircularProgressIndicator.adaptive());
     }
     final theme = Theme.of(context);
 

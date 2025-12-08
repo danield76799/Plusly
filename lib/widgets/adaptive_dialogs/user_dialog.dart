@@ -37,6 +37,36 @@ class UserDialog extends StatelessWidget {
 
   const UserDialog(this.profile, {this.noProfileWarning = false, super.key});
 
+  Widget _buildActionButton({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return Expanded(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textScaler: const TextScaler.linear(0.8),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
@@ -48,10 +78,6 @@ class UserDialog extends StatelessWidget {
     final theme = Theme.of(context);
     final avatar = profile.avatarUrl;
     return AlertDialog.adaptive(
-      title: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 256),
-        child: Center(child: Text(displayname, textAlign: TextAlign.center)),
-      ),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 256, maxHeight: 256),
         child: PresenceBuilder(
@@ -74,6 +100,50 @@ class UserDialog extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Center(
+                    child: Avatar(
+                      mxContent: avatar,
+                      name: displayname,
+                      size: Avatar.defaultSize * 2,
+                      onTap: avatar != null
+                          ? () => showDialog(
+                                context: context,
+                                builder: (_) => MxcImageViewer(avatar),
+                              )
+                          : null,
+                    ),
+                  ),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 256),
+                    child: Center(
+                      child: Text(
+                        displayname,
+                        textAlign: TextAlign.center,
+                        textScaler: const TextScaler.linear(1.67),
+                      ),
+                    ),
+                  ),
+                  if (presenceText != null)
+                    Text(
+                      presenceText,
+                      style: const TextStyle(fontSize: 10),
+                      textAlign: TextAlign.center,
+                    ),
+                  if (statusMsg != null)
+                    SelectableLinkify(
+                      text: statusMsg,
+                      textScaleFactor:
+                          MediaQuery.textScalerOf(context).scale(1),
+                      textAlign: TextAlign.center,
+                      options: const LinkifyOptions(humanize: false),
+                      linkStyle: TextStyle(
+                        color: theme.colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                        decorationColor: theme.colorScheme.primary,
+                      ),
+                      onOpen: (url) =>
+                          UrlLauncher(context, url.url).launchUrl(),
+                    ),
                   HoverBuilder(
                     builder: (context, hovered) => StatefulBuilder(
                       builder: (context, setState) => MouseRegion(
@@ -122,40 +192,6 @@ class UserDialog extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Center(
-                    child: Avatar(
-                      mxContent: avatar,
-                      name: displayname,
-                      size: Avatar.defaultSize * 2,
-                      onTap: avatar != null
-                          ? () => showDialog(
-                                context: context,
-                                builder: (_) => MxcImageViewer(avatar),
-                              )
-                          : null,
-                    ),
-                  ),
-                  if (presenceText != null)
-                    Text(
-                      presenceText,
-                      style: const TextStyle(fontSize: 10),
-                      textAlign: TextAlign.center,
-                    ),
-                  if (statusMsg != null)
-                    SelectableLinkify(
-                      text: statusMsg,
-                      textScaleFactor:
-                          MediaQuery.textScalerOf(context).scale(1),
-                      textAlign: TextAlign.center,
-                      options: const LinkifyOptions(humanize: false),
-                      linkStyle: TextStyle(
-                        color: theme.colorScheme.primary,
-                        decoration: TextDecoration.underline,
-                        decorationColor: theme.colorScheme.primary,
-                      ),
-                      onOpen: (url) =>
-                          UrlLauncher(context, url.url).launchUrl(),
-                    ),
                 ],
               ),
             );
@@ -163,46 +199,43 @@ class UserDialog extends StatelessWidget {
         ),
       ),
       actions: [
-        if (client.userID != profile.userId) ...[
-          AdaptiveDialogAction(
-            bigButtons: true,
-            onPressed: () async {
-              final router = GoRouter.of(context);
-              final roomIdResult = await showFutureLoadingDialog(
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          spacing: 5,
+          children: [
+            if (client.userID != profile.userId) ...[
+              _buildActionButton(
                 context: context,
-                future: () => client.startDirectChat(profile.userId),
-              );
-              final roomId = roomIdResult.result;
-              if (roomId == null) return;
-              if (context.mounted) Navigator.of(context).pop();
-              router.go('/rooms/$roomId');
-            },
-            child: Text(
-              dmRoomId == null
-                  ? L10n.of(context).startConversation
-                  : L10n.of(context).sendAMessage,
-            ),
-          ),
-          AdaptiveDialogAction(
-            bigButtons: true,
-            onPressed: () {
-              final router = GoRouter.of(context);
-              Navigator.of(context).pop();
-              router.go(
-                '/rooms/settings/security/ignorelist',
-                extra: profile.userId,
-              );
-            },
-            child: Text(
-              L10n.of(context).ignoreUser,
-              style: TextStyle(color: theme.colorScheme.error),
-            ),
-          ),
-        ],
-        AdaptiveDialogAction(
-          bigButtons: true,
-          onPressed: Navigator.of(context).pop,
-          child: Text(L10n.of(context).close),
+                icon: Icons.chat_bubble_outline,
+                label: L10n.of(context).chat,
+                onPressed: () async {
+                  final router = GoRouter.of(context);
+                  final roomIdResult = await showFutureLoadingDialog(
+                    context: context,
+                    future: () => client.startDirectChat(profile.userId),
+                  );
+                  final roomId = roomIdResult.result;
+                  if (roomId == null) return;
+                  if (context.mounted) Navigator.of(context).pop();
+                  router.go('/rooms/$roomId');
+                },
+              ),
+              _buildActionButton(
+                context: context,
+                icon: Icons.block,
+                label: L10n.of(context).ignoreUser,
+                onPressed: () async {
+                  final router = GoRouter.of(context);
+                  Navigator.of(context).pop();
+                  router.go(
+                    '/rooms/settings/security/ignorelist',
+                    extra: profile.userId,
+                  );
+                },
+              ),
+            ],
+          ],
         ),
       ],
     );
