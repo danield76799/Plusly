@@ -1,4 +1,5 @@
 import 'package:extera_next/pages/download_manager/download_manager_view.dart';
+import 'package:extera_next/utils/downloads_directory.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
@@ -22,7 +23,7 @@ class Download {
     try {
       final mx = Matrix.of(context).client;
       // final directory = await getDownloadsDirectory();
-      downloadPath = "/sdcard/Download/Extera";
+      downloadPath = getDownloadsDirectory();
 
       httpUrl = (await Uri.parse(url).getDownloadUri(mx)).toString();
 
