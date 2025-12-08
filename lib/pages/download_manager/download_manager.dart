@@ -1,14 +1,9 @@
-import 'dart:io';
-
-import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/download_manager/download_manager_view.dart';
 import 'package:extera_next/widgets/matrix.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
-import 'package:path_provider/path_provider.dart';
 
 class Download {
   final String url;
@@ -49,16 +44,16 @@ class Download {
                 .downloads
                 .remove(this);
           }
-          print("Download progress: $progress%");
+          Logs().w("Download progress: $progress%");
         },
         options: Options(
             responseType: ResponseType.bytes,
             headers: {'authorization': "Bearer ${mx.accessToken}"}),
         cancelToken: ct,
       );
-      print("Download completed and saved to $downloadPath/$name");
+      Logs().w("Download completed and saved to $downloadPath/$name");
         } catch (e) {
-      print("Error during download: $e");
+      Logs().w("Error during download: $e");
     }
   }
 
