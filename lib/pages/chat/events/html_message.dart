@@ -79,11 +79,9 @@ class HtmlMessage extends StatelessWidget {
     'rt',
     'html',
     'body',
-    // Workaround for https://github.com/krille-chan/fluffychat/issues/507
-    'tg-forward',
   };
 
-  static const Set<String> blockedHtmlTags = {
+  static const Set<String> ignoredHtmlTags = {
     'mx-reply',
   };
 
@@ -143,7 +141,7 @@ class HtmlMessage extends StatelessWidget {
     // We must not render elements nested more than 100 elements deep:
     if (depth >= 100) return const TextSpan();
 
-    if (node is dom.Element && blockedHtmlTags.contains(node.localName)) {
+    if (node is dom.Element && ignoredHtmlTags.contains(node.localName)) {
       return const TextSpan();
     }
 
