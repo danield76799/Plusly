@@ -28,7 +28,7 @@ extension LocalizedBody on Event {
 
   void downloadInBackground(BuildContext context) async {
     if (canDownloadInBackground) {
-      final dmc = Provider.of<DownloadManagerController>(context);
+      final dmc = Provider.of<DownloadManagerController>(context, listen: false);
       final filename = content.tryGet<String>('filename') ?? body;
       dmc.download(context, "$filename.${roomId!.substring(1, 5)}.${eventId.substring(1, 5)}.${extensionFromMime(attachmentMimetype)}", attachmentMxcUrl.toString());
     } else {

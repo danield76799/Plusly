@@ -41,7 +41,7 @@ class Download {
           totalBytes = total;
           progress = (receivedBytes / totalBytes) * 100;
           if (progress == 100) {
-            Provider.of<DownloadManagerController>(context)
+            Provider.of<DownloadManagerController>(context, listen: false)
                 .downloads
                 .remove(this);
           }
