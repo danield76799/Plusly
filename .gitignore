@@ -14,6 +14,7 @@ prime
 
 # libolm package
 /assets/js/package
+/lib/generated
 
 # IntelliJ related
 *.iml
