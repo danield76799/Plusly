@@ -1,4 +1,3 @@
-import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat_list/chat_list_item.dart';
 import 'package:extera_next/pages/chat_list/search_title.dart';
@@ -8,7 +7,6 @@ import 'package:extera_next/utils/stream_extension.dart';
 import 'package:extera_next/utils/url_launcher.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/future_loading_dialog.dart';
-import 'package:extera_next/widgets/hover_builder.dart';
 import 'package:extera_next/widgets/layouts/max_width_body.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:extera_next/widgets/mxc_image_viewer.dart';
@@ -69,6 +67,7 @@ class ProfileView extends StatelessWidget {
           .rateLimit(const Duration(seconds: 1)),
       builder: (context, _) {
         return ListView.builder(
+          physics: const NeverScrollableScrollPhysics(),
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
           itemCount: controller.mutualRooms.length,
@@ -97,7 +96,6 @@ class ProfileView extends StatelessWidget {
     final displayname = profile.displayName ??
         profile.userId.localpart ??
         L10n.of(context).user;
-    var copied = false;
     final theme = Theme.of(context);
     final avatar = profile.avatarUrl;
 
@@ -234,40 +232,41 @@ class ProfileView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            ListView(
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.alternate_email),
-                  trailing: const Icon(Icons.copy),
-                  title: Text(profile.userId),
-                  subtitle: Text(L10n.of(context).matrixId),
-                  onTap: () {
-                    Clipboard.setData(
-                      ClipboardData(text: profile.userId),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(L10n.of(context).copiedToClipboard),
-                      ),
-                    );
-                  },
-                ),
-              ],
+            ListTile(
+              leading: const Icon(Icons.alternate_email),
+              trailing: const Icon(Icons.copy),
+              title: Text(profile.userId),
+              subtitle: Text(L10n.of(context).matrixId),
+              onTap: () {
+                Clipboard.setData(
+                  ClipboardData(text: profile.userId),
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(L10n.of(context).copiedToClipboard),
+                  ),
+                );
+              },
             ),
+            if (controller.about != null && controller.about!.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.wysiwyg),
+                title: Text(controller.about!),
+                subtitle: Text(L10n.of(context).aboutUser),
+              ),
             const SizedBox(height: 8),
             if (controller.mutualRooms.isNotEmpty)
               SearchTitle(
                 title: L10n.of(context).mutualRooms,
                 icon: const Icon(Icons.chat_bubble_outline),
               ),
-            controller.isQueryingMutualRooms
-                ? const CircularProgressIndicator.adaptive()
-                : _buildMutualChatList(
-                    context: context,
-                    userId: profile.userId,
-                  ),
+            if (profile.userId != client.userID)
+              controller.isQueryingMutualRooms
+                  ? const CircularProgressIndicator.adaptive()
+                  : _buildMutualChatList(
+                      context: context,
+                      userId: profile.userId,
+                    ),
           ],
         ),
       ),

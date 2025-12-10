@@ -1,3 +1,4 @@
+import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/pages/profile/profile_view.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/msc2666_extension.dart';
 import 'package:extera_next/widgets/matrix.dart';
@@ -16,10 +17,34 @@ class ProfilePage extends StatefulWidget {
 }
 
 class ProfileController extends State<ProfilePage> {
+  String? about;
+  bool isQueryingAbout = false;
+
+  Future<void> queryAbout() async {
+    final client = Matrix.of(context).client;
+    if (isQueryingAbout) return;
+    setState(() {
+      isQueryingAbout = true;
+    });
+    final aboutResponse =
+        await client.getProfileField(widget.profile.userId, AppConfig.aboutProfileField);
+    if (aboutResponse.containsKey(AppConfig.aboutProfileField) &&
+        aboutResponse[AppConfig.aboutProfileField] is String &&
+        aboutResponse[AppConfig.aboutProfileField].toString().length <= 256) {
+      setState(() {
+        about = aboutResponse[AppConfig.aboutProfileField].toString();
+        isQueryingAbout = false;
+      });
+    } else {
+      setState(() {
+        isQueryingAbout = false;
+      });
+    }
+  }
+
   List<Room> mutualRooms = [];
   bool canQueryMutualRooms = true;
   bool isQueryingMutualRooms = false;
-  final ScrollController scrollController = ScrollController();
 
   Future<void> queryMutualRooms() async {
     final client = Matrix.of(context).client;
@@ -44,7 +69,11 @@ class ProfileController extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    queryMutualRooms();
+    queryAbout();
+
+    if (Matrix.of(context).client.userID != widget.profile.userId) {
+      queryMutualRooms();
+    }
   }
 
   void onChatTap(Room room) {
