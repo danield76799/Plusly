@@ -1,5 +1,6 @@
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/utils/poll_events.dart';
+import 'package:extera_next/utils/stream_extension.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -112,7 +113,7 @@ class PollWidgetState extends State<PollWidget> {
       for (final answer in answers.cast<String>()) {
         results[answer] = (results[answer] ?? 0) + 1;
       }
-        }
+    }
 
     setState(() {
       pollResults = results;
@@ -246,10 +247,13 @@ class PollWidgetState extends State<PollWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final client = Matrix.of(context).client;
     final event = widget.event;
-    final content =
-        event.content[PollEvents.PollStart] as Map<String, dynamic>;
-    final question = content['question']?['m.text'] as String? ?? content['question']?['org.matrix.msc1767.text'] as String? ?? content['question']?['body'] as String? ?? 'Poll';
+    final content = event.content[PollEvents.PollStart] as Map<String, dynamic>;
+    final question = content['question']?['m.text'] as String? ??
+        content['question']?['org.matrix.msc1767.text'] as String? ??
+        content['question']?['body'] as String? ??
+        'Poll';
     final List<dynamic> answers = content['answers'] ?? [];
     final maxSelections = content['max_selections'] as int? ?? 1;
     final kind = content['kind'] as String?;
@@ -275,90 +279,108 @@ class PollWidgetState extends State<PollWidget> {
           ),
           const SizedBox(height: 12),
 
-          // Answers
-          ...answers.asMap().entries.map((entry) {
-            final index = entry.key;
-            final answer = entry.value as Map<String, dynamic>;
-            final answerId = answer['id'] as String;
-            final answerText = answer['m.text'] as String? ??
-                answer['org.matrix.msc1767.text'] as String? ??
-                'Answer ${index + 1}';
-            final isSelected = selectedAnswers.contains(answerId);
-            final percentage = _getAnswerPercentage(answerId);
-            final voteCount = pollResults?[answerId] ?? 0;
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          // answers
+          StreamBuilder(
+            key: ValueKey(
+              client.userID.toString(),
+            ),
+            stream: client.onTimelineEvent.stream
+                .where((s) =>
+                    s.type == "org.matrix.msc3381.poll.response" &&
+                    s.relationshipEventId == event.eventId)
+                .rateLimit(const Duration(seconds: 1)),
+            builder: (context, _) {
+              return Column(
                 children: [
-                  // Answer row
-                  Row(
-                    children: [
-                      // Selection indicator
-                      if (canVote) ...[
-                        if (maxSelections == 1)
-                          Radio<bool>(
-                            value: true,
-                            groupValue: isSelected,
-                            onChanged: (_) =>
-                                _onAnswerSelected(answerId, !isSelected),
-                          )
-                        else
-                          Checkbox(
-                            value: isSelected,
-                            onChanged: (_) =>
-                                _onAnswerSelected(answerId, !isSelected),
-                          ),
-                      ] else if (isSelected)
-                        const Icon(Icons.check, color: Colors.green, size: 20),
+                  ...answers.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final answer = entry.value as Map<String, dynamic>;
+                    final answerId = answer['id'] as String;
+                    final answerText = answer['m.text'] as String? ??
+                        answer['org.matrix.msc1767.text'] as String? ??
+                        'Answer ${index + 1}';
+                    final isSelected = selectedAnswers.contains(answerId);
+                    final percentage = _getAnswerPercentage(answerId);
+                    final voteCount = pollResults?[answerId] ?? 0;
 
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: canVote
-                              ? () => _onAnswerSelected(answerId, !isSelected)
-                              : null,
-                          child: Text(
-                            answerText,
-                            style: TextStyle(
-                              fontSize: widget.fontSize - 1,
-                              color: widget.color.withOpacity(0.9),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Answer row
+                          Row(
+                            children: [
+                              // Selection indicator
+                              if (canVote) ...[
+                                if (maxSelections == 1)
+                                  Radio<bool>(
+                                    value: true,
+                                    groupValue: isSelected,
+                                    onChanged: (_) => _onAnswerSelected(
+                                        answerId, !isSelected),
+                                  )
+                                else
+                                  Checkbox(
+                                    value: isSelected,
+                                    onChanged: (_) => _onAnswerSelected(
+                                        answerId, !isSelected),
+                                  ),
+                              ] else if (isSelected)
+                                const Icon(Icons.check,
+                                    color: Colors.green, size: 20),
+
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: canVote
+                                      ? () => _onAnswerSelected(
+                                          answerId, !isSelected)
+                                      : null,
+                                  child: Text(
+                                    answerText,
+                                    style: TextStyle(
+                                      fontSize: widget.fontSize - 1,
+                                      color: widget.color.withValues(alpha: .9),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              // Vote count and percentage
+                              if (shouldShowResults && pollResults != null)
+                                Text(
+                                  '${(percentage * 100).toStringAsFixed(1)}% ($voteCount)',
+                                  style: TextStyle(
+                                    fontSize: widget.fontSize - 2,
+                                    color: widget.color.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                            ],
+                          ),
+
+                          // Progress bar
+                          if (shouldShowResults && pollResults != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4, left: 40),
+                              child: LinearProgressIndicator(
+                                value: percentage,
+                                backgroundColor:
+                                    widget.color.withValues(alpha: 0.2),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  isSelected
+                                      ? Colors.blue
+                                      : widget.color.withValues(alpha: 0.5),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
+                        ],
                       ),
-
-                      // Vote count and percentage
-                      if (shouldShowResults && pollResults != null)
-                        Text(
-                          '${(percentage * 100).toStringAsFixed(1)}% ($voteCount)',
-                          style: TextStyle(
-                            fontSize: widget.fontSize - 2,
-                            color: widget.color.withOpacity(0.7),
-                          ),
-                        ),
-                    ],
-                  ),
-
-                  // Progress bar
-                  if (shouldShowResults && pollResults != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4, left: 40),
-                      child: LinearProgressIndicator(
-                        value: percentage,
-                        backgroundColor: widget.color.withOpacity(0.2),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          isSelected
-                              ? Colors.blue
-                              : widget.color.withOpacity(0.5),
-                        ),
-                      ),
-                    ),
+                    );
+                  }),
                 ],
-              ),
-            );
-          }),
-
+              );
+            },
+          ),
           const SizedBox(height: 12),
 
           // Vote button and info
@@ -405,7 +427,7 @@ class PollWidgetState extends State<PollWidget> {
                     .choicesSelected(selectedAnswers.length, maxSelections),
                 style: TextStyle(
                   fontSize: widget.fontSize - 2,
-                  color: widget.color.withOpacity(0.6),
+                  color: widget.color.withValues(alpha: 0.6),
                 ),
               ),
             ),
