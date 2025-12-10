@@ -113,16 +113,16 @@ class MessageContent extends StatelessWidget {
       case EventTypes.Sticker:
       case PollEvents.PollStart:
         // temporary solution
-        if (event.type == PollEvents.PollStart) {
-          return PollWidget(
-            event,
-            color: textColor,
-            linkColor: linkColor,
-            fontSize: fontSize,
-            timeline: timeline,
-          );
-        }
         switch (event.messageType) {
+          case MessageTypes.Poll:
+            if (event.redacted) continue textmessage;
+            return PollWidget(
+              event,
+              color: textColor,
+              linkColor: linkColor,
+              fontSize: fontSize,
+              timeline: timeline,
+            );
           case MessageTypes.Image:
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
