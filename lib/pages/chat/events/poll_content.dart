@@ -91,7 +91,8 @@ class PollWidgetState extends State<PollWidget> {
   void _calculateResults() async {
     final room = widget.event.room;
     final pollEventId = widget.event.eventId;
-    final pollContent = widget.event.content['org.matrix.msc3381.poll.start']! as Map;
+    final pollContent =
+        widget.event.content['org.matrix.msc3381.poll.start']! as Map;
     final int maxAnswers = pollContent['max_selections'] ?? 1;
     final results = <String, int>{};
 
@@ -307,7 +308,8 @@ class PollWidgetState extends State<PollWidget> {
                   (s) =>
                       s.type == "org.matrix.msc3381.poll.response" &&
                       s.relationshipEventId == event.eventId,
-                ).rateLimit(const Duration(seconds: 1)),
+                )
+                .rateLimit(const Duration(seconds: 1)),
             builder: (context, _) {
               _calculateResults();
               return Column(
@@ -338,23 +340,32 @@ class PollWidgetState extends State<PollWidget> {
                                     value: true,
                                     groupValue: isSelected,
                                     onChanged: (_) => _onAnswerSelected(
-                                        answerId, !isSelected),
+                                      answerId,
+                                      !isSelected,
+                                    ),
                                   )
                                 else
                                   Checkbox(
                                     value: isSelected,
                                     onChanged: (_) => _onAnswerSelected(
-                                        answerId, !isSelected),
+                                      answerId,
+                                      !isSelected,
+                                    ),
                                   ),
                               ] else if (isSelected)
-                                const Icon(Icons.check,
-                                    color: Colors.green, size: 20),
+                                const Icon(
+                                  Icons.check,
+                                  color: Colors.green,
+                                  size: 20,
+                                ),
 
                               Expanded(
                                 child: GestureDetector(
                                   onTap: canVote
                                       ? () => _onAnswerSelected(
-                                          answerId, !isSelected)
+                                            answerId,
+                                            !isSelected,
+                                          )
                                       : null,
                                   child: Text(
                                     answerText,
