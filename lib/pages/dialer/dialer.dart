@@ -388,8 +388,8 @@ class MyCallingPage extends State<Calling> {
     final switchSpeakerButton = FloatingActionButton(
       heroTag: 'switchSpeaker',
       onPressed: _switchSpeaker,
-      foregroundColor: Colors.black54,
-      backgroundColor: Colors.black45,
+      foregroundColor: _speakerOn ? Colors.black26 : Colors.white,
+      backgroundColor: _speakerOn ? Colors.white : Colors.black45,
       child: Icon(_speakerOn ? Icons.volume_up : Icons.volume_off),
     );
     
