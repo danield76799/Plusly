@@ -1,3 +1,8 @@
+import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
+import 'package:extera_next/utils/date_time_extension.dart';
+import 'package:extera_next/utils/localized_exception_extension.dart';
+import 'package:extera_next/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/config/themes.dart';
@@ -5,6 +10,8 @@ import 'package:extera_next/pages/chat/chat.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
+import 'package:intl/intl.dart';
+import 'package:matrix/matrix.dart';
 
 class SeenByRow extends StatelessWidget {
   final ChatController controller;
@@ -14,7 +21,7 @@ class SeenByRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final seenByUsers = controller.room.getSeenByUsers(controller.timeline!);
+    final receipts = controller.room.getReceipts(controller.timeline!);
     const maxAvatars = 7;
     return Container(
       width: double.infinity,
@@ -22,10 +29,9 @@ class SeenByRow extends StatelessWidget {
       child: AnimatedContainer(
         constraints:
             const BoxConstraints(maxWidth: FluffyThemes.columnWidth * 2.5),
-        height: seenByUsers.isEmpty ? 0 : 24,
-        duration: seenByUsers.isEmpty
-            ? Duration.zero
-            : FluffyThemes.animationDuration,
+        height: receipts.isEmpty ? 0 : 24,
+        duration:
+            receipts.isEmpty ? Duration.zero : FluffyThemes.animationDuration,
         curve: FluffyThemes.animationCurve,
         alignment: controller.timeline!.events.isNotEmpty &&
                 controller.timeline!.events.first.senderId ==
@@ -33,36 +39,86 @@ class SeenByRow extends StatelessWidget {
             ? Alignment.topRight
             : Alignment.topLeft,
         padding: const EdgeInsets.only(left: 8, right: 8, bottom: 4),
-        child: Wrap(
-          spacing: 4,
-          children: [
-            ...(seenByUsers.length > maxAvatars
-                    ? seenByUsers.sublist(0, maxAvatars)
-                    : seenByUsers)
-                .map(
-              (user) => Avatar(
-                mxContent: user.avatarUrl,
-                name: user.calcDisplayname(),
-                size: 16,
+        child: GestureDetector(
+          onLongPress: () {
+            _SeenByDialog(receipts).show(context);
+          },
+          onTap: () {
+            // single tap for desktop
+            if (!PlatformInfos.isMobile) {
+              _SeenByDialog(receipts).show(context);
+            }
+          },
+          child: Wrap(
+            spacing: 4,
+            children: [
+              ...(receipts.length > maxAvatars
+                      ? receipts.sublist(0, maxAvatars)
+                      : receipts)
+                  .map(
+                (receipt) => Avatar(
+                  mxContent: receipt.user.avatarUrl,
+                  name: receipt.user.calcDisplayname(),
+                  size: 16,
+                ),
               ),
-            ),
-            if (seenByUsers.length > maxAvatars)
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: Material(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(32),
-                  child: Center(
-                    child: Text(
-                      '+${seenByUsers.length - maxAvatars}',
-                      style: const TextStyle(fontSize: 9),
+              if (receipts.length > maxAvatars)
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: Material(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(32),
+                    child: Center(
+                      child: Text(
+                        '+${receipts.length - maxAvatars}',
+                        style: const TextStyle(fontSize: 9),
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class _SeenByDialog extends StatelessWidget {
+  final List<Receipt> receipts;
+
+  const _SeenByDialog(
+    this.receipts,
+  );
+
+  Future<bool?> show(BuildContext context) => showAdaptiveBottomSheet(
+        context: context,
+        builder: (context) => this,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(L10n.of(context).readReceipts),
+      ),
+      body: ListView.builder(
+        itemCount: receipts.length,
+        itemBuilder: (context, i) {
+          final receipt = receipts[i];
+          return ListTile(
+            leading: Avatar(
+              mxContent: receipt.user.avatarUrl,
+              name: receipt.user.displayName,
+              size: 24,
+            ),
+            title: Text(receipt.user.calcDisplayname()),
+            subtitle: Text(
+              receipt.time.localizedTime(context),
+            ),
+          );
+        },
       ),
     );
   }

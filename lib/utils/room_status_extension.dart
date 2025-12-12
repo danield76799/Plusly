@@ -36,21 +36,21 @@ extension RoomStatusExtension on Room {
     return typingText;
   }
 
-  List<User> getSeenByUsers(Timeline timeline, {String? eventId}) {
+  List<Receipt> getReceipts(Timeline timeline, {String? eventId}) {
     if (timeline.events.isEmpty) return [];
     eventId ??= timeline.events.first.eventId;
 
-    final lastReceipts = <User>{};
+    final lastReceipts = <Receipt>{};
     // now we iterate the timeline events until we hit the first rendered event
     for (final event in timeline.events) {
-      lastReceipts.addAll(event.receipts.map((r) => r.user));
+      lastReceipts.addAll(event.receipts);
       if (event.eventId == eventId) {
         break;
       }
     }
     lastReceipts.removeWhere(
-      (user) =>
-          user.id == client.userID || user.id == timeline.events.first.senderId,
+      (receipt) =>
+          receipt.user.id == client.userID || receipt.user.id == timeline.events.first.senderId,
     );
     return lastReceipts.toList();
   }

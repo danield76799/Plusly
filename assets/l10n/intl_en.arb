@@ -3426,5 +3426,6 @@
   "callEnded": "Call ended",
   "callEnding": "Ending",
   "callRinging": "Ringing",
-  "callInviteSent": "Invite sent"
+  "callInviteSent": "Invite sent",
+  "readReceipts": "Read receipts"
 }
