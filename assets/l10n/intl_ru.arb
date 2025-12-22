@@ -3531,5 +3531,6 @@
   "callEnding": "Завершение",
   "callRinging": "Звонок...",
   "callInviteSent": "Приглашение отправлено",
-  "readReceipts": "Отчёты о прочтении"
+  "readReceipts": "Отчёты о прочтении",
+  "mentions": "Упоминания"
 }

@@ -150,6 +150,7 @@ class _Reaction extends StatelessWidget {
           color: reacted == true ? theme.onBubbleColor : textColor,
           fontSize: DefaultTextStyle.of(context).style.fontSize,
         ),
+        textScaler: const TextScaler.linear(1.15),
       );
     }
     return InkWell(
@@ -161,7 +162,7 @@ class _Reaction extends StatelessWidget {
           color: color,
           borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: content,
       ),
     );

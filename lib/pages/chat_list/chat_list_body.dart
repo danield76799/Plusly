@@ -1,3 +1,4 @@
+import 'package:extera_next/shortcuts/chat_list/chat_list_shortcuts.dart';
 import 'package:extera_next/utils/show_profile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +62,7 @@ class ChatListViewBody extends StatelessWidget {
     final userSearchResult = controller.userSearchResult;
     const dummyChatCount = 4;
     final filter = controller.searchController.text.toLowerCase();
+    
     return StreamBuilder(
       key: ValueKey(
         client.userID.toString(),
@@ -71,147 +73,162 @@ class ChatListViewBody extends StatelessWidget {
       builder: (context, _) {
         final rooms = controller.filteredRooms;
 
-        return SafeArea(
-          child: CustomScrollView(
-            controller: controller.scrollController,
-            slivers: [
-              ChatListHeader(controller: controller),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    if (controller.isSearchMode) ...[
-                      SearchTitle(
-                        title: L10n.of(context).publicRooms,
-                        icon: const Icon(Icons.explore_outlined),
-                      ),
-                      PublicRoomsHorizontalList(publicRooms: publicRooms),
-                      SearchTitle(
-                        title: L10n.of(context).publicSpaces,
-                        icon: const Icon(Icons.workspaces_outlined),
-                      ),
-                      PublicRoomsHorizontalList(publicRooms: publicSpaces),
-                      SearchTitle(
-                        title: L10n.of(context).users,
-                        icon: const Icon(Icons.group_outlined),
-                      ),
-                      AnimatedContainer(
-                        clipBehavior: Clip.hardEdge,
-                        decoration: const BoxDecoration(),
-                        height: userSearchResult == null ||
-                                userSearchResult.results.isEmpty
-                            ? 0
-                            : 106,
-                        duration: FluffyThemes.animationDuration,
-                        curve: FluffyThemes.animationCurve,
-                        child: userSearchResult == null
-                            ? null
-                            : ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: userSearchResult.results.length,
-                                itemBuilder: (context, i) => _SearchItem(
-                                  title:
-                                      userSearchResult.results[i].displayName ??
-                                          userSearchResult
-                                              .results[i].userId.localpart ??
-                                          L10n.of(context).unknownDevice,
-                                  avatar: userSearchResult.results[i].avatarUrl,
-                                  onPressed: () => showProfile(
-                                    context: context,
-                                    profile: userSearchResult.results[i],
+        return ChatListShortcuts(
+          onPreviousChat: () {
+            if (controller.activeChat == null) return;
+            var i = rooms.indexWhere((room) => room.id == controller.activeChat);
+            if (i - 1 < 0) i = rooms.length - 1;
+            controller.onChatTap(rooms[i - 1]);
+          },
+          onNextChat: () {
+            if (controller.activeChat == null) return;
+            var i = rooms.indexWhere((room) => room.id == controller.activeChat);
+            if (i >= rooms.length) i = 0;
+            controller.onChatTap(rooms[i + 1]);
+          },
+          child: SafeArea(
+            child: CustomScrollView(
+              controller: controller.scrollController,
+              slivers: [
+                ChatListHeader(controller: controller),
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
+                      if (controller.isSearchMode) ...[
+                        SearchTitle(
+                          title: L10n.of(context).publicRooms,
+                          icon: const Icon(Icons.explore_outlined),
+                        ),
+                        PublicRoomsHorizontalList(publicRooms: publicRooms),
+                        SearchTitle(
+                          title: L10n.of(context).publicSpaces,
+                          icon: const Icon(Icons.workspaces_outlined),
+                        ),
+                        PublicRoomsHorizontalList(publicRooms: publicSpaces),
+                        SearchTitle(
+                          title: L10n.of(context).users,
+                          icon: const Icon(Icons.group_outlined),
+                        ),
+                        AnimatedContainer(
+                          clipBehavior: Clip.hardEdge,
+                          decoration: const BoxDecoration(),
+                          height: userSearchResult == null ||
+                                  userSearchResult.results.isEmpty
+                              ? 0
+                              : 106,
+                          duration: FluffyThemes.animationDuration,
+                          curve: FluffyThemes.animationCurve,
+                          child: userSearchResult == null
+                              ? null
+                              : ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: userSearchResult.results.length,
+                                  itemBuilder: (context, i) => _SearchItem(
+                                    title: userSearchResult
+                                            .results[i].displayName ??
+                                        userSearchResult
+                                            .results[i].userId.localpart ??
+                                        L10n.of(context).unknownDevice,
+                                    avatar:
+                                        userSearchResult.results[i].avatarUrl,
+                                    onPressed: () => showProfile(
+                                      context: context,
+                                      profile: userSearchResult.results[i],
+                                    ),
                                   ),
                                 ),
-                              ),
-                      ),
-                    ],
-                    if (!controller.isSearchMode && AppConfig.showPresences)
-                      GestureDetector(
-                        onLongPress: () => controller.dismissStatusList(),
-                        child: StatusMessageList(
-                          onStatusEdit: controller.setStatus,
                         ),
-                      ),
-                    if (controller.isSearchMode)
-                      SearchTitle(
-                        title: L10n.of(context).chats,
-                        icon: const Icon(Icons.forum_outlined),
-                      ),
-                    if (client.prevBatch != null &&
-                        rooms.isEmpty &&
-                        !controller.isSearchMode) ...[
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              const Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  DummyChatListItem(
-                                    opacity: 0.5,
-                                    animate: false,
-                                  ),
-                                  DummyChatListItem(
-                                    opacity: 0.3,
-                                    animate: false,
-                                  ),
-                                ],
-                              ),
-                              Icon(
-                                CupertinoIcons.chat_bubble_text_fill,
-                                size: 128,
-                                color: theme.colorScheme.secondary,
-                              ),
-                            ],
+                      ],
+                      if (!controller.isSearchMode && AppConfig.showPresences)
+                        GestureDetector(
+                          onLongPress: () => controller.dismissStatusList(),
+                          child: StatusMessageList(
+                            onStatusEdit: controller.setStatus,
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              client.rooms.isEmpty
-                                  ? L10n.of(context).noChatsFoundHere
-                                  : L10n.of(context).noMoreChatsFound,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: theme.colorScheme.secondary,
+                        ),
+                      if (controller.isSearchMode)
+                        SearchTitle(
+                          title: L10n.of(context).chats,
+                          icon: const Icon(Icons.forum_outlined),
+                        ),
+                      if (client.prevBatch != null &&
+                          rooms.isEmpty &&
+                          !controller.isSearchMode) ...[
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                const Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    DummyChatListItem(
+                                      opacity: 0.5,
+                                      animate: false,
+                                    ),
+                                    DummyChatListItem(
+                                      opacity: 0.3,
+                                      animate: false,
+                                    ),
+                                  ],
+                                ),
+                                Icon(
+                                  CupertinoIcons.chat_bubble_text_fill,
+                                  size: 128,
+                                  color: theme.colorScheme.secondary,
+                                ),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                client.rooms.isEmpty
+                                    ? L10n.of(context).noChatsFoundHere
+                                    : L10n.of(context).noMoreChatsFound,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: theme.colorScheme.secondary,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ],
                     ],
-                  ],
-                ),
-              ),
-              if (client.prevBatch == null)
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, i) => DummyChatListItem(
-                      opacity: (dummyChatCount - i) / dummyChatCount,
-                      animate: true,
-                    ),
-                    childCount: dummyChatCount,
                   ),
                 ),
-              if (client.prevBatch != null)
-                SliverList.builder(
-                  itemCount: rooms.length,
-                  itemBuilder: (BuildContext context, int i) {
-                    final room = rooms[i];
-                    final space = spaceDelegateCandidates[room.id];
-                    return ChatListItem(
-                      room,
-                      space: space,
-                      key: Key('chat_list_item_${room.id}'),
-                      filter: filter,
-                      onTap: () => controller.onChatTap(room),
-                      onLongPress: (context) =>
-                          controller.chatContextAction(room, context, space),
-                      activeChat: controller.activeChat == room.id,
-                    );
-                  },
-                ),
-            ],
+                if (client.prevBatch == null)
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, i) => DummyChatListItem(
+                        opacity: (dummyChatCount - i) / dummyChatCount,
+                        animate: true,
+                      ),
+                      childCount: dummyChatCount,
+                    ),
+                  ),
+                if (client.prevBatch != null)
+                  SliverList.builder(
+                    itemCount: rooms.length,
+                    itemBuilder: (BuildContext context, int i) {
+                      final room = rooms[i];
+                      final space = spaceDelegateCandidates[room.id];
+                      return ChatListItem(
+                        room,
+                        space: space,
+                        key: Key('chat_list_item_${room.id}'),
+                        filter: filter,
+                        onTap: () => controller.onChatTap(room),
+                        onLongPress: (context) =>
+                            controller.chatContextAction(room, context, space),
+                        activeChat: controller.activeChat == room.id,
+                      );
+                    },
+                  ),
+              ],
+            ),
           ),
         );
       },

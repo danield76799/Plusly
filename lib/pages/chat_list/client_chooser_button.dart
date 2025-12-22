@@ -78,6 +78,16 @@ class ClientChooserButton extends StatelessWidget {
         ),
       ),
       PopupMenuItem(
+        value: SettingsAction.notifications,
+        child: Row(
+          children: [
+            const Icon(Icons.notifications_outlined),
+            const SizedBox(width: 18),
+            Text(L10n.of(context).notifications),
+          ],
+        ),
+      ),
+      PopupMenuItem(
         value: SettingsAction.settings,
         child: Row(
           children: [
@@ -228,6 +238,9 @@ class ClientChooserButton extends StatelessWidget {
         case SettingsAction.archive:
           context.go('/rooms/archive');
           break;
+        case SettingsAction.notifications:
+          context.go('/rooms/notifications');
+          break;
         case SettingsAction.setStatus:
           controller.setStatus();
           break;
@@ -247,4 +260,5 @@ enum SettingsAction {
   invite,
   settings,
   archive,
+  notifications,
 }

@@ -1391,6 +1391,7 @@
     "placeholders": {}
   },
   "mention": "Mention",
+  "mentions": "Mentions",
   "@mention": {
     "type": "String",
     "placeholders": {}

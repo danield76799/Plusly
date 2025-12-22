@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:extera_next/pages/chat_thread/thread.dart';
+import 'package:extera_next/pages/notifications/notifications.dart';
 import 'package:extera_next/pages/profile/profile.dart';
 import 'package:flutter/material.dart';
 
@@ -162,6 +163,15 @@ abstract class AppRoutes {
                   ),
           ),
           routes: [
+            GoRoute(
+              path: '/notifications',
+              pageBuilder: (context, state) => defaultPageBuilder(
+                context,
+                state,
+                const Notifications(),
+              ),
+              redirect: loggedOutRedirect,
+            ),
             GoRoute(
               path: 'archive',
               pageBuilder: (context, state) => defaultPageBuilder(
