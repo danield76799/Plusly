@@ -1,8 +1,10 @@
 import 'dart:ui' as ui;
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+// import 'package:extera_next/pages/chat/message_popup_menu.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/utils/poll_events.dart';
+import 'package:extera_next/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -191,11 +193,64 @@ class Message extends StatelessWidget {
       );
     }
 
-    final showReceiptsRow =
+    final showReactionsRow =
         event.hasAggregatedEvents(timeline, RelationshipTypes.reaction);
 
     final showReactionPicker =
         singleSelected && event.room.canSendDefaultMessages;
+
+    final hasBeenRead = event.room
+        .getReceipts(
+          timeline,
+          eventId: event.eventId,
+        )
+        .isNotEmpty;
+
+    final messageStatusRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (event.hasAggregatedEvents(
+          timeline,
+          RelationshipTypes.edit,
+        ))
+          Padding(
+            padding: const EdgeInsets.only(
+              right: 4.0,
+            ),
+            child: Icon(
+              Icons.edit_outlined,
+              color: textColor.withAlpha(
+                164,
+              ),
+              size: 14,
+            ),
+          ),
+        Text(
+          event.originServerTs.localizedTimeOfDay(
+            context,
+          ),
+          style: TextStyle(
+            color: textColor.withAlpha(
+              164,
+            ),
+            fontSize: 11,
+          ),
+        ),
+        if (ownMessage)
+          Padding(
+            padding: const EdgeInsets.only(
+              left: 4.0,
+            ),
+            child: Icon(
+              hasBeenRead ? Icons.done_all : Icons.check,
+              color: textColor.withAlpha(
+                164,
+              ),
+              size: 14,
+            ),
+          ),
+      ],
+    );
 
     final row = StatefulBuilder(
       builder: (context, setState) {
@@ -385,120 +440,134 @@ class Message extends StatelessWidget {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: <Widget>[
-                                              if (event.inReplyToEventId(
-                                                    includingFallback: false,
-                                                  ) !=
-                                                  null)
-                                                FutureBuilder<Event?>(
-                                                  future: event.getReplyEvent(
-                                                    timeline,
-                                                  ),
-                                                  builder: (
-                                                    BuildContext context,
-                                                    snapshot,
-                                                  ) {
-                                                    final replyEvent = snapshot
-                                                            .hasData
-                                                        ? snapshot.data!
-                                                        : Event(
-                                                            eventId: event
-                                                                    .inReplyToEventId() ??
-                                                                '\$fake_event_id',
-                                                            content: {
-                                                              'msgtype':
-                                                                  'm.text',
-                                                              'body': '...',
-                                                            },
-                                                            senderId:
-                                                                event.senderId,
-                                                            type:
-                                                                'm.room.message',
-                                                            room: event.room,
-                                                            status: EventStatus
-                                                                .sent,
-                                                            originServerTs:
-                                                                DateTime.now(),
-                                                          );
-                                                    return Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                        left: 16,
-                                                        right: 16,
-                                                        top: 8,
-                                                      ),
-                                                      child: Material(
-                                                        color:
-                                                            Colors.transparent,
-                                                        borderRadius:
-                                                            ReplyContent
-                                                                .borderRadius,
-                                                        child: InkWell(
-                                                          borderRadius:
-                                                              ReplyContent
-                                                                  .borderRadius,
-                                                          onTap: () =>
-                                                              scrollToEventId(
-                                                            replyEvent.eventId,
-                                                          ),
-                                                          child: AbsorbPointer(
-                                                            child: ReplyContent(
-                                                              replyEvent,
-                                                              ownMessage:
-                                                                  ownMessage,
-                                                              timeline:
-                                                                  timeline,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  },
-                                                ),
-                                              MessageContent(
-                                                displayEvent,
-                                                textColor: textColor,
-                                                linkColor: linkColor,
-                                                onInfoTab: onInfoTab,
-                                                borderRadius: borderRadius,
-                                                timeline: timeline,
-                                              ),
-                                              if (event.hasAggregatedEvents(
-                                                timeline,
-                                                RelationshipTypes.edit,
-                                              ))
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                    bottom: 8.0,
-                                                    left: 16.0,
-                                                    right: 16.0,
-                                                  ),
-                                                  child: Row(
+                                              Stack(
+                                                children: [
+                                                  Column(
                                                     mainAxisSize:
                                                         MainAxisSize.min,
-                                                    spacing: 4.0,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
-                                                      Icon(
-                                                        Icons.edit_outlined,
-                                                        color: textColor
-                                                            .withAlpha(164),
-                                                        size: 14,
-                                                      ),
-                                                      Text(
-                                                        displayEvent
-                                                            .originServerTs
-                                                            .localizedTimeShort(
-                                                          context,
+                                                      if (event
+                                                              .inReplyToEventId(
+                                                            includingFallback:
+                                                                false,
+                                                          ) !=
+                                                          null)
+                                                        FutureBuilder<Event?>(
+                                                          future: event
+                                                              .getReplyEvent(
+                                                            timeline,
+                                                          ),
+                                                          builder: (
+                                                            BuildContext
+                                                                context,
+                                                            snapshot,
+                                                          ) {
+                                                            final replyEvent =
+                                                                snapshot.hasData
+                                                                    ? snapshot
+                                                                        .data!
+                                                                    : Event(
+                                                                        eventId:
+                                                                            event.inReplyToEventId() ??
+                                                                                '\$fake_event_id',
+                                                                        content: {
+                                                                          'msgtype':
+                                                                              'm.text',
+                                                                          'body':
+                                                                              '...',
+                                                                        },
+                                                                        senderId:
+                                                                            event.senderId,
+                                                                        type:
+                                                                            'm.room.message',
+                                                                        room: event
+                                                                            .room,
+                                                                        status:
+                                                                            EventStatus.sent,
+                                                                        originServerTs:
+                                                                            DateTime.now(),
+                                                                      );
+                                                            return Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                left: 16,
+                                                                right: 16,
+                                                                top: 8,
+                                                              ),
+                                                              child: Material(
+                                                                color: Colors
+                                                                    .transparent,
+                                                                borderRadius:
+                                                                    ReplyContent
+                                                                        .borderRadius,
+                                                                child: InkWell(
+                                                                  borderRadius:
+                                                                      ReplyContent
+                                                                          .borderRadius,
+                                                                  onTap: () =>
+                                                                      scrollToEventId(
+                                                                    replyEvent
+                                                                        .eventId,
+                                                                  ),
+                                                                  child:
+                                                                      AbsorbPointer(
+                                                                    child:
+                                                                        ReplyContent(
+                                                                      replyEvent,
+                                                                      ownMessage:
+                                                                          ownMessage,
+                                                                      timeline:
+                                                                          timeline,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
                                                         ),
-                                                        style: TextStyle(
-                                                          color: textColor
-                                                              .withAlpha(164),
-                                                          fontSize: 11,
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                          top: 6,
+                                                        ),
+                                                        child: MessageContent(
+                                                          displayEvent,
+                                                          textColor: textColor,
+                                                          linkColor: linkColor,
+                                                          onInfoTab: onInfoTab,
+                                                          borderRadius:
+                                                              borderRadius,
+                                                          timeline: timeline,
+                                                        ),
+                                                      ),
+                                                      Opacity(
+                                                        opacity: 0,
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                            right: 16,
+                                                            bottom: 6,
+                                                            left: 16,
+                                                          ),
+                                                          child:
+                                                              messageStatusRow,
                                                         ),
                                                       ),
                                                     ],
                                                   ),
-                                                ),
+                                                  Positioned(
+                                                    bottom: 6,
+                                                    right: 16,
+                                                    child: messageStatusRow,
+                                                  ),
+                                                ],
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -771,7 +840,7 @@ class Message extends StatelessWidget {
       },
     );
     Widget container;
-    if (showReceiptsRow || displayTime || selected || displayReadMarker) {
+    if (showReactionsRow || displayTime || selected || displayReadMarker) {
       container = Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment:
@@ -811,7 +880,7 @@ class Message extends StatelessWidget {
           AnimatedSize(
             duration: FluffyThemes.animationDuration,
             curve: FluffyThemes.animationCurve,
-            child: !showReceiptsRow
+            child: !showReactionsRow
                 ? const SizedBox.shrink()
                 : Padding(
                     padding: EdgeInsets.only(
@@ -844,7 +913,7 @@ class Message extends StatelessWidget {
                     color: theme.colorScheme.surface.withAlpha(128),
                   ),
                   child: Text(
-                    L10n.of(context).readUpToHere,
+                    L10n.of(context).newMessages,
                     style: TextStyle(
                       fontSize: 12 * AppConfig.fontSizeFactor,
                     ),

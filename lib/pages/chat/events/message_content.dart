@@ -210,7 +210,7 @@ class MessageContent extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 8,
+                  vertical: 2,
                 ),
                 child: HtmlMessage(
                   html: html,
@@ -308,7 +308,7 @@ class MessageContent extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16,
-                vertical: 8,
+                vertical: 2,
               ),
               child: Linkify(
                 text: event.calcLocalizedBodyFallback(

@@ -60,6 +60,7 @@ class NotificationsView extends StatelessWidget {
                 )
               : ListView.builder(
                   shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: controller.notifications!.length,
                   itemBuilder: (context, i) {
                     final notification = controller.notifications![i];

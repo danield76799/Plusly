@@ -100,7 +100,7 @@ class ChatEventList extends StatelessWidget {
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SeenByRow(controller),
+                  // SeenByRow(controller),
                   TypingIndicators(controller),
                 ],
               );

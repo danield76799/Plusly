@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
+// import 'package:extera_next/pages/chat/message_popup_menu.dart';
 import 'package:extera_next/pages/chat/recovered_event_dialog.dart';
+import 'package:extera_next/pages/chat/seen_by_row.dart';
 import 'package:extera_next/pages/chat/send_poll_dialog.dart';
 import 'package:extera_next/pages/chat/translated_event_dialog.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/synapse_admin_extension.dart';
+import 'package:extera_next/utils/room_status_extension.dart';
 import 'package:extera_next/utils/translator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -841,8 +844,8 @@ class ChatController extends State<ChatPageWithRoom>
       ClipboardData(
         text: selectedEvents
             .map(
-              (event) => "https://matrix.to/#/${room.canonicalAlias != ''
-                ? room.canonicalAlias : roomId}/${event.eventId}",
+              (event) =>
+                  "https://matrix.to/#/${room.canonicalAlias != '' ? room.canonicalAlias : roomId}/${event.eventId}",
             )
             .join('\n'),
       ),
@@ -1376,6 +1379,12 @@ class ChatController extends State<ChatPageWithRoom>
     selectedEvents.sort(
       (a, b) => a.originServerTs.compareTo(b.originServerTs),
     );
+  }
+
+  void showReadReceipts() {
+    final event = selectedEvents.first;
+    final receipts = room.getReceipts(timeline!, eventId: event.eventId);
+    SeenByDialog(receipts).show(context);
   }
 
   int? findChildIndexCallback(Key key, Map<String, int> thisEventsKeyMap) {

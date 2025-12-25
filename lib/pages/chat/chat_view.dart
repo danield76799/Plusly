@@ -27,7 +27,7 @@ import '../../utils/stream_extension.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
 
-enum _EventContextAction { info, recover, report, endPoll, copyLink }
+enum _EventContextAction { info, recover, report, endPoll, copyLink, readReceipts }
 
 class ChatView extends StatelessWidget {
   final ChatController controller;
@@ -109,6 +109,8 @@ class ChatView extends StatelessWidget {
                   break;
                 case _EventContextAction.endPoll:
                   controller.endPollAction();
+                case _EventContextAction.readReceipts:
+                  controller.showReadReceipts();
                   break;
               }
             },
@@ -121,6 +123,17 @@ class ChatView extends StatelessWidget {
                     const Icon(Icons.info_outlined),
                     const SizedBox(width: 12),
                     Text(L10n.of(context).messageInfo),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: _EventContextAction.readReceipts,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.done_all),
+                    const SizedBox(width: 12),
+                    Text(L10n.of(context).readReceipts),
                   ],
                 ),
               ),

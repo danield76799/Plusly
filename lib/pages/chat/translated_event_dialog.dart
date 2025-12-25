@@ -53,6 +53,7 @@ class TranslatedEventDialogState extends State<TranslatedEventDialog> {
     return Scaffold(
       appBar: AppBar(title: Text(L10n.of(context).translatedMessage)),
       body: Column(
+        mainAxisSize: MainAxisSize.max,
         children: [
           message,
         ],

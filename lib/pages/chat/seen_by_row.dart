@@ -41,12 +41,12 @@ class SeenByRow extends StatelessWidget {
         padding: const EdgeInsets.only(left: 8, right: 8, bottom: 4),
         child: GestureDetector(
           onLongPress: () {
-            _SeenByDialog(receipts).show(context);
+            SeenByDialog(receipts).show(context);
           },
           onTap: () {
             // single tap for desktop
             if (!PlatformInfos.isMobile) {
-              _SeenByDialog(receipts).show(context);
+              SeenByDialog(receipts).show(context);
             }
           },
           child: Wrap(
@@ -85,10 +85,10 @@ class SeenByRow extends StatelessWidget {
   }
 }
 
-class _SeenByDialog extends StatelessWidget {
+class SeenByDialog extends StatelessWidget {
   final List<Receipt> receipts;
 
-  const _SeenByDialog(
+  const SeenByDialog(
     this.receipts,
   );
 
