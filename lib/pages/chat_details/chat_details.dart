@@ -92,11 +92,11 @@ class ChatDetailsController extends State<ChatDetails> {
   }
 
   void goToEmoteSettings() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
+    // final room = Matrix.of(context).client.getRoomById(roomId!)!;
     // okay, we need to test if there are any emote state events other than the default one
     // if so, we need to be directed to a selection screen for which pack we want to look at
     // otherwise, we just open the normal one.
-    context.push('/rooms/${room.id}/details/emotes');
+    context.push('/rooms/$roomId/details/emotes');
     // if ((room.states['im.ponies.room_emotes'] ?? <String, Event>{})
     //     .keys
     //     .any((String s) => s.isNotEmpty)) {
