@@ -3532,5 +3532,16 @@
   "callRinging": "Звонок...",
   "callInviteSent": "Приглашение отправлено",
   "readReceipts": "Отчёты о прочтении",
-  "mentions": "Упоминания"
+  "mentions": "Упоминания",
+  "translate": "Перевести",
+  "nViews": "{count, plural, =1{1 просмотр} one{{count} просмотр} few{{count} просмотра} many{{count} просмотров} other{{count} просмотров}}",
+"@nViews": {
+  "type": "text",
+  "placeholders": {
+    "count": {
+      "type": "int",
+      "example": "1"
+    }
+  }
+}
 }

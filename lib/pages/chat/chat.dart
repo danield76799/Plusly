@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
-// import 'package:extera_next/pages/chat/message_popup_menu.dart';
 import 'package:extera_next/pages/chat/recovered_event_dialog.dart';
 import 'package:extera_next/pages/chat/seen_by_row.dart';
 import 'package:extera_next/pages/chat/send_poll_dialog.dart';
 import 'package:extera_next/pages/chat/translated_event_dialog.dart';
+import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/synapse_admin_extension.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
 import 'package:extera_next/utils/translator.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -839,15 +839,16 @@ class ChatController extends State<ChatPageWithRoom>
     });
   }
 
-  void copyLinkAction() {
+  void copyLinkAction({Event? event}) {
     Clipboard.setData(
       ClipboardData(
-        text: selectedEvents
-            .map(
-              (event) =>
-                  "https://matrix.to/#/${room.canonicalAlias != '' ? room.canonicalAlias : roomId}/${event.eventId}",
-            )
-            .join('\n'),
+        text: event != null
+            ? event.getLink()
+            : selectedEvents
+                .map(
+                  (event) => event.getLink(),
+                )
+                .join('\n'),
       ),
     );
     setState(() {
@@ -900,8 +901,8 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void translateEventAction() async {
-    final event = selectedEvents.single;
+  void translateEventAction({Event? event}) async {
+    event ??= selectedEvents.single;
     var text = event.isRichMessage ? event.formattedText : event.text;
     final content = {...event.content};
     try {
@@ -928,7 +929,7 @@ class ChatController extends State<ChatPageWithRoom>
             event: Event(
               content: content,
               type: 'm.room.message',
-              eventId: event.eventId,
+              eventId: event!.eventId,
               senderId: event.senderId,
               originServerTs: event.originServerTs,
               room: room,
@@ -941,8 +942,8 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void reportEventAction() async {
-    final event = selectedEvents.single;
+  void reportEventAction({Event? event}) async {
+    event ??= selectedEvents.single;
     final score = await showModalActionPopup<int>(
       context: context,
       title: L10n.of(context).reportMessage,
@@ -975,7 +976,7 @@ class ChatController extends State<ChatPageWithRoom>
     final result = await showFutureLoadingDialog(
       context: context,
       future: () => Matrix.of(context).client.reportEvent(
-            event.roomId!,
+            event!.roomId!,
             event.eventId,
             reason: reason,
             score: score,
@@ -1007,8 +1008,8 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void discussAction() async {
-    final event = selectedEvents.first;
+  void discussAction({Event? threadRootEvent}) async {
+    final event = threadRootEvent ?? selectedEvents.first;
     if (!room.threads.containsKey(event.eventId)) {
       room.threads[event.eventId] = Thread(
         room: room,
@@ -1046,8 +1047,9 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void redactEventsAction() async {
-    final reasonInput = selectedEvents.any((event) => event.status.isSent)
+  void redactEventsAction({Event? event}) async {
+    final events = event != null ? [event] : selectedEvents;
+    final reasonInput = events.any((event) => event.status.isSent)
         ? await showTextInputDialog(
             context: context,
             title: L10n.of(context).redactMessage,
@@ -1060,7 +1062,7 @@ class ChatController extends State<ChatPageWithRoom>
         : null;
     if (reasonInput == null) return;
     final reason = reasonInput.isEmpty ? null : reasonInput;
-    for (final event in selectedEvents) {
+    for (final event in events) {
       await showFutureLoadingDialog(
         context: context,
         future: () async {
@@ -1069,7 +1071,7 @@ class ChatController extends State<ChatPageWithRoom>
               await event.redactEvent(reason: reason);
             } else {
               final client = currentRoomBundle.firstWhere(
-                (cl) => selectedEvents.first.senderId == cl!.userID,
+                (cl) => events.first.senderId == cl!.userID,
                 orElse: () => null,
               );
               if (client == null) {
@@ -1131,14 +1133,15 @@ class ChatController extends State<ChatPageWithRoom>
         .any((cl) => selectedEvents.first.senderId == cl!.userID);
   }
 
-  void forwardEventsAction() async {
-    if (selectedEvents.isEmpty) return;
+  void forwardEventsAction({Event? event}) async {
     await showScaffoldDialog(
       context: context,
       builder: (context) => ShareScaffoldDialog(
-        items: selectedEvents
-            .map((event) => ContentShareItem(event.content))
-            .toList(),
+        items: selectedEvents.isEmpty
+            ? [ContentShareItem(event!.content)]
+            : selectedEvents
+                .map((event) => ContentShareItem(event.content))
+                .toList(),
       ),
     );
     if (!mounted) return;
@@ -1308,9 +1311,10 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void editSelectedEventAction() {
+  void editSelectedEventAction({Event? event}) {
+    event ??= selectedEvents.first;
     final client = currentRoomBundle.firstWhere(
-      (cl) => selectedEvents.first.senderId == cl!.userID,
+      (cl) => event!.senderId == cl!.userID,
       orElse: () => null,
     );
     if (client == null) {
@@ -1319,7 +1323,7 @@ class ChatController extends State<ChatPageWithRoom>
     setSendingClient(client);
     setState(() {
       pendingText = sendController.text;
-      editEvent = selectedEvents.first;
+      editEvent = event;
       sendController.text =
           editEvent!.getDisplayEvent(timeline!).calcLocalizedBodyFallback(
                 MatrixLocals(L10n.of(context)),
@@ -1366,7 +1370,431 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void onSelectMessage(Event event) {
+  ContextMenuController? _contextMenuController;
+
+  Widget _buildMenuItem({
+    required Event event,
+    required String label,
+    required IconData icon,
+    Color? color,
+    required void Function() onPressed,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: color,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionList(Event event) {
+    final client = Matrix.of(context).client;
+    final clients = Matrix.of(context).currentBundle;
+    final theme = Theme.of(context);
+
+    final receipts = room
+        .getReceipts(timeline!, eventId: event.eventId)
+        .where((receipt) => receipt.user.id != client.userID!);
+
+    final sentReactions = <String>{};
+    sentReactions.addAll(
+      event
+          .aggregatedEvents(
+            timeline!,
+            RelationshipTypes.reaction,
+          )
+          .where(
+            (event) =>
+                event.senderId == event.room.client.userID &&
+                event.type == 'm.reaction',
+          )
+          .map(
+            (event) => event.content
+                .tryGetMap<String, Object?>('m.relates_to')
+                ?.tryGet<String>('key'),
+          )
+          .whereType<String>(),
+    );
+
+    return Material(
+      elevation: 8.0,
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias, // Ensures ink splashes don't bleed
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: 200,
+          maxWidth: PlatformInfos.isMobile ? double.infinity : 280,
+          maxHeight: 580,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (receipts.isNotEmpty)
+                _buildMenuItem(
+                  event: event,
+                  icon: Icons.done_all,
+                  label: L10n.of(context).nViews(receipts.length),
+                  onPressed: () {
+                    showReadReceipts(event: event);
+                  },
+                ),
+              if (room.canSendEvent(EventTypes.Reaction))
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: 4.0,
+                    bottom: 4.0,
+                    left: 8.0,
+                  ),
+                  child: Material(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ...AppConfig.defaultReactions.map(
+                          (emoji) => IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: Center(
+                              child: Opacity(
+                                opacity: sentReactions.contains(
+                                  emoji,
+                                )
+                                    ? 0.33
+                                    : 1,
+                                child: Text(
+                                  emoji,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                            onPressed: sentReactions.contains(
+                              emoji,
+                            )
+                                ? null
+                                : () {
+                                    _contextMenuController?.remove();
+                                    event.room.sendReaction(
+                                      event.eventId,
+                                      emoji,
+                                    );
+                                  },
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.add_reaction_outlined,
+                          ),
+                          tooltip: L10n.of(
+                            context,
+                          ).customReaction,
+                          onPressed: () async {
+                            final emoji = await showAdaptiveBottomSheet<String>(
+                              context: context,
+                              builder: (context) => Scaffold(
+                                appBar: AppBar(
+                                  title: Text(
+                                    L10n.of(context).customReaction,
+                                  ),
+                                  leading: CloseButton(
+                                    onPressed: () => Navigator.of(
+                                      context,
+                                    ).pop(
+                                      null,
+                                    ),
+                                  ),
+                                ),
+                                body: SizedBox(
+                                  height: double.infinity,
+                                  child: EmojiPicker(
+                                    onEmojiSelected: (
+                                      _,
+                                      emoji,
+                                    ) =>
+                                        Navigator.of(
+                                      context,
+                                    ).pop(
+                                      emoji.emoji,
+                                    ),
+                                    config: Config(
+                                      emojiViewConfig: const EmojiViewConfig(
+                                        backgroundColor: Colors.transparent,
+                                      ),
+                                      bottomActionBarConfig:
+                                          const BottomActionBarConfig(
+                                        enabled: false,
+                                      ),
+                                      categoryViewConfig: CategoryViewConfig(
+                                        initCategory: Category.SMILEYS,
+                                        backspaceColor:
+                                            theme.colorScheme.primary,
+                                        iconColor:
+                                            theme.colorScheme.primary.withAlpha(
+                                          128,
+                                        ),
+                                        iconColorSelected:
+                                            theme.colorScheme.primary,
+                                        indicatorColor:
+                                            theme.colorScheme.primary,
+                                        backgroundColor:
+                                            theme.colorScheme.surface,
+                                      ),
+                                      skinToneConfig: SkinToneConfig(
+                                        dialogBackgroundColor: Color.lerp(
+                                          theme.colorScheme.surface,
+                                          theme.colorScheme.primaryContainer,
+                                          0.75,
+                                        )!,
+                                        indicatorColor:
+                                            theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                            if (emoji == null) {
+                              return;
+                            }
+                            if (sentReactions.contains(
+                              emoji,
+                            )) {
+                              return;
+                            }
+                            _contextMenuController?.remove();
+
+                            await event.room.sendReaction(
+                              event.eventId,
+                              emoji,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              if (room.canSendDefaultMessages)
+                _buildMenuItem(
+                  event: event,
+                  icon: Icons.reply_outlined,
+                  label: L10n.of(context).reply,
+                  onPressed: () {
+                    _closeMessageMenu();
+                    replyAction(replyTo: event);
+                  },
+                ),
+              if (room.canSendDefaultMessages)
+                _buildMenuItem(
+                  event: event,
+                  icon: Icons.chat_bubble_outline,
+                  label: L10n.of(context).discuss,
+                  onPressed: () {
+                    _closeMessageMenu();
+                    discussAction(threadRootEvent: event);
+                  },
+                ),
+              if (room.canSendDefaultMessages &&
+                  event.senderId == client.userID!)
+                _buildMenuItem(
+                  event: event,
+                  icon: Icons.edit_outlined,
+                  label: L10n.of(context).edit,
+                  onPressed: () {
+                    _closeMessageMenu();
+                    editSelectedEventAction(event: event);
+                  },
+                ),
+              const Divider(),
+              _buildMenuItem(
+                event: event,
+                icon: Icons.forward_outlined,
+                label: L10n.of(context).forward,
+                onPressed: () {
+                  _closeMessageMenu();
+                  forwardEventsAction(event: event);
+                },
+              ),
+              _buildMenuItem(
+                event: event,
+                icon: Icons.copy_outlined,
+                label: L10n.of(context).copy,
+                onPressed: () {
+                  _closeMessageMenu();
+                  Clipboard.setData(
+                    ClipboardData(
+                      text: event
+                          .getDisplayEvent(timeline!)
+                          .calcLocalizedBodyFallback(
+                            MatrixLocals(L10n.of(context)),
+                          ),
+                    ),
+                  );
+                },
+              ),
+              _buildMenuItem(
+                event: event,
+                icon: Icons.link,
+                label: L10n.of(context).copyLink,
+                onPressed: () {
+                  _closeMessageMenu();
+                  copyLinkAction(event: event);
+                },
+              ),
+              _buildMenuItem(
+                event: event,
+                icon: Icons.check_circle_outline,
+                label: L10n.of(context).select,
+                onPressed: () {
+                  _closeMessageMenu();
+                  onMultiSelect(event);
+                },
+              ),
+              if (!room.encrypted)
+                _buildMenuItem(
+                  event: event,
+                  icon: Icons.translate,
+                  label: L10n.of(context).translate,
+                  onPressed: () {
+                    _closeMessageMenu();
+                    translateEventAction(event: event);
+                  },
+                ),
+              if (room.canChangeStateEvent(EventTypes.RoomPinnedEvents))
+                _buildMenuItem(
+                  event: event,
+                  icon: Icons.push_pin_outlined,
+                  label: room.pinnedEventIds.contains(event.eventId)
+                      ? L10n.of(context).unpin
+                      : L10n.of(context).pin,
+                  onPressed: () {
+                    _closeMessageMenu();
+                    pinEvent(event: event);
+                  },
+                ),
+              _buildMenuItem(
+                event: event,
+                icon: Icons.info_outline,
+                label: L10n.of(context).messageInfo,
+                onPressed: () {
+                  _closeMessageMenu();
+                  showEventInfo(event);
+                },
+              ),
+              const Divider(),
+              if (event.canRedact ||
+                  (clients!.any((cl) => event.senderId == cl!.userID)))
+                _buildMenuItem(
+                  event: event,
+                  icon: Icons.delete_outlined,
+                  color: Colors.red,
+                  label: L10n.of(context).delete,
+                  onPressed: () {
+                    _closeMessageMenu();
+                    redactEventsAction(event: event);
+                  },
+                ),
+              _buildMenuItem(
+                event: event,
+                icon: Icons.report_outlined,
+                color: Colors.red,
+                label: L10n.of(context).reportMessage,
+                onPressed: () {
+                  _closeMessageMenu();
+                  reportEventAction(event: event);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _closeMessageMenu() {
+    if (PlatformInfos.isMobile) {
+      Navigator.of(context, rootNavigator: true).pop(); // in 2
+    } else {
+      _contextMenuController?.remove();
+    }
+  }
+
+  void _openMenu(Event event, Offset? tapPosition) {
+    if (PlatformInfos.isMobile) {
+      showAdaptiveBottomSheet(
+        context: context,
+        builder: (context) {
+          return _buildActionList(event);
+        },
+      );
+    } else {
+      _contextMenuController?.remove();
+      _contextMenuController = ContextMenuController();
+
+      _contextMenuController!.show(
+        context: context,
+        contextMenuBuilder: (context) {
+          final screenSize = MediaQuery.of(context).size;
+          final padding = MediaQuery.of(context).padding;
+
+          const menuWidth = 280.0;
+          const menuHeight = 580.0;
+
+          var left = tapPosition!.dx;
+          if (left + menuWidth > screenSize.width) {
+            left = screenSize.width - menuWidth - 10;
+          }
+          if (left < 10) left = 10;
+
+          var top = tapPosition.dy;
+          if (top + menuHeight > screenSize.height - padding.bottom) {
+            top = tapPosition.dy - menuHeight;
+          }
+          if (top < padding.top) top = padding.top + 10;
+
+          return Stack(
+            children: [
+              GestureDetector(
+                onTap: () => _contextMenuController?.remove(),
+                behavior: HitTestBehavior.translucent,
+                child: Container(color: Colors.transparent),
+              ),
+              Positioned(
+                left: left,
+                top: top,
+                child: _buildActionList(event),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  void onSelectMessage(Event event, Offset? tapPosition) {
+    if (selectedEvents.isEmpty) {
+      _openMenu(event, tapPosition);
+    } else {
+      onMultiSelect(event);
+    }
+  }
+
+  void onMultiSelect(Event event) {
     if (selectedEvents.contains(event)) {
       setState(
         () => selectedEvents.remove(event),
@@ -1381,8 +1809,8 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void showReadReceipts() {
-    final event = selectedEvents.first;
+  void showReadReceipts({Event? event}) {
+    event ??= selectedEvents.first;
     final receipts = room.getReceipts(timeline!, eventId: event.eventId);
     SeenByDialog(receipts).show(context);
   }
@@ -1451,9 +1879,11 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void pinEvent() {
+  void pinEvent({Event? event}) {
     final pinnedEventIds = room.pinnedEventIds;
-    final selectedEventIds = selectedEvents.map((e) => e.eventId).toSet();
+    final selectedEventIds = event != null
+        ? [event.eventId]
+        : selectedEvents.map((e) => e.eventId).toSet();
     final unpin = selectedEventIds.length == 1 &&
         pinnedEventIds.contains(selectedEventIds.single);
     if (unpin) {

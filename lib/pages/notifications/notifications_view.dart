@@ -76,7 +76,7 @@ class NotificationsView extends StatelessWidget {
                       colors: colors,
                       onInfoTab: (Event ev) => {},
                       onMention: () => {},
-                      onSelect: (Event ev) {
+                      onSelect: (Event ev, Offset? tapPosition) {
                         if (ev.relationshipType != RelationshipTypes.thread) {
                           context.push("/rooms/${room.id}?event=${ev.eventId}");
                         } else {

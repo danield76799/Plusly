@@ -3428,5 +3428,16 @@
   "callEnding": "Ending",
   "callRinging": "Ringing",
   "callInviteSent": "Invite sent",
-  "readReceipts": "Read receipts"
+  "readReceipts": "Read receipts",
+  "translate": "Translate",
+  "nViews": "{count} views",
+  "@nViews": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  }
 }

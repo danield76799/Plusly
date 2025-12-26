@@ -54,21 +54,6 @@ class ChatView extends StatelessWidget {
             tooltip: L10n.of(context).copyLink,
             onPressed: controller.copyLinkAction,
           ),
-        if (controller.selectedEvents.length == 1)
-          IconButton(
-            onPressed: controller.discussAction,
-            icon: const Icon(Icons.chat_bubble_outline),
-            tooltip: L10n.of(context).discuss,
-          ),
-        if (controller.selectedEvents.length == 1 &&
-            controller.selectedEvents.single.content['xyz.extera.translated'] ==
-                null &&
-            !controller.room.encrypted)
-          IconButton(
-            icon: const Icon(Icons.translate_outlined),
-            tooltip: L10n.of(context).translateMessage,
-            onPressed: controller.translateEventAction,
-          ),
         if (controller.canSaveSelectedEvent)
           // Use builder context to correctly position the share dialog on iPad
           Builder(
@@ -109,6 +94,7 @@ class ChatView extends StatelessWidget {
                   break;
                 case _EventContextAction.endPoll:
                   controller.endPollAction();
+                  break;
                 case _EventContextAction.readReceipts:
                   controller.showReadReceipts();
                   break;

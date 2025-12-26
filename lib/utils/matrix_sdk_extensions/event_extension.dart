@@ -26,6 +26,10 @@ extension LocalizedBody on Event {
     matrixFile.result?.save(context);
   }
 
+  String getLink() {
+    return "https://matrix.to/#/${room.canonicalAlias != '' ? room.canonicalAlias : roomId}/$eventId";
+  }
+
   void downloadInBackground(BuildContext context) async {
     if (canDownloadInBackground) {
       final dmc = Provider.of<DownloadManagerController>(context, listen: false);

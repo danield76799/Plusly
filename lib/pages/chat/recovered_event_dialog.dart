@@ -38,7 +38,7 @@ class RecoveredEventDialogState extends State<RecoveredEventDialog> {
                         colors: colors,
                         onInfoTab: (Event ev) => {},
                         onMention: () => {},
-                        onSelect: (Event ev) => {},
+                        onSelect: (Event ev, Offset? tapPosition) => {},
                         onSwipe: () => {},
                         scrollToEventId: (String p0) => {},
                         timeline: timeline,
