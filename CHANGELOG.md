@@ -1,3 +1,8 @@
+## Extera 25.1.1
+- Added context menu for messages. Now, when selecting a single message, a context menu will appear. Multi-selection is still available.
+- Added timestamp and message status icon in message bubbles.
+- Removed "seen by" row in favour of context menu and status icons.
+
 ## Extera 25.1.0
 - Brought back calls. Just enable "Experimental video calls" and press that phone button in a chat - calls will probably work.
 - Fixed screen sharing in calls. Screen sharing now works, the problem was the foreground service missing MEDIA_PROJECTION flag.

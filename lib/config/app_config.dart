@@ -73,6 +73,7 @@ abstract class AppConfig {
   static bool? sendOnEnter;
   static bool showPresences = true;
   static bool experimentalVoip = false;
+  static String ringtone = "Homebase";
   static const bool hideTypingUsernames = false;
   static const bool hideAllStateEvents = false;
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
@@ -88,6 +89,12 @@ abstract class AppConfig {
     path: 'servers.json',
   );
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
+
+  // See CREDITS.md
+  static const Map<String, String> ringtoneFiles = {
+    // people won't answer calls listening to this banger
+    'Homebase': 'assets/sounds/ringtones/homebase.ogg',
+  };
 
   static void loadFromJson(Map<String, dynamic> json) {
     if (json['chat_color'] != null) {

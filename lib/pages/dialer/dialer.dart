@@ -130,10 +130,10 @@ class Calling extends StatefulWidget {
   });
 
   @override
-  MyCallingPage createState() => MyCallingPage();
+  CallingView createState() => CallingView();
 }
 
-class MyCallingPage extends State<Calling> {
+class CallingView extends State<Calling> {
   Room? get room => call.room;
 
   String get displayName => call.room.getLocalizedDisplayname(
@@ -213,10 +213,16 @@ class MyCallingPage extends State<Calling> {
     initialize();
   }
 
+  late StreamSubscription<CallState> onCallStateChangedSubscription;
+  late StreamSubscription<CallStateChange> onCallEventChangedSubscription;
+
   void initialize() async {
     final call = this.call;
-    call.onCallStateChanged.stream.listen(_handleCallState);
-    call.onCallEventChanged.stream.listen((event) {
+
+    onCallStateChangedSubscription =
+        call.onCallStateChanged.stream.listen(_handleCallState);
+    onCallEventChangedSubscription =
+        call.onCallEventChanged.stream.listen((event) {
       if (event == CallStateChange.kFeedsChanged) {
         setState(() {
           call.tryRemoveStopedStreams();
@@ -245,6 +251,14 @@ class MyCallingPage extends State<Calling> {
     try {
       unawaited(WakelockPlus.disable());
     } catch (_) {}
+  }
+
+  void minimise() {
+    final voipPlugin = Matrix.of(context).voipPlugin;
+    setState(() {
+      voipPlugin!.overlayMinimised = true;
+      voipPlugin.overlayEntry?.markNeedsBuild();
+    });
   }
 
   @override
@@ -388,6 +402,7 @@ class MyCallingPage extends State<Calling> {
       heroTag: 'switchCamera',
       onPressed: _switchCamera,
       backgroundColor: Colors.black45,
+      tooltip: L10n.of(context).switchCamera,
       child: const Icon(Icons.switch_camera),
     );
 
@@ -396,13 +411,14 @@ class MyCallingPage extends State<Calling> {
       onPressed: _switchSpeaker,
       foregroundColor: _speakerOn ? Colors.black26 : Colors.white,
       backgroundColor: _speakerOn ? Colors.white : Colors.black45,
+      tooltip: L10n.of(context).switchSpeaker,
       child: Icon(_speakerOn ? Icons.volume_up : Icons.volume_off),
     );
 
     final hangupButton = FloatingActionButton(
       heroTag: 'hangup',
       onPressed: _hangUp,
-      tooltip: 'Hangup',
+      tooltip: L10n.of(context).hangUp,
       backgroundColor: _state == CallState.kEnded ? Colors.black45 : Colors.red,
       child: const Icon(Icons.call_end),
     );
@@ -410,7 +426,7 @@ class MyCallingPage extends State<Calling> {
     final answerButton = FloatingActionButton(
       heroTag: 'answer',
       onPressed: _answerCall,
-      tooltip: 'Answer',
+      tooltip: L10n.of(context).answerCall,
       backgroundColor: Colors.green,
       child: const Icon(Icons.phone),
     );
@@ -420,6 +436,7 @@ class MyCallingPage extends State<Calling> {
       onPressed: _muteMic,
       foregroundColor: isMicrophoneMuted ? Colors.black26 : Colors.white,
       backgroundColor: isMicrophoneMuted ? Colors.white : Colors.black45,
+      tooltip: L10n.of(context).muteMic,
       child: Icon(isMicrophoneMuted ? Icons.mic_off : Icons.mic),
     );
 
@@ -428,6 +445,7 @@ class MyCallingPage extends State<Calling> {
       onPressed: _screenSharing,
       foregroundColor: isScreensharingEnabled ? Colors.black26 : Colors.white,
       backgroundColor: isScreensharingEnabled ? Colors.white : Colors.black45,
+      tooltip: L10n.of(context).screenSharing,
       child: const Icon(Icons.desktop_mac),
     );
 
@@ -436,6 +454,7 @@ class MyCallingPage extends State<Calling> {
       onPressed: _remoteOnHold,
       foregroundColor: isRemoteOnHold ? Colors.black26 : Colors.white,
       backgroundColor: isRemoteOnHold ? Colors.white : Colors.black45,
+      tooltip: L10n.of(context).holdCall,
       child: const Icon(Icons.pause),
     );
 
@@ -444,6 +463,7 @@ class MyCallingPage extends State<Calling> {
       onPressed: _muteCamera,
       foregroundColor: isLocalVideoMuted ? Colors.black26 : Colors.white,
       backgroundColor: isLocalVideoMuted ? Colors.white : Colors.black45,
+      tooltip: L10n.of(context).muteCam,
       child: Icon(isLocalVideoMuted ? Icons.videocam_off : Icons.videocam),
     );
 
@@ -660,6 +680,9 @@ class MyCallingPage extends State<Calling> {
 
   @override
   Widget build(BuildContext context) {
+    final voipPlugin = Matrix.of(context).voipPlugin;
+    if (voipPlugin!.overlayMinimised) return const SizedBox.shrink();
+
     return PIPView(
       builder: (context, isFloating) {
         return Scaffold(
@@ -672,6 +695,14 @@ class MyCallingPage extends State<Calling> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: _buildActionButtons(isFloating),
+            ),
+          ),
+          appBar: AppBar(
+            leading: IconButton(
+              onPressed: () {
+                minimise();
+              },
+              icon: Icon(Icons.adaptive.arrow_back),
             ),
           ),
           body: OrientationBuilder(

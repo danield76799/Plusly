@@ -28,9 +28,11 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
   }
   bool background = false;
   bool speakerOn = false;
+  bool overlayMinimised = false;
   late VoIP voip;
   OverlayEntry? overlayEntry;
   BuildContext get context => matrix.context;
+  CallSession? currentCallSession;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState? state) {
@@ -45,20 +47,7 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
       Logs().e('[VOIP] addCallingOverlay: The call session already exists?');
       overlayEntry!.remove();
     }
-    // Overlay.of(context) is broken on web
-    // falling back on a dialog
-    // if (kIsWeb) {
-    // showDialog(
-    //   context: context,
-    //   builder: (context) => Calling(
-    //     context: context,
-    //     client: client,
-    //     callId: callId,
-    //     call: call,
-    //     onClear: () => Navigator.of(context).pop(),
-    //   ),
-    // );
-    // } else {
+
     overlayEntry = OverlayEntry(
       builder: (_) => Calling(
         context: context,
@@ -74,7 +63,6 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
       canSizeOverlay: true,
     );
     Overlay.of(context).insert(overlayEntry!);
-    // }
   }
 
   @override
@@ -119,7 +107,7 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
       }
       Logs().w("Playing kOutgoing call sound");
       final path = 'assets/sounds/${call.state.name}.ogg';
-      if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isMacOS || PlatformInfos.isLinux) {
+      if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isMacOS) {
         final player = callSoundPlayer = AudioPlayer();
         await player.setAsset(path);
         player.setLoopMode(LoopMode.one);
@@ -127,7 +115,7 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
       } else {
         Logs().w('Playing sound not implemented for this platform!');
       }
-    } else {
+    } else if (call.state == CallState.kRinging) {
       Logs().w("Playing ringtone, ${call.direction.name}");
       playRingtone();
     }
@@ -158,6 +146,8 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
         Logs().e('VOIP foreground failed $e');
       }
       // use fallback flutter call pages for outgoing and video calls.
+      currentCallSession = call;
+      Logs().w("current call session ${call.callId}");
       playCallingSound(call);
       addCallingOverlay(call.callId, call);
     } else {
@@ -167,6 +157,8 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
 
   @override
   Future<void> handleCallEnded(CallSession session) async {
+    currentCallSession = null;
+    Logs().w("ended call session ${session.callId}");
     if (overlayEntry != null) {
       overlayEntry!.remove();
       overlayEntry = null;

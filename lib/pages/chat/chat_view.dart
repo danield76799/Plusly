@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:extera_next/pages/dialer/back_to_call_button.dart';
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
@@ -27,7 +28,14 @@ import '../../utils/stream_extension.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
 
-enum _EventContextAction { info, recover, report, endPoll, copyLink, readReceipts }
+enum _EventContextAction {
+  info,
+  recover,
+  report,
+  endPoll,
+  copyLink,
+  readReceipts
+}
 
 class ChatView extends StatelessWidget {
   final ChatController controller;
@@ -134,50 +142,6 @@ class ChatView extends StatelessWidget {
                   ],
                 ),
               ),
-              if (controller.selectedEvents.single.redacted)
-                PopupMenuItem(
-                  value: _EventContextAction.recover,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.redo),
-                      const SizedBox(width: 12),
-                      Text(L10n.of(context).recoverMessage),
-                    ],
-                  ),
-                ),
-              if (controller.selectedEvents.single.type ==
-                      'org.matrix.msc3381.poll.start' &&
-                  controller.selectedEvents.single.senderId ==
-                      Matrix.of(context).client.userID)
-                PopupMenuItem(
-                  value: _EventContextAction.endPoll,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.check,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(L10n.of(context).endPoll),
-                    ],
-                  ),
-                ),
-              if (controller.selectedEvents.single.status.isSent)
-                PopupMenuItem(
-                  value: _EventContextAction.report,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        Icons.shield_outlined,
-                        color: Colors.red,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(L10n.of(context).reportMessage),
-                    ],
-                  ),
-                ),
             ],
           ),
       ];
@@ -343,6 +307,7 @@ class ChatView extends StatelessWidget {
                     SafeArea(
                       child: Column(
                         children: <Widget>[
+                          BackToCallButton(),
                           Expanded(
                             child: GestureDetector(
                               onTap: controller.clearSingleSelectedEvent,

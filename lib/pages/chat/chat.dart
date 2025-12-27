@@ -860,7 +860,7 @@ class ChatController extends State<ChatPageWithRoom>
     });
   }
 
-  void recoverEventAction() async {
+  void recoverEventAction({Event? event}) async {
     final mx = Matrix.of(context);
     if (!await mx.client.isSynapseAdministrator()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -868,7 +868,7 @@ class ChatController extends State<ChatPageWithRoom>
       );
       return;
     }
-    final event = selectedEvents.single;
+    event ??= selectedEvents.single;
     await mx.client.reportEvent(
       roomId,
       event.eventId,
@@ -877,7 +877,7 @@ class ChatController extends State<ChatPageWithRoom>
 
     final reports = await mx.client.getEventReports();
     final report = reports.firstWhere(
-      (rep) => rep['room_id'] == roomId && rep['event_id'] == event.eventId,
+      (rep) => rep['room_id'] == roomId && rep['event_id'] == event!.eventId,
     );
     final recoveredEvent = await mx.client.getReportedEvent(report['id']);
 
@@ -1026,7 +1026,7 @@ class ChatController extends State<ChatPageWithRoom>
     selectedEvents.clear();
   }
 
-  void endPollAction() async {
+  void endPollAction({Event? event}) async {
     final event = selectedEvents.first;
     final client = currentRoomBundle.firstWhere(
       (cl) => selectedEvents.first.senderId == cl!.userID,
@@ -1445,25 +1445,16 @@ class ChatController extends State<ChatPageWithRoom>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (receipts.isNotEmpty)
-                _buildMenuItem(
-                  event: event,
-                  icon: Icons.done_all,
-                  label: L10n.of(context).nViews(receipts.length),
-                  onPressed: () {
-                    showReadReceipts(event: event);
-                  },
-                ),
               if (room.canSendEvent(EventTypes.Reaction))
                 Padding(
                   padding: const EdgeInsets.only(
                     top: 4.0,
                     bottom: 4.0,
-                    left: 8.0,
                   ),
                   child: Material(
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         ...AppConfig.defaultReactions.map(
                           (emoji) => IconButton(
@@ -1589,6 +1580,16 @@ class ChatController extends State<ChatPageWithRoom>
                     ),
                   ),
                 ),
+              if (receipts.isNotEmpty)
+                _buildMenuItem(
+                  event: event,
+                  icon: Icons.done_all,
+                  label: L10n.of(context).nViews(receipts.length),
+                  onPressed: () {
+                    if (!PlatformInfos.isMobile) _closeMessageMenu();
+                    showReadReceipts(event: event);
+                  },
+                ),
               if (room.canSendDefaultMessages)
                 _buildMenuItem(
                   event: event,
@@ -1618,6 +1619,17 @@ class ChatController extends State<ChatPageWithRoom>
                   onPressed: () {
                     _closeMessageMenu();
                     editSelectedEventAction(event: event);
+                  },
+                ),
+              if (event.type == 'org.matrix.msc3381.poll.start' &&
+                  event.senderId == Matrix.of(context).client.userID)
+                _buildMenuItem(
+                  event: event,
+                  icon: Icons.check,
+                  label: L10n.of(context).endPoll,
+                  onPressed: () {
+                    _closeMessageMenu();
+                    endPollAction(event: event);
                   },
                 ),
               const Divider(),
@@ -1673,6 +1685,16 @@ class ChatController extends State<ChatPageWithRoom>
                   onPressed: () {
                     _closeMessageMenu();
                     translateEventAction(event: event);
+                  },
+                ),
+              if (event.redacted)
+                _buildMenuItem(
+                  event: event,
+                  icon: Icons.redo,
+                  label: L10n.of(context).recoverMessage,
+                  onPressed: () {
+                    _closeMessageMenu();
+                    recoverEventAction(event: event);
                   },
                 ),
               if (room.canChangeStateEvent(EventTypes.RoomPinnedEvents))

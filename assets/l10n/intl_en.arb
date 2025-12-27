@@ -3439,5 +3439,17 @@
         "example": "1"
       }
     }
-  }
+  },
+  "backToCall": "Back to call",
+  "switchCamera": "Switch camera",
+  "switchSpeaker": "Switch speaker",
+  "hangUp": "Hang up",
+  "answerCall": "Answer",
+  "muteMic": "Mute microphone",
+  "screenSharing": "Screen sharing",
+  "holdCall": "Hold",
+  "muteCam": "Mute camera",
+  "ringtone": "Ringtone",
+  "ringtoneDescription": "Choose which ringtone should be played when you receive a call.",
+  "ringtoneSystem": "System ringtone"
 }

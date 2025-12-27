@@ -444,8 +444,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
             AppConfig.displayNavigationRail;
 
     AppConfig.enableGradient =
-        store.getBool(SettingKeys.enableGradient) ??
-            AppConfig.enableGradient;
+        store.getBool(SettingKeys.enableGradient) ?? AppConfig.enableGradient;
+
+    AppConfig.ringtone = store.getString(SettingKeys.ringtone) ??
+        (PlatformInfos.isMobile ? 'system' : 'Homebase');
   }
 
   @override
