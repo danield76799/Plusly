@@ -2,6 +2,8 @@
 - Added context menu for messages. Now, when selecting a single message, a context menu will appear. Multi-selection is still available.
 - Added timestamp and message status icon in message bubbles.
 - Removed "seen by" row in favour of context menu and status icons.
+- Always use foreground service for calls.
+- Slide to answer/reject call on mobiles.
 
 ## Extera 25.1.0
 - Brought back calls. Just enable "Experimental video calls" and press that phone button in a chat - calls will probably work.
