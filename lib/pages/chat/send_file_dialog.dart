@@ -18,7 +18,9 @@ import 'package:extera_next/utils/size_string.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/dialog_text_field.dart';
 import '../../utils/resize_video.dart';
+// ignore: implementation_imports
 import 'package:matrix/src/utils/markdown.dart';
+// ignore: depend_on_referenced_packages
 import 'package:html_unescape/html_unescape.dart';
 
 class SendFileDialog extends StatefulWidget {
@@ -43,6 +45,7 @@ class SendFileDialog extends StatefulWidget {
 
 class SendFileDialogState extends State<SendFileDialog> {
   bool compress = true;
+  bool isSending = false;
 
   /// Images smaller than 20kb don't need compression.
   static const int minSizeToCompress = 20 * 1000;
@@ -54,8 +57,10 @@ class SendFileDialogState extends State<SendFileDialog> {
     final l10n = L10n.of(context);
 
     try {
+      setState(() {
+        isSending = true;
+      });
       scaffoldMessenger.showLoadingSnackBar(l10n.prepareSendingAttachment);
-      Navigator.of(context, rootNavigator: false).pop();
       final clientConfig = await widget.room.client.getConfig();
       final maxUploadSize = clientConfig.mUploadSize ?? 100 * 1000 * 1000;
 
@@ -81,10 +86,12 @@ class SendFileDialogState extends State<SendFileDialog> {
           if (length > maxUploadSize) {
             throw FileTooBigMatrixException(length, maxUploadSize);
           }
-        
+
           // Else we just create a MatrixFile
           file = MatrixFile(
-            bytes: Uint8List.fromList(ExifCleaner.removeExifData(await xfile.readAsBytes())),
+            bytes: Uint8List.fromList(
+              ExifCleaner.removeExifData(await xfile.readAsBytes()),
+            ),
             name: xfile.name,
             mimeType: mimeType,
           ).detectFileType;
@@ -126,13 +133,15 @@ class SendFileDialogState extends State<SendFileDialog> {
             getEmotePacks: () =>
                 widget.room.getImagePacksFlat(ImagePackUsage.emoticon),
             getMention: widget.room.getMention,
-            convertLinebreaks:
-                Matrix.of(context).client.convertLinebreaksInFormatting,
+            convertLinebreaks: Matrix.of(
+              context,
+            ).client.convertLinebreaksInFormatting,
           );
 
           // if the decoded html is the same as the body, there is no need in sending a formatted message
-          if (HtmlUnescape()
-                  .convert(html.replaceAll(RegExp(r'<br />\n?'), '\n')) !=
+          if (HtmlUnescape().convert(
+                html.replaceAll(RegExp(r'<br />\n?'), '\n'),
+              ) !=
               label) {
             extraContent['format'] = 'org.matrix.custom.html';
             extraContent['formatted_body'] = html;
@@ -141,9 +150,7 @@ class SendFileDialogState extends State<SendFileDialog> {
 
         if (widget.replyEvent != null) {
           extraContent['m.relates_to'] = {
-            'm.in_reply_to': {
-              'event_id': widget.replyEvent!.eventId,
-            },
+            'm.in_reply_to': {'event_id': widget.replyEvent!.eventId},
           };
         }
 
@@ -153,16 +160,23 @@ class SendFileDialogState extends State<SendFileDialog> {
             thumbnail: thumbnail,
             shrinkImageMaxDimension: compress ? 1600 : null,
             extraContent: extraContent,
-            threadLastEventId: widget.thread?.lastEvent?.eventId ?? widget.thread?.rootEvent.eventId,
+            threadLastEventId:
+                widget.thread?.lastEvent?.eventId ??
+                widget.thread?.rootEvent.eventId,
             threadRootEventId: widget.thread?.rootEvent.eventId,
           );
+          setState(() {
+            isSending = false;
+          });
+          Navigator.of(context, rootNavigator: false).pop();
         } on MatrixException catch (e) {
           final retryAfterMs = e.retryAfterMs;
           if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {
             rethrow;
           }
-          final retryAfterDuration =
-              Duration(milliseconds: retryAfterMs + 1000);
+          final retryAfterDuration = Duration(
+            milliseconds: retryAfterMs + 1000,
+          );
 
           scaffoldMessenger.showSnackBar(
             SnackBar(
@@ -185,7 +199,10 @@ class SendFileDialogState extends State<SendFileDialog> {
       }
       scaffoldMessenger.clearSnackBars();
     } catch (e) {
-      print('error: ${e.toString()}');
+      Logs().e('error on send', e);
+      setState(() {
+        isSending = false;
+      });
       scaffoldMessenger.clearSnackBars();
       final theme = Theme.of(context);
       scaffoldMessenger.showSnackBar(
@@ -207,8 +224,9 @@ class SendFileDialogState extends State<SendFileDialog> {
   }
 
   Future<String> _calcCombinedFileSize() async {
-    final lengths =
-        await Future.wait(widget.files.map((file) => file.length()));
+    final lengths = await Future.wait(
+      widget.files.map((file) => file.length()),
+    );
     return lengths.fold<double>(0, (p, length) => p + length).sizeString;
   }
 
@@ -262,119 +280,122 @@ class SendFileDialogState extends State<SendFileDialog> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 12),
-                  // if (uniqueFileType == 'image')
-                  //   Padding(
-                  //     padding: const EdgeInsets.only(bottom: 16.0),
-                  //     child: SizedBox(
-                  //       height: 256,
-                  //       child: Center(
-                  //         child: ListView.builder(
-                  //           shrinkWrap: true,
-                  //           itemCount: widget.files.length,
-                  //           scrollDirection: Axis.horizontal,
-                  //           itemBuilder: (context, i) => Padding(
-                  //             padding: const EdgeInsets.only(right: 8.0),
-                  //             child: Material(
-                  //               borderRadius: BorderRadius.circular(
-                  //                 AppConfig.borderRadius / 2,
-                  //               ),
-                  //               color: Colors.black,
-                  //               clipBehavior: Clip.hardEdge,
-                  //               child: FutureBuilder(
-                  //                 future: widget.files[i].readAsBytes(),
-                  //                 builder: (context, snapshot) {
-                  //                   final bytes = snapshot.data;
-                  //                   if (bytes == null) {
-                  //                     return const Center(
-                  //                       child: CircularProgressIndicator
-                  //                           .adaptive(),
-                  //                     );
-                  //                   }
-                  //                   if (snapshot.error != null) {
-                  //                     Logs().w(
-                  //                       'Unable to preview image',
-                  //                       snapshot.error,
-                  //                       snapshot.stackTrace,
-                  //                     );
-                  //                     return const Center(
-                  //                       child: SizedBox(
-                  //                         width: 256,
-                  //                         height: 256,
-                  //                         child: Icon(
-                  //                           Icons.broken_image_outlined,
-                  //                           size: 64,
-                  //                         ),
-                  //                       ),
-                  //                     );
-                  //                   }
-                  //                   return Image.memory(
-                  //                     bytes,
-                  //                     height: 256,
-                  //                     width: widget.files.length == 1
-                  //                         ? 256 - 36
-                  //                         : null,
-                  //                     fit: BoxFit.contain,
-                  //                     errorBuilder: (context, e, s) {
-                  //                       Logs()
-                  //                           .w('Unable to preview image', e, s);
-                  //                       return const Center(
-                  //                         child: SizedBox(
-                  //                           width: 256,
-                  //                           height: 256,
-                  //                           child: Icon(
-                  //                             Icons.broken_image_outlined,
-                  //                             size: 64,
-                  //                           ),
-                  //                         ),
-                  //                       );
-                  //                     },
-                  //                   );
-                  //                 },
-                  //               ),
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // if (uniqueFileType != 'image')
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          uniqueFileType == null
-                              ? Icons.description_outlined
-                              : uniqueFileType == 'video'
-                                  ? Icons.video_file_outlined
-                                  : uniqueFileType == 'audio'
-                                      ? Icons.audio_file_outlined
-                                      : Icons.description_outlined,
-                          size: 32,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                fileName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                  if (uniqueFileType == 'image')
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: SizedBox(
+                        height: 256,
+                        child: Center(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: widget.files.length,
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, i) => Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Material(
+                                borderRadius: BorderRadius.circular(
+                                  AppConfig.borderRadius / 2,
+                                ),
+                                color: Colors.black,
+                                clipBehavior: Clip.hardEdge,
+                                child: FutureBuilder(
+                                  future: widget.files[i].readAsBytes(),
+                                  builder: (context, snapshot) {
+                                    final bytes = snapshot.data;
+                                    if (bytes == null) {
+                                      return const Center(
+                                        child:
+                                            CircularProgressIndicator.adaptive(),
+                                      );
+                                    }
+                                    if (snapshot.error != null) {
+                                      Logs().w(
+                                        'Unable to preview image',
+                                        snapshot.error,
+                                        snapshot.stackTrace,
+                                      );
+                                      return const Center(
+                                        child: SizedBox(
+                                          width: 256,
+                                          height: 256,
+                                          child: Icon(
+                                            Icons.broken_image_outlined,
+                                            size: 64,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return Image.memory(
+                                      bytes,
+                                      height: 256,
+                                      width: widget.files.length == 1
+                                          ? 256 - 36
+                                          : null,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (context, e, s) {
+                                        Logs().w(
+                                          'Unable to preview image',
+                                          e,
+                                          s,
+                                        );
+                                        return const Center(
+                                          child: SizedBox(
+                                            width: 256,
+                                            height: 256,
+                                            child: Icon(
+                                              Icons.broken_image_outlined,
+                                              size: 64,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
                               ),
-                              Text(
-                                '$sizeString - $fileTypes',
-                                style: theme.textTheme.labelSmall,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
+                  if (uniqueFileType != 'image')
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Row(
+                        children: [
+                          Icon(
+                            uniqueFileType == null
+                                ? Icons.description_outlined
+                                : uniqueFileType == 'video'
+                                ? Icons.video_file_outlined
+                                : uniqueFileType == 'audio'
+                                ? Icons.audio_file_outlined
+                                : Icons.description_outlined,
+                            size: 32,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  fileName,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  '$sizeString - $fileTypes',
+                                  style: theme.textTheme.labelSmall,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   if (widget.files.length == 1)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
@@ -392,8 +413,10 @@ class SendFileDialogState extends State<SendFileDialog> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        if ({TargetPlatform.iOS, TargetPlatform.macOS}
-                            .contains(theme.platform))
+                        if ({
+                          TargetPlatform.iOS,
+                          TargetPlatform.macOS,
+                        }.contains(theme.platform))
                           CupertinoSwitch(
                             value: compressionSupported && compress,
                             onChanged: compressionSupported
@@ -443,15 +466,18 @@ class SendFileDialogState extends State<SendFileDialog> {
             ),
           ),
           actions: <Widget>[
-            AdaptiveDialogAction(
-              onPressed: () =>
-                  Navigator.of(context, rootNavigator: false).pop(),
-              child: Text(L10n.of(context).cancel),
-            ),
-            AdaptiveDialogAction(
-              onPressed: _send,
-              child: Text(L10n.of(context).send),
-            ),
+            if (!isSending)
+              AdaptiveDialogAction(
+                onPressed: () =>
+                    Navigator.of(context, rootNavigator: false).pop(),
+                child: Text(L10n.of(context).cancel),
+              ),
+            if (!isSending)
+              AdaptiveDialogAction(
+                onPressed: _send,
+                child: Text(L10n.of(context).send),
+              ),
+            if (isSending) const CircularProgressIndicator.adaptive(),
           ],
         );
       },
@@ -473,9 +499,7 @@ extension on ScaffoldMessengerState {
             const SizedBox(
               width: 16,
               height: 16,
-              child: CircularProgressIndicator.adaptive(
-                strokeWidth: 2,
-              ),
+              child: CircularProgressIndicator.adaptive(strokeWidth: 2),
             ),
             const SizedBox(width: 16),
             Text(title),
