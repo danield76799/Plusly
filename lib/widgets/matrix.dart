@@ -456,6 +456,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
     AppConfig.checkForUpdates =
         store.getBool(SettingKeys.checkForUpdates) ?? AppConfig.checkForUpdates;
+
+    AppConfig.twemojiFont =
+        store.getBool(SettingKeys.twemojiFont) ?? AppConfig.twemojiFont;
   }
 
   @override

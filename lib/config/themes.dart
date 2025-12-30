@@ -17,10 +17,7 @@ abstract class FluffyThemes {
   static bool isThreeColumnMode(BuildContext context) =>
       MediaQuery.sizeOf(context).width > FluffyThemes.columnWidth * 3.5;
 
-  static LinearGradient backgroundGradient(
-    BuildContext context,
-    int alpha,
-  ) {
+  static LinearGradient backgroundGradient(BuildContext context, int alpha) {
     final colorScheme = Theme.of(context).colorScheme;
     return LinearGradient(
       begin: Alignment.topCenter,
@@ -41,6 +38,7 @@ abstract class FluffyThemes {
     Brightness brightness, [
     Color? seed,
     bool? pureBlack,
+    bool? twemoji,
   ]) {
     final extraDarkColors = (brightness == Brightness.dark && pureBlack == true)
         ? {
@@ -80,6 +78,7 @@ abstract class FluffyThemes {
       brightness: brightness,
       colorScheme: colorScheme,
       useSystemColors: true,
+      fontFamilyFallback: twemoji == true ? ['Twemoji Mozilla'] : null,
       dividerColor: brightness == Brightness.dark
           ? colorScheme.surfaceContainerHighest
           : colorScheme.surfaceContainer,
@@ -114,12 +113,14 @@ abstract class FluffyThemes {
       ),
       appBarTheme: AppBarTheme(
         toolbarHeight: isColumnMode ? 72 : 56,
-        shadowColor:
-            isColumnMode ? colorScheme.surfaceContainer.withAlpha(128) : null,
+        shadowColor: isColumnMode
+            ? colorScheme.surfaceContainer.withAlpha(128)
+            : null,
         surfaceTintColor: isColumnMode ? colorScheme.surface : null,
         backgroundColor: isColumnMode ? colorScheme.surface : null,
-        actionsPadding:
-            isColumnMode ? const EdgeInsets.symmetric(horizontal: 16.0) : null,
+        actionsPadding: isColumnMode
+            ? const EdgeInsets.symmetric(horizontal: 16.0)
+            : null,
         systemOverlayStyle: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           statusBarIconBrightness: brightness.reversed,
@@ -130,10 +131,7 @@ abstract class FluffyThemes {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            width: 1,
-            color: colorScheme.primary,
-          ),
+          side: BorderSide(width: 1, color: colorScheme.primary),
           shape: RoundedRectangleBorder(
             side: BorderSide(color: colorScheme.primary),
             borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
@@ -175,8 +173,8 @@ extension BubbleColorTheme on ThemeData {
       : colorScheme.onPrimaryContainer;
 
   Color get secondaryBubbleColor => HSLColor.fromColor(
-        brightness == Brightness.light
-            ? colorScheme.tertiary
-            : colorScheme.tertiaryContainer,
-      ).withSaturation(0.5).toColor();
+    brightness == Brightness.light
+        ? colorScheme.tertiary
+        : colorScheme.tertiaryContainer,
+  ).withSaturation(0.5).toColor();
 }

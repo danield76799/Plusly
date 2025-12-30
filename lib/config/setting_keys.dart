@@ -2,12 +2,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SettingKeys {
   static const String checkForUpdates = 'xyz.extera.next.checkForUpdates';
+  static const String twemojiFont = 'xyz.extera.next.twemojiFont';
   static const String ringtone = 'xyz.extera.next.ringtone';
   static const String httpProxy = 'xyz.extera.next.httpProxy';
   static const String cleanExif = 'xyz.extera.next.cleanExif';
-  static const String doNotSendIfCantClean = 'xyz.extera.next.doNotSendIfCantClean';
-  static const String displayNavigationRail = 'chat.fluffy.displayNavigationRail';
-  static const String hideAvatarsInInvites = 'xyz.extera.next.hideAvatarsInInvites';
+  static const String doNotSendIfCantClean =
+      'xyz.extera.next.doNotSendIfCantClean';
+  static const String displayNavigationRail =
+      'chat.fluffy.displayNavigationRail';
+  static const String hideAvatarsInInvites =
+      'xyz.extera.next.hideAvatarsInInvites';
   static const String pureBlack = 'xyz.extera.next.pureBlack';
   static const String renderHtml = 'chat.fluffy.renderHtml';
   static const String hideRedactedEvents = 'chat.fluffy.hideRedactedEvents';
@@ -40,10 +44,11 @@ abstract class SettingKeys {
       'chat.fluffy.swipeRightToLeftToReply';
   static const String experimentalVoip = 'chat.fluffy.experimental_voip';
   static const String showPresences = 'chat.fluffy.show_presences';
-  static const String enableGradient = 'xyz.extera.next.enableGradient'; 
+  static const String enableGradient = 'xyz.extera.next.enableGradient';
 }
 
 enum AppSettings<T> {
+  twemojiFont<bool>('xyz.extera.next.twemojiFont', false),
   checkForUpdates<bool>('xyz.extera.next.checkForUpdates', true),
   ringtone<String>('xyz.extera.next.ringtone', 'system'),
   audioRecordingNumChannels<int>('audioRecordingNumChannels', 1),
@@ -67,10 +72,7 @@ enum AppSettings<T> {
     'chat.fluffy.no_encryption_warning_shown',
     false,
   ),
-  displayChatDetailsColumn(
-    'chat.fluffy.display_chat_details_column',
-    false,
-  );
+  displayChatDetailsColumn('chat.fluffy.display_chat_details_column', false);
 
   final String key;
   final T defaultValue;

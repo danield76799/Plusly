@@ -3484,5 +3484,6 @@
   "downloadUpdateButton": "Download",
   "changelogButton": "Changelog",
   "updateCheckTitle": "Check for updates",
-  "updateCheckSubtitle": "Check whether a new version of Extera is out on every start."
+  "updateCheckSubtitle": "Check whether a new version of Extera is out on every start.",
+  "useTwemoji": "Enable Twemoji"
 }

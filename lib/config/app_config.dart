@@ -25,6 +25,8 @@ abstract class AppConfig {
   static bool checkForUpdates = true;
   static bool alreadyCheckedUpdates = false;
 
+  static bool twemojiFont = false;
+
   static String? httpProxy;
   static String get defaultHomeserver => _defaultHomeserver;
   static double fontSizeFactor = 1;

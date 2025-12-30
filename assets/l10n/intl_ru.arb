@@ -3588,5 +3588,6 @@
   "downloadUpdateButton": "Скачать обновление",
   "changelogButton": "Что нового?",
   "updateCheckTitle": "Проверка обновлений",
-  "updateCheckSubtitle": ""
+  "updateCheckSubtitle": "",
+  "useTwemoji": "Использовать Twemoji"
 }

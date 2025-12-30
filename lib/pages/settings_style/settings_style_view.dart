@@ -320,6 +320,12 @@ class SettingsStyleView extends StatelessWidget {
                       storeKey: SettingKeys.enableGradient,
                       defaultValue: AppConfig.enableGradient,
                     ),
+                    SettingsSwitchListTile.adaptive(
+                      title: L10n.of(context).useTwemoji,
+                      onChanged: (b) => AppConfig.twemojiFont = b,
+                      storeKey: SettingKeys.twemojiFont,
+                      defaultValue: AppConfig.twemojiFont,
+                    ),
                     Divider(
                       color: theme.dividerColor,
                     ),
