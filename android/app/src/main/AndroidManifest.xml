@@ -79,7 +79,7 @@
                <data android:scheme="matrix" />
             </intent-filter>
 
-            <!-- App can open im.fluffychat:// uris -->
+            <!-- App can open xyz.extera.next:// uris -->
             <intent-filter>
                <action android:name="android.intent.action.VIEW" />
                <category android:name="android.intent.category.DEFAULT" />
