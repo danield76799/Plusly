@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:audioplayers/audioplayers.dart';
-import 'package:extera_next/utils/check_updates.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -459,6 +458,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
     AppConfig.twemojiFont =
         store.getBool(SettingKeys.twemojiFont) ?? AppConfig.twemojiFont;
+
+    AppConfig.incomingCallsOnLockScreen = 
+        store.getBool(SettingKeys.incomingCallsOnLockScreen) ?? AppConfig.incomingCallsOnLockScreen;
   }
 
   @override

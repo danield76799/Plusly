@@ -3597,5 +3597,7 @@
   "widgetCreatorUser": "Добавил",
   "deleteWidget": "Убрать виджет",
   "widgetType": "Тип виджета",
-  "widget": "Виджет"
+  "widget": "Виджет",
+  "incomingCallsOnLockScreenTitle": "Звонки на заблокированном экране",
+  "incomingCallsOnLockScreenSubtitle": "Показывать входящие звонки, когда устройство заблокировано"
 }

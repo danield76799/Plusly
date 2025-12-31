@@ -3493,5 +3493,7 @@
   "widgetCreatorUser": "Added by",
   "deleteWidget": "Remove widget",
   "widgetType": "Widget type",
-  "widget": "Widget"
+  "widget": "Widget",
+  "incomingCallsOnLockScreenTitle": "Calls on lock screen",
+  "incomingCallsOnLockScreenSubtitle": "Show incoming calls on lock screen"
 }

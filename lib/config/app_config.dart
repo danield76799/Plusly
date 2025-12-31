@@ -65,6 +65,8 @@ abstract class AppConfig {
     host: 'git.extera.xyz',
     path: '/OfficialDakari/ExteraNext/issues',
   );
+
+  static bool incomingCallsOnLockScreen = true;
   static bool renderHtml = true;
   static bool hideRedactedEvents = false;
   static bool hideUnknownEvents = true;

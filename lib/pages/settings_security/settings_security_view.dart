@@ -67,6 +67,16 @@ class SettingsSecurityView extends StatelessWidget {
                     storeKey: SettingKeys.hideAvatarsInInvites,
                     defaultValue: AppConfig.hideAvatarsInInvites,
                   ),
+                  if (PlatformInfos.isMobile)
+                    SettingsSwitchListTile.adaptive(
+                      title: L10n.of(context).incomingCallsOnLockScreenTitle,
+                      subtitle: L10n.of(
+                        context,
+                      ).incomingCallsOnLockScreenSubtitle,
+                      onChanged: (b) => AppConfig.incomingCallsOnLockScreen = b,
+                      storeKey: SettingKeys.incomingCallsOnLockScreen,
+                      defaultValue: AppConfig.incomingCallsOnLockScreen,
+                    ),
                   ListTile(
                     title: Text(
                       L10n.of(context).privacy,
