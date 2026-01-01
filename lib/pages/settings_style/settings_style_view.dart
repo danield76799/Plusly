@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
 
@@ -73,9 +74,7 @@ class SettingsStyleView extends StatelessWidget {
               storeKey: SettingKeys.pureBlack,
               defaultValue: ThemeController.of(context).pureBlack,
             ),
-            Divider(
-              color: theme.dividerColor,
-            ),
+            Divider(color: theme.dividerColor),
             ListTile(
               title: Text(
                 L10n.of(context).setColorTheme,
@@ -89,10 +88,11 @@ class SettingsStyleView extends StatelessWidget {
               builder: (light, dark) {
                 final systemColor =
                     Theme.of(context).brightness == Brightness.light
-                        ? light?.primary
-                        : dark?.primary;
-                final colors =
-                    List<Color?>.from(SettingsStyleController.customColors);
+                    ? light?.primary
+                    : dark?.primary;
+                final colors = List<Color?>.from(
+                  SettingsStyleController.customColors,
+                );
                 if (systemColor == null) {
                   colors.remove(null);
                 }
@@ -116,8 +116,9 @@ class SettingsStyleView extends StatelessWidget {
                           child: Material(
                             color: color ?? systemColor,
                             elevation: 6,
-                            borderRadius:
-                                BorderRadius.circular(colorPickerSize),
+                            borderRadius: BorderRadius.circular(
+                              colorPickerSize,
+                            ),
                             child: SizedBox(
                               width: colorPickerSize,
                               height: colorPickerSize,
@@ -126,9 +127,9 @@ class SettingsStyleView extends StatelessWidget {
                                       child: Icon(
                                         Icons.check,
                                         size: 16,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimary,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onPrimary,
                                       ),
                                     )
                                   : null,
@@ -141,9 +142,7 @@ class SettingsStyleView extends StatelessWidget {
                 );
               },
             ),
-            Divider(
-              color: theme.dividerColor,
-            ),
+            Divider(color: theme.dividerColor),
             ListTile(
               title: Text(
                 L10n.of(context).messagesStyle,
@@ -202,8 +201,10 @@ class SettingsStyleView extends StatelessWidget {
                               StateMessage(
                                 Event(
                                   eventId: 'style_dummy',
-                                  room:
-                                      Room(id: '!style_dummy', client: client),
+                                  room: Room(
+                                    id: '!style_dummy',
+                                    client: client,
+                                  ),
                                   content: {'membership': 'join'},
                                   type: EventTypes.RoomMember,
                                   senderId: client.userID!,
@@ -236,7 +237,8 @@ class SettingsStyleView extends StatelessWidget {
                                       L10n.of(context).settingsStyleMessage1,
                                       style: TextStyle(
                                         color: theme.onBubbleColor,
-                                        fontSize: AppConfig.messageFontSize *
+                                        fontSize:
+                                            AppConfig.messageFontSize *
                                             AppConfig.fontSizeFactor,
                                       ),
                                     ),
@@ -269,7 +271,8 @@ class SettingsStyleView extends StatelessWidget {
                                         L10n.of(context).settingsStyleMessage2,
                                         style: TextStyle(
                                           color: theme.colorScheme.onSurface,
-                                          fontSize: AppConfig.messageFontSize *
+                                          fontSize:
+                                              AppConfig.messageFontSize *
                                               AppConfig.fontSizeFactor,
                                         ),
                                       ),
@@ -302,7 +305,8 @@ class SettingsStyleView extends StatelessWidget {
                                       L10n.of(context).settingsStyleMessage3,
                                       style: TextStyle(
                                         color: theme.onBubbleColor,
-                                        fontSize: AppConfig.messageFontSize *
+                                        fontSize:
+                                            AppConfig.messageFontSize *
                                             AppConfig.fontSizeFactor,
                                       ),
                                     ),
@@ -320,15 +324,14 @@ class SettingsStyleView extends StatelessWidget {
                       storeKey: SettingKeys.enableGradient,
                       defaultValue: AppConfig.enableGradient,
                     ),
-                    SettingsSwitchListTile.adaptive(
-                      title: L10n.of(context).useTwemoji,
-                      onChanged: (b) => AppConfig.twemojiFont = b,
-                      storeKey: SettingKeys.twemojiFont,
-                      defaultValue: AppConfig.twemojiFont,
-                    ),
-                    Divider(
-                      color: theme.dividerColor,
-                    ),
+                    if (!PlatformInfos.isMobile)
+                      SettingsSwitchListTile.adaptive(
+                        title: L10n.of(context).useTwemoji,
+                        onChanged: (b) => AppConfig.twemojiFont = b,
+                        storeKey: SettingKeys.twemojiFont,
+                        defaultValue: AppConfig.twemojiFont,
+                      ),
+                    Divider(color: theme.dividerColor),
                     ListTile(
                       title: TextButton.icon(
                         style: TextButton.styleFrom(
@@ -386,9 +389,7 @@ class SettingsStyleView extends StatelessWidget {
               semanticFormatterCallback: (d) => d.toString(),
               onChanged: controller.changeFontSizeFactor,
             ),
-            Divider(
-              color: theme.dividerColor,
-            ),
+            Divider(color: theme.dividerColor),
             ListTile(
               title: Text(
                 L10n.of(context).overview,
