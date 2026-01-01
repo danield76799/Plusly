@@ -5,7 +5,7 @@ import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
+// import 'package:extera_next/widgets/layouts/max_width_body.dart'; // Removed to fix layout error
 import 'package:extera_next/widgets/mxc_image.dart';
 import 'package:extera_next/widgets/mxc_image_viewer.dart';
 import '../../widgets/matrix.dart';
@@ -147,61 +147,77 @@ class EmotesSettingsView extends StatelessWidget {
                 ),
               ),
       ),
-      body: MaxWidthBody(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            if (controller.room != null) ...[
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
-                  maxLength: 256,
-                  controller: controller.packDisplayNameController,
-                  readOnly: controller.readonly,
-                  onSubmitted: (_) => controller.submitDisplaynameAction(),
-                  decoration: InputDecoration(
-                    counter: const SizedBox.shrink(),
-                    hintText: controller.stateKey,
-                    labelText: L10n.of(context).stickerPackName,
-                  ),
+      // Fix: Use Center + ConstrainedBox instead of MaxWidthBody to avoid
+      // "unbounded height" error, as CustomScrollView needs bounded vertical space.
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: CustomScrollView(
+            slivers: <Widget>[
+              // Header Content (Inputs, Buttons, Toggle)
+              SliverToBoxAdapter(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (controller.room != null) ...[
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: TextField(
+                          maxLength: 256,
+                          controller: controller.packDisplayNameController,
+                          readOnly: controller.readonly,
+                          onSubmitted: (_) =>
+                              controller.submitDisplaynameAction(),
+                          decoration: InputDecoration(
+                            counter: const SizedBox.shrink(),
+                            hintText: controller.stateKey,
+                            labelText: L10n.of(context).stickerPackName,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: TextField(
+                          maxLength: 256,
+                          controller: controller.packAttributionController,
+                          readOnly: controller.readonly,
+                          onSubmitted: (_) =>
+                              controller.submitAttributionAction(),
+                          decoration: InputDecoration(
+                            counter: const SizedBox.shrink(),
+                            labelText: L10n.of(context).attribution,
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (!controller.readonly) ...[
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: ElevatedButton.icon(
+                          onPressed: controller.createStickers,
+                          icon: const Icon(Icons.upload_outlined),
+                          label: Text(L10n.of(context).createSticker),
+                        ),
+                      ),
+                      const Divider(),
+                    ],
+                    if (controller.room != null && imageKeys.isNotEmpty)
+                      SwitchListTile.adaptive(
+                        title: Text(L10n.of(context).enableEmotesGlobally),
+                        value: controller.isGloballyActive(client),
+                        onChanged: controller.setIsGloballyActive,
+                      ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
-                  maxLength: 256,
-                  controller: controller.packAttributionController,
-                  readOnly: controller.readonly,
-                  onSubmitted: (_) => controller.submitAttributionAction(),
-                  decoration: InputDecoration(
-                    counter: const SizedBox.shrink(),
-                    labelText: L10n.of(context).attribution,
-                  ),
-                ),
-              ),
-            ],
-            if (!controller.readonly) ...[
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton.icon(
-                  onPressed: controller.createStickers,
-                  icon: const Icon(Icons.upload_outlined),
-                  label: Text(L10n.of(context).createSticker),
-                ),
-              ),
-              const Divider(),
-            ],
-            if (controller.room != null && imageKeys.isNotEmpty)
-              SwitchListTile.adaptive(
-                title: Text(L10n.of(context).enableEmotesGlobally),
-                value: controller.isGloballyActive(client),
-                onChanged: controller.setIsGloballyActive,
-              ),
-            imageKeys.isEmpty
-                ? Center(
+              // Emote List or Empty State
+              if (imageKeys.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
@@ -209,20 +225,19 @@ class EmotesSettingsView extends StatelessWidget {
                         style: const TextStyle(fontSize: 20),
                       ),
                     ),
-                  )
-                : ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    separatorBuilder: (BuildContext context, int i) =>
-                        const SizedBox.shrink(),
-                    itemCount: imageKeys.length,
-                    itemBuilder: (BuildContext context, int i) {
+                  ),
+                )
+              else
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int i) {
                       final imageCode = imageKeys[i];
                       final image = controller.pack!.images[imageCode]!;
                       final textEditingController = TextEditingController();
                       textEditingController.text = imageCode;
                       final useShortCuts =
                           (PlatformInfos.isWeb || PlatformInfos.isDesktop);
+                      
                       return ListTile(
                         title: Row(
                           children: [
@@ -231,8 +246,9 @@ class EmotesSettingsView extends StatelessWidget {
                                 shortcuts: !useShortCuts
                                     ? {}
                                     : {
-                                        LogicalKeySet(LogicalKeyboardKey.enter):
-                                            SubmitLineIntent(),
+                                        LogicalKeySet(
+                                          LogicalKeyboardKey.enter,
+                                        ): SubmitLineIntent(),
                                       },
                                 child: Actions(
                                   actions: !useShortCuts
@@ -331,8 +347,13 @@ class EmotesSettingsView extends StatelessWidget {
                               ),
                       );
                     },
+                    childCount: imageKeys.length,
                   ),
-          ],
+                ),
+              // Optional bottom padding for the list
+              const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
+            ],
+          ),
         ),
       ),
     );
