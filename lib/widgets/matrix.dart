@@ -461,6 +461,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
     AppConfig.incomingCallsOnLockScreen = 
         store.getBool(SettingKeys.incomingCallsOnLockScreen) ?? AppConfig.incomingCallsOnLockScreen;
+
+    AppConfig.pushToTalkHotkey = 
+        store.getBool(SettingKeys.pushToTalkHotkey) ?? AppConfig.pushToTalkHotkey;
   }
 
   @override

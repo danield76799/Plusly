@@ -19,6 +19,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ import 'package:action_slider/action_slider.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart' hide VideoRenderer;
+import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:matrix/matrix.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -71,9 +73,7 @@ class _StreamView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.black54,
-      ),
+      decoration: const BoxDecoration(color: Colors.black54),
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
@@ -136,9 +136,8 @@ class Calling extends StatefulWidget {
 class CallingView extends State<Calling> {
   Room? get room => call.room;
 
-  String get displayName => call.room.getLocalizedDisplayname(
-        MatrixLocals(L10n.of(widget.context)),
-      );
+  String get displayName =>
+      call.room.getLocalizedDisplayname(MatrixLocals(L10n.of(widget.context)));
 
   String get callId => widget.callId;
 
@@ -186,6 +185,13 @@ class CallingView extends State<Calling> {
   late StreamSubscription<CallState> onCallStateChangedSubscription;
   late StreamSubscription<CallStateChange> onCallEventChangedSubscription;
 
+  final HotKey _hotKey = HotKey(
+    key: PhysicalKeyboardKey.keyX,
+    modifiers: [HotKeyModifier.alt],
+    // Set hotkey scope (default is HotKeyScope.system)
+    scope: HotKeyScope.system, // Set as inapp-wide hotkey.
+  );
+
   void initialize() async {
     final call = this.call;
 
@@ -208,9 +214,19 @@ class CallingView extends State<Calling> {
 
     FlutterForegroundTask.startService(
       notificationTitle: L10n.of(widget.context).ongoingCall,
-      notificationText: L10n.of(widget.context)
-          .ongoingCallDetail(room!.getLocalizedDisplayname()),
+      notificationText: L10n.of(
+        widget.context,
+      ).ongoingCallDetail(room!.getLocalizedDisplayname()),
     );
+
+    if (AppConfig.pushToTalkHotkey) {
+      await hotKeyManager.register(
+        _hotKey,
+        keyDownHandler: (hotKey) {
+          _muteMic();
+        },
+      );
+    }
 
     try {
       // Enable wakelock (keep screen on)
@@ -219,10 +235,12 @@ class CallingView extends State<Calling> {
   }
 
   void registerListeners() {
-    onCallStateChangedSubscription =
-        call.onCallStateChanged.stream.listen(_handleCallState);
-    onCallEventChangedSubscription =
-        call.onCallEventChanged.stream.listen((event) {
+    onCallStateChangedSubscription = call.onCallStateChanged.stream.listen(
+      _handleCallState,
+    );
+    onCallEventChangedSubscription = call.onCallEventChanged.stream.listen((
+      event,
+    ) {
       if (event == CallStateChange.kFeedsChanged) {
         setState(() {
           call.tryRemoveStopedStreams();
@@ -238,13 +256,11 @@ class CallingView extends State<Calling> {
   }
 
   void cleanUp() {
-    Timer(
-      const Duration(seconds: 2),
-      () => widget.onClear?.call(),
-    );
+    Timer(const Duration(seconds: 2), () => widget.onClear?.call());
     try {
       unawaited(WakelockPlus.disable());
     } catch (_) {}
+    hotKeyManager.unregisterAll();
   }
 
   void minimise() {
@@ -330,18 +346,18 @@ class CallingView extends State<Calling> {
         }
         await FlutterForegroundTask.startService(
           notificationTitle: L10n.of(widget.context).screenSharingTitle,
-          notificationText: L10n.of(widget.context)
-              .screenSharingDetail(room!.getLocalizedDisplayname()),
-          serviceTypes: [
-            ForegroundServiceTypes.mediaProjection,
-          ],
+          notificationText: L10n.of(
+            widget.context,
+          ).screenSharingDetail(room!.getLocalizedDisplayname()),
+          serviceTypes: [ForegroundServiceTypes.mediaProjection],
         );
       } else {
         await FlutterForegroundTask.stopService();
         await FlutterForegroundTask.startService(
           notificationTitle: L10n.of(widget.context).ongoingCall,
-          notificationText: L10n.of(widget.context)
-              .ongoingCallDetail(room!.getLocalizedDisplayname()),
+          notificationText: L10n.of(
+            widget.context,
+          ).ongoingCallDetail(room!.getLocalizedDisplayname()),
         );
       }
     }
@@ -459,9 +475,7 @@ class CallingView extends State<Calling> {
     );
 
     final actionSlider = ConstrainedBox(
-      constraints: const BoxConstraints.tightFor(
-        width: 312,
-      ),
+      constraints: const BoxConstraints.tightFor(width: 312),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: ActionSlider.dual(
@@ -470,10 +484,7 @@ class CallingView extends State<Calling> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
-                  Icons.call_end,
-                  color: Colors.red,
-                ),
+                const Icon(Icons.call_end, color: Colors.red),
                 const SizedBox(width: 18),
                 Text(L10n.of(context).hangUp),
               ],
@@ -486,10 +497,7 @@ class CallingView extends State<Calling> {
               children: [
                 Text(L10n.of(context).answerCall),
                 const SizedBox(width: 18),
-                const Icon(
-                  Icons.call,
-                  color: Colors.green,
-                ),
+                const Icon(Icons.call, color: Colors.green),
               ],
             ),
           ),
@@ -516,8 +524,8 @@ class CallingView extends State<Calling> {
         return call.isOutgoing
             ? <Widget>[hangupButton]
             : PlatformInfos.isMobile
-                ? <Widget>[actionSlider]
-                : <Widget>[answerButton, hangupButton];
+            ? <Widget>[actionSlider]
+            : <Widget>[answerButton, hangupButton];
       case CallState.kConnecting:
         return <Widget>[hangupButton];
       case CallState.kConnected:
@@ -532,9 +540,7 @@ class CallingView extends State<Calling> {
           hangupButton,
         ];
       case CallState.kEnded:
-        return <Widget>[
-          hangupButton,
-        ];
+        return <Widget>[hangupButton];
       case CallState.kFledgling:
       case CallState.kWaitLocalMedia:
       case CallState.kCreateOffer:
@@ -567,16 +573,16 @@ class CallingView extends State<Calling> {
                 call.state == CallState.kConnected
                     ? L10n.of(context).callConnected
                     : call.state == CallState.kConnecting
-                        ? L10n.of(context).callConnecting
-                        : call.state == CallState.kEnded
-                            ? L10n.of(context).callEnded
-                            : call.state == CallState.kEnding
-                                ? L10n.of(context).callEnding
-                                : call.state == CallState.kRinging
-                                    ? L10n.of(context).callRinging
-                                    : call.state == CallState.kInviteSent
-                                        ? L10n.of(context).callInviteSent
-                                        : "",
+                    ? L10n.of(context).callConnecting
+                    : call.state == CallState.kEnded
+                    ? L10n.of(context).callEnded
+                    : call.state == CallState.kEnding
+                    ? L10n.of(context).callEnding
+                    : call.state == CallState.kRinging
+                    ? L10n.of(context).callRinging
+                    : call.state == CallState.kInviteSent
+                    ? L10n.of(context).callInviteSent
+                    : "",
               ),
             ],
           ),
@@ -591,9 +597,11 @@ class CallingView extends State<Calling> {
     if (call.localHold || call.remoteOnHold) {
       var title = '';
       if (call.localHold) {
-        title = L10n.of(context).heldTheCall(call.room.getLocalizedDisplayname(
-          MatrixLocals(L10n.of(widget.context)),
-        ));
+        title = L10n.of(context).heldTheCall(
+          call.room.getLocalizedDisplayname(
+            MatrixLocals(L10n.of(widget.context)),
+          ),
+        );
       } else if (call.remoteOnHold) {
         title = L10n.of(context).youHeldTheCall;
       }
@@ -602,17 +610,10 @@ class CallingView extends State<Calling> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.pause,
-                size: 48.0,
-                color: Colors.white,
-              ),
+              const Icon(Icons.pause, size: 48.0, color: Colors.white),
               Text(
                 title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24.0,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 24.0),
               ),
             ],
           ),
@@ -621,7 +622,8 @@ class CallingView extends State<Calling> {
       return stackWidgets;
     }
 
-    var primaryStream = call.remoteScreenSharingStream ??
+    var primaryStream =
+        call.remoteScreenSharingStream ??
         call.localScreenSharingStream ??
         call.remoteUserMediaStream ??
         call.localUserMediaStream;
@@ -670,8 +672,10 @@ class CallingView extends State<Calling> {
         SizedBox(
           width: _localVideoWidth,
           height: _localVideoHeight,
-          child:
-              _StreamView(remoteUserMediaStream!, matrixClient: widget.client),
+          child: _StreamView(
+            remoteUserMediaStream!,
+            matrixClient: widget.client,
+          ),
         ),
       );
       secondaryStreamViews.add(const SizedBox(height: 10));
@@ -712,9 +716,7 @@ class CallingView extends State<Calling> {
           child: Container(
             width: _localVideoWidth,
             margin: _localVideoMargin,
-            child: Column(
-              children: secondaryStreamViews,
-            ),
+            child: Column(children: secondaryStreamViews),
           ),
         ),
       );
@@ -753,9 +755,7 @@ class CallingView extends State<Calling> {
           body: OrientationBuilder(
             builder: (BuildContext context, Orientation orientation) {
               return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.black87,
-                ),
+                decoration: const BoxDecoration(color: Colors.black87),
                 child: Stack(
                   children: [
                     ..._buildContent(orientation, isFloating),

@@ -13,6 +13,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_webrtc
   gtk
   handy_window
+  hotkey_manager_linux
   pasteboard
   record_linux
   screen_retriever_linux

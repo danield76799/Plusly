@@ -116,6 +116,13 @@ class SettingsChatView extends StatelessWidget {
                 storeKey: SettingKeys.experimentalVoip,
                 defaultValue: AppConfig.experimentalVoip,
               ),
+              SettingsSwitchListTile.adaptive(
+                title: L10n.of(context).pushToTalkHotkey,
+                subtitle: Text(L10n.of(context).pushToTalkHotkeyDescription),
+                onChanged: (b) => AppConfig.pushToTalkHotkey = b,
+                storeKey: SettingKeys.pushToTalkHotkey,
+                defaultValue: AppConfig.pushToTalkHotkey,
+              ),
               ListTile(
                 title: Text(L10n.of(context).ringtone),
                 subtitle: Text(L10n.of(context).ringtoneDescription),

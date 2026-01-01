@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SettingKeys {
+  static const String pushToTalkHotkey = 'xyz.extera.next.pushToTalkHotkey';
   static const String incomingCallsOnLockScreen = 'xyz.extera.next.incomingCallsOnLockScreen';
   static const String checkForUpdates = 'xyz.extera.next.checkForUpdates';
   static const String twemojiFont = 'xyz.extera.next.twemojiFont';
@@ -50,6 +51,7 @@ abstract class SettingKeys {
 
 enum AppSettings<T> {
   incomingCallsOnLockScreen<bool>('xyz.extera.next.incomingCallsOnLockScreen', true),
+  pushToTalkHotkey<bool>('xyz.extera.next.pushToTalkHotkey', false),
   twemojiFont<bool>('xyz.extera.next.twemojiFont', false),
   checkForUpdates<bool>('xyz.extera.next.checkForUpdates', true),
   ringtone<String>('xyz.extera.next.ringtone', 'system'),

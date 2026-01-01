@@ -78,6 +78,7 @@ abstract class AppConfig {
   static bool sendTypingNotifications = true;
   static bool sendPublicReadReceipts = true;
   static bool swipeRightToLeftToReply = true;
+  static bool pushToTalkHotkey = true;
   static bool hideAvatarsInInvites = true;
   static bool? sendOnEnter;
   static bool showPresences = true;

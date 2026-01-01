@@ -3495,5 +3495,7 @@
   "widgetType": "Widget type",
   "widget": "Widget",
   "incomingCallsOnLockScreenTitle": "Calls on lock screen",
-  "incomingCallsOnLockScreenSubtitle": "Show incoming calls on lock screen"
+  "incomingCallsOnLockScreenSubtitle": "Show incoming calls on lock screen",
+  "pushToTalkHotkey": "Push to talk",
+  "pushToTalkHotkeyDescription": "Press Alt+X to toggle microphone"
 }
