@@ -20,6 +20,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/pages/dialer/task_handler.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -217,6 +218,23 @@ class CallingView extends State<Calling> {
       notificationText: L10n.of(
         widget.context,
       ).ongoingCallDetail(room!.getLocalizedDisplayname()),
+      notificationButtons: [
+        NotificationButton(id: 'mute', text: L10n.of(context).muteMic),
+        NotificationButton(id: 'speaker', text: L10n.of(context).switchSpeaker),
+        NotificationButton(
+          id: 'hangup',
+          text: L10n.of(context).hangUp,
+          textColor: Colors.red,
+        ),
+      ],
+    );
+
+    FlutterForegroundTask.setTaskHandler(
+      DialerTaskHandler(
+        muteMicrophone: _muteMic,
+        switchSpeaker: _switchSpeaker,
+        hangUp: _hangUp,
+      ),
     );
 
     if (AppConfig.pushToTalkHotkey) {
@@ -354,6 +372,18 @@ class CallingView extends State<Calling> {
             widget.context,
           ).screenSharingDetail(room!.getLocalizedDisplayname()),
           serviceTypes: [ForegroundServiceTypes.mediaProjection],
+          notificationButtons: [
+            NotificationButton(id: 'mute', text: L10n.of(context).muteMic),
+            NotificationButton(
+              id: 'speaker',
+              text: L10n.of(context).switchSpeaker,
+            ),
+            NotificationButton(
+              id: 'hangup',
+              text: L10n.of(context).hangUp,
+              textColor: Colors.red,
+            ),
+          ],
         );
       } else {
         await FlutterForegroundTask.stopService();
@@ -365,6 +395,15 @@ class CallingView extends State<Calling> {
         );
       }
     }
+
+    FlutterForegroundTask.setTaskHandler(
+      DialerTaskHandler(
+        muteMicrophone: _muteMic,
+        switchSpeaker: _switchSpeaker,
+        hangUp: _hangUp,
+      ),
+    );
+
     setState(() {
       call.setScreensharingEnabled(!call.screensharingEnabled);
       call.tryRemoveStopedStreams();

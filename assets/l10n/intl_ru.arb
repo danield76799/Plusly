@@ -790,7 +790,7 @@
 		"type": "String",
 		"placeholders": {}
 	},
-	"currentlyActive": "Сейчас активен(-а)",
+	"currentlyActive": "В сети",
 	"@currentlyActive": {
 		"type": "String",
 		"placeholders": {}
