@@ -1,3 +1,6 @@
+import 'dart:ui';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -155,6 +158,19 @@ class BootstrapDialogState extends State<BootstrapDialog> {
         ),
       );
     }
+
+    final defaultFontSize =
+        ElevatedButton.styleFrom().textStyle
+            ?.resolve(const <WidgetState>{})
+            ?.fontSize ??
+        14.0;
+    final scale =
+        clampDouble(
+          MediaQuery.textScalerOf(context).scale(defaultFontSize) / 14.0,
+          1.0,
+          2.0,
+        ) -
+        1.0;
 
     _wipe ??= widget.wipe;
     final buttons = <Widget>[];
@@ -334,16 +350,12 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    ElevatedButton.icon(
+                    ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         foregroundColor: theme.colorScheme.onPrimary,
                         iconColor: theme.colorScheme.onPrimary,
                         backgroundColor: theme.colorScheme.primary,
                       ),
-                      icon: _recoveryKeyInputLoading
-                          ? const CircularProgressIndicator.adaptive()
-                          : const Icon(Icons.lock_open_outlined),
-                      label: Text(L10n.of(context).unlockOldMessages),
                       onPressed: _recoveryKeyInputLoading
                           ? null
                           : () async {
@@ -398,6 +410,20 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                 );
                               }
                             },
+                      child: _recoveryKeyInputLoading
+                          ? const LinearProgressIndicator()
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: lerpDouble(8, 4, scale)!,
+                              children: [
+                                const Icon(Icons.lock_open_outlined),
+                                Flexible(
+                                  child: Text(
+                                    L10n.of(context).unlockOldMessages,
+                                  ),
+                                ),
+                              ],
+                            ),
                     ),
                     const SizedBox(height: 16),
                     Row(
