@@ -2,7 +2,7 @@ name: extera_next
 description: Chat with your friends.
 publish_to: none
 # Version schema: <YEAR>.<MAJOR UPDATE>.<MINOR><PATCH>
-version: 26.0.1
+version: 26.0.2
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
@@ -103,6 +103,8 @@ dependencies:
   uuid: ^4.5.2
   flutter_ringtone_player: ^4.0.0+4
   audioplayers_linux: ^4.2.1
+  pro_image_editor: ^11.15.2
+  google_fonts: ^6.3.3
 
 dev_dependencies:
   flutter_lints: ^3.0.0

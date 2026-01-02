@@ -3498,5 +3498,6 @@
   "incomingCallsOnLockScreenSubtitle": "Show incoming calls on lock screen",
   "pushToTalkHotkey": "Push to talk",
   "pushToTalkHotkeyDescription": "Press Alt+X to toggle microphone",
-  "roomAddress": "Room address"
+  "roomAddress": "Room address",
+  "imageEditFailed": "Failed to edit image"
 }

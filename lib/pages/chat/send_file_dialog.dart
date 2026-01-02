@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/utils/clean_exif.dart';
+import 'package:extera_next/widgets/adaptive_dialogs/image_editor_dialog.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/cupertino.dart' hide Image;
 import 'package:flutter/material.dart';
@@ -247,6 +248,28 @@ class SendFileDialogState extends State<SendFileDialog> {
     return lengths.fold<double>(0, (p, length) => p + length).sizeString;
   }
 
+  void editImage(int index) async {
+    final file = widget.files[index];
+    final edited = await showImageEditor(
+      context: context,
+      byteArray: await file.readAsBytes(),
+    );
+    if (edited == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(L10n.of(context).imageEditFailed)));
+      return;
+    }
+    setState(() {
+      widget.files[index] = XFile.fromData(
+        edited,
+        mimeType: file.mimeType,
+        name: file.name,
+        path: file.path,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -342,30 +365,44 @@ class SendFileDialogState extends State<SendFileDialog> {
                                         ),
                                       );
                                     }
-                                    return Image.memory(
-                                      bytes,
-                                      height: 256,
-                                      width: widget.files.length == 1
-                                          ? 256 - 36
-                                          : null,
-                                      fit: BoxFit.contain,
-                                      errorBuilder: (context, e, s) {
-                                        Logs().w(
-                                          'Unable to preview image',
-                                          e,
-                                          s,
-                                        );
-                                        return const Center(
-                                          child: SizedBox(
-                                            width: 256,
-                                            height: 256,
-                                            child: Icon(
-                                              Icons.broken_image_outlined,
-                                              size: 64,
+                                    return Stack(
+                                      children: [
+                                        Image.memory(
+                                          bytes,
+                                          height: 256,
+                                          width: widget.files.length == 1
+                                              ? 256 - 36
+                                              : null,
+                                          fit: BoxFit.contain,
+                                          errorBuilder: (context, e, s) {
+                                            Logs().w(
+                                              'Unable to preview image',
+                                              e,
+                                              s,
+                                            );
+                                            return const Center(
+                                              child: SizedBox(
+                                                width: 256,
+                                                height: 256,
+                                                child: Icon(
+                                                  Icons.broken_image_outlined,
+                                                  size: 64,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                        Positioned(
+                                          right: 8,
+                                          bottom: 8,
+                                          child: IconButton.filledTonal(
+                                            onPressed: () => editImage(i),
+                                            icon: const Icon(
+                                              Icons.edit_outlined,
                                             ),
                                           ),
-                                        );
-                                      },
+                                        ),
+                                      ],
                                     );
                                   },
                                 ),
