@@ -1,4 +1,5 @@
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
+import 'package:matrix/matrix.dart';
 
 class DialerTaskHandler extends TaskHandler {
 
@@ -14,6 +15,7 @@ class DialerTaskHandler extends TaskHandler {
 
   @override
   void onNotificationButtonPressed(String id) {
+    Logs().w("Task handler $id");
     switch (id) {
       case 'mute':
         muteMicrophone();

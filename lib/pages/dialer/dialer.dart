@@ -213,6 +213,14 @@ class CallingView extends State<Calling> {
       ),
     );
 
+    FlutterForegroundTask.setTaskHandler(
+      DialerTaskHandler(
+        muteMicrophone: _muteMic,
+        switchSpeaker: _switchSpeaker,
+        hangUp: _hangUp,
+      ),
+    );
+
     FlutterForegroundTask.startService(
       notificationTitle: L10n.of(widget.context).ongoingCall,
       notificationText: L10n.of(
@@ -227,14 +235,6 @@ class CallingView extends State<Calling> {
           textColor: Colors.red,
         ),
       ],
-    );
-
-    FlutterForegroundTask.setTaskHandler(
-      DialerTaskHandler(
-        muteMicrophone: _muteMic,
-        switchSpeaker: _switchSpeaker,
-        hangUp: _hangUp,
-      ),
     );
 
     if (AppConfig.pushToTalkHotkey) {
