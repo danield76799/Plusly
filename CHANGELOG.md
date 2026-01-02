@@ -1,3 +1,11 @@
+## Extera 26.0.1
+- Fixed emoji settings lagging, when there are a lot of emojis added.
+- Always show mute toggle in calls.
+- Added unread badge on bottom navigation bar.
+- Added QR code creation to share rooms.
+- Added sound effects for microphone mute/unmute.
+- Added microphone toggle global hotkey (does not work on Wayland).
+
 ## Extera 26.0.0
 - Fixed Auto-update option being buggy.
 - Hide Twemoji option for mobiles as a temporary solution.
