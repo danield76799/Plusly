@@ -6,7 +6,6 @@ import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:flutter_highlighter/flutter_highlighter.dart';
 import 'package:flutter_highlighter/themes/shades-of-purple.dart';
 import 'package:matrix/matrix.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/adaptive_dialog_action.dart';

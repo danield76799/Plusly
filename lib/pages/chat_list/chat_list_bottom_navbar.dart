@@ -1,4 +1,6 @@
+import 'package:badges/badges.dart';
 import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
@@ -38,6 +40,14 @@ class ChatListBottomNavbar extends StatelessWidget {
         ActiveFilter.spaces,
     ];
 
+    final filterLambdas = {
+      ActiveFilter.allChats: (Room room) => true,
+      ActiveFilter.messages: (Room room) => room.isDirectChat,
+      ActiveFilter.groups: (Room room) => !room.isDirectChat,
+      ActiveFilter.unread: (Room room) => room.isUnread,
+      ActiveFilter.spaces: (Room room) => false,
+    };
+
     return BottomNavigationBar(
       currentIndex: filters.indexOf(controller.activeFilter),
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -50,10 +60,14 @@ class ChatListBottomNavbar extends StatelessWidget {
       items: filters
           .map(
             (filter) => BottomNavigationBarItem(
-              icon: Icon(filter.toIconData(true)),
-              activeIcon: Icon(filter.toIconData(false)),
-              label: filter.toLocalizedString(context),
-            ),
+                icon: UnreadRoomsBadge(
+                  filter: filterLambdas[filter]!,
+                  badgePosition: BadgePosition.topEnd(),
+                  child: Icon(filter.toIconData(true)),
+                ),
+                activeIcon: Icon(filter.toIconData(false)),
+                label: filter.toLocalizedString(context),
+              ),
           )
           .toList(),
     );
