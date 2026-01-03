@@ -28,14 +28,15 @@ class ReplyContent extends StatelessWidget {
     final theme = Theme.of(context);
 
     final timeline = this.timeline;
-    final displayEvent =
-        timeline != null ? replyEvent.getDisplayEvent(timeline) : replyEvent;
+    final displayEvent = timeline != null
+        ? replyEvent.getDisplayEvent(timeline)
+        : replyEvent;
     final fontSize = AppConfig.messageFontSize * AppConfig.fontSizeFactor;
     final color = theme.brightness == Brightness.dark
         ? theme.colorScheme.onTertiaryContainer
         : ownMessage
-            ? theme.colorScheme.tertiaryContainer
-            : theme.colorScheme.tertiary;
+        ? theme.colorScheme.tertiaryContainer
+        : theme.colorScheme.tertiary;
 
     return Material(
       color: Colors.transparent,
@@ -74,20 +75,23 @@ class ReplyContent extends StatelessWidget {
                   },
                 ),
                 Text(
-                  displayEvent.calcLocalizedBodyFallback(
-                    MatrixLocals(L10n.of(context)),
-                    withSenderNamePrefix: false,
-                    hideReply: true,
-                    plaintextBody: true,
-                  ),
+                  displayEvent
+                      .calcLocalizedBodyFallback(
+                        MatrixLocals(L10n.of(context)),
+                        withSenderNamePrefix: false,
+                        hideReply: true,
+                        plaintextBody: true,
+                      )
+                      .split('\n')
+                      .first,
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: TextStyle(
                     color: theme.brightness == Brightness.dark
                         ? theme.colorScheme.onSurface
                         : ownMessage
-                            ? theme.colorScheme.onTertiary
-                            : theme.colorScheme.onSurface,
+                        ? theme.colorScheme.onTertiary
+                        : theme.colorScheme.onSurface,
                     fontSize: fontSize,
                   ),
                 ),

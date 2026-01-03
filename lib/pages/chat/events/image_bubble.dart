@@ -46,8 +46,8 @@ class ImageBubble extends StatelessWidget {
   Widget _buildPlaceholder(BuildContext context) {
     final String blurHashString =
         event.infoMap['xyz.amorgan.blurhash'] is String
-            ? event.infoMap['xyz.amorgan.blurhash']
-            : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+        ? event.infoMap['xyz.amorgan.blurhash']
+        : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
     return SizedBox(
       width: width,
       height: height,
@@ -68,11 +68,8 @@ class ImageBubble extends StatelessWidget {
     if (!tapToView) return;
     showDialog(
       context: context,
-      builder: (_) => ImageViewer(
-        event,
-        timeline: timeline,
-        outerContext: context,
-      ),
+      builder: (_) =>
+          ImageViewer(event, timeline: timeline, outerContext: context),
     );
   }
 
@@ -93,6 +90,13 @@ class ImageBubble extends StatelessWidget {
       );
     }
 
+    if (event.inReplyToEventId(includingFallback: false) != null && fileDescription != null) {
+      borderRadius = borderRadius.copyWith(
+        topLeft: Radius.zero,
+        topRight: Radius.zero,
+      );
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       spacing: 8,
@@ -101,13 +105,13 @@ class ImageBubble extends StatelessWidget {
           color: Colors.transparent,
           clipBehavior: Clip.hardEdge,
           shape: RoundedRectangleBorder(
-            borderRadius: borderRadius,
-            side: BorderSide(
-              color: event.messageType == MessageTypes.Sticker
-                  ? Colors.transparent
-                  : theme.dividerColor,
-            ),
-          ),
+                  borderRadius: borderRadius,
+                  side: BorderSide(
+                    color: event.messageType == MessageTypes.Sticker
+                        ? Colors.transparent
+                        : theme.dividerColor,
+                  ),
+                ),
           child: InkWell(
             onTap: () => _onTap(context),
             borderRadius: borderRadius,
@@ -133,10 +137,7 @@ class ImageBubble extends StatelessWidget {
           SizedBox(
             width: width,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Linkify(
                 text: fileDescription,
                 textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
@@ -163,10 +164,7 @@ class ImageBubble extends StatelessWidget {
           SizedBox(
             width: width,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: HtmlMessage(
                 html: fileDescription,
                 textColor: textColor,

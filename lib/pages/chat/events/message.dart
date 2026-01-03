@@ -437,8 +437,7 @@ class Message extends StatelessWidget {
                                           ),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: .start,
                                             children: <Widget>[
                                               Stack(
                                                 children: [
@@ -499,6 +498,8 @@ class Message extends StatelessWidget {
                                                                         right:
                                                                             16,
                                                                         top: 8,
+                                                                        bottom:
+                                                                            8,
                                                                       ),
                                                                   child: Material(
                                                                     color: Colors

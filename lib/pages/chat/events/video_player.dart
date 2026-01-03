@@ -18,12 +18,14 @@ class EventVideoPlayer extends StatelessWidget {
   final Timeline? timeline;
   final Color textColor;
   final Color linkColor;
+  final BorderRadius? borderRadius;
 
   const EventVideoPlayer(
     this.event,
     this.textColor,
     this.linkColor, {
     this.timeline,
+    this.borderRadius,
     super.key,
   });
 
@@ -32,9 +34,15 @@ class EventVideoPlayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final supportsVideoPlayer = PlatformInfos.supportsVideoPlayer;
+    final theme = Theme.of(context);
 
-    final blurHash = (event.thumbnailInfoMap as Map<String, dynamic>)
-            .tryGet<String>('xyz.amorgan.blurhash') ??
+    var borderRadius =
+        this.borderRadius ?? BorderRadius.circular(AppConfig.borderRadius);
+
+    final blurHash =
+        (event.thumbnailInfoMap as Map<String, dynamic>).tryGet<String>(
+          'xyz.amorgan.blurhash',
+        ) ??
         fallbackBlurHash;
     final fileDescription = event.fileDescription;
     final infoMap = event.content.tryGetMap<String, Object?>('info');
@@ -44,8 +52,23 @@ class EventVideoPlayer extends StatelessWidget {
     final width = videoWidth * (height / videoHeight);
 
     final durationInt = infoMap?.tryGet<int>('duration');
-    final duration =
-        durationInt == null ? null : Duration(milliseconds: durationInt);
+    final duration = durationInt == null
+        ? null
+        : Duration(milliseconds: durationInt);
+
+    if (fileDescription != null) {
+      borderRadius = borderRadius.copyWith(
+        bottomLeft: Radius.zero,
+        bottomRight: Radius.zero,
+      );
+    }
+
+    if (event.inReplyToEventId(includingFallback: false) != null && fileDescription != null) {
+      borderRadius = borderRadius.copyWith(
+        topLeft: Radius.zero,
+        topRight: Radius.zero,
+      );
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -53,7 +76,13 @@ class EventVideoPlayer extends StatelessWidget {
       children: [
         Material(
           color: Colors.black,
-          borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+          clipBehavior: Clip.hardEdge,
+          shape: RoundedRectangleBorder(
+            borderRadius: borderRadius,
+            side: BorderSide(
+              color: theme.dividerColor,
+            ),
+          ),
           child: InkWell(
             onTap: () => supportsVideoPlayer
                 ? showDialog(
@@ -65,7 +94,7 @@ class EventVideoPlayer extends StatelessWidget {
                     ),
                   )
                 : event.saveFile(context),
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+            borderRadius: borderRadius,
             child: SizedBox(
               width: width,
               height: height,
@@ -117,15 +146,11 @@ class EventVideoPlayer extends StatelessWidget {
             ),
           ),
         ),
-        if (fileDescription != null &&
-            !event.isRichFileDescription)
+        if (fileDescription != null && !event.isRichFileDescription)
           SizedBox(
             width: width,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Linkify(
                 text: fileDescription,
                 textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
@@ -146,15 +171,11 @@ class EventVideoPlayer extends StatelessWidget {
               ),
             ),
           ),
-        if (fileDescription != null &&
-            event.isRichFileDescription)
+        if (fileDescription != null && event.isRichFileDescription)
           SizedBox(
             width: width,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: HtmlMessage(
                 html: fileDescription,
                 textColor: textColor,
