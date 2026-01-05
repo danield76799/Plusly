@@ -11,6 +11,7 @@ import 'package:extera_next/utils/matrix_sdk_extensions/synapse_admin_extension.
 import 'package:extera_next/utils/privacy_options.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
 import 'package:extera_next/utils/translator.dart';
+import 'package:extera_next/widgets/emoji_picker.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +19,6 @@ import 'package:flutter/services.dart';
 import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
@@ -1194,7 +1194,7 @@ class ChatController extends State<ChatPageWithRoom>
     scrollController.jumpTo(0);
   }
 
-  void onEmojiSelected(_, Emoji? emoji) {
+  void onEmojiSelected(Category? _, PickerEmoji emoji) {
     switch (emojiPickerType) {
       case EmojiPickerType.reaction:
         senEmojiReaction(emoji);
@@ -1206,30 +1206,70 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void senEmojiReaction(Emoji? emoji) {
+  void senEmojiReaction(PickerEmoji? emoji) {
     setState(() => showEmojiPicker = false);
     if (emoji == null) return;
     // make sure we don't send the same emoji twice
     if (_allReactionEvents.any(
-      (e) => e.content.tryGetMap('m.relates_to')?['key'] == emoji.emoji,
+      (e) =>
+          e.content.tryGetMap('m.relates_to')?['key'] ==
+          (emoji.standardEmoji?.char ?? emoji.customData),
     )) {
       return;
     }
-    return sendEmojiAction(emoji.emoji);
+    return sendEmojiAction(emoji.standardEmoji?.char ?? emoji.customData);
   }
 
-  void typeEmoji(Emoji? emoji) {
+  void typeEmoji(PickerEmoji? emoji) {
     if (emoji == null) return;
+    if (emoji.type == .custom) {
+      typeCustomEmoji(emoji);
+      return;
+    }
     final text = sendController.text;
     final selection = sendController.selection;
+    final char = emoji.standardEmoji!.char;
     final newText = sendController.text.isEmpty
-        ? emoji.emoji
-        : text.replaceRange(selection.start, selection.end, emoji.emoji);
+        ? char
+        : text.replaceRange(selection.start, selection.end, char);
     sendController.value = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(
         // don't forget an UTF-8 combined emoji might have a length > 1
-        offset: selection.baseOffset + emoji.emoji.length,
+        offset: selection.baseOffset + char.length,
+      ),
+    );
+  }
+
+  void typeCustomEmoji(PickerEmoji emoji) {
+    final text = sendController.text;
+    final selection = sendController.selection;
+    var isUnique = true;
+    final insertPack = emoji.categoryId!;
+    final emotePacks = room.getImagePacks(ImagePackUsage.emoticon);
+    for (final pack in emotePacks.entries) {
+      if (pack.key == insertPack) {
+        continue;
+      }
+      for (final emote in pack.value.images.entries) {
+        if (emote.key == emoji.customId!) {
+          isUnique = false;
+          break;
+        }
+      }
+      if (!isUnique) {
+        break;
+      }
+    }
+    final insertText =
+        ':${isUnique ? '' : '$insertPack~'}${emoji.customId}: ';
+    final newText = sendController.text.isEmpty
+        ? insertText
+        : text.replaceRange(selection.start, selection.end, insertText);
+    sendController.value = TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(
+        offset: selection.baseOffset + newText.length,
       ),
     );
   }

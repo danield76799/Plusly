@@ -6,8 +6,8 @@ import 'package:matrix/matrix.dart';
 extension ClientDownloadContentExtension on Client {
   Future<Uint8List> downloadMxcCached(
     Uri mxc, {
-    num? width,
-    num? height,
+    num? width = 128,
+    num? height = 128,
     bool isThumbnail = false,
     bool? animated,
     ThumbnailMethod? thumbnailMethod,
@@ -44,7 +44,7 @@ extension ClientDownloadContentExtension on Client {
           accessToken == null ? null : {'authorization': 'Bearer $accessToken'},
     );
     if (response.statusCode != 200) {
-      throw Exception();
+      throw Exception("Failed to download: ${response.statusCode} ${response.body} $httpUri");
     }
     var imageData = response.bodyBytes;
 

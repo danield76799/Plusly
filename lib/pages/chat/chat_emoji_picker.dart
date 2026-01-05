@@ -1,6 +1,7 @@
+import 'package:extera_next/widgets/emoji_picker.dart';
+import 'package:extera_next/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
@@ -14,7 +15,8 @@ class ChatEmojiPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final imagePacks = controller.room.getImagePacks(ImagePackUsage.emoticon);
+
     return AnimatedContainer(
       duration: FluffyThemes.animationDuration,
       curve: FluffyThemes.animationCurve,
@@ -37,53 +39,57 @@ class ChatEmojiPicker extends StatelessWidget {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        EmojiPicker(
+                        MatrixEmojiPicker(
                           onEmojiSelected: controller.onEmojiSelected,
                           onBackspacePressed: controller.emojiPickerBackspace,
-                          config: Config(
-                            locale: Localizations.localeOf(context),
-                            emojiViewConfig: EmojiViewConfig(
-                              noRecents: const NoRecent(),
-                              backgroundColor:
-                                  theme.colorScheme.onInverseSurface,
-                            ),
-                            bottomActionBarConfig: const BottomActionBarConfig(
-                              enabled: false,
-                            ),
-                            categoryViewConfig: CategoryViewConfig(
-                              backspaceColor: theme.colorScheme.primary,
-                              iconColor:
-                                  theme.colorScheme.primary.withAlpha(128),
-                              iconColorSelected: theme.colorScheme.primary,
-                              indicatorColor: theme.colorScheme.primary,
-                              backgroundColor: theme.colorScheme.surface,
-                            ),
-                            skinToneConfig: SkinToneConfig(
-                              dialogBackgroundColor: Color.lerp(
-                                theme.colorScheme.surface,
-                                theme.colorScheme.primaryContainer,
-                                0.75,
-                              )!,
-                              indicatorColor: theme.colorScheme.onSurface,
-                            ),
-                          ),
+                          customCategories: imagePacks.entries
+                              .map(
+                                (entry) => CustomCategory(
+                                  id: entry.key,
+                                  name: entry.value.pack.displayName!,
+                                  icon: CircleAvatar(
+                                    child: MxcImage(
+                                      uri: entry.value.images.values.first.url,
+                                      width: 32,
+                                      height: 32,
+                                    ),
+                                  ),
+                                  emojis: entry.value.images.map((
+                                    name,
+                                    content,
+                                  ) {
+                                    return MapEntry(
+                                      name,
+                                      content.url.toString(),
+                                    );
+                                  }),
+                                ),
+                              )
+                              .toList(),
+                          customEmojiBuilder: (context, name, size) {
+                            return MxcImage(
+                              uri: Uri.parse(name),
+                              width: 32,
+                              height: 32,
+                            );
+                          },
                         ),
                         StickerPickerDialog(
                           room: controller.room,
                           onSelected: (sticker) {
-                            controller.room.sendEvent(
-                              {
-                                'body': sticker.body,
-                                'info': sticker.info ?? {},
-                                'url': sticker.url.toString(),
-                                'm.relates_to': controller.replyEvent != null ? {
-                                  'm.in_reply_to': {
-                                    'event_id': controller.replyEvent!.eventId,
-                                  },
-                                } : null,
-                              },
-                              type: EventTypes.Sticker,
-                            );
+                            controller.room.sendEvent({
+                              'body': sticker.body,
+                              'info': sticker.info ?? {},
+                              'url': sticker.url.toString(),
+                              'm.relates_to': controller.replyEvent != null
+                                  ? {
+                                      'm.in_reply_to': {
+                                        'event_id':
+                                            controller.replyEvent!.eventId,
+                                      },
+                                    }
+                                  : null,
+                            }, type: EventTypes.Sticker);
                             controller.cancelReplyEventAction();
                             controller.hideEmojiPicker();
                           },
