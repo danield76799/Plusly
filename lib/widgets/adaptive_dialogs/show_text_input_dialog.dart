@@ -100,10 +100,13 @@ Future<String?> showTextInputDialog({
                 Navigator.of(context).pop<String>(input);
               },
               autofocus: true,
-              style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error, foregroundColor: Theme.of(context).colorScheme.onError),
-              child: Text(
-                okLabel ?? L10n.of(context).ok,
-              ),
+              style: isDestructive
+                  ? FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      foregroundColor: Theme.of(context).colorScheme.onError,
+                    )
+                  : null,
+              child: Text(okLabel ?? L10n.of(context).ok),
             ),
           ],
         ),
