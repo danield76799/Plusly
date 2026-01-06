@@ -258,7 +258,6 @@ class ChatView extends StatelessWidget {
                             child: Text(L10n.of(context).jump),
                           ),
                         ),
-                      const Divider(height: 1),
                     ],
                   ),
                 ),
