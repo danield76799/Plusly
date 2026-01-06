@@ -47,12 +47,10 @@ class ChatEmojiPicker extends StatelessWidget {
                                 (entry) => CustomCategory(
                                   id: entry.key,
                                   name: entry.value.pack.displayName!,
-                                  icon: CircleAvatar(
-                                    child: MxcImage(
-                                      uri: entry.value.images.values.first.url,
-                                      width: 32,
-                                      height: 32,
-                                    ),
+                                  icon: MxcImage(
+                                    uri: entry.value.images.values.first.url,
+                                    width: 32,
+                                    height: 32,
                                   ),
                                   emojis: entry.value.images.map((
                                     name,
@@ -71,6 +69,7 @@ class ChatEmojiPicker extends StatelessWidget {
                               uri: Uri.parse(name),
                               width: 32,
                               height: 32,
+                              animated: true,
                             );
                           },
                         ),
