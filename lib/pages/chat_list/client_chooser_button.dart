@@ -1,3 +1,4 @@
+import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/pages/download_manager/download_manager_view.dart';
 import 'package:flutter/material.dart';
 
@@ -23,8 +24,8 @@ class ClientChooserButton extends StatelessWidget {
         (a, b) => a!.isValidMatrixId == b!.isValidMatrixId
             ? 0
             : a.isValidMatrixId && !b.isValidMatrixId
-                ? -1
-                : 1,
+            ? -1
+            : 1,
       );
     return <PopupMenuEntry<Object>>[
       PopupMenuItem(
@@ -130,7 +131,8 @@ class ClientChooserButton extends StatelessWidget {
                     children: [
                       Avatar(
                         mxContent: snapshot.data?.avatarUrl,
-                        name: snapshot.data?.displayName ??
+                        name:
+                            snapshot.data?.displayName ??
                             client.userID!.localpart,
                         size: 32,
                       ),
@@ -180,10 +182,7 @@ class ClientChooserButton extends StatelessWidget {
       builder: (context, snapshot) => Stack(
         alignment: Alignment.center,
         children: [
-          ...List.generate(
-            clientCount,
-            (index) => const SizedBox.shrink(),
-          ),
+          ...List.generate(clientCount, (index) => const SizedBox.shrink()),
           const SizedBox.shrink(),
           const SizedBox.shrink(),
           PopupMenuButton<Object>(
@@ -192,12 +191,15 @@ class ClientChooserButton extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(99),
-              child: Avatar(
-                mxContent: snapshot.data?.avatarUrl,
-                name: snapshot.data?.displayName ??
-                    matrix.client.userID!.localpart,
-                size: 32,
-              ),
+              child: AppConfig.avatarBorderRadius == 1
+                  ? Avatar(
+                      mxContent: snapshot.data?.avatarUrl,
+                      name:
+                          snapshot.data?.displayName ??
+                          matrix.client.userID!.localpart,
+                      size: 32,
+                    )
+                  : const CircleAvatar(child: Icon(Icons.menu)),
             ),
           ),
         ],
@@ -205,10 +207,7 @@ class ClientChooserButton extends StatelessWidget {
     );
   }
 
-  void _clientSelected(
-    Object object,
-    BuildContext context,
-  ) async {
+  void _clientSelected(Object object, BuildContext context) async {
     if (object is Client) {
       controller.setActiveClient(object);
     } else if (object is String) {
