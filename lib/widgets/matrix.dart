@@ -382,9 +382,11 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         state != AppLifecycleState.inactive &&
         state != AppLifecycleState.paused;
     for (final client in widget.clients) {
-      client.syncPresence = state == AppLifecycleState.resumed
-          ? null
-          : PresenceType.unavailable;
+      if (AppConfig.autoMarkUnavailable) {
+        client.syncPresence = state == AppLifecycleState.resumed
+            ? null
+            : PresenceType.unavailable;
+      }
       if (PlatformInfos.isMobile) {
         client.backgroundSync = foreground;
         client.requestHistoryOnLimitedTimeline = !foreground;
@@ -459,17 +461,21 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     AppConfig.twemojiFont =
         store.getBool(SettingKeys.twemojiFont) ?? AppConfig.twemojiFont;
 
-    AppConfig.incomingCallsOnLockScreen = 
-        store.getBool(SettingKeys.incomingCallsOnLockScreen) ?? AppConfig.incomingCallsOnLockScreen;
+    AppConfig.incomingCallsOnLockScreen =
+        store.getBool(SettingKeys.incomingCallsOnLockScreen) ??
+        AppConfig.incomingCallsOnLockScreen;
 
-    AppConfig.pushToTalkHotkey = 
-        store.getBool(SettingKeys.pushToTalkHotkey) ?? AppConfig.pushToTalkHotkey;
+    AppConfig.pushToTalkHotkey =
+        store.getBool(SettingKeys.pushToTalkHotkey) ??
+        AppConfig.pushToTalkHotkey;
 
-    AppConfig.autoMarkUnavailable = 
-        store.getBool(SettingKeys.autoMarkUnavailable) ?? AppConfig.autoMarkUnavailable;
+    AppConfig.autoMarkUnavailable =
+        store.getBool(SettingKeys.autoMarkUnavailable) ??
+        AppConfig.autoMarkUnavailable;
 
-    AppConfig.avatarBorderRadius = 
-        store.getDouble(SettingKeys.avatarBorderRadius) ?? AppConfig.avatarBorderRadius;
+    AppConfig.avatarBorderRadius =
+        store.getDouble(SettingKeys.avatarBorderRadius) ??
+        AppConfig.avatarBorderRadius;
   }
 
   @override
