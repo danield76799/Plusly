@@ -132,7 +132,7 @@ class HtmlMessage extends StatelessWidget {
     ];
   }
 
-  /// Transforms a Node to an InlineSpan.
+    /// Transforms a Node to an InlineSpan.
   InlineSpan _renderHtml(
     dom.Node node,
     BuildContext context, {
@@ -148,10 +148,16 @@ class HtmlMessage extends StatelessWidget {
     // This is a text node, so we render it as text:
     if (node is! dom.Element || !allowedHtmlTags.contains(node.localName)) {
       var text = node.text ?? '';
-      // Single linebreak nodes between Elements are ignored:
-      if (text == '\n') text = '';
+      
+      // --- FIX START ---
+      // Replaces all whitespace sequences (newlines, tabs, spaces) with a single space.
+      // This mimics standard HTML browser behavior where source code formatting 
+      // is collapsed.
+      text = text.replaceAll(RegExp(r'\s+'), ' ');
+      // --- FIX END ---
 
-      text = text.replaceAll(RegExp(r' +', unicode: true), ' ');
+      // Only render if there's actual content (or it's a significant space)
+      if (text.isEmpty) return const TextSpan();
 
       return LinkifySpan(
         text: text,
