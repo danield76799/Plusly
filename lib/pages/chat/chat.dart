@@ -173,6 +173,7 @@ class ChatController extends State<ChatPageWithRoom>
   final Set<String> unfolded = {};
 
   Event? replyEvent;
+  bool replyMention = true;
 
   Event? editEvent;
 
@@ -619,6 +620,7 @@ class ChatController extends State<ChatPageWithRoom>
     room.sendTextEvent(
       sendController.text,
       inReplyTo: replyEvent,
+      replyMention: replyMention,
       editEventId: editEvent?.eventId,
       parseCommands: parseCommands,
       threadRootEventId: thread?.rootEvent.eventId,
@@ -1134,6 +1136,12 @@ class ChatController extends State<ChatPageWithRoom>
       selectedEvents.clear();
     });
     inputFocus.requestFocus();
+  }
+
+  void setReplyMention(bool b) {
+    setState(() {
+      replyMention = b;
+    });
   }
 
   void scrollToEventId(String eventId, {bool highlightEvent = true}) async {
