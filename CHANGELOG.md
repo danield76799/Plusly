@@ -1,3 +1,16 @@
+## Extera 26.0.4
+- Added support for choosing Material 3 color palette.
+- Fix chat switching hotkeys on Desktop. Alt+Arrow Up/Down to switch chats.
+- Fixed "Auto mark as AFK" option not having effect.
+- Fix room history visibility options being always enabled, regardless of power level.
+- Add avatar border radius customisation.
+- Rename "Chat backups" into "Key backups", because Matrix is already server-synced chat.
+- Fix handling whitespaces and sequential line breaks in HTMLs.
+- Fix "Space members can knock" room access option being always visible.
+- Support HTTP ranges when loading videos (unencrypted rooms) and show progress bar for downloading videos (encrypted rooms).
+- Allow cleartext HTTP traffic for 127.0.0.1 and localhost for use with Yggstack (on Android)
+- Some optimisations and fixes.
+
 ## Extera 26.0.3
 - Did some redesign to make it look like Material 3 Expressive.
 - Get rid of emoji_picker_flutter, so now you can choose custom emojis from the picker.

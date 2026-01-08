@@ -209,17 +209,15 @@ class MessageContextMenu extends StatelessWidget {
                                                           .value
                                                           .pack
                                                           .displayName!,
-                                                      icon: CircleAvatar(
-                                                        child: MxcImage(
-                                                          uri: entry
-                                                              .value
-                                                              .images
-                                                              .values
-                                                              .first
-                                                              .url,
-                                                          width: 32,
-                                                          height: 32,
-                                                        ),
+                                                      icon: MxcImage(
+                                                        uri: entry
+                                                            .value
+                                                            .images
+                                                            .values
+                                                            .first
+                                                            .url,
+                                                        width: 32,
+                                                        height: 32,
                                                       ),
                                                       emojis: entry.value.images
                                                           .map((name, content) {
