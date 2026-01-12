@@ -13,11 +13,12 @@ list(APPEND FLUTTER_PLUGIN_LIST
   gtk
   handy_window
   hotkey_manager_linux
-  image_clipboard
+  irondash_engine_context
   pasteboard
   record_linux
   screen_retriever_linux
   sqlcipher_flutter_libs
+  super_native_extensions
   url_launcher_linux
   webcrypto
   window_manager

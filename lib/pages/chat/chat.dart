@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:clipboard/clipboard.dart';
 import 'package:extera_next/pages/chat/message_context_menu.dart';
 import 'package:extera_next/pages/chat/recovered_event_dialog.dart';
 import 'package:extera_next/pages/chat/seen_by_row.dart';
@@ -21,10 +22,8 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_clipboard/image_clipboard.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -672,25 +671,19 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void sendImageFromClipBoard(Uint8List? image) async {
-    if (PlatformInfos.isDesktop) {
-      final imageClipboard = ImageClipboard();
-      final tmp = await getTemporaryDirectory();
-      final pastedImage = await imageClipboard.readImage(
-        imageSaveDirectory: tmp.path,
-        imageFileName: "image.png",
-      );
-      if (pastedImage == null) return;
-      await showAdaptiveDialog(
-        context: context,
-        builder: (c) => SendFileDialog(
-          files: [XFile(pastedImage.path, name: 'pasted_image.png')],
-          room: room,
-          thread: thread,
-          outerContext: context,
-        ),
-      );
-      return;
-    }
+    // if (PlatformInfos.isDesktop) {
+      
+    //   await showAdaptiveDialog(
+    //     context: context,
+    //     builder: (c) => SendFileDialog(
+    //       files: [XFile.fromData(pastedImage, name: 'clipboard_image.png')],
+    //       room: room,
+    //       thread: thread,
+    //       outerContext: context,
+    //     ),
+    //   );
+    //   return;
+    // }
     if (image == null) return;
     await showAdaptiveDialog(
       context: context,
