@@ -13,6 +13,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   gtk
   handy_window
   hotkey_manager_linux
+  image_clipboard
   pasteboard
   record_linux
   screen_retriever_linux

@@ -13,6 +13,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_webrtc
   geolocator_windows
   hotkey_manager_windows
+  image_clipboard
   pasteboard
   permission_handler_windows
   record_windows

@@ -1078,6 +1078,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.7.2"
+  image_clipboard:
+    dependency: "direct main"
+    description:
+      name: image_clipboard
+      sha256: "72453fe5e73cd7553042f0aa5292d2debaec3b243c1dc94554a3a76bc00e00f2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0+1"
   image_picker:
     dependency: "direct main"
     description:
