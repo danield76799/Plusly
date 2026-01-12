@@ -56,7 +56,9 @@ void main() async {
     // Do not send online presences when app is in background fetch mode.
     for (final client in clients) {
       client.backgroundSync = false;
-      client.syncPresence = PresenceType.offline;
+      if (AppConfig.autoMarkUnavailable) {
+        client.syncPresence = PresenceType.offline;
+      }
     }
 
     // In the background fetch mode we do not want to waste ressources with
@@ -83,8 +85,9 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   String? pin;
   if (PlatformInfos.isMobile) {
     try {
-      pin =
-          await const FlutterSecureStorage().read(key: SettingKeys.appLockKey);
+      pin = await const FlutterSecureStorage().read(
+        key: SettingKeys.appLockKey,
+      );
     } catch (e, s) {
       Logs().d('Unable to read PIN from Secure storage', e, s);
     }
@@ -120,7 +123,9 @@ class AppStarter with WidgetsBindingObserver {
     // Switching to foreground mode needs to reenable send online sync presence.
     for (final client in clients) {
       client.backgroundSync = true;
-      client.syncPresence = PresenceType.online;
+      if (AppConfig.autoMarkUnavailable) {
+        client.syncPresence = PresenceType.online;
+      }
     }
     startGui(clients, store);
     // We must make sure that the GUI is only started once.
