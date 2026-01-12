@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:clipboard/clipboard.dart';
 import 'package:extera_next/pages/chat/message_context_menu.dart';
 import 'package:extera_next/pages/chat/recovered_event_dialog.dart';
 import 'package:extera_next/pages/chat/seen_by_row.dart';
 import 'package:extera_next/pages/chat/send_poll_dialog.dart';
 import 'package:extera_next/pages/chat/translated_event_dialog.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
+import 'package:extera_next/utils/clipboard_utils.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/synapse_admin_extension.dart';
 import 'package:extera_next/utils/privacy_options.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
@@ -671,19 +671,20 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void sendImageFromClipBoard(Uint8List? image) async {
-    // if (PlatformInfos.isDesktop) {
-      
-    //   await showAdaptiveDialog(
-    //     context: context,
-    //     builder: (c) => SendFileDialog(
-    //       files: [XFile.fromData(pastedImage, name: 'clipboard_image.png')],
-    //       room: room,
-    //       thread: thread,
-    //       outerContext: context,
-    //     ),
-    //   );
-    //   return;
-    // }
+    if (PlatformInfos.isLinux) {
+      final pastedImage = await getImageFromClipboardLinux();
+      if (pastedImage == null) return;
+      await showAdaptiveDialog(
+        context: context,
+        builder: (c) => SendFileDialog(
+          files: [XFile.fromData(pastedImage, mimeType: 'image/png', name: 'clipboard_image.png')],
+          room: room,
+          thread: thread,
+          outerContext: context,
+        ),
+      );
+      return;
+    }
     if (image == null) return;
     await showAdaptiveDialog(
       context: context,
