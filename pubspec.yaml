@@ -104,7 +104,8 @@ dependencies:
   audioplayers_linux: ^4.2.1
   pro_image_editor: ^11.15.2
   google_fonts: ^6.3.3
-  image_clipboard: ^1.1.0+1
+  clipboard: ^3.0.14
+  super_clipboard: ^0.1.7+6
 
 dev_dependencies:
   flutter_lints: ^3.0.0

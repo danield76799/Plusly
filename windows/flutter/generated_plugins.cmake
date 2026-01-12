@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   audioplayers_windows
+  clipboard
   desktop_drop
   desktop_webview_window
   dynamic_color
@@ -13,13 +14,14 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_webrtc
   geolocator_windows
   hotkey_manager_windows
-  image_clipboard
+  irondash_engine_context
   pasteboard
   permission_handler_windows
   record_windows
   screen_retriever_windows
   share_plus
   sqlcipher_flutter_libs
+  super_native_extensions
   url_launcher_windows
   webcrypto
   window_manager
