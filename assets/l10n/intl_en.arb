@@ -3530,5 +3530,14 @@
     }
   },
   "listeningToSomeTunes": "Listening to some tunes",
-  "playing": "Playing"
+  "playing": "Playing",
+  "editedAt": "edited at {when}",
+  "@editedAt": {
+    "type": "text",
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  }
 }

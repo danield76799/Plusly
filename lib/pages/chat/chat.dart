@@ -1488,9 +1488,18 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void showEdits({Event? event}) {
-    // event ??= selectedEvents.first;
-    // final events = event.aggregatedEvents(timeline!, RelationshipTypes.edit);
-    // MessageEditsDialog(event: event, events: events, controller: this).show(context);
+    event ??= selectedEvents.first;
+    final events = event.aggregatedEvents(timeline!, RelationshipTypes.edit);
+    showAdaptiveBottomSheet(
+      context: context,
+      builder: (context) {
+        return MessageEditsDialog(
+          event: event!,
+          events: events,
+          controller: this,
+        );
+      },
+    );
   }
 
   int? findChildIndexCallback(Key key, Map<String, int> thisEventsKeyMap) {
