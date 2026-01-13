@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:marquee/marquee.dart';
 
 import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/pages/chat/chat.dart';
@@ -102,12 +103,29 @@ class ChatAppBarTitle extends StatelessWidget {
                                   context,
                                 ).textTheme.bodySmall;
                                 if (presence?.currentlyActive == true) {
-                                  return Text(
-                                    L10n.of(context).currentlyActive +
-                                        (presence?.statusMsg != null
-                                            ? " | ${presence?.statusMsg}"
-                                            : ""),
-                                    style: style,
+                                  return SizedBox(
+                                    height: (style?.fontSize ?? 12) + 2, // visually better
+                                    child: Marquee(
+                                      text:
+                                          "${L10n.of(context).currentlyActive}${presence?.statusMsg != null
+                                              ? " | ${presence?.statusMsg}"
+                                              : ""}",
+                                      style: style,
+                                      velocity: 20.0, // Speed
+                                      blankSpace: 24,
+                                      pauseAfterRound: const Duration(
+                                        seconds: 2,
+                                      ),
+                                      accelerationDuration: const Duration(
+                                        milliseconds: 500,
+                                      ),
+                                      accelerationCurve: Curves.linear,
+                                      decelerationDuration: const Duration(
+                                        milliseconds: 500,
+                                      ),
+                                      decelerationCurve: Curves.linear,
+                                      scrollAxis: .horizontal,
+                                    ),
                                   );
                                 }
                                 if (lastActiveTimestamp != null) {
