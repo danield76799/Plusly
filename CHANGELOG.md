@@ -1,3 +1,9 @@
+## Extera 26.0.5
+- Fixed pasting images on Linux.
+- Support viewing MSC4320 Rich Presences.
+- Fix presence status related things.
+- Fix reply mentions.
+
 ## Extera 26.0.4
 - Added support for choosing Material 3 color palette.
 - Fix chat switching hotkeys on Desktop. Alt+Arrow Up/Down to switch chats.
