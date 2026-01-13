@@ -168,9 +168,9 @@ class Message extends StatelessWidget {
     }
 
     final textColor = ownMessage
-        ? theme.onBubbleColor
+        ? (event.onlyEmotes ? theme.colorScheme.onSurface : theme.onBubbleColor)
         : theme.colorScheme.onSurface;
-    
+
     final statusColor = theme.brightness == Brightness.dark
         ? (noBubble
               ? theme.colorScheme.onSurface
@@ -229,11 +229,7 @@ class Message extends StatelessWidget {
         if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit))
           Padding(
             padding: const EdgeInsets.only(left: 4.0),
-            child: Icon(
-              Icons.edit_outlined,
-              color: statusColor,
-              size: 14,
-            ),
+            child: Icon(Icons.edit_outlined, color: statusColor, size: 14),
           ),
         if (ownMessage)
           Padding(
@@ -528,7 +524,8 @@ class Message extends StatelessWidget {
                                                                       child: AbsorbPointer(
                                                                         child: ReplyContent(
                                                                           replyEvent,
-                                                                          noBubble: noBubble,
+                                                                          noBubble:
+                                                                              noBubble,
                                                                           ownMessage:
                                                                               ownMessage,
                                                                           timeline:
