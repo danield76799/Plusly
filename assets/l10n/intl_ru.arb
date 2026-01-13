@@ -3634,5 +3634,14 @@
     }
   },
   "listeningToSomeTunes": "Слушает аудио",
-  "playing": "Играет в"
+  "playing": "Играет в",
+  "editedAt": "изменено в {when}",
+  "@editedAt": {
+    "type": "text",
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  }
 }
