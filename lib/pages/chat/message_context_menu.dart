@@ -281,6 +281,20 @@ class MessageContextMenu extends StatelessWidget {
                             ),
                             const ListDivider(),
                           ],
+                          if (event.hasAggregatedEvents(controller.timeline!, RelationshipTypes.edit))...[
+                            _buildMenuItem(
+                              event: event,
+                              icon: Icons.edit_outlined,
+                              label: L10n.of(context).nEdits(event.aggregatedEvents(controller.timeline!, RelationshipTypes.edit).length),
+                              onPressed: () {
+                                if (!PlatformInfos.isMobile) {
+                                  controller.closeMessageMenu();
+                                }
+                                controller.showEdits(event: event);
+                              },
+                            ),
+                            const ListDivider(),
+                          ],
                           if (room.canSendDefaultMessages) ...[
                             _buildMenuItem(
                               event: event,

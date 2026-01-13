@@ -3441,6 +3441,16 @@
       }
     }
   },
+  "nEdits": "{count} edit(s)",
+  "@nEdits": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
   "backToCall": "Back to call",
   "switchCamera": "Switch camera",
   "switchSpeaker": "Switch speaker",

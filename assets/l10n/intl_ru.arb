@@ -3544,6 +3544,16 @@
     }
   }
 },
+"nEdits": "{count, plural, =1{1 изменение} one{{count} изменение} few{{count} изменения} many{{count} изменений} other{{count} изменений}}",
+  "@nEdits": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
 "backToCall": "Вернуться к звонку",
   "ringtone": "Рингтон",
   "ringtoneDescription": "Выберите рингтон, который будет звучать при входящем звонке.",

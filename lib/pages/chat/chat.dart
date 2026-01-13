@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:extera_next/pages/chat/message_context_menu.dart';
+import 'package:extera_next/pages/chat/message_edits_dialog.dart';
 import 'package:extera_next/pages/chat/recovered_event_dialog.dart';
 import 'package:extera_next/pages/chat/seen_by_row.dart';
 import 'package:extera_next/pages/chat/send_poll_dialog.dart';
@@ -677,7 +678,13 @@ class ChatController extends State<ChatPageWithRoom>
       await showAdaptiveDialog(
         context: context,
         builder: (c) => SendFileDialog(
-          files: [XFile.fromData(pastedImage, mimeType: 'image/png', name: 'clipboard_image.png')],
+          files: [
+            XFile.fromData(
+              pastedImage,
+              mimeType: 'image/png',
+              name: 'clipboard_image.png',
+            ),
+          ],
           room: room,
           thread: thread,
           outerContext: context,
@@ -1478,6 +1485,12 @@ class ChatController extends State<ChatPageWithRoom>
     event ??= selectedEvents.first;
     final receipts = room.getReceipts(timeline!, eventId: event.eventId);
     SeenByDialog(receipts).show(context);
+  }
+
+  void showEdits({Event? event}) {
+    // event ??= selectedEvents.first;
+    // final events = event.aggregatedEvents(timeline!, RelationshipTypes.edit);
+    // MessageEditsDialog(event: event, events: events, controller: this).show(context);
   }
 
   int? findChildIndexCallback(Key key, Map<String, int> thisEventsKeyMap) {
