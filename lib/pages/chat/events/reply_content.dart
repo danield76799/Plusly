@@ -1,3 +1,4 @@
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
@@ -35,7 +36,7 @@ class ReplyContent extends StatelessWidget {
     final displayEvent = timeline != null
         ? replyEvent.getDisplayEvent(timeline)
         : replyEvent;
-    final fontSize = AppConfig.messageFontSize * AppConfig.fontSizeFactor;
+    final fontSize = AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value;
 
     final color = theme.brightness == Brightness.dark
         ? (noBubble

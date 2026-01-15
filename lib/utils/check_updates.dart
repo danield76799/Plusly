@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/utils/custom_http_client.dart';
@@ -21,7 +22,7 @@ Future<String> getLatestVersion() async {
 }
 
 void checkForUpdates(BuildContext context) async {
-  if (!AppConfig.checkForUpdates || AppConfig.alreadyCheckedUpdates) return;
+  if (!AppSettings.checkForUpdates.value || AppConfig.alreadyCheckedUpdates) return;
   Logs().v("Checking updates...");
   try {
     final currentVersion = await PlatformInfos.getVersion();

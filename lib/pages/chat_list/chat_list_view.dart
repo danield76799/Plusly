@@ -1,4 +1,4 @@
-import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/chat_list/chat_list_bottom_navbar.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +36,7 @@ class ChatListView extends StatelessWidget {
       child: Row(
         children: [
           if (FluffyThemes.isColumnMode(context) ||
-              AppConfig.displayNavigationRail) ...[
+              AppSettings.displayNavigationRail.value) ...[
             SpacesNavigationRail(
               activeSpaceId: controller.activeSpaceId,
               onGoToChats: controller.clearActiveSpace,

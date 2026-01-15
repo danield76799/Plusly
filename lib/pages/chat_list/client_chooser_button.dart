@@ -1,4 +1,3 @@
-import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/pages/download_manager/download_manager_view.dart';
 import 'package:flutter/material.dart';
 
@@ -191,15 +190,14 @@ class ClientChooserButton extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               borderRadius: BorderRadius.circular(99),
-              child: AppConfig.avatarBorderRadius == 1
-                  ? Avatar(
-                      mxContent: snapshot.data?.avatarUrl,
-                      name:
-                          snapshot.data?.displayName ??
-                          matrix.client.userID!.localpart,
-                      size: 32,
-                    )
-                  : const CircleAvatar(child: Icon(Icons.menu)),
+              child: Avatar(
+                mxContent: snapshot.data?.avatarUrl,
+                name:
+                    snapshot.data?.displayName ??
+                    matrix.client.userID!.localpart,
+                size: 32,
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
           ),
         ],

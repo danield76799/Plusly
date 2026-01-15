@@ -1,4 +1,5 @@
 import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/settings_ringtone/settings_ringtone.dart';
 import 'package:extera_next/widgets/layouts/max_width_body.dart';
@@ -38,10 +39,10 @@ class SettingsRingtoneView extends StatelessWidget {
                     if (controller.isSystemRingtoneAvailable)
                       ListTile(
                         leading: CircleAvatar(
-                                backgroundColor: AppConfig.ringtone == 'system'
+                                backgroundColor: AppSettings.ringtone.value == 'system'
                                     ? theme.colorScheme.primary
                                     : theme.colorScheme.secondary,
-                                foregroundColor: AppConfig.ringtone == 'system'
+                                foregroundColor: AppSettings.ringtone.value == 'system'
                                     ? theme.colorScheme.onPrimary
                                     : theme.colorScheme.onSecondary,
                                 child: const Icon(Icons.music_note_outlined),
@@ -62,10 +63,10 @@ class SettingsRingtoneView extends StatelessWidget {
                           .map(
                             (entry) => ListTile(
                               leading: CircleAvatar(
-                                backgroundColor: AppConfig.ringtone == entry.key
+                                backgroundColor: AppSettings.ringtone.value == entry.key
                                     ? theme.colorScheme.primary
                                     : theme.colorScheme.secondary,
-                                foregroundColor: AppConfig.ringtone == entry.key
+                                foregroundColor: AppSettings.ringtone.value == entry.key
                                     ? theme.colorScheme.onPrimary
                                     : theme.colorScheme.onSecondary,
                                 child: const Icon(Icons.music_note_outlined),

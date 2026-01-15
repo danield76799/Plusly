@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/chat/events/poll_content.dart';
 import 'package:extera_next/pages/chat/events/redacted_content.dart';
 import 'package:extera_next/utils/poll_events.dart';
@@ -16,7 +17,6 @@ import 'package:extera_next/utils/date_time_extension.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
-import '../../../config/app_config.dart';
 import '../../../utils/platform_infos.dart';
 import '../../../utils/url_launcher.dart';
 import 'audio_player.dart';
@@ -98,7 +98,7 @@ class MessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSize = AppConfig.messageFontSize * AppConfig.fontSizeFactor;
+    final fontSize = AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value;
     final buttonTextColor = textColor;
     switch (event.type) {
       case EventTypes.Message:
@@ -192,10 +192,10 @@ class MessageContent extends StatelessWidget {
           case MessageTypes.Text:
           case MessageTypes.Notice:
           case MessageTypes.Emote:
-            if (AppConfig.renderHtml &&
+            if (AppSettings.renderHtml.value &&
                 !event.redacted &&
                 event.isRichMessage) {
-              var html = AppConfig.renderHtml && event.isRichMessage
+              var html = AppSettings.renderHtml.value && event.isRichMessage
                   ? event.formattedText
                   : event.text.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
               if (event.messageType == MessageTypes.Emote) {
@@ -208,11 +208,11 @@ class MessageContent extends StatelessWidget {
                   textColor: textColor,
                   room: event.room,
                   fontSize:
-                      AppConfig.fontSizeFactor * AppConfig.messageFontSize,
+                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
                   linkStyle: TextStyle(
                     color: linkColor,
                     fontSize:
-                        AppConfig.fontSizeFactor * AppConfig.messageFontSize,
+                        AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
                     decoration: TextDecoration.underline,
                     decorationColor: linkColor,
                   ),

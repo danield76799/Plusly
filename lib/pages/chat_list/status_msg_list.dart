@@ -1,3 +1,4 @@
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/utils/show_profile.dart';
 import 'package:flutter/material.dart';
 
@@ -137,10 +138,10 @@ class PresenceAvatar extends StatelessWidget {
                       duration: FluffyThemes.animationDuration,
                       curve: FluffyThemes.animationCurve,
                       child: InkWell(
-                        borderRadius: BorderRadius.circular(avatarSize * AppConfig.avatarBorderRadius),
+                        borderRadius: BorderRadius.circular(avatarSize * AppSettings.avatarBorderRadius.value),
                         onTap: profile == null ? null : () => onTap(profile),
                         child: Material(
-                          borderRadius: BorderRadius.circular(avatarSize * AppConfig.avatarBorderRadius),
+                          borderRadius: BorderRadius.circular(avatarSize * AppSettings.avatarBorderRadius.value),
                           child: Stack(
                             children: [
                               Container(
@@ -148,7 +149,7 @@ class PresenceAvatar extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   gradient: presence.gradient,
                                   borderRadius:
-                                      BorderRadius.circular(avatarSize * AppConfig.avatarBorderRadius * 0.5),
+                                      BorderRadius.circular(avatarSize * AppSettings.avatarBorderRadius.value * 0.5),
                                 ),
                                 child: Avatar(
                                   name: displayName,

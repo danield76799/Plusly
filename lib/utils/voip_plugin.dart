@@ -2,6 +2,7 @@ import 'dart:core';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -86,7 +87,7 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
   @override
   Future<void> playRingtone() async {
     try {
-      if (AppConfig.ringtone == 'system') {
+      if (AppSettings.ringtone.value == 'system') {
         FlutterRingtonePlayer().playRingtone(looping: true);
       } else if (kIsWeb ||
           PlatformInfos.isMobile ||
@@ -102,7 +103,7 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
             ),
           ),
         );
-        player.play(AssetSource(AppConfig.ringtoneFiles[AppConfig.ringtone]!));
+        player.play(AssetSource(AppConfig.ringtoneFiles[AppSettings.ringtone.value]!));
       }
     } catch (ex) {
       Logs().e("Failed to play ringtone", ex);
@@ -113,7 +114,7 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
   Future<void> stopRingtone() async {
     try {
       Logs().w("Stopping ringtone");
-      if (AppConfig.ringtone == 'system') {
+      if (AppSettings.ringtone.value == 'system') {
         FlutterRingtonePlayer().stop();
       } else {
         await callSoundPlayer?.stop();
@@ -217,7 +218,7 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
           'wasForeground',
           wasForeground == true ? 'true' : 'false',
         );
-        FlutterForegroundTask.setOnLockScreenVisibility(AppConfig.incomingCallsOnLockScreen);
+        FlutterForegroundTask.setOnLockScreenVisibility(AppSettings.incomingCallsOnLockScreen.value);
         FlutterForegroundTask.wakeUpScreen();
         FlutterForegroundTask.launchApp();
       } catch (e) {

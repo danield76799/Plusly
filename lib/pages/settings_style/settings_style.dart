@@ -20,7 +20,7 @@ class SettingsStyle extends StatefulWidget {
 
 class SettingsStyleController extends State<SettingsStyle> {
   void setChatColor(Color? color) async {
-    AppConfig.colorSchemeSeed = color;
+    // AppConfig.colorSchemeSeed = color;
     ThemeController.of(context).setPrimaryColor(color);
   }
 
@@ -212,19 +212,17 @@ class SettingsStyleController extends State<SettingsStyle> {
   }
 
   void changeFontSizeFactor(double d) {
-    setState(() => AppConfig.fontSizeFactor = d);
-    Matrix.of(context).store.setString(
-      SettingKeys.fontSizeFactor,
-      AppConfig.fontSizeFactor.toString(),
+    AppSettings.fontSizeFactor.setItem(
+      d,
     );
+    setState(() {});
   }
 
   void changeAvatarBorderRadius(double d) {
-    setState(() => AppConfig.avatarBorderRadius = d);
-    Matrix.of(context).store.setDouble(
-      SettingKeys.avatarBorderRadius,
-      AppConfig.avatarBorderRadius,
+    AppSettings.avatarBorderRadius.setItem(
+      d,
     );
+    setState(() {});
   }
 
   @override

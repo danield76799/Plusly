@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:badges/badges.dart';
-import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
 
@@ -31,7 +31,7 @@ class ChatListBottomNavbar extends StatelessWidget {
     }
 
     final filters = [
-      if (AppConfig.separateChatTypes)
+      if (AppSettings.separateChatTypes.value)
         ActiveFilter.messages
       else
         ActiveFilter.allChats,

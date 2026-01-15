@@ -45,7 +45,7 @@ void main() async {
   await vod.init(wasmPath: './assets/assets/vodozemac/');
 
   Logs().nativeColors = !PlatformInfos.isIOS;
-  final store = await SharedPreferences.getInstance();
+  final store = await AppSettings.init();
   final clients = await ClientManager.getClients(store: store);
 
   // If the app starts in detached mode, we assume that it is in
@@ -68,12 +68,12 @@ void main() async {
       '${AppConfig.applicationName} started in background-fetch mode. No GUI will be created unless the app is no longer detached.',
     );
     return;
-  } else {
-    for (final client in clients) {
-      client.syncPresence = PresenceType.values.firstWhere(
-        (x) => x.name == AppSettings.presenceStatus.getItem(store),
-      );
-    }
+  }
+
+  for (final client in clients) {
+    client.syncPresence = PresenceType.values.firstWhere(
+      (x) => x.name == AppSettings.presenceStatus.value,
+    );
   }
 
   // Started in foreground mode.
@@ -128,7 +128,7 @@ class AppStarter with WidgetsBindingObserver {
     for (final client in clients) {
       client.backgroundSync = true;
       client.syncPresence = PresenceType.values.firstWhere(
-        (x) => x.name == AppSettings.presenceStatus.getItem(store),
+        (x) => x.name == AppSettings.presenceStatus.value,
       );
     }
     startGui(clients, store);

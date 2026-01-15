@@ -1,10 +1,10 @@
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/shortcuts/chat/paste_shortcut.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animations/animations.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/recording_input_row.dart';
 import 'package:extera_next/pages/chat/recording_view_model.dart';
@@ -307,7 +307,7 @@ class ChatInputRow extends StatelessWidget {
                           autofocus: !PlatformInfos.isMobile,
                           keyboardType: TextInputType.multiline,
                           textInputAction:
-                              AppConfig.sendOnEnter == true &&
+                              AppSettings.sendOnEnter.value &&
                                   PlatformInfos.isMobile
                               ? TextInputAction.send
                               : null,

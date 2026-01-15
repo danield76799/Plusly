@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/utils/clean_exif.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/image_editor_dialog.dart';
 import 'package:extera_next/widgets/matrix.dart';
@@ -80,7 +81,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           file = await xfile.resizeVideo();
         } else if (mimeType != null &&
             mimeType.startsWith('image') &&
-            AppConfig.cleanExif) {
+            AppSettings.cleanExif.value) {
           if (length > maxUploadSize) {
             throw FileTooBigMatrixException(length, maxUploadSize);
           }

@@ -18,21 +18,10 @@ abstract class AppConfig {
   static String? get applicationWelcomeMessage => _applicationWelcomeMessage;
   static String _defaultHomeserver = 'extera.xyz';
 
-  static bool displayNavigationRail = true;
-  static bool enableGradient = true;
-  static bool cleanExif = true;
-  static bool doNotSendIfCantClean = true;
-  static bool checkForUpdates = true;
   static bool alreadyCheckedUpdates = false;
 
-  static bool twemojiFont = false;
-
-  static String? httpProxy;
   static String get defaultHomeserver => _defaultHomeserver;
-  static double fontSizeFactor = 1;
   static const Color chatColor = primaryColor;
-  static Color? colorSchemeSeed = primaryColor;
-  static const double messageFontSize = 16.0;
   static const bool allowOtherHomeservers = true;
   static const bool enableRegistration = true;
   static const Color primaryColor = Color(0xFF5625BA);
@@ -66,23 +55,6 @@ abstract class AppConfig {
     path: '/ExteraApp/Extera/issues',
   );
 
-  static bool incomingCallsOnLockScreen = true;
-  static bool renderHtml = true;
-  static bool hideRedactedEvents = false;
-  static bool hideUnknownEvents = true;
-  static bool hideUnimportantStateEvents = true;
-  static bool separateChatTypes = false;
-  static bool autoplayImages = true;
-  static bool sendTypingNotifications = true;
-  static bool sendPublicReadReceipts = true;
-  static bool swipeRightToLeftToReply = true;
-  static bool pushToTalkHotkey = true;
-  static bool hideAvatarsInInvites = true;
-  static bool autoMarkUnavailable = true;
-  static bool? sendOnEnter;
-  static bool showPresences = true;
-  static bool experimentalVoip = false;
-  static String ringtone = "Homebase";
   static const bool hideTypingUsernames = false;
   static const bool hideAllStateEvents = false;
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
@@ -99,8 +71,6 @@ abstract class AppConfig {
   );
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
 
-  static double avatarBorderRadius = 1;
-
   // See CREDITS.md
   static const Map<String, String> ringtoneFiles = {
     // people won't answer calls listening to this banger
@@ -109,16 +79,16 @@ abstract class AppConfig {
   };
 
   static void loadFromJson(Map<String, dynamic> json) {
-    if (json['chat_color'] != null) {
-      try {
-        colorSchemeSeed = Color(json['chat_color']);
-      } catch (e) {
-        Logs().w(
-          'Invalid color in config.json! Please make sure to define the color in this format: "0xffdd0000"',
-          e,
-        );
-      }
-    }
+    // if (json['chat_color'] != null) {
+    //   try {
+    //     colorSchemeSeed = Color(json['chat_color']);
+    //   } catch (e) {
+    //     Logs().w(
+    //       'Invalid color in config.json! Please make sure to define the color in this format: "0xffdd0000"',
+    //       e,
+    //     );
+    //   }
+    // }
     if (json['application_name'] is String) {
       _applicationName = json['application_name'];
     }
@@ -133,18 +103,6 @@ abstract class AppConfig {
     }
     if (json['web_base_url'] is String) {
       _webBaseUrl = json['web_base_url'];
-    }
-    if (json['render_html'] is bool) {
-      renderHtml = json['render_html'];
-    }
-    if (json['hide_redacted_events'] is bool) {
-      hideRedactedEvents = json['hide_redacted_events'];
-    }
-    if (json['hide_unknown_events'] is bool) {
-      hideUnknownEvents = json['hide_unknown_events'];
-    }
-    if (json['enable_gradient'] is bool) {
-      enableGradient = json['enable_gradient'];
     }
   }
 }

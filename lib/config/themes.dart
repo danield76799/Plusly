@@ -1,3 +1,4 @@
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -59,7 +60,7 @@ abstract class FluffyThemes {
 
     final colorScheme = ColorScheme.fromSeed(
       brightness: brightness,
-      seedColor: seed ?? AppConfig.colorSchemeSeed ?? AppConfig.primaryColor,
+      seedColor: seed ?? Color(AppSettings.colorSchemeSeed.value),
       surface: extraDarkColors['surface'],
       surfaceBright: extraDarkColors['surfaceBright'],
       surfaceContainer: extraDarkColors['surfaceContainer'],

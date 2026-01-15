@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/utils/platform_infos.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
@@ -31,9 +31,9 @@ class CustomHttpClient {
 
     final client = HttpClient(context: context);
 
-    if (AppConfig.httpProxy != null) {
+    if (AppSettings.httpProxy.value.isNotEmpty) {
       client.findProxy = (uri) {
-        return "PROXY ${AppConfig.httpProxy};";
+        return "PROXY ${AppSettings.httpProxy.value};";
       };
     }
 

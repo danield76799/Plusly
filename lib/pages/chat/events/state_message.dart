@@ -1,3 +1,4 @@
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
@@ -32,7 +33,7 @@ class StateMessage extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 12 * AppConfig.fontSizeFactor,
+                  fontSize: 12 * AppSettings.fontSizeFactor.value,
                   decoration:
                       event.redacted ? TextDecoration.lineThrough : null,
                 ),

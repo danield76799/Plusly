@@ -1,3 +1,4 @@
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/utils/poll_events.dart';
 import 'package:matrix/matrix.dart';
 
@@ -52,15 +53,15 @@ extension IsStateExtension on Event {
       // if a reaction has been redacted we also want it to be hidden in the timeline
       !{EventTypes.Reaction, EventTypes.Redaction}.contains(type) &&
       // if we enabled to hide all redacted events, don't show those
-      (!AppConfig.hideRedactedEvents || !redacted) &&
+      (!AppSettings.hideRedactedEvents.value || !redacted) &&
       // if we enabled to hide all unknown events, don't show those
-      (!AppConfig.hideUnknownEvents ||
+      (!AppSettings.hideUnknownEvents.value ||
           isEventTypeKnown ||
           type == PollEvents.PollStart) &&
       // remove state events that we don't want to render
       (isState || !AppConfig.hideAllStateEvents) &&
       // hide simple join/leave member events in public rooms
-      (!AppConfig.hideUnimportantStateEvents ||
+      (!AppSettings.hideUnimportantStateEvents.value ||
           type != EventTypes.RoomMember ||
           room.joinRules != JoinRules.public ||
           content.tryGet<String>('membership') == 'ban' ||

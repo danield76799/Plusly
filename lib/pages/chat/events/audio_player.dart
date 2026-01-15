@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/chat/events/html_message.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
@@ -452,11 +453,11 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                 html: fileDescription,
                 textColor: textColor,
                 room: widget.event.room,
-                fontSize: AppConfig.fontSizeFactor * AppConfig.messageFontSize,
+                fontSize: AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
                 linkStyle: TextStyle(
                   color: linkColor,
                   fontSize:
-                      AppConfig.fontSizeFactor * AppConfig.messageFontSize,
+                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),

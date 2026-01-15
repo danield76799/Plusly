@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/dialer/task_handler.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/foundation.dart';
@@ -235,7 +235,7 @@ class CallingView extends State<Calling> {
 
     FlutterForegroundTask.addTaskDataCallback(onDataReceived);
 
-    if (AppConfig.pushToTalkHotkey) {
+    if (AppSettings.pushToTalkHotkey.value) {
       await hotKeyManager.register(
         _hotKey,
         keyDownHandler: (hotKey) {

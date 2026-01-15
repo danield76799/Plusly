@@ -92,10 +92,8 @@ class SettingsController extends State<Settings> {
   }
 
   void setCheckForUpdates(bool newValue) {
-    setState(() {
-      AppConfig.checkForUpdates = newValue;
-      Matrix.of(context).store.setBool(SettingKeys.checkForUpdates, newValue);
-    });
+    AppSettings.checkForUpdates.setItem(newValue);
+    setState(() {});
   }
 
   void setDisplaynameAction() async {

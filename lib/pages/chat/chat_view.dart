@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/dialer/back_to_call_button.dart';
 import 'package:flutter/material.dart';
 
@@ -8,7 +9,6 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/pages/chat/chat.dart';
 import 'package:extera_next/pages/chat/chat_app_bar_list_tile.dart';
@@ -147,7 +147,7 @@ class ChatView extends StatelessWidget {
       ];
     } else if (!controller.room.isArchived) {
       return [
-        if (AppConfig.experimentalVoip &&
+        if (AppSettings.experimentalVoip.value &&
             Matrix.of(context).voipPlugin != null &&
             controller.room.isDirectChat)
           IconButton(

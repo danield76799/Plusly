@@ -1,3 +1,4 @@
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/widgets/list_divider.dart';
 import 'package:flutter/material.dart';
 
@@ -232,7 +233,6 @@ class SettingsView extends StatelessWidget {
                           const ListDivider(),
                           ListTile(
                             title: Text(L10n.of(context).updateCheckTitle),
-                            // subtitle: Text(L10n.of(context).updateCheckSubtitle),
                             leading: CircleAvatar(
                               backgroundColor: theme.colorScheme.tertiary,
                               child: Icon(
@@ -241,10 +241,10 @@ class SettingsView extends StatelessWidget {
                               ),
                             ),
                             trailing: Switch(
-                              value: AppConfig.checkForUpdates,
+                              value: AppSettings.checkForUpdates.value,
                               onChanged: controller.setCheckForUpdates,
                             ),
-                            onTap: () => controller.setCheckForUpdates(!AppConfig.checkForUpdates),
+                            onTap: () => controller.setCheckForUpdates(!AppSettings.checkForUpdates.value),
                           ),
                         ],
                       ),

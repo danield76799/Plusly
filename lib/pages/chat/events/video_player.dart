@@ -1,3 +1,4 @@
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/chat/events/html_message.dart';
 import 'package:extera_next/pages/image_viewer/image_viewer.dart';
 import 'package:extera_next/widgets/mxc_image.dart';
@@ -157,13 +158,13 @@ class EventVideoPlayer extends StatelessWidget {
                 style: TextStyle(
                   color: textColor,
                   fontSize:
-                      AppConfig.fontSizeFactor * AppConfig.messageFontSize,
+                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
                 ),
                 options: const LinkifyOptions(humanize: false),
                 linkStyle: TextStyle(
                   color: linkColor,
                   fontSize:
-                      AppConfig.fontSizeFactor * AppConfig.messageFontSize,
+                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),
@@ -180,11 +181,11 @@ class EventVideoPlayer extends StatelessWidget {
                 html: fileDescription,
                 textColor: textColor,
                 room: event.room,
-                fontSize: AppConfig.fontSizeFactor * AppConfig.messageFontSize,
+                fontSize: AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
                 linkStyle: TextStyle(
                   color: linkColor,
                   fontSize:
-                      AppConfig.fontSizeFactor * AppConfig.messageFontSize,
+                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),

@@ -1,4 +1,4 @@
-import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
@@ -42,7 +42,7 @@ class Avatar extends StatelessWidget {
   Widget build(BuildContext context) {
     // 1. Calculate expensive or logic-heavy primitives once
     final borderRadius = this.borderRadius ??
-        BorderRadius.circular((size / 2) * AppConfig.avatarBorderRadius);
+        BorderRadius.circular((size / 2) * AppSettings.avatarBorderRadius.value);
         
     // 2. Wrap the layout in a Stack
     final container = Stack(

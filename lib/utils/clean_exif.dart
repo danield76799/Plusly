@@ -1,5 +1,5 @@
 import 'dart:typed_data';
-import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:image/image.dart';
 
 class ExifCleaner {
@@ -8,7 +8,7 @@ class ExifCleaner {
       final image = decodeImage(Uint8List.fromList(imageBytes));
 
       if (image == null) {
-        if (AppConfig.doNotSendIfCantClean) {
+        if (AppSettings.doNotSendIfCantClean.value) {
           throw Exception('Failed to decode image');
         } else {
           return imageBytes;

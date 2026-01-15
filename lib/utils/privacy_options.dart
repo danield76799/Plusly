@@ -1,4 +1,4 @@
-import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:matrix/matrix.dart';
 
 bool hasIndividualPrivacyOptionsEnabled(Client client, String roomId) {
@@ -6,13 +6,13 @@ bool hasIndividualPrivacyOptionsEnabled(Client client, String roomId) {
 }
 
 bool shouldSendPublicReadReceipts(Client client, String roomId) {
-  if (!hasIndividualPrivacyOptionsEnabled(client, roomId)) return AppConfig.sendPublicReadReceipts;
+  if (!hasIndividualPrivacyOptionsEnabled(client, roomId)) return AppSettings.sendPublicReadReceipts.value;
   final content = client.accountData['xyz.extera.room_privacy_settings.$roomId']!.content;
-  return content.tryGet('read_receipts') ?? AppConfig.sendPublicReadReceipts;
+  return content.tryGet('read_receipts') ?? AppSettings.sendPublicReadReceipts.value;
 }
 
 bool shouldSendTypingNotifications(Client client, String roomId) {
-  if (!hasIndividualPrivacyOptionsEnabled(client, roomId)) return AppConfig.sendTypingNotifications;
+  if (!hasIndividualPrivacyOptionsEnabled(client, roomId)) return AppSettings.sendTypingNotifications.value;
   final content = client.accountData['xyz.extera.room_privacy_settings.$roomId']!.content;
-  return content.tryGet('typing_notifications') ?? AppConfig.sendTypingNotifications;
+  return content.tryGet('typing_notifications') ?? AppSettings.sendTypingNotifications.value;
 }

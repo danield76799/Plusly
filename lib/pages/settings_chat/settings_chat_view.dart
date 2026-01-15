@@ -53,9 +53,7 @@ class SettingsChatView extends StatelessWidget {
                       SettingsSwitchListTile.adaptive(
                         title: L10n.of(context).formattedMessages,
                         subtitle: L10n.of(context).formattedMessagesDescription,
-                        onChanged: (b) => AppConfig.renderHtml = b,
-                        storeKey: SettingKeys.renderHtml,
-                        defaultValue: AppConfig.renderHtml,
+                        setting: AppSettings.renderHtml,
                       ),
                       const ListDivider(),
                       SettingsSwitchListTile.adaptive(
@@ -63,51 +61,37 @@ class SettingsChatView extends StatelessWidget {
                         subtitle: L10n.of(
                           context,
                         ).hideMemberChangesInPublicChatsBody,
-                        onChanged: (b) =>
-                            AppConfig.hideUnimportantStateEvents = b,
-                        storeKey: SettingKeys.hideUnimportantStateEvents,
-                        defaultValue: AppConfig.hideUnimportantStateEvents,
+                        setting: AppSettings.hideMemberChangesInPublicChats,
                       ),
                       const ListDivider(),
                       SettingsSwitchListTile.adaptive(
                         title: L10n.of(context).hideRedactedMessages,
                         subtitle: L10n.of(context).hideRedactedMessagesBody,
-                        onChanged: (b) => AppConfig.hideRedactedEvents = b,
-                        storeKey: SettingKeys.hideRedactedEvents,
-                        defaultValue: AppConfig.hideRedactedEvents,
+                        setting: AppSettings.hideRedactedEvents,
                       ),
                       const ListDivider(),
                       SettingsSwitchListTile.adaptive(
                         title: L10n.of(
                           context,
                         ).hideInvalidOrUnknownMessageFormats,
-                        onChanged: (b) => AppConfig.hideUnknownEvents = b,
-                        storeKey: SettingKeys.hideUnknownEvents,
-                        defaultValue: AppConfig.hideUnknownEvents,
+                        setting: AppSettings.hideUnknownEvents,
                       ),
                       const ListDivider(),
                       if (PlatformInfos.isMobile) ...[
                         SettingsSwitchListTile.adaptive(
                           title: L10n.of(context).autoplayImages,
-                          onChanged: (b) => AppConfig.autoplayImages = b,
-                          storeKey: SettingKeys.autoplayImages,
-                          defaultValue: AppConfig.autoplayImages,
+                          setting: AppSettings.autoplayImages,
                         ),
                         const ListDivider(),
                       ],
                       SettingsSwitchListTile.adaptive(
                         title: L10n.of(context).sendOnEnter,
-                        onChanged: (b) => AppConfig.sendOnEnter = b,
-                        storeKey: SettingKeys.sendOnEnter,
-                        defaultValue:
-                            AppConfig.sendOnEnter ?? !PlatformInfos.isMobile,
+                        setting: AppSettings.sendOnEnter,
                       ),
                       const ListDivider(),
                       SettingsSwitchListTile.adaptive(
                         title: L10n.of(context).swipeRightToLeftToReply,
-                        onChanged: (b) => AppConfig.swipeRightToLeftToReply = b,
-                        storeKey: SettingKeys.swipeRightToLeftToReply,
-                        defaultValue: AppConfig.swipeRightToLeftToReply,
+                        setting: AppSettings.swipeRightToLeftToReply,
                       ),
                     ],
                   ),
@@ -162,13 +146,10 @@ class SettingsChatView extends StatelessWidget {
                       ),
                       SettingsSwitchListTile.adaptive(
                         title: L10n.of(context).experimentalVideoCalls,
-                        onChanged: (b) {
-                          AppConfig.experimentalVoip = b;
+                        setting: AppSettings.experimentalVoip,
+                        onChanged: (value) {
                           Matrix.of(context).createVoipPlugin();
-                          return;
                         },
-                        storeKey: SettingKeys.experimentalVoip,
-                        defaultValue: AppConfig.experimentalVoip,
                       ),
                       const ListDivider(),
                       if (PlatformInfos.isDesktop) ...[
@@ -177,9 +158,7 @@ class SettingsChatView extends StatelessWidget {
                           subtitle: L10n.of(
                             context,
                           ).pushToTalkHotkeyDescription,
-                          onChanged: (b) => AppConfig.pushToTalkHotkey = b,
-                          storeKey: SettingKeys.pushToTalkHotkey,
-                          defaultValue: AppConfig.pushToTalkHotkey,
+                          setting: AppSettings.pushToTalkHotkey,
                         ),
                         const ListDivider(),
                       ],

@@ -97,8 +97,7 @@ class SettingsStyleView extends StatelessWidget {
                         title: L10n.of(context).pureBlackToggle,
                         onChanged: (b) =>
                             ThemeController.of(context).setPureBlack(b),
-                        storeKey: SettingKeys.pureBlack,
-                        defaultValue: ThemeController.of(context).pureBlack,
+                        setting: AppSettings.pureBlack,
                       ),
                     ],
                   ],
@@ -316,10 +315,12 @@ class SettingsStyleView extends StatelessWidget {
                                                         color:
                                                             theme.onBubbleColor,
                                                         fontSize:
-                                                            AppConfig
-                                                                .messageFontSize *
-                                                            AppConfig
-                                                                .fontSizeFactor,
+                                                            AppSettings
+                                                                .messageFontSize
+                                                                .value *
+                                                            AppSettings
+                                                                .fontSizeFactor
+                                                                .value,
                                                       ),
                                                     ),
                                                   ),
@@ -373,10 +374,12 @@ class SettingsStyleView extends StatelessWidget {
                                                                     .colorScheme
                                                                     .onSurface,
                                                                 fontSize:
-                                                                    AppConfig
-                                                                        .messageFontSize *
-                                                                    AppConfig
-                                                                        .fontSizeFactor,
+                                                                    AppSettings
+                                                                        .messageFontSize
+                                                                        .value *
+                                                                    AppSettings
+                                                                        .fontSizeFactor
+                                                                        .value,
                                                               ),
                                                             ),
                                                           ),
@@ -427,10 +430,12 @@ class SettingsStyleView extends StatelessWidget {
                                                         color:
                                                             theme.onBubbleColor,
                                                         fontSize:
-                                                            AppConfig
-                                                                .messageFontSize *
-                                                            AppConfig
-                                                                .fontSizeFactor,
+                                                            AppSettings
+                                                                .messageFontSize
+                                                                .value *
+                                                            AppSettings
+                                                                .fontSizeFactor
+                                                                .value,
                                                       ),
                                                     ),
                                                   ),
@@ -447,18 +452,16 @@ class SettingsStyleView extends StatelessWidget {
                             ),
                             SettingsSwitchListTile.adaptive(
                               title: L10n.of(context).enableGradient,
-                              onChanged: (b) => AppConfig.enableGradient = b,
-                              storeKey: SettingKeys.enableGradient,
-                              defaultValue: AppConfig.enableGradient,
+                              setting: AppSettings.enableGradient,
                             ),
                             if (!PlatformInfos.isMobile ||
-                                AppConfig.twemojiFont)
+                                AppSettings.twemojiFont.value) ...[
+                              const ListDivider(),
                               SettingsSwitchListTile.adaptive(
                                 title: L10n.of(context).useTwemoji,
-                                onChanged: (b) => AppConfig.twemojiFont = b,
-                                storeKey: SettingKeys.twemojiFont,
-                                defaultValue: AppConfig.twemojiFont,
+                                setting: AppSettings.twemojiFont,
                               ),
+                            ],
                             const SizedBox(height: 8),
                             ListTile(
                               title: TextButton.icon(
@@ -510,26 +513,28 @@ class SettingsStyleView extends StatelessWidget {
                     const ListDivider(),
                     ListTile(
                       title: Text(L10n.of(context).fontSize),
-                      trailing: Text('× ${AppConfig.fontSizeFactor}'),
+                      trailing: Text(
+                        '× ${AppSettings.fontSizeFactor.value.toStringAsFixed(2)}',
+                      ),
                     ),
                     Slider.adaptive(
                       min: 0.5,
                       max: 2.5,
                       divisions: 20,
-                      value: AppConfig.fontSizeFactor,
+                      value: AppSettings.fontSizeFactor.value,
                       semanticFormatterCallback: (d) => d.toString(),
                       onChanged: controller.changeFontSizeFactor,
                     ),
                     const ListDivider(),
                     ListTile(
                       title: Text(L10n.of(context).avatarBorderRadius),
-                      trailing: Text('× ${AppConfig.avatarBorderRadius}'),
+                      trailing: Text('× ${AppSettings.avatarBorderRadius.value}'),
                     ),
                     Slider.adaptive(
                       min: 0.5,
                       max: 1,
                       divisions: 20,
-                      value: AppConfig.avatarBorderRadius,
+                      value: AppSettings.avatarBorderRadius.value,
                       semanticFormatterCallback: (d) => d.toString(),
                       onChanged: controller.changeAvatarBorderRadius,
                     ),
@@ -554,23 +559,17 @@ class SettingsStyleView extends StatelessWidget {
                     ),
                     SettingsSwitchListTile.adaptive(
                       title: L10n.of(context).presencesToggle,
-                      onChanged: (b) => AppConfig.showPresences = b,
-                      storeKey: SettingKeys.showPresences,
-                      defaultValue: AppConfig.showPresences,
+                      setting: AppSettings.showPresences,
                     ),
                     const ListDivider(),
                     SettingsSwitchListTile.adaptive(
                       title: L10n.of(context).separateChatTypes,
-                      onChanged: (b) => AppConfig.separateChatTypes = b,
-                      storeKey: SettingKeys.separateChatTypes,
-                      defaultValue: AppConfig.separateChatTypes,
+                      setting: AppSettings.separateChatTypes,
                     ),
                     const ListDivider(),
                     SettingsSwitchListTile.adaptive(
                       title: L10n.of(context).displayNavigationRail,
-                      onChanged: (b) => AppConfig.displayNavigationRail = b,
-                      storeKey: SettingKeys.displayNavigationRail,
-                      defaultValue: AppConfig.displayNavigationRail,
+                      setting: AppSettings.displayNavigationRail,
                     ),
                   ],
                 ),

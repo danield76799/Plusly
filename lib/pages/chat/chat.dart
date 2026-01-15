@@ -28,7 +28,6 @@ import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/pages/chat/chat_view.dart';
@@ -311,7 +310,7 @@ class ChatController extends State<ChatPageWithRoom>
   @override
   void initState() {
     inputFocus = FocusNode(
-      onKeyEvent: (AppConfig.sendOnEnter ?? !PlatformInfos.isMobile)
+      onKeyEvent: AppSettings.sendOnEnter.value
           ? _shiftEnterKeyHandling
           : null,
     );
@@ -323,7 +322,7 @@ class ChatController extends State<ChatPageWithRoom>
     WidgetsBinding.instance.addPostFrameCallback(_shareItems);
     super.initState();
     _displayChatDetailsColumn = ValueNotifier(
-      AppSettings.displayChatDetailsColumn.getItem(Matrix.of(context).store),
+      AppSettings.displayChatDetailsColumn.value,
     );
 
     sendingClient = Matrix.of(context).client;
@@ -1703,7 +1702,6 @@ class ChatController extends State<ChatPageWithRoom>
 
   void toggleDisplayChatDetailsColumn() async {
     await AppSettings.displayChatDetailsColumn.setItem(
-      Matrix.of(context).store,
       !_displayChatDetailsColumn.value,
     );
     _displayChatDetailsColumn.value = !_displayChatDetailsColumn.value;

@@ -102,8 +102,8 @@ abstract class ClientManager {
     String clientName,
     SharedPreferences store,
   ) async {
-    final shareKeysWith = AppSettings.shareKeysWith.getItem(store);
-    final enableSoftLogout = AppSettings.enableSoftLogout.getItem(store);
+    final shareKeysWith = AppSettings.shareKeysWith.value;
+    final enableSoftLogout = AppSettings.enableSoftLogout.value;
 
     return Client(
       clientName,

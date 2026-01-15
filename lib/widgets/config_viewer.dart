@@ -18,7 +18,7 @@ class ConfigViewer extends StatelessWidget {
     String initialValue,
   ) async {
     if (appSetting is AppSettings<bool>) {
-      appSetting.setItem(store, !(initialValue == 'true'));
+      appSetting.setItem(!(initialValue == 'true'));
       return;
     }
 
@@ -31,13 +31,13 @@ class ConfigViewer extends StatelessWidget {
     if (value == null) return;
 
     if (appSetting is AppSettings<String>) {
-      appSetting.setItem(store, value);
+      appSetting.setItem(value);
     }
     if (appSetting is AppSettings<int>) {
-      appSetting.setItem(store, int.parse(value));
+      appSetting.setItem(int.parse(value));
     }
     if (appSetting is AppSettings<double>) {
-      appSetting.setItem(store, double.parse(value));
+      appSetting.setItem(double.parse(value));
     }
 
     setState(() {});
@@ -76,16 +76,16 @@ class ConfigViewer extends StatelessWidget {
                     final appSetting = AppSettings.values[i];
                     var value = '';
                     if (appSetting is AppSettings<String>) {
-                      value = appSetting.getItem(store);
+                      value = appSetting.value;
                     }
                     if (appSetting is AppSettings<int>) {
-                      value = appSetting.getItem(store).toString();
+                      value = appSetting.value.toString();
                     }
                     if (appSetting is AppSettings<bool>) {
-                      value = appSetting.getItem(store).toString();
+                      value = appSetting.value.toString();
                     }
                     if (appSetting is AppSettings<double>) {
-                      value = appSetting.getItem(store).toString();
+                      value = appSetting.value.toString();
                     }
                     return ListTile(
                       title: Text(appSetting.name),

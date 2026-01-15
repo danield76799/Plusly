@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/utils/poll_events.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
@@ -701,7 +702,7 @@ class Message extends StatelessWidget {
                       child: Text(
                         event.originServerTs.localizedTime(context),
                         style: TextStyle(
-                          fontSize: 12 * AppConfig.fontSizeFactor,
+                          fontSize: 12 * AppSettings.fontSizeFactor.value,
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.secondary,
                         ),
@@ -751,7 +752,7 @@ class Message extends StatelessWidget {
                   ),
                   child: Text(
                     L10n.of(context).newMessages,
-                    style: TextStyle(fontSize: 12 * AppConfig.fontSizeFactor),
+                    style: TextStyle(fontSize: 12 * AppSettings.fontSizeFactor.value),
                   ),
                 ),
                 Expanded(
@@ -774,7 +775,7 @@ class Message extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: Center(child: Icon(Icons.check_outlined)),
         ),
-        direction: AppConfig.swipeRightToLeftToReply
+        direction: AppSettings.swipeRightToLeftToReply.value
             ? SwipeDirection.endToStart
             : SwipeDirection.startToEnd,
         onSwipe: (_) => onSwipe(),

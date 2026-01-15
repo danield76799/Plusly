@@ -217,11 +217,11 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     initMatrix();
-    if (PlatformInfos.isWeb) {
-      initConfig().then((_) => initSettings());
-    } else {
-      initSettings();
-    }
+    // if (PlatformInfos.isWeb) {
+    //   initConfig().then((_) => initSettings());
+    // } else {
+    //   initSettings();
+    // }
   }
 
   Future<void> initConfig() async {
@@ -382,9 +382,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         state != AppLifecycleState.inactive &&
         state != AppLifecycleState.paused;
     for (final client in widget.clients) {
-      if (AppConfig.autoMarkUnavailable && client.syncPresence == PresenceType.online) {
+      if (AppSettings.autoMarkUnavailable.value && client.syncPresence == PresenceType.online) {
         client.syncPresence = state == AppLifecycleState.resumed
-            ? PresenceType.values.firstWhere((x) => x.name == AppSettings.presenceStatus.getItem(store))
+            ? PresenceType.values.firstWhere((x) => x.name == AppSettings.presenceStatus.value)
             : PresenceType.unavailable;
       }
       if (PlatformInfos.isMobile) {
@@ -393,89 +393,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         Logs().v('Set background sync to', foreground);
       }
     }
-  }
-
-  void initSettings() {
-    AppConfig.fontSizeFactor =
-        double.tryParse(store.getString(SettingKeys.fontSizeFactor) ?? '') ??
-        AppConfig.fontSizeFactor;
-
-    AppConfig.renderHtml =
-        store.getBool(SettingKeys.renderHtml) ?? AppConfig.renderHtml;
-
-    AppConfig.swipeRightToLeftToReply =
-        store.getBool(SettingKeys.swipeRightToLeftToReply) ??
-        AppConfig.swipeRightToLeftToReply;
-
-    AppConfig.hideRedactedEvents =
-        store.getBool(SettingKeys.hideRedactedEvents) ??
-        AppConfig.hideRedactedEvents;
-
-    AppConfig.hideUnknownEvents =
-        store.getBool(SettingKeys.hideUnknownEvents) ??
-        AppConfig.hideUnknownEvents;
-
-    AppConfig.hideUnimportantStateEvents =
-        store.getBool(SettingKeys.hideUnimportantStateEvents) ??
-        AppConfig.hideUnimportantStateEvents;
-
-    AppConfig.separateChatTypes =
-        store.getBool(SettingKeys.separateChatTypes) ??
-        AppConfig.separateChatTypes;
-
-    AppConfig.autoplayImages =
-        store.getBool(SettingKeys.autoplayImages) ?? AppConfig.autoplayImages;
-
-    AppConfig.sendTypingNotifications =
-        store.getBool(SettingKeys.sendTypingNotifications) ??
-        AppConfig.sendTypingNotifications;
-
-    AppConfig.sendPublicReadReceipts =
-        store.getBool(SettingKeys.sendPublicReadReceipts) ??
-        AppConfig.sendPublicReadReceipts;
-
-    AppConfig.sendOnEnter =
-        store.getBool(SettingKeys.sendOnEnter) ?? AppConfig.sendOnEnter;
-
-    AppConfig.experimentalVoip =
-        store.getBool(SettingKeys.experimentalVoip) ??
-        AppConfig.experimentalVoip;
-
-    AppConfig.showPresences =
-        store.getBool(SettingKeys.showPresences) ?? AppConfig.showPresences;
-
-    AppConfig.displayNavigationRail =
-        store.getBool(SettingKeys.displayNavigationRail) ??
-        AppConfig.displayNavigationRail;
-
-    AppConfig.enableGradient =
-        store.getBool(SettingKeys.enableGradient) ?? AppConfig.enableGradient;
-
-    AppConfig.ringtone =
-        store.getString(SettingKeys.ringtone) ??
-        (PlatformInfos.isMobile ? 'system' : 'Homebase');
-
-    AppConfig.checkForUpdates =
-        store.getBool(SettingKeys.checkForUpdates) ?? AppConfig.checkForUpdates;
-
-    AppConfig.twemojiFont =
-        store.getBool(SettingKeys.twemojiFont) ?? AppConfig.twemojiFont;
-
-    AppConfig.incomingCallsOnLockScreen =
-        store.getBool(SettingKeys.incomingCallsOnLockScreen) ??
-        AppConfig.incomingCallsOnLockScreen;
-
-    AppConfig.pushToTalkHotkey =
-        store.getBool(SettingKeys.pushToTalkHotkey) ??
-        AppConfig.pushToTalkHotkey;
-
-    AppConfig.autoMarkUnavailable =
-        store.getBool(SettingKeys.autoMarkUnavailable) ??
-        AppConfig.autoMarkUnavailable;
-
-    AppConfig.avatarBorderRadius =
-        store.getDouble(SettingKeys.avatarBorderRadius) ??
-        AppConfig.avatarBorderRadius;
   }
 
   @override

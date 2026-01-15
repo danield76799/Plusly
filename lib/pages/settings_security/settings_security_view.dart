@@ -1,3 +1,4 @@
+import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/pages/settings_security/chat_privacy_list.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/widgets/list_divider.dart';
@@ -7,7 +8,6 @@ import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/utils/beautify_string_extension.dart';
@@ -75,10 +75,7 @@ class SettingsSecurityView extends StatelessWidget {
                             subtitle: L10n.of(
                               context,
                             ).hideAvatarsInInvitesDescription,
-                            onChanged: (b) =>
-                                AppConfig.hideAvatarsInInvites = b,
-                            storeKey: SettingKeys.hideAvatarsInInvites,
-                            defaultValue: AppConfig.hideAvatarsInInvites,
+                            setting: AppSettings.hideAvatarsInInvites,
                           ),
                           if (PlatformInfos.isMobile) ...[
                             const ListDivider(),
@@ -89,10 +86,8 @@ class SettingsSecurityView extends StatelessWidget {
                               subtitle: L10n.of(
                                 context,
                               ).incomingCallsOnLockScreenSubtitle,
-                              onChanged: (b) =>
-                                  AppConfig.incomingCallsOnLockScreen = b,
-                              storeKey: SettingKeys.incomingCallsOnLockScreen,
-                              defaultValue: AppConfig.incomingCallsOnLockScreen,
+                              setting:
+                                  AppSettings.incomingCallsOnLockScreen,
                             ),
                           ],
                         ],
@@ -117,9 +112,7 @@ class SettingsSecurityView extends StatelessWidget {
                           SettingsSwitchListTile.adaptive(
                             title: L10n.of(context).cleanExif,
                             subtitle: L10n.of(context).cleanExifDescription,
-                            onChanged: (b) => AppConfig.cleanExif = b,
-                            storeKey: SettingKeys.cleanExif,
-                            defaultValue: AppConfig.cleanExif,
+                            setting: AppSettings.cleanExif,
                           ),
                           const ListDivider(),
                           SettingsSwitchListTile.adaptive(
@@ -127,10 +120,7 @@ class SettingsSecurityView extends StatelessWidget {
                             subtitle: L10n.of(
                               context,
                             ).doNotSendIfCantCleanDescription,
-                            onChanged: (b) =>
-                                AppConfig.doNotSendIfCantClean = b,
-                            storeKey: SettingKeys.doNotSendIfCantClean,
-                            defaultValue: AppConfig.doNotSendIfCantClean,
+                            setting: AppSettings.doNotSendIfCantClean,
                           ),
                           const ListDivider(),
                           SettingsSwitchListTile.adaptive(
@@ -138,10 +128,7 @@ class SettingsSecurityView extends StatelessWidget {
                             subtitle: L10n.of(
                               context,
                             ).sendTypingNotificationsDescription,
-                            onChanged: (b) =>
-                                AppConfig.sendTypingNotifications = b,
-                            storeKey: SettingKeys.sendTypingNotifications,
-                            defaultValue: AppConfig.sendTypingNotifications,
+                            setting: AppSettings.sendTypingNotifications,
                           ),
                           const ListDivider(),
                           SettingsSwitchListTile.adaptive(
@@ -149,10 +136,7 @@ class SettingsSecurityView extends StatelessWidget {
                             subtitle: L10n.of(
                               context,
                             ).sendReadReceiptsDescription,
-                            onChanged: (b) =>
-                                AppConfig.sendPublicReadReceipts = b,
-                            storeKey: SettingKeys.sendPublicReadReceipts,
-                            defaultValue: AppConfig.sendPublicReadReceipts,
+                            setting: AppSettings.sendPublicReadReceipts,
                           ),
                           const ListDivider(),
                           SettingsSwitchListTile.adaptive(
@@ -160,9 +144,7 @@ class SettingsSecurityView extends StatelessWidget {
                             subtitle: L10n.of(
                               context,
                             ).autoMarkUnavailableDescription,
-                            onChanged: (b) => AppConfig.autoMarkUnavailable = b,
-                            storeKey: SettingKeys.autoMarkUnavailable,
-                            defaultValue: AppConfig.autoMarkUnavailable,
+                            setting: AppSettings.autoMarkUnavailable,
                           ),
                           const ListDivider(),
                           ListTile(

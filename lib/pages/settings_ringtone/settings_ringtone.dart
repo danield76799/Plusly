@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/settings_ringtone/settings_ringtone_view.dart';
 import 'package:extera_next/utils/platform_infos.dart';
@@ -27,14 +26,14 @@ class SettingsRingtoneController extends State<SettingsRingtone> {
   }
 
   String get currentRingtone {
-    return store.getString(SettingKeys.ringtone) ?? AppConfig.ringtone;
+    return AppSettings.ringtone.value;
   }
 
   bool get isSystemRingtoneAvailable => PlatformInfos.isMobile;
 
   void setRingtone(String ringtone) {
     setState(() {
-      AppConfig.ringtone = ringtone;
+      AppSettings.ringtone.setItem(ringtone);
       store.setString(SettingKeys.ringtone, ringtone);
       previewRingtone();
     });

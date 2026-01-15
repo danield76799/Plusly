@@ -14,7 +14,6 @@ import 'package:matrix/matrix.dart' as sdk;
 import 'package:matrix/matrix.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/pages/chat_list/chat_list_view.dart';
 import 'package:extera_next/utils/localized_exception_extension.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -99,7 +98,7 @@ class ChatListController extends State<ChatList>
 
   StreamSubscription? _intentUriStreamSubscription;
 
-  ActiveFilter activeFilter = AppConfig.separateChatTypes
+  ActiveFilter activeFilter = AppSettings.separateChatTypes.value
       ? ActiveFilter.messages
       : ActiveFilter.allChats;
 
@@ -458,7 +457,7 @@ class ChatListController extends State<ChatList>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!AppConfig.hideAvatarsInInvites ||
+              if (!AppSettings.hideAvatarsInInvites.value||
                   room.membership != Membership.invite)
                 Avatar(
                   mxContent: room.avatar,
@@ -482,7 +481,7 @@ class ChatListController extends State<ChatList>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (!AppConfig.hideAvatarsInInvites ||
+                if (!AppSettings.hideAvatarsInInvites.value ||
                     room.membership != Membership.invite)
                   Avatar(
                     mxContent: space.avatar,
@@ -726,7 +725,8 @@ class ChatListController extends State<ChatList>
     );
     if (result == OkCancelResult.ok) {
       await Matrix.of(context).store.setBool(SettingKeys.showPresences, false);
-      AppConfig.showPresences = false;
+      AppSettings.showPresences.setItem(false);
+      if (!mounted) return;
       setState(() {});
     }
   }
@@ -747,7 +747,6 @@ class ChatListController extends State<ChatList>
       future: () async {
         client.syncPresence = input.$1;
         AppSettings.presenceStatus.setItem(
-          Matrix.of(context).store,
           input.$1.name,
         );
         await client.setPresence(client.userID!, input.$1, statusMsg: input.$2);

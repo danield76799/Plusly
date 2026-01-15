@@ -1,4 +1,4 @@
-import 'package:extera_next/config/app_config.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/chat_privacy/chat_privacy_view.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/material.dart';
@@ -31,16 +31,16 @@ class ChatPrivacyController extends State<ChatPrivacy> {
 
   bool get sendReadReceipts {
     final client = Matrix.of(context).client;
-    if (!privacySettingsEnabled) return AppConfig.sendPublicReadReceipts;
+    if (!privacySettingsEnabled) return AppSettings.sendPublicReadReceipts.value;
     final content = client.accountData[_eventKey]!.content;
-    return content.tryGet<bool>('read_receipts') ?? AppConfig.sendPublicReadReceipts;
+    return content.tryGet<bool>('read_receipts') ?? AppSettings.sendPublicReadReceipts.value;
   }
 
   bool get sendTypingNotifications {
     final client = Matrix.of(context).client;
-    if (!privacySettingsEnabled) return AppConfig.sendPublicReadReceipts;
+    if (!privacySettingsEnabled) return AppSettings.sendPublicReadReceipts.value;
     final content = client.accountData[_eventKey]!.content;
-    return content.tryGet<bool>('typing_notifications') ?? AppConfig.sendTypingNotifications;
+    return content.tryGet<bool>('typing_notifications') ?? AppSettings.sendTypingNotifications.value;
   }
 
   void setReadReceipts(bool readReceipts) async {
