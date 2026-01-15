@@ -76,6 +76,22 @@ class BackgroundPush {
 
   bool upAction = false;
 
+  Future<void> initialiseLocalNotifications() async {
+    await _flutterLocalNotificationsPlugin.initialize(
+      const InitializationSettings(
+        android: AndroidInitializationSettings('notifications_icon'),
+        iOS: DarwinInitializationSettings(),
+      ),
+      onDidReceiveNotificationResponse: (response) => notificationTap(
+        response,
+        client: client,
+        router: FluffyChatApp.router,
+        l10n: l10n,
+      ),
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+    );
+  }
+
   void _init() async {
     //<GOOGLE_SERVICES>firebaseEnabled = true;
     try {
@@ -111,19 +127,7 @@ class BackgroundPush {
           }
         });
       }
-      await _flutterLocalNotificationsPlugin.initialize(
-        const InitializationSettings(
-          android: AndroidInitializationSettings('notifications_icon'),
-          iOS: DarwinInitializationSettings(),
-        ),
-        onDidReceiveNotificationResponse: (response) => notificationTap(
-          response,
-          client: client,
-          router: FluffyChatApp.router,
-          l10n: l10n,
-        ),
-        onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
-      );
+      await initialiseLocalNotifications();
       Logs().v('Flutter Local Notifications initialized');
       //<GOOGLE_SERVICES>firebase.setListeners(
       //<GOOGLE_SERVICES>  onMessage: (message) => pushHelper(
