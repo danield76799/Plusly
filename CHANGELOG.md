@@ -1,3 +1,8 @@
+## Extera 26.0.6
+- Fixed pasted images not having a name, so they weren't handled by Telegram bridge.
+- Hide spaces and their rooms from global chat list.
+- Fix < and > escaping in code blocks.
+
 ## Extera 26.0.5
 - Fixed pasting images on Linux.
 - Support viewing MSC4320 Rich Presences.
