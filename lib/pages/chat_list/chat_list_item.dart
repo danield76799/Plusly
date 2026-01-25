@@ -19,6 +19,7 @@ enum ArchivedRoomAction { delete, rejoin }
 class ChatListItem extends StatelessWidget {
   final Room room;
   final Room? space;
+  final bool noBackgroundColor;
   final bool activeChat;
   final bool firstElement;
   final bool lastElement;
@@ -30,6 +31,7 @@ class ChatListItem extends StatelessWidget {
   const ChatListItem(
     this.room, {
     this.activeChat = false,
+    this.noBackgroundColor = false,
     required this.onTap,
     this.onLongPress,
     this.onForget,
@@ -98,7 +100,7 @@ class ChatListItem extends StatelessWidget {
       child: Material(
         borderRadius: borderRadius,
         clipBehavior: Clip.hardEdge,
-        color: backgroundColor,
+        color: noBackgroundColor ? null : backgroundColor,
         child: FutureBuilder(
           future: room.name.isEmpty ? room.loadHeroUsers() : null,
           builder: (context, _) => HoverBuilder(

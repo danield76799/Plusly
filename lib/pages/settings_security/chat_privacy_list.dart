@@ -43,6 +43,7 @@ class ChatPrivacyList extends StatelessWidget {
                 if (room == null) return const SizedBox.shrink();
                 return ChatListItem(
                   room,
+                  noBackgroundColor: true,
                   onTap: () {
                     context.pop();
                     context.push('/rooms/$roomId/details/privacy');

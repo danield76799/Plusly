@@ -70,7 +70,9 @@ class SendFileDialogState extends State<SendFileDialog> {
         MatrixImageFile? thumbnail;
         final length = await xfile.length();
         final mimeType = xfile.mimeType ?? lookupMimeType(xfile.path);
-        final name = xfile.name.isNotEmpty ? xfile.name : "file.${mimeType!.split('/').last}";
+        final name = xfile.name.isNotEmpty
+            ? xfile.name
+            : "file.${mimeType!.split('/').last}";
 
         // If file is a video, shrink it!
         if (PlatformInfos.isMobile &&
@@ -168,11 +170,6 @@ class SendFileDialogState extends State<SendFileDialog> {
           };
         }
 
-        setState(() {
-          isSending = false;
-        });
-        Navigator.of(context, rootNavigator: false).pop();
-
         try {
           await widget.room.sendFileEvent(
             file,
@@ -216,6 +213,10 @@ class SendFileDialogState extends State<SendFileDialog> {
           );
         }
       }
+      setState(() {
+        isSending = false;
+      });
+      Navigator.of(context, rootNavigator: false).pop();
       scaffoldMessenger.clearSnackBars();
     } catch (e) {
       Logs().e('error on send', e);
