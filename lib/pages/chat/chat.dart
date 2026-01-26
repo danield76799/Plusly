@@ -310,9 +310,7 @@ class ChatController extends State<ChatPageWithRoom>
   @override
   void initState() {
     inputFocus = FocusNode(
-      onKeyEvent: AppSettings.sendOnEnter.value
-          ? _shiftEnterKeyHandling
-          : null,
+      onKeyEvent: AppSettings.sendOnEnter.value ? _shiftEnterKeyHandling : null,
     );
 
     scrollController.addListener(_updateScrollController);
@@ -1224,6 +1222,8 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void onEmojiSelected(Category? _, PickerEmoji emoji) {
+    room.client.addRecentEmoji(emoji.customData ?? emoji.standardEmoji!.char);
+    // print('selected emoji ${emoji.customData ?? emoji.standardEmoji!.char}');
     switch (emojiPickerType) {
       case EmojiPickerType.reaction:
         senEmojiReaction(emoji);
@@ -1273,32 +1273,37 @@ class ChatController extends State<ChatPageWithRoom>
   void typeCustomEmoji(PickerEmoji emoji) {
     final text = sendController.text;
     final selection = sendController.selection;
+
+    final String customId = emoji.customId ?? emoji.customData ?? '';
+    final String? insertPack = emoji.categoryId;
+
     var isUnique = true;
-    final insertPack = emoji.categoryId!;
-    final emotePacks = room.getImagePacks(ImagePackUsage.emoticon);
-    for (final pack in emotePacks.entries) {
-      if (pack.key == insertPack) {
-        continue;
-      }
-      for (final emote in pack.value.images.entries) {
-        if (emote.key == emoji.customId!) {
-          isUnique = false;
-          break;
+    if (customId.isNotEmpty && insertPack != null) {
+      final emotePacks = room.getImagePacks(ImagePackUsage.emoticon);
+      for (final pack in emotePacks.entries) {
+        if (pack.key == insertPack) continue;
+        for (final emote in pack.value.images.entries) {
+          if (emote.key == customId) {
+            isUnique = false;
+            break;
+          }
         }
-      }
-      if (!isUnique) {
-        break;
+        if (!isUnique) break;
       }
     }
-    final insertText = ':${isUnique ? '' : '$insertPack~'}${emoji.customId}: ';
-    final newText = sendController.text.isEmpty
-        ? insertText
-        : text.replaceRange(selection.start, selection.end, insertText);
+
+    final packPrefix = (!isUnique && insertPack != null) ? '$insertPack~' : '';
+    final insertText = ':$packPrefix$customId: ';
+
+    final int start = (selection.isValid ? selection.start : text.length).clamp(0, text.length);
+    final int end = (selection.isValid ? selection.end : text.length).clamp(0, text.length);
+
+    final newText = text.isEmpty ? insertText : text.replaceRange(start, end, insertText);
+    final int cursorOffset = (start + insertText.length).clamp(0, newText.length);
+
     sendController.value = TextEditingValue(
       text: newText,
-      selection: TextSelection.collapsed(
-        offset: selection.baseOffset + newText.length,
-      ),
+      selection: TextSelection.collapsed(offset: cursorOffset),
     );
   }
 

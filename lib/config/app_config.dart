@@ -60,6 +60,7 @@ abstract class AppConfig {
   static const String schemePrefix = 'matrix:';
   static const String pushNotificationsChannelId = 'exteranext_push';
   static const String pushNotificationsAppId = 'xyz.extera.next';
+  static const String recentEmojisAccountDataKey = 'io.element.recent_emoji';
   static const double borderRadius = 18.0;
   static const double columnWidth = 360.0;
   static final Uri homeserverList = Uri(

@@ -125,6 +125,15 @@ class _CustomTab extends _PickerTab {
   String get name => category.name;
 }
 
+class _RecentTab extends _PickerTab {
+  _RecentTab();
+  @override
+  Widget get icon => const Icon(Icons.history, size: 22);
+
+  @override
+  String get name => 'Recent';
+}
+
 // ==========================================
 // 3. Main Widget
 // ==========================================
@@ -132,6 +141,9 @@ class _CustomTab extends _PickerTab {
 class MatrixEmojiPicker extends StatefulWidget {
   final EmojiSelectionCallback onEmojiSelected;
   final VoidCallback onBackspacePressed;
+  /// A list of recent `PickerEmoji` items to show in the "Recent" tab.
+  final List<PickerEmoji> recentEmojis;
+
   final List<CustomCategory> customCategories;
 
   /// Required to render custom emojis.
@@ -142,6 +154,7 @@ class MatrixEmojiPicker extends StatefulWidget {
     super.key,
     required this.onEmojiSelected,
     required this.onBackspacePressed,
+    this.recentEmojis = const [],
     this.customCategories = const [],
     this.customEmojiBuilder,
   });
@@ -174,6 +187,7 @@ class MatrixEmojiPickerState extends State<MatrixEmojiPicker>
 
   void _initTabs() {
     _tabs = [
+      _RecentTab(),
       ...Category.values.map((c) => _StandardTab(c)),
       ...widget.customCategories.map((c) => _CustomTab(c)),
     ];
@@ -193,7 +207,8 @@ class MatrixEmojiPickerState extends State<MatrixEmojiPicker>
   @override
   void didUpdateWidget(MatrixEmojiPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.customCategories != oldWidget.customCategories) {
+    if (widget.customCategories != oldWidget.customCategories ||
+        widget.recentEmojis != oldWidget.recentEmojis) {
       _tabController.dispose();
       _initTabs();
       _loadEmojis();
@@ -256,7 +271,16 @@ class MatrixEmojiPickerState extends State<MatrixEmojiPicker>
     final currentTab = _tabs[_selectedTabIndex];
 
     if (searchText.isNotEmpty) {
-      _displayedEmojis = _allEmojis.where((e) {
+      // Include recent emojis in search results in addition to the full set
+      final source = <PickerEmoji>[];
+      source.addAll(_allEmojis);
+      for (final r in widget.recentEmojis) {
+        if (!source.any((e) => e.displayName == r.displayName && e.type == r.type)) {
+          source.add(r);
+        }
+      }
+
+      _displayedEmojis = source.where((e) {
         if (e.displayName.toLowerCase().contains(searchText)) return true;
         for (final k in e.keywords) {
           if (k.toLowerCase().contains(searchText)) return true;
@@ -280,6 +304,8 @@ class MatrixEmojiPickerState extends State<MatrixEmojiPicker>
           if (e.type != PickerEmojiType.custom) return false;
           return e.categoryId == currentTab.category.id;
         }).toList();
+      } else if (currentTab is _RecentTab) {
+        _displayedEmojis = widget.recentEmojis.toList();
       }
     }
   }
