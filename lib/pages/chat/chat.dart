@@ -1274,8 +1274,8 @@ class ChatController extends State<ChatPageWithRoom>
     final text = sendController.text;
     final selection = sendController.selection;
 
-    final String customId = emoji.customId ?? emoji.customData ?? '';
-    final String? insertPack = emoji.categoryId;
+    final customId = emoji.customId ?? emoji.customData ?? '';
+    final insertPack = emoji.categoryId;
 
     var isUnique = true;
     if (customId.isNotEmpty && insertPack != null) {
@@ -1295,11 +1295,11 @@ class ChatController extends State<ChatPageWithRoom>
     final packPrefix = (!isUnique && insertPack != null) ? '$insertPack~' : '';
     final insertText = ':$packPrefix$customId: ';
 
-    final int start = (selection.isValid ? selection.start : text.length).clamp(0, text.length);
-    final int end = (selection.isValid ? selection.end : text.length).clamp(0, text.length);
+    final start = (selection.isValid ? selection.start : text.length).clamp(0, text.length);
+    final end = (selection.isValid ? selection.end : text.length).clamp(0, text.length);
 
     final newText = text.isEmpty ? insertText : text.replaceRange(start, end, insertText);
-    final int cursorOffset = (start + insertText.length).clamp(0, newText.length);
+    final cursorOffset = (start + insertText.length).clamp(0, newText.length);
 
     sendController.value = TextEditingValue(
       text: newText,
