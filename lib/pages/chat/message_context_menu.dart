@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/chat.dart';
@@ -54,6 +55,12 @@ class MessageContextMenu extends StatelessWidget {
     final theme = Theme.of(context);
     final borderRadius = BorderRadius.circular(AppConfig.borderRadius);
     final imagePacks = controller.room.getImagePacks(ImagePackUsage.emoticon);
+
+    final recentEmojis = client.recentEmojis.entries
+        .sortedByCompare((element) => element.value, (a, b) => b - a)
+        .map((entry) => entry.key)
+        .toList()
+        .sublist(0, 5);
 
     final receipts = room
         .getReceipts(timeline!, eventId: event.eventId)
@@ -139,7 +146,7 @@ class MessageContextMenu extends StatelessWidget {
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              ...AppConfig.defaultReactions.map(
+                              ...recentEmojis.map(
                                 (emoji) => IconButton(
                                   padding: EdgeInsets.zero,
                                   icon: Center(
@@ -147,7 +154,13 @@ class MessageContextMenu extends StatelessWidget {
                                       opacity: sentReactions.contains(emoji)
                                           ? 0.33
                                           : 1,
-                                      child: Text(
+                                      child: emoji.startsWith("mxc://")
+                                      ? MxcImage(
+                                        uri: Uri.parse(emoji),
+                                        width: 32,
+                                        height: 32,
+                                      )
+                                      : Text(
                                         emoji,
                                         style: const TextStyle(fontSize: 20),
                                         textAlign: TextAlign.center,
