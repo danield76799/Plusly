@@ -315,7 +315,13 @@ class ProfileView extends StatelessWidget {
                                     const SizedBox(height: 8),
                                     FilledButton.tonalIcon(
                                       onPressed: () {
-                                        UrlLauncher(context, controller.richPresenceData!['streaming_link'], controller.richPresenceData!['player']).launchUrl();
+                                        UrlLauncher(
+                                          context,
+                                          controller
+                                              .richPresenceData!['streaming_link'],
+                                          controller
+                                              .richPresenceData!['player'],
+                                        ).launchUrl();
                                       },
                                       label: Text(
                                         controller.richPresenceData?.tryGet(
@@ -446,7 +452,26 @@ class ProfileView extends StatelessWidget {
                             color: theme.colorScheme.onSecondary,
                           ),
                         ),
-                        title: Text(controller.about!),
+                        title: Linkify(
+                          text: controller.about!,
+                          textScaleFactor: MediaQuery.textScalerOf(
+                            context,
+                          ).scale(1),
+                          style: const TextStyle(
+                            fontSize: 16,
+                          ),
+                          options: const LinkifyOptions(humanize: false),
+                          linkStyle: TextStyle(
+                            color: theme.colorScheme.secondary,
+                            decoration: TextDecoration.underline,
+                            decorationColor: theme.colorScheme.secondary,
+                          ),
+                          onOpen: (link) => UrlLauncher(
+                            context,
+                            link.url,
+                            link.text,
+                          ).launchUrl(),
+                        ),
                         subtitle: Text(L10n.of(context).aboutUser),
                       ),
                     ],
