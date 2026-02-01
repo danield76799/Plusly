@@ -15,55 +15,55 @@ Future<OkCancelResult?> showOkCancelAlertDialog({
   String? cancelLabel,
   bool isDestructive = false,
   bool useRootNavigator = true,
-}) =>
-    showAdaptiveDialog<OkCancelResult>(
-      context: context,
-      useRootNavigator: useRootNavigator,
-      builder: (context) => AlertDialog.adaptive(
-        title: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 256),
-          child: Text(title),
-        ),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 256),
-          child: message == null
-              ? null
-              : SelectableLinkify(
-                  text: message,
-                  textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
-                  linkStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    decorationColor: Theme.of(context).colorScheme.primary,
-                  ),
-                  options: const LinkifyOptions(humanize: false),
-                  onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
-                ),
-        ),
-        actions: [
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24.0),
-                ),
+}) => showAdaptiveDialog<OkCancelResult>(
+  context: context,
+  useRootNavigator: useRootNavigator,
+  builder: (context) => AlertDialog.adaptive(
+    title: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 256),
+      child: Text(title),
+    ),
+    content: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 256),
+      child: message == null
+          ? null
+          : SelectableLinkify(
+              text: message,
+              textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+              linkStyle: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                decorationColor: Theme.of(context).colorScheme.primary,
               ),
-            onPressed: () => Navigator.of(context)
-                .pop<OkCancelResult>(OkCancelResult.cancel),
-            child: Text(cancelLabel ?? L10n.of(context).cancel),
-          ),
-          FilledButton(
-            onPressed: () =>
-                Navigator.of(context).pop<OkCancelResult>(OkCancelResult.ok),
-            autofocus: true,
-            child: Text(
-              okLabel ?? L10n.of(context).ok,
-              style: isDestructive
-                  ? TextStyle(color: Theme.of(context).colorScheme.error)
-                  : null,
+              options: const LinkifyOptions(humanize: false),
+              onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
             ),
+    ),
+    actions: [
+      OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24.0),
           ),
-        ],
+        ),
+        onPressed: () =>
+            Navigator.of(context).pop<OkCancelResult>(OkCancelResult.cancel),
+        child: Text(cancelLabel ?? L10n.of(context).cancel),
       ),
-    );
+      FilledButton(
+        onPressed: () =>
+            Navigator.of(context).pop<OkCancelResult>(OkCancelResult.ok),
+        autofocus: true,
+        style: isDestructive
+            ? FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+                foregroundColor: Theme.of(context).colorScheme.onError,
+              )
+            : null,
+        child: Text(okLabel ?? L10n.of(context).ok),
+      ),
+    ],
+  ),
+);
 
 Future<OkCancelResult?> showOkAlertDialog({
   required BuildContext context,
@@ -71,37 +71,36 @@ Future<OkCancelResult?> showOkAlertDialog({
   String? message,
   String? okLabel,
   bool useRootNavigator = true,
-}) =>
-    showAdaptiveDialog<OkCancelResult>(
-      context: context,
-      useRootNavigator: useRootNavigator,
-      builder: (context) => AlertDialog.adaptive(
-        title: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 256),
-          child: Text(title),
-        ),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 256),
-          child: message == null
-              ? null
-              : SelectableLinkify(
-                  text: message,
-                  textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
-                  linkStyle: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    decorationColor: Theme.of(context).colorScheme.primary,
-                  ),
-                  options: const LinkifyOptions(humanize: false),
-                  onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
-                ),
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () =>
-                Navigator.of(context).pop<OkCancelResult>(OkCancelResult.ok),
-            autofocus: true,
-            child: Text(okLabel ?? L10n.of(context).close),
-          ),
-        ],
+}) => showAdaptiveDialog<OkCancelResult>(
+  context: context,
+  useRootNavigator: useRootNavigator,
+  builder: (context) => AlertDialog.adaptive(
+    title: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 256),
+      child: Text(title),
+    ),
+    content: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 256),
+      child: message == null
+          ? null
+          : SelectableLinkify(
+              text: message,
+              textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+              linkStyle: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
+                decorationColor: Theme.of(context).colorScheme.primary,
+              ),
+              options: const LinkifyOptions(humanize: false),
+              onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+            ),
+    ),
+    actions: [
+      FilledButton(
+        onPressed: () =>
+            Navigator.of(context).pop<OkCancelResult>(OkCancelResult.ok),
+        autofocus: true,
+        child: Text(okLabel ?? L10n.of(context).close),
       ),
-    );
+    ],
+  ),
+);
