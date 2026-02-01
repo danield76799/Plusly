@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:extera_next/pages/chat_list/invite_dialog.dart';
+import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/utils/check_updates.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/set_status_dialog.dart';
 import 'package:flutter/material.dart';
@@ -119,6 +121,10 @@ class ChatListController extends State<ChatList>
 
   void onChatTap(Room room) async {
     if (room.membership == Membership.invite) {
+      await showAdaptiveBottomSheet(
+        context: context,
+        builder: (context) => InviteDialog(room),
+      );
       return;
     }
 
@@ -145,11 +151,22 @@ class ChatListController extends State<ChatList>
   bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
     switch (activeFilter) {
       case ActiveFilter.allChats:
-        return (room) => !room.isSpace && (AppSettings.showSpaceRoomsInGlobalList.value || room.spaceParents.isEmpty);
+        return (room) =>
+            !room.isSpace &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
       case ActiveFilter.messages:
-        return (room) => !room.isSpace && room.isDirectChat && (AppSettings.showSpaceRoomsInGlobalList.value || room.spaceParents.isEmpty);
+        return (room) =>
+            !room.isSpace &&
+            room.isDirectChat &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
       case ActiveFilter.groups:
-        return (room) => !room.isSpace && !room.isDirectChat && (AppSettings.showSpaceRoomsInGlobalList.value || room.spaceParents.isEmpty);
+        return (room) =>
+            !room.isSpace &&
+            !room.isDirectChat &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
       case ActiveFilter.unread:
         return (room) => room.isUnreadOrInvited;
       case ActiveFilter.spaces:
@@ -159,9 +176,7 @@ class ChatListController extends State<ChatList>
 
   List<Room> get filteredRooms => Matrix.of(
     context,
-  ).client.rooms
-    .where(getRoomFilterByActiveFilter(activeFilter))
-    .toList();
+  ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).toList();
 
   bool isSearchMode = false;
   Future<QueryPublicRoomsResponse>? publicRoomsResponse;
@@ -459,7 +474,7 @@ class ChatListController extends State<ChatList>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (!AppSettings.hideAvatarsInInvites.value||
+              if (!AppSettings.hideAvatarsInInvites.value ||
                   room.membership != Membership.invite)
                 Avatar(
                   mxContent: room.avatar,
@@ -747,9 +762,7 @@ class ChatListController extends State<ChatList>
       context: context,
       future: () async {
         client.syncPresence = input.$1;
-        AppSettings.presenceStatus.setItem(
-          input.$1.name,
-        );
+        AppSettings.presenceStatus.setItem(input.$1.name);
         await client.setPresence(client.userID!, input.$1, statusMsg: input.$2);
       },
     );
