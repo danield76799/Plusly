@@ -2640,7 +2640,7 @@
       }
     }
   },
-  "youInvitedBy": "📩 You have been invited by {user}",
+  "youInvitedBy": "You were invited by {user}",
   "@youInvitedBy": {
     "placeholders": {
       "user": {
@@ -2648,7 +2648,7 @@
       }
     }
   },
-  "invitedBy": "📩 Invited by {user}",
+  "invitedBy": "Invited by {user}",
   "@invitedBy": {
     "placeholders": {
       "user": {
@@ -3540,5 +3540,6 @@
       }
     }
   },
-  "showSpaceRoomsInGlobalList": "Show rooms from spaces alongside other rooms"
+  "showSpaceRoomsInGlobalList": "Show rooms from spaces alongside other rooms",
+  "newInvitation": "New invitation"
 }

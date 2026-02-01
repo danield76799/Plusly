@@ -2633,7 +2633,7 @@
 			}
 		}
 	},
-	"youInvitedBy": "📩 Вы были приглашены {user}",
+	"youInvitedBy": "Вы были приглашены {user}",
 	"@youInvitedBy": {
 		"placeholders": {
 			"user": {
@@ -2641,7 +2641,7 @@
 			}
 		}
 	},
-	"invitedBy": "📩 Приглашен(а) {user}",
+	"invitedBy": "Приглашен(а) {user}",
 	"@invitedBy": {
 		"placeholders": {
 			"user": {
@@ -3644,5 +3644,6 @@
       }
     }
   },
-  "showSpaceRoomsInGlobalList": "Показывать комнаты из пространств среди всего списка"
+  "showSpaceRoomsInGlobalList": "Показывать комнаты из пространств среди всего списка",
+  "newInvitation": "Новое приглашение"
 }
