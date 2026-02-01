@@ -429,7 +429,7 @@ class HtmlMessage extends StatelessWidget {
             'del' ||
             's' ||
             'strikethrough' =>
-              const TextStyle(decoration: TextDecoration.lineThrough),
+              TextStyle(decoration: TextDecoration.lineThrough, decorationColor: textColor),
             'u' => const TextStyle(decoration: TextDecoration.underline),
             'h1' => TextStyle(fontSize: fontSize * 1.6, height: 2),
             'h2' => TextStyle(fontSize: fontSize * 1.5, height: 2),
