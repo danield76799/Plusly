@@ -153,6 +153,7 @@ class MessageContent extends StatelessWidget {
               borderRadius: borderRadius,
               timeline: timeline,
               textColor: textColor,
+              linkColor: linkColor,
             );
           case CuteEventContent.eventType:
             return CuteContent(event);
