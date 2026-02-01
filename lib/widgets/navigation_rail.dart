@@ -51,8 +51,9 @@ class SpacesNavigationRail extends StatelessWidget {
             )
             .toList();
 
-        return SizedBox(
+        return Container(
           width: FluffyThemes.navRailWidth,
+          color: Theme.of(context).scaffoldBackgroundColor,
           child: SafeArea(
             child: Column(
               children: [
@@ -133,8 +134,7 @@ class SpacesNavigationRail extends StatelessWidget {
               ],
             ),
           ),
-        );
-      },
+        );      },
     );
   }
 }
