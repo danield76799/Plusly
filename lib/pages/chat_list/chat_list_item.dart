@@ -1,3 +1,4 @@
+import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
@@ -44,6 +45,7 @@ class ChatListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final client = Matrix.of(context).client;
     final theme = Theme.of(context);
 
     final isMuted = room.pushRuleState != PushRuleState.notify;
@@ -269,6 +271,9 @@ class ChatListItem extends StatelessWidget {
                               (room.summary.mJoinedMemberCount ?? 1),
                             ),
                             style: TextStyle(color: theme.colorScheme.outline),
+                            // Added overflow handling here for safety
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           )
                         : typingText.isNotEmpty
                         ? Text(
@@ -276,6 +281,8 @@ class ChatListItem extends StatelessWidget {
                             style: TextStyle(color: theme.colorScheme.primary),
                             maxLines: 1,
                             softWrap: false,
+                            // Added overflow handling here for safety
+                            overflow: TextOverflow.ellipsis,
                           )
                         : FutureBuilder(
                             key: ValueKey(
@@ -300,36 +307,63 @@ class ChatListItem extends StatelessWidget {
                               hideEdit: true,
                               plaintextBody: true,
                               removeMarkdown: true,
-                              withSenderNamePrefix:
-                                  (!isDirectChat ||
-                                  directChatMatrixId !=
-                                      room.lastEvent?.senderId),
+                              withSenderNamePrefix: !isDirectChat,
                             ),
-                            builder: (context, snapshot) => Text(
-                              room.membership == Membership.invite
-                                  ? room
-                                            .getState(
-                                              EventTypes.RoomMember,
-                                              room.client.userID!,
+                            builder: (context, snapshot) => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 2,
+                              children: [
+                                if (room.membership == Membership.join &&
+                                    ownMessage)
+                                  Icon(
+                                    lastEvent!.receipts
+                                            .where(
+                                              (receipt) =>
+                                                  receipt.user.id !=
+                                                  client.userID!,
                                             )
-                                            ?.content
-                                            .tryGet<String>('reason') ??
-                                        (isDirectChat
-                                            ? L10n.of(context).newChatRequest
-                                            : L10n.of(context).inviteGroupChat)
-                                  : snapshot.data ??
-                                        L10n.of(context).noMessagesYet,
-                              softWrap: false,
-                              maxLines: room.notificationCount >= 1 ? 2 : 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: unread || room.hasNewMessages
-                                    ? theme.colorScheme.onSurface
-                                    : theme.colorScheme.outline,
-                                decoration: room.lastEvent?.redacted == true
-                                    ? TextDecoration.lineThrough
-                                    : null,
-                              ),
+                                            .isNotEmpty
+                                        ? Icons.done_all
+                                        : Icons.done,
+                                    size: 16,
+                                    color: theme.colorScheme.outline,
+                                  ),
+                                Flexible(
+                                  child: Text(
+                                    room.membership == Membership.invite
+                                        ? room
+                                                  .getState(
+                                                    EventTypes.RoomMember,
+                                                    room.client.userID!,
+                                                  )
+                                                  ?.content
+                                                  .tryGet<String>('reason') ??
+                                              (isDirectChat
+                                                  ? L10n.of(
+                                                      context,
+                                                    ).newChatRequest
+                                                  : L10n.of(
+                                                      context,
+                                                    ).inviteGroupChat)
+                                        : snapshot.data ??
+                                              L10n.of(context).noMessagesYet,
+                                    softWrap: false,
+                                    maxLines: room.notificationCount >= 1
+                                        ? 2
+                                        : 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: unread || room.hasNewMessages
+                                          ? theme.colorScheme.onSurface
+                                          : theme.colorScheme.outline,
+                                      decoration:
+                                          room.lastEvent?.redacted == true
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                   ),
