@@ -1,38 +1,89 @@
-import 'package:extera_next/pages/download_manager/download_manager_view.dart';
 import 'package:extera_next/utils/downloads_directory.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:matrix/matrix.dart';
+import 'dart:async';
+
 import 'package:provider/provider.dart';
+
+sealed class DownloadEvent {
+  final String downloadName;
+  final DateTime timestamp;
+
+  DownloadEvent({required this.downloadName, DateTime? timestamp})
+    : timestamp = timestamp ?? DateTime.now();
+}
+
+class DownloadStartEvent extends DownloadEvent {
+  final int totalBytes;
+
+  DownloadStartEvent({required super.downloadName, required this.totalBytes});
+
+  @override
+  String toString() =>
+      'DownloadStartEvent(name: $downloadName, totalBytes: $totalBytes)';
+}
+
+class DownloadProgressEvent extends DownloadEvent {
+  final int receivedBytes;
+  final int totalBytes;
+  final double progress;
+
+  DownloadProgressEvent({
+    required super.downloadName,
+    required this.receivedBytes,
+    required this.totalBytes,
+    required this.progress,
+  });
+
+  @override
+  String toString() =>
+      'DownloadProgressEvent(name: $downloadName, progress: ${progress.toStringAsFixed(1)}%, received: $receivedBytes/$totalBytes)';
+}
+
+class DownloadEndEvent extends DownloadEvent {
+  final bool success;
+  final String? filePath;
+  final Object? error;
+
+  DownloadEndEvent({
+    required super.downloadName,
+    this.success = true,
+    this.filePath,
+    this.error,
+  });
+
+  @override
+  String toString() =>
+      'DownloadEndEvent(name: $downloadName, success: $success, error: $error)';
+}
 
 class Download {
   final String url;
   final String name;
-  final BuildContext context;
+  final DownloadManagerState manager;
   late Future<Response<dynamic>> response;
-  late int receivedBytes = 0;
-  late int totalBytes = 1;
-  late double progress = 0;
+  int receivedBytes = 0;
+  int totalBytes = 1;
+  double progress = 0;
   late String httpUrl;
   late String downloadPath;
   late CancelToken ct;
-  Download(this.context, this.url, this.name);
+  bool _isCompleted = false;
 
-  void start() async {
+  Download(this.manager, this.url, this.name);
+
+  void start(BuildContext context) async {
     try {
       final mx = Matrix.of(context).client;
-      // final directory = await getDownloadsDirectory();
       downloadPath = getDownloadsDirectory();
 
       httpUrl = (await Uri.parse(url).getDownloadUri(mx)).toString();
 
-      // Create Dio instance
       final dio = Dio();
-
       ct = CancelToken();
 
-      // Download the file
       response = dio.download(
         httpUrl,
         "$downloadPath/$name",
@@ -40,11 +91,22 @@ class Download {
           receivedBytes = received;
           totalBytes = total;
           progress = (receivedBytes / totalBytes) * 100;
-          if (progress == 100) {
-            Provider.of<DownloadManagerController>(context, listen: false)
-                .downloads
-                .remove(this);
+
+          if (received == 0 || totalBytes == total && receivedBytes == 0) {
+            manager._emitEvent(
+              DownloadStartEvent(downloadName: name, totalBytes: totalBytes),
+            );
           }
+
+          manager._emitEvent(
+            DownloadProgressEvent(
+              downloadName: name,
+              receivedBytes: receivedBytes,
+              totalBytes: totalBytes,
+              progress: progress,
+            ),
+          );
+
           Logs().w("Download progress: $progress%");
         },
         options: Options(
@@ -53,37 +115,201 @@ class Download {
         ),
         cancelToken: ct,
       );
-      Logs().w("Download completed and saved to $downloadPath/$name");
+
+      await response;
+
+      if (!_isCompleted) {
+        _isCompleted = true;
+        manager._emitEvent(
+          DownloadEndEvent(
+            downloadName: name,
+            success: true,
+            filePath: "$downloadPath/$name",
+          ),
+        );
+        manager._removeDownload(this);
+        Logs().w("Download completed and saved to $downloadPath/$name");
+      }
     } catch (e) {
-      Logs().w("Error during download: $e");
+      if (!_isCompleted) {
+        _isCompleted = true;
+        Logs().w("Error during download: $e");
+        manager._emitEvent(
+          DownloadEndEvent(downloadName: name, success: false, error: e),
+        );
+        manager._removeDownload(this);
+      }
     }
   }
 
-  void cancel() async {
-    ct.cancel();
-    Provider.of<DownloadManagerController>(context).downloads.remove(this);
+  void cancel() {
+    if (!_isCompleted) {
+      _isCompleted = true;
+      ct.cancel();
+      manager._emitEvent(
+        DownloadEndEvent(
+          downloadName: name,
+          success: false,
+          error: 'Cancelled by user',
+        ),
+      );
+      manager._removeDownload(this);
+    }
+  }
+}
+
+/// Wrapper class for managing event subscriptions with easy cancellation
+class DownloadEventSubscription {
+  final StreamSubscription<DownloadEvent> _subscription;
+  final DownloadManagerState _manager;
+  bool _isCancelled = false;
+
+  DownloadEventSubscription(this._subscription, this._manager);
+
+  bool get isCancelled => _isCancelled;
+
+  void pause() => _subscription.pause();
+
+  void resume() => _subscription.resume();
+
+  bool get isPaused => _subscription.isPaused;
+
+  Future<void> cancel() async {
+    if (!_isCancelled) {
+      _isCancelled = true;
+      await _subscription.cancel();
+      _manager._removeSubscription(this);
+    }
+  }
+}
+
+class DownloadManagerState extends State<DownloadManager>
+    with WidgetsBindingObserver {
+  final List<Download> downloads = [];
+  final Set<DownloadEventSubscription> _subscriptions = {};
+
+  final StreamController<DownloadEvent> _eventStreamController =
+      StreamController<DownloadEvent>.broadcast();
+
+  Stream<DownloadEvent> get eventStream => _eventStreamController.stream;
+
+  int get activeSubscriptionCount => _subscriptions.length;
+
+  void _emitEvent(DownloadEvent event) {
+    if (!_eventStreamController.isClosed) {
+      _eventStreamController.add(event);
+    }
+  }
+
+  void _removeDownload(Download download) {
+    downloads.remove(download);
+  }
+
+  void _removeSubscription(DownloadEventSubscription subscription) {
+    _subscriptions.remove(subscription);
+  }
+
+  void download(BuildContext context, String name, String url) {
+    final dl = Download(this, url, name);
+    downloads.add(dl);
+    dl.start(context);
+  }
+
+  Download? getDownloadByName(String name) {
+    try {
+      return downloads.firstWhere((d) => d.name == name);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Subscribe to download events. Returns a [DownloadEventSubscription]
+  /// that can be cancelled by calling [DownloadEventSubscription.cancel].
+  DownloadEventSubscription onEvent(
+    void Function(DownloadEvent event) onData, {
+    void Function(Object error)? onError,
+    void Function()? onDone,
+    bool cancelOnError = false,
+  }) {
+    final streamSubscription = _eventStreamController.stream.listen(
+      onData,
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
+
+    final subscription = DownloadEventSubscription(streamSubscription, this);
+    _subscriptions.add(subscription);
+
+    return subscription;
+  }
+
+  /// Subscribe to events for a specific download only
+  DownloadEventSubscription onEventFor(
+    String downloadName,
+    void Function(DownloadEvent event) onData, {
+    void Function(Object error)? onError,
+    void Function()? onDone,
+    bool cancelOnError = false,
+    bool autoDisposeOnEnd = true,
+  }) {
+    late DownloadEventSubscription subscription;
+
+    subscription = onEvent(
+      (event) {
+        if (event.downloadName == downloadName) {
+          onData(event);
+
+          // Auto-cancel when download ends
+          if (autoDisposeOnEnd && event is DownloadEndEvent) {
+            subscription.cancel();
+          }
+        }
+      },
+      onError: onError,
+      onDone: onDone,
+      cancelOnError: cancelOnError,
+    );
+
+    return subscription;
+  }
+
+  /// Cancel all active subscriptions
+  Future<void> cancelAllSubscriptions() async {
+    final subscriptionsCopy = Set<DownloadEventSubscription>.from(
+      _subscriptions,
+    );
+    for (final subscription in subscriptionsCopy) {
+      await subscription.cancel();
+    }
+    _subscriptions.clear();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    cancelAllSubscriptions();
+    for (final download in downloads.toList()) {
+      download.cancel();
+    }
+    _eventStreamController.close();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Provider(create: (_) => this, child: widget.child);
   }
 }
 
 class DownloadManager extends StatefulWidget {
-  final BuildContext context;
+  final Widget child;
 
-  const DownloadManager(this.context, {super.key});
+  const DownloadManager({required this.child, super.key});
 
   @override
-  State<StatefulWidget> createState() =>
-      Provider.of<DownloadManagerController>(context);
-}
+  DownloadManagerState createState() => DownloadManagerState();
 
-class DownloadManagerController extends State<DownloadManager>
-    with ChangeNotifier {
-  @override
-  Widget build(BuildContext context) => DownloadManagerView(this);
-
-  final List<Download> downloads = [];
-  void download(BuildContext context, String name, String url) async {
-    final dl = Download(context, url, name);
-    downloads.add(dl);
-    dl.start();
-  }
+  /// Returns the (nearest) Client instance of your application.
+  static DownloadManagerState of(BuildContext context) =>
+      Provider.of<DownloadManagerState>(context, listen: false);
 }

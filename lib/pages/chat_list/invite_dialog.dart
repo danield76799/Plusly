@@ -9,7 +9,6 @@ import 'package:extera_next/widgets/list_divider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:go_router/go_router.dart';
-import 'package:linkify/linkify.dart';
 import 'package:matrix/matrix.dart';
 
 class InviteDialog extends StatelessWidget {
@@ -51,9 +50,9 @@ class InviteDialog extends StatelessWidget {
     );
     final topic = room.topic;
     final reason = membershipEvent?.content.tryGet<String>('reason');
-    final actualMembersCount =
-        (room.summary.mInvitedMemberCount ?? 0) +
-        (room.summary.mJoinedMemberCount ?? 0);
+    // final actualMembersCount =
+        // (room.summary.mInvitedMemberCount ?? 0) +
+        // (room.summary.mJoinedMemberCount ?? 0);
 
     return Scaffold(
       appBar: AppBar(title: Text(L10n.of(context).newInvitation)),

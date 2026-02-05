@@ -10,7 +10,6 @@ import 'package:matrix/matrix.dart';
 import 'package:extera_next/utils/size_string.dart';
 import 'package:extera_next/widgets/future_loading_dialog.dart';
 import 'package:mime/mime.dart';
-import 'package:provider/provider.dart';
 import 'matrix_file_extension.dart';
 
 extension LocalizedBody on Event {
@@ -32,10 +31,7 @@ extension LocalizedBody on Event {
 
   void downloadInBackground(BuildContext context) async {
     if (canDownloadInBackground) {
-      final dmc = Provider.of<DownloadManagerController>(
-        context,
-        listen: false,
-      );
+      final dmc = DownloadManager.of(context);
       final filename = content.tryGet<String>('filename') ?? body;
       dmc.download(
         context,

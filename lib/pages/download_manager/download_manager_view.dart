@@ -3,27 +3,26 @@ import 'package:extera_next/pages/download_manager/download_manager.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/widgets/layouts/max_width_body.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class DownloadManagerView extends StatelessWidget {
-  final DownloadManagerController controller;
-  const DownloadManagerView(this.controller, {super.key});
+  const DownloadManagerView({super.key});
 
   static void showDownloads(BuildContext context) {
     showAdaptiveBottomSheet(
       context: context,
-      builder: (context) => DownloadManagerView(Provider.of<DownloadManagerController>(context)),
+      builder: (context) => const DownloadManagerView(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final dlm = DownloadManager.of(context);
     return Scaffold(
       body: MaxWidthBody(
         child: ListView.builder(
-          itemCount: controller.downloads.length,
+          itemCount: dlm.downloads.length,
           itemBuilder: (context, index) {
-            final download = controller.downloads[index];
+            final download = dlm.downloads[index];
             return ListTile(
               title: Text(download.name),
               subtitle: LinearProgressIndicator(

@@ -73,8 +73,7 @@ class FluffyChatApp extends StatelessWidget {
               clients: clients,
               // Need a navigator above the Matrix widget for
               // displaying dialogs
-              child: ChangeNotifierProvider(
-                create: (context) => DownloadManagerController(),
+              child: DownloadManager(
                 child: Matrix(
                   clients: clients,
                   store: store,
