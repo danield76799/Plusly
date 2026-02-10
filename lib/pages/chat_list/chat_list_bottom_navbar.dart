@@ -1,6 +1,7 @@
-import 'dart:math';
+// import 'dart:math';
 
 import 'package:badges/badges.dart';
+import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
@@ -50,28 +51,87 @@ class ChatListBottomNavbar extends StatelessWidget {
       ActiveFilter.spaces: (Room room) => false,
     };
 
-    return BottomNavigationBar(
-      currentIndex: max(0, filters.indexOf(controller.activeFilter)),
-      backgroundColor: theme.colorScheme.surfaceContainer,
-      selectedItemColor: theme.colorScheme.primary,
-      unselectedItemColor: theme.colorScheme.secondary,
-      enableFeedback: true,
-      onTap: (index) {
-        controller.setActiveFilter(filters[index]);
-      },
-      items: filters
-          .map(
-            (filter) => BottomNavigationBarItem(
-              icon: UnreadRoomsBadge(
-                filter: filterLambdas[filter]!,
-                badgePosition: BadgePosition.topEnd(),
-                child: Icon(filter.toIconData(true)),
-              ),
-              activeIcon: Icon(filter.toIconData(false)),
-              label: filter.toLocalizedString(context),
-            ),
-          )
-          .toList(),
+    return Material(
+      borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+      clipBehavior: .hardEdge,
+      color: theme.colorScheme.surfaceContainerHigh,
+      child: Padding(
+        padding: const .all(4),
+        child: Row(
+          children: filters.map((filter) {
+            final isActive = controller.activeFilter == filter;
+
+            return Expanded(
+              child: isActive
+                  ? FilledButton.tonal(
+                      onPressed: () => controller.setActiveFilter(filter),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConfig.borderRadius - 4,
+                          ),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(filter.toIconData(false), size: 20),
+                          const SizedBox(height: 4),
+                          Text(
+                            filter.toLocalizedString(context),
+                            style: const TextStyle(fontSize: 13),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
+                    )
+                  : TextButton(
+                      onPressed: () => controller.setActiveFilter(filter),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppConfig.borderRadius,
+                          ),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          UnreadRoomsBadge(
+                            filter: filterLambdas[filter]!,
+                            badgePosition: BadgePosition.topEnd(),
+                            child: Icon(
+                              filter.toIconData(true),
+                              size: 20,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            filter.toLocalizedString(context),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

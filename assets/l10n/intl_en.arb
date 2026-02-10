@@ -3541,5 +3541,6 @@
     }
   },
   "showSpaceRoomsInGlobalList": "Show rooms from spaces alongside other rooms",
-  "newInvitation": "New invitation"
+  "newInvitation": "New invitation",
+  "useLegacyAppBar": "Use legacy search bar"
 }
