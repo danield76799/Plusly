@@ -2820,7 +2820,7 @@
 			}
 		}
 	},
-	"jumpToLastReadMessage": "Последнее прочитанное сообщение",
+	"jumpToLastReadMessage": "Перейти к непрочитанному",
 	"@jumpToLastReadMessage": {},
 	"newMessages": "Новые сообщения",
 	"@newMessages": {},
@@ -3645,5 +3645,6 @@
     }
   },
   "showSpaceRoomsInGlobalList": "Показывать комнаты из пространств среди всего списка",
-  "newInvitation": "Новое приглашение"
+  "newInvitation": "Новое приглашение",
+  "useLegacyAppBar": "Использовать старое поле поиска"
 }

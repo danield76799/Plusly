@@ -58,7 +58,7 @@ class ChatListItem extends StatelessWidget {
     final hasNotifications = room.notificationCount > 0;
     final backgroundColor = activeChat
         ? theme.colorScheme.secondaryContainer
-        : theme.colorScheme.surfaceContainerHigh;
+        : Colors.transparent;
     final displayname = room.getLocalizedDisplayname(
       MatrixLocals(L10n.of(context)),
     );
@@ -72,30 +72,7 @@ class ChatListItem extends StatelessWidget {
         : room.getState(EventTypes.RoomMember, lastEvent.senderId) == null;
     final space = this.space;
 
-    var borderRadius = BorderRadius.circular(AppConfig.borderRadius);
-
-    if (!activeChat) {
-      if (firstElement) {
-        borderRadius = borderRadius.copyWith(
-          bottomLeft: Radius.zero,
-          bottomRight: Radius.zero,
-        );
-      }
-      if (lastElement) {
-        borderRadius = borderRadius.copyWith(
-          topLeft: Radius.zero,
-          topRight: Radius.zero,
-        );
-      }
-      if (!firstElement && !lastElement) {
-        borderRadius = borderRadius.copyWith(
-          topLeft: Radius.zero,
-          topRight: Radius.zero,
-          bottomLeft: Radius.zero,
-          bottomRight: Radius.zero,
-        );
-      }
-    }
+    final borderRadius = BorderRadius.circular(AppConfig.borderRadius);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),

@@ -576,6 +576,11 @@ class SettingsStyleView extends StatelessWidget {
                       title: L10n.of(context).displayNavigationRail,
                       setting: AppSettings.displayNavigationRail,
                     ),
+                    const ListDivider(),
+                    SettingsSwitchListTile.adaptive(
+                      title: L10n.of(context).useLegacyAppBar,
+                      setting: AppSettings.useLegacyChatListAppBar,
+                    ),
                   ],
                 ),
               ),

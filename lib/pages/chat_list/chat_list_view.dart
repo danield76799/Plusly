@@ -19,7 +19,8 @@ class ChatListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
-    
+    final theme = Theme.of(context);
+
     return PopScope(
       canPop: !controller.isSearchMode && controller.activeSpaceId == null,
       onPopInvokedWithResult: (pop, _) {
@@ -42,10 +43,7 @@ class ChatListView extends StatelessWidget {
               onGoToChats: controller.clearActiveSpace,
               onGoToSpaceId: controller.setActiveSpace,
             ),
-            Container(
-              color: Theme.of(context).dividerColor,
-              width: 1,
-            ),
+            Container(color: Theme.of(context).dividerColor, width: 1),
           ],
           Expanded(
             child: GestureDetector(
@@ -53,21 +51,69 @@ class ChatListView extends StatelessWidget {
               excludeFromSemantics: true,
               behavior: HitTestBehavior.translucent,
               child: Scaffold(
-                body: ChatListViewBody(controller),
-                floatingActionButton: !controller.isSearchMode &&
-                        controller.activeSpaceId == null
-                    ? FloatingActionButton.extended(
-                        onPressed: () => context.go('/rooms/newprivatechat'),
-                        icon: const Icon(Icons.chat_outlined),
-                        label: Text(L10n.of(context).newChat),
-                      )
-                    : const SizedBox.shrink(),
-                floatingActionButtonLocation:
-                    FloatingActionButtonLocation.endFloat,
-                bottomNavigationBar: client.rooms.isNotEmpty &&
-                        !controller.isSearchMode
-                    ? ChatListBottomNavbar(controller)
-                    : null,
+                body: Stack(
+                  children: [
+                    ChatListViewBody(controller),
+                    if (client.rooms.isNotEmpty && !controller.isSearchMode)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: IgnorePointer(
+                          child: Container(
+                            height: 100,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  theme.colorScheme.surface.withValues(
+                                    alpha: 0,
+                                  ),
+                                  theme.colorScheme.surface,
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (!controller.isSearchMode &&
+                        controller.activeSpaceId == null)
+                      Positioned(
+                        right: 16,
+                        bottom: client.rooms.isNotEmpty
+                            ? 88 // height of navbar + padding + gap
+                            : 16,
+                        child: FloatingActionButton.extended(
+                          onPressed: () => context.go('/rooms/newprivatechat'),
+                          icon: const Icon(Icons.chat_outlined),
+                          label: Text(L10n.of(context).newChat),
+                        ),
+                      ),
+
+                    if (client.rooms.isNotEmpty && !controller.isSearchMode)
+                      Positioned(
+                        left: 16,
+                        right: 16,
+                        bottom: 16,
+                        child: ChatListBottomNavbar(controller),
+                      ),
+                  ],
+                ),
+                // floatingActionButton: !controller.isSearchMode &&
+                //         controller.activeSpaceId == null
+                //     ? FloatingActionButton.extended(
+                //         onPressed: () => context.go('/rooms/newprivatechat'),
+                //         icon: const Icon(Icons.chat_outlined),
+                //         label: Text(L10n.of(context).newChat),
+                //       )
+                //     : const SizedBox.shrink(),
+                // floatingActionButtonLocation:
+                //     FloatingActionButtonLocation.endFloat,
+                // bottomNavigationBar: client.rooms.isNotEmpty &&
+                //         !controller.isSearchMode
+                //     ? ChatListBottomNavbar(controller)
+                //     : null,
               ),
             ),
           ),

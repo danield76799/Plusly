@@ -1,4 +1,5 @@
 import 'package:extera_next/config/setting_keys.dart';
+import 'package:extera_next/pages/chat_list/chat_list_old_header.dart';
 import 'package:extera_next/shortcuts/chat_list/chat_list_shortcuts.dart';
 import 'package:extera_next/utils/show_profile.dart';
 import 'package:flutter/cupertino.dart';
@@ -92,7 +93,10 @@ class ChatListViewBody extends StatelessWidget {
             child: CustomScrollView(
               controller: controller.scrollController,
               slivers: [
-                ChatListHeader(controller: controller),
+                if (AppSettings.useLegacyChatListAppBar.value)
+                  ChatListOldHeader(controller: controller)
+                else
+                  ChatListHeader(controller: controller),
                 SliverList(
                   delegate: SliverChildListDelegate([
                     if (controller.isSearchMode) ...[
@@ -151,7 +155,8 @@ class ChatListViewBody extends StatelessWidget {
                               ),
                       ),
                     ],
-                    if (!controller.isSearchMode && AppSettings.showPresences.value)
+                    if (!controller.isSearchMode &&
+                        AppSettings.showPresences.value)
                       GestureDetector(
                         onLongPress: () => controller.dismissStatusList(),
                         child: StatusMessageList(

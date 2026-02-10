@@ -198,9 +198,6 @@ class ChatView extends StatelessWidget {
             if (controller.room.pinnedEventIds.isNotEmpty) {
               appbarBottomHeight += ChatAppBarListTile.fixedHeight;
             }
-            if (scrollUpBannerEventId != null) {
-              appbarBottomHeight += ChatAppBarListTile.fixedHeight;
-            }
             return Scaffold(
               appBar: AppBar(
                 actionsIconTheme: IconThemeData(
@@ -236,29 +233,7 @@ class ChatView extends StatelessWidget {
                   preferredSize: Size.fromHeight(appbarBottomHeight),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      PinnedEvents(controller),
-                      if (scrollUpBannerEventId != null)
-                        ChatAppBarListTile(
-                          leading: IconButton(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            icon: const Icon(Icons.close),
-                            tooltip: L10n.of(context).close,
-                            onPressed: () {
-                              controller.discardScrollUpBannerEventId();
-                              controller.setReadMarker();
-                            },
-                          ),
-                          title: L10n.of(context).jumpToLastReadMessage,
-                          trailing: TextButton(
-                            onPressed: () {
-                              controller.scrollToEventId(scrollUpBannerEventId);
-                              controller.discardScrollUpBannerEventId();
-                            },
-                            child: Text(L10n.of(context).jump),
-                          ),
-                        ),
-                    ],
+                    children: [PinnedEvents(controller)],
                   ),
                 ),
               ),
@@ -392,6 +367,42 @@ class ChatView extends StatelessWidget {
                         color: theme.scaffoldBackgroundColor.withAlpha(230),
                         alignment: Alignment.center,
                         child: const Icon(Icons.upload_outlined, size: 100),
+                      ),
+
+                    if (scrollUpBannerEventId != null)
+                      Positioned(
+                        top: 16,
+                        left: 0,
+                        right: 0,
+                        child: SizedBox(
+                          child: Align(
+                            alignment: .center,
+                            child: Row(
+                              mainAxisSize: .min,
+                              children: [
+                                FilledButton(
+                                  onPressed: () {
+                                    controller.discardScrollUpBannerEventId();
+                                    controller.setReadMarker();
+                                  },
+                                  style: FilledButton.styleFrom(
+                                    shadowColor: Colors.black,
+                                    elevation: 4,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.arrow_upward),
+                                      const SizedBox(width: 18),
+                                      Text(
+                                        L10n.of(context).jumpToLastReadMessage,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                   ],
                 ),
