@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/widgets/layouts/login_scaffold.dart';
-import 'package:extera_next/widgets/matrix.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 import 'login.dart';
 
 class LoginView extends StatelessWidget {
@@ -17,32 +14,18 @@ class LoginView extends StatelessWidget {
     final theme = Theme.of(context);
 
     final homeserver = controller.widget.client.homeserver
-        .toString()
+        ?.toString()
         .replaceFirst('https://', '');
-    final title = L10n.of(context).logInTo(homeserver);
-    final titleParts = title.split(homeserver);
+    final title = homeserver == null
+        ? L10n.of(context).loginWithMatrixId
+        : L10n.of(context).logInTo(homeserver);
 
     return LoginScaffold(
-      enforceMobileMode:
-          Matrix.of(context).widget.clients.any((client) => client.isLogged()),
       appBar: AppBar(
         leading: controller.loading ? null : const Center(child: BackButton()),
         automaticallyImplyLeading: !controller.loading,
         titleSpacing: !controller.loading ? 0 : null,
-        centerTitle: true,
-        title: Text.rich(
-          TextSpan(
-            children: [
-              TextSpan(text: titleParts.first),
-              TextSpan(
-                text: homeserver,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              TextSpan(text: titleParts.last),
-            ],
-          ),
-          style: const TextStyle(fontSize: 18),
-        ),
+        title: Text(title),
       ),
       body: Builder(
         builder: (context) {
@@ -50,24 +33,9 @@ class LoginView extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               children: <Widget>[
-                const SizedBox(height: 32),
-                const Hero(
+                Hero(
                   tag: 'info-logo',
-                  child: Icon(Icons.lock_outline),
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                  child: SelectableLinkify(
-                    text: L10n.of(context).logInToYourAccount,
-                    textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
-                    textAlign: TextAlign.center,
-                    linkStyle: TextStyle(
-                      color: theme.colorScheme.secondary,
-                      decorationColor: theme.colorScheme.secondary,
-                    ),
-                    onOpen: (link) => launchUrlString(link.url),
-                  ),
+                  child: Image.asset('assets/banner_transparent.png'),
                 ),
                 const SizedBox(height: 16),
                 Padding(
@@ -80,8 +48,9 @@ class LoginView extends StatelessWidget {
                     controller: controller.usernameController,
                     textInputAction: TextInputAction.next,
                     keyboardType: TextInputType.emailAddress,
-                    autofillHints:
-                        controller.loading ? null : [AutofillHints.username],
+                    autofillHints: controller.loading
+                        ? null
+                        : [AutofillHints.username],
                     decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.account_box_outlined),
                       errorText: controller.usernameError,
@@ -97,8 +66,9 @@ class LoginView extends StatelessWidget {
                   child: TextField(
                     readOnly: controller.loading,
                     autocorrect: false,
-                    autofillHints:
-                        controller.loading ? null : [AutofillHints.password],
+                    autofillHints: controller.loading
+                        ? null
+                        : [AutofillHints.password],
                     controller: controller.passwordController,
                     textInputAction: TextInputAction.go,
                     obscureText: !controller.showPassword,
@@ -113,6 +83,7 @@ class LoginView extends StatelessWidget {
                           controller.showPassword
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
+                          color: Colors.black,
                         ),
                       ),
                       hintText: '******',
@@ -135,18 +106,19 @@ class LoginView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: TextButton(
-                    onPressed: controller.loading
-                        ? () {}
-                        : controller.passwordForgotten,
-                    style: TextButton.styleFrom(
-                      foregroundColor: theme.colorScheme.error,
+                if (homeserver != null)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: TextButton(
+                      onPressed: controller.loading
+                          ? () {}
+                          : controller.passwordForgotten,
+                      style: TextButton.styleFrom(
+                        foregroundColor: theme.colorScheme.error,
+                      ),
+                      child: Text(L10n.of(context).passwordForgotten),
                     ),
-                    child: Text(L10n.of(context).passwordForgotten),
                   ),
-                ),
                 const SizedBox(height: 16),
               ],
             ),

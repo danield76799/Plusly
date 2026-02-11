@@ -7,6 +7,7 @@ import 'package:extera_next/pages/chat_widgets/chat_widgets.dart';
 import 'package:extera_next/pages/notifications/notifications.dart';
 import 'package:extera_next/pages/profile/profile.dart';
 import 'package:extera_next/pages/settings_ringtone/settings_ringtone.dart';
+import 'package:extera_next/pages/sign_in/sign_in_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,6 @@ import 'package:extera_next/pages/chat_members/chat_members.dart';
 import 'package:extera_next/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:extera_next/pages/chat_search/chat_search_page.dart';
 import 'package:extera_next/pages/device_settings/device_settings.dart';
-import 'package:extera_next/pages/homeserver_picker/homeserver_picker.dart';
 import 'package:extera_next/pages/invitation_selection/invitation_selection.dart';
 import 'package:extera_next/pages/login/login.dart';
 import 'package:extera_next/pages/new_group/new_group.dart';
@@ -67,13 +67,26 @@ abstract class AppRoutes {
     ),
     GoRoute(
       path: '/home',
-      pageBuilder: (context, state) => defaultPageBuilder(
-        context,
-        state,
-        const HomeserverPicker(addMultiAccount: false),
-      ),
       redirect: loggedInRedirect,
       routes: [
+        GoRoute(
+          path: 'sign_in',
+          pageBuilder: (context, state) => defaultPageBuilder(
+            context,
+            state,
+            const SignInPage(signUp: false),
+          ),
+          redirect: loggedInRedirect,
+        ),
+        GoRoute(
+          path: 'sign_up',
+          pageBuilder: (context, state) => defaultPageBuilder(
+            context,
+            state,
+            const SignInPage(signUp: true),
+          ),
+          redirect: loggedInRedirect,
+        ),
         GoRoute(
           path: 'login',
           pageBuilder: (context, state) => defaultPageBuilder(
@@ -313,11 +326,6 @@ abstract class AppRoutes {
                     GoRoute(
                       path: 'addaccount',
                       redirect: loggedOutRedirect,
-                      pageBuilder: (context, state) => defaultPageBuilder(
-                        context,
-                        state,
-                        const HomeserverPicker(addMultiAccount: true),
-                      ),
                       routes: [
                         GoRoute(
                           path: 'login',
@@ -325,6 +333,24 @@ abstract class AppRoutes {
                             context,
                             state,
                             Login(client: state.extra as Client),
+                          ),
+                          redirect: loggedInRedirect,
+                        ),
+                        GoRoute(
+                          path: 'sign_in',
+                          pageBuilder: (context, state) => defaultPageBuilder(
+                            context,
+                            state,
+                            const SignInPage(signUp: false),
+                          ),
+                          redirect: loggedOutRedirect,
+                        ),
+                        GoRoute(
+                          path: 'sign_up',
+                          pageBuilder: (context, state) => defaultPageBuilder(
+                            context,
+                            state,
+                            const SignInPage(signUp: true),
                           ),
                           redirect: loggedOutRedirect,
                         ),
