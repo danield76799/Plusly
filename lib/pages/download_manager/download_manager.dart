@@ -9,20 +9,21 @@ import 'package:provider/provider.dart';
 
 sealed class DownloadEvent {
   final String downloadName;
+  final String downloadUrl;
   final DateTime timestamp;
 
-  DownloadEvent({required this.downloadName, DateTime? timestamp})
+  DownloadEvent({required this.downloadName, required this.downloadUrl, DateTime? timestamp})
     : timestamp = timestamp ?? DateTime.now();
 }
 
 class DownloadStartEvent extends DownloadEvent {
   final int totalBytes;
 
-  DownloadStartEvent({required super.downloadName, required this.totalBytes});
+  DownloadStartEvent({required super.downloadName, required super.downloadUrl, required this.totalBytes});
 
   @override
   String toString() =>
-      'DownloadStartEvent(name: $downloadName, totalBytes: $totalBytes)';
+      'DownloadStartEvent(name: $downloadName, url: $downloadUrl, totalBytes: $totalBytes)';
 }
 
 class DownloadProgressEvent extends DownloadEvent {
@@ -32,6 +33,7 @@ class DownloadProgressEvent extends DownloadEvent {
 
   DownloadProgressEvent({
     required super.downloadName,
+    required super.downloadUrl,
     required this.receivedBytes,
     required this.totalBytes,
     required this.progress,
@@ -39,7 +41,7 @@ class DownloadProgressEvent extends DownloadEvent {
 
   @override
   String toString() =>
-      'DownloadProgressEvent(name: $downloadName, progress: ${progress.toStringAsFixed(1)}%, received: $receivedBytes/$totalBytes)';
+      'DownloadProgressEvent(name: $downloadName, url: $downloadUrl, progress: ${progress.toStringAsFixed(1)}%, received: $receivedBytes/$totalBytes)';
 }
 
 class DownloadEndEvent extends DownloadEvent {
@@ -49,6 +51,7 @@ class DownloadEndEvent extends DownloadEvent {
 
   DownloadEndEvent({
     required super.downloadName,
+    required super.downloadUrl,
     this.success = true,
     this.filePath,
     this.error,
@@ -56,7 +59,7 @@ class DownloadEndEvent extends DownloadEvent {
 
   @override
   String toString() =>
-      'DownloadEndEvent(name: $downloadName, success: $success, error: $error)';
+      'DownloadEndEvent(name: $downloadName, url: $downloadUrl, success: $success, error: $error)';
 }
 
 class Download {
@@ -94,13 +97,14 @@ class Download {
 
           if (received == 0 || totalBytes == total && receivedBytes == 0) {
             manager._emitEvent(
-              DownloadStartEvent(downloadName: name, totalBytes: totalBytes),
+              DownloadStartEvent(downloadName: name, downloadUrl: url, totalBytes: totalBytes),
             );
           }
 
           manager._emitEvent(
             DownloadProgressEvent(
               downloadName: name,
+              downloadUrl: url,
               receivedBytes: receivedBytes,
               totalBytes: totalBytes,
               progress: progress,
@@ -123,6 +127,7 @@ class Download {
         manager._emitEvent(
           DownloadEndEvent(
             downloadName: name,
+            downloadUrl: url,
             success: true,
             filePath: "$downloadPath/$name",
           ),
@@ -135,7 +140,7 @@ class Download {
         _isCompleted = true;
         Logs().w("Error during download: $e");
         manager._emitEvent(
-          DownloadEndEvent(downloadName: name, success: false, error: e),
+          DownloadEndEvent(downloadName: name, downloadUrl: url, success: false, error: e),
         );
         manager._removeDownload(this);
       }
@@ -149,6 +154,7 @@ class Download {
       manager._emitEvent(
         DownloadEndEvent(
           downloadName: name,
+          downloadUrl: url,
           success: false,
           error: 'Cancelled by user',
         ),
@@ -223,6 +229,14 @@ class DownloadManagerState extends State<DownloadManager>
     }
   }
 
+  Download? getDownloadByUrl(String url) {
+    try {
+      return downloads.firstWhere((d) => d.url == url);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Subscribe to download events. Returns a [DownloadEventSubscription]
   /// that can be cancelled by calling [DownloadEventSubscription.cancel].
   DownloadEventSubscription onEvent(
@@ -244,9 +258,9 @@ class DownloadManagerState extends State<DownloadManager>
     return subscription;
   }
 
-  /// Subscribe to events for a specific download only
+  /// Subscribe to events for a specific download by URL only
   DownloadEventSubscription onEventFor(
-    String downloadName,
+    String downloadUrl,
     void Function(DownloadEvent event) onData, {
     void Function(Object error)? onError,
     void Function()? onDone,
@@ -257,7 +271,7 @@ class DownloadManagerState extends State<DownloadManager>
 
     subscription = onEvent(
       (event) {
-        if (event.downloadName == downloadName) {
+        if (event.downloadUrl == downloadUrl) {
           onData(event);
 
           // Auto-cancel when download ends
