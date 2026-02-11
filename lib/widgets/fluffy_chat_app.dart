@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:extera_next/config/routes.dart';
