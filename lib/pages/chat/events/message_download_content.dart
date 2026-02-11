@@ -40,31 +40,34 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
     final dlm = DownloadManager.of(context);
 
     // 2. Store the subscription returned by the manager
-    _downloadSubscription = dlm.onEvent((event) {
-      // 3. Check if the widget is still on screen before doing anything
-      if (!mounted) return;
+    _downloadSubscription = dlm.onEventFor(
+      widget.event.attachmentMxcUrl.toString(),
+      (event) {
+        // 3. Check if the widget is still on screen before doing anything
+        if (!mounted) return;
 
-      switch (event) {
-        case DownloadStartEvent():
-          setState(() {
-            downloadProgress = 0.0;
-            downloadError = false;
-            downloadSuccess = false;
-            isDownloading = true;
-          });
-        case DownloadProgressEvent(:final progress):
-          setState(() {
-            isDownloading = true;
-            downloadProgress = progress;
-          });
-        case DownloadEndEvent(:final success, :final error):
-          setState(() {
-            isDownloading = false;
-            downloadError = !success && error != null;
-            downloadSuccess = success;
-          });
-      }
-    });
+        switch (event) {
+          case DownloadStartEvent():
+            setState(() {
+              downloadProgress = 0.0;
+              downloadError = false;
+              downloadSuccess = false;
+              isDownloading = true;
+            });
+          case DownloadProgressEvent(:final progress):
+            setState(() {
+              isDownloading = true;
+              downloadProgress = progress;
+            });
+          case DownloadEndEvent(:final success, :final error):
+            setState(() {
+              isDownloading = false;
+              downloadError = !success && error != null;
+              downloadSuccess = success;
+            });
+        }
+      },
+    );
   }
 
   @override
