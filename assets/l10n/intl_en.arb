@@ -3545,10 +3545,11 @@
   "legacySwitches": "Legacy switches",
   "useLegacyAppBar": "Use legacy search bar",
   "useLegacyNavBar": "Use legacy navigation bar",
-  "appIntro": "App intro.",
+  "appIntro": "Welcome to Extera. This is a decentralised chat app for [matrix]. Learn more at https://matrix.org/",
   "signIn": "Sign in",
   "createNewAccount": "Sign up",
   "signUpGreeting": "Extera is decentralised. Pick a server to begin.",
   "signInGreeting": "Do you already have a Matrix account? Welcome back!",
-  "theProcessWasCanceled": "The process was canceled."
+  "theProcessWasCanceled": "The process was canceled.",
+  "searchOrEnterHomeserverAddress": "Search or enter homeserver address"
 }

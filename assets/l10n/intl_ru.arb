@@ -3648,5 +3648,12 @@
   "newInvitation": "Новое приглашение",
   "legacySwitches": "Откат изменений",
   "useLegacyAppBar": "Старое поле поиска",
-  "useLegacyNavBar": "Старая панель навигации"
+  "useLegacyNavBar": "Старая панель навигации",
+  "appIntro": "Привет, это Extera. Это децентрализованный мессенджер на протоколе [matrix]. Узнайте больше на https://matrix.org/",
+  "signIn": "Войти",
+  "createNewAccount": "Зарегистрироваться",
+  "signUpGreeting": "Extera децентрализована. Выберите сервер чтобы начать.",
+  "signInGreeting": "Уже есть Matrix аккаунт? С возвращением!",
+  "theProcessWasCanceled": "Операция отменена.",
+  "searchOrEnterHomeserverAddress": "Найдите или введите адрес сервера"
 }
