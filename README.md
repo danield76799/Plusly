@@ -1,42 +1,85 @@
 # Extera Next
-Extera Next is another generation of Extera, made on top of FluffyChat.
 
-# Features
+A feature-rich Matrix client for mobile and desktop platforms built on [FluffyChat](https://github.com/krille-chan/fluffychat). Extera Next extends FluffyChat with additional features and improvements.
 
-- Send all kinds of messages, images and files
+## Features
+
+### Core Messaging
+- Send all kinds of messages, images, and files
 - Voice messages
 - Location sharing
-- Push notifications
+- Message translation (built-in)
 - Unlimited private and public group chats
 - Public channels with thousands of participants
-- Feature rich group moderation including all matrix features
-- Discover and join public groups
-- Dark & AMOLED mode
+
+### Security & Privacy
+- End-to-end encryption
+- Encrypted chat backup
+- Emoji verification & cross-signing
+- Compatible with Element, Nheko, NeoChat, and all other Matrix clients
+
+### UI & Design
+- Dark & AMOLED modes
 - Material You design
 - Custom emotes and stickers
-- Spaces
-- Compatible with Element, Nheko, NeoChat and all other Matrix apps
-- End to end encryption
-- Encrypted chat backup
-- Emoji verification & cross signing
-- **Things exclusive to Extera (compared to FluffyChat)**
+- Spaces support
+- Push notifications
+
+### Moderation & Administration
+- Feature-rich group moderation (all Matrix features)
+- Discover and join public groups
+- Redacted message recovery (for Synapse admins)
+
+### Extera Next Exclusives
 - Built-in message translation
-- "About" field in profiles
-- Updated profile design with a list of mutual rooms
-- Redacted message recovery for Synapse admins (might be removed)
-- Probably working calls
+- "About" field in user profiles
+- Enhanced profile design with mutual rooms list
+- 1:1 voice/video call support
 
-... and much more. (actually no)
+## Prerequisites
 
+Before building, ensure you have:
+- Flutter SDK installed
+- The [matrix-dart-sdk](https://github.com/ExteraApp/matrix-dart-sdk) in the same directory as Extera Next
 
-# Build
-**Do this if I forgot to edit pubspec.yaml**
-To build, make sure you have [matrix-dart-sdk](https://git.extera.xyz/OfficialDakari/matrix-dart-sdk) in the same directory as Extera Next.
+## Building
 
-Or, replace `matrix` in pubspec.yaml:
+### Setup
+
+The `matrix` dependency can be configured in two ways:
+
+**Option 1: Directory-based (Recommended for development)**
+Ensure `matrix-dart-sdk` is cloned in the same parent directory:
+```
+parent-directory/
+├── ExteraNext/
+└── matrix-dart-sdk/
+```
+
+**Option 2: Git reference**
+Update `pubspec.yaml`:
 ```yaml
 matrix:
-    git:
-        url: https://git.extera.xyz/OfficialDakari/matrix-dart-sdk.git
-        ref: main
+  git:
+    url: https://github.com/ExteraApp/matrix-dart-sdk.git
+    ref: main
 ```
+
+### Build Commands
+
+Platform-specific build scripts are available in the `scripts/` directory:
+- `./scripts/build-macos.sh` - macOS
+- `./scripts/build-windows.ps1` - Windows
+- `./scripts/build-ios.sh` - iOS
+- `./scripts/build-appimage.sh` - AppImage (Linux)
+- `./scripts/build-linux.sh` - Linux (Run only after build-appimage.sh)
+
+## License
+
+This project is licensed under the [AGPL-3.0 License](LICENSE). See the LICENSE file for details.
+
+## Resources
+
+- [Matrix.org](https://matrix.org/) - The Matrix protocol specification
+- [FluffyChat](https://github.com/krille-chan/fluffychat) - The original FluffyChat project
+- [matrix-dart-sdk](https://github.com/ExteraApp/matrix-dart-sdk) - Dart SDK for Matrix

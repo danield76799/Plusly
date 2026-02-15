@@ -66,7 +66,7 @@ dependencies:
   matrix:
     path: /home/officialdakari/repos/matrix-dart-sdk
     # git:
-    #   url: https://git.extera.xyz/OfficialDakari/matrix-dart-sdk
+    #   url: https://github.com/ExteraApp/matrix-dart-sdk.git
     #   ref: main
   mime: ^2.0.0
   native_imaging: ^0.2.0
