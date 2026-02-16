@@ -110,7 +110,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ),
               ),
             ),
-            
+
             ClipRect(
               child: Align(
                 alignment: Alignment.topCenter,
@@ -126,11 +126,13 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                     child: StreamBuilder(
                       stream: client.onSyncStatus.stream,
                       builder: (context, snapshot) {
-                        final status = client.onSyncStatus.value ??
+                        final status =
+                            client.onSyncStatus.value ??
                             const SyncStatusUpdate(
                               SyncStatus.waitingForResponse,
                             );
-                        final hide = client.onSync.value != null &&
+                        final hide =
+                            client.onSync.value != null &&
                             status.status != SyncStatus.error &&
                             client.prevBatch != null;
                         return SizedBox(
@@ -150,8 +152,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                             ),
                             decoration: InputDecoration(
                               filled: true,
-                              fillColor:
-                                  theme.colorScheme.secondaryContainer,
+                              fillColor: theme.colorScheme.secondaryContainer,
                               border: OutlineInputBorder(
                                 borderSide: BorderSide.none,
                                 borderRadius: BorderRadius.circular(99),
@@ -168,100 +169,89 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                                 fontSize: 14,
                                 color: status.error != null
                                     ? theme.colorScheme.error
-                                    : theme.colorScheme
-                                        .onSecondaryContainer,
+                                    : theme.colorScheme.onSecondaryContainer,
                                 fontWeight: FontWeight.normal,
                               ),
                               prefixIcon: hide
                                   ? controller.isSearchMode
-                                      ? IconButton(
-                                          tooltip:
-                                              L10n.of(context).cancel,
-                                          icon: const Icon(
-                                            Icons.close_outlined,
-                                            size: 20,
-                                          ),
-                                          onPressed:
-                                              controller.cancelSearch,
-                                          color: theme.colorScheme
-                                              .onSecondaryContainer,
-                                        )
-                                      : IconButton(
-                                          onPressed:
-                                              controller.startSearch,
-                                          icon: Icon(
-                                            Icons.search_outlined,
-                                            size: 20,
-                                            color: theme.colorScheme
+                                        ? IconButton(
+                                            tooltip: L10n.of(context).cancel,
+                                            icon: const Icon(
+                                              Icons.close_outlined,
+                                              size: 20,
+                                            ),
+                                            onPressed: controller.cancelSearch,
+                                            color: theme
+                                                .colorScheme
                                                 .onSecondaryContainer,
-                                          ),
-                                        )
+                                          )
+                                        : IconButton(
+                                            onPressed: controller.startSearch,
+                                            icon: Icon(
+                                              Icons.search_outlined,
+                                              size: 20,
+                                              color: theme
+                                                  .colorScheme
+                                                  .onSecondaryContainer,
+                                            ),
+                                          )
                                   : Container(
                                       margin: const EdgeInsets.all(8),
                                       width: 8,
                                       height: 8,
                                       child: Center(
                                         child:
-                                            CircularProgressIndicator
-                                                .adaptive(
-                                          strokeWidth: 2,
-                                          value: status.progress,
-                                          valueColor:
-                                              status.error != null
+                                            CircularProgressIndicator.adaptive(
+                                              constraints: const .tightFor(width: 24, height: 32),
+                                              strokeWidth: 2,
+                                              value: status.progress,
+                                              valueColor: status.error != null
                                                   ? AlwaysStoppedAnimation<
-                                                      Color>(
-                                                      theme.colorScheme
-                                                          .error,
-                                                    )
+                                                      Color
+                                                    >(theme.colorScheme.error)
                                                   : null,
-                                        ),
+                                            ),
                                       ),
                                     ),
-                              suffixIcon: controller.isSearchMode &&
-                                      globalSearch
+                              suffixIcon:
+                                  controller.isSearchMode && globalSearch
                                   ? controller.isSearching
-                                      ? const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 8.0,
-                                            horizontal: 10,
-                                          ),
-                                          child: SizedBox.square(
-                                            dimension: 20,
-                                            child:
-                                                CircularProgressIndicator
-                                                    .adaptive(
-                                              strokeWidth: 2,
+                                        ? const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              vertical: 8.0,
+                                              horizontal: 10,
                                             ),
-                                          ),
-                                        )
-                                      : TextButton.icon(
-                                          onPressed:
-                                              controller.setServer,
-                                          style: TextButton.styleFrom(
-                                            shape:
-                                                RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius
-                                                      .circular(99),
+                                            child: SizedBox.square(
+                                              dimension: 20,
+                                              child:
+                                                  CircularProgressIndicator.adaptive(
+                                                    strokeWidth: 2,
+                                                  ),
                                             ),
-                                            textStyle:
-                                                const TextStyle(
-                                              fontSize: 11,
+                                          )
+                                        : TextButton.icon(
+                                            onPressed: controller.setServer,
+                                            style: TextButton.styleFrom(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(99),
+                                              ),
+                                              textStyle: const TextStyle(
+                                                fontSize: 11,
+                                              ),
                                             ),
-                                          ),
-                                          icon: const Icon(
-                                            Icons.edit_outlined,
-                                            size: 14,
-                                          ),
-                                          label: Text(
-                                            controller.searchServer ??
-                                                Matrix.of(context)
-                                                    .client
-                                                    .homeserver!
-                                                    .host,
-                                            maxLines: 2,
-                                          ),
-                                        )
+                                            icon: const Icon(
+                                              Icons.edit_outlined,
+                                              size: 14,
+                                            ),
+                                            label: Text(
+                                              controller.searchServer ??
+                                                  Matrix.of(
+                                                    context,
+                                                  ).client.homeserver!.host,
+                                              maxLines: 2,
+                                            ),
+                                          )
                                   : null,
                             ),
                           ),

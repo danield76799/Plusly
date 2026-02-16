@@ -2,7 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/chat.dart';
+import 'package:extera_next/pages/download_manager/download_manager.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
+import 'package:extera_next/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
@@ -14,17 +16,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:matrix/matrix.dart';
 
-class MessageContextMenu extends StatelessWidget {
+class MessageContextMenu extends StatefulWidget {
   final ChatController controller;
   final Event event;
-  Room get room => controller.room;
-  Timeline? get timeline => controller.timeline;
 
   const MessageContextMenu({
     required this.controller,
     required this.event,
     super.key,
   });
+
+  @override
+  State<MessageContextMenu> createState() => _MessageContextMenuState();
+}
+
+class _MessageContextMenuState extends State<MessageContextMenu> {
+  ChatController get controller => widget.controller;
+  Event get event => widget.event;
+  Room get room => controller.room;
+  Timeline? get timeline => controller.timeline;
 
   Widget _buildMenuItem({
     required Event event,
@@ -46,6 +56,58 @@ class MessageContextMenu extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  bool isDownloading = false;
+  bool downloadSuccess = false;
+  bool downloadError = false;
+  double downloadProgress = 0.0;
+
+  DownloadEventSubscription? _downloadSubscription;
+
+  void subscribe() {
+    final dlm = DownloadManager.of(context);
+
+    _downloadSubscription = dlm.onEventFor(
+      widget.event.attachmentMxcUrl.toString(),
+      (event) {
+        if (!mounted) return;
+
+        switch (event) {
+          case DownloadStartEvent():
+            setState(() {
+              downloadProgress = 0.0;
+              downloadError = false;
+              downloadSuccess = false;
+              isDownloading = true;
+            });
+          case DownloadProgressEvent(:final progress):
+            setState(() {
+              isDownloading = true;
+              downloadProgress = progress;
+            });
+          case DownloadEndEvent(:final success, :final error):
+            setState(() {
+              isDownloading = false;
+              downloadError = !success && error != null;
+              downloadSuccess = success;
+            });
+        }
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    subscribe();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _downloadSubscription?.cancel();
+    _downloadSubscription = null;
   }
 
   @override
@@ -96,14 +158,14 @@ class MessageContextMenu extends StatelessWidget {
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const .all(8),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (event.status == EventStatus.error)
                     Material(
                       color: theme.colorScheme.surfaceContainerHigh,
-                      clipBehavior: .hardEdge,
+                      clipBehavior: Clip.hardEdge,
                       borderRadius: borderRadius,
                       child: Column(
                         children: [
@@ -140,7 +202,7 @@ class MessageContextMenu extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 4.0),
                         child: Material(
                           color: theme.colorScheme.surfaceContainerHigh,
-                          clipBehavior: .hardEdge,
+                          clipBehavior: Clip.hardEdge,
                           borderRadius: borderRadius,
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
@@ -155,16 +217,18 @@ class MessageContextMenu extends StatelessWidget {
                                           ? 0.33
                                           : 1,
                                       child: emoji.startsWith("mxc://")
-                                      ? MxcImage(
-                                        uri: Uri.parse(emoji),
-                                        width: 32,
-                                        height: 32,
-                                      )
-                                      : Text(
-                                        emoji,
-                                        style: const TextStyle(fontSize: 20),
-                                        textAlign: TextAlign.center,
-                                      ),
+                                          ? MxcImage(
+                                              uri: Uri.parse(emoji),
+                                              width: 32,
+                                              height: 32,
+                                            )
+                                          : Text(
+                                              emoji,
+                                              style: const TextStyle(
+                                                fontSize: 20,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
                                     ),
                                   ),
                                   onPressed: sentReactions.contains(emoji)
@@ -262,7 +326,6 @@ class MessageContextMenu extends StatelessWidget {
                                     return;
                                   }
                                   controller.closeMessageMenu();
-
                                   await event.room.sendReaction(
                                     event.eventId,
                                     emoji,
@@ -276,7 +339,7 @@ class MessageContextMenu extends StatelessWidget {
                     const SizedBox(height: 8),
                     Material(
                       color: theme.colorScheme.surfaceContainerHigh,
-                      clipBehavior: .hardEdge,
+                      clipBehavior: Clip.hardEdge,
                       borderRadius: borderRadius,
                       child: Column(
                         children: [
@@ -294,11 +357,21 @@ class MessageContextMenu extends StatelessWidget {
                             ),
                             const ListDivider(),
                           ],
-                          if (event.hasAggregatedEvents(controller.timeline!, RelationshipTypes.edit))...[
+                          if (event.hasAggregatedEvents(
+                            controller.timeline!,
+                            RelationshipTypes.edit,
+                          )) ...[
                             _buildMenuItem(
                               event: event,
                               icon: Icons.edit_outlined,
-                              label: L10n.of(context).nEdits(event.aggregatedEvents(controller.timeline!, RelationshipTypes.edit).length),
+                              label: L10n.of(context).nEdits(
+                                event
+                                    .aggregatedEvents(
+                                      controller.timeline!,
+                                      RelationshipTypes.edit,
+                                    )
+                                    .length,
+                              ),
                               onPressed: () {
                                 if (!PlatformInfos.isMobile) {
                                   controller.closeMessageMenu();
@@ -367,10 +440,66 @@ class MessageContextMenu extends StatelessWidget {
                     const SizedBox(height: 8),
                     Material(
                       color: theme.colorScheme.surfaceContainerHigh,
-                      clipBehavior: .hardEdge,
+                      clipBehavior: Clip.hardEdge,
                       borderRadius: borderRadius,
                       child: Column(
                         children: [
+                          if ([
+                            MessageTypes.File,
+                            MessageTypes.Audio,
+                            MessageTypes.Image,
+                            MessageTypes.Video,
+                          ].contains(event.messageType)) ...[
+                            if (isDownloading)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                child: Row(
+                                  children: [
+                                    downloadSuccess
+                                        ? Icon(
+                                            Icons.download_done_outlined,
+                                            size: 20,
+                                          )
+                                        : downloadError
+                                        ? Icon(Icons.error_outline, size: 20)
+                                        : CircularProgressIndicator.adaptive(
+                                            value: downloadProgress / 100,
+                                          ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        downloadSuccess
+                                            ? L10n.of(context).downloadSuccess
+                                            : downloadError
+                                            ? L10n.of(context).downloadFailed
+                                            : event.content.tryGet<String>(
+                                                    'filename',
+                                                  ) ??
+                                                  event.body,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              _buildMenuItem(
+                                event: event,
+                                icon: Icons.download_outlined,
+                                label: L10n.of(context).downloadFile,
+                                onPressed: () {
+                                  controller.closeMessageMenu();
+                                  if (event.canDownloadInBackground) {
+                                    event.downloadInBackground(context);
+                                  } else {
+                                    event.saveFile(context);
+                                  }
+                                },
+                              ),
+                            const ListDivider(),
+                          ],
                           _buildMenuItem(
                             event: event,
                             icon: Icons.forward_outlined,
@@ -474,7 +603,7 @@ class MessageContextMenu extends StatelessWidget {
                     const SizedBox(height: 8),
                     Material(
                       color: theme.colorScheme.surfaceContainerHigh,
-                      clipBehavior: .hardEdge,
+                      clipBehavior: Clip.hardEdge,
                       borderRadius: borderRadius,
                       child: Column(
                         children: [

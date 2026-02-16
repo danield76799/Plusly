@@ -3655,5 +3655,7 @@
   "signUpGreeting": "Extera децентрализована. Выберите сервер чтобы начать.",
   "signInGreeting": "Уже есть Matrix аккаунт? С возвращением!",
   "theProcessWasCanceled": "Операция отменена.",
-  "searchOrEnterHomeserverAddress": "Найдите или введите адрес сервера"
+  "searchOrEnterHomeserverAddress": "Найдите или введите адрес сервера",
+  "downloadFailed": "Ошибка при скачивании",
+  "downloadSuccess": "Файл успешно сохранён"
 }
