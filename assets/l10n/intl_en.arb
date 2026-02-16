@@ -3551,5 +3551,7 @@
   "signUpGreeting": "Extera is decentralised. Pick a server to begin.",
   "signInGreeting": "Do you already have a Matrix account? Welcome back!",
   "theProcessWasCanceled": "The process was canceled.",
-  "searchOrEnterHomeserverAddress": "Search or enter homeserver address"
+  "searchOrEnterHomeserverAddress": "Search or enter homeserver address",
+  "downloadFailed": "Download failed",
+  "downloadSuccess": "File successfully saved"
 }

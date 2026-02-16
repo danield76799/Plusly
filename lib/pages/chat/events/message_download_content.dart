@@ -33,17 +33,14 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
   bool downloadError = false;
   double downloadProgress = 0.0;
 
-  // 1. Create a variable to hold the subscription
   DownloadEventSubscription? _downloadSubscription;
 
   void subscribe() {
     final dlm = DownloadManager.of(context);
 
-    // 2. Store the subscription returned by the manager
     _downloadSubscription = dlm.onEventFor(
       widget.event.attachmentMxcUrl.toString(),
       (event) {
-        // 3. Check if the widget is still on screen before doing anything
         if (!mounted) return;
 
         switch (event) {
