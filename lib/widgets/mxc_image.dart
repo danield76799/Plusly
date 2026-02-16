@@ -51,10 +51,10 @@ class MxcImage extends StatefulWidget {
 
 class _MxcImageState extends State<MxcImage> {
   static final Map<String, Uint8List> _imageDataCache = {};
-  
+
   Uint8List? _currentData;
   bool _isLoading = false;
-  
+
   // FIX: Track retry attempts to prevent infinite loops
   int _retryCount = 0;
   static const int _maxRetries = 5;
@@ -79,10 +79,9 @@ class _MxcImageState extends State<MxcImage> {
     if (oldWidget.uri != widget.uri ||
         oldWidget.event != widget.event ||
         oldWidget.cacheKey != widget.cacheKey) {
-      
       // Reset retry count on widget update
       _retryCount = 0;
-      
+
       final cached = _getFromCache();
       if (cached != null) {
         setState(() {
@@ -114,11 +113,13 @@ class _MxcImageState extends State<MxcImage> {
 
   Future<void> _load() async {
     if (_isLoading || !mounted) return;
-    
+
     // Check if we've exceeded max retries
     if (_retryCount >= _maxRetries) {
-       Logs().w('MxcImage failed to load after $_maxRetries attempts: ${widget.uri}');
-       return;
+      Logs().w(
+        'MxcImage failed to load after $_maxRetries attempts: ${widget.uri}',
+      );
+      return;
     }
 
     setState(() {
@@ -126,22 +127,23 @@ class _MxcImageState extends State<MxcImage> {
     });
 
     try {
-      final client = widget.client ??
+      final client =
+          widget.client ??
           widget.event?.room.client ??
           Matrix.of(context).client;
       final uri = widget.uri;
       final event = widget.event;
-      
+
       Uint8List? loadedBytes;
 
       if (uri != null) {
         final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-        final realWidth = widget.width != null 
-             ? widget.width! * devicePixelRatio 
-             : null;
-        final realHeight = widget.height != null 
-             ? widget.height! * devicePixelRatio 
-             : null;
+        final realWidth = widget.width != null
+            ? widget.width! * devicePixelRatio
+            : null;
+        final realHeight = widget.height != null
+            ? widget.height! * devicePixelRatio
+            : null;
 
         loadedBytes = await client.downloadMxcCached(
           uri,
@@ -186,14 +188,14 @@ class _MxcImageState extends State<MxcImage> {
 
   void _scheduleRetry() {
     if (!mounted) return;
-    
+
     setState(() => _isLoading = false);
-    
+
     _retryCount++;
-    
+
     // Exponential backoff: 2s, 4s, 8s, 16s...
     final delay = widget.retryDuration * pow(2, _retryCount - 1);
-    
+
     Future.delayed(delay, () {
       if (mounted && _currentData == null) {
         _load();
@@ -211,7 +213,9 @@ class _MxcImageState extends State<MxcImage> {
         ),
       );
 
-  Widget _buildError(BuildContext context) => SizedBox(
+  Widget _buildError(BuildContext context) =>
+      widget.placeholder?.call(context) ??
+      SizedBox(
         width: widget.width,
         height: widget.height,
         child: Material(
@@ -227,13 +231,13 @@ class _MxcImageState extends State<MxcImage> {
   @override
   Widget build(BuildContext context) {
     final data = _currentData;
-    
+
     // If we have no data and have given up retrying, show error
     if (data == null || data.isEmpty) {
       if (_retryCount >= _maxRetries && !_isLoading) {
-         return _buildError(context);
+        return _buildError(context);
       }
-      
+
       return KeyedSubtree(
         key: const ValueKey('placeholder'),
         child: _buildPlaceholder(context),

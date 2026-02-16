@@ -1,13 +1,9 @@
-// import 'dart:math';
-
 import 'package:badges/badges.dart';
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
-
 import 'package:matrix/matrix.dart';
-
 import 'package:extera_next/pages/chat_list/chat_list.dart';
 import '../../widgets/matrix.dart';
 
@@ -23,6 +19,7 @@ class ChatListBottomNavbar extends StatelessWidget {
 
     final spaces = client.rooms.where((r) => r.isSpace);
     final spaceDelegateCandidates = <String, Room>{};
+
     for (final space in spaces) {
       for (final spaceChild in space.spaceChildren) {
         final roomId = spaceChild.roomId;
@@ -53,81 +50,93 @@ class ChatListBottomNavbar extends StatelessWidget {
 
     return Material(
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-      clipBehavior: .hardEdge,
+      clipBehavior: Clip.hardEdge,
       color: theme.colorScheme.surfaceContainerHigh,
       child: Padding(
-        padding: const .all(4),
+        padding: const EdgeInsets.all(4),
         child: Row(
           children: filters.map((filter) {
             final isActive = controller.activeFilter == filter;
 
+            // Pre-calculate styles
+            final backgroundColor = isActive
+                ? theme.colorScheme.secondaryContainer
+                : Colors.transparent;
+            
+            final foregroundColor = isActive
+                ? theme.colorScheme.onSecondaryContainer
+                : theme.colorScheme.onSurfaceVariant;
+
+            final currentBorderRadius = BorderRadius.circular(
+              isActive ? AppConfig.borderRadius - 4 : AppConfig.borderRadius,
+            );
+
             return Expanded(
-              child: isActive
-                  ? FilledButton.tonal(
-                      onPressed: () => controller.setActiveFilter(filter),
-                      style: FilledButton.styleFrom(
+              // Using a Key helps Flutter track that this is the same widget 
+              // even if the list order were to change (good practice).
+              key: ValueKey(filter), 
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                
+                // 1. The Container handles the Background Color & Shape Animation
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius: currentBorderRadius,
+                  ),
+                  
+                  // 2. The Material provides the canvas for the InkWell splash.
+                  // By being a child of the Container, it sits ON TOP of the background color.
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: InkWell(
+                      onTap: () => controller.setActiveFilter(filter),
+                      // Pass the dynamic border radius so the ripple clips correctly
+                      borderRadius: currentBorderRadius, 
+                      child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
                           vertical: 8,
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppConfig.borderRadius - 4,
-                          ),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(filter.toIconData(false), size: 20),
-                          const SizedBox(height: 4),
-                          Text(
-                            filter.toLocalizedString(context),
-                            style: const TextStyle(fontSize: 13),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ],
-                      ),
-                    )
-                  : TextButton(
-                      onPressed: () => controller.setActiveFilter(filter),
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppConfig.borderRadius,
-                          ),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          UnreadRoomsBadge(
-                            filter: filterLambdas[filter]!,
-                            badgePosition: BadgePosition.topEnd(),
-                            child: Icon(
-                              filter.toIconData(true),
-                              size: 20,
-                              color: theme.colorScheme.onSurfaceVariant,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isActive)
+                              Icon(
+                                filter.toIconData(false), 
+                                size: 20, 
+                                color: foregroundColor
+                              )
+                            else
+                              UnreadRoomsBadge(
+                                filter: filterLambdas[filter]!,
+                                badgePosition: BadgePosition.topEnd(),
+                                child: Icon(
+                                  filter.toIconData(true),
+                                  size: 20,
+                                  color: foregroundColor,
+                                ),
+                              ),
+                            const SizedBox(height: 4),
+                            Text(
+                              filter.toLocalizedString(context),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: foregroundColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            filter.toLocalizedString(context),
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
+                  ),
+                ),
+              ),
             );
           }).toList(),
         ),
