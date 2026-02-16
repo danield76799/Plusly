@@ -50,31 +50,24 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage> {
-  // Static cache to hold bytes in memory across widget rebuilds
   static final Map<String, Uint8List> _imageDataCache = {};
-
+  
   Uint8List? _currentData;
   bool _isLoading = false;
+  
+  // FIX: Track retry attempts to prevent infinite loops
+  int _retryCount = 0;
+  static const int _maxRetries = 5;
 
   @override
   void initState() {
     super.initState();
-    // OPTIMIZATION: Check cache synchronously.
-    // This is safe because _getFromCache does NOT use context/MediaQuery.
-    // If data is there, render it on Frame 1.
     _currentData = _getFromCache();
-    
-    // REMOVED: _load() call from here. 
-    // It requires MediaQuery, so we move it to didChangeDependencies.
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // This method is called immediately after initState and whenever
-    // dependencies (like MediaQuery or Matrix.of) change.
-    
-    // Only load if we don't have data and aren't already loading.
     if (_currentData == null && !_isLoading) {
       _load();
     }
@@ -83,13 +76,14 @@ class _MxcImageState extends State<MxcImage> {
   @override
   void didUpdateWidget(MxcImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // OPTIMIZATION: Only reload if the source actually changed.
     if (oldWidget.uri != widget.uri ||
         oldWidget.event != widget.event ||
         oldWidget.cacheKey != widget.cacheKey) {
       
-      final cached = _getFromCache();
+      // Reset retry count on widget update
+      _retryCount = 0;
       
+      final cached = _getFromCache();
       if (cached != null) {
         setState(() {
           _currentData = cached;
@@ -98,12 +92,9 @@ class _MxcImageState extends State<MxcImage> {
       } else {
         setState(() {
           _currentData = null;
-          // We can set _isLoading to false here to ensure _load triggers
-          _isLoading = false; 
+          _isLoading = false;
         });
-        // We can call _load here safely because context is available 
-        // in didUpdateWidget
-        _load(); 
+        _load();
       }
     }
   }
@@ -122,35 +113,35 @@ class _MxcImageState extends State<MxcImage> {
   }
 
   Future<void> _load() async {
-    // Safety check: Ensure we don't load if already loading 
-    // (unless forced by update) or if unmounted
     if (_isLoading || !mounted) return;
     
+    // Check if we've exceeded max retries
+    if (_retryCount >= _maxRetries) {
+       Logs().w('MxcImage failed to load after $_maxRetries attempts: ${widget.uri}');
+       return;
+    }
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Matrix.of(context) requires context, safe now in didChangeDependencies
-      final client =
-          widget.client ??
+      final client = widget.client ??
           widget.event?.room.client ??
           Matrix.of(context).client;
-          
       final uri = widget.uri;
       final event = widget.event;
+      
       Uint8List? loadedBytes;
 
       if (uri != null) {
-        // MediaQuery.devicePixelRatioOf requires context, safe now
         final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-        
-        final realWidth = widget.width != null
-            ? widget.width! * devicePixelRatio
-            : null;
-        final realHeight = widget.height != null
-            ? widget.height! * devicePixelRatio
-            : null;
+        final realWidth = widget.width != null 
+             ? widget.width! * devicePixelRatio 
+             : null;
+        final realHeight = widget.height != null 
+             ? widget.height! * devicePixelRatio 
+             : null;
 
         loadedBytes = await client.downloadMxcCached(
           uri,
@@ -176,6 +167,7 @@ class _MxcImageState extends State<MxcImage> {
         setState(() {
           _currentData = loadedBytes;
           _isLoading = false;
+          _retryCount = 0; // Success! Reset retries.
         });
       } else {
         _scheduleRetry();
@@ -187,18 +179,24 @@ class _MxcImageState extends State<MxcImage> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+      // Depending on the error (e.g. 404), you might NOT want to retry here.
+      // If you do want to retry generic errors, call _scheduleRetry() instead.
     }
   }
 
   void _scheduleRetry() {
     if (!mounted) return;
     
-    // Mark as not loading so retry can fire
     setState(() => _isLoading = false);
     
-    Future.delayed(widget.retryDuration, () {
+    _retryCount++;
+    
+    // Exponential backoff: 2s, 4s, 8s, 16s...
+    final delay = widget.retryDuration * pow(2, _retryCount - 1);
+    
+    Future.delayed(delay, () {
       if (mounted && _currentData == null) {
-         _load();
+        _load();
       }
     });
   }
@@ -214,23 +212,28 @@ class _MxcImageState extends State<MxcImage> {
       );
 
   Widget _buildError(BuildContext context) => SizedBox(
-    width: widget.width,
-    height: widget.height,
-    child: Material(
-      color: Theme.of(context).colorScheme.surfaceContainer,
-      child: Icon(
-        Icons.broken_image_outlined,
-        size: min(widget.height ?? 64, 64),
-        color: Theme.of(context).colorScheme.onSurface,
-      ),
-    ),
-  );
+        width: widget.width,
+        height: widget.height,
+        child: Material(
+          color: Theme.of(context).colorScheme.surfaceContainer,
+          child: Icon(
+            Icons.broken_image_outlined,
+            size: min(widget.height ?? 64, 64),
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
     final data = _currentData;
-
+    
+    // If we have no data and have given up retrying, show error
     if (data == null || data.isEmpty) {
+      if (_retryCount >= _maxRetries && !_isLoading) {
+         return _buildError(context);
+      }
+      
       return KeyedSubtree(
         key: const ValueKey('placeholder'),
         child: _buildPlaceholder(context),
@@ -255,7 +258,6 @@ class _MxcImageState extends State<MxcImage> {
     if (widget.borderRadius == BorderRadius.zero) {
       return imageWidget;
     }
-
     return ClipRRect(
       key: ValueKey(widget.cacheKey ?? widget.uri),
       borderRadius: widget.borderRadius,
