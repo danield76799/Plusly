@@ -2409,5 +2409,73 @@
                 "type": "String"
             }
         }
-    }
+    },
+    "importEmojis": "絵文字をインポート",
+    "importNow": "今すぐインポート",
+    "importFromZipFile": ".zipファイルからインポート",
+    "exportEmotePack": "エモートパックを.zipでエクスポート",
+    "replace": "置き換え",
+    "commandHint_roomupgrade": "このルームを特定のルームバージョンにアップグレード",
+    "commandHint_cuddle": "笑顔を送る",
+    "googlyEyesContent": "{senderName}がギョロ目を送りました",
+    "@googlyEyesContent": {
+        "type": "String",
+        "placeholders": {
+            "senderName": {
+                "type": "String"
+            }
+        }
+    },
+    "cuddleContent": "{senderName}が笑顔を送りました",
+    "@cuddleContent": {
+        "type": "String",
+        "placeholders": {
+            "senderName": {
+                "type": "String"
+            }
+        }
+    },
+    "hugContent": "{senderName}がハグしました",
+    "@hugContent": {
+        "type": "String",
+        "placeholders": {
+            "senderName": {
+                "type": "String"
+            }
+        }
+    },
+    "appLockDescription": "未使用時にアプリをPINコードでロック",
+    "sendTypingNotifications": "入力通知を送信",
+    "swipeRightToLeftToReply": "左にスワイプして返信",
+    "countChatsAndCountParticipants": "{chats}チャットと{participants}人の参加者",
+    "@countChatsAndCountParticipants": {
+        "type": "String",
+        "placeholders": {
+            "chats": {
+                "type": "int"
+            },
+            "participants": {
+                "type": "int"
+            }
+        }
+    },
+    "noChatsFoundHere": "ここにはまだチャットがありません。下のボタンを使ってみんなと新しいチャットを始めましょう。⤵️",
+    "joinedChats": "チャットに参加しました",
+    "commandHint_unban": "このルームから禁止されたユーザーを解禁する",
+    "@commandHint_unban": {
+        "type": "String",
+        "description": "Usage hint for the command /unban"
+    },
+    "chatPermissions": "チャット権限",
+    "checkList": "チェックリスト",
+    "accessAndVisibility": "アクセスと範囲",
+    "accessAndVisibilityDescription": "誰がこのチャットに参加できて、どのように発見することができるか。",
+    "customEmojisAndStickers": "カスタム絵文字とステッカー",
+    "customEmojisAndStickersBody": "どのチャットでも利用可能なカスタム絵文字やステッカーを追加・共有します。",
+    "hideRedactedMessages": "削除されたメッセージを隠す",
+    "hideRedactedMessagesBody": "誰かがメッセージを削除した場合、このメッセージはそれ以降チャット内では見えなくなります。",
+    "hideInvalidOrUnknownMessageFormats": "無効であるか不明なメッセージ形式を隠す",
+    "blockListDescription": "迷惑なユーザーをブロックすることができます。あなたの個人的なブロックリストに記載されたユーザーは、あらゆるメッセージやルームへの招待を受け取ることができません。",
+    "invalidServerName": "無効なサーバー名",
+    "redactMessageDescription": "メッセージはこの会話のすべての参加者から削除されます。これは取り消すことができません。"
 }
