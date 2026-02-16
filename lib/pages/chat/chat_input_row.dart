@@ -1,3 +1,4 @@
+import 'package:fluffychat/widgets/hover_builder.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animations/animations.dart';
@@ -362,32 +363,40 @@ class ChatInputRow extends StatelessWidget {
                         PlatformInfos.platformCanRecord &&
                             !controller.sendController.text.isNotEmpty &&
                             controller.editEvent == null
-                        ? IconButton(
-                            tooltip: L10n.of(context).voiceMessage,
-                            onPressed: () =>
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    margin: EdgeInsets.only(
-                                      bottom: height + 16,
-                                      left: 16,
-                                      right: 16,
-                                      top: 16,
-                                    ),
-                                    showCloseIcon: true,
-                                    content: Text(
-                                      L10n.of(
-                                        context,
-                                      ).longPressToRecordVoiceMessage,
-                                    ),
-                                  ),
-                                ),
-                            onLongPress: () => recordingViewModel
-                                .startRecording(controller.room),
-                            style: IconButton.styleFrom(
-                              backgroundColor: theme.bubbleColor,
-                              foregroundColor: theme.onBubbleColor,
+                        ? HoverBuilder(
+                            builder: (context, hovered) => IconButton(
+                              tooltip: L10n.of(context).voiceMessage,
+                              onPressed: hovered
+                                  ? () => recordingViewModel.startRecording(
+                                      controller.room,
+                                    )
+                                  : () => ScaffoldMessenger.of(context)
+                                        .showSnackBar(
+                                          SnackBar(
+                                            margin: EdgeInsets.only(
+                                              bottom: height + 16,
+                                              left: 16,
+                                              right: 16,
+                                              top: 16,
+                                            ),
+                                            showCloseIcon: true,
+                                            content: Text(
+                                              L10n.of(
+                                                context,
+                                              ).longPressToRecordVoiceMessage,
+                                            ),
+                                          ),
+                                        ),
+                              onLongPress: () => recordingViewModel
+                                  .startRecording(controller.room),
+                              style: IconButton.styleFrom(
+                                backgroundColor: theme.bubbleColor,
+                                foregroundColor: theme.onBubbleColor,
+                              ),
+                              icon: Icon(
+                                hovered ? Icons.mic : Icons.mic_none_outlined,
+                              ),
                             ),
-                            icon: const Icon(Icons.mic_none_outlined),
                           )
                         : IconButton(
                             tooltip: L10n.of(context).send,
