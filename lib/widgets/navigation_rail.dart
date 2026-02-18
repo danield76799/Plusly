@@ -96,12 +96,17 @@ class SpacesNavigationRail extends StatelessWidget {
                           icon: Avatar(
                             mxContent: allSpaces[i].avatar,
                             name: displayname,
-                            border: BorderSide(
-                              width: 1,
-                              color: Theme.of(context).dividerColor,
+                            shapeBorder: RoundedSuperellipseBorder(
+                              side: BorderSide(
+                                width: 1,
+                                color: Theme.of(context).dividerColor,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                AppConfig.spaceBorderRadius,
+                              ),
                             ),
                             borderRadius: BorderRadius.circular(
-                              AppConfig.borderRadius / 2,
+                              AppConfig.spaceBorderRadius,
                             ),
                           ),
                         );

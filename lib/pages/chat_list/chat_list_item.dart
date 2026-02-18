@@ -92,14 +92,19 @@ class ChatListItem extends StatelessWidget {
                             top: 0,
                             left: 0,
                             child: Avatar(
-                              border: BorderSide(
-                                width: 2,
-                                color:
-                                    backgroundColor ??
-                                    theme.colorScheme.surface,
+                              shapeBorder: RoundedSuperellipseBorder(
+                                side: BorderSide(
+                                  width: 2,
+                                  color:
+                                      backgroundColor ??
+                                      theme.colorScheme.surface,
+                                ),
+                                borderRadius: BorderRadius.circular(
+                                  AppConfig.spaceBorderRadius * 0.75,
+                                ),
                               ),
                               borderRadius: BorderRadius.circular(
-                                AppConfig.borderRadius / 4,
+                                AppConfig.spaceBorderRadius * 0.75,
                               ),
                               mxContent: space.avatar,
                               size: Avatar.defaultSize * 0.75,
@@ -111,22 +116,32 @@ class ChatListItem extends StatelessWidget {
                           bottom: 0,
                           right: 0,
                           child: Avatar(
-                            border: space == null
+                            shapeBorder: space == null
                                 ? room.isSpace
-                                      ? BorderSide(
-                                          width: 1,
-                                          color: theme.dividerColor,
+                                      ? RoundedSuperellipseBorder(
+                                          side: BorderSide(
+                                            width: 1,
+                                            color: theme.dividerColor,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            AppConfig.spaceBorderRadius,
+                                          ),
                                         )
                                       : null
-                                : BorderSide(
-                                    width: 2,
-                                    color:
-                                        backgroundColor ??
-                                        theme.colorScheme.surface,
+                                : RoundedRectangleBorder(
+                                    side: BorderSide(
+                                      width: 2,
+                                      color:
+                                          backgroundColor ??
+                                          theme.colorScheme.surface,
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      Avatar.defaultSize,
+                                    ),
                                   ),
                             borderRadius: room.isSpace
                                 ? BorderRadius.circular(
-                                    AppConfig.borderRadius / 4,
+                                    AppConfig.spaceBorderRadius,
                                   )
                                 : null,
                             mxContent: room.avatar,

@@ -17,7 +17,7 @@ class Avatar extends StatelessWidget {
   final Color? presenceBackgroundColor;
   final BorderRadius? borderRadius;
   final IconData? icon;
-  final BorderSide? border;
+  final ShapeBorder? shapeBorder;
   final Color? backgroundColor;
   final Color? textColor;
 
@@ -30,7 +30,7 @@ class Avatar extends StatelessWidget {
     this.presenceUserId,
     this.presenceBackgroundColor,
     this.borderRadius,
-    this.border,
+    this.shapeBorder,
     this.icon,
     this.backgroundColor,
     this.textColor,
@@ -61,10 +61,12 @@ class Avatar extends StatelessWidget {
             color: theme.brightness == Brightness.light
                 ? Colors.white
                 : Colors.black,
-            shape: RoundedRectangleBorder(
-              borderRadius: borderRadius,
-              side: border ?? BorderSide.none,
-            ),
+            shape:
+                shapeBorder ??
+                RoundedSuperellipseBorder(
+                  borderRadius: borderRadius,
+                  side: BorderSide.none,
+                ),
             clipBehavior: Clip.antiAlias,
             child: MxcImage(
               client: client,

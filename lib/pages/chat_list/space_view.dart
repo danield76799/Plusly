@@ -403,8 +403,11 @@ class _SpaceViewState extends State<SpaceView> {
             size: avatarSize,
             mxContent: room?.avatar,
             name: displayname,
-            border: BorderSide(width: 1, color: theme.dividerColor),
-            borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+            shapeBorder: RoundedSuperellipseBorder(
+              side: BorderSide(width: 1, color: theme.dividerColor),
+              borderRadius: BorderRadius.circular(AppConfig.spaceBorderRadius),
+            ),
+            borderRadius: BorderRadius.circular(AppConfig.spaceBorderRadius),
           ),
           title: Text(
             displayname,
@@ -637,11 +640,18 @@ class _SpaceViewState extends State<SpaceView> {
                                         textColor:
                                             item.name?.darkColor ??
                                             theme.colorScheme.onSurface,
-                                        border: item.roomType == 'm.space'
-                                            ? BorderSide(
-                                                color: theme
-                                                    .colorScheme
-                                                    .surfaceContainerHighest,
+                                        shapeBorder: item.roomType == 'm.space'
+                                            ? RoundedSuperellipseBorder(
+                                                side: BorderSide(
+                                                  color: theme
+                                                      .colorScheme
+                                                      .surfaceContainerHighest,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      AppConfig.borderRadius /
+                                                          4,
+                                                    ),
                                               )
                                             : null,
                                         borderRadius: item.roomType == 'm.space'
