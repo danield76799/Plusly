@@ -29,15 +29,6 @@ import '../../config/setting_keys.dart';
 import '../../utils/url_launcher.dart';
 import '../../widgets/matrix.dart';
 
-enum PopupMenuAction {
-  settings,
-  invite,
-  newGroup,
-  newSpace,
-  setStatus,
-  archive,
-}
-
 enum ActiveFilter { allChats, messages, groups, unread, spaces }
 
 extension LocalizedActiveFilter on ActiveFilter {
@@ -878,8 +869,6 @@ class ChatListController extends State<ChatList>
 }
 
 enum EditBundleAction { addToBundle, removeFromBundle }
-
-enum InviteActions { accept, decline, block }
 
 enum ChatContextAction {
   open,

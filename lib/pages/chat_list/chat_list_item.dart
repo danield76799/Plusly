@@ -14,8 +14,6 @@ import '../../config/themes.dart';
 import '../../utils/date_time_extension.dart';
 import '../../widgets/avatar.dart';
 
-enum ArchivedRoomAction { delete, rejoin }
-
 class ChatListItem extends StatelessWidget {
   final Room room;
   final Room? space;

@@ -29,6 +29,9 @@ jobs:
         run: ./scripts/add-firebase-messaging.sh
       - run: flutter analyze
       - run: flutter test
+      - run: dart run dart_code_linter:metrics check-unused-code lib
+      - run: dart run dart_code_linter:metrics check-unused-files lib
+      - run: dart run dart_code_linter:metrics check-unused-l10n lib
 
   build_debug_apk:
     runs-on: ubuntu-latest
