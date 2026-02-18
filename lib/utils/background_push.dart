@@ -45,10 +45,6 @@ import 'platform_infos.dart';
 
 //<GOOGLE_SERVICES>import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 
-class NoTokenException implements Exception {
-  String get cause => 'Cannot get firebase token';
-}
-
 class BackgroundPush {
   static BackgroundPush? _instance;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
