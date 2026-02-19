@@ -73,6 +73,7 @@ parts:
       - xz-utils
       - zip
       - lld
+      - llvm-18
     override-prime: ''
 
   fluffychat:
