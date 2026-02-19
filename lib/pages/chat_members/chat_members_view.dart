@@ -124,10 +124,7 @@ class ChatMembersView extends StatelessWidget {
                           SizedBox(
                             height: 64,
                             child: ListView.builder(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12.0,
-                                vertical: 12.0,
-                              ),
+                              padding: const EdgeInsets.all(12.0),
                               scrollDirection: Axis.horizontal,
                               itemCount: availableFilters.length,
                               itemBuilder: (context, i) => Padding(

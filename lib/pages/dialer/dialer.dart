@@ -552,7 +552,7 @@ class MyCallingPage extends State<Calling> {
     if (secondaryStreamViews.isNotEmpty) {
       stackWidgets.add(
         Container(
-          padding: const EdgeInsets.fromLTRB(0, 20, 0, 120),
+          padding: const EdgeInsets.only(top: 20, bottom: 120),
           alignment: Alignment.bottomRight,
           child: Container(
             width: _localVideoWidth,

@@ -22,6 +22,7 @@ analyzer:
 
 dart_code_linter:
   rules:
+    # Dart specific:
     - avoid-dynamic
     - avoid-redundant-async
     - avoid-unnecessary-type-assertions
@@ -48,3 +49,12 @@ dart_code_linter:
     # - no-magic-number:
     #     allowed: [-1, 0, 1,2,4,6,8,12,16,32,40,56,64]
     #     allow-only-once: true
+    # Flutter specific:
+    - prefer-media-query-direct-access
+    - avoid-wrapping-in-padding
+    - prefer-correct-edge-insets-constructor
+    # TODO:
+    # - avoid-returning-widgets
+    # - prefer-single-widget-per-file:
+    #    ignore-private-widgets: true
+    # - prefer-extracting-callbacks

@@ -120,7 +120,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
         final textEditingController = TextEditingController();
         String input;
         body = Container(
-          margin: const EdgeInsets.only(left: 8.0, right: 8.0),
+          margin: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Column(
             mainAxisSize: .min,
             children: <Widget>[

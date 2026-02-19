@@ -52,7 +52,7 @@ class LoginScaffold extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              if (!MediaQuery.of(context).disableAnimations)
+              if (!MediaQuery.disableAnimationsOf(context))
                 ParticleNetwork(
                   maxSpeed: 0.25,
                   particleColor: theme.colorScheme.primary,

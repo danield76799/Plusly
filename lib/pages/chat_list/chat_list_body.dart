@@ -132,10 +132,7 @@ class ChatListViewBody extends StatelessWidget {
                     SizedBox(
                       height: 64,
                       child: ListView(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0,
-                          vertical: 12.0,
-                        ),
+                        padding: const EdgeInsets.all(12.0),
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,
                         children:
