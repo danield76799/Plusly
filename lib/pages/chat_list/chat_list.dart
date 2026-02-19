@@ -168,9 +168,8 @@ class ChatListController extends State<ChatList>
       initialText: searchServer,
       keyboardType: TextInputType.url,
       autocorrect: false,
-      validator: (server) => server.contains('.') == true
-          ? null
-          : L10n.of(context).invalidServerName,
+      validator: (server) =>
+          server.contains('.') ? null : L10n.of(context).invalidServerName,
     );
     if (newServer == null) return;
     Matrix.of(context).store.setString(_serverStoreNamespace, newServer);
@@ -203,10 +202,9 @@ class ChatListController extends State<ChatList>
 
       if (searchQuery.isValidMatrixId &&
           searchQuery.sigil == '#' &&
-          roomSearchResult.chunk.any(
-                (room) => room.canonicalAlias == searchQuery,
-              ) ==
-              false) {
+          !roomSearchResult.chunk.any(
+            (room) => room.canonicalAlias == searchQuery,
+          )) {
         final response = await client.getRoomIdByAlias(searchQuery);
         final roomId = response.roomId;
         if (roomId != null) {

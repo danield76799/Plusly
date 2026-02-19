@@ -314,7 +314,7 @@ extension on CachedPresence {
           ? DateTime.now()
           : DateTime.fromMillisecondsSinceEpoch(0));
 
-  LinearGradient get gradient => presence.isOnline == true
+  LinearGradient get gradient => presence.isOnline
       ? LinearGradient(
           colors: [Colors.green, Colors.green.shade200, Colors.green.shade900],
           begin: Alignment.topLeft,

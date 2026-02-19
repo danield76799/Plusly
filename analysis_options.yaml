@@ -24,3 +24,7 @@ dart_code_linter:
   rules:
     - avoid-dynamic
     - avoid-redundant-async
+    - avoid-unnecessary-type-assertions
+    - avoid-unnecessary-type-casts
+    - avoid-unrelated-type-assertions
+    - no-boolean-literal-compare

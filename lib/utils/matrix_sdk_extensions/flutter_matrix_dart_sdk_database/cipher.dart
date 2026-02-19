@@ -50,7 +50,7 @@ Future<String?> getDatabaseCipher() async {
 void _sendNoEncryptionWarning(Object exception) async {
   final isStored = AppSettings.noEncryptionWarningShown.value;
 
-  if (isStored == true) return;
+  if (isStored) return;
 
   final l10n = await lookupL10n(PlatformDispatcher.instance.locale);
   ClientManager.sendInitNotification(

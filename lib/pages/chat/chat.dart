@@ -249,9 +249,9 @@ class ChatController extends State<ChatPageWithRoom>
     }
     if (!scrollController.hasClients) return;
     if (timeline?.allowNewEvent == false ||
-        scrollController.position.pixels > 0 && _scrolledUp == false) {
+        scrollController.position.pixels > 0 && _scrolledUp) {
       setState(() => _scrolledUp = true);
-    } else if (scrollController.position.pixels <= 0 && _scrolledUp == true) {
+    } else if (scrollController.position.pixels <= 0 && _scrolledUp) {
       setState(() => _scrolledUp = false);
       setReadMarker();
     }
@@ -919,7 +919,7 @@ class ChatController extends State<ChatPageWithRoom>
     final clients = Matrix.of(context).currentBundle;
     for (final event in selectedEvents) {
       if (!event.status.isSent) return false;
-      if (event.canRedact == false &&
+      if (event.canRedact &&
           !(clients!.any((cl) => event.senderId == cl!.userID))) {
         return false;
       }

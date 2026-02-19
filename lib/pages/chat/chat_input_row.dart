@@ -317,7 +317,7 @@ class ChatInputRow extends StatelessWidget {
                         autofocus: !PlatformInfos.isMobile,
                         keyboardType: TextInputType.multiline,
                         textInputAction:
-                            AppSettings.sendOnEnter.value == true &&
+                            AppSettings.sendOnEnter.value &&
                                 PlatformInfos.isMobile
                             ? TextInputAction.send
                             : null,

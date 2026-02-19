@@ -320,7 +320,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     try {
       await room.client.setRoomVisibilityOnDirectory(
         room.id,
-        visibility: visibility == true ? Visibility.public : Visibility.private,
+        visibility: visibility ? Visibility.public : Visibility.private,
       );
       setState(() {});
     } catch (e, s) {

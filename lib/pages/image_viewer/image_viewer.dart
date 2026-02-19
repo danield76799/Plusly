@@ -110,7 +110,7 @@ class ImageViewerController extends State<ImageViewer> {
 
   /// Go back if user swiped it away
   void onInteractionEnds(ScaleEndDetails endDetails) {
-    if (PlatformInfos.usesTouchscreen == false) {
+    if (!PlatformInfos.usesTouchscreen) {
       if (endDetails.velocity.pixelsPerSecond.dy >
           MediaQuery.sizeOf(context).height * maxScaleFactor) {
         Navigator.of(context, rootNavigator: false).pop();
