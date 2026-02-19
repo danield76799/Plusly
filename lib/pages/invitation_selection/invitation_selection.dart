@@ -66,7 +66,7 @@ class InvitationSelectionController extends State<InvitationSelection> {
     }
   }
 
-  void searchUserWithCoolDown(String text) async {
+  void searchUserWithCoolDown(String text) {
     coolDown?.cancel();
     coolDown = Timer(
       const Duration(milliseconds: 500),

@@ -19,7 +19,7 @@ class SettingsStyle extends StatefulWidget {
 }
 
 class SettingsStyleController extends State<SettingsStyle> {
-  void setChatColor(Color? color) async {
+  void setChatColor(Color? color) {
     AppSettings.colorSchemeSeedInt.setItem(
       color?.toARGB32() ?? AppSettings.colorSchemeSeedInt.defaultValue,
     );

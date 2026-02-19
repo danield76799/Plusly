@@ -90,7 +90,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     context.canPop() ? context.pop(success) : context.go('/rooms');
   }
 
-  void _decryptLastEvents() async {
+  void _decryptLastEvents() {
     for (final room in client.rooms) {
       final event = room.lastEvent;
       if (event != null &&

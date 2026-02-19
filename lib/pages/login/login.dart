@@ -94,7 +94,7 @@ class LoginController extends State<Login> {
 
   Timer? _coolDown;
 
-  void checkWellKnownWithCoolDown(String userId) async {
+  void checkWellKnownWithCoolDown(String userId) {
     _coolDown?.cancel();
     _coolDown = Timer(
       const Duration(seconds: 1),

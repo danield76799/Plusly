@@ -189,7 +189,7 @@ class MyCallingPage extends State<Calling> {
     _playCallSound();
   }
 
-  void initialize() async {
+  void initialize() {
     final call = this.call;
     call.onCallStateChanged.stream.listen(_handleCallState);
     call.onCallEventChanged.stream.listen((event) {
@@ -282,7 +282,7 @@ class MyCallingPage extends State<Calling> {
     });
   }
 
-  void _screenSharing() async {
+  void _screenSharing() {
     if (PlatformInfos.isAndroid) {
       if (!call.screensharingEnabled) {
         FlutterForegroundTask.init(

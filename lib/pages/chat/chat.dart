@@ -257,7 +257,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void _loadDraft() async {
+  void _loadDraft() {
     final prefs = Matrix.of(context).store;
     final draft = prefs.getString('draft_$roomId');
     if (draft != null && draft.isNotEmpty) {
