@@ -1855,7 +1855,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "pleaseEnterYourPin": "Cuir isteach d'uimhir PIN le do thoil",
+    "pleaseEnterYourPin": "Cuir isteach do uap le do thoil",
     "@pleaseEnterYourPin": {
         "type": "String",
         "placeholders": {}
@@ -2585,7 +2585,7 @@
     "invite": "Tabhair cuireadh",
     "publicSpaces": "Spásanna poiblí",
     "whyIsThisMessageEncrypted": "Cén fáth nach féidir an teachtaireacht seo a léamh?",
-    "pinMessage": "PIN go seomra",
+    "pinMessage": "Bioráin chuig an seomra",
     "dehydrate": "Easpórtáil seisiún agus gléas wipe",
     "dehydrateTor": "Úsáideoirí TOR: Seisiún easpórtála",
     "commandHint_markasdm": "Marcáil mar sheomra teachtaireachta dírí don ID Maitrís tugtha",
