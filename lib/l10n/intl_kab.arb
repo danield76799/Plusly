@@ -1557,5 +1557,71 @@
     "pollHasBeenEnded": "Tafrent tfukk",
     "answersWillBeVisibleWhenPollHasEnded": "Tiririyin ad banent ticki tafrent tfukk",
     "replyInThread": "Err deg udras udiwenni",
-    "thread": "Adras udiwenni"
+    "thread": "Adras udiwenni",
+    "oneOfYourDevicesIsNotVerified": "iwen seg ibenkan-ik·im ur yettusenqed ara",
+    "noticeChatBackupDeviceVerification": "Tamawt: Mi ara teqqneḍ akk ibenkan-ik·im ɣer weḥraz udiwenni, ttusneqden s wudem awurman.",
+    "continueText": "Ddu",
+    "blur": "Asluɣu:",
+    "opacity": "Tiḍullest:",
+    "setWallpaper": "Sbadu tugna ugilal",
+    "manageAccount": "Sefrek amiḍan",
+    "noContactInformationProvided": "Aqeddac ur yezmir ara ad d-yefk talɣut n unermis tameɣtut",
+    "contactServerAdmin": "Nermes anedbal n uqeddac",
+    "contactServerSecurity": "Taɣellist uqeddac n unermis",
+    "supportPage": "Asebter n tallalt",
+    "serverInformation": "Talɣut n uqeddac:",
+    "name": "Isem",
+    "version": "Lqem",
+    "website": "Asmel Web",
+    "compress": "Sekussem",
+    "boldText": "Aḍris azuran",
+    "italicText": "Aḍris uknan",
+    "strikeThrough": "Yettwajeṛṛeḍ",
+    "pleaseFillOut": "Ttxil-k·m, ččar",
+    "invalidUrl": "url armeɣtu",
+    "addLink": "Rnu aseɣwen",
+    "serverLimitReached": "Talast n uqeddac tewweḍ! Araǧu n {seconds} n tasinin…",
+    "@serverLimitReached": {
+        "type": "integer",
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "unableToJoinChat": "Ur yezmir ara ad yernu ɣer udiwenni. Ahat aseqdac n udiwenni-agi imdel-it yakan.",
+    "previous": "Uzwir",
+    "otherPartyNotLoggedIn": "Aḥric nniḍen ur yeqqin ara akka tura, ihi ur yezmir ara ad d-yeṭṭef iznan!",
+    "appWantsToUseForLogin": "Seqdec '{server]' akken ad teqqneḍ",
+    "@appWantsToUseForLogin": {
+        "type": "String",
+        "placeholders": {
+            "server": {
+                "type": "String"
+            }
+        }
+    },
+    "open": "Ldi",
+    "waitingForServer": "Araǧu n uqeddac...",
+    "newChatRequest": "📩 Asuter n udiwenni amaynut",
+    "contentNotificationSettings": "Iɣewwaṛen n telɣut n ugbur",
+    "generalNotificationSettings": "Iɣewwaren imuta n ilɣa",
+    "roomNotificationSettings": "Iɣewwaṛen n telɣut n texxamt",
+    "userSpecificNotificationSettings": "Iɣewwaṛen n telɣut n useqdac",
+    "otherNotificationSettings": "Iɣewwaṛen-nniḍen n telɣut",
+    "notificationRuleContainsUserName": "Yegber isem n useqdac",
+    "notificationRuleContainsUserNameDescription": "Azen tilɣa i useqdac ma yella yizen yegber isem-is useqdac.",
+    "notificationRuleMaster": "Sgugem akk tilɣa",
+    "notificationRuleMasterDescription": "Ad isemselsi akk ilugan-nniḍen sakin ad sexsi akk tilɣa.",
+    "notificationRuleSuppressNotices": "Kkes iznan s wudem awurman",
+    "notificationRuleSuppressNoticesDescription": "Kkes ilɣa seg imsaɣen iwurmanen am yiṛubuten.",
+    "notificationRuleInviteForMe": "Asnubget i nekk",
+    "notificationRuleInviteForMeDescription": "Azen ilɣa i useqdac ticki yettwaɛreḍ ɣer texxamt.",
+    "notificationRuleMemberEvent": "Tadyant i yiɛeggalen",
+    "notificationRuleIsUserMention": "Abdar n useqdac",
+    "notificationRuleIsUserMentionDescription": "Azen ilɣa i useqdac ma yella yettwabder s srid deg yizen.",
+    "notificationRuleContainsDisplayName": "Yegber Isem n ubeqqeḍ",
+    "notificationRuleContainsDisplayNameDescription": "Azen ilɣa i useqdac ma yella yizen yegber Isem-is n ubeqqeḍ.",
+    "notificationRuleIsRoomMention": "Abdar n Texxamt",
+    "notificationRuleIsRoomMentionDescription": "Azen ilɣa i useqdac ticki yella ubdar n texxamt."
 }
