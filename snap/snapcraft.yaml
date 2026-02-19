@@ -72,6 +72,7 @@ parts:
       - unzip
       - xz-utils
       - zip
+      - lld
     override-prime: ''
 
   fluffychat:
