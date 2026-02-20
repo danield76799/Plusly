@@ -194,9 +194,7 @@ class MyCallingPage extends State<Calling> {
     call.onCallStateChanged.stream.listen(_handleCallState);
     call.onCallEventChanged.stream.listen((event) {
       if (event == CallStateChange.kFeedsChanged) {
-        setState(() {
-          call.tryRemoveStopedStreams();
-        });
+        setState(call.tryRemoveStopedStreams);
       } else if (event == CallStateChange.kLocalHoldUnhold ||
           event == CallStateChange.kRemoteHoldUnhold) {
         setState(() {});

@@ -145,9 +145,7 @@ class RecordingViewModelState extends State<RecordingViewModel> {
   }
 
   void cancel() {
-    setState(() {
-      _reset();
-    });
+    setState(_reset);
   }
 
   void pause() {

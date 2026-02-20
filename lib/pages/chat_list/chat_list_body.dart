@@ -35,7 +35,7 @@ class ChatListViewBody extends StatelessWidget {
         key: ValueKey(activeSpace),
         spaceId: activeSpace,
         onBack: controller.clearActiveSpace,
-        onChatTab: (room) => controller.onChatTap(room),
+        onChatTab: controller.onChatTap,
         activeChat: controller.activeChat,
       );
     }
@@ -123,7 +123,7 @@ class ChatListViewBody extends StatelessWidget {
                   if (!controller.isSearchMode &&
                       AppSettings.showPresences.value)
                     GestureDetector(
-                      onLongPress: () => controller.dismissStatusList(),
+                      onLongPress: controller.dismissStatusList,
                       child: StatusMessageList(
                         onStatusEdit: controller.setStatus,
                       ),

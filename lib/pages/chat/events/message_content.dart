@@ -207,7 +207,7 @@ class MessageContent extends StatelessWidget {
                   .split(';')
                   .first
                   .split(',')
-                  .map((s) => double.tryParse(s))
+                  .map(double.tryParse)
                   .toList();
               if (latlong.length == 2 &&
                   latlong.first != null &&

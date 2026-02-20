@@ -105,9 +105,7 @@ extension UiaRequestManager on MatrixState {
 
           launchUrl(url, mode: LaunchMode.inAppBrowserView);
           final completer = Completer();
-          final listener = AppLifecycleListener(
-            onResume: () => completer.complete(),
-          );
+          final listener = AppLifecycleListener(onResume: completer.complete);
           await completer.future;
           listener.dispose();
 

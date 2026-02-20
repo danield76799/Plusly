@@ -17,6 +17,8 @@ linter:
     - unnecessary_statements
     - avoid_bool_literals_in_conditional_expressions
     - prefer_single_quotes
+    - prefer_const_declarations
+    - unnecessary_lambdas
 
 analyzer:
   plugins:

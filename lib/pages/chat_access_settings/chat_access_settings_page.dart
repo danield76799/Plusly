@@ -181,9 +181,7 @@ class ChatAccessSettingsPageView extends StatelessWidget {
                         return const SizedBox.shrink();
                       }
                       localAddresses.remove(room.canonicalAlias);
-                      localAddresses.removeWhere(
-                        (alias) => altAliases.contains(alias),
-                      );
+                      localAddresses.removeWhere(altAliases.contains);
                       return Column(
                         mainAxisSize: .min,
                         children: localAddresses

@@ -25,7 +25,7 @@ class PollWidget extends StatelessWidget {
   });
 
   void _endPoll(BuildContext context) =>
-      showFutureLoadingDialog(context: context, future: () => event.endPoll());
+      showFutureLoadingDialog(context: context, future: event.endPoll);
 
   void _toggleVote(BuildContext context, String answerId, int maxSelection) {
     final userId = event.room.client.userID!;
