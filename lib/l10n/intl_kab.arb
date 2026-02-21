@@ -1665,5 +1665,103 @@
     },
     "noMoreChatsFound": "Ulac ugar n idiwenniyen yettwafen…",
     "noChatsFoundHere": "Ur d-nufi ula d yiwen n udiwenni da. Bdu adiwenni akked yiwen s useqdec n tqeffalt ukessar-a. ⤵️",
-    "joinedChats": "Yettwarna ɣer udiwenni"
+    "joinedChats": "Yettwarna ɣer udiwenni",
+    "widgetName": "Isem",
+    "widgetUrlError": "Wagi mačči d URL ameɣtu.",
+    "widgetNameError": "Ttxil-k·m sekcem isem n uskan.",
+    "errorAddingWidget": "Tuccḍa deg tmerna n uwiǧit.",
+    "youRejectedTheInvitation": "Tugiḍ tinnubga",
+    "youJoinedTheChat": "Tekcemeḍ ɣer udiwenni",
+    "youAcceptedTheInvitation": "👍 Tqebleḍ tinubga",
+    "youBannedUser": "Tgedleḍ {user}",
+    "@youBannedUser": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "youHaveWithdrawnTheInvitationFor": "Tekkseḍ tinnubga i {user}",
+    "@youHaveWithdrawnTheInvitationFor": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "youInvitedToBy": "📩 Tettwaɛerḍeḍ s useɣwen ɣer:\n{alias}",
+    "@youInvitedToBy": {
+        "placeholders": {
+            "alias": {
+                "type": "String"
+            }
+        }
+    },
+    "youInvitedBy": "📩 Tettwaɛerḍeḍ sɣur {user}",
+    "@youInvitedBy": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "invitedBy": "📩 Tettwaɛerḍeɣ sɣur {user}",
+    "@invitedBy": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "youInvitedUser": "📩 Tɛerḍeḍ-d {user}",
+    "@youInvitedUser": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "youKicked": "👞 Tegliḍ s rrkel {user}",
+    "@youKicked": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "youKickedAndBanned": "🙅 Tegliḍ s rrkel u tgedleḍ {user}",
+    "@youKickedAndBanned": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "youUnbannedUser": "Tekkseḍ agdel n {user}",
+    "@youUnbannedUser": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "hasKnocked": "🚪{user} yesṭebṭbed",
+    "@hasKnocked": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "usersMustKnock": "Iseqdacen yessefk ad sṭebṭben",
+    "noOneCanJoin": "Yiwen ur yezmir ad d-yernu",
+    "userWouldLikeToChangeTheChat": "{user} yebɣa ad yettekki deg udiwenni.",
+    "@userWouldLikeToChangeTheChat": {
+        "placeholders": {
+            "user": {
+                "type": "String"
+            }
+        }
+    },
+    "noPublicLinkHasBeenCreatedYet": "Werɛad ur d-yennulfa ula d yiwen n wassaɣ azayez"
 }
