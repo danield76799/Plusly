@@ -3498,5 +3498,6 @@
   "appIntro": "With FluffyChat you can chat with your friends. It's a secure decentralized [matrix] messenger! Learn more on https://matrix.org if you like or just sign up.",
   "theProcessWasCanceled": "The process was canceled.",
   "join": "Join",
-  "searchOrEnterHomeserverAddress": "Search or enter homeserver address"
+  "searchOrEnterHomeserverAddress": "Search or enter homeserver address",
+  "matrixId": "Matrix ID"
 }
