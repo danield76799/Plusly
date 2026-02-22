@@ -50,8 +50,8 @@ abstract class AppConfig {
 
   static final Uri homeserverList = Uri(
     scheme: 'https',
-    host: 'servers.joinmatrix.org',
-    path: 'servers.json',
+    host: 'raw.githubusercontent.com',
+    path: 'krille-chan/fluffychat/refs/heads/main/recommended_homeservers.json',
   );
 
   static final Uri privacyUrl = Uri(

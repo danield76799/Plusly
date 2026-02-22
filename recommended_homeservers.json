@@ -1,0 +1,40 @@
+{
+    "public_servers": [
+        {
+            "name": "matrix.org",
+            "description": "The Matrix.org Foundation offers the matrix.org homeserver as an easy entry point for anyone wanting to try out Matrix.",
+            "reg_method": "oidc",
+            "languages": [
+                "All",
+                "English"
+            ]
+        },
+        {
+            "name": "converser.eu",
+            "description": "A free and decentralized communication server.",
+            "reg_method": "oidc",
+            "languages": [
+                "All",
+                "Français"
+            ]
+        },
+        {
+            "name": "mozilla.org",
+            "description": "Matrix homeserver hosted by Mozilla.",
+            "reg_method": "oidc",
+            "languages": [
+                "All",
+                "English"
+            ]
+        },
+        {
+            "name": "frei.chat",
+            "description": "frei.chat was opened on January 23rd, 2022 and enjoys new users every day.",
+            "reg_method": "oidc",
+            "languages": [
+                "All",
+                "Deutsch"
+            ]
+        }
+    ]
+}
