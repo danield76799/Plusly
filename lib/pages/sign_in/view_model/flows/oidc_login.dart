@@ -1,12 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:fluffychat/config/app_config.dart';
 import 'package:fluffychat/config/setting_keys.dart';
+import 'package:fluffychat/utils/matrix_sdk_extensions/oidc_session_json_extension.dart';
 import 'package:fluffychat/utils/platform_infos.dart';
 
 Future<void> oidcLoginFlow(
@@ -16,9 +20,7 @@ Future<void> oidcLoginFlow(
 ) async {
   Logs().i('Starting Matrix Native OIDC Flow...');
   final redirectUrl = kIsWeb
-      ? Uri.parse(
-          html.window.location.href,
-        ).resolveUri(Uri(pathSegments: ['auth.html']))
+      ? Uri.parse(html.window.location.href).resolveUri(Uri(query: ''))
       : (PlatformInfos.isMobile || PlatformInfos.isWeb || PlatformInfos.isMacOS)
       ? Uri.parse('${AppConfig.appOpenUrlScheme.toLowerCase()}:/login')
       : Uri.parse('http://localhost:3001/login');
@@ -62,11 +64,28 @@ Future<void> oidcLoginFlow(
 
   if (!context.mounted) return;
 
+  if (kIsWeb) {
+    final store = await SharedPreferences.getInstance();
+    store.setString(
+      OidcSessionJsonExtension.homeserverStoreKey,
+      client.homeserver!.toString(),
+    );
+    store.setString(
+      OidcSessionJsonExtension.storeKey,
+      jsonEncode(session.toJson()),
+    );
+  }
+
   final returnUrlString = await FlutterWebAuth2.authenticate(
     url: session.authenticationUri.toString(),
     callbackUrlScheme: urlScheme,
-    options: FlutterWebAuth2Options(useWebview: PlatformInfos.isMobile),
+    options: FlutterWebAuth2Options(
+      useWebview: PlatformInfos.isMobile,
+      windowName: '_self',
+    ),
   );
+  if (kIsWeb) return; // On Web we return at intro page when app starts again!
+
   final returnUrl = Uri.parse(returnUrlString);
   final queryParameters = returnUrl.hasFragment
       ? Uri.parse(returnUrl.fragment).queryParameters

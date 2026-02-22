@@ -13,7 +13,14 @@ import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
 class IntroPage extends StatelessWidget {
-  const IntroPage({super.key});
+  final bool isLoading;
+  final String? loggingInToHomeserver;
+
+  const IntroPage({
+    required this.isLoading,
+    required this.loggingInToHomeserver,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +28,7 @@ class IntroPage extends StatelessWidget {
     final addMultiAccount = Matrix.of(
       context,
     ).widget.clients.any((client) => client.isLogged());
+    final loggingInToHomeserver = this.loggingInToHomeserver;
 
     return LoginScaffold(
       appBar: AppBar(
@@ -35,7 +43,7 @@ class IntroPage extends StatelessWidget {
             useRootNavigator: true,
             itemBuilder: (_) => [
               PopupMenuItem(
-                onTap: () => restoreBackupFlow(context),
+                onTap: isLoading ? null : () => restoreBackupFlow(context),
                 child: Row(
                   mainAxisSize: .min,
                   children: [
@@ -71,87 +79,110 @@ class IntroPage extends StatelessWidget {
           ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight),
-              child: IntrinsicHeight(
-                child: Column(
-                  children: [
-                    Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Hero(
-                        tag: 'info-logo',
-                        child: Image.asset(
-                          './assets/banner_transparent.png',
-                          fit: BoxFit.fitWidth,
-                        ),
-                      ),
+      body: isLoading
+          ? Center(
+              child: Column(
+                mainAxisAlignment: .center,
+                children: [
+                  CircularProgressIndicator.adaptive(),
+                  if (loggingInToHomeserver != null)
+                    Text(L10n.of(context).logInTo(loggingInToHomeserver)),
+                ],
+              ),
+            )
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
                     ),
-                    const SizedBox(height: 32),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                      child: SelectableLinkify(
-                        text: L10n.of(context).appIntro,
-                        textScaleFactor: MediaQuery.textScalerOf(
-                          context,
-                        ).scale(1),
-                        textAlign: TextAlign.center,
-                        linkStyle: TextStyle(
-                          color: theme.colorScheme.secondary,
-                          decorationColor: theme.colorScheme.secondary,
-                        ),
-                        onOpen: (link) => launchUrlString(link.url),
-                      ),
-                    ),
-                    const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.all(32.0),
+                    child: IntrinsicHeight(
                       child: Column(
-                        mainAxisSize: .min,
-                        crossAxisAlignment: .stretch,
                         children: [
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.secondary,
-                              foregroundColor: theme.colorScheme.onSecondary,
+                          Container(
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
                             ),
-                            onPressed: () => context.go(
-                              '${GoRouterState.of(context).uri.path}/sign_up',
+                            child: Hero(
+                              tag: 'info-logo',
+                              child: Image.asset(
+                                './assets/banner_transparent.png',
+                                fit: BoxFit.fitWidth,
+                              ),
                             ),
-                            child: Text(L10n.of(context).createNewAccount),
                           ),
-                          SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () => context.go(
-                              '${GoRouterState.of(context).uri.path}/sign_in',
+                          const SizedBox(height: 32),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32.0,
                             ),
-                            child: Text(L10n.of(context).signIn),
-                          ),
-                          TextButton(
-                            onPressed: () async {
-                              final client = await Matrix.of(
+                            child: SelectableLinkify(
+                              text: L10n.of(context).appIntro,
+                              textScaleFactor: MediaQuery.textScalerOf(
                                 context,
-                              ).getLoginClient();
-                              context.go(
-                                '${GoRouterState.of(context).uri.path}/login',
-                                extra: client,
-                              );
-                            },
-                            child: Text(L10n.of(context).loginWithMatrixId),
+                              ).scale(1),
+                              textAlign: TextAlign.center,
+                              linkStyle: TextStyle(
+                                color: theme.colorScheme.secondary,
+                                decorationColor: theme.colorScheme.secondary,
+                              ),
+                              onOpen: (link) => launchUrlString(link.url),
+                            ),
+                          ),
+                          const Spacer(),
+                          Padding(
+                            padding: const EdgeInsets.all(32.0),
+                            child: Column(
+                              mainAxisSize: .min,
+                              crossAxisAlignment: .stretch,
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        theme.colorScheme.secondary,
+                                    foregroundColor:
+                                        theme.colorScheme.onSecondary,
+                                  ),
+                                  onPressed: () => context.go(
+                                    '${GoRouterState.of(context).uri.path}/sign_up',
+                                  ),
+                                  child: Text(
+                                    L10n.of(context).createNewAccount,
+                                  ),
+                                ),
+                                SizedBox(height: 16),
+                                ElevatedButton(
+                                  onPressed: () => context.go(
+                                    '${GoRouterState.of(context).uri.path}/sign_in',
+                                  ),
+                                  child: Text(L10n.of(context).signIn),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    final client = await Matrix.of(
+                                      context,
+                                    ).getLoginClient();
+                                    context.go(
+                                      '${GoRouterState.of(context).uri.path}/login',
+                                      extra: client,
+                                    );
+                                  },
+                                  child: Text(
+                                    L10n.of(context).loginWithMatrixId,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }

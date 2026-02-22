@@ -17,7 +17,7 @@ import 'package:fluffychat/pages/chat_members/chat_members.dart';
 import 'package:fluffychat/pages/chat_permissions_settings/chat_permissions_settings.dart';
 import 'package:fluffychat/pages/chat_search/chat_search_page.dart';
 import 'package:fluffychat/pages/device_settings/device_settings.dart';
-import 'package:fluffychat/pages/intro/intro_page.dart';
+import 'package:fluffychat/pages/intro/intro_page_presenter.dart';
 import 'package:fluffychat/pages/invitation_selection/invitation_selection.dart';
 import 'package:fluffychat/pages/login/login.dart';
 import 'package:fluffychat/pages/new_group/new_group.dart';
@@ -68,7 +68,7 @@ abstract class AppRoutes {
     GoRoute(
       path: '/home',
       pageBuilder: (context, state) =>
-          defaultPageBuilder(context, state, const IntroPage()),
+          defaultPageBuilder(context, state, const IntroPagePresenter()),
       redirect: loggedInRedirect,
       routes: [
         GoRoute(
@@ -263,8 +263,11 @@ abstract class AppRoutes {
                     GoRoute(
                       path: 'addaccount',
                       redirect: loggedOutRedirect,
-                      pageBuilder: (context, state) =>
-                          defaultPageBuilder(context, state, const IntroPage()),
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        const IntroPagePresenter(),
+                      ),
                       routes: [
                         GoRoute(
                           path: 'sign_in',
