@@ -3497,5 +3497,6 @@
   "signInGreeting": "You already have an account in Matrix? Welcome back! Select your homeserver and sign in.",
   "appIntro": "With FluffyChat you can chat with your friends. It's a secure decentralized [matrix] messenger! Learn more on https://matrix.org if you like or just sign up.",
   "theProcessWasCanceled": "The process was canceled.",
-  "join": "Join"
+  "join": "Join",
+  "searchOrEnterHomeserverAddress": "Search or enter homeserver address"
 }

@@ -69,7 +69,9 @@ class SignInPage extends StatelessWidget {
                         errorText: state.publicHomeservers.error
                             ?.toLocalizedString(context),
                         prefixIcon: const Icon(Icons.search_outlined),
-                        hintText: 'Search or enter homeserver address',
+                        hintText: L10n.of(
+                          context,
+                        ).searchOrEnterHomeserverAddress,
                       ),
                     ),
                   ],
