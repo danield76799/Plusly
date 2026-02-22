@@ -96,7 +96,7 @@ flutter build web --release
 #### Install custom dependencies (Linux)
 
 ```bash
-sudo apt install libjsoncpp1 libsecret-1-dev libsecret-1-0 librhash0 libwebkit2gtk-4.0-dev
+sudo apt install libjsoncpp1 libsecret-1-dev libsecret-1-0 librhash0 libwebkit2gtk-4.0-dev lld
 ```
 
 * Build with one of these:
