@@ -1763,5 +1763,31 @@
             }
         }
     },
-    "noPublicLinkHasBeenCreatedYet": "Werɛad ur d-yennulfa ula d yiwen n wassaɣ azayez"
+    "noPublicLinkHasBeenCreatedYet": "Werɛad ur d-yennulfa ula d yiwen n wassaɣ azayez",
+    "users": "Iseqdacen",
+    "unlockOldMessages": "Kkes asekkeṛ i yiznan iqbuṛen",
+    "storeInSecureStorageDescription": "Ḥrez tasarut n tririt deg usekles aɣelsan n yibenk-a.",
+    "saveKeyManuallyDescription": "Sekles tasarut-agi s ufus deg udiwenni n beṭṭu n unagraw neɣ ɣef tecfawit.",
+    "storeInAndroidKeystore": "Sekles deg Android KeyStore",
+    "storeInAppleKeyChain": "Sekles deg uzrar n tsura n Apple",
+    "storeSecurlyOnThisDevice": "Ḥrez s wudem aɣelsan ɣef yibenk-a",
+    "countFiles": "{count} n yifuyla",
+    "@countFiles": {
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "user": "Aseqdac",
+    "custom": "Yugnen",
+    "foregroundServiceRunning": "Alɣu-agi yettban-d ticki ameẓlu n uɣawas amezwaru iteddu.",
+    "screenSharingTitle": "beṭṭu n ugdil",
+    "screenSharingDetail": "Tbeṭṭuḍ agdil-ik·im deg FluffyChat",
+    "callingPermissions": "Tisirag n usiwel",
+    "callingAccount": "amiḍan n usiwel",
+    "callingAccountDetails": "Sireg FluffyChat ad iseqdec asnas aneṣli n Android i usɛeddi n usiwel.",
+    "appearOnTop": "Sbeqeḍ deg uksawen",
+    "otherCallingPermissions": "Tisirag n umikrufun, takamiṛat akked tiyaḍ n FluffyChat",
+    "whyIsThisMessageEncrypted": "Acuɣer izen-agi ur yettwaɣri ara?"
 }

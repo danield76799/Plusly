@@ -3023,5 +3023,35 @@
     "setupChatBackup": "Настроить резервную копию чата",
     "createNewAccount": "Создать новый аккаунт",
     "theProcessWasCanceled": "Процесс был отменен.",
-    "noMoreResultsFound": "Ничего не найдено"
+    "noMoreResultsFound": "Ничего не найдено",
+    "countChatsAndCountParticipants": "{chats} чатов и {participants} участников",
+    "@countChatsAndCountParticipants": {
+        "type": "String",
+        "placeholders": {
+            "chats": {
+                "type": "int"
+            },
+            "participants": {
+                "type": "int"
+            }
+        }
+    },
+    "countInvited": "{count} приглашенных",
+    "@countInvited": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "loadCountMoreParticipants": "Загрузить ещё {count} участников",
+    "@loadCountMoreParticipants": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    }
 }
