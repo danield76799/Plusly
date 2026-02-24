@@ -7,7 +7,7 @@ int sortHomeservers(PublicHomeserverData a, PublicHomeserverData b) {
 int _calcHomeserverScore(PublicHomeserverData homeserver) {
   var score = 0;
   if (homeserver.description?.isNotEmpty == true) score++;
-  if (homeserver.homepage?.isNotEmpty == true) score++;
+  if (homeserver.website?.isNotEmpty == true) score++;
   score += (homeserver.languages?.length ?? 0);
   score += (homeserver.features?.length ?? 0);
   score += (homeserver.onlineStatus ?? 0);

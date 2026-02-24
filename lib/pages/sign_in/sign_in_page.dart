@@ -37,164 +37,165 @@ class SignInPage extends StatelessWidget {
                   ? L10n.of(context).createNewAccount
                   : L10n.of(context).login,
             ),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(56 + 60),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: .min,
-                  crossAxisAlignment: .center,
-                  spacing: 12,
-                  children: [
-                    SelectableText(
-                      signUp
-                          ? L10n.of(context).signUpGreeting
-                          : L10n.of(context).signInGreeting,
-                      textAlign: .center,
+          ),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              spacing: 16,
+              children: [
+                SelectableText(
+                  signUp
+                      ? L10n.of(context).signUpGreeting
+                      : L10n.of(context).signInGreeting,
+                  textAlign: .center,
+                ),
+                TextField(
+                  readOnly:
+                      state.publicHomeservers.connectionState ==
+                      ConnectionState.waiting,
+                  controller: viewModel.filterTextController,
+                  autocorrect: false,
+                  keyboardType: TextInputType.url,
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: theme.colorScheme.secondaryContainer,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(99),
                     ),
-                    TextField(
-                      readOnly:
-                          state.publicHomeservers.connectionState ==
-                          ConnectionState.waiting,
-                      controller: viewModel.filterTextController,
-                      autocorrect: false,
-                      keyboardType: TextInputType.url,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: theme.colorScheme.secondaryContainer,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(99),
+                    errorText: state.publicHomeservers.error?.toLocalizedString(
+                      context,
+                    ),
+                    prefixIcon: const Icon(Icons.search_outlined),
+                    hintText: L10n.of(context).searchOrEnterHomeserverAddress,
+                  ),
+                ),
+                if (state.publicHomeservers.connectionState ==
+                    ConnectionState.done)
+                  Expanded(
+                    child: Material(
+                      borderRadius: BorderRadius.circular(
+                        AppConfig.borderRadius,
+                      ),
+                      clipBehavior: Clip.hardEdge,
+                      color: theme.colorScheme.surfaceContainerLow,
+                      child: RadioGroup<PublicHomeserverData>(
+                        groupValue: state.selectedHomeserver,
+                        onChanged: viewModel.selectHomeserver,
+                        child: ListView.builder(
+                          itemCount: publicHomeservers.length,
+                          itemBuilder: (context, i) {
+                            final server = publicHomeservers[i];
+                            final website = server.website;
+                            return RadioListTile.adaptive(
+                              value: server,
+                              radioScaleFactor:
+                                  FluffyThemes.isColumnMode(context) ||
+                                      {
+                                        TargetPlatform.iOS,
+                                        TargetPlatform.macOS,
+                                      }.contains(theme.platform)
+                                  ? 2
+                                  : 1,
+                              title: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(server.name ?? 'Unknown'),
+                                  ),
+                                  if (website != null)
+                                    SizedBox.square(
+                                      dimension: 32,
+                                      child: IconButton(
+                                        icon: const Icon(
+                                          Icons.open_in_new_outlined,
+                                          size: 16,
+                                        ),
+                                        onPressed: () =>
+                                            launchUrlString(website),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              subtitle: Column(
+                                spacing: 4.0,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (server.features?.isNotEmpty == true)
+                                    Wrap(
+                                      spacing: 4.0,
+                                      runSpacing: 4.0,
+                                      children: [
+                                        ...?server.languages?.map(
+                                          (language) => Material(
+                                            borderRadius: BorderRadius.circular(
+                                              AppConfig.borderRadius,
+                                            ),
+                                            color: theme
+                                                .colorScheme
+                                                .tertiaryContainer,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6.0,
+                                                    vertical: 3.0,
+                                                  ),
+                                              child: Text(
+                                                language,
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onTertiaryContainer,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        ...server.features!.map(
+                                          (feature) => Material(
+                                            borderRadius: BorderRadius.circular(
+                                              AppConfig.borderRadius,
+                                            ),
+                                            color: theme
+                                                .colorScheme
+                                                .secondaryContainer,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 6.0,
+                                                    vertical: 3.0,
+                                                  ),
+                                              child: Text(
+                                                feature,
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSecondaryContainer,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  Text(
+                                    server.description ?? 'A matrix homeserver',
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                        errorText: state.publicHomeservers.error
-                            ?.toLocalizedString(context),
-                        prefixIcon: const Icon(Icons.search_outlined),
-                        hintText: L10n.of(
-                          context,
-                        ).searchOrEnterHomeserverAddress,
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  )
+                else
+                  Center(child: CircularProgressIndicator.adaptive()),
+              ],
             ),
           ),
-          body: state.publicHomeservers.connectionState == ConnectionState.done
-              ? Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-                    clipBehavior: Clip.hardEdge,
-                    color: theme.colorScheme.surfaceContainerLow,
-                    child: RadioGroup<PublicHomeserverData>(
-                      groupValue: state.selectedHomeserver,
-                      onChanged: viewModel.selectHomeserver,
-                      child: ListView.builder(
-                        itemCount: publicHomeservers.length,
-                        itemBuilder: (context, i) {
-                          final server = publicHomeservers[i];
-                          final homepage = server.homepage;
-                          return RadioListTile.adaptive(
-                            value: server,
-                            radioScaleFactor:
-                                FluffyThemes.isColumnMode(context) ||
-                                    {
-                                      TargetPlatform.iOS,
-                                      TargetPlatform.macOS,
-                                    }.contains(theme.platform)
-                                ? 2
-                                : 1,
-                            title: Row(
-                              children: [
-                                Expanded(child: Text(server.name ?? 'Unknown')),
-                                if (homepage != null)
-                                  SizedBox.square(
-                                    dimension: 32,
-                                    child: IconButton(
-                                      icon: const Icon(
-                                        Icons.open_in_new_outlined,
-                                        size: 16,
-                                      ),
-                                      onPressed: () =>
-                                          launchUrlString(homepage),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            subtitle: Column(
-                              spacing: 4.0,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (server.features?.isNotEmpty == true)
-                                  Wrap(
-                                    spacing: 4.0,
-                                    runSpacing: 4.0,
-                                    children: [
-                                      ...?server.languages?.map(
-                                        (language) => Material(
-                                          borderRadius: BorderRadius.circular(
-                                            AppConfig.borderRadius,
-                                          ),
-                                          color: theme
-                                              .colorScheme
-                                              .tertiaryContainer,
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6.0,
-                                              vertical: 3.0,
-                                            ),
-                                            child: Text(
-                                              language,
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: theme
-                                                    .colorScheme
-                                                    .onTertiaryContainer,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      ...server.features!.map(
-                                        (feature) => Material(
-                                          borderRadius: BorderRadius.circular(
-                                            AppConfig.borderRadius,
-                                          ),
-                                          color: theme
-                                              .colorScheme
-                                              .secondaryContainer,
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6.0,
-                                              vertical: 3.0,
-                                            ),
-                                            child: Text(
-                                              feature,
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: theme
-                                                    .colorScheme
-                                                    .onSecondaryContainer,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                Text(
-                                  server.description ?? 'A matrix homeserver',
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                )
-              : Center(child: CircularProgressIndicator.adaptive()),
           bottomNavigationBar: AnimatedSize(
             duration: FluffyThemes.animationDuration,
             curve: FluffyThemes.animationCurve,
@@ -203,12 +204,14 @@ class SignInPage extends StatelessWidget {
                     !publicHomeservers.contains(selectedHomserver)
                 ? const SizedBox.shrink()
                 : Material(
-                    elevation: 8,
-                    shadowColor: theme.appBarTheme.shadowColor,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: SafeArea(
                         child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: theme.colorScheme.onPrimary,
+                          ),
                           onPressed:
                               state.loginLoading.connectionState ==
                                   ConnectionState.waiting
