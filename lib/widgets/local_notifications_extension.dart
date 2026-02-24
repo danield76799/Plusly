@@ -22,7 +22,7 @@ extension LocalNotificationsExtension on MatrixState {
     ..src = 'assets/assets/sounds/notification.ogg'
     ..load();
 
-  void showLocalNotification(Event event) async {
+  Future<void> showLocalNotification(Event event) async {
     final roomId = event.room.id;
     if (activeRoomId == roomId) {
       if (WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {

@@ -27,7 +27,7 @@ class UrlLauncher {
 
   const UrlLauncher(this.context, this.url, [this.name]);
 
-  void launchUrl() async {
+  Future<void> launchUrl() async {
     if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         url!.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
         {'#', '@', '!', '+', '\$'}.contains(url![0]) ||
@@ -117,7 +117,7 @@ class UrlLauncher {
     );
   }
 
-  void openMatrixToUrl() async {
+  Future<void> openMatrixToUrl() async {
     final matrix = Matrix.of(context);
     final url = this.url!.replaceFirst(
       AppConfig.deepLinkPrefix,

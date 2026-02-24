@@ -72,7 +72,7 @@ class BackgroundPush {
 
   bool upAction = false;
 
-  void _init() async {
+  Future<void> _init() async {
     //<GOOGLE_SERVICES>firebaseEnabled = true;
     try {
       mainIsolateReceivePort?.listen((message) async {

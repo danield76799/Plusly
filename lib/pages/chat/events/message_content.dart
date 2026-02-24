@@ -47,7 +47,7 @@ class MessageContent extends StatelessWidget {
     required this.selected,
   });
 
-  void _verifyOrRequestKey(BuildContext context) async {
+  Future<void> _verifyOrRequestKey(BuildContext context) async {
     final l10n = L10n.of(context);
     if (event.content['can_request_session'] != true) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -171,7 +171,7 @@ class MyCallingPage extends State<Calling> {
   EdgeInsetsGeometry? _localVideoMargin;
   CallState? _state;
 
-  void _playCallSound() async {
+  Future<void> _playCallSound() async {
     const path = 'assets/sounds/call.ogg';
     if (kIsWeb || PlatformInfos.isMobile || PlatformInfos.isMacOS) {
       final player = AudioPlayer();
@@ -245,7 +245,7 @@ class MyCallingPage extends State<Calling> {
   }
 
   void _handleCallState(CallState state) {
-    Logs().v('CallingPage::handleCallState: ${state.toString()}');
+    Logs().v('CallingPage::handleCallState: $state');
     if ({CallState.kConnected, CallState.kEnded}.contains(state)) {
       HapticFeedback.heavyImpact();
     }
@@ -322,7 +322,7 @@ class MyCallingPage extends State<Calling> {
     });
   }
 
-  void _switchCamera() async {
+  Future<void> _switchCamera() async {
     if (call.localUserMediaStream != null) {
       await Helper.switchCamera(
         call.localUserMediaStream!.stream!.getVideoTracks().first,

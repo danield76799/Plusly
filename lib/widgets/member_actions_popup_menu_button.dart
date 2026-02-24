@@ -10,7 +10,7 @@ import 'adaptive_dialogs/user_dialog.dart';
 import 'avatar.dart';
 import 'future_loading_dialog.dart';
 
-void showMemberActionsPopupMenu({
+Future<void> showMemberActionsPopupMenu({
   required BuildContext context,
   required User user,
   void Function()? onMention,

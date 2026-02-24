@@ -47,7 +47,7 @@ class NewGroupController extends State<NewGroup> {
 
   void setGroupCanBeFound(bool b) => setState(() => groupCanBeFound = b);
 
-  void selectPhoto() async {
+  Future<void> selectPhoto() async {
     final photo = await selectFiles(
       context,
       type: FileType.image,
@@ -108,7 +108,7 @@ class NewGroupController extends State<NewGroup> {
     context.pop<String>(spaceId);
   }
 
-  void submitAction([_]) async {
+  Future<void> submitAction([_]) async {
     final client = Matrix.of(context).client;
 
     try {

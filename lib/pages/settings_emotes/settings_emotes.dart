@@ -245,7 +245,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
     });
   }
 
-  void createImagePack() async {
+  Future<void> createImagePack() async {
     final room = this.room;
     if (room == null) throw Exception('Cannot create image pack without room');
 
@@ -287,14 +287,14 @@ class EmotesSettingsController extends State<EmotesSettings> {
     setState(() {});
   }
 
-  void saveAction() async {
+  Future<void> saveAction() async {
     await save(context);
     setState(() {
       showSave = false;
     });
   }
 
-  void createStickers() async {
+  Future<void> createStickers() async {
     final pickedFiles = await selectFiles(
       context,
       type: FileType.image,

@@ -56,7 +56,7 @@ class MarkdownContextBuilder extends StatelessWidget {
               controller.text = controller.text.replaceRange(
                 selection.start,
                 selection.end,
-                '[$selectedText](${url.toString()})',
+                '[$selectedText]($url)',
               );
               ContextMenuController.removeAny();
             },

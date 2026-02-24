@@ -10,7 +10,7 @@ import 'package:fluffychat/utils/platform_infos.dart';
 abstract class UpdateNotifier {
   static const String versionStoreKey = 'last_known_version';
 
-  static void showUpdateSnackBar(BuildContext context) async {
+  static Future<void> showUpdateSnackBar(BuildContext context) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final currentVersion = await PlatformInfos.getVersion();
     final store = await SharedPreferences.getInstance();

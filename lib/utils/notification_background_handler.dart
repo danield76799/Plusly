@@ -53,7 +53,7 @@ Future<void> waitForPushIsolateDone() async {
 }
 
 @pragma('vm:entry-point')
-void notificationTapBackground(
+Future<void> notificationTapBackground(
   NotificationResponse notificationResponse,
 ) async {
   final sendPort = IsolateNameServer.lookupPortByName(

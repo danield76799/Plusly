@@ -28,7 +28,7 @@ class _StartPollBottomSheetState extends State<StartPollBottomSheet> {
 
   String? _txid;
 
-  void _createPoll() async {
+  Future<void> _createPoll() async {
     try {
       var id = 0;
       _txid ??= widget.room.client.generateUniqueTransactionId();

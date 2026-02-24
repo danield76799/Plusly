@@ -71,7 +71,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     _createBootstrap(widget.wipe);
   }
 
-  void _cancelAction() async {
+  Future<void> _cancelAction() async {
     final consent = await showOkCancelAlertDialog(
       context: context,
       title: L10n.of(context).skipChatBackup,
@@ -110,7 +110,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
     }
   }
 
-  void _createBootstrap(bool wipe) async {
+  Future<void> _createBootstrap(bool wipe) async {
     await client.roomsLoading;
     await client.accountDataLoading;
     await client.userDeviceKeysLoading;

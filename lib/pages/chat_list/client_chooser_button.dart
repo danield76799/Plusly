@@ -194,7 +194,7 @@ class ClientChooserButton extends StatelessWidget {
     );
   }
 
-  void _clientSelected(Object object, BuildContext context) async {
+  Future<void> _clientSelected(Object object, BuildContext context) async {
     if (object is Client) {
       controller.setActiveClient(object);
     } else if (object is String) {

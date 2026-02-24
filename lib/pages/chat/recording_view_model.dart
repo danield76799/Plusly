@@ -164,7 +164,7 @@ class RecordingViewModelState extends State<RecordingViewModel> {
     });
   }
 
-  void stopAndSend(
+  Future<void> stopAndSend(
     Future<void> Function(
       String path,
       int duration,

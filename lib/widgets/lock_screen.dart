@@ -20,7 +20,7 @@ class _LockScreenState extends State<LockScreen> {
   bool _inputBlocked = false;
   final TextEditingController _textEditingController = TextEditingController();
 
-  void tryUnlock(String text) async {
+  Future<void> tryUnlock(String text) async {
     text = text.trim();
     setState(() {
       _errorText = null;

@@ -30,7 +30,7 @@ class ChatEncryptionSettingsController extends State<ChatEncryptionSettings> {
     }
   }
 
-  void enableEncryption(_) async {
+  Future<void> enableEncryption(_) async {
     if (room.encrypted) {
       showOkAlertDialog(
         context: context,
@@ -69,7 +69,7 @@ class ChatEncryptionSettingsController extends State<ChatEncryptionSettings> {
     );
   }
 
-  void startVerification() async {
+  Future<void> startVerification() async {
     final consent = await showOkCancelAlertDialog(
       context: context,
       title: L10n.of(context).verifyOtherUser,

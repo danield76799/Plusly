@@ -44,7 +44,7 @@ class ChatSearchController extends State<ChatSearchPage>
     });
   }
 
-  void startSearch() async {
+  Future<void> startSearch() async {
     switch (tabController.index) {
       case 0:
         final searchQuery = searchController.text.trim();

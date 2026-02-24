@@ -25,7 +25,7 @@ class SettingsPasswordController extends State<SettingsPassword> {
 
   bool loading = false;
 
-  void changePassword() async {
+  Future<void> changePassword() async {
     setState(() {
       oldPasswordError = newPassword1Error = newPassword2Error = null;
     });

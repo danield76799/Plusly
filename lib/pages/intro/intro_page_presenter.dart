@@ -35,7 +35,7 @@ class _IntroPagePresenterState extends State<IntroPagePresenter> {
     if (kIsWeb) _finishOidcLogin();
   }
 
-  void _finishOidcLogin() async {
+  Future<void> _finishOidcLogin() async {
     final store = await SharedPreferences.getInstance();
     final storedHomeserverString = store.getString(
       OidcSessionJsonExtension.homeserverStoreKey,

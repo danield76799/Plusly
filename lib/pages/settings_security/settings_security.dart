@@ -19,7 +19,7 @@ class SettingsSecurity extends StatefulWidget {
 }
 
 class SettingsSecurityController extends State<SettingsSecurity> {
-  void setAppLockAction() async {
+  Future<void> setAppLockAction() async {
     if (AppLock.of(context).isActive) {
       AppLock.of(context).showLockScreen();
     }
@@ -46,7 +46,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
     }
   }
 
-  void deleteAccountAction() async {
+  Future<void> deleteAccountAction() async {
     if (await showOkCancelAlertDialog(
           useRootNavigator: false,
           context: context,
@@ -93,7 +93,7 @@ class SettingsSecurityController extends State<SettingsSecurity> {
 
   Future<void> dehydrateAction() => Matrix.of(context).dehydrateAction(context);
 
-  void changeShareKeysWith(ShareKeysWith? shareKeysWith) async {
+  Future<void> changeShareKeysWith(ShareKeysWith? shareKeysWith) async {
     if (shareKeysWith == null) return;
     AppSettings.shareKeysWith.setItem(shareKeysWith.name);
     Matrix.of(context).client.shareKeysWith = shareKeysWith;

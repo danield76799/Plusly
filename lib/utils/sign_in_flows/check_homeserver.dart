@@ -13,7 +13,7 @@ import 'package:fluffychat/utils/sign_in_flows/sso_login.dart';
 import 'package:fluffychat/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:fluffychat/widgets/matrix.dart';
 
-void connectToHomeserverFlow(
+Future<void> connectToHomeserverFlow(
   PublicHomeserverData homeserverData,
   BuildContext context,
   void Function(AsyncSnapshot<bool>) setState,

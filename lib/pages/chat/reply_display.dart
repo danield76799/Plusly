@@ -35,7 +35,7 @@ class ReplyDisplay extends StatelessWidget {
             child: controller.replyEvent != null
                 ? ReplyContent(
                     controller.replyEvent!,
-                    timeline: controller.timeline!,
+                    timeline: controller.timeline,
                   )
                 : _EditContent(
                     controller.editEvent?.getDisplayEvent(controller.timeline!),

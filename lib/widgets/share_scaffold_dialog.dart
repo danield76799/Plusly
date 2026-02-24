@@ -48,7 +48,7 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
     });
   }
 
-  void _forwardAction() async {
+  Future<void> _forwardAction() async {
     final roomId = selectedRoomId;
     if (roomId == null) {
       throw Exception(

@@ -11,6 +11,7 @@ linter:
     - omit_local_variable_types
     - cancel_subscriptions
     - always_declare_return_types
+    - avoid_void_async
     - no_adjacent_strings_in_list
     - test_types_in_equals
     - throw_in_finally
@@ -19,6 +20,15 @@ linter:
     - prefer_single_quotes
     - prefer_const_declarations
     - unnecessary_lambdas
+    - combinators_ordering
+    - noop_primitive_operations
+    - unnecessary_null_checks
+    - unnecessary_null_in_if_null_operators
+    - unnecessary_to_list_in_spreads
+    - use_is_even_rather_than_modulo
+    - use_super_parameters
+    # Flutter specific:
+    - use_colored_box
 
 analyzer:
   plugins:
@@ -61,7 +71,6 @@ dart_code_linter:
     - prefer-correct-edge-insets-constructor
     - avoid-returning-widgets
     # TODO:
-    # - avoid-returning-widgets
     # - prefer-single-widget-per-file:
     #    ignore-private-widgets: true
     # - prefer-extracting-callbacks

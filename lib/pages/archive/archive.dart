@@ -23,7 +23,7 @@ class ArchiveController extends State<Archive> {
     return archive = await Matrix.of(context).client.loadArchive();
   }
 
-  void forgetRoomAction(int i) async {
+  Future<void> forgetRoomAction(int i) async {
     await showFutureLoadingDialog(
       context: context,
       future: () async {
@@ -35,7 +35,7 @@ class ArchiveController extends State<Archive> {
     setState(() {});
   }
 
-  void forgetAllAction() async {
+  Future<void> forgetAllAction() async {
     final archive = this.archive;
     final client = Matrix.of(context).client;
     if (archive.isEmpty) return;

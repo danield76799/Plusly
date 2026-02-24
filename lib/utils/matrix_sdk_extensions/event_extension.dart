@@ -26,13 +26,13 @@ extension LocalizedBody on Event {
         },
       );
 
-  void saveFile(BuildContext context) async {
+  Future<void> saveFile(BuildContext context) async {
     final matrixFile = await _getFile(context);
 
     matrixFile.result?.save(context);
   }
 
-  void shareFile(BuildContext context) async {
+  Future<void> shareFile(BuildContext context) async {
     final matrixFile = await _getFile(context);
     inspect(matrixFile);
 

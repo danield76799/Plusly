@@ -60,7 +60,7 @@ class _SpaceViewState extends State<SpaceView> {
     super.initState();
   }
 
-  void _loadHierarchy() async {
+  Future<void> _loadHierarchy() async {
     final matrix = Matrix.of(context);
     final room = matrix.client.getRoomById(widget.spaceId);
     if (room == null) return;
@@ -127,7 +127,7 @@ class _SpaceViewState extends State<SpaceView> {
     }
   }
 
-  void _joinChildRoom(SpaceRoomsChunk$2 item) async {
+  Future<void> _joinChildRoom(SpaceRoomsChunk$2 item) async {
     final client = Matrix.of(context).client;
     final space = client.getRoomById(widget.spaceId);
     final via = space?.spaceChildren
@@ -146,7 +146,7 @@ class _SpaceViewState extends State<SpaceView> {
     if (room != null) widget.onChatTab(room);
   }
 
-  void _onSpaceAction(SpaceActions action) async {
+  Future<void> _onSpaceAction(SpaceActions action) async {
     final space = Matrix.of(context).client.getRoomById(widget.spaceId);
 
     switch (action) {
@@ -184,7 +184,7 @@ class _SpaceViewState extends State<SpaceView> {
     }
   }
 
-  void _addChatOrSubspace(AddRoomType roomType) async {
+  Future<void> _addChatOrSubspace(AddRoomType roomType) async {
     final names = await showTextInputDialog(
       context: context,
       title: roomType == AddRoomType.subspace
@@ -261,7 +261,10 @@ class _SpaceViewState extends State<SpaceView> {
     _loadHierarchy();
   }
 
-  void _showSpaceChildEditMenu(BuildContext posContext, String roomId) async {
+  Future<void> _showSpaceChildEditMenu(
+    BuildContext posContext,
+    String roomId,
+  ) async {
     final overlay =
         Overlay.of(posContext).context.findRenderObject() as RenderBox;
 

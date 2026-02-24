@@ -145,7 +145,7 @@ abstract class ClientManager {
     );
   }
 
-  static void sendInitNotification(String title, String body) async {
+  static Future<void> sendInitNotification(String title, String body) async {
     if (kIsWeb) {
       html.Notification(title, body: body);
       return;

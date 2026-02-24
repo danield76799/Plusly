@@ -67,7 +67,7 @@ class ImageViewerController extends State<ImageViewer> {
     }
   }
 
-  void prevImage() async {
+  Future<void> prevImage() async {
     await pageController.previousPage(
       duration: FluffyThemes.animationDuration,
       curve: FluffyThemes.animationCurve,
@@ -76,7 +76,7 @@ class ImageViewerController extends State<ImageViewer> {
     setState(() {});
   }
 
-  void nextImage() async {
+  Future<void> nextImage() async {
     await pageController.nextPage(
       duration: FluffyThemes.animationDuration,
       curve: FluffyThemes.animationCurve,

@@ -78,7 +78,7 @@ class ChatListController extends State<ChatList>
   String? _activeSpaceId;
   String? get activeSpaceId => _activeSpaceId;
 
-  void setActiveSpace(String spaceId) async {
+  Future<void> setActiveSpace(String spaceId) async {
     await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
 
     setState(() {
@@ -90,7 +90,7 @@ class ChatListController extends State<ChatList>
     _activeSpaceId = null;
   });
 
-  void onChatTap(Room room) async {
+  Future<void> onChatTap(Room room) async {
     if (room.membership == Membership.invite) {
       final joinResult = await showFutureLoadingDialog(
         context: context,
@@ -156,7 +156,7 @@ class ChatListController extends State<ChatList>
   bool isSearching = false;
   static const String _serverStoreNamespace = 'im.fluffychat.search.server';
 
-  void setServer() async {
+  Future<void> setServer() async {
     final newServer = await showTextInputDialog(
       useRootNavigator: false,
       title: L10n.of(context).changeTheHomeserver,
@@ -184,7 +184,7 @@ class ChatListController extends State<ChatList>
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
 
-  void _search() async {
+  Future<void> _search() async {
     final client = Matrix.of(context).client;
     if (!isSearching) {
       setState(() {
@@ -292,7 +292,7 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  void editSpace(BuildContext context, String spaceId) async {
+  Future<void> editSpace(BuildContext context, String spaceId) async {
     await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
     if (mounted) {
       context.push('/rooms/$spaceId/details');
@@ -326,7 +326,7 @@ class ChatListController extends State<ChatList>
     );
   }
 
-  void _processIncomingUris(Uri? uri) async {
+  Future<void> _processIncomingUris(Uri? uri) async {
     if (uri == null) return;
     context.go('/rooms');
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -399,7 +399,7 @@ class ChatListController extends State<ChatList>
     super.dispose();
   }
 
-  void chatContextAction(
+  Future<void> chatContextAction(
     Room room,
     BuildContext posContext, [
     Room? space,
@@ -671,7 +671,7 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  void dismissStatusList() async {
+  Future<void> dismissStatusList() async {
     final result = await showOkCancelAlertDialog(
       title: L10n.of(context).hidePresences,
       context: context,
@@ -682,7 +682,7 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  void setStatus() async {
+  Future<void> setStatus() async {
     final client = Matrix.of(context).client;
     final currentPresence = await client.fetchCurrentPresence(client.userID!);
     final input = await showTextInputDialog(
@@ -793,7 +793,10 @@ class ChatListController extends State<ChatList>
     });
   }
 
-  void editBundlesForAccount(String? userId, String? activeBundle) async {
+  Future<void> editBundlesForAccount(
+    String? userId,
+    String? activeBundle,
+  ) async {
     final l10n = L10n.of(context);
     final client = Matrix.of(
       context,

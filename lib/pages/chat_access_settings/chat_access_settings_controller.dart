@@ -78,7 +78,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     return joinRules.toList();
   }
 
-  void setJoinRule(JoinRules? newJoinRules) async {
+  Future<void> setJoinRule(JoinRules? newJoinRules) async {
     if (newJoinRules == null) return;
     setState(() {
       joinRulesLoading = true;
@@ -111,7 +111,9 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     }
   }
 
-  void setHistoryVisibility(HistoryVisibility? historyVisibility) async {
+  Future<void> setHistoryVisibility(
+    HistoryVisibility? historyVisibility,
+  ) async {
     if (historyVisibility == null) return;
     setState(() {
       historyVisibilityLoading = true;
@@ -135,7 +137,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     }
   }
 
-  void setGuestAccess(GuestAccess? guestAccess) async {
+  Future<void> setGuestAccess(GuestAccess? guestAccess) async {
     if (guestAccess == null) return;
     setState(() {
       guestAccessLoading = true;
@@ -159,7 +161,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     }
   }
 
-  void updateRoomAction() async {
+  Future<void> updateRoomAction() async {
     final roomVersion = room
         .getState(EventTypes.RoomCreate)!
         .content
@@ -303,7 +305,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     );
   }
 
-  void deleteAlias(String alias) async {
+  Future<void> deleteAlias(String alias) async {
     await showFutureLoadingDialog(
       context: context,
       future: () => room.client.deleteRoomAlias(alias),
@@ -311,7 +313,7 @@ class ChatAccessSettingsController extends State<ChatAccessSettings> {
     setState(() {});
   }
 
-  void setChatVisibilityOnDirectory(bool? visibility) async {
+  Future<void> setChatVisibilityOnDirectory(bool? visibility) async {
     if (visibility == null) return;
     setState(() {
       visibilityLoading = true;

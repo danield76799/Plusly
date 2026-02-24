@@ -33,7 +33,7 @@ class NewPrivateChatController extends State<NewPrivateChat> {
 
   static const Duration _coolDown = Duration(milliseconds: 500);
 
-  void searchUsers([String? input]) async {
+  Future<void> searchUsers([String? input]) async {
     final searchTerm = input ?? controller.text;
     if (searchTerm.isEmpty) {
       _searchCoolDown?.cancel();
@@ -68,7 +68,7 @@ class NewPrivateChatController extends State<NewPrivateChat> {
 
   void inviteAction() => FluffyShare.shareInviteLink(context);
 
-  void openScannerAction() async {
+  Future<void> openScannerAction() async {
     if (PlatformInfos.isAndroid) {
       final info = await DeviceInfoPlugin().androidInfo;
       if (info.version.sdkInt < 21) {
@@ -88,7 +88,7 @@ class NewPrivateChatController extends State<NewPrivateChat> {
     );
   }
 
-  void copyUserId() async {
+  Future<void> copyUserId() async {
     await Clipboard.setData(
       ClipboardData(text: Matrix.of(context).client.userID!),
     );

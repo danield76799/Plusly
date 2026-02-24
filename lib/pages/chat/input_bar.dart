@@ -411,7 +411,7 @@ class InputBar extends StatelessWidget {
         ),
         minLines: minLines,
         maxLines: maxLines,
-        keyboardType: keyboardType!,
+        keyboardType: keyboardType,
         textInputAction: textInputAction,
         autofocus: autofocus!,
         inputFormatters: [

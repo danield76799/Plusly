@@ -109,7 +109,7 @@ class _MxcImageState extends State<MxcImage> {
     }
   }
 
-  void _tryLoad() async {
+  Future<void> _tryLoad() async {
     if (_imageData != null) {
       return;
     }

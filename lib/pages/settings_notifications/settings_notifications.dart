@@ -26,7 +26,7 @@ class SettingsNotifications extends StatefulWidget {
 class SettingsNotificationsController extends State<SettingsNotifications> {
   bool isLoading = false;
 
-  void onPusherTap(Pusher pusher) async {
+  Future<void> onPusherTap(Pusher pusher) async {
     final delete = await showModalActionPopup<bool>(
       context: context,
       title: pusher.deviceDisplayName,
@@ -58,7 +58,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
 
   Future<List<Pusher>?>? pusherFuture;
 
-  void togglePushRule(PushRuleKind kind, PushRule pushRule) async {
+  Future<void> togglePushRule(PushRuleKind kind, PushRule pushRule) async {
     setState(() {
       isLoading = true;
     });
@@ -91,7 +91,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
     }
   }
 
-  void editPushRule(PushRule rule, PushRuleKind kind) async {
+  Future<void> editPushRule(PushRule rule, PushRuleKind kind) async {
     final theme = Theme.of(context);
     final action = await showAdaptiveDialog<PushRuleDialogAction>(
       context: context,

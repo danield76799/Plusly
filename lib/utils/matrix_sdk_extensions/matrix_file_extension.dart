@@ -8,7 +8,7 @@ import 'package:fluffychat/l10n/l10n.dart';
 import 'package:fluffychat/utils/size_string.dart';
 
 extension MatrixFileExtension on MatrixFile {
-  void save(BuildContext context) async {
+  Future<void> save(BuildContext context) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final l10n = L10n.of(context);
     final downloadPath = await FilePicker.platform.saveFile(
@@ -31,7 +31,7 @@ extension MatrixFileExtension on MatrixFile {
     return FileType.any;
   }
 
-  void share(BuildContext context) async {
+  Future<void> share(BuildContext context) async {
     // Workaround for iPad from
     // https://github.com/fluttercommunity/plus_plugins/tree/main/packages/share_plus/share_plus#ipad
     final box = context.findRenderObject() as RenderBox?;

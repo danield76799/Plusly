@@ -35,7 +35,7 @@ class SettingsController extends State<Settings> {
     profileFuture = null;
   });
 
-  void setDisplaynameAction() async {
+  Future<void> setDisplaynameAction() async {
     final profile = await profileFuture;
     final input = await showTextInputDialog(
       useRootNavigator: false,
@@ -61,7 +61,7 @@ class SettingsController extends State<Settings> {
     }
   }
 
-  void logoutAction() async {
+  Future<void> logoutAction() async {
     if (await showOkCancelAlertDialog(
           useRootNavigator: false,
           context: context,
@@ -81,7 +81,7 @@ class SettingsController extends State<Settings> {
     );
   }
 
-  void setAvatarAction() async {
+  Future<void> setAvatarAction() async {
     final profile = await profileFuture;
     final actions = [
       if (PlatformInfos.isMobile)
@@ -159,7 +159,7 @@ class SettingsController extends State<Settings> {
     super.initState();
   }
 
-  void checkBootstrap() async {
+  Future<void> checkBootstrap() async {
     final client = Matrix.of(context).client;
     if (!client.encryptionEnabled) return;
     await client.accountDataLoading;
@@ -176,7 +176,7 @@ class SettingsController extends State<Settings> {
 
   bool? cryptoIdentityConnected;
 
-  void firstRunBootstrapAction([_]) async {
+  Future<void> firstRunBootstrapAction([_]) async {
     if (cryptoIdentityConnected == true) {
       showOkAlertDialog(
         context: context,

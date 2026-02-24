@@ -38,7 +38,7 @@ class ChatDetailsController extends State<ChatDetails> {
 
   String? get roomId => widget.roomId;
 
-  void setDisplaynameAction() async {
+  Future<void> setDisplaynameAction() async {
     final room = Matrix.of(context).client.getRoomById(roomId!)!;
     final input = await showTextInputDialog(
       context: context,
@@ -59,7 +59,7 @@ class ChatDetailsController extends State<ChatDetails> {
     }
   }
 
-  void setTopicAction() async {
+  Future<void> setTopicAction() async {
     final room = Matrix.of(context).client.getRoomById(roomId!)!;
     final input = await showTextInputDialog(
       context: context,
@@ -83,7 +83,7 @@ class ChatDetailsController extends State<ChatDetails> {
     }
   }
 
-  void setAvatarAction() async {
+  Future<void> setAvatarAction() async {
     final room = Matrix.of(context).client.getRoomById(roomId!);
     final actions = [
       if (PlatformInfos.isMobile)

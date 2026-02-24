@@ -124,7 +124,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     }
   }
 
-  void _onButtonTap() async {
+  Future<void> _onButtonTap() async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(matrix.context).clearMaterialBanners();
     });
@@ -216,7 +216,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     );
   }
 
-  void _toggleSpeed() async {
+  Future<void> _toggleSpeed() async {
     final audioPlayer = matrix.audioPlayer;
     if (audioPlayer == null) return;
     switch (audioPlayer.speed) {
@@ -459,7 +459,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                 height: 20,
                                 child: Center(
                                   child: Text(
-                                    '${audioPlayer?.speed.toString()}x',
+                                    '${audioPlayer?.speed}x',
                                     style: TextStyle(
                                       color: widget.color,
                                       fontSize: 9,

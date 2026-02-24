@@ -73,7 +73,7 @@ class SendLocationDialogState extends State<SendLocationDialog> {
     }
   }
 
-  void sendAction() async {
+  Future<void> sendAction() async {
     setState(() => isSending = true);
     final body =
         'https://www.openstreetmap.org/?mlat=${position!.latitude}&mlon=${position!.longitude}#map=16/${position!.latitude}/${position!.longitude}';

@@ -201,7 +201,7 @@ class SettingsStyleView extends StatelessWidget {
                                   type: EventTypes.RoomMember,
                                   senderId: client.userID!,
                                   originServerTs: DateTime.now(),
-                                  stateKey: client.userID!,
+                                  stateKey: client.userID,
                                 ),
                               ),
                               Padding(

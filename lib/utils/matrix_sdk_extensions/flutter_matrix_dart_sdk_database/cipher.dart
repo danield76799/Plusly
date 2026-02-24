@@ -47,7 +47,7 @@ Future<String?> getDatabaseCipher() async {
   return password;
 }
 
-void _sendNoEncryptionWarning(Object exception) async {
+Future<void> _sendNoEncryptionWarning(Object exception) async {
   final isStored = AppSettings.noEncryptionWarningShown.value;
 
   if (isStored == true) return;

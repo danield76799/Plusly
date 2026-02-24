@@ -121,7 +121,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   void onDragExited(_) => setState(() => dragging = false);
 
-  void onDragDone(DropDoneDetails details) async {
+  Future<void> onDragDone(DropDoneDetails details) async {
     setState(() => dragging = false);
     if (details.files.isEmpty) return;
 
@@ -190,7 +190,7 @@ class ChatController extends State<ChatPageWithRoom>
     selectedEvents.clear();
   });
 
-  void recreateChat() async {
+  Future<void> recreateChat() async {
     final room = this.room;
     final userId = room.directChatMatrixID;
     if (userId == null) {
@@ -204,7 +204,7 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void leaveChat() async {
+  Future<void> leaveChat() async {
     final success = await showFutureLoadingDialog(
       context: context,
       future: room.leave,
@@ -213,12 +213,12 @@ class ChatController extends State<ChatPageWithRoom>
     context.go('/rooms');
   }
 
-  void requestHistory([_]) async {
+  Future<void> requestHistory([_]) async {
     Logs().v('Requesting history...');
     await timeline?.requestHistory(historyCount: _loadHistoryCount);
   }
 
-  void requestFuture() async {
+  Future<void> requestFuture() async {
     final timeline = this.timeline;
     if (timeline == null) return;
     Logs().v('Requesting future...');
@@ -392,7 +392,7 @@ class ChatController extends State<ChatPageWithRoom>
     });
   }
 
-  void _tryLoadTimeline() async {
+  Future<void> _tryLoadTimeline() async {
     final initialEventId = widget.eventId;
     loadTimelineFuture = _getTimeline();
     try {
@@ -625,7 +625,7 @@ class ChatController extends State<ChatPageWithRoom>
     });
   }
 
-  void sendFileAction({FileType type = FileType.any}) async {
+  Future<void> sendFileAction({FileType type = FileType.any}) async {
     final files = await selectFiles(context, allowMultiple: true, type: type);
     if (files.isEmpty) return;
     await showAdaptiveDialog(
@@ -640,7 +640,7 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void sendImageFromClipBoard(Uint8List? image) async {
+  Future<void> sendImageFromClipBoard(Uint8List? image) async {
     if (image == null) return;
     await showAdaptiveDialog(
       context: context,
@@ -654,7 +654,7 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void openCameraAction() async {
+  Future<void> openCameraAction() async {
     // Make sure the textfield is unfocused before opening the camera
     FocusScope.of(context).requestFocus(FocusNode());
     final file = await ImagePicker().pickImage(source: ImageSource.camera);
@@ -672,7 +672,7 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void openVideoCameraAction() async {
+  Future<void> openVideoCameraAction() async {
     // Make sure the textfield is unfocused before opening the camera
     FocusScope.of(context).requestFocus(FocusNode());
     final file = await ImagePicker().pickVideo(
@@ -759,7 +759,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void sendLocationAction() async {
+  Future<void> sendLocationAction() async {
     await showAdaptiveDialog(
       context: context,
       builder: (c) => SendLocationDialog(room: room),
@@ -793,7 +793,7 @@ class ChatController extends State<ChatPageWithRoom>
     });
   }
 
-  void reportEventAction() async {
+  Future<void> reportEventAction() async {
     final event = selectedEvents.single;
     final score = await showModalActionPopup<int>(
       context: context,
@@ -837,7 +837,7 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void deleteErrorEventsAction() async {
+  Future<void> deleteErrorEventsAction() async {
     try {
       if (selectedEvents.any((event) => event.status != EventStatus.error)) {
         throw Exception(
@@ -856,7 +856,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void redactEventsAction() async {
+  Future<void> redactEventsAction() async {
     final reasonInput = selectedEvents.any((event) => event.status.isSent)
         ? await showTextInputDialog(
             context: context,
@@ -949,7 +949,7 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  void forwardEventsAction() async {
+  Future<void> forwardEventsAction() async {
     if (selectedEvents.isEmpty) return;
     final timeline = this.timeline;
     if (timeline == null) return;
@@ -992,7 +992,10 @@ class ChatController extends State<ChatPageWithRoom>
     inputFocus.requestFocus();
   }
 
-  void scrollToEventId(String eventId, {bool highlightEvent = true}) async {
+  Future<void> scrollToEventId(
+    String eventId, {
+    bool highlightEvent = true,
+  }) async {
     final foundEvent = timeline!.events.firstWhereOrNull(
       (event) => event.eventId == eventId,
     );
@@ -1036,7 +1039,7 @@ class ChatController extends State<ChatPageWithRoom>
     _updateScrollController();
   }
 
-  void scrollDown() async {
+  Future<void> scrollDown() async {
     if (!timeline!.allowNewEvent) {
       setState(() {
         timeline = null;
@@ -1117,7 +1120,7 @@ class ChatController extends State<ChatPageWithRoom>
     inputFocus.requestFocus();
   }
 
-  void goToNewRoomAction() async {
+  Future<void> goToNewRoomAction() async {
     final result = await showFutureLoadingDialog(
       context: context,
       future: () async {
@@ -1216,7 +1219,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void unpinEvent(String eventId) async {
+  Future<void> unpinEvent(String eventId) async {
     final response = await showOkCancelAlertDialog(
       context: context,
       title: L10n.of(context).unpin,
@@ -1309,7 +1312,7 @@ class ChatController extends State<ChatPageWithRoom>
   void showEventInfo([Event? event]) =>
       (event ?? selectedEvents.single).showInfoDialog(context);
 
-  void onPhoneButtonTap() async {
+  Future<void> onPhoneButtonTap() async {
     // VoIP required Android SDK 21
     if (PlatformInfos.isAndroid) {
       DeviceInfoPlugin().androidInfo.then((value) {
@@ -1365,7 +1368,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   late final ValueNotifier<bool> _displayChatDetailsColumn;
 
-  void toggleDisplayChatDetailsColumn() async {
+  Future<void> toggleDisplayChatDetailsColumn() async {
     await AppSettings.displayChatDetailsColumn.setItem(
       !_displayChatDetailsColumn.value,
     );

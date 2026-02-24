@@ -52,7 +52,7 @@ class SignInViewModel extends ValueNotifier<SignInState> {
     );
   }
 
-  void refreshPublicHomeservers() async {
+  Future<void> refreshPublicHomeservers() async {
     value = value.copyWith(publicHomeservers: AsyncSnapshot.waiting());
     final defaultHomeserverData = PublicHomeserverData(
       name: AppSettings.defaultHomeserver.value,

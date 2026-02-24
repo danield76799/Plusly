@@ -23,7 +23,7 @@ class PublicRoomDialog extends StatelessWidget {
 
   const PublicRoomDialog({super.key, this.roomAlias, this.chunk, this.via});
 
-  void _joinRoom(BuildContext context) async {
+  Future<void> _joinRoom(BuildContext context) async {
     final client = Matrix.of(context).client;
     final chunk = this.chunk;
     final knock = chunk?.joinRule == 'knock';

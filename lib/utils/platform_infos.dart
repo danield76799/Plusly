@@ -47,7 +47,7 @@ abstract class PlatformInfos {
     return version;
   }
 
-  static void showDialog(BuildContext context) async {
+  static Future<void> showDialog(BuildContext context) async {
     final version = await PlatformInfos.getVersion();
     showAboutDialog(
       context: context,

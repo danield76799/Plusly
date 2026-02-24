@@ -16,7 +16,7 @@ class ConfigViewer extends StatefulWidget {
 }
 
 class _ConfigViewerState extends State<ConfigViewer> {
-  void _changeSetting(
+  Future<void> _changeSetting(
     AppSettings appSetting,
     SharedPreferences store,
     String initialValue,
