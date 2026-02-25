@@ -48,7 +48,7 @@ Future<void> connectToHomeserverFlow(
       if (consent != OkCancelResult.ok) return;
     }
 
-    if (authMetadata != null) {
+    if (authMetadata != null && AppSettings.enableMatrixNativeOIDC.value) {
       await oidcLoginFlow(client, context, signUp);
     } else if (supportsSso) {
       await ssoLoginFlow(client, context, signUp);
