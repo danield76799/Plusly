@@ -70,6 +70,7 @@ Future<void> connectToHomeserverFlow(
 
     if (context.mounted) {
       setState(AsyncSnapshot.withData(ConnectionState.done, true));
+      context.go('/backup');
     }
   } catch (e, s) {
     setState(AsyncSnapshot.withError(ConnectionState.done, e, s));
