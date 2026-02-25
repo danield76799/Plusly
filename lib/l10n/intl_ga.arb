@@ -602,7 +602,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "areGuestsAllowedToJoin": "An bhfuil cead ag aoi-úsáideoirí a bheith páirteach",
+    "areGuestsAllowedToJoin": "An bhfuil cead ag úsáideoirí aoi páirt a ghlacadh?",
     "@areGuestsAllowedToJoin": {
         "type": "String",
         "placeholders": {}
@@ -3151,5 +3151,7 @@
     "signInGreeting": "An bhfuil cuntas agat i Matrix cheana féin? Fáilte ar ais! Roghnaigh do fhreastalaí baile agus sínigh isteach.",
     "appIntro": "Le FluffyChat is féidir leat comhrá a dhéanamh le do chairde. Is teachtaire [maitrís] díláraithe slán é! Foghlaim tuilleadh ar https://matrix.org más maith leat nó cláraigh.",
     "theProcessWasCanceled": "Cuireadh an próiseas ar ceal.",
-    "join": "Téigh i"
+    "join": "Téigh i",
+    "searchOrEnterHomeserverAddress": "Cuardaigh nó cuir isteach seoladh an fhreastalaí baile",
+    "matrixId": "Aitheantas Maitrís"
 }

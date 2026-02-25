@@ -1789,5 +1789,176 @@
     "callingAccountDetails": "Sireg FluffyChat ad iseqdec asnas aneṣli n Android i usɛeddi n usiwel.",
     "appearOnTop": "Sbeqeḍ deg uksawen",
     "otherCallingPermissions": "Tisirag n umikrufun, takamiṛat akked tiyaḍ n FluffyChat",
-    "whyIsThisMessageEncrypted": "Acuɣer izen-agi ur yettwaɣri ara?"
+    "whyIsThisMessageEncrypted": "Acuɣer izen-agi ur yettwaɣri ara?",
+    "recoveryKeyLost": "Tasarut n tririt teɛreq?",
+    "seenByUser": "Yemmẓer sɣur {username}",
+    "@seenByUser": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "send": "Azen",
+    "@send": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendAMessage": "Azen izen",
+    "@sendAMessage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendAsText": "Azen am uḍris",
+    "@sendAsText": {
+        "type": "String"
+    },
+    "sendAudio": "Azen ameslaw",
+    "@sendAudio": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendFile": "Azen afaylu",
+    "@sendFile": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendImage": "Azen tugna",
+    "@sendImage": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendImages": "Azen {count} n tugna(iwin)",
+    "@sendImages": {
+        "type": "String",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "sendMessages": "Azen iznan",
+    "@sendMessages": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendOriginal": "Azen aneṣli",
+    "@sendOriginal": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendSticker": "Azen ticṛeṭ n tesfift",
+    "@sendSticker": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sendVideo": "Azen avidyu",
+    "@sendVideo": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "sentAFile": "📁 {username} yuzen afaylu",
+    "@sentAFile": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "sentAnAudio": "🎤 {username} yuzen ameslaw",
+    "@sentAnAudio": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "sentAPicture": "🖼️ {username} yuzen tugna",
+    "@sentAPicture": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "sentASticker": "😊 {username} yuzen ticṛeṭ n tesfift",
+    "@sentASticker": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "sentAVideo": "🎥 {username} yuzen tavidyut",
+    "@sentAVideo": {
+        "type": "String",
+        "placeholders": {
+            "username": {
+                "type": "String"
+            }
+        }
+    },
+    "sentCallInformations": "{senderName} yuzen talɣut n usiwel",
+    "@sentCallInformations": {
+        "type": "String",
+        "placeholders": {
+            "senderName": {
+                "type": "String"
+            }
+        }
+    },
+    "setAsCanonicalAlias": "Sbadu-t d tazaẓlut tagejdant",
+    "@setAsCanonicalAlias": {
+        "type": "String",
+        "placeholders": {}
+    },
+    "noOtherDevicesFound": "Ulac ibenkan nniḍen yettwafen",
+    "fileIsTooBigForServer": "Ur izmir ara ad yazen! Aqeddac yessefrak kan ifuyla imeddayen almi ɣer {max}.",
+    "@fileIsTooBigForServer": {
+        "type": "String",
+        "placeholders": {
+            "max": {
+                "type": "String"
+            }
+        }
+    },
+    "fileHasBeenSavedAt": "Afaylu yettwasekles deg {path}",
+    "@fileHasBeenSavedAt": {
+        "type": "String",
+        "placeholders": {
+            "path": {
+                "type": "String"
+            }
+        }
+    },
+    "jumpToLastReadMessage": "Ddu ɣer yizen aneggaru yettwaɣen",
+    "readUpToHere": "Ɣeṛ dagi",
+    "jump": "Neggez",
+    "openLinkInBrowser": "Ldi aseɣwen deg yiminig",
+    "reportErrorDescription": "😭 Uhu. Yella kra n wugur ay yellan. Ma tebɣiḍ, tzemreḍ ad tazneḍ aneqqis-a i yineflayen.",
+    "report": "aneqqis",
+    "signInWithPassword": "Kcem s wawal n uɛeddi",
+    "pleaseTryAgainLaterOrChooseDifferentServer": "Ma ulac aɣilif, ɛreḍ tikelt nniḍen ticki neɣ fren aqeddac nniḍen.",
+    "profileNotFound": "Aseqdac ur yettwaf ara deg uqeddac. Ahat yella wugur n uẓeṭṭa neɣ aseqdac ulac-it.",
+    "setTheme": "Sbadu asentel:",
+    "setColorTheme": "Sbadu asentel n yini:",
+    "invite": "Snubget",
+    "inviteGroupChat": "📨Snubget ɣer udiwenni n ugraw",
+    "invitePrivateChat": "📨Snubget ɣze udiwenni Uslig",
+    "invalidInput": "Anekcam d armeɣtu!",
+    "wrongPinEntered": "Tettwasekcem tangalt PIN d armeɣtut! Ɛreḍ tikkelt nniḍen deg {seconds} n tasinin…",
+    "@wrongPinEntered": {
+        "type": "String",
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "pleaseEnterANumber": "Ma ulac aɣilif sekcem amḍan yugaren 0"
 }

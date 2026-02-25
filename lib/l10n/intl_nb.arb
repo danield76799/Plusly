@@ -72,7 +72,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "areGuestsAllowedToJoin": "Skal gjester tillates å ta del",
+    "areGuestsAllowedToJoin": "Kan gjester bli med?",
     "@areGuestsAllowedToJoin": {
         "type": "String",
         "placeholders": {}
@@ -1065,7 +1065,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "ok": "OK",
+    "ok": "Ok",
     "@ok": {
         "type": "String",
         "placeholders": {}
@@ -2064,7 +2064,7 @@
         "placeholders": {}
     },
     "pleaseEnterRecoveryKey": "Vennligst skriv inn gjenopprettingsnøkkelen din:",
-    "pleaseEnterYourPin": "Vennligst skriv inn PIN-koden din",
+    "pleaseEnterYourPin": "Oppgi din PIN-kode",
     "@pleaseEnterYourPin": {
         "type": "String",
         "placeholders": {}
@@ -2197,7 +2197,7 @@
     "groupName": "Gruppenavn",
     "createGroupAndInviteUsers": "Opprett en gruppe og inviter brukere",
     "invite": "Inviter",
-    "wrongPinEntered": "Feil PIN-kode tastet inn! Prøv igjen om {seconds} sekunder...",
+    "wrongPinEntered": "Feil PIN-kode oppgitt! Prøv igjen om {seconds} sekunder...",
     "@wrongPinEntered": {
         "type": "String",
         "placeholders": {
@@ -3152,5 +3152,7 @@
     "signInGreeting": "Har du allerede en Matrix-konto? Velkommen tilbake! Velg hjemmeserveren din og logg inn.",
     "appIntro": "Med FluffyChat kan du chatte med vennene dine. Det er en sikker, desentralisert [matrix]-meldingsapp! Les mer på https://matrix.org hvis du vil, eller bare registrer deg.",
     "theProcessWasCanceled": "Prosessen ble avbrutt.",
-    "join": "Bli med"
+    "join": "Bli med",
+    "searchOrEnterHomeserverAddress": "Søk eller angi adresse til hjemmeserver",
+    "matrixId": "Matrix ID"
 }

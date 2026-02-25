@@ -83,7 +83,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "areGuestsAllowedToJoin": "Kas külalised võivad liituda",
+    "areGuestsAllowedToJoin": "Kas külalised võivad liituda?",
     "@areGuestsAllowedToJoin": {
         "type": "String",
         "placeholders": {}
@@ -3145,5 +3145,7 @@
     "signInGreeting": "Sul juba on Matrixi kasutajakonto olemas? Tere tulemast tagasi! Vali oma koduserver ja logi sisse.",
     "appIntro": "FluffyChati abil saad suhelda oma sõpradega. See on turvaline ja hajutatud sõnumiklient [matrix]-i võrgus! Lisateavet leiad https://matrix.org saidist või lihtsalt liitu.",
     "theProcessWasCanceled": "Protsess on katkestatud.",
-    "join": "Liitu"
+    "join": "Liitu",
+    "searchOrEnterHomeserverAddress": "Otsi koduserveri aadressi või sisesta see",
+    "matrixId": "Matrixi kasutajatunnus"
 }

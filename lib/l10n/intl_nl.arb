@@ -83,7 +83,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "areGuestsAllowedToJoin": "Mogen gasten deelnemen",
+    "areGuestsAllowedToJoin": "Mogen gasten deelnemen?",
     "@areGuestsAllowedToJoin": {
         "type": "String",
         "placeholders": {}
@@ -861,7 +861,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "groupIsPublic": "Groep is openbaar",
+    "groupIsPublic": "Groep is publiek",
     "@groupIsPublic": {
         "type": "String",
         "placeholders": {}
@@ -1200,7 +1200,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "noEncryptionForPublicRooms": "Je kunt de versleuteling pas activeren zodra de chat niet meer openbaar toegankelijk is.",
+    "noEncryptionForPublicRooms": "Je kunt de versleuteling pas activeren zodra de chat niet meer publiek toegankelijk is.",
     "@noEncryptionForPublicRooms": {
         "type": "String",
         "placeholders": {}
@@ -1420,7 +1420,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "publicRooms": "Openbare chats",
+    "publicRooms": "Publieke chats",
     "@publicRooms": {
         "type": "String",
         "placeholders": {}
@@ -1738,7 +1738,7 @@
         "type": "String",
         "placeholders": {}
     },
-    "spaceIsPublic": "Space is openbaar",
+    "spaceIsPublic": "Space is publiek",
     "@spaceIsPublic": {
         "type": "String",
         "placeholders": {}
@@ -2364,7 +2364,7 @@
     "encryptThisChat": "Versleutel deze chat",
     "deviceKeys": "Apparaatsleutels:",
     "startFirstChat": "Begin je eerste chat",
-    "newSpaceDescription": "Met spaces kun je je chats samenvoegen en privé- of openbare community's bouwen.",
+    "newSpaceDescription": "Met spaces kun je je chats samenvoegen en privé- of publieke community's bouwen.",
     "noOtherDevicesFound": "Geen andere apparaten gevonden",
     "noBackupWarning": "Waarschuwing! Zonder de chatback-up in te schakelen, verlies je de toegang tot je versleutelde berichten. Het is sterk aanbevolen om eerst de chatback-up in te schakelen voordat je uitlogt.",
     "fileIsTooBigForServer": "Kan niet verzenden! De server ondersteunt alleen bijlages tot {max}.",
@@ -2480,7 +2480,7 @@
     "learnMore": "Lees meer",
     "roomUpgradeDescription": "De chat zal dan opnieuw gemaakt worden met de nieuwe kamerversie. Alle deelnemers worden geïnformeerd dat ze moeten overstappen naar de nieuwe chat. Je kan meer lezen over kamerversies op https://spec.matrix.org/latest/rooms/",
     "pleaseEnterANumber": "Vul een getal in groter dan 0",
-    "kickUserDescription": "De persoon is verwijderd uit de chat, maar is niet verbannen. In openbare chats kan de persoon op elk moment opnieuw deelnemen.",
+    "kickUserDescription": "De persoon is verwijderd uit de chat, maar is niet verbannen. In publieke chats kan de persoon op elk moment opnieuw deelnemen.",
     "alwaysUse24HourFormat": "true",
     "@alwaysUse24HourFormat": {
         "description": "Set to true to always display time of day in 24 hour format."
@@ -2527,9 +2527,9 @@
             }
         }
     },
-    "publicSpaces": "Openbare spaces",
+    "publicSpaces": "Publieke spaces",
     "blockUsername": "Negeer inlognaam",
-    "publicChatAddresses": "Openbare chat adressen",
+    "publicChatAddresses": "Publieke chat adressen",
     "createNewAddress": "Creëer nieuw adres",
     "countChatsAndCountParticipants": "{chats} chats en {participants} deelnemers",
     "@countChatsAndCountParticipants": {
@@ -2566,7 +2566,7 @@
     "restricted": "Beperkt",
     "searchForUsers": "Zoek @personen...",
     "searchMore": "Zoek meer...",
-    "noPublicLinkHasBeenCreatedYet": "Openbare link is nog niet gecreëerd",
+    "noPublicLinkHasBeenCreatedYet": "Publieke link is nog niet gecreëerd",
     "groupCanBeFoundViaSearch": "Groep kan gevonden worden via zoeken",
     "searchIn": "Zoek in chat \"{chat}\"...",
     "@searchIn": {
@@ -2668,8 +2668,8 @@
         "placeholders": {}
     },
     "website": "Website",
-    "hideMemberChangesInPublicChats": "Verberg persoon veranderingen in openbare chats",
-    "hideMemberChangesInPublicChatsBody": "Verberg in de tijdlijn van de chat als iemand zich aanmeldt bij een openbare chat of deze verlaat om de leesbaarheid te verbeteren.",
+    "hideMemberChangesInPublicChats": "Verberg persoon veranderingen in publieke chats",
+    "hideMemberChangesInPublicChatsBody": "Verberg in de tijdlijn van de chat als iemand zich aanmeldt bij een publieke chat of deze verlaat om de leesbaarheid te verbeteren.",
     "startConversation": "Start gesprek",
     "usersMustKnock": "Personen moeten kloppen",
     "noUsersFoundWithQuery": "Helaas kan er geen persoon gevonden worden met \"{query}\". Controleer of je een typfout hebt gemaakt.",
@@ -2715,7 +2715,7 @@
     "passwordIsWrong": "Je ingevoerde wachtwoord is fout",
     "newPassword": "Nieuw wachtwoord",
     "pleaseChooseAStrongPassword": "Kies a.j.b. een sterk wachtwoord",
-    "publicLink": "Openbare link",
+    "publicLink": "Publieke link",
     "select": "Selecteer",
     "leaveEmptyToClearStatus": "Laat leeg om je status te resetten.",
     "addChatOrSubSpace": "Voeg chat of subspace toe",
@@ -2778,7 +2778,7 @@
     "notificationRuleInviteForMe": "Persoonlijke uitnodiging",
     "inviteOtherUsers": "Personen voor deze chat uitnodigen",
     "changeTheChatPermissions": "Chatrechten wijzigen",
-    "changeTheCanonicalRoomAlias": "Standaard openbaar chat-adres wijzigen",
+    "changeTheCanonicalRoomAlias": "Standaard publiek chat-adres wijzigen",
     "blur": "Vervaag:",
     "isReadyForKeyVerification": "{sender} is klaar voor de sleutelverificatie",
     "@isReadyForKeyVerification": {
@@ -3144,5 +3144,7 @@
     "signInGreeting": "Heb je al een Matrix account? Welkom terug! Kies jouw server en log in.",
     "appIntro": "Met FluffyChat kan je chatten met je vrienden. Het is een veilige en decentrale [matrix] app! Lees meer op https://matrix.org als je wilt of kies registreren.",
     "theProcessWasCanceled": "Het proces is geannuleerd.",
-    "join": "Deelnemen"
+    "join": "Deelnemen",
+    "searchOrEnterHomeserverAddress": "Zoek of voer serveradres in",
+    "matrixId": "Matrix-ID"
 }
