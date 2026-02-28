@@ -3657,5 +3657,8 @@
   "theProcessWasCanceled": "Операция отменена.",
   "searchOrEnterHomeserverAddress": "Найдите или введите адрес сервера",
   "downloadFailed": "Ошибка при скачивании",
-  "downloadSuccess": "Файл успешно сохранён"
+  "downloadSuccess": "Файл успешно сохранён",
+  "audioMessage": "Аудио-сообщение",
+  "noCustomPrivacySettings": "Нет чатов с особой конфиденциальностью",
+  "noCustomPrivacySettingsDetails": "Чаты с особыми настройками конфиденциальности будут появляться здесь. Вы можете задавать такие настройки в секции \"Конфиденциальность\" на странице настроек чата."
 }
