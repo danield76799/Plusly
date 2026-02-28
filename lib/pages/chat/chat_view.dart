@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/dialer/back_to_call_button.dart';
+import 'package:extera_next/widgets/mini_audio_player.dart';
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
@@ -280,7 +281,6 @@ class ChatView extends StatelessWidget {
                     SafeArea(
                       child: Column(
                         children: <Widget>[
-                          const BackToCallButton(),
                           Expanded(
                             child: GestureDetector(
                               onTap: controller.clearSingleSelectedEvent,
@@ -380,7 +380,9 @@ class ChatView extends StatelessWidget {
                               children: [
                                 FilledButton(
                                   onPressed: () {
-                                    controller.scrollToEventId(scrollUpBannerEventId);
+                                    controller.scrollToEventId(
+                                      scrollUpBannerEventId,
+                                    );
                                     controller.discardScrollUpBannerEventId();
                                     // controller.setReadMarker();
                                   },
@@ -403,6 +405,18 @@ class ChatView extends StatelessWidget {
                           ),
                         ),
                       ),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: const BackToCallButton(),
+                    ),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: const MiniAudioPlayer(),
+                    ),
                   ],
                 ),
               ),

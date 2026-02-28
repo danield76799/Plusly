@@ -34,7 +34,10 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
   late VoIP voip;
   OverlayEntry? overlayEntry;
   BuildContext get context => matrix.context;
-  CallSession? currentCallSession;
+
+  final ValueNotifier<CallSession?> currentCallNotifier = ValueNotifier(null);
+  CallSession? get currentCallSession => currentCallNotifier.value;
+  set currentCallSession(CallSession? value) => currentCallNotifier.value = value;
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState? state) {
@@ -211,6 +214,10 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
   @override
   Future<void> handleNewCall(CallSession call) async {
     if (PlatformInfos.isAndroid) {
+      if (call.direction == .kIncoming && call.remoteUserId == call.client.userID) {
+        Logs().w("Ignoring a call from ourselves, it's probably a call to someone else from different device.");
+        return;
+      }
       try {
         final wasForeground = await FlutterForegroundTask.isAppOnForeground;
 

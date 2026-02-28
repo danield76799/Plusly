@@ -23,34 +23,79 @@ class ChatPrivacyList extends StatelessWidget {
     return keys;
   }
 
+  Widget _buildEmptyPlaceholder(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.shield_outlined,
+              size: 36,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            L10n.of(context).noCustomPrivacySettings,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            L10n.of(context).noCustomPrivacySettingsDetails,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ids = roomIds;
     return Material(
       elevation: 8.0,
-      borderRadius: .circular(12),
-      clipBehavior: .antiAlias, // Ensures ink splashes don't bleed
+      borderRadius: BorderRadius.circular(12),
+      clipBehavior: Clip.antiAlias,
       child: SingleChildScrollView(
         child: Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            ListView.builder(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: roomIds.length,
-              itemBuilder: (context, index) {
-                final roomId = roomIds[index];
-                final room = client.getRoomById(roomId);
-                if (room == null) return const SizedBox.shrink();
-                return ChatListItem(
-                  room,
-                  noBackgroundColor: true,
-                  onTap: () {
-                    context.pop();
-                    context.push('/rooms/$roomId/details/privacy');
-                  },
-                );
-              },
-            ),
+            if (ids.isEmpty)
+              _buildEmptyPlaceholder(context)
+            else
+              ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: ids.length,
+                itemBuilder: (context, index) {
+                  final roomId = ids[index];
+                  final room = client.getRoomById(roomId);
+                  if (room == null) return const SizedBox.shrink();
+                  return ChatListItem(
+                    room,
+                    noBackgroundColor: true,
+                    onTap: () {
+                      context.pop();
+                      context.push('/rooms/$roomId/details/privacy');
+                    },
+                  );
+                },
+              ),
             const Divider(),
             ListView(
               physics: const NeverScrollableScrollPhysics(),

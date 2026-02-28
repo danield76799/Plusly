@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -301,7 +302,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
   void createStickers() async {
     final pickedFiles = await selectFiles(
       context,
-      type: FileSelectorType.images,
+      type: FileType.image,
       allowMultiple: true,
     );
     if (pickedFiles.isEmpty) return;
@@ -365,7 +366,7 @@ class EmotesSettingsController extends State<EmotesSettings> {
   Future<void> importEmojiZip() async {
     final result = await selectFiles(
       context,
-      type: FileSelectorType.zip,
+      type: FileType.any,
     );
 
     if (result.isEmpty) return;

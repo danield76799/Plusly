@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
@@ -55,7 +56,7 @@ class NewGroupController extends State<NewGroup> {
   void selectPhoto() async {
     final photo = await selectFiles(
       context,
-      type: FileSelectorType.images,
+      type: FileType.image,
       allowMultiple: false,
     );
     final bytes = await photo.singleOrNull?.readAsBytes();

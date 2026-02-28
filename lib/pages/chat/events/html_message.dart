@@ -12,7 +12,7 @@ import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/mxc_image.dart';
 import '../../../utils/url_launcher.dart';
 
-class HtmlMessage extends StatelessWidget {
+class HtmlMessage extends StatefulWidget {
   final String html;
   final Room room;
   final Color textColor;
@@ -108,6 +108,31 @@ class HtmlMessage extends StatelessWidget {
     'li',
   };
 
+  @override
+  State<HtmlMessage> createState() => _HtmlMessageState();
+}
+
+class _HtmlMessageState extends State<HtmlMessage> {
+  /// Tracks the open/closed state of \<details> elements by their index.
+  final Map<int, bool> _detailsOpenState = {};
+
+  /// Tracks the revealed/hidden state of spoiler <span> elements by their index.
+  final Map<int, bool> _spoilerRevealedState = {};
+
+  /// Counter used during rendering to assign stable indices to \<details> elements.
+  int _detailsCounter = 0;
+
+  /// Counter used during rendering to assign stable indices to spoiler elements.
+  int _spoilerCounter = 0;
+
+  // Convenience accessors for widget properties
+  String get html => widget.html;
+  Room get room => widget.room;
+  Color get textColor => widget.textColor;
+  double get fontSize => widget.fontSize;
+  TextStyle get linkStyle => widget.linkStyle;
+  void Function(LinkableElement) get onOpen => widget.onOpen;
+
   /// Adding line breaks before block elements.
   List<InlineSpan> _renderWithLineBreaks(
     dom.NodeList nodes,
@@ -123,16 +148,18 @@ class HtmlMessage extends StatelessWidget {
         if (nodes[i] is dom.Element &&
             onlyElements.indexOf(nodes[i] as dom.Element) <
                 onlyElements.length - 1) ...[
-          if (blockHtmlTags.contains((nodes[i] as dom.Element).localName))
+          if (HtmlMessage.blockHtmlTags
+              .contains((nodes[i] as dom.Element).localName))
             const TextSpan(text: '\n\n'),
-          if (fullLineHtmlTag.contains((nodes[i] as dom.Element).localName))
+          if (HtmlMessage.fullLineHtmlTag
+              .contains((nodes[i] as dom.Element).localName))
             const TextSpan(text: '\n'),
         ],
       ],
     ];
   }
 
-    /// Transforms a Node to an InlineSpan.
+  /// Transforms a Node to an InlineSpan.
   InlineSpan _renderHtml(
     dom.Node node,
     BuildContext context, {
@@ -141,17 +168,19 @@ class HtmlMessage extends StatelessWidget {
     // We must not render elements nested more than 100 elements deep:
     if (depth >= 100) return const TextSpan();
 
-    if (node is dom.Element && ignoredHtmlTags.contains(node.localName)) {
+    if (node is dom.Element &&
+        HtmlMessage.ignoredHtmlTags.contains(node.localName)) {
       return const TextSpan();
     }
 
     // This is a text node, so we render it as text:
-    if (node is! dom.Element || !allowedHtmlTags.contains(node.localName)) {
+    if (node is! dom.Element ||
+        !HtmlMessage.allowedHtmlTags.contains(node.localName)) {
       var text = node.text ?? '';
-      
+
       // --- FIX START ---
       // Replaces all whitespace sequences (newlines, tabs, spaces) with a single space.
-      // This mimics standard HTML browser behavior where source code formatting 
+      // This mimics standard HTML browser behavior where source code formatting
       // is collapsed.
       text = text.replaceAll(RegExp(r'\s+'), ' ');
       // --- FIX END ---
@@ -300,7 +329,8 @@ class HtmlMessage extends StatelessWidget {
                   language: node.className
                           .split(' ')
                           .singleWhereOrNull(
-                              (className) => className.startsWith('language-'),)
+                            (className) => className.startsWith('language-'),
+                          )
                           ?.split('language-')
                           .last ??
                       'md',
@@ -342,46 +372,45 @@ class HtmlMessage extends StatelessWidget {
       case 'hr':
         return const WidgetSpan(child: Divider());
       case 'details':
-        var obscure = true;
+        final index = _detailsCounter++;
+        final isOpen = _detailsOpenState[index] ?? false;
         return WidgetSpan(
-          child: StatefulBuilder(
-            builder: (context, setState) => InkWell(
-              splashColor: Colors.transparent,
-              onTap: () => setState(() {
-                obscure = !obscure;
-              }),
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    WidgetSpan(
-                      child: Icon(
-                        obscure ? Icons.arrow_right : Icons.arrow_drop_down,
-                        size: fontSize * 1.2,
-                        color: textColor,
-                      ),
+          child: InkWell(
+            splashColor: Colors.transparent,
+            onTap: () => setState(() {
+              _detailsOpenState[index] = !isOpen;
+            }),
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  WidgetSpan(
+                    child: Icon(
+                      isOpen ? Icons.arrow_drop_down : Icons.arrow_right,
+                      size: fontSize * 1.2,
+                      color: textColor,
                     ),
-                    if (obscure)
-                      ...node.nodes
-                          .where(
-                            (node) =>
-                                node is dom.Element &&
-                                node.localName == 'summary',
-                          )
-                          .map(
-                            (node) => _renderHtml(node, context, depth: depth),
-                          )
-                    else
-                      ..._renderWithLineBreaks(
-                        node.nodes,
-                        context,
-                        depth: depth,
-                      ),
-                  ],
-                ),
-                style: TextStyle(
-                  fontSize: fontSize,
-                  color: textColor,
-                ),
+                  ),
+                  if (!isOpen)
+                    ...node.nodes
+                        .where(
+                          (node) =>
+                              node is dom.Element &&
+                              node.localName == 'summary',
+                        )
+                        .map(
+                          (node) => _renderHtml(node, context, depth: depth),
+                        )
+                  else
+                    ..._renderWithLineBreaks(
+                      node.nodes,
+                      context,
+                      depth: depth,
+                    ),
+                ],
+              ),
+              style: TextStyle(
+                fontSize: fontSize,
+                color: textColor,
               ),
             ),
           ),
@@ -390,27 +419,26 @@ class HtmlMessage extends StatelessWidget {
         if (!node.attributes.containsKey('data-mx-spoiler')) {
           continue block;
         }
-        var obscure = true;
+        final index = _spoilerCounter++;
+        final isRevealed = _spoilerRevealedState[index] ?? false;
         return WidgetSpan(
-          child: StatefulBuilder(
-            builder: (context, setState) => InkWell(
-              splashColor: Colors.transparent,
-              onTap: () => setState(() {
-                obscure = !obscure;
-              }),
-              child: Text.rich(
-                TextSpan(
-                  children: _renderWithLineBreaks(
-                    node.nodes,
-                    context,
-                    depth: depth,
-                  ),
+          child: InkWell(
+            splashColor: Colors.transparent,
+            onTap: () => setState(() {
+              _spoilerRevealedState[index] = !isRevealed;
+            }),
+            child: Text.rich(
+              TextSpan(
+                children: _renderWithLineBreaks(
+                  node.nodes,
+                  context,
+                  depth: depth,
                 ),
-                style: TextStyle(
-                  fontSize: fontSize,
-                  color: textColor,
-                  backgroundColor: obscure ? textColor : null,
-                ),
+              ),
+              style: TextStyle(
+                fontSize: fontSize,
+                color: textColor,
+                backgroundColor: isRevealed ? null : textColor,
               ),
             ),
           ),
@@ -429,7 +457,10 @@ class HtmlMessage extends StatelessWidget {
             'del' ||
             's' ||
             'strikethrough' =>
-              TextStyle(decoration: TextDecoration.lineThrough, decorationColor: textColor),
+              TextStyle(
+                decoration: TextDecoration.lineThrough,
+                decorationColor: textColor,
+              ),
             'u' => const TextStyle(decoration: TextDecoration.underline),
             'h1' => TextStyle(fontSize: fontSize * 1.6, height: 2),
             'h2' => TextStyle(fontSize: fontSize * 1.5, height: 2),
@@ -460,6 +491,10 @@ class HtmlMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Reset counters before each build so indices are assigned consistently.
+    _detailsCounter = 0;
+    _spoilerCounter = 0;
+
     return Text.rich(
       _renderHtml(
         parser.parse(html).body ?? dom.Element.html(''),

@@ -1,4 +1,5 @@
 import 'package:extera_next/pages/download_manager/download_manager.dart';
+import 'package:extera_next/widgets/background_audio_player.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
@@ -73,10 +74,12 @@ class FluffyChatApp extends StatelessWidget {
               // Need a navigator above the Matrix widget for
               // displaying dialogs
               child: DownloadManager(
-                child: Matrix(
-                  clients: clients,
-                  store: store,
-                  child: testWidget ?? child,
+                child: BackgroundAudioPlayer(
+                  child: Matrix(
+                    clients: clients,
+                    store: store,
+                    child: testWidget ?? child,
+                  ),
                 ),
               ),
             ),
