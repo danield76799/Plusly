@@ -1,5 +1,6 @@
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/config/app_config.dart';
@@ -26,7 +27,7 @@ class SettingsStyleController extends State<SettingsStyle> {
 
   void setWallpaper() async {
     final client = Matrix.of(context).client;
-    final picked = await selectFiles(context, type: FileSelectorType.images);
+    final picked = await selectFiles(context, type: FileType.image);
     final pickedFile = picked.firstOrNull;
     if (pickedFile == null) return;
 

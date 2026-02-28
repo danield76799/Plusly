@@ -1,7 +1,9 @@
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/chat_list/chat_list_legacy_header.dart';
+import 'package:extera_next/pages/dialer/back_to_call_button.dart';
 import 'package:extera_next/shortcuts/chat_list/chat_list_shortcuts.dart';
 import 'package:extera_next/utils/show_profile.dart';
+import 'package:extera_next/widgets/mini_audio_player.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -163,6 +165,10 @@ class ChatListViewBody extends StatelessWidget {
                           onStatusEdit: controller.setStatus,
                         ),
                       ),
+                    if (!FluffyThemes.isColumnMode(context)) ...[
+                      const BackToCallButton(),
+                      const MiniAudioPlayer(),
+                    ],
                     if (controller.isSearchMode)
                       Padding(
                         padding: const .all(8),

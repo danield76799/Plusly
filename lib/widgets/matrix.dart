@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -143,9 +142,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   bool get hasComplexBundles => accountBundles.values.any((v) => v.length > 1);
 
   Client? _loginClientCandidate;
-
-  AudioPlayer? audioPlayer;
-  final ValueNotifier<String?> voiceMessageEventId = ValueNotifier(null);
 
   Future<Client> getLoginClient() async {
     if (widget.clients.isNotEmpty && !client.isLogged()) {

@@ -14,6 +14,7 @@ import 'package:extera_next/utils/privacy_options.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
 import 'package:extera_next/utils/translator.dart';
 import 'package:extera_next/widgets/emoji_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -649,7 +650,7 @@ class ChatController extends State<ChatPageWithRoom>
     replyEvent = null;
   }
 
-  void sendFileAction({FileSelectorType type = FileSelectorType.any}) async {
+  void sendFileAction({FileType type = .any}) async {
     final files = await selectFiles(context, allowMultiple: true, type: type);
     if (files.isEmpty) {
       Logs().v("Returning in sendFileAction, bc files.isEmpty==true");
@@ -1534,10 +1535,10 @@ class ChatController extends State<ChatPageWithRoom>
       sendFileAction();
     }
     if (choice == 'image') {
-      sendFileAction(type: FileSelectorType.images);
+      sendFileAction(type: FileType.image);
     }
     if (choice == 'video') {
-      sendFileAction(type: FileSelectorType.videos);
+      sendFileAction(type: FileType.video);
     }
     if (choice == 'poll') {
       sendPollAction();

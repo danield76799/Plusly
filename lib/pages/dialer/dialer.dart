@@ -581,19 +581,19 @@ class CallingView extends State<Calling> {
       case CallState.kInviteSent:
       case CallState.kCreateAnswer:
         return call.isOutgoing
-            ? <Widget>[muteMicButton, hangupButton]
+            ? <Widget>[muteMicButton, const SizedBox(width: 48), hangupButton]
             : PlatformInfos.isMobile
             ? <Widget>[actionSlider]
-            : <Widget>[answerButton, hangupButton];
+            : <Widget>[answerButton, const SizedBox(width: 48), hangupButton];
       case CallState.kConnecting:
-        return <Widget>[muteMicButton, hangupButton];
+        return <Widget>[muteMicButton, const SizedBox(width: 48), hangupButton];
       case CallState.kConnected:
         return <Widget>[
           muteMicButton,
           switchSpeakerButton,
           if (!voiceonly && !kIsWeb) switchCameraButton,
           if (!voiceonly) muteCameraButton,
-          if (PlatformInfos.isMobile || PlatformInfos.isWeb || PlatformInfos.isLinux)
+          if (PlatformInfos.isMobile || PlatformInfos.isWeb)
             screenSharingButton,
           holdButton,
           hangupButton,
@@ -605,9 +605,8 @@ class CallingView extends State<Calling> {
       case CallState.kCreateOffer:
       case CallState.kEnding:
       case null:
-        break;
+        return <Widget>[hangupButton];
     }
-    return <Widget>[];
   }
 
   List<Widget> _buildContent(Orientation orientation, bool isFloating) {
@@ -795,12 +794,18 @@ class CallingView extends State<Calling> {
           resizeToAvoidBottomInset: !isFloating,
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerFloat,
-          floatingActionButton: SizedBox(
-            width: 320.0,
-            height: 150.0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: _buildActionButtons(isFloating),
+          floatingActionButton: Padding(
+            padding: const EdgeInsets.only(bottom: 48.0),
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width - 32,
+              ),
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: _buildActionButtons(isFloating),
+              ),
             ),
           ),
           appBar: AppBar(
