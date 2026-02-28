@@ -3553,5 +3553,8 @@
   "theProcessWasCanceled": "The process was canceled.",
   "searchOrEnterHomeserverAddress": "Search or enter homeserver address",
   "downloadFailed": "Download failed",
-  "downloadSuccess": "File successfully saved"
+  "downloadSuccess": "File successfully saved",
+  "audioMessage": "Audio message",
+  "noCustomPrivacySettings": "No custom privacy settings",
+  "noCustomPrivacySettingsDetails": "Rooms with custom privacy configurations will appear here. You can set per-room privacy options from a room's details page."
 }
