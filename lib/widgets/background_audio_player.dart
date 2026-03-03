@@ -238,7 +238,7 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     _currentTrack = AudioTrackInfo(
       id: event.eventId,
       title: event.content.tryGet<String>('filename') ?? L10n.of(context).audioMessage,
-      subtitle: '$senderName • $roomName',
+      subtitle: senderName == roomName ? senderName : '$senderName • $roomName',
       mxcUrl: event.attachmentMxcUrl?.toString(),
       duration: durationMs != null ? Duration(milliseconds: durationMs) : null,
       waveform: waveform,
