@@ -192,6 +192,33 @@ class ChatController extends State<ChatPageWithRoom>
 
   bool showEmojiPicker = false;
 
+  void acceptInvite() async {
+    final result = await showFutureLoadingDialog(
+      context: context,
+      future: () async {
+        final waitForRoom = room.client.waitForRoomInSync(room.id, join: true);
+        await room.join();
+        await waitForRoom;
+      },
+      exceptionContext: ExceptionContext.joinRoom,
+    );
+    if (result.error != null) return;
+  }
+
+  void declineInvite() async {
+    await showFutureLoadingDialog(context: context, future: room.leave);
+    if (!mounted) return;
+    context.go('/rooms');
+  }
+
+  void ignoreInvite() async {
+    final userId = room
+        .getState(EventTypes.RoomMember, room.client.userID!)
+        ?.senderId;
+    if (!mounted) return;
+    context.go('/rooms/settings/security/ignorelist', extra: userId);
+  }
+
   void recreateChat() async {
     final room = this.room;
     final userId = room.directChatMatrixID;

@@ -2,12 +2,14 @@ import 'dart:ui' as ui;
 
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/dialer/back_to_call_button.dart';
+import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/mini_audio_player.dart';
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/config/themes.dart';
@@ -19,9 +21,8 @@ import 'package:extera_next/pages/chat/encryption_button.dart';
 import 'package:extera_next/pages/chat/pinned_events.dart';
 import 'package:extera_next/pages/chat/reply_display.dart';
 import 'package:extera_next/utils/account_config.dart';
-import 'package:extera_next/utils/localized_exception_extension.dart';
+import 'package:extera_next/utils/url_launcher.dart';
 import 'package:extera_next/widgets/chat_settings_popup_menu.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:extera_next/widgets/mxc_image.dart';
 import 'package:extera_next/widgets/unread_rooms_badge.dart';
@@ -163,15 +164,198 @@ class ChatView extends StatelessWidget {
     return [];
   }
 
+  Widget _buildInviteView(BuildContext context) {
+    final theme = Theme.of(context);
+    final room = controller.room;
+    final membershipEvent = room.getState(
+      EventTypes.RoomMember,
+      room.client.userID!,
+    );
+    final topic = room.topic;
+    final reason = membershipEvent?.content.tryGet<String>('reason');
+    final displayName = room.getLocalizedDisplayname();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(L10n.of(context).newInvitation),
+        automaticallyImplyLeading: false,
+        leading: FluffyThemes.isColumnMode(context)
+            ? null
+            : const Center(child: BackButton()),
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 32),
+                // Room avatar
+                Avatar(
+                  mxContent: AppSettings.hideAvatarsInInvites.value
+                      ? null
+                      : room.avatar,
+                  name: displayName,
+                  size: 96,
+                  client: room.client,
+                ),
+                const SizedBox(height: 24),
+                // Room name
+                Text(
+                  displayName,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                // Invited by
+                if (membershipEvent != null)
+                  Text(
+                    L10n.of(context).youInvitedBy(membershipEvent.senderId),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                else if (room.directChatMatrixID != null)
+                  Text(
+                    L10n.of(context).newChatRequest,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  )
+                else
+                  Text(
+                    L10n.of(context).inviteGroupChat,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                // Reason
+                if (reason != null && reason.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Card.outlined(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.format_quote_outlined,
+                            color: theme.colorScheme.onSurfaceVariant,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  L10n.of(context).reason,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(reason, style: theme.textTheme.bodyMedium),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                // Topic
+                if (topic.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Card.outlined(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            L10n.of(context).chatDescription,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          SelectableLinkify(
+                            text: topic,
+                            options: const LinkifyOptions(humanize: false),
+                            linkStyle: TextStyle(
+                              color: theme.colorScheme.primary,
+                              decorationColor: theme.colorScheme.primary,
+                            ),
+                            style: theme.textTheme.bodyMedium,
+                            onOpen: (url) =>
+                                UrlLauncher(context, url.url).launchUrl(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 32),
+                // Action buttons
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: () => controller.acceptInvite(),
+                    icon: const Icon(Icons.check_circle_outline),
+                    label: Text(L10n.of(context).accept),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonalIcon(
+                    onPressed: () => controller.declineInvite(),
+                    icon: const Icon(Icons.cancel_outlined),
+                    label: Text(L10n.of(context).decline),
+                    style: FilledButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                      backgroundColor: theme.colorScheme.errorContainer,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => controller.ignoreInvite(),
+                    icon: const Icon(Icons.block_outlined),
+                    label: Text(L10n.of(context).block),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                      side: BorderSide(color: theme.colorScheme.error),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     if (controller.room.membership == Membership.invite) {
-      showFutureLoadingDialog(
-        context: context,
-        future: () => controller.room.join(),
-        exceptionContext: ExceptionContext.joinRoom,
-      );
+      return _buildInviteView(context);
     }
     final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 8.0;
     final scrollUpBannerEventId = controller.scrollUpBannerEventId;

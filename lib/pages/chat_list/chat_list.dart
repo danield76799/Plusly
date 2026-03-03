@@ -121,10 +121,15 @@ class ChatListController extends State<ChatList>
 
   void onChatTap(Room room) async {
     if (room.membership == Membership.invite) {
-      await showAdaptiveBottomSheet(
-        context: context,
-        builder: (context) => InviteDialog(room),
-      );
+      if (room.isSpace) {
+        // For spaces, keep the old behavior since they can't be opened as chat
+        await showAdaptiveBottomSheet(
+          context: context,
+          builder: (context) => InviteDialog(room),
+        );
+        return;
+      }
+      context.go('/rooms/${room.id}');
       return;
     }
 
