@@ -19,6 +19,7 @@ class HtmlMessage extends StatefulWidget {
   final double fontSize;
   final TextStyle linkStyle;
   final void Function(LinkableElement) onOpen;
+  final bool selectable;
 
   const HtmlMessage({
     super.key,
@@ -28,6 +29,7 @@ class HtmlMessage extends StatefulWidget {
     required this.linkStyle,
     this.textColor = Colors.black,
     required this.onOpen,
+    this.selectable = false,
   });
 
   /// Keep in sync with: https://spec.matrix.org/latest/client-server-api/#mroommessage-msgtypes
@@ -495,15 +497,25 @@ class _HtmlMessageState extends State<HtmlMessage> {
     _detailsCounter = 0;
     _spoilerCounter = 0;
 
+    final textSpan = _renderHtml(
+      parser.parse(html).body ?? dom.Element.html(''),
+      context,
+    );
+    final textStyle = TextStyle(
+      fontSize: fontSize,
+      color: textColor,
+    );
+
+    if (widget.selectable) {
+      return SelectableText.rich(
+        textSpan as TextSpan,
+        style: textStyle,
+      );
+    }
+
     return Text.rich(
-      _renderHtml(
-        parser.parse(html).body ?? dom.Element.html(''),
-        context,
-      ),
-      style: TextStyle(
-        fontSize: fontSize,
-        color: textColor,
-      ),
+      textSpan,
+      style: textStyle,
     );
   }
 }

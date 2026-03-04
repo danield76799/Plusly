@@ -33,6 +33,7 @@ class MessageContent extends StatelessWidget {
   final void Function(Event)? onInfoTab;
   final BorderRadius borderRadius;
   final Timeline timeline;
+  final bool selectable;
 
   const MessageContent(
     this.event, {
@@ -42,6 +43,7 @@ class MessageContent extends StatelessWidget {
     required this.textColor,
     required this.linkColor,
     required this.borderRadius,
+    this.selectable = false,
   });
 
   void _verifyOrRequestKey(BuildContext context) async {
@@ -208,6 +210,7 @@ class MessageContent extends StatelessWidget {
                   html: html,
                   textColor: textColor,
                   room: event.room,
+                  selectable: selectable,
                   fontSize:
                       AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
                   linkStyle: TextStyle(
@@ -284,30 +287,42 @@ class MessageContent extends StatelessWidget {
                 event.onlyEmotes &&
                 event.numberEmotes > 0 &&
                 event.numberEmotes <= 3;
+            final messageText = event.calcLocalizedBodyFallback(
+              MatrixLocals(L10n.of(context)),
+              hideReply: true,
+            );
+            final messageStyle = TextStyle(
+              color: textColor,
+              fontSize: bigEmotes ? fontSize * 5 : fontSize,
+              decoration: event.redacted
+                  ? TextDecoration.lineThrough
+                  : null,
+            );
+            final messageLinkStyle = TextStyle(
+              color: linkColor,
+              fontSize: fontSize,
+              decoration: TextDecoration.underline,
+              decorationColor: linkColor,
+            );
             return Padding(
               padding: const .symmetric(horizontal: 16, vertical: 2),
-              child: Linkify(
-                text: event.calcLocalizedBodyFallback(
-                  MatrixLocals(L10n.of(context)),
-                  hideReply: true,
-                ),
-                textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: bigEmotes ? fontSize * 5 : fontSize,
-                  decoration: event.redacted
-                      ? TextDecoration.lineThrough
-                      : null,
-                ),
-                options: const LinkifyOptions(humanize: false),
-                linkStyle: TextStyle(
-                  color: linkColor,
-                  fontSize: fontSize,
-                  decoration: TextDecoration.underline,
-                  decorationColor: linkColor,
-                ),
-                onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
-              ),
+              child: selectable
+                  ? SelectableLinkify(
+                      text: messageText,
+                      textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+                      style: messageStyle,
+                      options: const LinkifyOptions(humanize: false),
+                      linkStyle: messageLinkStyle,
+                      onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+                    )
+                  : Linkify(
+                      text: messageText,
+                      textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+                      style: messageStyle,
+                      options: const LinkifyOptions(humanize: false),
+                      linkStyle: messageLinkStyle,
+                      onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+                    ),
             );
         }
       case EventTypes.CallInvite:
