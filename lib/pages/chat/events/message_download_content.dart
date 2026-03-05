@@ -1,7 +1,9 @@
 import 'package:extera_next/config/setting_keys.dart';
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/events/html_message.dart';
 import 'package:extera_next/pages/download_manager/download_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
@@ -214,6 +216,12 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
                 decorationColor: linkColor,
               ),
               onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+              onCopy: () {
+                Clipboard.setData(ClipboardData(text: event.body));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(L10n.of(context).copiedToClipboard)),
+                  );
+              },
             ),
           ),
         ],

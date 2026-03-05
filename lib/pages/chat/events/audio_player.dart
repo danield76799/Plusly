@@ -1,7 +1,9 @@
 import 'package:extera_next/config/setting_keys.dart';
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/events/html_message.dart';
 import 'package:extera_next/widgets/background_audio_player.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
@@ -53,9 +55,9 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     } else {
       _player.playFromEvent(widget.event).catchError((e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString())),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(e.toString())));
         }
       });
     }
@@ -142,19 +144,19 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                         final currentPosition = isThisTrack
                             ? position.inMilliseconds.toDouble()
                             : 0.0;
-                        final maxPosition = isThisTrack &&
-                                duration.inMilliseconds > 0
+                        final maxPosition =
+                            isThisTrack && duration.inMilliseconds > 0
                             ? duration.inMilliseconds.toDouble()
                             : 1.0;
 
-                        final statusText = isThisTrack &&
-                                position != Duration.zero
+                        final statusText =
+                            isThisTrack && position != Duration.zero
                             ? '${position.inMinutes.toString().padLeft(2, '0')}:${(position.inSeconds % 60).toString().padLeft(2, '0')}'
                             : _durationString ?? '00:00';
 
                         final wavePosition = maxPosition > 0
                             ? (currentPosition / maxPosition) *
-                                AudioPlayerWidget.wavesCount
+                                  AudioPlayerWidget.wavesCount
                             : 0.0;
 
                         return Padding(
@@ -185,15 +187,16 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                                   .saveFile(context),
                                               onTap: _startAction,
                                               child: Material(
-                                                color: widget.color
-                                                    .withAlpha(64),
+                                                color: widget.color.withAlpha(
+                                                  64,
+                                                ),
                                                 borderRadius:
                                                     BorderRadius.circular(64),
                                                 child: Icon(
                                                   isPlaying
                                                       ? Icons.pause_outlined
                                                       : Icons
-                                                          .play_arrow_outlined,
+                                                            .play_arrow_outlined,
                                                   color: widget.color,
                                                 ),
                                               ),
@@ -207,14 +210,17 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                             Padding(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                      horizontal: 16.0),
+                                                    horizontal: 16.0,
+                                                  ),
                                               child: Row(
                                                 children: [
-                                                  for (var i = 0;
-                                                      i <
-                                                          AudioPlayerWidget
-                                                              .wavesCount;
-                                                      i++)
+                                                  for (
+                                                    var i = 0;
+                                                    i <
+                                                        AudioPlayerWidget
+                                                            .wavesCount;
+                                                    i++
+                                                  )
                                                     Expanded(
                                                       child: Container(
                                                         height: 32,
@@ -222,24 +228,24 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                                             Alignment.center,
                                                         child: Container(
                                                           margin:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                            horizontal: 1,
-                                                          ),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: i <
-                                                                    wavePosition
+                                                              const EdgeInsets.symmetric(
+                                                                horizontal: 1,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color:
+                                                                i < wavePosition
                                                                 ? widget.color
                                                                 : widget.color
-                                                                    .withAlpha(
-                                                                        128),
+                                                                      .withAlpha(
+                                                                        128,
+                                                                      ),
                                                             borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        64),
+                                                                BorderRadius.circular(
+                                                                  64,
+                                                                ),
                                                           ),
-                                                          height: 32 *
+                                                          height:
+                                                              32 *
                                                               (waveform[i] /
                                                                   1024),
                                                         ),
@@ -251,12 +257,14 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                           SizedBox(
                                             height: 32,
                                             child: Slider(
-                                              thumbColor: widget
-                                                          .event.senderId ==
-                                                      widget.event.room.client
+                                              thumbColor:
+                                                  widget.event.senderId ==
+                                                      widget
+                                                          .event
+                                                          .room
+                                                          .client
                                                           .userID
-                                                  ? theme
-                                                      .colorScheme.onPrimary
+                                                  ? theme.colorScheme.onPrimary
                                                   : theme.colorScheme.primary,
                                               activeColor: waveform == null
                                                   ? widget.color
@@ -266,7 +274,9 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                                   : Colors.transparent,
                                               max: maxPosition,
                                               value: currentPosition.clamp(
-                                                  0.0, maxPosition),
+                                                0.0,
+                                                maxPosition,
+                                              ),
                                               onChanged: (position) {
                                                 if (!isThisTrack) {
                                                   _startAction();
@@ -285,22 +295,27 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                       child: Text(
                                         statusText,
                                         style: TextStyle(
-                                            color: widget.color, fontSize: 12),
+                                          color: widget.color,
+                                          fontSize: 12,
+                                        ),
                                       ),
                                     ),
                                     const SizedBox(width: 8),
                                     AnimatedCrossFade(
                                       firstChild: Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 8.0),
+                                        padding: const EdgeInsets.only(
+                                          right: 8.0,
+                                        ),
                                         child: Icon(
-                                            Icons.mic_none_outlined,
-                                            color: widget.color),
+                                          Icons.mic_none_outlined,
+                                          color: widget.color,
+                                        ),
                                       ),
                                       secondChild: Material(
                                         color: widget.color.withAlpha(64),
                                         borderRadius: BorderRadius.circular(
-                                            AppConfig.borderRadius),
+                                          AppConfig.borderRadius,
+                                        ),
                                         child: InkWell(
                                           borderRadius: BorderRadius.circular(
                                             AppConfig.borderRadius,
@@ -313,8 +328,9 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                               child: Text(
                                                 '${isThisTrack ? playbackRate : 1.0}x',
                                                 style: TextStyle(
-                                                    color: widget.color,
-                                                    fontSize: 9),
+                                                  color: widget.color,
+                                                  fontSize: 9,
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -324,8 +340,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                       crossFadeState: !isThisTrack
                                           ? CrossFadeState.showFirst
                                           : CrossFadeState.showSecond,
-                                      duration:
-                                          FluffyThemes.animationDuration,
+                                      duration: FluffyThemes.animationDuration,
                                     ),
                                   ],
                                 ),
@@ -335,12 +350,14 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                 const SizedBox(height: 8),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
                                   child: Text(
                                     widget.event.plaintextBody,
-                                    textScaleFactor:
-                                        MediaQuery.textScalerOf(context)
-                                            .scale(1),
+                                    textScaleFactor: MediaQuery.textScalerOf(
+                                      context,
+                                    ).scale(1),
                                     style: TextStyle(
                                       color: widget.color,
                                       fontSize: widget.fontSize,
@@ -353,27 +370,31 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                 const SizedBox(height: 8),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
                                   child: Linkify(
                                     text: fileDescription,
-                                    textScaleFactor:
-                                        MediaQuery.textScalerOf(context)
-                                            .scale(1),
+                                    textScaleFactor: MediaQuery.textScalerOf(
+                                      context,
+                                    ).scale(1),
                                     style: TextStyle(
                                       color: widget.color,
                                       fontSize: widget.fontSize,
                                     ),
-                                    options:
-                                        const LinkifyOptions(humanize: false),
+                                    options: const LinkifyOptions(
+                                      humanize: false,
+                                    ),
                                     linkStyle: TextStyle(
                                       color: widget.linkColor,
                                       fontSize: widget.fontSize,
                                       decoration: TextDecoration.underline,
                                       decorationColor: widget.linkColor,
                                     ),
-                                    onOpen: (url) =>
-                                        UrlLauncher(context, url.url)
-                                            .launchUrl(),
+                                    onOpen: (url) => UrlLauncher(
+                                      context,
+                                      url.url,
+                                    ).launchUrl(),
                                   ),
                                 ),
                               ],
@@ -382,25 +403,42 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                 const SizedBox(height: 8),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
                                   child: HtmlMessage(
                                     html: fileDescription,
                                     textColor: textColor,
                                     room: widget.event.room,
-                                    fontSize: AppSettings.fontSizeFactor.value *
+                                    fontSize:
+                                        AppSettings.fontSizeFactor.value *
                                         AppSettings.messageFontSize.value,
                                     linkStyle: TextStyle(
                                       color: linkColor,
                                       fontSize:
                                           AppSettings.fontSizeFactor.value *
-                                              AppSettings
-                                                  .messageFontSize.value,
+                                          AppSettings.messageFontSize.value,
                                       decoration: TextDecoration.underline,
                                       decorationColor: linkColor,
                                     ),
-                                    onOpen: (url) =>
-                                        UrlLauncher(context, url.url)
-                                            .launchUrl(),
+                                    onOpen: (url) => UrlLauncher(
+                                      context,
+                                      url.url,
+                                    ).launchUrl(),
+                                    onCopy: () {
+                                      Clipboard.setData(
+                                        ClipboardData(text: fileDescription),
+                                      );
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            L10n.of(context).copiedToClipboard,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ),
                               ],

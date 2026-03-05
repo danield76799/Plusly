@@ -1,8 +1,10 @@
 import 'package:extera_next/config/setting_keys.dart';
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/events/html_message.dart';
 import 'package:extera_next/pages/image_viewer/image_viewer.dart';
 import 'package:extera_next/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
@@ -64,7 +66,8 @@ class EventVideoPlayer extends StatelessWidget {
       );
     }
 
-    if (event.inReplyToEventId(includingFallback: false) != null && fileDescription != null) {
+    if (event.inReplyToEventId(includingFallback: false) != null &&
+        fileDescription != null) {
       borderRadius = borderRadius.copyWith(
         topLeft: Radius.zero,
         topRight: Radius.zero,
@@ -80,9 +83,7 @@ class EventVideoPlayer extends StatelessWidget {
           clipBehavior: Clip.hardEdge,
           shape: RoundedRectangleBorder(
             borderRadius: borderRadius,
-            side: BorderSide(
-              color: theme.dividerColor,
-            ),
+            side: BorderSide(color: theme.dividerColor),
           ),
           child: InkWell(
             onTap: () => supportsVideoPlayer
@@ -158,13 +159,15 @@ class EventVideoPlayer extends StatelessWidget {
                 style: TextStyle(
                   color: textColor,
                   fontSize:
-                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
+                      AppSettings.fontSizeFactor.value *
+                      AppSettings.messageFontSize.value,
                 ),
                 options: const LinkifyOptions(humanize: false),
                 linkStyle: TextStyle(
                   color: linkColor,
                   fontSize:
-                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
+                      AppSettings.fontSizeFactor.value *
+                      AppSettings.messageFontSize.value,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),
@@ -181,15 +184,24 @@ class EventVideoPlayer extends StatelessWidget {
                 html: fileDescription,
                 textColor: textColor,
                 room: event.room,
-                fontSize: AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
+                fontSize:
+                    AppSettings.fontSizeFactor.value *
+                    AppSettings.messageFontSize.value,
                 linkStyle: TextStyle(
                   color: linkColor,
                   fontSize:
-                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
+                      AppSettings.fontSizeFactor.value *
+                      AppSettings.messageFontSize.value,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),
                 onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+                onCopy: () {
+                  Clipboard.setData(ClipboardData(text: event.body));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(L10n.of(context).copiedToClipboard)),
+                  );
+                },
               ),
             ),
           ),

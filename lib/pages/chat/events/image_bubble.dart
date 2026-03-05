@@ -1,6 +1,8 @@
 import 'package:extera_next/config/setting_keys.dart';
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/events/html_message.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
@@ -45,8 +47,7 @@ class ImageBubble extends StatelessWidget {
   });
 
   Widget _buildPlaceholder(BuildContext context) {
-    final blurHashString =
-        event.infoMap['xyz.amorgan.blurhash'] is String
+    final blurHashString = event.infoMap['xyz.amorgan.blurhash'] is String
         ? event.infoMap['xyz.amorgan.blurhash'] as String
         : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
     return SizedBox(
@@ -91,7 +92,8 @@ class ImageBubble extends StatelessWidget {
       );
     }
 
-    if (event.inReplyToEventId(includingFallback: false) != null && fileDescription != null) {
+    if (event.inReplyToEventId(includingFallback: false) != null &&
+        fileDescription != null) {
       borderRadius = borderRadius.copyWith(
         topLeft: Radius.zero,
         topRight: Radius.zero,
@@ -106,13 +108,13 @@ class ImageBubble extends StatelessWidget {
           color: Colors.transparent,
           clipBehavior: Clip.hardEdge,
           shape: RoundedRectangleBorder(
-                  borderRadius: borderRadius,
-                  side: BorderSide(
-                    color: event.messageType == MessageTypes.Sticker
-                        ? Colors.transparent
-                        : theme.dividerColor,
-                  ),
-                ),
+            borderRadius: borderRadius,
+            side: BorderSide(
+              color: event.messageType == MessageTypes.Sticker
+                  ? Colors.transparent
+                  : theme.dividerColor,
+            ),
+          ),
           child: InkWell(
             onTap: () => _onTap(context),
             borderRadius: borderRadius,
@@ -145,13 +147,15 @@ class ImageBubble extends StatelessWidget {
                 style: TextStyle(
                   color: textColor,
                   fontSize:
-                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
+                      AppSettings.fontSizeFactor.value *
+                      AppSettings.messageFontSize.value,
                 ),
                 options: const LinkifyOptions(humanize: false),
                 linkStyle: TextStyle(
                   color: linkColor,
                   fontSize:
-                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
+                      AppSettings.fontSizeFactor.value *
+                      AppSettings.messageFontSize.value,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),
@@ -170,15 +174,24 @@ class ImageBubble extends StatelessWidget {
                 html: fileDescription,
                 textColor: textColor,
                 room: event.room,
-                fontSize: AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
+                fontSize:
+                    AppSettings.fontSizeFactor.value *
+                    AppSettings.messageFontSize.value,
                 linkStyle: TextStyle(
                   color: linkColor,
                   fontSize:
-                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
+                      AppSettings.fontSizeFactor.value *
+                      AppSettings.messageFontSize.value,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),
                 onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+                onCopy: () {
+                  Clipboard.setData(ClipboardData(text: event.body));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(L10n.of(context).copiedToClipboard)),
+                  );
+                },
               ),
             ),
           ),

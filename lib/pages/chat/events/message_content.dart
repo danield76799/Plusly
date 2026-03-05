@@ -7,6 +7,7 @@ import 'package:extera_next/utils/poll_events.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
@@ -100,7 +101,8 @@ class MessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSize = AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value;
+    final fontSize =
+        AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value;
     final buttonTextColor = textColor;
     switch (event.type) {
       case EventTypes.Message:
@@ -212,15 +214,25 @@ class MessageContent extends StatelessWidget {
                   room: event.room,
                   selectable: selectable,
                   fontSize:
-                      AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
+                      AppSettings.fontSizeFactor.value *
+                      AppSettings.messageFontSize.value,
                   linkStyle: TextStyle(
                     color: linkColor,
                     fontSize:
-                        AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value,
+                        AppSettings.fontSizeFactor.value *
+                        AppSettings.messageFontSize.value,
                     decoration: TextDecoration.underline,
                     decorationColor: linkColor,
                   ),
                   onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+                  onCopy: () {
+                    Clipboard.setData(ClipboardData(text: event.body));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(L10n.of(context).copiedToClipboard),
+                      ),
+                    );
+                  },
                 ),
               );
             }
@@ -294,9 +306,7 @@ class MessageContent extends StatelessWidget {
             final messageStyle = TextStyle(
               color: textColor,
               fontSize: bigEmotes ? fontSize * 5 : fontSize,
-              decoration: event.redacted
-                  ? TextDecoration.lineThrough
-                  : null,
+              decoration: event.redacted ? TextDecoration.lineThrough : null,
             );
             final messageLinkStyle = TextStyle(
               color: linkColor,
@@ -309,19 +319,25 @@ class MessageContent extends StatelessWidget {
               child: selectable
                   ? SelectableLinkify(
                       text: messageText,
-                      textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+                      textScaleFactor: MediaQuery.textScalerOf(
+                        context,
+                      ).scale(1),
                       style: messageStyle,
                       options: const LinkifyOptions(humanize: false),
                       linkStyle: messageLinkStyle,
-                      onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+                      onOpen: (url) =>
+                          UrlLauncher(context, url.url).launchUrl(),
                     )
                   : Linkify(
                       text: messageText,
-                      textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
+                      textScaleFactor: MediaQuery.textScalerOf(
+                        context,
+                      ).scale(1),
                       style: messageStyle,
                       options: const LinkifyOptions(humanize: false),
                       linkStyle: messageLinkStyle,
-                      onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+                      onOpen: (url) =>
+                          UrlLauncher(context, url.url).launchUrl(),
                     ),
             );
         }

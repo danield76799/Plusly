@@ -154,6 +154,10 @@ class ChatEventList extends StatelessWidget {
                         controller.selectedEvents.first.eventId ==
                             event.eventId,
                     onSwipe: () => controller.replyAction(replyTo: event),
+                    // onQuote: () {
+                    //   controller.replyAction(replyTo: event);
+                    //   controller.sendController.text = "> ";
+                    // },
                     onInfoTab: controller.showEventInfo,
                     onMention: () => controller.sendController.text +=
                         '${event.senderFromMemoryOrFallback.mention} ',

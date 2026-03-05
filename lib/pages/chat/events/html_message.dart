@@ -1,6 +1,8 @@
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/services.dart';
 import 'package:highlight_selectable/theme_map.dart';
 import 'package:highlight_selectable/highlight_selectable.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -18,7 +20,10 @@ class HtmlMessage extends StatefulWidget {
   final Color textColor;
   final double fontSize;
   final TextStyle linkStyle;
+
   final void Function(LinkableElement) onOpen;
+  final void Function() onCopy;
+
   final bool selectable;
 
   const HtmlMessage({
@@ -29,6 +34,7 @@ class HtmlMessage extends StatefulWidget {
     required this.linkStyle,
     this.textColor = Colors.black,
     required this.onOpen,
+    required this.onCopy,
     this.selectable = false,
   });
 
@@ -83,9 +89,7 @@ class HtmlMessage extends StatefulWidget {
     'tg-forward',
   };
 
-  static const Set<String> ignoredHtmlTags = {
-    'mx-reply',
-  };
+  static const Set<String> ignoredHtmlTags = {'mx-reply'};
 
   /// We add line breaks before these tags:
   static const Set<String> blockHtmlTags = {
@@ -150,11 +154,13 @@ class _HtmlMessageState extends State<HtmlMessage> {
         if (nodes[i] is dom.Element &&
             onlyElements.indexOf(nodes[i] as dom.Element) <
                 onlyElements.length - 1) ...[
-          if (HtmlMessage.blockHtmlTags
-              .contains((nodes[i] as dom.Element).localName))
+          if (HtmlMessage.blockHtmlTags.contains(
+            (nodes[i] as dom.Element).localName,
+          ))
             const TextSpan(text: '\n\n'),
-          if (HtmlMessage.fullLineHtmlTag
-              .contains((nodes[i] as dom.Element).localName))
+          if (HtmlMessage.fullLineHtmlTag.contains(
+            (nodes[i] as dom.Element).localName,
+          ))
             const TextSpan(text: '\n'),
         ],
       ],
@@ -162,11 +168,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
   }
 
   /// Transforms a Node to an InlineSpan.
-  InlineSpan _renderHtml(
-    dom.Node node,
-    BuildContext context, {
-    int depth = 1,
-  }) {
+  InlineSpan _renderHtml(dom.Node node, BuildContext context, {int depth = 1}) {
     // We must not render elements nested more than 100 elements deep:
     if (depth >= 100) return const TextSpan();
 
@@ -275,11 +277,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
                       text:
                           '${(node.parent?.nodes.whereType<dom.Element>().toList().indexOf(node) ?? 0) + (int.tryParse(node.parent?.attributes['start'] ?? '1') ?? 1)}. ',
                     ),
-                  ..._renderWithLineBreaks(
-                    node.nodes,
-                    context,
-                    depth: depth,
-                  ),
+                  ..._renderWithLineBreaks(node.nodes, context, depth: depth),
                 ],
                 style: TextStyle(fontSize: fontSize, color: textColor),
               ),
@@ -291,12 +289,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
           child: Container(
             padding: const EdgeInsets.only(left: 8.0),
             decoration: BoxDecoration(
-              border: Border(
-                left: BorderSide(
-                  color: textColor,
-                  width: 5,
-                ),
-              ),
+              border: Border(left: BorderSide(color: textColor, width: 5)),
             ),
             child: Text.rich(
               TextSpan(
@@ -306,10 +299,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
                   depth: depth,
                 ),
               ),
-              style: TextStyle(
-                fontSize: fontSize,
-                color: textColor,
-              ),
+              style: TextStyle(fontSize: fontSize, color: textColor),
             ),
           ),
         );
@@ -328,7 +318,8 @@ class _HtmlMessageState extends State<HtmlMessage> {
             : WidgetSpan(
                 child: HighlightSelectable(
                   node.text,
-                  language: node.className
+                  language:
+                      node.className
                           .split(' ')
                           .singleWhereOrNull(
                             (className) => className.startsWith('language-'),
@@ -343,8 +334,10 @@ class _HtmlMessageState extends State<HtmlMessage> {
                     horizontal: 8,
                     vertical: isInline ? 0 : 8,
                   ),
-                  textStyle:
-                      TextStyle(fontSize: fontSize, fontFamily: 'RobotoMono'),
+                  textStyle: TextStyle(
+                    fontSize: fontSize,
+                    fontFamily: 'RobotoMono',
+                  ),
                 ),
               );
       case 'img':
@@ -399,21 +392,12 @@ class _HtmlMessageState extends State<HtmlMessage> {
                               node is dom.Element &&
                               node.localName == 'summary',
                         )
-                        .map(
-                          (node) => _renderHtml(node, context, depth: depth),
-                        )
+                        .map((node) => _renderHtml(node, context, depth: depth))
                   else
-                    ..._renderWithLineBreaks(
-                      node.nodes,
-                      context,
-                      depth: depth,
-                    ),
+                    ..._renderWithLineBreaks(node.nodes, context, depth: depth),
                 ],
               ),
-              style: TextStyle(
-                fontSize: fontSize,
-                color: textColor,
-              ),
+              style: TextStyle(fontSize: fontSize, color: textColor),
             ),
           ),
         );
@@ -449,20 +433,14 @@ class _HtmlMessageState extends State<HtmlMessage> {
       default:
         return TextSpan(
           style: switch (node.localName) {
-            'body' => TextStyle(
-                fontSize: fontSize,
-                color: textColor,
-              ),
+            'body' => TextStyle(fontSize: fontSize, color: textColor),
             'a' => linkStyle,
             'strong' => const TextStyle(fontWeight: FontWeight.bold),
             'em' || 'i' => const TextStyle(fontStyle: FontStyle.italic),
-            'del' ||
-            's' ||
-            'strikethrough' =>
-              TextStyle(
-                decoration: TextDecoration.lineThrough,
-                decorationColor: textColor,
-              ),
+            'del' || 's' || 'strikethrough' => TextStyle(
+              decoration: TextDecoration.lineThrough,
+              decorationColor: textColor,
+            ),
             'u' => const TextStyle(decoration: TextDecoration.underline),
             'h1' => TextStyle(fontSize: fontSize * 1.6, height: 2),
             'h2' => TextStyle(fontSize: fontSize * 1.5, height: 2),
@@ -471,22 +449,19 @@ class _HtmlMessageState extends State<HtmlMessage> {
             'h5' => TextStyle(fontSize: fontSize * 1.2, height: 1.75),
             'h6' => TextStyle(fontSize: fontSize * 1.1, height: 1.5),
             'span' => TextStyle(
-                color: node.attributes['color']?.hexToColor ??
-                    node.attributes['data-mx-color']?.hexToColor ??
-                    textColor,
-                backgroundColor:
-                    node.attributes['data-mx-bg-color']?.hexToColor,
-              ),
-            'sup' =>
-              const TextStyle(fontFeatures: [FontFeature.superscripts()]),
+              color:
+                  node.attributes['color']?.hexToColor ??
+                  node.attributes['data-mx-color']?.hexToColor ??
+                  textColor,
+              backgroundColor: node.attributes['data-mx-bg-color']?.hexToColor,
+            ),
+            'sup' => const TextStyle(
+              fontFeatures: [FontFeature.superscripts()],
+            ),
             'sub' => const TextStyle(fontFeatures: [FontFeature.subscripts()]),
             _ => null,
           },
-          children: _renderWithLineBreaks(
-            node.nodes,
-            context,
-            depth: depth,
-          ),
+          children: _renderWithLineBreaks(node.nodes, context, depth: depth),
         );
     }
   }
@@ -501,22 +476,29 @@ class _HtmlMessageState extends State<HtmlMessage> {
       parser.parse(html).body ?? dom.Element.html(''),
       context,
     );
-    final textStyle = TextStyle(
-      fontSize: fontSize,
-      color: textColor,
-    );
+    final textStyle = TextStyle(fontSize: fontSize, color: textColor);
 
     if (widget.selectable) {
       return SelectableText.rich(
         textSpan as TextSpan,
         style: textStyle,
+        contextMenuBuilder: (context, editableTextState) {
+          return AdaptiveTextSelectionToolbar.buttonItems(
+            buttonItems: [
+              ContextMenuButtonItem(
+                onPressed: () {
+                  widget.onCopy();
+                },
+                label: L10n.of(context).copy,
+              ),
+            ],
+            anchors: editableTextState.contextMenuAnchors,
+          );
+        },
       );
     }
 
-    return Text.rich(
-      textSpan,
-      style: textStyle,
-    );
+    return Text.rich(textSpan, style: textStyle);
   }
 }
 
