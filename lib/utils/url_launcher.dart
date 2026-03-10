@@ -28,10 +28,12 @@ class UrlLauncher {
   const UrlLauncher(this.context, this.url, [this.name]);
 
   void launchUrl() async {
+    if (url!.toLowerCase().startsWith(AppConfig.schemePrefix)) {
+      return openMatrixUrl();
+    }
     if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         url!.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
-        {'#', '@', '!', '+', '\$'}.contains(url![0]) ||
-        url!.toLowerCase().startsWith(AppConfig.schemePrefix)) {
+        {'#', '@', '!', '+', '\$'}.contains(url![0])) {
       return openMatrixToUrl();
     }
     final uri = Uri.tryParse(url!);
@@ -115,6 +117,231 @@ class UrlLauncher {
       uri.replace(host: newHost).toString(),
       mode: LaunchMode.externalApplication,
     );
+  }
+
+  void openMatrixUrl() async {
+    final matrix = Matrix.of(context);
+    final rawUrl = url;
+    if (rawUrl == null) return;
+
+    // 1. Parse the URI into components
+    final uri = Uri.tryParse(rawUrl);
+    if (uri == null) return;
+
+    // 2. Verify scheme is 'matrix'
+    if (uri.scheme.toLowerCase() != 'matrix') return;
+
+    // 3. Split the path into segments separated by '/'
+    // Uri.pathSegments already handles this, but for matrix: URIs
+    // we need to handle the path manually since Dart's Uri parser
+    // may treat the first path segment as authority for some forms.
+    // We'll use the raw path from the URI.
+    var path = uri.path;
+    // Remove leading slash if present (from authority form matrix://authority/path)
+    if (path.startsWith('/')) {
+      path = path.substring(1);
+    }
+
+    final segments = path.split('/');
+
+    // 4. Check that the URI contains either 2 or 4 segments
+    if (segments.length != 2 && segments.length != 4) return;
+
+    // 5. Construct the top-level (primary) Matrix identifier
+    final typeSpecifier = segments[0].toLowerCase();
+    String sigil;
+    switch (typeSpecifier) {
+      case 'u':
+      case 'user': // deprecated
+        sigil = '@';
+        break;
+      case 'r':
+      case 'room': // deprecated
+        sigil = '#';
+        break;
+      case 'roomid':
+        sigil = '!';
+        break;
+      default:
+        return; // invalid type specifier
+    }
+
+    final idWithoutSigil1 = Uri.decodeComponent(segments[1]);
+    if (idWithoutSigil1.isEmpty) return;
+    final primaryId = '$sigil$idWithoutSigil1';
+
+    // 6. If we have 4 segments and the primary is a room (! or #),
+    //    try to construct a secondary (event) identifier
+    String? eventId;
+    if (segments.length == 4 && (sigil == '!' || sigil == '#')) {
+      final secondTypeSpecifier = segments[2].toLowerCase();
+      if (secondTypeSpecifier != 'e' && secondTypeSpecifier != 'event') {
+        return; // invalid second-level type specifier
+      }
+      final idWithoutSigil2 = Uri.decodeComponent(segments[3]);
+      if (idWithoutSigil2.isEmpty) return;
+      eventId = '\$$idWithoutSigil2';
+    } else if (segments.length == 4) {
+      // 4 segments but primary is not a room - invalid
+      return;
+    }
+
+    // 7. Parse query parameters
+    String? action;
+    final servers = <String>{};
+    for (final entry in uri.queryParametersAll.entries) {
+      switch (entry.key) {
+        case 'action':
+          // Use the last action= value as per spec
+          if (entry.value.isNotEmpty) {
+            action = entry.value.last;
+          }
+          break;
+        case 'via':
+          servers.addAll(entry.value);
+          break;
+      }
+    }
+
+    // Now handle the parsed URI based on sigil type
+    if (sigil == '@') {
+      // User identifier
+      if (action == 'chat') {
+        // Open or create a direct chat with this user
+        final userId = primaryId;
+        final client = matrix.client;
+        final roomId = client.getDirectChatFromUserId(userId);
+        if (roomId != null) {
+          context.go('/rooms/$roomId');
+          return;
+        } // Do not create DM
+      }
+      // Default: show user profile
+      final userId = primaryId;
+      var noProfileWarning = false;
+      final profileResult = await showFutureLoadingDialog(
+        context: context,
+        future: () =>
+            matrix.client.getProfileFromUserId(userId).catchError((_) {
+              noProfileWarning = true;
+              return Profile(userId: userId);
+            }),
+      );
+      if (profileResult.result == null) return;
+      showProfile(
+        context: context,
+        profile: profileResult.result!,
+        noProfileWarning: noProfileWarning,
+      );
+    } else if (sigil == '#' || sigil == '!') {
+      // Room alias or room ID
+      final roomIdOrAlias = primaryId;
+      var room =
+          matrix.client.getRoomByAlias(roomIdOrAlias) ??
+          matrix.client.getRoomById(roomIdOrAlias);
+      var roomId = room?.id;
+
+      if (room == null && sigil == '#') {
+        // Resolve alias
+        final response = await showFutureLoadingDialog(
+          context: context,
+          future: () => matrix.client.getRoomIdByAlias(roomIdOrAlias),
+        );
+        final result = response.result;
+        if (result != null) {
+          roomId = result.roomId;
+          servers.addAll(result.servers ?? []);
+          room = matrix.client.getRoomById(roomId!);
+        }
+      }
+
+      if (action == 'join') {
+        if (room != null && room.membership == Membership.join) {
+          // Already joined, just open
+          _navigateToRoom(room.id, eventId);
+        } else {
+          // Ask for confirmation before joining
+          if (await showOkCancelAlertDialog(
+                useRootNavigator: false,
+                context: context,
+                title: L10n.of(
+                  context,
+                ).joinRoomByLinkConfirmation(roomIdOrAlias),
+              ) ==
+              OkCancelResult.ok) {
+            final joinId = roomId ?? roomIdOrAlias;
+            final response = await showFutureLoadingDialog(
+              context: context,
+              future: () => matrix.client.joinRoom(
+                joinId,
+                serverName: servers.isNotEmpty ? servers.toList() : null,
+              ),
+            );
+            if (response.error != null) return;
+            // Wait for sync
+            await showFutureLoadingDialog(
+              context: context,
+              future: () => Future.delayed(const Duration(seconds: 2)),
+            );
+            _navigateToRoom(response.result!, eventId);
+          }
+        }
+      } else {
+        // Default: open the room
+        if (room != null) {
+          if (room.isSpace) {
+            context.go('/rooms/${room.id}');
+            return;
+          }
+          _navigateToRoom(room.id, eventId);
+        } else {
+          // Room not found locally - show public room dialog or offer to join
+          if (sigil == '#') {
+            await showAdaptiveDialog(
+              context: context,
+              builder: (c) => PublicRoomDialog(roomAlias: roomIdOrAlias),
+            );
+          } else {
+            // Room ID not found locally, offer to join
+            if (await showOkCancelAlertDialog(
+                  useRootNavigator: false,
+                  context: context,
+                  title: L10n.of(
+                    context,
+                  ).joinRoomByLinkConfirmation(roomIdOrAlias),
+                ) ==
+                OkCancelResult.ok) {
+              final response = await showFutureLoadingDialog(
+                context: context,
+                future: () => matrix.client.joinRoom(
+                  roomIdOrAlias,
+                  serverName: servers.isNotEmpty ? servers.toList() : null,
+                ),
+              );
+              if (response.error != null) return;
+              await showFutureLoadingDialog(
+                context: context,
+                future: () => Future.delayed(const Duration(seconds: 2)),
+              );
+              _navigateToRoom(response.result!, eventId);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  void _navigateToRoom(String roomId, String? eventId) {
+    if (eventId != null) {
+      context.go(
+        Uri(
+          pathSegments: ['', 'rooms', roomId],
+          queryParameters: {'event': eventId},
+        ).toString(),
+      );
+    } else {
+      context.go('/rooms/$roomId');
+    }
   }
 
   void openMatrixToUrl() async {

@@ -234,10 +234,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                   onPressed: sentReactions.contains(emoji)
                                       ? null
                                       : () {
-                                          Navigator.of(
-                                            context,
-                                            rootNavigator: true,
-                                          ).pop();
+                                          controller.closeMessageMenu();
                                           event.room.sendReaction(
                                             event.eventId,
                                             emoji,

@@ -1,8 +1,6 @@
-import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/services.dart';
 import 'package:highlight_selectable/theme_map.dart';
 import 'package:highlight_selectable/highlight_selectable.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
@@ -479,22 +477,8 @@ class _HtmlMessageState extends State<HtmlMessage> {
     final textStyle = TextStyle(fontSize: fontSize, color: textColor);
 
     if (widget.selectable) {
-      return SelectableText.rich(
-        textSpan as TextSpan,
-        style: textStyle,
-        contextMenuBuilder: (context, editableTextState) {
-          return AdaptiveTextSelectionToolbar.buttonItems(
-            buttonItems: [
-              ContextMenuButtonItem(
-                onPressed: () {
-                  widget.onCopy();
-                },
-                label: L10n.of(context).copy,
-              ),
-            ],
-            anchors: editableTextState.contextMenuAnchors,
-          );
-        },
+      return SelectionArea(
+        child: Text.rich(textSpan, style: textStyle),
       );
     }
 
