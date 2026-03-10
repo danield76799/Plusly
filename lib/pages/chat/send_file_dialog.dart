@@ -216,7 +216,9 @@ class SendFileDialogState extends State<SendFileDialog> {
       setState(() {
         isSending = false;
       });
-      Navigator.of(context, rootNavigator: false).pop();
+      if (mounted) {
+        Navigator.of(context, rootNavigator: false).pop();
+      }
       scaffoldMessenger.clearSnackBars();
     } catch (e) {
       Logs().e('error on send', e);

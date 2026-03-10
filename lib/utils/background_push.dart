@@ -31,7 +31,6 @@ import 'package:flutter_new_badger/flutter_new_badger.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
-import 'package:unifiedpush_ui/unifiedpush_ui.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/main.dart';
@@ -61,7 +60,6 @@ class BackgroundPush {
 
   Future<void> loadLocale() async {
     final context = matrix?.context;
-    // inspired by _lookupL10n in .dart_tool/flutter_gen/gen_l10n/l10n.dart
     l10n ??=
         (context != null ? L10n.of(context) : null) ??
         (await L10n.delegate.load(PlatformDispatcher.instance.locale));
@@ -377,13 +375,76 @@ class BackgroundPush {
   }
 
   Future<void> setupUp() async {
-    await UnifiedPushUi(
-      context: matrix!.context,
-      instances: ["default"],
-      unifiedPushFunctions: UPFunctions(),
-      showNoDistribDialog: false,
-      onNoDistribDialogDismissed: () {}, // TODO: Implement me
-    ).registerAppWithDialog();
+    final distributors = await UnifiedPush.getDistributors();
+    if (distributors.isEmpty) {
+      Logs().i('[Push] No UnifiedPush distributors found');
+      return;
+    }
+
+    // Check if a distributor is already saved
+    final savedDistributor = await UnifiedPush.getDistributor();
+    if (savedDistributor != null) {
+      Logs().i('[Push] Using saved UnifiedPush distributor: $savedDistributor');
+      await UnifiedPush.register(instance: 'default');
+      return;
+    }
+
+    String selectedDistributor;
+    if (distributors.length == 1) {
+      selectedDistributor = distributors.first;
+    } else {
+      // Multiple distributors: show a picker dialog
+      final dialogContext =
+          FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
+          matrix!.context;
+
+      if (!dialogContext.mounted) {
+        Logs().w('[Push] Context not mounted, cannot show distributor picker');
+        // Fallback: use the first distributor
+        selectedDistributor = distributors.first;
+      } else {
+        await loadLocale();
+        final picked = await showDialog<String>(
+          context: dialogContext,
+          builder: (context) => AlertDialog(
+            title: Text(l10n?.selectPushDistributor ?? 'Select push distributor'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: distributors
+                  .map(
+                    (d) => ListTile(
+                      title: Text(
+                        d.split('.').last[0].toUpperCase() +
+                            d.split('.').last.substring(1),
+                      ),
+                      subtitle: Text(d),
+                      onTap: () => Navigator.of(context).pop(d),
+                    ),
+                  )
+                  .toList(),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(l10n?.cancel ?? 'Cancel'),
+              ),
+            ],
+          ),
+        );
+
+        if (picked != null) {
+          selectedDistributor = picked;
+        } else {
+          // User dismissed the dialog - use the first distributor as fallback
+          Logs().i('[Push] User dismissed distributor picker, using first available');
+          selectedDistributor = distributors.first;
+        }
+      }
+    }
+
+    Logs().i('[Push] Saving UnifiedPush distributor: $selectedDistributor');
+    await UnifiedPush.saveDistributor(selectedDistributor);
+    await UnifiedPush.register(instance: 'default');
   }
 
   Future<void> _newUpEndpoint(PushEndpoint newPushEndpoint, String i) async {
@@ -462,31 +523,5 @@ class BackgroundPush {
       useNotificationActions:
           false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
     );
-  }
-}
-
-class UPFunctions extends UnifiedPushFunctions {
-  final List<String> features = [
-    /*list of features*/
-  ];
-
-  @override
-  Future<String?> getDistributor() async {
-    return await UnifiedPush.getDistributor();
-  }
-
-  @override
-  Future<List<String>> getDistributors() async {
-    return await UnifiedPush.getDistributors(features);
-  }
-
-  @override
-  Future<void> registerApp(String instance) async {
-    await UnifiedPush.register(instance: instance, features: features);
-  }
-
-  @override
-  Future<void> saveDistributor(String distributor) async {
-    await UnifiedPush.saveDistributor(distributor);
   }
 }
