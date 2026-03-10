@@ -9,6 +9,7 @@ import 'package:extera_next/pages/chat/send_poll_dialog.dart';
 import 'package:extera_next/pages/chat/translated_event_dialog.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/utils/clipboard_utils.dart';
+import 'package:extera_next/utils/loading_snackbar_extension.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/synapse_admin_extension.dart';
 import 'package:extera_next/utils/privacy_options.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
@@ -933,7 +934,7 @@ class ChatController extends State<ChatPageWithRoom>
     event ??= selectedEvents.single;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(L10n.of(context).translating)));
+    ).showLoadingSnackBar(L10n.of(context).translating);
     var text = event.isRichMessage ? event.formattedText : event.text;
     final content = {...event.content};
     try {
@@ -953,24 +954,23 @@ class ChatController extends State<ChatPageWithRoom>
       content['body'] = text;
     }
     content['xyz.extera.translated'] = true;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext ctx) {
-          return TranslatedEventDialog(
-            event: Event(
-              content: content,
-              type: 'm.room.message',
-              eventId: event!.eventId,
-              senderId: event.senderId,
-              originServerTs: event.originServerTs,
-              room: room,
-            ),
-            timeline: timeline!,
-          );
-        },
-        fullscreenDialog: true,
-      ),
+    await showAdaptiveBottomSheet(
+      context: context,
+      builder: (BuildContext ctx) {
+        return TranslatedEventDialog(
+          event: Event(
+            content: content,
+            type: 'm.room.message',
+            eventId: event!.eventId,
+            senderId: event.senderId,
+            originServerTs: event.originServerTs,
+            room: room,
+          ),
+          timeline: timeline!,
+        );
+      },
     );
+    ScaffoldMessenger.of(context).clearSnackBars();
   }
 
   void reportEventAction({Event? event}) async {
