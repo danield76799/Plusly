@@ -1,12 +1,16 @@
+import 'package:extera_next/config/setting_keys.dart';
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/services.dart';
 import 'package:highlight_selectable/theme_map.dart';
 import 'package:highlight_selectable/highlight_selectable.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' as parser;
+import 'package:linkify/linkify.dart';
 import 'package:matrix/matrix.dart';
+import 'package:latext/latext.dart';
 
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/mxc_image.dart';
@@ -137,7 +141,35 @@ class _HtmlMessageState extends State<HtmlMessage> {
   TextStyle get linkStyle => widget.linkStyle;
   void Function(LinkableElement) get onOpen => widget.onOpen;
 
-  /// Adding line breaks before block elements.
+  // to fix issue 7
+  TextSpan _buildLinkifySpan(
+    BuildContext context, {
+    required String text,
+    LinkifyOptions options = const LinkifyOptions(humanize: false),
+  }) {
+    final elements = linkify(text, options: options);
+    return TextSpan(
+      children: elements.map((element) {
+        if (element is LinkableElement) {
+          return WidgetSpan(
+            child: GestureDetector(
+              onTap: () => onOpen(element),
+              onLongPress: () {
+                Clipboard.setData(ClipboardData(text: element.url));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(L10n.of(context).copiedToClipboard)),
+                );
+              },
+              child: Text(element.text, style: linkStyle),
+            ),
+          );
+        } else {
+          return TextSpan(text: element.text);
+        }
+      }).toList(),
+    );
+  }
+
   List<InlineSpan> _renderWithLineBreaks(
     dom.NodeList nodes,
     BuildContext context, {
@@ -165,9 +197,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
     ];
   }
 
-  /// Transforms a Node to an InlineSpan.
   InlineSpan _renderHtml(dom.Node node, BuildContext context, {int depth = 1}) {
-    // We must not render elements nested more than 100 elements deep:
     if (depth >= 100) return const TextSpan();
 
     if (node is dom.Element &&
@@ -175,27 +205,30 @@ class _HtmlMessageState extends State<HtmlMessage> {
       return const TextSpan();
     }
 
-    // This is a text node, so we render it as text:
     if (node is! dom.Element ||
         !HtmlMessage.allowedHtmlTags.contains(node.localName)) {
       var text = node.text ?? '';
 
-      // --- FIX START ---
-      // Replaces all whitespace sequences (newlines, tabs, spaces) with a single space.
-      // This mimics standard HTML browser behavior where source code formatting
-      // is collapsed.
-      text = text.replaceAll(RegExp(r'\s+'), ' ');
-      // --- FIX END ---
+      // Whitespace-only text nodes inside block containers (ul, ol, li, etc.)
+      // are just HTML formatting artifacts and should not be rendered.
+      final parentTag = node.parent?.localName;
+      if (const {
+            'ul',
+            'ol',
+            'li',
+            'table',
+            'thead',
+            'tbody',
+            'tr',
+          }.contains(parentTag) &&
+          text.trim().isEmpty) {
+        return const TextSpan();
+      }
 
-      // Only render if there's actual content (or it's a significant space)
+      text = text.replaceAll(RegExp(r'\s+'), ' ');
       if (text.isEmpty) return const TextSpan();
 
-      return LinkifySpan(
-        text: text,
-        options: const LinkifyOptions(humanize: false),
-        linkStyle: linkStyle,
-        onOpen: onOpen,
-      );
+      return _buildLinkifySpan(context, text: text);
     }
 
     switch (node.localName) {
@@ -244,6 +277,12 @@ class _HtmlMessageState extends State<HtmlMessage> {
             child: InkWell(
               splashColor: Colors.transparent,
               onTap: () => UrlLauncher(context, href, node.text).launchUrl(),
+              onLongPress: () {
+                Clipboard.setData(ClipboardData(text: href));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(L10n.of(context).copiedToClipboard)),
+                );
+              },
               child: Text.rich(
                 TextSpan(
                   children: _renderWithLineBreaks(
@@ -399,7 +438,48 @@ class _HtmlMessageState extends State<HtmlMessage> {
             ),
           ),
         );
+      case 'div':
+        if (node.attributes.containsKey('data-mx-maths') &&
+            AppSettings.latexMath.value) {
+          final maths = node.attributes['data-mx-maths']!;
+          return WidgetSpan(
+            child: InkWell(
+              onLongPress: () {
+                Clipboard.setData(ClipboardData(text: maths));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(L10n.of(context).copiedToClipboard)),
+                );
+              },
+              child: LatexSpan(
+                math: maths,
+                fontSize: fontSize,
+                color: textColor,
+              ),
+            ),
+          );
+        } else {
+          continue block;
+        }
       case 'span':
+        if (node.attributes.containsKey('data-mx-maths') &&
+            AppSettings.latexMath.value) {
+          final maths = node.attributes['data-mx-maths']!;
+          return WidgetSpan(
+            child: InkWell(
+              onLongPress: () {
+                Clipboard.setData(ClipboardData(text: maths));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(L10n.of(context).copiedToClipboard)),
+                );
+              },
+              child: LatexSpan(
+                math: maths,
+                fontSize: fontSize,
+                color: textColor,
+              ),
+            ),
+          );
+        }
         if (!node.attributes.containsKey('data-mx-spoiler')) {
           continue block;
         }
@@ -477,9 +557,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
     final textStyle = TextStyle(fontSize: fontSize, color: textColor);
 
     if (widget.selectable) {
-      return SelectionArea(
-        child: Text.rich(textSpan, style: textStyle),
-      );
+      return SelectionArea(child: Text.rich(textSpan, style: textStyle));
     }
 
     return Text.rich(textSpan, style: textStyle);
@@ -531,6 +609,32 @@ class MatrixPill extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class LatexSpan extends StatelessWidget {
+  final Color color;
+  final double fontSize;
+  final String math;
+
+  const LatexSpan({
+    required this.math,
+    required this.fontSize,
+    required this.color,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return LaTexT(
+      laTeXCode: Text(
+        '\$$math\$',
+        style: TextStyle(color: color, fontSize: fontSize),
+      ),
+      onErrorFallback: (text) {
+        return "$text (LaTeX Error)";
+      },
     );
   }
 }

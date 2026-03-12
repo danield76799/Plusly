@@ -3670,5 +3670,6 @@
     }
   },
   "translating": "Переводим сообщение...",
-  "messageTranslations": "Перевод сообщений"
+  "messageTranslations": "Перевод сообщений",
+  "latexMath": "Формулы LaTeX"
 }

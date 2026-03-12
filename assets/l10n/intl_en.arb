@@ -3570,5 +3570,6 @@
     }
   },
   "translating": "Translating...",
-  "messageTranslations": "Message translations"
+  "messageTranslations": "Message translations",
+  "latexMath": "LaTeX Math"
 }

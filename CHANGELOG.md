@@ -1,3 +1,14 @@
+## Extera 26.0.8
+- Support for LaTeX formulas.
+- Added ability to copy links by long pressing them.
+- Moved legacy appbar/navbar switches to a seperate settings section.
+- Added ability to toggle AI-powered message translations.
+- New incoming invite UX.
+- Added a background audio player.
+- Partially select text in messages.
+- Fixed crashing after sending a reaction (desktop).
+- Render custom reactions instead of their URLs when opening list of who reacted.
+
 ## Extera 26.0.7
 - Fixed message context menu.
 - Added download button in message menu.

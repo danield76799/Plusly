@@ -61,6 +61,11 @@ class SettingsFeaturesView extends StatelessWidget {
                         title: L10n.of(context).messageTranslations,
                         setting: AppSettings.messageTranslation,
                       ),
+                      const ListDivider(),
+                      SettingsSwitchListTile.adaptive(
+                        title: L10n.of(context).latexMath,
+                        setting: AppSettings.latexMath,
+                      ),
                     ],
                   ),
                 ),

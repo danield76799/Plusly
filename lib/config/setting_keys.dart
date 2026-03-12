@@ -9,6 +9,7 @@ import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SettingKeys {
+  static const String latexMath = 'xyz.extera.latexMath';
   static const String messageTranslation = 'xyz.extera.messageTranslation';
   static const String avatarBorderRadius = 'xyz.extera.next.avatarBorderRadius';
   static const String autoMarkUnavailable = 'xyz.extera.next.autoMarkUnavailable';
@@ -60,6 +61,7 @@ abstract class SettingKeys {
 }
 
 enum AppSettings<T> {
+  latexMath<bool>('xyz.extera.latexMath', false),
   messageTranslation<bool>('xyz.extera.messageTranslation', true),
   useLegacyChatListAppBar<bool>('xyz.extera.legacyAppBar', false),
   useLegacyNavBar<bool>('xyz.extera.legacyNavBar', false),
