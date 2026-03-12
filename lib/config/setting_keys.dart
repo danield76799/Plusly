@@ -9,6 +9,8 @@ import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SettingKeys {
+  static const String exteraServiceUrl = 'xyz.extera.serviceUrl';
+  static const String translationTargetLanguage = 'xyz.extera.translationTargetLanguage';
   static const String latexMath = 'xyz.extera.latexMath';
   static const String messageTranslation = 'xyz.extera.messageTranslation';
   static const String avatarBorderRadius = 'xyz.extera.next.avatarBorderRadius';
@@ -61,6 +63,8 @@ abstract class SettingKeys {
 }
 
 enum AppSettings<T> {
+  translationTargetLanguage<String>('xyz.extera.translationTargetLanguage', ''),
+  exteraServiceUrl<String>('xyz.extera.serviceUrl', 'https://ecs.extera.xyz'),
   latexMath<bool>('xyz.extera.latexMath', false),
   messageTranslation<bool>('xyz.extera.messageTranslation', true),
   useLegacyChatListAppBar<bool>('xyz.extera.legacyAppBar', false),

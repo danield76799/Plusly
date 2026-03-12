@@ -940,7 +940,10 @@ class ChatController extends State<ChatPageWithRoom>
     try {
       text = await Translator.translate(
         text,
-        PlatformDispatcher.instance.locale.languageCode,
+        AppSettings.translationTargetLanguage.value.isEmpty
+            ? PlatformDispatcher.instance.locale.languageCode
+            : AppSettings.translationTargetLanguage.value,
+        AppSettings.exteraServiceUrl.value,
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
