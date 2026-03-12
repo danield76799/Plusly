@@ -21,7 +21,7 @@ class SettingsFeaturesView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Features'),
+        title: Text(L10n.of(context).featureSwitches),
         automaticallyImplyLeading: !FluffyThemes.isColumnMode(context),
         centerTitle: FluffyThemes.isColumnMode(context),
       ),
