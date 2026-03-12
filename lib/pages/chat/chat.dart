@@ -954,6 +954,7 @@ class ChatController extends State<ChatPageWithRoom>
       content['body'] = text;
     }
     content['xyz.extera.translated'] = true;
+    ScaffoldMessenger.of(context).clearSnackBars();
     await showAdaptiveBottomSheet(
       context: context,
       builder: (BuildContext ctx) {
@@ -970,7 +971,6 @@ class ChatController extends State<ChatPageWithRoom>
         );
       },
     );
-    ScaffoldMessenger.of(context).clearSnackBars();
   }
 
   void reportEventAction({Event? event}) async {
