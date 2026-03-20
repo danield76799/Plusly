@@ -114,7 +114,7 @@ class UrlLauncher {
     // Force LaunchMode.externalApplication, otherwise url_launcher will default
     // to opening links in a webview on mobile platforms.
     launchUrlString(
-      uri.replace(host: newHost).toString(),
+      url!.replaceFirst(uri.host, newHost),
       mode: LaunchMode.externalApplication,
     );
   }
