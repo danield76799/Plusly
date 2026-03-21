@@ -174,12 +174,13 @@ class _HtmlMessageState extends State<HtmlMessage> {
     dom.NodeList nodes,
     BuildContext context, {
     int depth = 1,
+    bool insideAnchor = false,
   }) {
     final onlyElements = nodes.whereType<dom.Element>().toList();
     return [
       for (var i = 0; i < nodes.length; i++) ...[
         // Actually render the node child:
-        _renderHtml(nodes[i], context, depth: depth + 1),
+        _renderHtml(nodes[i], context, depth: depth + 1, insideAnchor: insideAnchor),
         // Add linebreaks between blocks:
         if (nodes[i] is dom.Element &&
             onlyElements.indexOf(nodes[i] as dom.Element) <
@@ -197,7 +198,12 @@ class _HtmlMessageState extends State<HtmlMessage> {
     ];
   }
 
-  InlineSpan _renderHtml(dom.Node node, BuildContext context, {int depth = 1}) {
+  InlineSpan _renderHtml(
+    dom.Node node,
+    BuildContext context, {
+    int depth = 1,
+    bool insideAnchor = false,
+  }) {
     if (depth >= 100) return const TextSpan();
 
     if (node is dom.Element &&
@@ -228,7 +234,9 @@ class _HtmlMessageState extends State<HtmlMessage> {
       text = text.replaceAll(RegExp(r'\s+'), ' ');
       if (text.isEmpty) return const TextSpan();
 
-      return _buildLinkifySpan(context, text: text);
+      return insideAnchor
+          ? TextSpan(text: text)
+          : _buildLinkifySpan(context, text: text);
     }
 
     switch (node.localName) {
@@ -289,6 +297,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
                     node.nodes,
                     context,
                     depth: depth,
+                    insideAnchor: true,
                   ),
                   style: linkStyle,
                 ),
