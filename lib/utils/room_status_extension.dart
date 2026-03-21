@@ -39,6 +39,7 @@ extension RoomStatusExtension on Room {
   List<Receipt> getReceipts(Timeline timeline, {String? eventId}) {
     if (timeline.events.isEmpty) return [];
     eventId ??= timeline.events.first.eventId;
+    // print(eventId);
 
     final lastReceipts = <Receipt>{};
     // now we iterate the timeline events until we hit the first rendered event
@@ -53,5 +54,28 @@ extension RoomStatusExtension on Room {
           receipt.user.id == client.userID || receipt.user.id == timeline.events.first.senderId,
     );
     return lastReceipts.toList();
+  }
+
+  bool hasBeenReadBySomeone(Timeline timeline, String eventId) {
+    if (timeline.events.isEmpty) return false;
+    for (final event in timeline.events) {
+      if (event.receipts.where((receipt) => receipt.user.id != client.userID!).isNotEmpty) {
+        return true;
+      }
+      if (event.eventId == eventId) {
+        break;
+      }
+    }
+    return true;
+  }
+
+  String? getLatestReadMessage(Timeline timeline) {
+    if (timeline.events.isEmpty) return null;
+    for (final event in timeline.events) {
+      if (event.receipts.where((receipt) => receipt.user.id != client.userID!).isNotEmpty) {
+        return event.eventId;
+      }
+    }
+    return null;
   }
 }

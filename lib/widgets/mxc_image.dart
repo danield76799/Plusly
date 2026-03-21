@@ -1,10 +1,10 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/utils/client_download_content_extension.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:extera_next/widgets/matrix.dart';
@@ -18,8 +18,6 @@ class MxcImage extends StatefulWidget {
   final bool isThumbnail;
   final bool animated;
   final Duration retryDuration;
-  final Duration animationDuration;
-  final Curve animationCurve;
   final ThumbnailMethod thumbnailMethod;
   final Widget Function(BuildContext context)? placeholder;
   final String? cacheKey;
@@ -35,9 +33,7 @@ class MxcImage extends StatefulWidget {
     this.placeholder,
     this.isThumbnail = true,
     this.animated = false,
-    this.animationDuration = FluffyThemes.animationDuration,
     this.retryDuration = const Duration(seconds: 2),
-    this.animationCurve = FluffyThemes.animationCurve,
     this.thumbnailMethod = ThumbnailMethod.scale,
     this.cacheKey,
     this.client,
@@ -50,14 +46,17 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage> {
-  static final Map<String, Uint8List> _imageDataCache = {};
+  // LRU cache with max 200 entries to prevent unbounded memory growth
+  static const int _maxCacheSize = 200;
+  static final LinkedHashMap<String, Uint8List> _imageDataCache =
+      LinkedHashMap<String, Uint8List>();
 
   Uint8List? _currentData;
   bool _isLoading = false;
 
   // FIX: Track retry attempts to prevent infinite loops
   int _retryCount = 0;
-  static const int _maxRetries = 5;
+  static const int _maxRetries = 3;
 
   @override
   void initState() {
@@ -100,14 +99,25 @@ class _MxcImageState extends State<MxcImage> {
 
   Uint8List? _getFromCache() {
     if (widget.cacheKey != null) {
-      return _imageDataCache[widget.cacheKey];
+      final data = _imageDataCache.remove(widget.cacheKey);
+      if (data != null) {
+        // Re-insert to mark as most recently used
+        _imageDataCache[widget.cacheKey!] = data;
+      }
+      return data;
     }
     return null;
   }
 
   void _saveToCache(Uint8List data) {
     if (widget.cacheKey != null) {
+      // Move to end (most recently used) if already exists
+      _imageDataCache.remove(widget.cacheKey!);
       _imageDataCache[widget.cacheKey!] = data;
+      // Evict oldest entries if over capacity
+      while (_imageDataCache.length > _maxCacheSize) {
+        _imageDataCache.remove(_imageDataCache.keys.first);
+      }
     }
   }
 

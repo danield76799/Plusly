@@ -1,5 +1,6 @@
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:extera_next/utils/room_status_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -31,10 +32,9 @@ class ChatEventList extends StatelessWidget {
     }
     final theme = Theme.of(context);
 
-    final colors = [
-      theme.secondaryBubbleColor,
-      theme.bubbleColor,
-    ];
+    final colors = [theme.secondaryBubbleColor, theme.bubbleColor];
+
+    final latestReadEvent = controller.room.getLatestReadMessage(timeline);
 
     final horizontalPadding = FluffyThemes.isColumnMode(context) ? 8.0 : 0.0;
 
@@ -48,16 +48,19 @@ class ChatEventList extends StatelessWidget {
 
     events = events.filterByVisibleInGui();
 
-    final animateInEventIndex = controller.animateInEventIndex;
     final threads = controller.room.threads;
-    
+
     final thisEventsKeyMap = <String, int>{};
     for (var i = 0; i < events.length; i++) {
       thisEventsKeyMap[events[i].eventId] = i;
     }
-    
+
     final hasWallpaper =
         controller.room.client.applicationAccountConfig.wallpaperUrl != null;
+
+    final latestReadEventIndex = latestReadEvent != null
+        ? events.indexWhere((event) => event.eventId == latestReadEvent)
+        : -1;
 
     return CustomScrollView(
       controller: controller.scrollController,
@@ -96,9 +99,7 @@ class ChatEventList extends StatelessWidget {
                   }
                   return Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TypingIndicators(controller),
-                    ],
+                    children: [TypingIndicators(controller)],
                   );
                 }
 
@@ -106,8 +107,9 @@ class ChatEventList extends StatelessWidget {
                   if (timeline.canRequestHistory) {
                     return Builder(
                       builder: (context) {
-                        WidgetsBinding.instance
-                            .addPostFrameCallback(controller.requestHistory);
+                        WidgetsBinding.instance.addPostFrameCallback(
+                          controller.requestHistory,
+                        );
                         return Center(
                           child: ElevatedButton(
                             onPressed: controller.requestHistory,
@@ -131,52 +133,53 @@ class ChatEventList extends StatelessWidget {
                 i--;
 
                 final event = events[i];
-                final animateIn = animateInEventIndex != null &&
-                    timeline.events.length > animateInEventIndex &&
-                    event == timeline.events[animateInEventIndex];
+                final animateIn = i == 0 && controller.firstUpdateReceived;
 
                 final thread = threads.containsKey(event.eventId)
                     ? threads[event.eventId]
                     : null;
 
                 return AutoScrollTag(
-                  key: ValueKey(event.eventId),
+                  key: ValueKey(event.transactionId ?? event.eventId),
                   index: i,
                   controller: controller.scrollController,
-                  child: Message(
-                    event,
-                    animateIn: animateIn,
-                    thread: thread,
-                    resetAnimateIn: () {
-                      controller.animateInEventIndex = null;
-                    },
-                    singleSelected: controller.selectedEvents.length == 1 &&
-                        controller.selectedEvents.first.eventId ==
-                            event.eventId,
-                    onSwipe: () => controller.replyAction(replyTo: event),
-                    // onQuote: () {
-                    //   controller.replyAction(replyTo: event);
-                    //   controller.sendController.text = "> ";
-                    // },
-                    onInfoTab: controller.showEventInfo,
-                    onMention: () => controller.sendController.text +=
-                        '${event.senderFromMemoryOrFallback.mention} ',
-                    highlightMarker:
-                        controller.scrollToEventIdMarker == event.eventId,
-                    onSelect: controller.onSelectMessage,
-                    scrollToEventId: (String eventId) =>
-                        controller.scrollToEventId(eventId),
-                    longPressSelect: controller.selectedEvents.isNotEmpty,
-                    selected: controller.selectedEvents
-                        .any((e) => e.eventId == event.eventId),
-                    timeline: timeline,
-                    displayReadMarker:
-                        i > 0 && controller.readMarkerEventId == event.eventId,
-                    nextEvent: i + 1 < events.length ? events[i + 1] : null,
-                    previousEvent: i > 0 ? events[i - 1] : null,
-                    wallpaperMode: hasWallpaper,
-                    colors: colors,
-                    gradient: AppSettings.enableGradient.value,
+                  child: RepaintBoundary(
+                    child: Message(
+                      event,
+                      animateIn: animateIn,
+                      thread: thread,
+                      singleSelected:
+                          controller.selectedEvents.length == 1 &&
+                          controller.selectedEvents.first.eventId ==
+                              event.eventId,
+                      onSwipe: () => controller.replyAction(replyTo: event),
+                      hasBeenRead: latestReadEventIndex != -1 && latestReadEventIndex <= i,
+                      // onQuote: () {
+                      //   controller.replyAction(replyTo: event);
+                      //   controller.sendController.text = "> ";
+                      // },
+                      onInfoTab: controller.showEventInfo,
+                      onMention: () => controller.sendController.text +=
+                          '${event.senderFromMemoryOrFallback.mention} ',
+                      highlightMarker:
+                          controller.scrollToEventIdMarker == event.eventId,
+                      onSelect: controller.onSelectMessage,
+                      scrollToEventId: (String eventId) =>
+                          controller.scrollToEventId(eventId),
+                      longPressSelect: controller.selectedEvents.isNotEmpty,
+                      selected: controller.selectedEvents.any(
+                        (e) => e.eventId == event.eventId,
+                      ),
+                      timeline: timeline,
+                      displayReadMarker:
+                          i > 0 &&
+                          controller.readMarkerEventId == event.eventId,
+                      nextEvent: i + 1 < events.length ? events[i + 1] : null,
+                      previousEvent: i > 0 ? events[i - 1] : null,
+                      wallpaperMode: hasWallpaper,
+                      colors: colors,
+                      gradient: AppSettings.enableGradient.value,
+                    ),
                   ),
                 );
               },

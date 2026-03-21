@@ -410,12 +410,16 @@ class ChatController extends State<ChatPageWithRoom>
   void _showScrollUpMaterialBanner(String eventId) => setState(() {
     scrollUpBannerEventId = eventId;
   });
+  
+  bool firstUpdateReceived = false;
 
   Future<void> updateView() async {
     if (!mounted) return;
     setReadMarker();
-    await updateThreads();
-    setState(() {});
+    // updateThreads();
+    setState(() {
+      firstUpdateReceived = true;
+    });
   }
 
   Future<void> updateThreads() async {
@@ -441,27 +445,18 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void>? loadTimelineFuture;
   Map<String, Thread>? threads = {};
 
-  int? animateInEventIndex;
-
-  void onInsert(int i) {
-    // setState will be called by updateView() anyway
-    if (i <= 5) animateInEventIndex = i;
-  }
-
   Future<void> _loadRoomTimeline({String? eventContextId}) async {
     try {
       timeline?.cancelSubscriptions();
       timeline = await room.getTimeline(
         onUpdate: updateView,
         eventContextId: eventContextId,
-        onInsert: onInsert,
       );
     } catch (e, s) {
       Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
       if (!mounted) return;
       timeline = await room.getTimeline(
         onUpdate: updateView,
-        onInsert: onInsert,
       );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
@@ -481,7 +476,6 @@ class ChatController extends State<ChatPageWithRoom>
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
         eventContextId: eventContextId,
-        onInsert: onInsert,
       );
       Logs().v("Thread timeline loaded");
     } catch (e, s) {
@@ -493,7 +487,6 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
-        onInsert: onInsert,
       );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
