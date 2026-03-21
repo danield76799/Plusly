@@ -125,9 +125,9 @@ class SettingsStyleView extends StatelessWidget {
                             Theme.of(context).brightness == Brightness.light
                             ? light?.primary
                             : dark?.primary;
-                        final colors = List<Color?>.from(
-                          SettingsStyleController.customColors,
-                        );
+                        final colors = [
+                          null, AppConfig.chatColor, ...Colors.primaries,
+                        ];
                         if (systemColor == null) {
                           colors.remove(null);
                         }
@@ -137,6 +137,7 @@ class SettingsStyleView extends StatelessWidget {
                               const SliverGridDelegateWithMaxCrossAxisExtent(
                                 maxCrossAxisExtent: 64,
                               ),
+                          physics: const NeverScrollableScrollPhysics(),
                           itemCount: colors.length,
                           itemBuilder: (context, i) {
                             final color = colors[i];
@@ -528,7 +529,9 @@ class SettingsStyleView extends StatelessWidget {
                     const ListDivider(),
                     ListTile(
                       title: Text(L10n.of(context).avatarBorderRadius),
-                      trailing: Text('× ${AppSettings.avatarBorderRadius.value}'),
+                      trailing: Text(
+                        '× ${AppSettings.avatarBorderRadius.value}',
+                      ),
                     ),
                     Slider.adaptive(
                       min: 0.5,
