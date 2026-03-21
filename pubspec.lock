@@ -1337,10 +1337,10 @@ packages:
   matrix:
     dependency: "direct main"
     description:
-      path: "/home/officialdakari/repos/matrix-dart-sdk"
-      relative: false
+      path: "../matrix-dart-sdk"
+      relative: true
     source: path
-    version: "6.1.1"
+    version: "6.2.0"
   meta:
     dependency: transitive
     description:

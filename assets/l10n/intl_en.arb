@@ -3571,5 +3571,7 @@
   },
   "translating": "Translating...",
   "messageTranslations": "Message translations",
-  "latexMath": "LaTeX Math"
+  "latexMath": "LaTeX Math",
+  "setLowPriority": "Low priority",
+  "unsetLowPriority": "Unset low priority"
 }

@@ -4,6 +4,7 @@ import 'package:extera_next/pages/chat_list/invite_dialog.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/utils/check_updates.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/set_status_dialog.dart';
+import 'package:extera_next/widgets/future_loading_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -558,23 +559,42 @@ class ChatListController extends State<ChatList>
               ],
             ),
           ),
-          PopupMenuItem(
-            value: ChatContextAction.favorite,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  room.isFavourite ? Icons.push_pin : Icons.push_pin_outlined,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  room.isFavourite
-                      ? L10n.of(context).unpin
-                      : L10n.of(context).pin,
-                ),
-              ],
+          if (!room.isLowPriority)
+            PopupMenuItem(
+              value: ChatContextAction.favorite,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    room.isFavourite ? Icons.push_pin : Icons.push_pin_outlined,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    room.isFavourite
+                        ? L10n.of(context).unpin
+                        : L10n.of(context).pin,
+                  ),
+                ],
+              ),
             ),
-          ),
+          if (!room.isFavourite)
+            PopupMenuItem(
+              value: ChatContextAction.lowPriority,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    room.isLowPriority ? Icons.low_priority : Icons.low_priority_outlined,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    room.isFavourite
+                        ? L10n.of(context).unsetLowPriority
+                        : L10n.of(context).setLowPriority,
+                  ),
+                ],
+              ),
+            ),
           if (spacesWithPowerLevels.isNotEmpty)
             PopupMenuItem(
               value: ChatContextAction.addToSpace,
@@ -655,7 +675,7 @@ class ChatListController extends State<ChatList>
 
     switch (action) {
       case ChatContextAction.join:
-        final joinResult = await showFutureLoadingDialog(
+        final joinResult = await showFutureLoadingSnackbar(
           context: context,
           future: () async {
             final waitForRoom = room.client.waitForRoomInSync(
@@ -676,19 +696,25 @@ class ChatListController extends State<ChatList>
         setActiveSpace(space!.id);
         return;
       case ChatContextAction.favorite:
-        await showFutureLoadingDialog(
+        await showFutureLoadingSnackbar(
           context: context,
           future: () => room.setFavourite(!room.isFavourite),
         );
         return;
+      case ChatContextAction.lowPriority:
+        await showFutureLoadingSnackbar(
+          context: context,
+          future: () => room.setLowPriority(!room.isLowPriority),
+        );
+        return;
       case ChatContextAction.markUnread:
-        await showFutureLoadingDialog(
+        await showFutureLoadingSnackbar(
           context: context,
           future: () => room.markUnread(!room.markedUnread),
         );
         return;
       case ChatContextAction.mute:
-        await showFutureLoadingDialog(
+        await showFutureLoadingSnackbar(
           context: context,
           future: () => room.setPushRuleState(
             room.pushRuleState == PushRuleState.notify
@@ -709,7 +735,7 @@ class ChatListController extends State<ChatList>
         if (confirmed == OkCancelResult.cancel) return;
         if (!mounted) return;
 
-        await showFutureLoadingDialog(context: context, future: room.leave);
+        await showFutureLoadingSnackbar(context: context, future: room.leave);
 
         return;
       case ChatContextAction.addToSpace:
@@ -728,7 +754,7 @@ class ChatListController extends State<ChatList>
               .toList(),
         );
         if (space == null) return;
-        await showFutureLoadingDialog(
+        await showFutureLoadingSnackbar(
           context: context,
           future: () => space.setSpaceChild(room.id),
         );
@@ -763,7 +789,7 @@ class ChatListController extends State<ChatList>
     );
     if (input == null) return;
     if (!mounted) return;
-    await showFutureLoadingDialog(
+    await showFutureLoadingSnackbar(
       context: context,
       future: () async {
         client.syncPresence = input.$1;
@@ -886,13 +912,13 @@ class ChatListController extends State<ChatList>
           hintText: l10n.bundleName,
         );
         if (bundle == null || bundle.isEmpty || bundle.isEmpty) return;
-        await showFutureLoadingDialog(
+        await showFutureLoadingSnackbar(
           context: context,
           future: () => client.setAccountBundle(bundle),
         );
         break;
       case EditBundleAction.removeFromBundle:
-        await showFutureLoadingDialog(
+        await showFutureLoadingSnackbar(
           context: context,
           future: () => client.removeFromAccountBundle(activeBundle!),
         );
@@ -940,6 +966,7 @@ enum ChatContextAction {
   open,
   goToSpace,
   favorite,
+  lowPriority,
   markUnread,
   mute,
   leave,
