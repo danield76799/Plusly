@@ -50,12 +50,12 @@ class ChatEventList extends StatelessWidget {
 
     final animateInEventIndex = controller.animateInEventIndex;
     final threads = controller.room.threads;
-
+    
     final thisEventsKeyMap = <String, int>{};
     for (var i = 0; i < events.length; i++) {
       thisEventsKeyMap[events[i].eventId] = i;
     }
-
+    
     final hasWallpaper =
         controller.room.client.applicationAccountConfig.wallpaperUrl != null;
 
