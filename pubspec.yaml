@@ -9,7 +9,6 @@ environment:
 
 dependencies:
   action_slider: ^0.7.0
-  animations: ^2.1.1
   app_links: ^7.0.0
   archive: ^4.0.7
   async: ^2.11.0
