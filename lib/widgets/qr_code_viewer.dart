@@ -20,6 +20,7 @@ Future<void> showQrCodeViewer(
     showDialog(
       context: context,
       builder: (context) => QrCodeViewer(content: content),
+      useRootNavigator: false,
     );
 
 class QrCodeViewer extends StatelessWidget {

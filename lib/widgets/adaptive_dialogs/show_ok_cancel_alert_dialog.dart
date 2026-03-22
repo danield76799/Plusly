@@ -14,7 +14,7 @@ Future<OkCancelResult?> showOkCancelAlertDialog({
   String? okLabel,
   String? cancelLabel,
   bool isDestructive = false,
-  bool useRootNavigator = true,
+  bool useRootNavigator = false,
 }) => showAdaptiveDialog<OkCancelResult>(
   context: context,
   useRootNavigator: useRootNavigator,

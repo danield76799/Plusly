@@ -8,7 +8,7 @@ import 'package:matrix/matrix.dart';
 
 Future<(PresenceType, String?)?> showStatusInputDialog({
   required BuildContext context,
-  bool useRootNavigator = true,
+  bool useRootNavigator = false,
   PresenceType? initialPresence,
   String? initialText,
 }) {

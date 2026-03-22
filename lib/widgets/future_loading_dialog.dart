@@ -45,6 +45,7 @@ Future<Result<T>> showFutureLoadingDialog<T>({
   final result = await showAdaptiveDialog<Result<T>>(
     context: context,
     barrierDismissible: barrierDismissible,
+    useRootNavigator: false,
     builder: (BuildContext context) => LoadingDialog<T>(
       future: futureExec,
       title: title,

@@ -12,7 +12,7 @@ Future<String?> showTextInputDialog({
   String? message,
   String? okLabel,
   String? cancelLabel,
-  bool useRootNavigator = true,
+  bool useRootNavigator = false,
   String? hintText,
   String? labelText,
   String? initialText,

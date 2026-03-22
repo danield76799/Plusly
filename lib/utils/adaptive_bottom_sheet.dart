@@ -10,7 +10,7 @@ Future<T?> showAdaptiveBottomSheet<T>({
   required Widget Function(BuildContext) builder,
   bool isDismissible = true,
   bool isScrollControlled = true,
-  bool useRootNavigator = true,
+  bool useRootNavigator = false,
 }) {
   if (FluffyThemes.isColumnMode(context)) {
     return showDialog<T>(

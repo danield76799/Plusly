@@ -291,6 +291,7 @@ class PublicRoomsHorizontalList extends StatelessWidget {
                 avatar: publicRooms[i].avatarUrl,
                 onPressed: () => showAdaptiveDialog(
                   context: context,
+                  useRootNavigator: false,
                   builder: (c) => PublicRoomDialog(
                     roomAlias:
                         publicRooms[i].canonicalAlias ?? publicRooms[i].roomId,

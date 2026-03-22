@@ -32,7 +32,7 @@ class IntroPage extends StatelessWidget {
         ),
         actions: [
           PopupMenuButton(
-            useRootNavigator: true,
+            useRootNavigator: false,
             itemBuilder: (_) => [
               PopupMenuItem(
                 onTap: () => restoreBackupFlow(context),

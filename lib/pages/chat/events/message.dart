@@ -199,8 +199,9 @@ class _MessageState extends State<Message> {
           event.originServerTs,
         );
 
-    final rowMainAxisAlignment =
-        ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
+    final rowMainAxisAlignment = ownMessage
+        ? MainAxisAlignment.end
+        : MainAxisAlignment.start;
 
     final displayEvent = event.getDisplayEvent(timeline);
     const hardCorner = Radius.circular(4);
@@ -208,10 +209,12 @@ class _MessageState extends State<Message> {
     final borderRadius = BorderRadius.only(
       topLeft: !ownMessage && nextEventSameSender ? hardCorner : roundedCorner,
       topRight: ownMessage && nextEventSameSender ? hardCorner : roundedCorner,
-      bottomLeft:
-          !ownMessage && previousEventSameSender ? hardCorner : roundedCorner,
-      bottomRight:
-          ownMessage && previousEventSameSender ? hardCorner : roundedCorner,
+      bottomLeft: !ownMessage && previousEventSameSender
+          ? hardCorner
+          : roundedCorner,
+      bottomRight: ownMessage && previousEventSameSender
+          ? hardCorner
+          : roundedCorner,
     );
     final noBubble =
         ({
@@ -228,8 +231,9 @@ class _MessageState extends State<Message> {
             event.numberEmotes <= 3);
 
     if (ownMessage) {
-      color =
-          displayEvent.status.isError ? Colors.redAccent : theme.bubbleColor;
+      color = displayEvent.status.isError
+          ? Colors.redAccent
+          : theme.bubbleColor;
     }
 
     final textColor = ownMessage
@@ -243,8 +247,8 @@ class _MessageState extends State<Message> {
                     ? theme.colorScheme.onPrimaryContainer
                     : theme.colorScheme.onSecondaryContainer))
         : ownMessage
-            ? theme.colorScheme.tertiaryContainer
-            : theme.colorScheme.tertiary;
+        ? theme.colorScheme.tertiaryContainer
+        : theme.colorScheme.tertiary;
 
     final linkColor = ownMessage
         ? theme.brightness == Brightness.light
@@ -276,10 +280,10 @@ class _MessageState extends State<Message> {
               event.status == EventStatus.sending
                   ? Icons.watch_later_outlined
                   : event.status == EventStatus.error
-                      ? Icons.error_outline
-                      : hasBeenRead
-                          ? Icons.done_all
-                          : Icons.check,
+                  ? Icons.error_outline
+                  : hasBeenRead
+                  ? Icons.done_all
+                  : Icons.check,
               color: statusColor,
               size: 14,
             ),
@@ -305,11 +309,11 @@ class _MessageState extends State<Message> {
                 onTapDown: (details) => _tapPosition = details.globalPosition,
                 onTap: () => widget.onSelect(event, _tapPosition),
                 onLongPress: () => widget.onSelect(event, _tapPosition),
-                borderRadius:
-                    BorderRadius.circular(AppConfig.borderRadius / 2),
+                borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
                 child: Material(
-                  borderRadius:
-                      BorderRadius.circular(AppConfig.borderRadius / 2),
+                  borderRadius: BorderRadius.circular(
+                    AppConfig.borderRadius / 2,
+                  ),
                   color: widget.selected || widget.highlightMarker
                       ? theme.colorScheme.secondaryContainer.withAlpha(128)
                       : Colors.transparent,
@@ -340,10 +344,10 @@ class _MessageState extends State<Message> {
                         child: event.status == EventStatus.error
                             ? const Icon(Icons.error, color: Colors.red)
                             : event.fileSendingStatus != null
-                                ? const CircularProgressIndicator.adaptive(
-                                    strokeWidth: 1,
-                                  )
-                                : null,
+                            ? const CircularProgressIndicator.adaptive(
+                                strokeWidth: 1,
+                              )
+                            : null,
                       ),
                     ),
                   )
@@ -357,8 +361,9 @@ class _MessageState extends State<Message> {
                       onMention: widget.onMention,
                     ),
                     presenceUserId: user.stateKey,
-                    presenceBackgroundColor:
-                        widget.wallpaperMode ? Colors.transparent : null,
+                    presenceBackgroundColor: widget.wallpaperMode
+                        ? Colors.transparent
+                        : null,
                   ),
                 Expanded(
                   child: Column(
@@ -367,8 +372,7 @@ class _MessageState extends State<Message> {
                     children: [
                       if (!nextEventSameSender)
                         Padding(
-                          padding:
-                              const EdgeInsets.only(left: 8.0, bottom: 4),
+                          padding: const EdgeInsets.only(left: 8.0, bottom: 4),
                           child: ownMessage || event.room.isDirectChat
                               ? const SizedBox(height: 12)
                               : Text(
@@ -376,8 +380,7 @@ class _MessageState extends State<Message> {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
-                                    color: (theme.brightness ==
-                                            Brightness.light
+                                    color: (theme.brightness == Brightness.light
                                         ? displayname.color
                                         : displayname.lightColorText),
                                     shadows: !widget.wallpaperMode
@@ -412,7 +415,8 @@ class _MessageState extends State<Message> {
                             clipBehavior: Clip.antiAlias,
                             child: BubbleBackground(
                               colors: widget.colors,
-                              ignore: noBubble ||
+                              ignore:
+                                  noBubble ||
                                   !ownMessage ||
                                   !widget.gradient ||
                                   MediaQuery.highContrastOf(context),
@@ -428,8 +432,7 @@ class _MessageState extends State<Message> {
                                 ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Stack(
                                       children: [
@@ -441,18 +444,17 @@ class _MessageState extends State<Message> {
                                             if (_replyEventFuture != null)
                                               FutureBuilder<Event?>(
                                                 future: _replyEventFuture,
-                                                builder: (BuildContext context,
-                                                    snapshot) {
-                                                  final replyEvent = snapshot
-                                                          .hasData
+                                                builder: (BuildContext context, snapshot) {
+                                                  final replyEvent =
+                                                      snapshot.hasData
                                                       ? snapshot.data!
                                                       : Event(
-                                                          eventId: event
+                                                          eventId:
+                                                              event
                                                                   .inReplyToEventId() ??
                                                               '\$fake_event_id',
                                                           content: {
-                                                            'msgtype':
-                                                                'm.text',
+                                                            'msgtype': 'm.text',
                                                             'body': '...',
                                                           },
                                                           senderId:
@@ -468,34 +470,31 @@ class _MessageState extends State<Message> {
                                                   return Padding(
                                                     padding:
                                                         const EdgeInsets.only(
-                                                      left: 16,
-                                                      right: 16,
-                                                      top: 8,
-                                                      bottom: 8,
-                                                    ),
+                                                          left: 16,
+                                                          right: 16,
+                                                          top: 8,
+                                                          bottom: 8,
+                                                        ),
                                                     child: Material(
-                                                      color:
-                                                          Colors.transparent,
-                                                      borderRadius:
-                                                          ReplyContent
-                                                              .borderRadius,
+                                                      color: Colors.transparent,
+                                                      borderRadius: ReplyContent
+                                                          .borderRadius,
                                                       child: InkWell(
                                                         borderRadius:
                                                             ReplyContent
                                                                 .borderRadius,
                                                         onTap: () => widget
                                                             .scrollToEventId(
-                                                          replyEvent.eventId,
-                                                        ),
+                                                              replyEvent
+                                                                  .eventId,
+                                                            ),
                                                         child: AbsorbPointer(
                                                           child: ReplyContent(
                                                             replyEvent,
-                                                            noBubble:
-                                                                noBubble,
+                                                            noBubble: noBubble,
                                                             ownMessage:
                                                                 ownMessage,
-                                                            timeline:
-                                                                timeline,
+                                                            timeline: timeline,
                                                           ),
                                                         ),
                                                       ),
@@ -505,11 +504,14 @@ class _MessageState extends State<Message> {
                                               ),
                                             Padding(
                                               padding: EdgeInsets.only(
-                                                top: {
-                                                  MessageTypes.Text,
-                                                  MessageTypes.Emote,
-                                                  MessageTypes.Notice,
-                                                }.contains(event.messageType)
+                                                top:
+                                                    {
+                                                      MessageTypes.Text,
+                                                      MessageTypes.Emote,
+                                                      MessageTypes.Notice,
+                                                    }.contains(
+                                                      event.messageType,
+                                                    )
                                                     ? 6
                                                     : 0,
                                               ),
@@ -522,16 +524,14 @@ class _MessageState extends State<Message> {
                                                 timeline: timeline,
                                                 selectable:
                                                     PlatformInfos.isMobile
-                                                        ? widget
-                                                            .longPressSelect
-                                                        : true,
+                                                    ? widget.longPressSelect
+                                                    : true,
                                               ),
                                             ),
                                             Opacity(
                                               opacity: 0,
                                               child: Padding(
-                                                padding:
-                                                    const EdgeInsets.only(
+                                                padding: const EdgeInsets.only(
                                                   right: 16,
                                                   bottom: 6,
                                                   left: 16,
@@ -578,13 +578,12 @@ class _MessageState extends State<Message> {
                                     FutureBuilder<User?>(
                                       future: _threadSenderFuture,
                                       builder: (context, snapshot) {
-                                        final threadUser = snapshot.data ??
-                                            event
-                                                .senderFromMemoryOrFallback;
+                                        final threadUser =
+                                            snapshot.data ??
+                                            event.senderFromMemoryOrFallback;
                                         return Avatar(
                                           mxContent: threadUser.avatarUrl,
-                                          name:
-                                              threadUser.calcDisplayname(),
+                                          name: threadUser.calcDisplayname(),
                                           size: 24,
                                         );
                                       },
@@ -594,12 +593,14 @@ class _MessageState extends State<Message> {
                                   const SizedBox(width: 6),
                                   widget.thread!.lastEvent != null
                                       ? Text(
-                                          widget.thread!.lastEvent!.text
+                                          widget
+                                                      .thread!
+                                                      .lastEvent!
+                                                      .text
                                                       .length >
                                                   32
                                               ? "${widget.thread!.lastEvent!.text.substring(0, 32)}..."
-                                              : widget
-                                                  .thread!.lastEvent!.text,
+                                              : widget.thread!.lastEvent!.text,
                                         )
                                       : const Text('Thread'),
                                 ],
@@ -627,8 +628,9 @@ class _MessageState extends State<Message> {
         widget.displayReadMarker) {
       container = Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment:
-            ownMessage ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: ownMessage
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: <Widget>[
           if (displayTime || widget.selected)
             Padding(
@@ -662,20 +664,15 @@ class _MessageState extends State<Message> {
               ),
             ),
           row,
-          AnimatedSize(
-            duration: FluffyThemes.animationDuration,
-            curve: FluffyThemes.animationCurve,
-            child: !showReactionsRow
-                ? const SizedBox.shrink()
-                : Padding(
-                    padding: EdgeInsets.only(
-                      top: 4.0,
-                      left: (ownMessage ? 0 : Avatar.defaultSize) + 12.0,
-                      right: ownMessage ? 0 : 12.0,
-                    ),
-                    child: MessageReactions(event, timeline),
-                  ),
-          ),
+          if (showReactionsRow)
+            Padding(
+              padding: EdgeInsets.only(
+                top: 4.0,
+                left: (ownMessage ? 0 : Avatar.defaultSize) + 12.0,
+                right: ownMessage ? 0 : 12.0,
+              ),
+              child: MessageReactions(event, timeline),
+            ),
           if (widget.displayReadMarker)
             Row(
               children: [
@@ -832,29 +829,47 @@ class _AnimateIn extends StatefulWidget {
   State<_AnimateIn> createState() => __AnimateInState();
 }
 
-class __AnimateInState extends State<_AnimateIn> {
-  bool _animationFinished = false;
+class __AnimateInState extends State<_AnimateIn>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<Offset> _slideAnimation;
+  late final Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: FluffyThemes.animationDuration,
+      vsync: this,
+    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 1.0), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: FluffyThemes.animationCurve,
+          ),
+        );
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: FluffyThemes.animationCurve,
+    );
+    if (widget.animateIn) {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!widget.animateIn) return widget.child;
-    if (!_animationFinished) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _animationFinished = true;
-          });
-        }
-      });
-    }
-    return AnimatedOpacity(
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
-      opacity: _animationFinished ? 1 : 0,
-      child: AnimatedSize(
-        duration: FluffyThemes.animationDuration,
-        curve: FluffyThemes.animationCurve,
-        child: _animationFinished ? widget.child : const SizedBox.shrink(),
-      ),
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(position: _slideAnimation, child: widget.child),
     );
   }
 }

@@ -149,6 +149,7 @@ class ChatController extends State<ChatPageWithRoom>
 
     await showAdaptiveDialog(
       context: context,
+      useRootNavigator: false,
       builder: (c) => SendFileDialog(
         files: details.files,
         room: room,
@@ -246,6 +247,10 @@ class ChatController extends State<ChatPageWithRoom>
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
   void requestHistory([_]) async {
+    if (scrollController.hasClients &&
+        scrollController.position.isScrollingNotifier.value) {
+      return;
+    }
     Logs().v('Requesting history...');
     await timeline?.requestHistory(historyCount: _loadHistoryCount);
   }
@@ -665,6 +670,7 @@ class ChatController extends State<ChatPageWithRoom>
   void sendPollAction() async {
     await showAdaptiveDialog(
       context: context,
+      useRootNavigator: false,
       builder: (c) =>
           SendPollDialog(room: room, thread: thread, outerContext: context),
     );
@@ -679,6 +685,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
     await showAdaptiveDialog(
       context: context,
+      useRootNavigator: false,
       builder: (c) => SendFileDialog(
         files: files,
         room: room,
@@ -714,6 +721,7 @@ class ChatController extends State<ChatPageWithRoom>
     if (image == null) return;
     await showAdaptiveDialog(
       context: context,
+      useRootNavigator: false,
       builder: (c) => SendFileDialog(
         files: [XFile.fromData(image)],
         room: room,
@@ -731,6 +739,7 @@ class ChatController extends State<ChatPageWithRoom>
 
     await showAdaptiveDialog(
       context: context,
+      useRootNavigator: false,
       builder: (c) => SendFileDialog(
         files: [file],
         room: room,
@@ -751,6 +760,7 @@ class ChatController extends State<ChatPageWithRoom>
 
     await showAdaptiveDialog(
       context: context,
+      useRootNavigator: false,
       builder: (c) => SendFileDialog(
         files: [file],
         room: room,
@@ -831,6 +841,7 @@ class ChatController extends State<ChatPageWithRoom>
   void sendLocationAction() async {
     await showAdaptiveDialog(
       context: context,
+      useRootNavigator: false,
       builder: (c) => SendLocationDialog(room: room, thread: thread),
     );
   }
@@ -1448,7 +1459,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   void closeMessageMenu() {
     if (PlatformInfos.isMobile) {
-      Navigator.of(context, rootNavigator: true).pop(); // in 2
+      Navigator.of(context).pop(); // in 2
     } else {
       _contextMenuController?.remove();
     }
@@ -1461,6 +1472,7 @@ class ChatController extends State<ChatPageWithRoom>
         builder: (context) {
           return MessageContextMenu(controller: this, event: event);
         },
+        useRootNavigator: false,
       );
     } else {
       _contextMenuController?.remove();
