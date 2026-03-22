@@ -299,6 +299,7 @@ class UrlLauncher {
           if (sigil == '#') {
             await showAdaptiveDialog(
               context: context,
+              useRootNavigator: false,
               builder: (c) => PublicRoomDialog(roomAlias: roomIdOrAlias),
             );
           } else {
@@ -408,6 +409,7 @@ class UrlLauncher {
       } else {
         await showAdaptiveDialog(
           context: context,
+          useRootNavigator: false,
           builder: (c) =>
               PublicRoomDialog(roomAlias: identityParts.primaryIdentifier),
         );

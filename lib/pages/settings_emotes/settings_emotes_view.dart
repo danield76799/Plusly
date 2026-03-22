@@ -59,7 +59,7 @@ class EmotesSettingsView extends StatelessWidget {
             )
           else
             PopupMenuButton<PopupMenuEmojiActions>(
-              useRootNavigator: true,
+              useRootNavigator: false,
               onSelected: (value) {
                 switch (value) {
                   case PopupMenuEmojiActions.export:
@@ -387,8 +387,11 @@ class _EmoteImage extends StatelessWidget {
     final key = 'sticker_preview_$mxc';
     return InkWell(
       borderRadius: BorderRadius.circular(4),
-      onTap: () =>
-          showDialog(context: context, builder: (_) => MxcImageViewer(mxc)),
+      onTap: () => showDialog(
+        context: context,
+        useRootNavigator: false,
+        builder: (_) => MxcImageViewer(mxc),
+      ),
       child: MxcImage(
         key: ValueKey(key),
         cacheKey: key,

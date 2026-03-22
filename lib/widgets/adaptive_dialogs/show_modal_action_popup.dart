@@ -7,7 +7,7 @@ Future<T?> showModalActionPopup<T>({
   String? title,
   String? message,
   String? cancelLabel,
-  bool useRootNavigator = true,
+  bool useRootNavigator = false,
 }) {
   final theme = Theme.of(context);
 

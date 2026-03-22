@@ -31,6 +31,7 @@ class ErrorReporter {
   void _onErrorCallback(String text) async {
     await showAdaptiveDialog(
       context: context!,
+      useRootNavigator: false,
       builder: (context) => AlertDialog.adaptive(
         title: Text(L10n.of(context).reportErrorDescription),
         content: SizedBox(

@@ -105,27 +105,20 @@ class ChatEventList extends StatelessWidget {
 
                 if (i == events.length + 1) {
                   if (timeline.canRequestHistory) {
-                    return Builder(
-                      builder: (context) {
-                        WidgetsBinding.instance.addPostFrameCallback(
-                          controller.requestHistory,
-                        );
-                        return Center(
-                          child: ElevatedButton(
-                            onPressed: controller.requestHistory,
-                            child: timeline.isRequestingHistory
-                                ? const LinearProgressIndicator()
-                                : Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.arrow_upward),
-                                      const SizedBox(width: 5),
-                                      Text(L10n.of(context).loadMore),
-                                    ],
-                                  ),
-                          ),
-                        );
-                      },
+                    return Center(
+                      child: ElevatedButton(
+                        onPressed: controller.requestHistory,
+                        child: timeline.isRequestingHistory
+                            ? const LinearProgressIndicator()
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.arrow_upward),
+                                  const SizedBox(width: 5),
+                                  Text(L10n.of(context).loadMore),
+                                ],
+                              ),
+                      ),
                     );
                   }
                   return const SizedBox.shrink();
