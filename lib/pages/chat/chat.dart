@@ -255,16 +255,46 @@ class ChatController extends State<ChatPageWithRoom>
     await timeline?.requestHistory(historyCount: _loadHistoryCount);
   }
 
+  bool _requestingFuture = false;
+
   void requestFuture() async {
     final timeline = this.timeline;
     if (timeline == null) return;
+    if (_requestingFuture) return;
+    _requestingFuture = true;
     Logs().v('Requesting future...');
-    final mostRecentEvent = timeline.events.filterByVisibleInGui().firstOrNull;
+    final visibleEvents = timeline.events.filterByVisibleInGui();
+    final mostRecentEvent = visibleEvents.firstOrNull;
+
+    final anchorEventId = mostRecentEvent?.eventId;
+
     await timeline.requestFuture(historyCount: _loadHistoryCount);
+
+    if (!mounted) {
+      _requestingFuture = false;
+      return;
+    }
+
+    if (anchorEventId != null && scrollController.hasClients) {
+      final newVisibleEvents = timeline.events.filterByVisibleInGui();
+      final anchorIndex = newVisibleEvents.indexWhere(
+        (e) => e.eventId == anchorEventId,
+      );
+      if (anchorIndex > 0) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !scrollController.hasClients) return;
+          scrollController.scrollToIndex(
+            anchorIndex + 1, // index 0 is the typing indicator
+            preferPosition: AutoScrollPosition.begin,
+          );
+        });
+      }
+    }
 
     if (mostRecentEvent != null) {
       setReadMarker(eventId: mostRecentEvent.eventId);
     }
+    _requestingFuture = false;
   }
 
   void _updateScrollController() {
@@ -379,8 +409,6 @@ class ChatController extends State<ChatPageWithRoom>
                 .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
                 .indexWhere((e) => e.eventId == readMarkerEventId);
 
-      // Read marker is existing but not found in first events. Try a single
-      // requestHistory call before opening timeline on event context:
       if (readMarkerEventId.isNotEmpty && readMarkerEventIndex == -1) {
         await timeline?.requestHistory(historyCount: _loadHistoryCount);
         readMarkerEventIndex = timeline!.events
@@ -396,7 +424,6 @@ class ChatController extends State<ChatPageWithRoom>
         _showScrollUpMaterialBanner(readMarkerEventId);
       }
 
-      // Mark room as read on first visit if requirements are fulfilled
       setReadMarker();
 
       if (!mounted) return;
@@ -421,7 +448,7 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void> updateView() async {
     if (!mounted) return;
     setReadMarker();
-    // updateThreads();
+    updateThreads();
     setState(() {
       firstUpdateReceived = true;
     });
