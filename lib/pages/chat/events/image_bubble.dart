@@ -24,6 +24,7 @@ class ImageBubble extends StatelessWidget {
   final bool thumbnailOnly;
   final bool animated;
   final double width;
+  final double? imageWidth;
   final double height;
   final void Function()? onTap;
   final BorderRadius? borderRadius;
@@ -36,6 +37,7 @@ class ImageBubble extends StatelessWidget {
     this.fit = BoxFit.contain,
     this.thumbnailOnly = true,
     this.width = 400,
+    this.imageWidth,
     this.height = 300,
     this.animated = false,
     this.onTap,
@@ -46,16 +48,18 @@ class ImageBubble extends StatelessWidget {
     super.key,
   });
 
+  double get _effectiveImageWidth => imageWidth ?? width;
+
   Widget _buildPlaceholder(BuildContext context) {
     final blurHashString = event.infoMap['xyz.amorgan.blurhash'] is String
         ? event.infoMap['xyz.amorgan.blurhash'] as String
         : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
     return SizedBox(
-      width: width,
+      width: _effectiveImageWidth,
       height: height,
       child: BlurHash(
         blurhash: blurHashString,
-        width: width,
+        width: _effectiveImageWidth,
         height: height,
         fit: fit,
       ),
@@ -105,32 +109,34 @@ class ImageBubble extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       spacing: 8,
       children: [
-        Material(
-          color: Colors.transparent,
-          clipBehavior: Clip.hardEdge,
-          shape: RoundedRectangleBorder(
+        Container(
+          width: width,
+          decoration: BoxDecoration(
+            color: event.messageType == MessageTypes.Sticker
+                ? Colors.transparent
+                : theme.colorScheme.surfaceContainerHighest,
             borderRadius: borderRadius,
-            side: BorderSide(
-              color: event.messageType == MessageTypes.Sticker
-                  ? Colors.transparent
-                  : theme.dividerColor,
-            ),
           ),
-          child: InkWell(
-            onTap: () => _onTap(context),
-            borderRadius: borderRadius,
-            child: Hero(
-              tag: event.eventId,
-              child: MxcImage(
-                event: event,
-                width: width,
-                height: height,
-                fit: fit,
-                animated: animated,
-                isThumbnail: thumbnailOnly,
-                placeholder: event.messageType == MessageTypes.Sticker
-                    ? null
-                    : _buildPlaceholder,
+          clipBehavior: Clip.hardEdge,
+          child: Center(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _onTap(context),
+                child: Hero(
+                  tag: event.eventId,
+                  child: MxcImage(
+                    event: event,
+                    width: _effectiveImageWidth,
+                    height: height,
+                    fit: fit,
+                    animated: animated,
+                    isThumbnail: thumbnailOnly,
+                    placeholder: event.messageType == MessageTypes.Sticker
+                        ? null
+                        : _buildPlaceholder,
+                  ),
+                ),
               ),
             ),
           ),

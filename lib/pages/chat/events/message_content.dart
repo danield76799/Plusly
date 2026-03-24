@@ -14,6 +14,7 @@ import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/pages/chat/events/video_player.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
+import 'package:extera_next/utils/file_description.dart';
 import 'package:extera_next/utils/date_time_extension.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:extera_next/widgets/avatar.dart';
@@ -125,6 +126,8 @@ class MessageContent extends StatelessWidget {
             if (event.redacted) continue textmessage;
             final maxSize = event.messageType == MessageTypes.Sticker
                 ? 128.0
+                : event.messageType == MessageTypes.Image
+                ? 512.0
                 : 256.0;
             final w = event.content
                 .tryGetMap<String, Object?>('info')
@@ -132,25 +135,33 @@ class MessageContent extends StatelessWidget {
             final h = event.content
                 .tryGetMap<String, Object?>('info')
                 ?.tryGet<int>('h');
-            var width = maxSize;
-            var height = maxSize;
+            var imageWidth = maxSize;
+            var imageHeight = maxSize;
             var fit = event.messageType == MessageTypes.Sticker
                 ? BoxFit.contain
                 : BoxFit.cover;
             if (w != null && h != null) {
               fit = BoxFit.contain;
               if (w > h) {
-                width = maxSize;
-                height = max(32, maxSize * (h / w));
+                imageWidth = maxSize;
+                imageHeight = max(32, maxSize * (h / w));
               } else {
-                height = maxSize;
-                width = max(32, maxSize * (w / h));
+                imageHeight = maxSize;
+                imageWidth = max(32, maxSize * (w / h));
               }
             }
+            // Ensure the bubble is wide enough for text content
+            // when there's a file description below the image.
+            final hasDescription = event.fileDescription != null;
+            const minBubbleWidth = 180.0;
+            final bubbleWidth = hasDescription
+                ? max(minBubbleWidth, imageWidth)
+                : imageWidth;
             return ImageBubble(
               event,
-              width: width,
-              height: height,
+              width: bubbleWidth,
+              imageWidth: imageWidth,
+              height: imageHeight,
               fit: fit,
               borderRadius: borderRadius,
               timeline: timeline,
