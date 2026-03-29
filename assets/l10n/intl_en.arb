@@ -3573,5 +3573,9 @@
   "messageTranslations": "Message translations",
   "latexMath": "LaTeX Math",
   "setLowPriority": "Low priority",
-  "unsetLowPriority": "Unset low priority"
+  "unsetLowPriority": "Unset low priority",
+  "setBanner": "Upload banner",
+  "clearBanner": "Remove banner",
+  "changeYourBanner": "Change your banner",
+  "removeYourBanner": "Remove your banner"
 }

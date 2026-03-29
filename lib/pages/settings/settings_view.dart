@@ -13,6 +13,7 @@ import 'package:extera_next/utils/fluffy_share.dart';
 import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
+import 'package:extera_next/widgets/mxc_image.dart';
 import 'package:extera_next/widgets/navigation_rail.dart';
 import '../../widgets/mxc_image_viewer.dart';
 import 'settings.dart';
@@ -21,6 +22,16 @@ class SettingsView extends StatelessWidget {
   final SettingsController controller;
 
   const SettingsView(this.controller, {super.key});
+
+  Widget _buildBannerPlaceholder(BuildContext context) {
+    return Container(
+      height: 360,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +64,7 @@ class SettingsView extends StatelessWidget {
             body: ListTileTheme(
               iconColor: theme.colorScheme.onSurface,
               child: Padding(
-                padding: const .symmetric(horizontal: 8),
+                padding: const .all(8),
                 child: ListView(
                   key: const Key('SettingsListViewContent'),
                   children: <Widget>[
@@ -68,90 +79,158 @@ class SettingsView extends StatelessWidget {
                         final displayname =
                             profile?.displayName ?? mxid.localpart ?? mxid;
 
-                        return Row(
+                        return Stack(
+                          clipBehavior: Clip.none,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.all(32.0),
-                              child: Stack(
-                                children: [
-                                  Avatar(
-                                    mxContent: avatar,
-                                    name: displayname,
-                                    size: Avatar.defaultSize * 2.5,
-                                    onTap: avatar != null
-                                        ? () => showDialog(
-                                            context: context,
-                                            useRootNavigator: false,
-                                            builder: (_) =>
-                                                MxcImageViewer(avatar),
-                                          )
-                                        : null,
+                            FutureBuilder<String?>(
+                              future: controller.bannerFuture,
+                              builder: (context, snapshot) {
+                                return Positioned.fill(
+                                  child: snapshot.hasData
+                                      ? MxcImage(
+                                          uri: Uri.parse(snapshot.data!),
+                                          fit: BoxFit.cover,
+                                          isThumbnail: false,
+                                          borderRadius: borderRadius,
+                                        )
+                                      : _buildBannerPlaceholder(context),
+                                );
+                              },
+                            ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(32.0),
+                                  child: Stack(
+                                    children: [
+                                      Avatar(
+                                        mxContent: avatar,
+                                        name: displayname,
+                                        size: Avatar.defaultSize * 2.5,
+                                        onTap: avatar != null
+                                            ? () => showDialog(
+                                                context: context,
+                                                useRootNavigator: false,
+                                                builder: (_) =>
+                                                    MxcImageViewer(avatar),
+                                              )
+                                            : null,
+                                      ),
+                                      if (profile != null)
+                                        Positioned(
+                                          bottom: 0,
+                                          right: 0,
+                                          child: FloatingActionButton.small(
+                                            elevation: 2,
+                                            onPressed:
+                                                controller.setAvatarAction,
+                                            heroTag: null,
+                                            child: const Icon(
+                                              Icons.camera_alt_outlined,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
-                                  if (profile != null)
-                                    Positioned(
-                                      bottom: 0,
-                                      right: 0,
-                                      child: FloatingActionButton.small(
-                                        elevation: 2,
-                                        onPressed: controller.setAvatarAction,
-                                        heroTag: null,
-                                        child: const Icon(
-                                          Icons.camera_alt_outlined,
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextButton.icon(
+                                        onPressed:
+                                            controller.setDisplaynameAction,
+                                        icon: const Icon(
+                                          Icons.edit_outlined,
+                                          size: 16,
+                                        ),
+                                        style: TextButton.styleFrom(
+                                          foregroundColor:
+                                              theme.colorScheme.onSurface,
+                                          iconColor:
+                                              theme.colorScheme.onSurface,
+                                        ),
+                                        label: Text(
+                                          displayname,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 18),
                                         ),
                                       ),
-                                    ),
-                                ],
-                              ),
+                                      TextButton.icon(
+                                        onPressed: () =>
+                                            FluffyShare.share(mxid, context),
+                                        icon: const Icon(
+                                          Icons.copy_outlined,
+                                          size: 14,
+                                        ),
+                                        style: TextButton.styleFrom(
+                                          foregroundColor:
+                                              theme.colorScheme.secondary,
+                                          iconColor:
+                                              theme.colorScheme.secondary,
+                                        ),
+                                        label: Text(
+                                          mxid,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          //    style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  TextButton.icon(
-                                    onPressed: controller.setDisplaynameAction,
-                                    icon: const Icon(
-                                      Icons.edit_outlined,
-                                      size: 16,
-                                    ),
-                                    style: TextButton.styleFrom(
-                                      foregroundColor:
-                                          theme.colorScheme.onSurface,
-                                      iconColor: theme.colorScheme.onSurface,
-                                    ),
-                                    label: Text(
-                                      displayname,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 18),
-                                    ),
-                                  ),
-                                  TextButton.icon(
-                                    onPressed: () =>
-                                        FluffyShare.share(mxid, context),
-                                    icon: const Icon(
-                                      Icons.copy_outlined,
-                                      size: 14,
-                                    ),
-                                    style: TextButton.styleFrom(
-                                      foregroundColor:
-                                          theme.colorScheme.secondary,
-                                      iconColor: theme.colorScheme.secondary,
-                                    ),
-                                    label: Text(
-                                      mxid,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      //    style: const TextStyle(fontSize: 12),
-                                    ),
-                                  ),
-                                ],
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: FutureBuilder<String?>(
+                                future: controller.bannerFuture,
+                                builder: (context, snapshot) {
+                                  return PopupMenuButton<String>(
+                                    icon: const Icon(Icons.more_vert),
+                                    onSelected: (value) {
+                                      if (value == 'set_banner') {
+                                        controller.setBannerAction();
+                                      }
+                                    },
+                                    itemBuilder: (context) => [
+                                      PopupMenuItem(
+                                        value: 'set_banner',
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.image_outlined),
+                                            const SizedBox(width: 12),
+                                            Text(L10n.of(context).setBanner),
+                                          ],
+                                        ),
+                                      ),
+                                      if (snapshot.hasData)
+                                        PopupMenuItem(
+                                          value: 'clear_banner',
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(Icons.image_not_supported_outlined),
+                                              const SizedBox(width: 12),
+                                              Text(L10n.of(context).clearBanner),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  );
+                                },
                               ),
                             ),
                           ],
                         );
                       },
                     ),
+                    const SizedBox(height: 8),
                     Material(
                       color: theme.colorScheme.surfaceContainerHigh,
                       borderRadius: borderRadius,
@@ -354,7 +433,9 @@ class SettingsView extends StatelessWidget {
                             title: Text(L10n.of(context).featureSwitches),
                             onTap: () => context.go('/rooms/settings/features'),
                             tileColor:
-                                activeRoute.startsWith('/rooms/settings/features')
+                                activeRoute.startsWith(
+                                  '/rooms/settings/features',
+                                )
                                 ? theme.colorScheme.surfaceContainerHigh
                                 : null,
                           ),

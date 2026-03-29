@@ -3671,5 +3671,7 @@
   },
   "translating": "Переводим сообщение...",
   "messageTranslations": "Перевод сообщений",
-  "latexMath": "Формулы LaTeX"
+  "latexMath": "Формулы LaTeX",
+  "setBanner": "Загрузить баннер",
+  "clearBanner": "Убрать баннер"
 }

@@ -29,16 +29,30 @@ class ProfileView extends StatelessWidget {
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
+    bool destructive = false,
   }) {
+    var style = ElevatedButton.styleFrom(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppConfig.borderRadius - 4),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+    );
+
+    if (destructive) {
+      style = style.copyWith(
+        backgroundColor: WidgetStateProperty.all(
+          Theme.of(context).colorScheme.errorContainer,
+        ),
+        foregroundColor: WidgetStateProperty.all(
+          Theme.of(context).colorScheme.onErrorContainer,
+        ),
+      );
+    }
+
     return Expanded(
       child: ElevatedButton(
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-        ),
+        style: style,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -82,6 +96,16 @@ class ProfileView extends StatelessWidget {
     );
   }
 
+  Widget _buildBannerPlaceholder(BuildContext context) {
+    return Container(
+      height: 120,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(AppConfig.borderRadius),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final profile = controller.widget.profile;
@@ -101,412 +125,497 @@ class ProfileView extends StatelessWidget {
         ),
       ),
       body: MaxWidthBody(
-        child: Padding(
-          padding: const .symmetric(horizontal: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              PresenceBuilder(
-                userId: profile.userId,
-                client: Matrix.of(context).client,
-                builder: (context, presence) {
-                  if (presence == null) return const SizedBox.shrink();
-                  final statusMsg = presence.statusMsg;
-                  final lastActiveTimestamp = presence.lastActiveTimestamp;
-                  final presenceText = presence.currentlyActive == true
-                      ? L10n.of(context).currentlyActive
-                      : lastActiveTimestamp != null
-                      ? L10n.of(context).lastActiveAgo(
-                          lastActiveTimestamp.localizedTimeShort(context),
-                        )
-                      : null;
-                  return SingleChildScrollView(
+        withoutVerticalPadding: true,
+        withoutVisibleBorder: true,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Padding(
+              padding: const .all(8),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  // Banner image (background layer) - fills entire Stack height
+                  if (controller.bannerUrl != null)
+                    Positioned.fill(
+                      child: MxcImage(
+                        uri: controller.bannerUrl,
+                        fit: BoxFit.cover,
+                        isThumbnail: false,
+                        borderRadius: BorderRadius.circular(
+                          AppConfig.borderRadius,
+                        ),
+                        placeholder: _buildBannerPlaceholder,
+                      ),
+                    )
+                  else
+                    Positioned.fill(child: _buildBannerPlaceholder(context)),
+
+                  Padding(
+                    padding: const .all(8),
                     child: Column(
-                      spacing: 4,
                       mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Center(
-                          child: Avatar(
-                            mxContent: avatar,
-                            name: displayname,
-                            size: Avatar.defaultSize * 2,
-                            onTap: avatar != null
-                                ? () => showDialog(
-                                    context: context,
-                                    useRootNavigator: false,
-                                    builder: (_) => MxcImageViewer(avatar),
+                        PresenceBuilder(
+                          userId: profile.userId,
+                          client: Matrix.of(context).client,
+                          builder: (context, presence) {
+                            if (presence == null) {
+                              return const SizedBox.shrink();
+                            }
+                            final statusMsg = presence.statusMsg;
+                            final lastActiveTimestamp =
+                                presence.lastActiveTimestamp;
+                            final presenceText =
+                                presence.currentlyActive == true
+                                ? L10n.of(context).currentlyActive
+                                : lastActiveTimestamp != null
+                                ? L10n.of(context).lastActiveAgo(
+                                    lastActiveTimestamp.localizedTimeShort(
+                                      context,
+                                    ),
                                   )
-                                : null,
-                          ),
-                        ),
-                        ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 256),
-                          child: Center(
-                            child: Text(
-                              displayname,
-                              textAlign: TextAlign.center,
-                              textScaler: const TextScaler.linear(1.67),
-                            ),
-                          ),
-                        ),
-                        if (presenceText != null)
-                          Text(
-                            presenceText,
-                            style: const TextStyle(fontSize: 10),
-                            textAlign: TextAlign.center,
-                          ),
-                        if (statusMsg != null)
-                          SelectableLinkify(
-                            text: statusMsg,
-                            textScaleFactor: MediaQuery.textScalerOf(
-                              context,
-                            ).scale(1),
-                            textAlign: TextAlign.center,
-                            options: const LinkifyOptions(humanize: false),
-                            linkStyle: TextStyle(
-                              color: theme.colorScheme.primary,
-                              decoration: TextDecoration.underline,
-                              decorationColor: theme.colorScheme.primary,
-                            ),
-                            onOpen: (url) =>
-                                UrlLauncher(context, url.url).launchUrl(),
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  return ConstrainedBox(
-                    constraints: constraints,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      spacing: 5,
-                      children: [
-                        if (client.userID != profile.userId) ...[
-                          _buildActionButton(
-                            context: context,
-                            icon: Icons.chat_bubble_outline,
-                            label: L10n.of(context).chat,
-                            onPressed: () async {
-                              final router = GoRouter.of(context);
-                              final roomIdResult =
-                                  await showFutureLoadingDialog(
-                                    context: context,
-                                    future: () =>
-                                        client.startDirectChat(profile.userId),
-                                  );
-                              final roomId = roomIdResult.result;
-                              if (roomId == null) return;
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                              router.go('/rooms/$roomId');
-                            },
-                          ),
-                          if (controller.showCallButton)
-                            _buildActionButton(
-                              context: context,
-                              icon: Icons.call,
-                              label: L10n.of(context).callAction,
-                              onPressed: () {
-                                controller.onCallTap();
-                              },
-                            ),
-                          _buildActionButton(
-                            context: context,
-                            icon: Icons.block,
-                            label: L10n.of(context).ignoreUser,
-                            onPressed: () async {
-                              final router = GoRouter.of(context);
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                              }
-                              router.go(
-                                '/rooms/settings/security/ignorelist',
-                                extra: profile.userId,
-                              );
-                            },
-                          ),
-                        ],
-                      ],
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 8),
-              if (controller.isRpcMedia) ...[
-                Material(
-                  clipBehavior: .hardEdge,
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: borderRadius,
-                  child: Padding(
-                    padding: const .all(16),
-                    child: Column(
-                      children: [
-                        Align(
-                          alignment: .centerLeft,
-                          child: Text(
-                            controller.richPresenceData!.containsKey('player')
-                                ? L10n.of(context).listeningTo(
-                                    controller.richPresenceData!['player'],
-                                  )
-                                : L10n.of(context).listeningToSomeTunes,
-                            style: TextStyle(
-                              color: theme.colorScheme.secondary,
-                              fontWeight: .bold,
-                            ),
-                          ),
+                                : null;
+                            return SingleChildScrollView(
+                              child: Column(
+                                spacing: 4,
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Center(
+                                    child: Avatar(
+                                      mxContent: avatar,
+                                      name: displayname,
+                                      size: Avatar.defaultSize * 2,
+                                      onTap: avatar != null
+                                          ? () => showDialog(
+                                              context: context,
+                                              useRootNavigator: false,
+                                              builder: (_) =>
+                                                  MxcImageViewer(avatar),
+                                            )
+                                          : null,
+                                    ),
+                                  ),
+                                  ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: 256,
+                                    ),
+                                    child: Center(
+                                      child: Text(
+                                        displayname,
+                                        textAlign: TextAlign.center,
+                                        textScaler: const TextScaler.linear(
+                                          1.67,
+                                        ),
+                                        style: TextStyle(
+                                          shadows: controller.bannerUrl != null
+                                              ? [
+                                                  Shadow(
+                                                    offset: Offset(0.0, 0.0),
+                                                    blurRadius: 3,
+                                                    color:
+                                                        Theme.of(
+                                                              context,
+                                                            ).brightness ==
+                                                            Brightness.dark
+                                                        ? Colors.black
+                                                        : Colors.white,
+                                                  ),
+                                                ]
+                                              : null,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  if (presenceText != null)
+                                    Text(
+                                      presenceText,
+                                      style: const TextStyle(fontSize: 10),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  if (statusMsg != null)
+                                    SelectableLinkify(
+                                      text: statusMsg,
+                                      textScaleFactor: MediaQuery.textScalerOf(
+                                        context,
+                                      ).scale(1),
+                                      textAlign: TextAlign.center,
+                                      options: const LinkifyOptions(
+                                        humanize: false,
+                                      ),
+                                      linkStyle: TextStyle(
+                                        color: theme.colorScheme.primary,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor:
+                                            theme.colorScheme.primary,
+                                      ),
+                                      onOpen: (url) => UrlLauncher(
+                                        context,
+                                        url.url,
+                                      ).launchUrl(),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(height: 8),
-                        Row(
-                          mainAxisSize: .max,
-                          children: [
-                            if (controller.richPresenceData!.containsKey(
-                              'cover_url',
-                            )) ...[
-                              Material(
-                                clipBehavior: .antiAlias,
-                                borderRadius: BorderRadius.circular(
-                                  AppConfig.borderRadius / 2,
-                                ),
-                                color:
-                                    theme.colorScheme.surfaceContainerHighest,
-                                child: MxcImage(
-                                  uri: Uri.parse(
-                                    controller.richPresenceData!['cover_url'],
-                                  ),
-                                  width: 128,
-                                  height: 128,
-                                ),
-                              ),
-                              const SizedBox(width: 9),
-                            ],
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: .start,
-                                crossAxisAlignment: .start,
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            return ConstrainedBox(
+                              constraints: constraints,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                spacing: 5,
                                 children: [
-                                  Align(
-                                    alignment: .centerLeft,
-                                    child: Text(
-                                      controller.richPresenceData!['track'],
-                                      style: const TextStyle(fontSize: 18),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: .centerLeft,
-                                    child: Text(
-                                      controller.richPresenceData!['album'],
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: .centerLeft,
-                                    child: Text(
-                                      controller.richPresenceData!['artist'],
-                                    ),
-                                  ),
-                                  if (controller.richPresenceData!.containsKey(
-                                    'streaming_link',
-                                  )) ...[
-                                    const SizedBox(height: 8),
-                                    FilledButton.tonalIcon(
-                                      onPressed: () {
-                                        UrlLauncher(
-                                          context,
-                                          controller
-                                              .richPresenceData!['streaming_link'],
-                                          controller
-                                              .richPresenceData!['player'],
-                                        ).launchUrl();
+                                  if (client.userID != profile.userId) ...[
+                                    _buildActionButton(
+                                      context: context,
+                                      icon: Icons.chat_bubble_outline,
+                                      label: L10n.of(context).chat,
+                                      onPressed: () async {
+                                        final router = GoRouter.of(context);
+                                        final roomIdResult =
+                                            await showFutureLoadingDialog(
+                                              context: context,
+                                              future: () =>
+                                                  client.startDirectChat(
+                                                    profile.userId,
+                                                  ),
+                                            );
+                                        final roomId = roomIdResult.result;
+                                        if (roomId == null) return;
+                                        if (context.mounted) {
+                                          Navigator.of(context).pop();
+                                        }
+                                        router.go('/rooms/$roomId');
                                       },
-                                      label: Text(
-                                        controller.richPresenceData?.tryGet(
-                                              'player',
-                                            ) ??
-                                            L10n.of(context).openLinkInBrowser,
+                                    ),
+                                    if (controller.showCallButton)
+                                      _buildActionButton(
+                                        context: context,
+                                        icon: Icons.call,
+                                        label: L10n.of(context).callAction,
+                                        onPressed: () {
+                                          controller.onCallTap();
+                                        },
                                       ),
-                                      icon: const Icon(Icons.open_in_new),
+                                    _buildActionButton(
+                                      context: context,
+                                      icon: Icons.block,
+                                      label: L10n.of(context).ignoreUser,
+                                      destructive: true,
+                                      onPressed: () async {
+                                        final router = GoRouter.of(context);
+                                        if (context.mounted) {
+                                          Navigator.of(context).pop();
+                                        }
+                                        router.go(
+                                          '/rooms/settings/security/ignorelist',
+                                          extra: profile.userId,
+                                        );
+                                      },
                                     ),
                                   ],
                                 ],
                               ),
-                            ),
-                          ],
+                            );
+                          },
                         ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-              ],
-              if (controller.isRpcActivity) ...[
-                Material(
-                  clipBehavior: .hardEdge,
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: borderRadius,
-                  child: Padding(
-                    padding: const .all(16),
+                ],
+              ),
+            ),
+            
+            Padding(
+              padding: const .symmetric(horizontal: 8),
+              child: Column(
+                mainAxisSize: .max,
+                children: [
+                  if (controller.isRpcMedia) ...[
+                    Material(
+                      clipBehavior: .hardEdge,
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: borderRadius,
+                      child: Padding(
+                        padding: const .all(16),
+                        child: Column(
+                          children: [
+                            Align(
+                              alignment: .centerLeft,
+                              child: Text(
+                                controller.richPresenceData!.containsKey(
+                                      'player',
+                                    )
+                                    ? L10n.of(context).listeningTo(
+                                        controller.richPresenceData!['player'],
+                                      )
+                                    : L10n.of(context).listeningToSomeTunes,
+                                style: TextStyle(
+                                  color: theme.colorScheme.secondary,
+                                  fontWeight: .bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisSize: .max,
+                              children: [
+                                if (controller.richPresenceData!.containsKey(
+                                  'cover_url',
+                                )) ...[
+                                  Material(
+                                    clipBehavior: .antiAlias,
+                                    borderRadius: BorderRadius.circular(
+                                      AppConfig.borderRadius / 2,
+                                    ),
+                                    color: theme
+                                        .colorScheme
+                                        .surfaceContainerHighest,
+                                    child: MxcImage(
+                                      uri: Uri.parse(
+                                        controller
+                                            .richPresenceData!['cover_url'],
+                                      ),
+                                      width: 128,
+                                      height: 128,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 9),
+                                ],
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: .start,
+                                    crossAxisAlignment: .start,
+                                    children: [
+                                      Align(
+                                        alignment: .centerLeft,
+                                        child: Text(
+                                          controller.richPresenceData!['track'],
+                                          style: const TextStyle(fontSize: 18),
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: .centerLeft,
+                                        child: Text(
+                                          controller.richPresenceData!['album'],
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: .centerLeft,
+                                        child: Text(
+                                          controller
+                                              .richPresenceData!['artist'],
+                                        ),
+                                      ),
+                                      if (controller.richPresenceData!
+                                          .containsKey('streaming_link')) ...[
+                                        const SizedBox(height: 8),
+                                        FilledButton.tonalIcon(
+                                          onPressed: () {
+                                            UrlLauncher(
+                                              context,
+                                              controller
+                                                  .richPresenceData!['streaming_link'],
+                                              controller
+                                                  .richPresenceData!['player'],
+                                            ).launchUrl();
+                                          },
+                                          label: Text(
+                                            controller.richPresenceData?.tryGet(
+                                                  'player',
+                                                ) ??
+                                                L10n.of(
+                                                  context,
+                                                ).openLinkInBrowser,
+                                          ),
+                                          icon: const Icon(Icons.open_in_new),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  if (controller.isRpcActivity) ...[
+                    Material(
+                      clipBehavior: .hardEdge,
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: borderRadius,
+                      child: Padding(
+                        padding: const .all(16),
+                        child: Column(
+                          children: [
+                            Align(
+                              alignment: .centerLeft,
+                              child: Text(
+                                L10n.of(context).playing,
+                                style: TextStyle(
+                                  color: theme.colorScheme.secondary,
+                                  fontWeight: .bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisSize: .max,
+                              children: [
+                                if (controller.richPresenceData!.containsKey(
+                                  'image',
+                                )) ...[
+                                  Material(
+                                    clipBehavior: .antiAlias,
+                                    borderRadius: BorderRadius.circular(
+                                      AppConfig.borderRadius / 2,
+                                    ),
+                                    color: theme
+                                        .colorScheme
+                                        .surfaceContainerHighest,
+                                    child: MxcImage(
+                                      uri: Uri.parse(
+                                        controller.richPresenceData!['image'],
+                                      ),
+                                      width: 128,
+                                      height: 128,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 9),
+                                ],
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: .start,
+                                    crossAxisAlignment: .start,
+                                    children: [
+                                      Align(
+                                        alignment: .centerLeft,
+                                        child: Text(
+                                          controller.richPresenceData!['name'],
+                                          style: const TextStyle(fontSize: 18),
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment: .centerLeft,
+                                        child: Text(
+                                          controller
+                                              .richPresenceData!['details'],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                  Material(
+                    clipBehavior: .hardEdge,
+                    color: theme.colorScheme.surfaceContainerHigh,
+                    borderRadius: borderRadius,
                     child: Column(
                       children: [
-                        Align(
-                          alignment: .centerLeft,
-                          child: Text(
-                            L10n.of(context).playing,
-                            style: TextStyle(
-                              color: theme.colorScheme.secondary,
-                              fontWeight: .bold,
+                        ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: theme.colorScheme.primary,
+                            child: Icon(
+                              Icons.alternate_email,
+                              color: theme.colorScheme.onPrimary,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisSize: .max,
-                          children: [
-                            if (controller.richPresenceData!.containsKey(
-                              'image',
-                            )) ...[
-                              Material(
-                                clipBehavior: .antiAlias,
-                                borderRadius: BorderRadius.circular(
-                                  AppConfig.borderRadius / 2,
-                                ),
-                                color:
-                                    theme.colorScheme.surfaceContainerHighest,
-                                child: MxcImage(
-                                  uri: Uri.parse(
-                                    controller.richPresenceData!['image'],
-                                  ),
-                                  width: 128,
-                                  height: 128,
+                          trailing: const Icon(Icons.copy),
+                          title: Text(profile.userId),
+                          subtitle: Text(L10n.of(context).matrixId),
+                          onTap: () {
+                            Clipboard.setData(
+                              ClipboardData(text: profile.userId),
+                            );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  L10n.of(context).copiedToClipboard,
                                 ),
                               ),
-                              const SizedBox(width: 9),
-                            ],
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: .start,
-                                crossAxisAlignment: .start,
-                                children: [
-                                  Align(
-                                    alignment: .centerLeft,
-                                    child: Text(
-                                      controller.richPresenceData!['name'],
-                                      style: const TextStyle(fontSize: 18),
-                                    ),
-                                  ),
-                                  Align(
-                                    alignment: .centerLeft,
-                                    child: Text(
-                                      controller.richPresenceData!['details'],
-                                    ),
-                                  ),
-                                ],
+                            );
+                          },
+                        ),
+                        if (controller.about != null &&
+                            controller.about!.isNotEmpty) ...[
+                          const ListDivider(),
+                          ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: theme.colorScheme.secondary,
+                              child: Icon(
+                                Icons.wysiwyg,
+                                color: theme.colorScheme.onSecondary,
                               ),
                             ),
-                          ],
-                        ),
+                            title: Linkify(
+                              text: controller.about!,
+                              textScaleFactor: MediaQuery.textScalerOf(
+                                context,
+                              ).scale(1),
+                              style: const TextStyle(fontSize: 16),
+                              options: const LinkifyOptions(humanize: false),
+                              linkStyle: TextStyle(
+                                color: theme.colorScheme.secondary,
+                                decoration: TextDecoration.underline,
+                                decorationColor: theme.colorScheme.secondary,
+                              ),
+                              onOpen: (link) => UrlLauncher(
+                                context,
+                                link.url,
+                                link.text,
+                              ).launchUrl(),
+                            ),
+                            subtitle: Text(L10n.of(context).aboutUser),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-              ],
-              Material(
-                clipBehavior: .hardEdge,
-                color: theme.colorScheme.surfaceContainerHigh,
-                borderRadius: borderRadius,
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: theme.colorScheme.primary,
-                        child: Icon(
-                          Icons.alternate_email,
-                          color: theme.colorScheme.onPrimary,
-                        ),
-                      ),
-                      trailing: const Icon(Icons.copy),
-                      title: Text(profile.userId),
-                      subtitle: Text(L10n.of(context).matrixId),
-                      onTap: () {
-                        Clipboard.setData(ClipboardData(text: profile.userId));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(L10n.of(context).copiedToClipboard),
+                  const SizedBox(height: 8),
+                  if (profile.userId != client.userID &&
+                      !controller.isQueryingMutualRooms &&
+                      controller.mutualRooms.isNotEmpty)
+                    Material(
+                      clipBehavior: .hardEdge,
+                      color: theme.colorScheme.surfaceContainerHigh,
+                      borderRadius: borderRadius,
+                      child: Column(
+                        children: [
+                          ListTile(
+                            title: Text(
+                              L10n.of(context).mutualRooms,
+                              style: TextStyle(
+                                color: theme.colorScheme.secondary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                        );
-                      },
+                          _buildMutualChatList(
+                            context: context,
+                            userId: profile.userId,
+                          ),
+                        ],
+                      ),
                     ),
-                    if (controller.about != null &&
-                        controller.about!.isNotEmpty) ...[
-                      const ListDivider(),
-                      ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: theme.colorScheme.secondary,
-                          child: Icon(
-                            Icons.wysiwyg,
-                            color: theme.colorScheme.onSecondary,
-                          ),
-                        ),
-                        title: Linkify(
-                          text: controller.about!,
-                          textScaleFactor: MediaQuery.textScalerOf(
-                            context,
-                          ).scale(1),
-                          style: const TextStyle(
-                            fontSize: 16,
-                          ),
-                          options: const LinkifyOptions(humanize: false),
-                          linkStyle: TextStyle(
-                            color: theme.colorScheme.secondary,
-                            decoration: TextDecoration.underline,
-                            decorationColor: theme.colorScheme.secondary,
-                          ),
-                          onOpen: (link) => UrlLauncher(
-                            context,
-                            link.url,
-                            link.text,
-                          ).launchUrl(),
-                        ),
-                        subtitle: Text(L10n.of(context).aboutUser),
-                      ),
-                    ],
-                  ],
-                ),
+                ],
               ),
-              const SizedBox(height: 8),
-              if (profile.userId != client.userID &&
-                  !controller.isQueryingMutualRooms &&
-                  controller.mutualRooms.isNotEmpty)
-                Material(
-                  clipBehavior: .hardEdge,
-                  color: theme.colorScheme.surfaceContainerHigh,
-                  borderRadius: borderRadius,
-                  child: Column(
-                    children: [
-                      ListTile(
-                        title: Text(
-                          L10n.of(context).mutualRooms,
-                          style: TextStyle(
-                            color: theme.colorScheme.secondary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      _buildMutualChatList(
-                        context: context,
-                        userId: profile.userId,
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

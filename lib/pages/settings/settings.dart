@@ -31,6 +31,10 @@ class SettingsController extends State<Settings> {
   Future<String?>? aboutFuture;
   bool isQueryingAbout = false;
 
+  // Uri? bannerUrl;
+  Future<String?>? bannerFuture;
+  bool isQueryingBanner = false;
+
   Future<String?> _getAbout() async {
     final client = Matrix.of(context).client;
     try {
@@ -48,10 +52,29 @@ class SettingsController extends State<Settings> {
     }
     return null;
   }
+
+  Future<String?> _getBanner() async {
+    final client = Matrix.of(context).client;
+    try {
+      final bannerResponse = await client.getProfileField(
+        client.userID!,
+        AppConfig.bannerProfileField,
+      );
+      if (bannerResponse.containsKey((AppConfig.bannerProfileField)) &&
+          bannerResponse[AppConfig.bannerProfileField] is String &&
+          bannerResponse[AppConfig.bannerProfileField].toString().startsWith(
+            'mxc://',
+          )) {
+        return bannerResponse.tryGet<String>(AppConfig.bannerProfileField);
+      }
+    } catch (ex) {
+      Logs().e("Failed to query banner field", ex);
+    }
+    return null;
+  }
   // bool aboutUpdated = false;
 
   Future<Profile>? profileFuture;
-  // bool profileUpdated = false;
 
   void updateProfile() => setState(() {
     // profileUpdated = true;
@@ -61,6 +84,10 @@ class SettingsController extends State<Settings> {
   void updateAbout() => setState(() {
     // aboutUpdated = true;
     aboutFuture = null;
+  });
+
+  void updateBanner() => setState(() {
+    bannerFuture = null;
   });
 
   void setAboutAction() async {
@@ -215,6 +242,91 @@ class SettingsController extends State<Settings> {
     }
   }
 
+  void setBannerAction() async {
+    final bannerUrl = await bannerFuture;
+    final actions = [
+      if (PlatformInfos.isMobile)
+        AdaptiveModalAction(
+          value: AvatarAction.camera,
+          label: L10n.of(context).openCamera,
+          isDefaultAction: true,
+          icon: const Icon(Icons.camera_alt_outlined),
+        ),
+      AdaptiveModalAction(
+        value: AvatarAction.file,
+        label: L10n.of(context).openGallery,
+        icon: const Icon(Icons.photo_outlined),
+      ),
+      if (bannerUrl != null)
+        AdaptiveModalAction(
+          value: AvatarAction.remove,
+          label: L10n.of(context).clearBanner,
+          isDestructive: true,
+          icon: const Icon(Icons.delete_outlined),
+        ),
+    ];
+    final action = actions.length == 1
+        ? actions.single.value
+        : await showModalActionPopup<AvatarAction>(
+            context: context,
+            title: L10n.of(context).changeYourBanner,
+            cancelLabel: L10n.of(context).cancel,
+            actions: actions,
+          );
+    if (action == null) return;
+    final matrix = Matrix.of(context);
+    if (action == AvatarAction.remove) {
+      final success = await showFutureLoadingDialog(
+        context: context,
+        future: () => matrix.client.deleteProfileField(
+          matrix.client.userID!,
+          AppConfig.bannerProfileField,
+        ),
+      );
+      if (success.error == null) {
+        updateBanner();
+      }
+      return;
+    }
+    MatrixFile file;
+    if (PlatformInfos.isMobile) {
+      final result = await ImagePicker().pickImage(
+        source: action == AvatarAction.camera
+            ? ImageSource.camera
+            : ImageSource.gallery,
+        imageQuality: 50,
+      );
+      if (result == null) return;
+      file = MatrixFile(bytes: await result.readAsBytes(), name: result.path);
+    } else {
+      final result = await selectFiles(context, type: FileType.image);
+      final pickedFile = result.firstOrNull;
+      if (pickedFile == null) return;
+      file = MatrixFile(
+        bytes: await pickedFile.readAsBytes(),
+        name: pickedFile.name,
+      );
+    }
+    final success = await showFutureLoadingDialog(
+      context: context,
+      future: () async {
+        final url = await matrix.client.uploadContent(
+          file.bytes,
+          filename: file.name,
+          contentType: file.mimeType,
+        );
+        await matrix.client.setProfileField(
+          matrix.client.userID!,
+          AppConfig.bannerProfileField,
+          {AppConfig.bannerProfileField: url.toString()},
+        );
+      },
+    );
+    if (success.error == null) {
+      updateBanner();
+    }
+  }
+
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) => checkBootstrap());
@@ -264,6 +376,8 @@ class SettingsController extends State<Settings> {
     final client = Matrix.of(context).client;
     profileFuture ??= client.getProfileFromUserId(client.userID!);
     aboutFuture ??= _getAbout();
+    bannerFuture ??= _getBanner();
+
     return SettingsView(this);
   }
 }

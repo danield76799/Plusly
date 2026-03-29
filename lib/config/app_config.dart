@@ -4,6 +4,8 @@ abstract class AppConfig {
   static const String pushIsolatePortName = 'push_isolate';
   static const String mainIsolatePortName = 'main_isolate';
 
+  static const String bannerProfileField = 'chat.commet.profile_banner';
+
   static const String aboutProfileField = 'xyz.extera.about';
   static const String updateCheckUrl = 'https://extera.xyz/next/version.txt';
   static const String downloadUpdateUrl = 'https://extera.xyz/';

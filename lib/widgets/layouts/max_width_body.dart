@@ -7,12 +7,16 @@ class MaxWidthBody extends StatelessWidget {
   final Widget child;
   final double maxWidth;
   final bool withScrolling;
+  final bool withoutVerticalPadding;
+  final bool withoutVisibleBorder;
   final EdgeInsets? innerPadding;
 
   const MaxWidthBody({
     required this.child,
     this.maxWidth = 600,
     this.withScrolling = true,
+    this.withoutVerticalPadding = false,
+    this.withoutVisibleBorder = false,
     this.innerPadding,
     super.key,
   });
@@ -35,17 +39,22 @@ class MaxWidthBody extends StatelessWidget {
                     ),
                     child: Material(
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppConfig.borderRadius),
-                        side: BorderSide(
-                          color: theme.dividerColor,
+                        borderRadius: BorderRadius.circular(
+                          AppConfig.borderRadius,
                         ),
+                        side: withoutVisibleBorder
+                            ? BorderSide.none
+                            : BorderSide(color: theme.dividerColor),
                       ),
                       clipBehavior: Clip.hardEdge,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        child: child,
-                      ),
+                      child: withoutVerticalPadding
+                          ? child
+                          : Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 16.0,
+                              ),
+                              child: child,
+                            ),
                     ),
                   ),
                 );

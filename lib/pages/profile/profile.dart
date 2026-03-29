@@ -29,6 +29,9 @@ class ProfileController extends State<ProfilePage> {
   Map<String, dynamic>? richPresenceData;
   bool isQueryingRichPresenceData = false;
 
+  Uri? bannerUrl;
+  bool isQueryingBanner = false;
+
   Future<void> queryAbout() async {
     final client = Matrix.of(context).client;
     if (isQueryingAbout) return;
@@ -49,6 +52,46 @@ class ProfileController extends State<ProfilePage> {
     } else {
       setState(() {
         isQueryingAbout = false;
+      });
+    }
+  }
+
+  Future<void> queryBanner() async {
+    final client = Matrix.of(context).client;
+    if (isQueryingBanner) return;
+    setState(() {
+      isQueryingBanner = true;
+    });
+    final bannerResponse = await client.getProfileField(
+      widget.profile.userId,
+      AppConfig.bannerProfileField,
+    );
+    if (bannerResponse.containsKey(AppConfig.bannerProfileField) &&
+        bannerResponse[AppConfig.bannerProfileField] is String) {
+      try {
+        final urlString = bannerResponse.tryGet<String>(
+          AppConfig.bannerProfileField,
+        );
+        if (urlString != null) {
+          final url = Uri.parse(urlString);
+          setState(() {
+            bannerUrl = url;
+            isQueryingBanner = false;
+          });
+        } else {
+          setState(() {
+            isQueryingBanner = false;
+          });
+        }
+      } catch (e) {
+        Logs().e("Failed to parse banner URL", e);
+        setState(() {
+          isQueryingBanner = false;
+        });
+      }
+    } else {
+      setState(() {
+        isQueryingBanner = false;
       });
     }
   }
@@ -80,7 +123,9 @@ class ProfileController extends State<ProfilePage> {
 
   bool get isRpcMedia {
     if (richPresenceData == null) return false;
-    if (richPresenceData!['type'] != 'com.ip-logger.msc4320.rpc.media') return false;
+    if (richPresenceData!['type'] != 'com.ip-logger.msc4320.rpc.media') {
+      return false;
+    }
     if (richPresenceData!['artist'] is! String ||
         richPresenceData!['album'] is! String ||
         richPresenceData!['track'] is! String) {
@@ -104,7 +149,9 @@ class ProfileController extends State<ProfilePage> {
 
   bool get isRpcActivity {
     if (richPresenceData == null) return false;
-    if (richPresenceData!['type'] != 'com.ip-logger.msc4320.rpc.activity') return false;
+    if (richPresenceData!['type'] != 'com.ip-logger.msc4320.rpc.activity') {
+      return false;
+    }
     if (!richPresenceData!.containsKey('name')) return false;
     if (richPresenceData!.containsKey("image") &&
         richPresenceData!['image'] is! String) {
@@ -142,6 +189,7 @@ class ProfileController extends State<ProfilePage> {
     super.initState();
     queryAbout();
     queryRichPresence();
+    queryBanner();
 
     if (Matrix.of(context).client.userID != widget.profile.userId) {
       queryMutualRooms();
