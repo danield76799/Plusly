@@ -3,6 +3,7 @@
 - Better UX for polls
 - Predictive back gesture support for Android
 - Fix link double underline
+- Fix widget things
 
 ## Extera 26.0.8
 - Support for LaTeX formulas.
