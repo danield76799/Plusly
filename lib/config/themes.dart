@@ -81,7 +81,8 @@ abstract class FluffyThemes {
       brightness: brightness,
       colorScheme: colorScheme,
       useSystemColors: true,
-      fontFamilyFallback: twemoji == true ? ['Twemoji Mozilla'] : null,
+      fontFamily: AppSettings.systemFont.value ? 'SystemFont' : null,
+      fontFamilyFallback: twemoji == true ? ['Twemoji Mozilla', 'SystemFont', 'Roboto'] : null,
       dividerColor: brightness == Brightness.dark
           ? colorScheme.surfaceContainerHighest
           : colorScheme.surfaceContainer,

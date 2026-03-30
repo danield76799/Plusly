@@ -4,6 +4,7 @@
 - Predictive back gesture support for Android
 - Fix link double underline
 - Fix widget things
+- Use system font option on android
 
 ## Extera 26.0.8
 - Support for LaTeX formulas.

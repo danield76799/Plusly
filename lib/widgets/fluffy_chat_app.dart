@@ -1,8 +1,12 @@
+import 'dart:io';
+
+import 'package:android_system_font/android_system_font.dart';
 import 'package:extera_next/pages/download_manager/download_manager.dart';
 import 'package:extera_next/widgets/background_audio_player.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,7 +19,7 @@ import '../config/app_config.dart';
 import '../utils/custom_scroll_behaviour.dart';
 import 'matrix.dart';
 
-class FluffyChatApp extends StatelessWidget {
+class FluffyChatApp extends StatefulWidget {
   final Widget? testWidget;
   final List<Client> clients;
   final String? pincode;
@@ -42,10 +46,60 @@ class FluffyChatApp extends StatelessWidget {
   );
 
   @override
+  State<FluffyChatApp> createState() => _FluffyChatAppState();
+}
+
+class _FluffyChatAppState extends State<FluffyChatApp> {
+  final _androidSystemFontPlugin = AndroidSystemFont();
+
+  @override
+  void initState() {
+    super.initState();
+    initPlatformState();
+  }
+
+  static Future<ByteData> _readFileBytes(String path) async {
+    final bytes = await File(path).readAsBytes();
+    return ByteData.view(bytes.buffer);
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initPlatformState() async {
+    String fontFilePath;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    // We also handle the message potentially returning null.
+    try {
+      fontFilePath =
+          await _androidSystemFontPlugin.getFilePath() ??
+          'Unknown font file path';
+    } on PlatformException {
+      fontFilePath = 'Failed to get font file path.';
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      final fontLoader = FontLoader('SystemFont');
+      fontLoader.addFont(_readFileBytes(fontFilePath));
+      fontLoader.load();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ThemeBuilder(
-      builder: (context, themeMode, primaryColor, schemeVariant, pureBlack, twemoji) =>
-          MaterialApp.router(
+      builder:
+          (
+            context,
+            themeMode,
+            primaryColor,
+            schemeVariant,
+            pureBlack,
+            twemoji,
+          ) => MaterialApp.router(
             title: AppConfig.applicationName,
             themeMode: themeMode,
             theme: FluffyThemes.buildTheme(
@@ -67,18 +121,18 @@ class FluffyChatApp extends StatelessWidget {
             scrollBehavior: CustomScrollBehavior(),
             localizationsDelegates: L10n.localizationsDelegates,
             supportedLocales: L10n.supportedLocales,
-            routerConfig: router,
+            routerConfig: FluffyChatApp.router,
             builder: (context, child) => AppLockWidget(
-              pincode: pincode,
-              clients: clients,
+              pincode: widget.pincode,
+              clients: widget.clients,
               // Need a navigator above the Matrix widget for
               // displaying dialogs
               child: DownloadManager(
                 child: BackgroundAudioPlayer(
                   child: Matrix(
-                    clients: clients,
-                    store: store,
-                    child: testWidget ?? child,
+                    clients: widget.clients,
+                    store: widget.store,
+                    child: widget.testWidget ?? child,
                   ),
                 ),
               ),
