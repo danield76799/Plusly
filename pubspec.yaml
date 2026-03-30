@@ -9,6 +9,10 @@ environment:
 
 dependencies:
   action_slider: ^0.7.0
+  android_system_font:
+    git:
+      url: https://github.com/re7gog/android_system_font.git
+      ref: master
   app_links: ^7.0.0
   archive: ^4.0.7
   async: ^2.11.0

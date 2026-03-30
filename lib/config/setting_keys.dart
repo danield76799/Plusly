@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class SettingKeys {
   static const String exteraServiceUrl = 'xyz.extera.serviceUrl';
+  static const String systemFont = 'xyz.extera.systemFont';
   static const String translationTargetLanguage = 'xyz.extera.translationTargetLanguage';
   static const String latexMath = 'xyz.extera.latexMath';
   static const String messageTranslation = 'xyz.extera.messageTranslation';
@@ -63,6 +64,7 @@ abstract class SettingKeys {
 }
 
 enum AppSettings<T> {
+  systemFont<bool>('xyz.extera.systemFont', false),
   translationTargetLanguage<String>('xyz.extera.translationTargetLanguage', ''),
   exteraServiceUrl<String>('xyz.extera.serviceUrl', 'https://ecs.extera.xyz'),
   latexMath<bool>('xyz.extera.latexMath', false),

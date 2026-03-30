@@ -126,7 +126,9 @@ class SettingsStyleView extends StatelessWidget {
                             ? light?.primary
                             : dark?.primary;
                         final colors = [
-                          null, AppConfig.chatColor, ...Colors.primaries,
+                          null,
+                          AppConfig.chatColor,
+                          ...Colors.primaries,
                         ];
                         if (systemColor == null) {
                           colors.remove(null);
@@ -579,6 +581,13 @@ class SettingsStyleView extends StatelessWidget {
                       title: L10n.of(context).displayNavigationRail,
                       setting: AppSettings.displayNavigationRail,
                     ),
+                    if (PlatformInfos.isAndroid) ...[
+                      const ListDivider(),
+                      SettingsSwitchListTile.adaptive(
+                        title: L10n.of(context).systemFont,
+                        setting: AppSettings.systemFont,
+                      ),
+                    ],
                   ],
                 ),
               ),
