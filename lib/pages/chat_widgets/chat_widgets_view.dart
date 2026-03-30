@@ -33,6 +33,7 @@ class ChatWidgetsView extends StatelessWidget {
                 Material(
                   borderRadius: borderRadius,
                   color: theme.colorScheme.surfaceContainerHigh,
+                    clipBehavior: .hardEdge,
                   child: StreamBuilder(
                     stream: client.onRoomState.stream
                         .where(
@@ -84,6 +85,7 @@ class ChatWidgetsView extends StatelessWidget {
                   Material(
                     borderRadius: borderRadius,
                     color: theme.colorScheme.surfaceContainerHigh,
+                    clipBehavior: .hardEdge,
                     child: ListTile(
                       leading: const Icon(Icons.add),
                       title: Text(L10n.of(context).addWidget),

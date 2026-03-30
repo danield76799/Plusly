@@ -1,5 +1,6 @@
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/utils/url_launcher.dart';
+import 'package:extera_next/widgets/future_loading_snackbar.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
@@ -24,10 +25,10 @@ class WidgetInfo extends StatelessWidget {
     data['matrix_user_id'] = client.userID!;
     data['matrix_room_id'] = room.id;
     data['matrix_display_name'] = profile.displayname ?? client.userID!;
-    data['matrix_avatar_url'] = profile.avatarUrl?.getDownloadUri(client) ?? '';
+    // data['matrix_avatar_url'] = profile.avatarUrl?.getDownloadUri(client) ?? '';
 
     for (final key in data.keys) {
-      url = url.replaceAll('\$$key', data[key]);
+      url = url.replaceAll('\$$key', data[key].toString());
     }
 
     UrlLauncher(context, url).launchUrl();
@@ -86,12 +87,21 @@ class WidgetInfo extends StatelessWidget {
               leading: const Icon(Icons.cancel_outlined, color: Colors.red),
               title: Text(L10n.of(context).deleteWidget),
               onTap: () {
-                room.setState(
-                  StrippedStateEvent(
-                    type: 'im.vector.modular.widgets',
-                    content: {},
-                    senderId: client.userID!,
-                    stateKey: widgetEvent.stateKey,
+                // room.setState(
+                //   StrippedStateEvent(
+                //     type: 'im.vector.modular.widgets',
+                //     content: {},
+                //     senderId: client.userID!,
+                //     stateKey: widgetEvent.stateKey,
+                //   ),
+                // );
+                showFutureLoadingSnackbar(
+                  context: context,
+                  future: () => client.setRoomStateWithKey(
+                    room.id,
+                    'im.vector.modular.widgets',
+                    widgetEvent.stateKey!,
+                    {},
                   ),
                 );
                 Navigator.of(context).pop();
