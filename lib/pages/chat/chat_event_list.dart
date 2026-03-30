@@ -105,19 +105,33 @@ class ChatEventList extends StatelessWidget {
 
                 if (i == events.length + 1) {
                   if (timeline.canRequestHistory) {
-                    return Center(
-                      child: ElevatedButton(
-                        onPressed: controller.requestHistory,
-                        child: timeline.isRequestingHistory
-                            ? const LinearProgressIndicator()
-                            : Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.arrow_upward),
-                                  const SizedBox(width: 5),
-                                  Text(L10n.of(context).loadMore),
-                                ],
-                              ),
+                    final visibleIndex = timeline.events.lastIndexWhere(
+                      (event) =>
+                          event.isVisibleInGui,
+                    );
+                    if (visibleIndex > timeline.events.length - 50) {
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        controller.requestHistory,
+                      );
+                    }
+                    // Add top padding when scroll banner is visible to prevent overlap
+                    final hasScrollBanner = controller.scrollUpBannerEventId != null;
+                    return Padding(
+                      padding: EdgeInsets.only(top: hasScrollBanner ? 72.0 : 0.0),
+                      child: Center(
+                        child: ElevatedButton(
+                          onPressed: controller.requestHistory,
+                          child: timeline.isRequestingHistory
+                              ? const LinearProgressIndicator()
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.arrow_upward),
+                                    const SizedBox(width: 5),
+                                    Text(L10n.of(context).loadMore),
+                                  ],
+                                ),
+                        ),
                       ),
                     );
                   }
@@ -126,7 +140,12 @@ class ChatEventList extends StatelessWidget {
                 i--;
 
                 final event = events[i];
-                final animateIn = i == 0 && (DateTime.now().millisecondsSinceEpoch - event.originServerTs.millisecondsSinceEpoch) < 1000 && controller.firstUpdateReceived;
+                final animateIn =
+                    i == 0 &&
+                    (DateTime.now().millisecondsSinceEpoch -
+                            event.originServerTs.millisecondsSinceEpoch) <
+                        1000 &&
+                    controller.firstUpdateReceived;
 
                 final thread = threads.containsKey(event.eventId)
                     ? threads[event.eventId]
@@ -147,7 +166,9 @@ class ChatEventList extends StatelessWidget {
                           controller.selectedEvents.first.eventId ==
                               event.eventId,
                       onSwipe: () => controller.replyAction(replyTo: event),
-                      hasBeenRead: latestReadEventIndex != -1 && latestReadEventIndex <= i,
+                      hasBeenRead:
+                          latestReadEventIndex != -1 &&
+                          latestReadEventIndex <= i,
                       // onQuote: () {
                       //   controller.replyAction(replyTo: event);
                       //   controller.sendController.text = "> ";
