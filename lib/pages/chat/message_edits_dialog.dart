@@ -21,10 +21,9 @@ class MessageEditsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(L10n.of(context).nEdits(events.length)),
-      ),
-      body: Padding(padding: const .all(8),
+      appBar: AppBar(title: Text(L10n.of(context).nEdits(events.length))),
+      body: Padding(
+        padding: const .all(8),
         child: Material(
           clipBehavior: .hardEdge,
           borderRadius: BorderRadius.circular(AppConfig.borderRadius),
@@ -40,17 +39,18 @@ class MessageEditsDialog extends StatelessWidget {
                   ListTile(
                     dense: true,
                     title: Text(editEvent.text),
-                    subtitle: Text(L10n.of(context).editedAt(
-                      editEvent.originServerTs.localizedTime(context),
-                    )),
+                    subtitle: Text(
+                      L10n.of(context).editedAt(
+                        editEvent.originServerTs.localizedTime(context),
+                      ),
+                    ),
                   ),
                 ],
               );
             },
           ),
-        )
+        ),
       ),
     );
   }
-
 }

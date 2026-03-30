@@ -34,6 +34,7 @@ class SettingsController extends State<Settings> {
   // Uri? bannerUrl;
   Future<String?>? bannerFuture;
   bool isQueryingBanner = false;
+  bool hasBanner = false;
 
   Future<String?> _getAbout() async {
     final client = Matrix.of(context).client;
@@ -65,11 +66,13 @@ class SettingsController extends State<Settings> {
           bannerResponse[AppConfig.bannerProfileField].toString().startsWith(
             'mxc://',
           )) {
+        hasBanner = true;
         return bannerResponse.tryGet<String>(AppConfig.bannerProfileField);
       }
     } catch (ex) {
       Logs().e("Failed to query banner field", ex);
     }
+    hasBanner = false;
     return null;
   }
   // bool aboutUpdated = false;

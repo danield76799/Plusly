@@ -136,7 +136,6 @@ class MessageContent extends StatelessWidget {
                 .tryGetMap<String, Object?>('info')
                 ?.tryGet<int>('h');
             var imageWidth = maxSize;
-            var imageHeight = maxSize;
             var fit = event.messageType == MessageTypes.Sticker
                 ? BoxFit.contain
                 : BoxFit.cover;
@@ -144,9 +143,7 @@ class MessageContent extends StatelessWidget {
               fit = BoxFit.contain;
               if (w > h) {
                 imageWidth = maxSize;
-                imageHeight = max(32, maxSize * (h / w));
               } else {
-                imageHeight = maxSize;
                 imageWidth = max(32, maxSize * (w / h));
               }
             }
@@ -161,7 +158,6 @@ class MessageContent extends StatelessWidget {
               event,
               width: bubbleWidth,
               imageWidth: imageWidth,
-              height: imageHeight,
               fit: fit,
               borderRadius: borderRadius,
               timeline: timeline,

@@ -73,14 +73,14 @@ class WidgetInfo extends StatelessWidget {
             subtitle: Text(L10n.of(context).widgetCreatorUser),
           ),
           const Divider(),
-            ListTile(
-              leading: const Icon(Icons.open_in_browser_outlined),
-              title: Text(L10n.of(context).open),
-              onTap: () {
-                Navigator.of(context, rootNavigator: true).pop();
-                onOpenTap(context);
-              },
-            ),
+          ListTile(
+            leading: const Icon(Icons.open_in_browser_outlined),
+            title: Text(L10n.of(context).open),
+            onTap: () {
+              Navigator.of(context).pop();
+              onOpenTap(context);
+            },
+          ),
           if (room.canChangeStateEvent('im.vector.modular.widgets'))
             ListTile(
               leading: const Icon(Icons.cancel_outlined, color: Colors.red),
@@ -94,7 +94,7 @@ class WidgetInfo extends StatelessWidget {
                     stateKey: widgetEvent.stateKey,
                   ),
                 );
-                Navigator.of(context, rootNavigator: true).pop();
+                Navigator.of(context).pop();
               },
             ),
         ],

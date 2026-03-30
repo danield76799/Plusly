@@ -718,6 +718,7 @@ class _MessageState extends State<Message> {
 
     return _AnimateIn(
       animateIn: widget.animateIn,
+      halfOpacity: event.status == .sending ? true : false,
       child: Center(
         child: Swipeable(
           key: ValueKey(event.eventId),
@@ -822,8 +823,13 @@ class BubblePainter extends CustomPainter {
 
 class _AnimateIn extends StatefulWidget {
   final bool animateIn;
+  final bool halfOpacity;
   final Widget child;
-  const _AnimateIn({required this.animateIn, required this.child});
+  const _AnimateIn({
+    required this.animateIn,
+    required this.halfOpacity,
+    required this.child,
+  });
 
   @override
   State<_AnimateIn> createState() => __AnimateInState();
@@ -844,7 +850,7 @@ class __AnimateInState extends State<_AnimateIn> {
     return AnimatedOpacity(
       duration: FluffyThemes.animationDuration,
       curve: FluffyThemes.animationCurve,
-      opacity: _animationFinished ? 1 : 0,
+      opacity: _animationFinished ? (widget.halfOpacity ? 0.5 : 1) : 0,
       child: AnimatedSize(
         duration: FluffyThemes.animationDuration,
         curve: FluffyThemes.animationCurve,

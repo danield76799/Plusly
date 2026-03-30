@@ -475,6 +475,19 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             ),
                             const ListDivider(),
                           ],
+                          if (event.type ==
+                              'org.matrix.msc3381.poll.start') ...[
+                            _buildMenuItem(
+                              event: event,
+                              icon: Icons.info_outline,
+                              label: "Poll details",
+                              onPressed: () {
+                                controller.closeMessageMenu();
+                                controller.showPollResults(event);
+                              },
+                            ),
+                            const ListDivider(),
+                          ],
                           if (event.type == 'org.matrix.msc3381.poll.start' &&
                               event.senderId ==
                                   Matrix.of(context).client.userID)

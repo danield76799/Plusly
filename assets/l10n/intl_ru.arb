@@ -3673,5 +3673,22 @@
   "messageTranslations": "Перевод сообщений",
   "latexMath": "Формулы LaTeX",
   "setBanner": "Загрузить баннер",
-  "clearBanner": "Убрать баннер"
+  "clearBanner": "Убрать баннер",
+  "totalVotes": "Всего голосов: {count}",
+  "@totalVotes": {
+    "type": "String",
+    "placeholders": {
+        "count": {"type": "int", "example": "1"}
+    }
+  },
+ "voteCount": "{count, plural, one{{count} голос} few{{count} голоса} many{{count} голосов} other{{count} голоса}}",
+  "@voteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "pollResults": "Результаты опроса"
 }

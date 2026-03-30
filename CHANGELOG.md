@@ -1,3 +1,9 @@
+## Extera 26.0.9
+- Profile banners
+- Better UX for polls
+- Predictive back gesture support for Android
+- Fix link double underline
+
 ## Extera 26.0.8
 - Support for LaTeX formulas.
 - Added ability to copy links by long pressing them.

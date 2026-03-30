@@ -3577,5 +3577,22 @@
   "setBanner": "Upload banner",
   "clearBanner": "Remove banner",
   "changeYourBanner": "Change your banner",
-  "removeYourBanner": "Remove your banner"
+  "removeYourBanner": "Remove your banner",
+  "totalVotes": "Total votes: {count}",
+  "@totalVotes": {
+    "type": "String",
+    "placeholders": {
+        "count": {"type": "int", "example": "1"}
+    }
+  },
+ "voteCount": "{count, plural, one{{count} vote} other{{count} votes}}",
+  "@voteCount": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "pollResults": "Poll results"
 }

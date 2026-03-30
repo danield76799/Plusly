@@ -7,6 +7,7 @@ import 'package:extera_next/pages/chat/recovered_event_dialog.dart';
 import 'package:extera_next/pages/chat/seen_by_row.dart';
 import 'package:extera_next/pages/chat/send_poll_dialog.dart';
 import 'package:extera_next/pages/chat/translated_event_dialog.dart';
+import 'package:extera_next/pages/chat/vote_results_dialog.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/utils/clipboard_utils.dart';
 import 'package:extera_next/utils/loading_snackbar_extension.dart';
@@ -15,6 +16,7 @@ import 'package:extera_next/utils/privacy_options.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
 import 'package:extera_next/utils/translator.dart';
 import 'package:extera_next/widgets/emoji_picker.dart';
+import 'package:extera_next/widgets/future_loading_snackbar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
@@ -442,7 +444,7 @@ class ChatController extends State<ChatPageWithRoom>
   void _showScrollUpMaterialBanner(String eventId) => setState(() {
     scrollUpBannerEventId = eventId;
   });
-  
+
   bool firstUpdateReceived = false;
 
   Future<void> updateView() async {
@@ -487,9 +489,7 @@ class ChatController extends State<ChatPageWithRoom>
     } catch (e, s) {
       Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
       if (!mounted) return;
-      timeline = await room.getTimeline(
-        onUpdate: updateView,
-      );
+      timeline = await room.getTimeline(onUpdate: updateView);
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
         _showScrollUpMaterialBanner(eventContextId!);
@@ -517,9 +517,7 @@ class ChatController extends State<ChatPageWithRoom>
         s,
       );
       if (!mounted) return;
-      timeline = await thread!.getTimeline(
-        onUpdate: updateView,
-      );
+      timeline = await thread!.getTimeline(onUpdate: updateView);
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
         _showScrollUpMaterialBanner(eventContextId!);
@@ -555,6 +553,13 @@ class ChatController extends State<ChatPageWithRoom>
     } catch (e, s) {
       Logs().w('Unable to load threads in $roomId', e, s);
     }
+  }
+
+  Future<void> showPollResults(Event event) async {
+    await showFutureLoadingSnackbar(
+      context: context,
+      future: () => showPollResultsDialog(context, event),
+    );
   }
 
   String? scrollToEventIdMarker;
@@ -1086,9 +1091,9 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void endPollAction({Event? event}) async {
-    final event = selectedEvents.first;
+    event ??= selectedEvents.first;
     final client = currentRoomBundle.firstWhere(
-      (cl) => selectedEvents.first.senderId == cl!.userID,
+      (cl) => event!.senderId == cl!.userID,
       orElse: () => null,
     );
     if (client == null) return;

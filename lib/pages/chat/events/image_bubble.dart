@@ -50,19 +50,34 @@ class ImageBubble extends StatelessWidget {
 
   double get _effectiveImageWidth => imageWidth ?? width;
 
+  double get _aspectRatio {
+    // Get image dimensions from event metadata
+    final infoMap = event.infoMap;
+    final imageWidth = infoMap['w'] as int?;
+    final imageHeight = infoMap['h'] as int?;
+    
+    if (imageWidth != null && imageHeight != null && imageWidth > 0 && imageHeight > 0) {
+      // Return aspect ratio (width / height)
+      return imageWidth / imageHeight;
+    }
+      
+    // Fallback to square aspect ratio if metadata is not available
+    return 1.0;
+  }
+
   Widget _buildPlaceholder(BuildContext context) {
     final blurHashString = event.infoMap['xyz.amorgan.blurhash'] is String
         ? event.infoMap['xyz.amorgan.blurhash'] as String
         : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
-    return SizedBox(
-      width: _effectiveImageWidth,
-      height: height,
-      child: BlurHash(
-        blurhash: blurHashString,
-        width: _effectiveImageWidth,
-        height: height,
-        fit: fit,
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return BlurHash(
+          blurhash: blurHashString,
+          width: constraints.maxWidth,
+          height: constraints.maxHeight,
+          fit: fit,
+        );
+      },
     );
   }
 
@@ -109,32 +124,34 @@ class ImageBubble extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       spacing: 8,
       children: [
-        Container(
-          width: width,
-          decoration: BoxDecoration(
-            color: event.messageType == MessageTypes.Sticker
-                ? Colors.transparent
-                : theme.colorScheme.surfaceContainerHighest,
-            borderRadius: borderRadius,
-          ),
-          clipBehavior: Clip.hardEdge,
-          child: Center(
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => _onTap(context),
-                child: Hero(
-                  tag: event.eventId,
-                  child: MxcImage(
-                    event: event,
-                    width: _effectiveImageWidth,
-                    height: height,
-                    fit: fit,
-                    animated: animated,
-                    isThumbnail: thumbnailOnly,
-                    placeholder: event.messageType == MessageTypes.Sticker
-                        ? null
-                        : _buildPlaceholder,
+        ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: width),
+          child: AspectRatio(
+            aspectRatio: _aspectRatio,
+            child: Container(
+              decoration: BoxDecoration(
+                color: event.messageType == MessageTypes.Sticker
+                    ? Colors.transparent
+                    : theme.colorScheme.surfaceContainerHighest,
+                borderRadius: borderRadius,
+              ),
+              clipBehavior: Clip.hardEdge,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _onTap(context),
+                  child: Hero(
+                    tag: event.eventId,
+                    child: MxcImage(
+                      event: event,
+                      width: _effectiveImageWidth,
+                      fit: fit,
+                      animated: animated,
+                      isThumbnail: thumbnailOnly,
+                      placeholder: event.messageType == MessageTypes.Sticker
+                          ? null
+                          : _buildPlaceholder,
+                    ),
                   ),
                 ),
               ),

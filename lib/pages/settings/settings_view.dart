@@ -156,7 +156,24 @@ class SettingsView extends StatelessWidget {
                                           displayname,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(fontSize: 18),
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            shadows: controller.hasBanner
+                                                ? [
+                                                    Shadow(
+                                                      offset: Offset(0.0, 0.0),
+                                                      blurRadius: 3,
+                                                      color:
+                                                          Theme.of(
+                                                                context,
+                                                              ).brightness ==
+                                                              Brightness.dark
+                                                          ? Colors.black
+                                                          : Colors.white,
+                                                    ),
+                                                  ]
+                                                : null,
+                                          ),
                                         ),
                                       ),
                                       TextButton.icon(
@@ -176,7 +193,23 @@ class SettingsView extends StatelessWidget {
                                           mxid,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          //    style: const TextStyle(fontSize: 12),
+                                          style: TextStyle(
+                                            shadows: controller.hasBanner
+                                                ? [
+                                                    Shadow(
+                                                      offset: Offset(0.0, 0.0),
+                                                      blurRadius: 3,
+                                                      color:
+                                                          Theme.of(
+                                                                context,
+                                                              ).brightness ==
+                                                              Brightness.dark
+                                                          ? Colors.black
+                                                          : Colors.white,
+                                                    ),
+                                                  ]
+                                                : null,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -209,18 +242,6 @@ class SettingsView extends StatelessWidget {
                                           ],
                                         ),
                                       ),
-                                      if (snapshot.hasData)
-                                        PopupMenuItem(
-                                          value: 'clear_banner',
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(Icons.image_not_supported_outlined),
-                                              const SizedBox(width: 12),
-                                              Text(L10n.of(context).clearBanner),
-                                            ],
-                                          ),
-                                        ),
                                     ],
                                   );
                                 },
