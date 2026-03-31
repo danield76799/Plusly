@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:extera_next/pages/sign_in/view_model/model/public_homeserver_data.dart';
 
 class SignInState {

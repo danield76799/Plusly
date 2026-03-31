@@ -108,13 +108,13 @@
         </activity>
 
         <activity
-            android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
-            android:exported="true">
+          android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
+          android:exported="true">
             <intent-filter android:label="flutter_web_auth">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="xyz.extera.next" android:host="login" />
+                <data android:scheme="xyz.extera.auth" android:path="/login"/>
             </intent-filter>
         </activity>
 

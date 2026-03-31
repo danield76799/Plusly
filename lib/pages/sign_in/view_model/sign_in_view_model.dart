@@ -1,15 +1,13 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
-
 import 'package:collection/collection.dart';
-import 'package:matrix/matrix_api_lite/utils/logs.dart';
-
 import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/pages/sign_in/view_model/flows/sort_homeservers.dart';
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/sign_in/view_model/model/public_homeserver_data.dart';
 import 'package:extera_next/pages/sign_in/view_model/sign_in_state.dart';
 import 'package:extera_next/widgets/matrix.dart';
+import 'package:flutter/widgets.dart';
+import 'package:matrix/matrix_api_lite/utils/logs.dart';
 
 class SignInViewModel extends ValueNotifier<SignInState> {
   final MatrixState matrixService;
@@ -38,23 +36,24 @@ class SignInViewModel extends ValueNotifier<SignInState> {
             )
             .toList() ??
         [];
-    final splitted = filterText.split('.');
-    if (splitted.length >= 2 && !splitted.any((part) => part.isEmpty)) {
-      if (!filteredPublicHomeservers.any(
-        (homeserver) => homeserver.name == filterText,
-      )) {
-        filteredPublicHomeservers.add(PublicHomeserverData(name: filterText));
-      }
+    if (filterText.length >= 3 &&
+        (filterText.contains('.') || filterText == 'localhost') &&
+        Uri.tryParse(filterText) != null &&
+        !filteredPublicHomeservers.any(
+          (homeserver) => homeserver.name == filterText,
+        )) {
+      filteredPublicHomeservers.add(PublicHomeserverData(name: filterText));
     }
+
     value = value.copyWith(
       filteredPublicHomeservers: filteredPublicHomeservers,
     );
   }
 
-  void refreshPublicHomeservers() async {
+  Future<void> refreshPublicHomeservers() async {
     value = value.copyWith(publicHomeservers: AsyncSnapshot.waiting());
     final defaultHomeserverData = PublicHomeserverData(
-      name: AppConfig.defaultHomeserver,
+      name: AppSettings.defaultHomeserver.value,
     );
     try {
       final client = await matrixService.getLoginClient();
@@ -72,15 +71,13 @@ class SignInViewModel extends ValueNotifier<SignInState> {
         });
       }
 
-      publicHomeservers.sort(sortHomeservers);
+      final defaultServer = publicHomeservers.singleWhereOrNull(
+        (server) => server.name == AppSettings.defaultHomeserver.value,
+      );
 
-      final defaultServer =
-          publicHomeservers.singleWhereOrNull(
-            (server) => server.name == AppConfig.defaultHomeserver,
-          ) ??
-          defaultHomeserverData;
-
-      publicHomeservers.insert(0, defaultServer);
+      if (defaultServer == null) {
+        publicHomeservers.insert(0, defaultHomeserverData);
+      }
 
       value = value.copyWith(
         selectedHomeserver: value.selectedHomeserver ?? publicHomeservers.first,
