@@ -209,6 +209,7 @@ class _PollResultsDialog extends StatelessWidget {
             color: theme.colorScheme.surfaceContainer,
             child: ListView.builder(
               shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               itemCount: answers.length,
               itemBuilder: (context, index) {
                 final answer = answers[index];
