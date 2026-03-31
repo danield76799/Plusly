@@ -480,7 +480,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             _buildMenuItem(
                               event: event,
                               icon: Icons.info_outline,
-                              label: "Poll details",
+                              label: L10n.of(context).pollResults,
                               onPressed: () {
                                 controller.closeMessageMenu();
                                 controller.showPollResults(event);

@@ -214,13 +214,13 @@ class SendFileDialogState extends State<SendFileDialog> {
           );
         }
       }
+      scaffoldMessenger.clearSnackBars();
       setState(() {
         isSending = false;
       });
       if (mounted) {
         Navigator.of(context, rootNavigator: false).pop();
       }
-      scaffoldMessenger.clearSnackBars();
     } catch (e) {
       Logs().e('error on send', e);
       setState(() {
