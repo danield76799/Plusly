@@ -10,25 +10,7 @@ import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-/// Represents the current state of the background audio player.
-enum BackgroundAudioStatus {
-  /// No audio is loaded or playing.
-  idle,
-
-  /// Audio file is being downloaded/prepared.
-  loading,
-
-  /// Audio is currently playing.
-  playing,
-
-  /// Audio is paused.
-  paused,
-
-  /// Audio playback has completed.
-  completed,
-}
-
-/// Information about the currently playing audio track.
+enum BackgroundAudioStatus { idle, loading, playing, paused, completed }
 class AudioTrackInfo {
   final String id;
   final String title;
@@ -69,11 +51,6 @@ class AudioTrackInfo {
   }
 }
 
-/// A widget that provides a global background audio player, similar to how
-/// [Matrix] widget provides the Matrix client.
-///
-/// Place this widget high in the widget tree (e.g., wrapping your app).
-/// Access the state via [BackgroundAudioPlayer.of(context)].
 class BackgroundAudioPlayer extends StatefulWidget {
   final Widget child;
 
@@ -82,7 +59,6 @@ class BackgroundAudioPlayer extends StatefulWidget {
   @override
   BackgroundAudioPlayerState createState() => BackgroundAudioPlayerState();
 
-  /// Returns the nearest [BackgroundAudioPlayerState] instance.
   static BackgroundAudioPlayerState of(BuildContext context) =>
       Provider.of<BackgroundAudioPlayerState>(context, listen: false);
 }
@@ -95,20 +71,17 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
 
   Event? _playingEvent;
 
-  // --- State ---
   BackgroundAudioStatus _status = BackgroundAudioStatus.idle;
   AudioTrackInfo? _currentTrack;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
   double _playbackRate = 1.0;
 
-  // --- Streams ---
   StreamSubscription? _positionSub;
   StreamSubscription? _durationSub;
   StreamSubscription? _stateSub;
   StreamSubscription? _completeSub;
 
-  // --- Notifiers for reactive UI (miniplayer, etc.) ---
   final ValueNotifier<BackgroundAudioStatus> statusNotifier = ValueNotifier(
     BackgroundAudioStatus.idle,
   );
@@ -116,8 +89,7 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
   final ValueNotifier<Duration> durationNotifier = ValueNotifier(Duration.zero);
   final ValueNotifier<AudioTrackInfo?> trackNotifier = ValueNotifier(null);
   final ValueNotifier<double> playbackRateNotifier = ValueNotifier(1.0);
-
-  // --- Getters ---
+  
   BackgroundAudioStatus get status => _status;
   AudioTrackInfo? get currentTrack => _currentTrack;
   Duration get position => _position;
@@ -129,13 +101,10 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
   bool get hasTrack => _currentTrack != null;
   Event? get playingEvent => _playingEvent;
 
-  /// Formatted position string (mm:ss).
   String get positionString => _formatDuration(_position);
 
-  /// Formatted duration string (mm:ss).
   String get durationString => _formatDuration(_duration);
 
-  /// Progress as a value between 0.0 and 1.0.
   double get progress {
     if (_duration.inMilliseconds == 0) return 0.0;
     return (_position.inMilliseconds / _duration.inMilliseconds).clamp(
@@ -161,7 +130,6 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
       if (dur == Duration.zero) return;
       _duration = dur;
       durationNotifier.value = dur;
-      // Update track info with actual duration if it was unknown
       if (_currentTrack != null && _currentTrack!.duration == null) {
         _currentTrack = _currentTrack!.copyWith(duration: dur);
         trackNotifier.value = _currentTrack;
@@ -201,10 +169,6 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     _playingEvent = null;
   }
 
-  // ==========================================
-  // Public API - Playback Controls
-  // ==========================================
-
   /// Play an audio message from a Matrix event.
   ///
   /// Downloads and decrypts the attachment if needed, then starts playback.
@@ -217,13 +181,10 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
       return;
     }
 
-    // If something else is playing, stop it first
-    if (_status == .playing ||
-        _status == .paused) {
+    if (_status == .playing || _status == .paused) {
       await stop();
     }
 
-    // Build track info
     final info = event.content.tryGetMap<String, dynamic>('info');
     final audioInfo = event.content.tryGetMap<String, dynamic>(
       'org.matrix.msc1767.audio',
@@ -237,7 +198,9 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
 
     _currentTrack = AudioTrackInfo(
       id: event.eventId,
-      title: event.content.tryGet<String>('filename') ?? L10n.of(context).audioMessage,
+      title:
+          event.content.tryGet<String>('filename') ??
+          L10n.of(context).audioMessage,
       subtitle: senderName == roomName ? senderName : '$senderName • $roomName',
       mxcUrl: event.attachmentMxcUrl?.toString(),
       duration: durationMs != null ? Duration(milliseconds: durationMs) : null,
@@ -283,7 +246,6 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
           DeviceFileSource(file.path, mimeType: matrixFile.mimeType),
         );
       } else {
-        // Web: play from URL
         final downloadUrl = (await event.attachmentMxcUrl?.getDownloadUri(
           effectiveClient,
         )).toString();
@@ -298,7 +260,6 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     }
   }
 
-  /// Play from a URL directly.
   Future<void> playFromUrl(
     String url, {
     String? title,
@@ -306,8 +267,7 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     String? id,
     String? mimeType,
   }) async {
-    if (_status == .playing ||
-        _status == .paused) {
+    if (_status == .playing || _status == .paused) {
       await stop();
     }
 
@@ -332,7 +292,6 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     }
   }
 
-  /// Play from a local file path.
   Future<void> playFromFile(
     String filePath, {
     String? title,
@@ -340,8 +299,7 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     String? id,
     String? mimeType,
   }) async {
-    if (_status == .playing ||
-        _status == .paused) {
+    if (_status == .playing || _status == .paused) {
       await stop();
     }
 
@@ -365,21 +323,18 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     }
   }
 
-  /// Pause the current playback.
   Future<void> pause() async {
     if (_status == .playing) {
       await audioPlayer.pause();
     }
   }
 
-  /// Resume playback after pause.
   Future<void> resume() async {
     if (_status == .paused) {
       await audioPlayer.resume();
     }
   }
 
-  /// Toggle between play and pause.
   Future<void> togglePlayPause() async {
     if (isPlaying) {
       await pause();
@@ -388,7 +343,6 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     }
   }
 
-  /// Stop playback and clear the current track.
   Future<void> stop() async {
     await audioPlayer.stop();
     await audioPlayer.seek(.zero);
@@ -399,26 +353,22 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     _updateStatus(.idle);
   }
 
-  /// Seek to a specific position.
   Future<void> seek(Duration position) async {
     await audioPlayer.seek(position);
     _position = position;
     positionNotifier.value = position;
   }
 
-  /// Seek to a position by milliseconds.
   Future<void> seekToMs(double milliseconds) async {
     await seek(Duration(milliseconds: milliseconds.round()));
   }
 
-  /// Set the playback rate (speed).
   Future<void> setPlaybackRate(double rate) async {
     await audioPlayer.setPlaybackRate(rate);
     _playbackRate = rate;
     playbackRateNotifier.value = rate;
   }
 
-  /// Cycle through playback speeds: 1.0 -> 1.25 -> 1.5 -> 2.0 -> 0.5 -> 1.0
   Future<void> cyclePlaybackRate() async {
     switch (_playbackRate) {
       case 1.0:
@@ -440,24 +390,14 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     }
   }
 
-  /// Check if a specific track (by event ID) is currently loaded.
   bool isTrackLoaded(String trackId) => _currentTrack?.id == trackId;
 
-  /// Check if a specific track is currently playing.
   bool isTrackPlaying(String trackId) =>
       _currentTrack?.id == trackId && isPlaying;
-
-  // ==========================================
-  // Helpers
-  // ==========================================
 
   String _formatDuration(Duration d) {
     return '${d.inMinutes.toString().padLeft(2, '0')}:${(d.inSeconds % 60).toString().padLeft(2, '0')}';
   }
-
-  // ==========================================
-  // Lifecycle
-  // ==========================================
 
   @override
   void dispose() {
