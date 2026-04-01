@@ -114,7 +114,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="xyz.extera.auth" android:path="/login"/>
+                <data android:scheme="xyz.extera.auth" android:pathPrefix="/login"/>
             </intent-filter>
         </activity>
 

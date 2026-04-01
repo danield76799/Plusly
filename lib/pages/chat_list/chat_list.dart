@@ -366,6 +366,7 @@ class ChatListController extends State<ChatList>
 
   void _processIncomingUris(Uri? uri) async {
     if (uri == null) return;
+    Logs().w("Processing incoming url: ${uri.toString()}");
     context.go('/rooms');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       UrlLauncher(context, uri.toString()).openMatrixToUrl();
