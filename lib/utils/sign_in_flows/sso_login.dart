@@ -2,7 +2,7 @@ import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/utils/sign_in_flows/calc_redirect_url.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/show_modal_action_popup.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Intent;
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:matrix/matrix.dart';
 
@@ -56,7 +56,11 @@ Future<void> ssoLoginFlow(
   final result = await FlutterWebAuth2.authenticate(
     url: url.toString(),
     callbackUrlScheme: urlScheme,
-    options: FlutterWebAuth2Options(useWebview: PlatformInfos.isMobile),
+    options: FlutterWebAuth2Options(
+      useWebview: false,
+      preferEphemeral: true,
+      intentFlags: ephemeralIntentFlags,
+    ),
   );
   final token = Uri.parse(result).queryParameters['loginToken'];
   if (token?.isEmpty ?? false) return;

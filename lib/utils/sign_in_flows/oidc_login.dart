@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/oidc_session_json_extension.dart';
-import 'package:extera_next/utils/platform_infos.dart';
+// import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/utils/sign_in_flows/calc_redirect_url.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -69,7 +69,9 @@ Future<void> oidcLoginFlow(
     url: session.authenticationUri.toString(),
     callbackUrlScheme: urlScheme,
     options: FlutterWebAuth2Options(
-      useWebview: PlatformInfos.isMobile,
+      useWebview: false,
+      preferEphemeral: true,
+      intentFlags: ephemeralIntentFlags,
       windowName: '_self',
     ),
   );

@@ -49,7 +49,8 @@
             android:showOnLockScreen="false"
             android:turnScreenOn="true"
             android:windowSoftInputMode="adjustResize"
-            android:exported="true">
+            android:exported="true"
+            android:taskAffinity="">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -108,13 +109,15 @@
         </activity>
 
         <activity
-          android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
-          android:exported="true">
-            <intent-filter android:label="flutter_web_auth">
+            android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
+            android:exported="true"
+            android:taskAffinity=""
+            android:launchMode="singleTop">
+            <intent-filter android:label="flutter_web_auth" android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="xyz.extera.auth" android:pathPrefix="/login"/>
+                <data android:scheme="xyz.extera.auth" />
             </intent-filter>
         </activity>
 

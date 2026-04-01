@@ -1,6 +1,7 @@
 ## Extera 26.0.91
 - Translate hard-coded strings ("Poll details")
 - Fix poll results window scrolling
+- Fix SSO/OIDC on mobile
 
 ## Extera 26.0.9
 - Profile banners
