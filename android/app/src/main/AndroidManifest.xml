@@ -111,8 +111,7 @@
         <activity
             android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
             android:exported="true"
-            android:taskAffinity=""
-            android:launchMode="singleTop">
+            android:taskAffinity="">
             <intent-filter android:label="flutter_web_auth" android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
