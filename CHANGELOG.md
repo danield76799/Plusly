@@ -1,7 +1,9 @@
 ## Extera 26.0.91
 - Translate hard-coded strings ("Poll details")
 - Fix poll results window scrolling
-- Fix SSO/OIDC on mobile
+- ~~Fix SSO/OIDC on mobile.~~ Click "Open in browser", this should work.
+- Add Jitsi group calls behind a featire flag.
+- Updated thread list view.
 
 ## Extera 26.0.9
 - Profile banners
