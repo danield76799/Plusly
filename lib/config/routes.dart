@@ -52,12 +52,20 @@ abstract class AppRoutes {
   static FutureOr<String?> loggedInRedirect(
     BuildContext context,
     GoRouterState state,
-  ) => Matrix.of(context).client.isLogged() ? '/rooms' : null;
+  ) =>
+      (Matrix.of(context).currentBundle?.isNotEmpty ?? false) &&
+          Matrix.of(context).client.isLogged()
+      ? '/rooms'
+      : null;
 
   static FutureOr<String?> loggedOutRedirect(
     BuildContext context,
     GoRouterState state,
-  ) => Matrix.of(context).client.isLogged() ? null : '/home';
+  ) =>
+      (Matrix.of(context).currentBundle?.isNotEmpty ?? false) &&
+          Matrix.of(context).client.isLogged()
+      ? null
+      : '/home';
 
   AppRoutes();
 
@@ -65,7 +73,10 @@ abstract class AppRoutes {
     GoRoute(
       path: '/',
       redirect: (context, state) =>
-          Matrix.of(context).client.isLogged() ? '/rooms' : '/home',
+          (Matrix.of(context).currentBundle?.isNotEmpty ?? false) &&
+              Matrix.of(context).client.isLogged()
+          ? '/rooms'
+          : '/home',
     ),
     GoRoute(
       path: '/home',
