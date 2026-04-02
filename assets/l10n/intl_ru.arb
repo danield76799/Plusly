@@ -3694,5 +3694,13 @@
   "systemFont": "Использовать шрифт системы",
   "setLowPriority": "Низкий приоритет",
   "unsetLowPriority": "Снять низкий приоритет",
-  "jitsiFeatureFlag": "Групповые звонки (Jitsi)"
+  "jitsiFeatureFlag": "Групповые звонки (Jitsi)",
+  "removeCallFromChat": "Убрать конференцию",
+  "removeCallFromChatDescription": "Вы уверены, что хотите убрать эту конференцию из чата?",
+  "removeCallForEveryone": "Убрать конференцию для всех",
+  "startVoiceCall": "Аудио-конференция",
+  "startVideoCall": "Видео-конференция",
+  "joinVoiceCall": "Аудио-конференция",
+  "joinVideoCall": "Видео-конференция",
+  "live": "Live"
 }
