@@ -7,8 +7,7 @@ import 'package:extera_next/utils/stream_extension.dart';
 import 'package:extera_next/widgets/layouts/max_width_body.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:flutter/material.dart';
-import 'package:matrix/matrix_api_lite.dart';
-
+import 'package:matrix/matrix.dart';
 class ChatWidgetsView extends StatelessWidget {
   final ChatWidgetsController controller;
 
@@ -42,9 +41,9 @@ class ChatWidgetsView extends StatelessWidget {
                         .rateLimit(const Duration(seconds: 1)),
                     builder: (context, _) {
                       return Column(
-                        children: controller.widgetEvents
+                        children: controller.room.widgets
                             .map(
-                              (event) => ListTile(
+                              (widget) => ListTile(
                                 leading: Icon(
                                   ({
                                         'm.jitsi': Icons.video_call_outlined,
@@ -59,17 +58,16 @@ class ChatWidgetsView extends StatelessWidget {
                                         'm.grafana': Icons.analytics_outlined,
                                         'm.custom': Icons.widgets_outlined,
                                       }).tryGet(
-                                        event.content.tryGet('type') ??
-                                            'm.custom',
+                                        widget.type,
                                       ) ??
                                       Icons.widgets_outlined,
                                 ),
                                 title: Text(
-                                  event.content.tryGet('name') ?? "Widget",
+                                  widget.name ?? "Widget",
                                 ),
                                 // subtitle: ,
                                 onTap: () {
-                                  controller.onWidgetTap(event);
+                                  controller.onWidgetTap(widget);
                                 },
                               ),
                             )

@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:extera_next/config/setting_keys.dart';
+import 'package:extera_next/pages/chat/jitsi_popup_button.dart';
 import 'package:extera_next/pages/dialer/back_to_call_button.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/mini_audio_player.dart';
@@ -156,7 +157,9 @@ class ChatView extends StatelessWidget {
             onPressed: controller.onPhoneButtonTap,
             icon: const Icon(Icons.call_outlined),
             tooltip: L10n.of(context).placeCall,
-          ),
+          )
+        else if (AppSettings.experimentalJitsi.value)
+          JitsiPopupButton(controller.room),
         EncryptionButton(controller.room),
         ChatSettingsPopupMenu(controller.room, true),
       ];

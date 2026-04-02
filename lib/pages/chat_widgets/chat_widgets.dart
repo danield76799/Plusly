@@ -20,27 +20,27 @@ class ChatWidgetsController extends State<ChatWidgets> {
     return client.getRoomById(widget.roomId)!;
   }
 
-  List<StrippedStateEvent> get widgetEvents {
-    return room.states
-            .tryGet<Map<String, StrippedStateEvent>>(
-              'im.vector.modular.widgets',
-            )
-            ?.values
-            .where((event) {
-              final content = event.content;
-              return content.containsKey('name') &&
-                  content.containsKey('url') &&
-                  content.containsKey('type');
-            })
-            .toList() ??
-        <StrippedStateEvent>[];
-  }
+  // List<StrippedStateEvent> get widgetEvents {
+  //   return room.states
+  //           .tryGet<Map<String, StrippedStateEvent>>(
+  //             'im.vector.modular.widgets',
+  //           )
+  //           ?.values
+  //           .where((event) {
+  //             final content = event.content;
+  //             return content.containsKey('name') &&
+  //                 content.containsKey('url') &&
+  //                 content.containsKey('type');
+  //           })
+  //           .toList() ??
+  //       <StrippedStateEvent>[];
+  // }
 
-  void onWidgetTap(StrippedStateEvent event) async {
+  void onWidgetTap(MatrixWidget widget) async {
     await showAdaptiveBottomSheet(
       context: context,
       builder: (context) {
-        return WidgetInfo(room: room, widgetEvent: event);
+        return WidgetInfo(room: room, widget: widget);
       },
     );
   }

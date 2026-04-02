@@ -3693,5 +3693,6 @@
   "pollResults": "Результаты опроса",
   "systemFont": "Использовать шрифт системы",
   "setLowPriority": "Низкий приоритет",
-  "unsetLowPriority": "Снять низкий приоритет"
+  "unsetLowPriority": "Снять низкий приоритет",
+  "jitsiFeatureFlag": "Групповые звонки (Jitsi)"
 }

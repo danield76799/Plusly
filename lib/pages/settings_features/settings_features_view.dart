@@ -66,6 +66,11 @@ class SettingsFeaturesView extends StatelessWidget {
                         title: L10n.of(context).latexMath,
                         setting: AppSettings.latexMath,
                       ),
+                      const ListDivider(),
+                      SettingsSwitchListTile.adaptive(
+                        title: L10n.of(context).jitsiFeatureFlag,
+                        setting: AppSettings.experimentalJitsi,
+                      ),
                     ],
                   ),
                 ),
