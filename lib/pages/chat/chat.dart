@@ -29,6 +29,7 @@ import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:matrix/matrix.dart';
+import 'package:mime/mime.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -807,7 +808,7 @@ class ChatController extends State<ChatPageWithRoom>
     String path,
     int duration,
     List<int> waveform,
-    String? fileName,
+    String fileName,
   ) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final audioFile = XFile(path);
@@ -819,10 +820,14 @@ class ChatController extends State<ChatPageWithRoom>
     final bytes = bytesResult.result;
     if (bytes == null) return;
 
-    final file = MatrixAudioFile(
-      bytes: bytes,
-      name: fileName ?? audioFile.path,
-    );
+    final mimeType = lookupMimeType(fileName, headerBytes: bytes);
+    final ext = mimeType == null ? null : extensionFromMime(mimeType);
+    if (ext != null) {
+      fileName =
+          'voice_message_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    }
+
+    final file = MatrixAudioFile(bytes: bytes, name: fileName);
 
     await room
         .sendFileEvent(

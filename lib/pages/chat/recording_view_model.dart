@@ -20,10 +20,7 @@ import 'events/audio_player.dart';
 class RecordingViewModel extends StatefulWidget {
   final Widget Function(BuildContext, RecordingViewModelState) builder;
 
-  const RecordingViewModel({
-    required this.builder,
-    super.key,
-  });
+  const RecordingViewModel({required this.builder, super.key});
 
   @override
   RecordingViewModelState createState() => RecordingViewModelState();
@@ -72,10 +69,10 @@ class RecordingViewModelState extends State<RecordingViewModel> {
           ? AudioEncoder.wav
           // Everywhere else we use opus if supported by the platform:
           : await audioRecorder.isEncoderSupported(AudioEncoder.opus)
-              ? AudioEncoder.opus
-              : AudioEncoder.aacLc;
+          ? AudioEncoder.opus
+          : AudioEncoder.aacLc;
       fileName =
-          'recording${DateTime.now().microsecondsSinceEpoch}.${codec.fileExtension}';
+          'voice_message_${DateTime.now().millisecondsSinceEpoch}.${codec.fileExtension}';
       String? path;
       if (!kIsWeb) {
         final tempDir = await getTemporaryDirectory();
@@ -126,8 +123,9 @@ class RecordingViewModelState extends State<RecordingViewModel> {
 
   void _subscribe() {
     _recorderSubscription?.cancel();
-    _recorderSubscription =
-        Timer.periodic(const Duration(milliseconds: 100), (_) async {
+    _recorderSubscription = Timer.periodic(const Duration(milliseconds: 100), (
+      _,
+    ) async {
       final amplitude = await _audioRecorder!.getAmplitude();
       var value = 100 + amplitude.current * 2;
       value = value < 1 ? 1 : value;
@@ -177,8 +175,9 @@ class RecordingViewModelState extends State<RecordingViewModel> {
       String path,
       int duration,
       List<int> waveform,
-      String? fileName,
-    ) onSend,
+      String fileName,
+    )
+    onSend,
   ) async {
     _recorderSubscription?.cancel();
     final path = await _audioRecorder?.stop();
@@ -197,7 +196,7 @@ class RecordingViewModelState extends State<RecordingViewModel> {
       isSending = true;
     });
     try {
-      await onSend(path, duration.inMilliseconds, waveform, fileName);
+      await onSend(path, duration.inMilliseconds, waveform, fileName!);
     } catch (e, s) {
       Logs().e('Unable to send voice message', e, s);
       setState(() {
