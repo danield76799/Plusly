@@ -1,8 +1,8 @@
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/pages/chat/chat_view.dart';
-import 'package:fluffychat/pages/chat_list/chat_list_body.dart';
-import 'package:fluffychat/pages/chat_list/search_title.dart';
-import 'package:fluffychat/pages/invitation_selection/invitation_selection_view.dart';
+import 'package:extera_next/config/setting_keys.dart';
+import 'package:extera_next/pages/chat/chat_view.dart';
+import 'package:extera_next/pages/chat_list/chat_list_body.dart';
+import 'package:extera_next/pages/chat_list/search_title.dart';
+import 'package:extera_next/pages/invitation_selection/invitation_selection_view.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
