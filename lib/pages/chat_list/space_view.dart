@@ -28,12 +28,7 @@ enum AddRoomType { chat, subspace }
 
 enum SpaceChildAction { edit, moveToSpace, removeFromSpace }
 
-enum SpaceActions {
-  settings,
-  invite,
-  members,
-  leave,
-}
+enum SpaceActions { settings, invite, members, leave }
 
 class SpaceView extends StatefulWidget {
   final String spaceId;
@@ -128,8 +123,9 @@ class _SpaceViewState extends State<SpaceView> {
     } catch (e, s) {
       Logs().w('Unable to load hierarchy', e, s);
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
       setState(() {
         _isLoading = false;
       });
@@ -145,9 +141,7 @@ class _SpaceViewState extends State<SpaceView> {
       builder: (_) => PublicRoomDialog(
         chunk: item,
         via: space?.spaceChildren
-            .firstWhereOrNull(
-              (child) => child.roomId == item.roomId,
-            )
+            .firstWhereOrNull((child) => child.roomId == item.roomId)
             ?.via,
       ),
     );
@@ -228,8 +222,9 @@ class _SpaceViewState extends State<SpaceView> {
         if (roomType == AddRoomType.subspace) {
           roomId = await client.createSpace(
             name: names,
-            visibility:
-                isPublicSpace ? sdk.Visibility.public : sdk.Visibility.private,
+            visibility: isPublicSpace
+                ? sdk.Visibility.public
+                : sdk.Visibility.private,
           );
         } else {
           roomId = await client.createGroupChat(
@@ -238,8 +233,9 @@ class _SpaceViewState extends State<SpaceView> {
             preset: isPublicSpace
                 ? CreateRoomPreset.publicChat
                 : CreateRoomPreset.privateChat,
-            visibility:
-                isPublicSpace ? sdk.Visibility.public : sdk.Visibility.private,
+            visibility: isPublicSpace
+                ? sdk.Visibility.public
+                : sdk.Visibility.private,
             initialState: isPublicSpace
                 ? null
                 : [
@@ -348,8 +344,9 @@ class _SpaceViewState extends State<SpaceView> {
               .map(
                 (space) => AdaptiveModalAction(
                   value: space,
-                  label: space
-                      .getLocalizedDisplayname(MatrixLocals(L10n.of(context))),
+                  label: space.getLocalizedDisplayname(
+                    MatrixLocals(L10n.of(context)),
+                  ),
                 ),
               )
               .toList(),
@@ -396,19 +393,12 @@ class _SpaceViewState extends State<SpaceView> {
     final displayname =
         room?.getLocalizedDisplayname() ?? L10n.of(context).nothingFound;
     const avatarSize = Avatar.defaultSize / 1.5;
-    final isAdmin = room?.canChangeStateEvent(
-          EventTypes.SpaceChild,
-        ) ==
-        true;
+    final isAdmin = room?.canChangeStateEvent(EventTypes.SpaceChild) == true;
     return Scaffold(
       appBar: AppBar(
         leading: FluffyThemes.isColumnMode(context)
             ? null
-            : Center(
-                child: CloseButton(
-                  onPressed: widget.onBack,
-                ),
-              ),
+            : Center(child: CloseButton(onPressed: widget.onBack)),
         automaticallyImplyLeading: false,
         titleSpacing: FluffyThemes.isColumnMode(context) ? null : 0,
         title: ListTile(
@@ -514,27 +504,22 @@ class _SpaceViewState extends State<SpaceView> {
         ],
       ),
       body: room == null
-          ? const Center(
-              child: Icon(
-                Icons.search_outlined,
-                size: 80,
-              ),
-            )
+          ? const Center(child: Icon(Icons.search_outlined, size: 80))
           : StreamBuilder(
               stream: room.client.onSync.stream
                   .where((s) => s.hasRoomUpdate)
                   .rateLimit(const Duration(seconds: 1)),
               builder: (context, snapshot) {
-                final childrenIds = room.spaceChildren
-                    .map((c) => c.roomId)
-                    .whereType<String>()
-                    .toSet();
+                // final childrenIds = room.spaceChildren
+                //     .map((c) => c.roomId)
+                //     .whereType<String>()
+                //     .toSet();
 
-                final joinedRooms = Map.fromEntries(
-                  room.client.rooms
-                      .where((room) => childrenIds.remove(room.id))
-                      .map((room) => MapEntry(room.id, room)),
-                );
+                // final joinedRooms = Map.fromEntries(
+                //   room.client.rooms
+                //       .where((room) => childrenIds.remove(room.id))
+                //       .map((room) => MapEntry(room.id, room)),
+                // );
 
                 final joinedParents = room.spaceParents
                     .map((parent) {
@@ -578,16 +563,17 @@ class _SpaceViewState extends State<SpaceView> {
                     SliverList.builder(
                       itemCount: joinedParents.length,
                       itemBuilder: (context, i) {
-                        final displayname =
-                            joinedParents[i].getLocalizedDisplayname();
+                        final displayname = joinedParents[i]
+                            .getLocalizedDisplayname();
                         return Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 1,
                           ),
                           child: Material(
-                            borderRadius:
-                                BorderRadius.circular(AppConfig.borderRadius),
+                            borderRadius: BorderRadius.circular(
+                              AppConfig.borderRadius,
+                            ),
                             clipBehavior: Clip.hardEdge,
                             child: ListTile(
                               minVerticalPadding: 0,
@@ -637,40 +623,50 @@ class _SpaceViewState extends State<SpaceView> {
                           );
                         }
                         final item = _discoveredChildren[i];
-                        final displayname = item.name ??
+                        var joinedRoom = room.client.getRoomById(item.roomId);
+                        final displayname =
+                            item.name ??
                             item.canonicalAlias ??
+                            joinedRoom?.getLocalizedDisplayname() ??
                             L10n.of(context).emptyChat;
+                        final avatarUrl = item.avatarUrl ?? joinedRoom?.avatar;
                         if (!displayname.toLowerCase().contains(filter)) {
                           return const SizedBox.shrink();
                         }
-                        final joinedRoom = joinedRooms[item.roomId];
+                        if (joinedRoom?.membership == .leave) {
+                          joinedRoom = null;
+                        }
                         return Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 1,
                           ),
                           child: Material(
-                            borderRadius:
-                                BorderRadius.circular(AppConfig.borderRadius),
+                            borderRadius: BorderRadius.circular(
+                              AppConfig.borderRadius,
+                            ),
                             clipBehavior: Clip.hardEdge,
-                            color: joinedRoom != null &&
+                            color:
+                                joinedRoom != null &&
                                     widget.activeChat == joinedRoom.id
                                 ? theme.colorScheme.secondaryContainer
                                 : Colors.transparent,
                             child: HoverBuilder(
                               builder: (context, hovered) => ListTile(
-                                visualDensity:
-                                    const VisualDensity(vertical: -0.5),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(horizontal: 8),
+                                visualDensity: const VisualDensity(
+                                  vertical: -0.5,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                ),
                                 onTap: joinedRoom != null
-                                    ? () => widget.onChatTab(joinedRoom)
+                                    ? () => widget.onChatTab(joinedRoom!)
                                     : () => _joinChildRoom(item),
                                 onLongPress: isAdmin
                                     ? () => _showSpaceChildEditMenu(
-                                          context,
-                                          item.roomId,
-                                        )
+                                        context,
+                                        item.roomId,
+                                      )
                                     : null,
                                 leading: hovered && isAdmin
                                     ? SizedBox.square(
@@ -679,30 +675,34 @@ class _SpaceViewState extends State<SpaceView> {
                                           splashRadius: avatarSize,
                                           iconSize: 14,
                                           style: IconButton.styleFrom(
-                                            foregroundColor: theme.colorScheme
+                                            foregroundColor: theme
+                                                .colorScheme
                                                 .onTertiaryContainer,
                                             backgroundColor: theme
-                                                .colorScheme.tertiaryContainer,
+                                                .colorScheme
+                                                .tertiaryContainer,
                                           ),
                                           onPressed: () =>
                                               _showSpaceChildEditMenu(
-                                            context,
-                                            item.roomId,
-                                          ),
+                                                context,
+                                                item.roomId,
+                                              ),
                                           icon: const Icon(Icons.edit_outlined),
                                         ),
                                       )
                                     : Avatar(
                                         size: avatarSize,
-                                        mxContent: item.avatarUrl,
+                                        mxContent: avatarUrl,
                                         name: '#',
                                         backgroundColor:
                                             theme.colorScheme.surfaceContainer,
-                                        textColor: item.name?.darkColor ??
+                                        textColor:
+                                            item.name?.darkColor ??
                                             theme.colorScheme.onSurface,
                                         border: item.roomType == 'm.space'
                                             ? BorderSide(
-                                                color: theme.colorScheme
+                                                color: theme
+                                                    .colorScheme
                                                     .surfaceContainerHighest,
                                               )
                                             : null,

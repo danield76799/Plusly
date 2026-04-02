@@ -71,7 +71,7 @@ Future<void> oidcLoginFlow(
     options: FlutterWebAuth2Options(
       useWebview: false,
       preferEphemeral: true,
-      intentFlags: ephemeralIntentFlags,
+      // intentFlags: ephemeralIntentFlags,
       windowName: '_self',
     ),
   );

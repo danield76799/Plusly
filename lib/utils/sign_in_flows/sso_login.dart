@@ -59,7 +59,7 @@ Future<void> ssoLoginFlow(
     options: FlutterWebAuth2Options(
       useWebview: false,
       preferEphemeral: true,
-      intentFlags: ephemeralIntentFlags,
+      // intentFlags: ephemeralIntentFlags,
     ),
   );
   final token = Uri.parse(result).queryParameters['loginToken'];

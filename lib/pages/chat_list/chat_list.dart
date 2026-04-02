@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/pages/chat_list/invite_dialog.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/utils/check_updates.dart';
@@ -345,6 +346,8 @@ class ChatListController extends State<ChatList>
 
   void _processIncomingSharedMedia(List<SharedMediaFile> files) {
     if (files.isEmpty) return;
+
+    files.removeWhere((file) => file.path.startsWith(AppConfig.deepLinkPrefix) || file.path.startsWith(AppConfig.appSsoUrlScheme));
 
     showScaffoldDialog(
       context: context,
