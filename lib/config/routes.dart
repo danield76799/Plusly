@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:extera_next/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:extera_next/pages/chat_privacy/chat_privacy.dart';
 import 'package:extera_next/pages/chat_thread/thread.dart';
+import 'package:extera_next/pages/chat_threads/chat_threads.dart';
 import 'package:extera_next/pages/chat_widgets/chat_widgets.dart';
 import 'package:extera_next/pages/intro/intro_page.dart';
 import 'package:extera_next/pages/notifications/notifications.dart';
@@ -211,6 +212,11 @@ abstract class AppRoutes {
                     GoRoute(
                       path: 'threads',
                       redirect: loggedOutRedirect,
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        ChatThreads(roomId: state.pathParameters['roomid']!),
+                      ),
                       routes: [
                         GoRoute(
                           path: ':threadroot',
@@ -454,8 +460,8 @@ abstract class AppRoutes {
                     roomId: state.pathParameters['roomid']!,
                     shareItems: shareItems,
                     eventId: state.uri.queryParameters['event'],
-                    showThreadRoots:
-                        state.uri.queryParameters['threads'] == 'true',
+                    // showThreadRoots:
+                    //     state.uri.queryParameters['threads'] == 'true',
                   ),
                 );
               },
@@ -463,6 +469,11 @@ abstract class AppRoutes {
               routes: [
                 GoRoute(
                   path: 'threads',
+                  pageBuilder: (context, state) => defaultPageBuilder(
+                    context,
+                    state,
+                    ChatThreads(roomId: state.pathParameters['roomid']!),
+                  ),
                   redirect: loggedOutRedirect,
                   routes: [
                     GoRoute(
@@ -477,6 +488,7 @@ abstract class AppRoutes {
                           eventId: state.uri.queryParameters['event'],
                         ),
                       ),
+                      redirect: loggedOutRedirect,
                     ),
                   ],
                 ),

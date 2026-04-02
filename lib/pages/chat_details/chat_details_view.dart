@@ -294,7 +294,7 @@ class ChatDetailsView extends StatelessWidget {
                             L10n.of(context).chatThreadsDescription,
                           ),
                           onTap: () =>
-                              context.push('/rooms/${room.id}?threads=true'),
+                              context.push('/rooms/${room.id}/threads'),
                           trailing: const Icon(Icons.chevron_right_outlined),
                         ),
                         const ListDivider(),
