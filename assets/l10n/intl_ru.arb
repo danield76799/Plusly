@@ -2409,7 +2409,7 @@
 		"type": "String",
 		"placeholders": {}
 	},
-	"voiceMessage": "Отправить голосовое сообщение",
+	"voiceMessage": "Голосовое сообщение",
 	"@voiceMessage": {
 		"type": "String",
 		"placeholders": {}
