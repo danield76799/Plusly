@@ -289,6 +289,7 @@ class ChatController extends State<ChatPageWithRoom>
           scrollController.scrollToIndex(
             anchorIndex + 1, // index 0 is the typing indicator
             preferPosition: AutoScrollPosition.begin,
+            duration: Duration.zero,
           );
         });
       }
