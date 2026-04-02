@@ -7,6 +7,8 @@ String getDownloadsDirectory() {
     return "/sdcard/Download/Extera";
   } else if (PlatformInfos.isLinux) {
     return "${Platform.environment['HOME']}/Downloads/Extera";
+  } else if (PlatformInfos.isWindows) {
+    return "${Platform.environment['USERPROFILE']}\\Downloads\\Extera";
   }
 
   return "";
