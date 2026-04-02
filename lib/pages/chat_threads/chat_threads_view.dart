@@ -76,21 +76,17 @@ class ChatThreadsView extends StatelessWidget {
             Icon(
               Icons.forum_outlined,
               size: 80,
-              color: theme.colorScheme.secondary.withAlpha(127),
+              color: theme.colorScheme.secondary,
             ),
             const SizedBox(height: 16),
             Text(
-              L10n.of(context).noMessagesYet,
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.onSurface.withAlpha(178),
-              ),
+              L10n.of(context).noThreadsYet,
+              style: theme.textTheme.titleLarge,
             ),
             const SizedBox(height: 8),
             Text(
-              L10n.of(context).chatThreadsDescription,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withAlpha(127),
-              ),
+              L10n.of(context).noThreadsYetLong,
+              style: theme.textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
           ],

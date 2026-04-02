@@ -3604,5 +3604,7 @@
   "startVideoCall": "Start video call",
   "joinVoiceCall": "Join voice call",
   "joinVideoCall": "Join video call",
-  "live": "Live"
+  "live": "Live",
+  "noThreadsYet": "No threads yet",
+  "noThreadsYetLong": "There are no any threads to view."
 }

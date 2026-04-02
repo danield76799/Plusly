@@ -3702,5 +3702,7 @@
   "startVideoCall": "Видео-конференция",
   "joinVoiceCall": "Аудио-конференция",
   "joinVideoCall": "Видео-конференция",
-  "live": "Live"
+  "live": "Live",
+  "noThreadsYet": "Нет обсуждений",
+  "noThreadsYetLong": "В этой комнате ещё нет отдельных веток обсуждений."
 }
