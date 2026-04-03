@@ -1,6 +1,6 @@
-import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/pages/profile/profile.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
+import 'package:extera_next/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
@@ -18,7 +18,7 @@ void showProfile({
       'no_profile_warning': noProfileWarning.toString(),
     },
   ).toString();
-  if (FluffyThemes.isThreeColumnMode(context)) {
+  if (PlatformInfos.isMobile) {
     showAdaptiveBottomSheet(
       context: context,
       builder: (p0) => ProfilePage(profile, noProfileWarning: noProfileWarning),
