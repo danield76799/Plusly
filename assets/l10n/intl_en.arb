@@ -3607,5 +3607,12 @@
   "live": "Live",
   "noThreadsYet": "No threads yet",
   "noThreadsYetLong": "There are no any threads to view.",
-  "stickerScale": "Sticker scale"
+  "stickerScale": "Sticker scale",
+  "videoNote": "Video note",
+  "videoNotes": "Video notes",
+  "enableVideoNotes": "Enable video notes",
+  "longPressToRecordVideoNote": "Long press to record video note.",
+  "tapToSwitchToVoice": "Tap to switch to voice message",
+  "tapToSwitchToVideo": "Tap to switch to video note",
+  "sendVideoNote": "Send video note"
 }

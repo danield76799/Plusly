@@ -1,4 +1,5 @@
 import 'package:extera_next/config/setting_keys.dart';
+import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/widgets/list_divider.dart';
 import 'package:extera_next/widgets/settings_switch_list_tile.dart';
 import 'package:flutter/material.dart';
@@ -71,6 +72,13 @@ class SettingsFeaturesView extends StatelessWidget {
                         title: L10n.of(context).jitsiFeatureFlag,
                         setting: AppSettings.experimentalJitsi,
                       ),
+                      if (PlatformInfos.isMobile) ...[
+                        const ListDivider(),
+                        SettingsSwitchListTile.adaptive(
+                          title: L10n.of(context).enableVideoNotes,
+                          setting: AppSettings.enableVideoNotes,
+                        ),
+                      ],
                     ],
                   ),
                 ),

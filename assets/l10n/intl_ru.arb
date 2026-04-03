@@ -3705,5 +3705,12 @@
   "live": "Live",
   "noThreadsYet": "Нет обсуждений",
   "noThreadsYetLong": "В этой комнате ещё нет отдельных веток обсуждений.",
-  "stickerScale": "Размер стикеров"
+  "stickerScale": "Размер стикеров",
+  "videoNote": "Видео-заметка",
+  "videoNotes": "Видео-заметки",
+  "enableVideoNotes": "Включить видео-заметки",
+  "longPressToRecordVideoNote": "Зажмите чтобы записать видео-заметку.",
+  "tapToSwitchToVoice": "Нажмите для переключения на голосовое сообщение",
+  "tapToSwitchToVideo": "Нажмите для переключения на видео-заметку",
+  "sendVideoNote": "Отправить видео-заметку"
 }

@@ -19,12 +19,12 @@ void showProfile({
     },
   ).toString();
   if (PlatformInfos.isMobile) {
+    context.push(url);
+  } else {
     showAdaptiveBottomSheet(
       context: context,
       builder: (p0) => ProfilePage(profile, noProfileWarning: noProfileWarning),
       useRootNavigator: true, // we are PROBABLY not on mobile, use root nav
     );
-  } else {
-    context.push(url);
   }
 }

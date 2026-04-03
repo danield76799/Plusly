@@ -54,6 +54,7 @@ import 'package:extera_next/widgets/matrix.dart';
 import 'package:extera_next/widgets/share_scaffold_dialog.dart';
 import '../../utils/account_bundles.dart';
 import '../../utils/localized_exception_extension.dart';
+import '../../utils/resize_video.dart';
 import 'send_file_dialog.dart';
 import 'send_location_dialog.dart';
 
@@ -841,6 +842,61 @@ class ChatController extends State<ChatPageWithRoom>
               'duration': duration,
               'waveform': waveform,
             },
+          },
+          threadLastEventId: thread?.lastEvent?.eventId,
+          threadRootEventId: thread?.rootEvent.eventId,
+        )
+        .catchError((e) {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(content: Text((e as Object).toLocalizedString(context))),
+          );
+          return null;
+        });
+    setState(() {
+      replyEvent = null;
+    });
+  }
+
+  Future<void> onVideoNoteSend(
+    String path,
+    int duration,
+    String fileName,
+  ) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final videoFile = XFile(path);
+
+    final bytesResult = await showFutureLoadingDialog(
+      context: context,
+      future: videoFile.readAsBytes,
+    );
+    final bytes = bytesResult.result;
+    if (bytes == null) return;
+
+    final mimeType = lookupMimeType(fileName, headerBytes: bytes);
+    final ext = mimeType == null ? null : extensionFromMime(mimeType);
+    if (ext != null) {
+      fileName =
+          'video_note_${DateTime.now().millisecondsSinceEpoch}.$ext';
+    }
+
+    final file = await videoFile.resizeVideo();
+
+    MatrixImageFile? thumbnail;
+    try {
+      thumbnail = await videoFile.getVideoThumbnail();
+    } catch (e, s) {
+      Logs().w('Failed to generate video note thumbnail', e, s);
+    }
+
+    file.info['duration'] = duration;
+
+    await room
+        .sendFileEvent(
+          file,
+          thumbnail: thumbnail,
+          inReplyTo: replyEvent,
+          extraContent: {
+            'xyz.extera.video_note': {},
           },
           threadLastEventId: thread?.lastEvent?.eventId,
           threadRootEventId: thread?.rootEvent.eventId,
