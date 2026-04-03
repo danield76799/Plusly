@@ -61,7 +61,7 @@ extension IsStateExtension on Event {
       // remove state events that we don't want to render
       (isState || !AppConfig.hideAllStateEvents) &&
       // hide simple join/leave member events in public rooms
-      (!AppSettings.hideUnimportantStateEvents.value ||
+      (!AppSettings.hideMemberChangesInPublicChats.value ||
           type != EventTypes.RoomMember ||
           room.joinRules != JoinRules.public ||
           content.tryGet<String>('membership') == 'ban' ||

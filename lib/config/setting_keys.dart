@@ -58,8 +58,8 @@ enum AppSettings<T> {
   ),
   hideRedactedEvents<bool>('chat.fluffy.hideRedactedEvents', false),
   hideUnknownEvents<bool>('chat.fluffy.hideUnknownEvents', true),
-  hideUnimportantStateEvents<bool>(
-      'chat.fluffy.hideUnimportantStateEvents', true),
+  // hideUnimportantStateEvents<bool>(
+  //     'chat.fluffy.hideUnimportantStateEvents', true),
   separateChatTypes<bool>('chat.fluffy.separateChatTypes', false),
   autoplayImages<bool>('chat.fluffy.autoplay_images', true),
   sendTypingNotifications<bool>(
