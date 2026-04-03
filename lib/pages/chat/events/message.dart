@@ -13,7 +13,6 @@ import 'package:swipe_to_action/swipe_to_action.dart';
 import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/pages/chat/events/room_creation_state_event.dart';
 import 'package:extera_next/utils/date_time_extension.dart';
-import 'package:extera_next/utils/file_description.dart';
 import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/utils/string_color.dart';
 import 'package:extera_next/widgets/avatar.dart';

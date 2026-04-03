@@ -14,7 +14,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/pages/chat/events/video_player.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
-import 'package:extera_next/utils/file_description.dart';
 import 'package:extera_next/utils/date_time_extension.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:extera_next/widgets/avatar.dart';
