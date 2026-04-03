@@ -9,7 +9,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/pages/image_viewer/image_viewer.dart';
-import 'package:extera_next/utils/file_description.dart';
 import 'package:extera_next/utils/url_launcher.dart';
 import 'package:extera_next/widgets/mxc_image.dart';
 import '../../../widgets/blur_hash.dart';

@@ -9,7 +9,6 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/utils/file_description.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:extera_next/utils/url_launcher.dart';
 

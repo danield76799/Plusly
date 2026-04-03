@@ -10,7 +10,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/utils/file_description.dart';
 import 'package:extera_next/utils/url_launcher.dart';
 import '../../../utils/matrix_sdk_extensions/event_extension.dart';
 
