@@ -8,10 +8,32 @@ import 'package:extera_next/pages/chat/recording_view_model.dart';
 class RecordingInputRow extends StatelessWidget {
   final RecordingViewModelState state;
   final Future<void> Function(String, int, List<int>, String) onSend;
+  final Future<void> Function(String, int, String)? onVideoSend;
   const RecordingInputRow({
     required this.state,
     required this.onSend,
+    this.onVideoSend,
     super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Video recording is now handled by VideoNoteRecordingDialog,
+    // so this widget only handles audio recording.
+    return _AudioRecordingInputRow(
+      state: state,
+      onSend: onSend,
+    );
+  }
+}
+
+class _AudioRecordingInputRow extends StatelessWidget {
+  final RecordingViewModelState state;
+  final Future<void> Function(String, int, List<int>, String) onSend;
+
+  const _AudioRecordingInputRow({
+    required this.state,
+    required this.onSend,
   });
 
   @override
@@ -23,12 +45,12 @@ class RecordingInputRow extends StatelessWidget {
     return SizedBox(
       height: ChatInputRow.height,
       child: Row(
-        crossAxisAlignment: .center,
-        mainAxisAlignment: .spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const SizedBox(width: 4),
           Container(
-            alignment: .center,
+            alignment: Alignment.center,
             width: 48,
             child: IconButton(
               tooltip: L10n.of(context).cancel,
@@ -39,7 +61,7 @@ class RecordingInputRow extends StatelessWidget {
           ),
           if (state.isPaused)
             Container(
-              alignment: .center,
+              alignment: Alignment.center,
               width: 48,
               child: IconButton(
                 tooltip: L10n.of(context).resume,
@@ -49,7 +71,7 @@ class RecordingInputRow extends StatelessWidget {
             )
           else
             Container(
-              alignment: .center,
+              alignment: Alignment.center,
               width: 48,
               child: IconButton(
                 tooltip: L10n.of(context).pause,
@@ -63,8 +85,8 @@ class RecordingInputRow extends StatelessWidget {
               builder: (context, constraints) {
                 const width = 4;
                 return Row(
-                  mainAxisSize: .min,
-                  mainAxisAlignment: .end,
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: state.amplitudeTimeline.reversed
                       .take((constraints.maxWidth / (width + 2)).floor())
                       .toList()

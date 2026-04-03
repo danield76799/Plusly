@@ -88,6 +88,7 @@ enum AppSettings<T> {
   audioRecordingNoiseSuppress<bool>('audioRecordingNoiseSuppress', true),
   audioRecordingBitRate<int>('audioRecordingBitRate', 64000),
   audioRecordingSamplingRate<int>('audioRecordingSamplingRate', 44100),
+  enableVideoNotes<bool>('xyz.extera.next.enableVideoNotes', false),
   enableSoftLogout<bool>('enableSoftLogout', false),
   enableGradient<bool>('enableGradient', true),
   pushNotificationsGatewayUrl<String>(

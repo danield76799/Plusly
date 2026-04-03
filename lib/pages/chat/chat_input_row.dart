@@ -7,6 +7,7 @@ import 'package:matrix/matrix.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/recording_input_row.dart';
 import 'package:extera_next/pages/chat/recording_view_model.dart';
+import 'package:extera_next/pages/chat/video_note_recording_dialog.dart';
 import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
@@ -35,6 +36,7 @@ class ChatInputRow extends StatelessWidget {
           return RecordingInputRow(
             state: recordingViewModel,
             onSend: controller.onVoiceMessageSend,
+            onVideoSend: controller.onVideoNoteSend,
           );
         }
         return Row(
@@ -325,8 +327,17 @@ class ChatInputRow extends StatelessWidget {
                         PlatformInfos.platformCanRecord &&
                             controller.sendController.text.isEmpty
                         ? IconButton(
-                            tooltip: L10n.of(context).voiceMessage,
-                            onPressed: () =>
+                            tooltip: recordingViewModel.recordingMode == RecordingMode.video
+                                ? L10n.of(context).videoNote
+                                : L10n.of(context).voiceMessage,
+                            onPressed: () {
+                              // On tap: show tip and toggle mode if video notes enabled
+                              final videoNotesEnabled = AppSettings.enableVideoNotes.value && PlatformInfos.isMobile;
+                              if (videoNotesEnabled) {
+                                final newMode = recordingViewModel.recordingMode == RecordingMode.audio
+                                    ? RecordingMode.video
+                                    : RecordingMode.audio;
+                                recordingViewModel.setRecordingMode(newMode);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     margin: const EdgeInsets.only(
@@ -337,19 +348,54 @@ class ChatInputRow extends StatelessWidget {
                                     ),
                                     showCloseIcon: true,
                                     content: Text(
-                                      L10n.of(
-                                        context,
-                                      ).longPressToRecordVoiceMessage,
+                                      newMode == RecordingMode.video
+                                          ? L10n.of(context).longPressToRecordVideoNote
+                                          : L10n.of(context).longPressToRecordVoiceMessage,
                                     ),
                                   ),
-                                ),
-                            onLongPress: () => recordingViewModel
-                                .startRecording(controller.room),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    margin: const EdgeInsets.only(
+                                      bottom: height + 16,
+                                      left: 16,
+                                      right: 16,
+                                      top: 16,
+                                    ),
+                                    showCloseIcon: true,
+                                    content: Text(
+                                      L10n.of(context).longPressToRecordVoiceMessage,
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            onLongPress: () {
+                              if (recordingViewModel.recordingMode == RecordingMode.video) {
+                                // Open full-screen video note dialog
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    fullscreenDialog: true,
+                                    builder: (_) => VideoNoteRecordingDialog(
+                                      room: controller.room,
+                                      onVideoSend: controller.onVideoNoteSend,
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                recordingViewModel.startRecording(controller.room);
+                              }
+                            },
                             style: IconButton.styleFrom(
                               backgroundColor: theme.bubbleColor,
                               foregroundColor: theme.onBubbleColor,
                             ),
-                            icon: const Icon(Icons.mic_none_outlined),
+                            icon: Icon(
+                              recordingViewModel.recordingMode == RecordingMode.video
+                                  ? Icons.camera_alt_outlined
+                                  : Icons.mic_none_outlined,
+                            ),
                           )
                         : IconButton(
                             tooltip: L10n.of(context).send,
