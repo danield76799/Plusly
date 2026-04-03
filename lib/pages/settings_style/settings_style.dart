@@ -200,6 +200,13 @@ class SettingsStyleController extends State<SettingsStyle> {
     setState(() {});
   }
 
+  void changeStickerScale(double d) {
+    AppSettings.stickerScale.setItem(
+      d,
+    );
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) => SettingsStyleView(this);
 }

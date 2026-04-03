@@ -605,7 +605,7 @@ class _MessageState extends State<Message> {
                                       : const Text('Thread'),
                                 ],
                               ),
-                              onTap: () => context.go(
+                              onTap: () => context.push(
                                 '/rooms/${event.roomId}/threads/${event.eventId}',
                               ),
                             ),

@@ -125,7 +125,7 @@ class MessageContent extends StatelessWidget {
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
             final maxSize = event.messageType == MessageTypes.Sticker
-                ? 128.0
+                ? 128.0 * AppSettings.stickerScale.value
                 : event.messageType == MessageTypes.Image
                 ? 512.0
                 : 256.0;

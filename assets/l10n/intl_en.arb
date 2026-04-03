@@ -3606,5 +3606,6 @@
   "joinVideoCall": "Join video call",
   "live": "Live",
   "noThreadsYet": "No threads yet",
-  "noThreadsYetLong": "There are no any threads to view."
+  "noThreadsYetLong": "There are no any threads to view.",
+  "stickerScale": "Sticker scale"
 }
