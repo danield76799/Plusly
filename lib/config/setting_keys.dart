@@ -13,6 +13,7 @@ abstract class SettingKeys {
 }
 
 enum AppSettings<T> {
+  stickerScale<double>('xyz.extera.stickerScale', 2),
   experimentalJitsi<bool>('xyz.extera.jitsi', false),
   jitsiDomain<String>('xyz.extera.jitsi_domain', 'meet.jit.si'),
   applicationName<String>('xyz.extera.app_name', 'Extera'),

@@ -543,6 +543,21 @@ class SettingsStyleView extends StatelessWidget {
                       semanticFormatterCallback: (d) => d.toString(),
                       onChanged: controller.changeAvatarBorderRadius,
                     ),
+                    const ListDivider(),
+                    ListTile(
+                      title: Text(L10n.of(context).stickerScale),
+                      trailing: Text(
+                        '× ${AppSettings.stickerScale.value}',
+                      ),
+                    ),
+                    Slider.adaptive(
+                      min: 1,
+                      max: 5,
+                      divisions: 20,
+                      value: AppSettings.stickerScale.value,
+                      semanticFormatterCallback: (d) => d.toString(),
+                      onChanged: controller.changeStickerScale,
+                    ),
                   ],
                 ),
               ),

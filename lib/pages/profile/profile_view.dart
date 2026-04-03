@@ -123,6 +123,7 @@ class ProfileView extends StatelessWidget {
         leading: Center(
           child: BackButton(onPressed: Navigator.of(context).pop),
         ),
+        title: Text(displayname),
       ),
       body: MaxWidthBody(
         withoutVerticalPadding: true,
