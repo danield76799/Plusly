@@ -95,6 +95,22 @@ class PushHelper {
       }
       helper.client = client;
 
+      // Deduplicate: if multiple clients are in the same room, only the first
+      // client in the list that has this room should show the notification.
+      // This prevents duplicate push notifications when 2+ accounts share a room.
+      if (notification.roomId != null && clients.isNotEmpty) {
+        final firstClientInRoom = clients.firstWhereOrNull(
+          (c) => c.rooms.any((r) => r.id == notification.roomId),
+        );
+        if (firstClientInRoom != null && firstClientInRoom != client) {
+          Logs().v(
+            'Another client (${firstClientInRoom.clientName}) already handles '
+            'notifications for room ${notification.roomId}. Skipping for ${client.clientName}.',
+          );
+          return null;
+        }
+      }
+
       if (_isInForeground(notification, activeRoomId, activeClient, client)) {
         Logs().v('Room is in foreground. Stop push helper here.');
         return null;
@@ -156,11 +172,9 @@ class PushHelper {
   Future<void> _crashHandler(Object e, StackTrace s) async {
     Logs().e('Push Helper has crashed!', e, s);
 
-    final notificationId = '${client.clientName}-${notification.roomId}';
-
     l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
     flutterLocalNotificationsPlugin.show(
-      id: notificationId.hashCode,
+      id: notification.roomId?.hashCode ?? 0,
       title: l10n!.newMessageInFluffyChat,
       body: l10n!.openAppToReadMessages,
       notificationDetails: NotificationDetails(
@@ -221,7 +235,6 @@ class PushHelper {
               removeMarkdown: true,
             );
 
-      final id = '${client.clientName}-${notification.roomId}'.hashCode;
       final title = event.room.getLocalizedDisplayname(matrixLocals);
       final roomName = event.room.getLocalizedDisplayname(matrixLocals);
 
@@ -250,14 +263,14 @@ class PushHelper {
           ?.createNotificationChannel(roomsChannel);
 
       final platformChannelSpecifics = await _getPlatformChannelSpecifics(
-        id,
+        notification.roomId?.hashCode ?? 0,
         body,
         title,
         roomName,
       );
 
       await flutterLocalNotificationsPlugin.show(
-        id: id,
+        id: notification.roomId?.hashCode ?? 0,
         title: title,
         body: body,
         notificationDetails: platformChannelSpecifics,
