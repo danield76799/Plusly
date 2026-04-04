@@ -3661,7 +3661,7 @@
   "audioMessage": "Аудио-сообщение",
   "noCustomPrivacySettings": "Нет чатов с особой конфиденциальностью",
   "noCustomPrivacySettingsDetails": "Чаты с особыми настройками конфиденциальности будут появляться здесь. Вы можете задавать такие настройки в секции \"Конфиденциальность\" на странице настроек чата.",
-  "selectPushDistributor": "Выберите провайдер push-уведомлений",
+  "selectPushDistributor": "Выберите поставщика push-уведомлений",
   "joinRoomByLinkConfirmation": "Присоединиться к {room}?",
   "@joinRoomByLinkConfirmation": {
     "type": "String",
