@@ -470,10 +470,9 @@ class _MessageState extends State<Message> {
                                   ),
                                 ),
                                 constraints: BoxConstraints(
-                                  maxWidth: (_replyEventFuture != null
-                                          ? _calculateMediaWidth(
-                                              displayEvent,
-                                            )
+                                  maxWidth:
+                                      (_replyEventFuture != null
+                                          ? _calculateMediaWidth(displayEvent)
                                           : null) ??
                                       FluffyThemes.columnWidth * 1.5,
                                 ),
