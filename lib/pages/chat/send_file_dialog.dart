@@ -32,12 +32,14 @@ class SendFileDialog extends StatefulWidget {
   final List<XFile> files;
   final BuildContext outerContext;
   final Event? replyEvent;
+  final void Function()? onClearReply;
 
   const SendFileDialog({
     required this.room,
     required this.thread,
     required this.files,
     required this.outerContext,
+    this.onClearReply,
     this.replyEvent,
     super.key,
   });
@@ -172,6 +174,8 @@ class SendFileDialogState extends State<SendFileDialog> {
           };
         }
 
+        widget.onClearReply?.call();
+
         try {
           await widget.room.sendFileEvent(
             file,
@@ -216,10 +220,10 @@ class SendFileDialogState extends State<SendFileDialog> {
         }
       }
       scaffoldMessenger.clearSnackBars();
-      setState(() {
-        isSending = false;
-      });
       if (mounted) {
+        setState(() {
+          isSending = false;
+        });
         Navigator.of(context, rootNavigator: false).pop();
       }
     } catch (e) {

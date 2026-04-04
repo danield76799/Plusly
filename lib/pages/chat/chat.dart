@@ -730,9 +730,12 @@ class ChatController extends State<ChatPageWithRoom>
         thread: thread,
         outerContext: context,
         replyEvent: replyEvent,
+        onClearReply: () {
+          replyEvent = null;
+        },
       ),
     );
-    replyEvent = null;
+    // replyEvent = null;
   }
 
   void sendImageFromClipBoard(Uint8List? image) async {
@@ -752,6 +755,10 @@ class ChatController extends State<ChatPageWithRoom>
           room: room,
           thread: thread,
           outerContext: context,
+          replyEvent: replyEvent,
+          onClearReply: () {
+            replyEvent = null;
+          },
         ),
       );
       return;
@@ -765,6 +772,10 @@ class ChatController extends State<ChatPageWithRoom>
         room: room,
         thread: thread,
         outerContext: context,
+        replyEvent: replyEvent,
+        onClearReply: () {
+          replyEvent = null;
+        },
       ),
     );
   }

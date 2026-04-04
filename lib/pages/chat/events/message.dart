@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -134,6 +135,48 @@ class _MessageState extends State<Message> {
       _threadSenderFuture = threadLastEvent.fetchSenderUser();
     } else {
       _threadSenderFuture = null;
+    }
+  }
+
+  /// Calculates the width of the media content (image/video/sticker) for
+  /// the given event, matching the logic in [MessageContent], [ImageBubble],
+  /// and [EventVideoPlayer]. Returns null if the event is not a media type.
+  double? _calculateMediaWidth(Event event) {
+    if (event.redacted) return null;
+
+    switch (event.messageType) {
+      case MessageTypes.Image:
+      case MessageTypes.Sticker:
+        final maxSize = event.messageType == MessageTypes.Sticker
+            ? 128.0 * AppSettings.stickerScale.value
+            : 512.0;
+        final w = event.content
+            .tryGetMap<String, Object?>('info')
+            ?.tryGet<int>('w');
+        final h = event.content
+            .tryGetMap<String, Object?>('info')
+            ?.tryGet<int>('h');
+        var imageWidth = maxSize;
+        if (w != null && h != null) {
+          if (w > h) {
+            imageWidth = maxSize;
+          } else {
+            imageWidth = max(32, maxSize * (w / h));
+          }
+        }
+        final hasDescription = event.fileDescription != null;
+        const minBubbleWidth = 180.0;
+        return hasDescription ? max(minBubbleWidth, imageWidth) : imageWidth;
+
+      case MessageTypes.Video:
+        final infoMap = event.content.tryGetMap<String, Object?>('info');
+        final videoWidth = infoMap?.tryGet<int>('w') ?? 400;
+        final videoHeight = infoMap?.tryGet<int>('h') ?? 300;
+        const height = 300.0;
+        return videoWidth * (height / videoHeight);
+
+      default:
+        return null;
     }
   }
 
@@ -426,8 +469,13 @@ class _MessageState extends State<Message> {
                                     AppConfig.borderRadius,
                                   ),
                                 ),
-                                constraints: const BoxConstraints(
-                                  maxWidth: FluffyThemes.columnWidth * 1.5,
+                                constraints: BoxConstraints(
+                                  maxWidth: (_replyEventFuture != null
+                                          ? _calculateMediaWidth(
+                                              displayEvent,
+                                            )
+                                          : null) ??
+                                      FluffyThemes.columnWidth * 1.5,
                                 ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
