@@ -13,8 +13,6 @@ import 'package:extera_next/widgets/future_loading_snackbar.dart';
 
 // import 'package:extera_next/widgets/matrix.dart';
 
-
-
 class JitsiPopupButton extends StatelessWidget {
   final Room room;
   const JitsiPopupButton(this.room, {super.key});
