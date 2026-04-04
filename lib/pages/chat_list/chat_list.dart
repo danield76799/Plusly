@@ -417,7 +417,7 @@ class ChatListController extends State<ChatList>
         searchServer = Matrix.of(
           context,
         ).store.getString(_serverStoreNamespace);
-        Matrix.of(context).backgroundPush?.setupPush();
+        Matrix.of(context).backgroundPush?.setupPush(Matrix.of(context).widget.clients);
         UpdateNotifier.showUpdateSnackBar(context);
       }
 

@@ -609,7 +609,7 @@ class ChatController extends State<ChatPageWithRoom>
 
     if (timeline is RoomTimeline) {
       if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
-        Matrix.of(context).backgroundPush?.cancelNotification(roomId);
+        Matrix.of(context).backgroundPush?.cancelNotification(room.client, roomId);
       }
     }
     // TODO same for Threads
