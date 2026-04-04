@@ -3,19 +3,19 @@ import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
-import 'package:extera_next/utils/privacy_options.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/utils/client_download_content_extension.dart';
 import 'package:extera_next/utils/client_manager.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:extera_next/utils/platform_infos.dart';
+import 'package:extera_next/utils/privacy_options.dart';
 import 'package:extera_next/utils/push_helper.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../config/app_config.dart';
 
 bool _vodInitialized = false;
@@ -89,9 +89,8 @@ void notificationTapBackground(
   final payload = NotificationPushPayload.fromString(
     notificationResponse.payload ?? '',
   );
-  final client = clients.firstWhereOrNull(
-        (c) => c.clientName == payload.clientName,
-      ) ??
+  final client =
+      clients.firstWhereOrNull((c) => c.clientName == payload.clientName) ??
       clients.first;
 
   await client.abortSync();
@@ -133,9 +132,8 @@ Future<void> notificationTap(
     return;
   }
 
-  final client = clients.firstWhereOrNull(
-        (c) => c.clientName == clientName,
-      ) ??
+  final client =
+      clients.firstWhereOrNull((c) => c.clientName == clientName) ??
       clients.first;
 
   switch (notificationResponse.notificationResponseType) {

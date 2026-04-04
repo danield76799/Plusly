@@ -130,8 +130,8 @@ class PushHelper {
           // Make sure client is fully loaded and synced before dismiss notifications:
           await client.roomsLoading;
           await client.oneShotSync();
-          final activeNotifications =
-              await flutterLocalNotificationsPlugin.getActiveNotifications();
+          final activeNotifications = await flutterLocalNotificationsPlugin
+              .getActiveNotifications();
           for (final activeNotification in activeNotifications) {
             final room = client.rooms.singleWhereOrNull(
               (room) => room.id.hashCode == activeNotification.id,
@@ -157,10 +157,7 @@ class PushHelper {
 
   /// Selects the correct client from the list based on the instance string.
   /// Falls back to the first client if no instance is provided.
-  static Client? _clientFromInstance(
-    String? instance,
-    List<Client> clients,
-  ) {
+  static Client? _clientFromInstance(String? instance, List<Client> clients) {
     if (clients.isEmpty) return null;
     if (instance == null) return clients.first;
     return clients.firstWhereOrNull(
@@ -238,10 +235,12 @@ class PushHelper {
       final title = event.room.getLocalizedDisplayname(matrixLocals);
       final roomName = event.room.getLocalizedDisplayname(matrixLocals);
 
-      final notificationGroupId =
-          event.room.isDirectChat ? 'directChats' : 'groupChats';
-      final groupName =
-          event.room.isDirectChat ? l10n!.directChats : l10n!.groups;
+      final notificationGroupId = event.room.isDirectChat
+          ? 'directChats'
+          : 'groupChats';
+      final groupName = event.room.isDirectChat
+          ? l10n!.directChats
+          : l10n!.groups;
 
       final messageRooms = AndroidNotificationChannelGroup(
         notificationGroupId,
@@ -255,11 +254,13 @@ class PushHelper {
 
       await flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.createNotificationChannelGroup(messageRooms);
       await flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
+            AndroidFlutterLocalNotificationsPlugin
+          >()
           ?.createNotificationChannel(roomsChannel);
 
       final platformChannelSpecifics = await _getPlatformChannelSpecifics(
@@ -322,7 +323,7 @@ class PushHelper {
 
     final messagingStyleInformation = PlatformInfos.isAndroid
         ? await AndroidFlutterLocalNotificationsPlugin()
-            .getActiveNotificationMessagingStyle(id: notificationId)
+              .getActiveNotificationMessagingStyle(id: notificationId)
         : null;
     messagingStyleInformation?.messages?.add(newMessage);
 
@@ -339,7 +340,8 @@ class PushHelper {
       subText: client.clientName,
       category: AndroidNotificationCategory.message,
       shortcutId: event.room.id,
-      styleInformation: messagingStyleInformation ??
+      styleInformation:
+          messagingStyleInformation ??
           MessagingStyleInformation(
             Person(
               name: senderName,
@@ -394,10 +396,7 @@ class PushHelper {
   /// Creates a shortcut for Android platform but does not block displaying the
   /// notification. This is optional but provides a nicer view of the
   /// notification popup.
-  Future<void> _setShortcut(
-    String title,
-    Uint8List? avatarFile,
-  ) async {
+  Future<void> _setShortcut(String title, Uint8List? avatarFile) async {
     final flutterShortcuts = FlutterShortcuts();
     await flutterShortcuts.initialize(debug: !kReleaseMode);
     await flutterShortcuts.pushShortcutItem(
@@ -420,16 +419,16 @@ class PushHelper {
       return avatar == null
           ? null
           : await client
-              .downloadMxcCached(
-                avatar,
-                thumbnailMethod: ThumbnailMethod.crop,
-                width: notificationAvatarDimension,
-                height: notificationAvatarDimension,
-                animated: false,
-                isThumbnail: true,
-                rounded: true,
-              )
-              .timeout(const Duration(seconds: 3));
+                .downloadMxcCached(
+                  avatar,
+                  thumbnailMethod: ThumbnailMethod.crop,
+                  width: notificationAvatarDimension,
+                  height: notificationAvatarDimension,
+                  animated: false,
+                  isThumbnail: true,
+                  rounded: true,
+                )
+                .timeout(const Duration(seconds: 3));
     } catch (e, s) {
       Logs().e('Unable to get avatar picture', e, s);
       return null;

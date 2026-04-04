@@ -321,7 +321,9 @@ class BackgroundPush {
       matrix!.store.remove(AppSettings.unifiedPushRegistered.key);
     }
 
-    if (!clients.any((c) => c.onLoginStateChanged.value == LoginState.loggedIn) ||
+    if (!clients.any(
+          (c) => c.onLoginStateChanged.value == LoginState.loggedIn,
+        ) ||
         !PlatformInfos.isMobile ||
         matrix == null) {
       return;
@@ -547,18 +549,18 @@ class BackgroundPush {
       Logs().w('[Push] Could not find client for instance $i');
       return;
     }
-    Logs().i('[Push] Removing UnifiedPush endpoint for ${client.clientName}...');
+    Logs().i(
+      '[Push] Removing UnifiedPush endpoint for ${client.clientName}...',
+    );
     final endpointKey = client.clientName + AppSettings.unifiedPushEndpoint.key;
-    final registeredKey = client.clientName + AppSettings.unifiedPushRegistered.key;
+    final registeredKey =
+        client.clientName + AppSettings.unifiedPushRegistered.key;
     final oldEndpoint = matrix?.store.getString(endpointKey) ?? '';
     await matrix?.store.setString(endpointKey, '');
     await matrix?.store.setBool(registeredKey, false);
     if (oldEndpoint.isNotEmpty) {
       // remove the old pusher
-      await setupPusher(
-        oldTokens: {oldEndpoint},
-        client: client,
-      );
+      await setupPusher(oldTokens: {oldEndpoint}, client: client);
     }
   }
 
