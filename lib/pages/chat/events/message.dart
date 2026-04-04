@@ -1,19 +1,19 @@
 import 'dart:ui' as ui;
 
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/utils/poll_events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:swipe_to_action/swipe_to_action.dart';
 
+import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/config/themes.dart';
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/events/room_creation_state_event.dart';
 import 'package:extera_next/utils/date_time_extension.dart';
 import 'package:extera_next/utils/platform_infos.dart';
+import 'package:extera_next/utils/poll_events.dart';
 import 'package:extera_next/utils/string_color.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
