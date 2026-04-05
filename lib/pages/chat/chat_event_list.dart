@@ -72,7 +72,9 @@ class ChatEventList extends StatelessWidget {
       slivers: [
         SliverPadding(
           padding: EdgeInsets.only(
-            top: 16,
+            top: AppSettings.enableChatFrostedGlass.value
+                ? MediaQuery.of(context).padding.top + 16
+                : 16,
             // ChatInputRow.height (48) + bottomSheetPadding (~8-16) + extra gap
             bottom: ChatInputRow.height + 32,
             left: horizontalPadding,
@@ -115,7 +117,6 @@ class ChatEventList extends StatelessWidget {
                         controller.requestHistory,
                       );
                     }
-                    // Add top padding when scroll banner is visible to prevent overlap
                     final hasScrollBanner =
                         controller.scrollUpBannerEventId != null;
                     return Padding(
