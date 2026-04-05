@@ -5,6 +5,7 @@
 - Use dialogs when opening profiles on desktop.
 - Video notes behind a feature flag (**unstable, do not use**)
 - Fixed "Hide member changes in public chats" not having effect.
+- Option to adjust sticker scale.
 
 ## Extera 26.0.91
 - Translate hard-coded strings ("Poll details")
