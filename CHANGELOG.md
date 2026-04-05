@@ -1,3 +1,8 @@
+## Extera 26.1.1
+- Fix replying with pasted image (desktop).
+- Add recent stickers feature.
+- Add favourite stickers feature.
+
 ## Extera 26.1.0
 - **UnifiedPush notifications for multiple accounts!**
 - Fixed scrolling for recovered and translated message dialogs.
