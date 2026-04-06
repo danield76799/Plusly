@@ -255,76 +255,78 @@ class ExploreRoomsView extends StatelessWidget {
     final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Avatar(
-                  name: room.name ?? room.roomId,
-                  mxContent: room.avatarUrl,
-                  size: 64,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        room.name ?? room.canonicalAlias ?? room.roomId,
-                        style: theme.textTheme.titleLarge,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (room.canonicalAlias != null)
-                        Text(
-                          room.canonicalAlias!,
-                          style: theme.textTheme.bodySmall,
-                        ),
-                    ],
+      builder: (context) => SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Avatar(
+                    name: room.name ?? room.roomId,
+                    mxContent: room.avatarUrl,
+                    size: 64,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            if (room.topic != null && room.topic!.isNotEmpty) ...[
-              Text(
-                L10n.of(context).chatDescription,
-                style: theme.textTheme.labelLarge,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          room.name ?? room.canonicalAlias ?? room.roomId,
+                          style: theme.textTheme.titleLarge,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (room.canonicalAlias != null)
+                          Text(
+                            room.canonicalAlias!,
+                            style: theme.textTheme.bodySmall,
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(room.topic!),
               const SizedBox(height: 16),
-            ],
-            Row(
-              children: [
-                Icon(
-                  Icons.people_outline,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(width: 8),
+              if (room.topic != null && room.topic!.isNotEmpty) ...[
                 Text(
-                  L10n.of(context).countParticipants(room.numJoinedMembers),
-                  style: theme.textTheme.bodyMedium,
+                  L10n.of(context).chatDescription,
+                  style: theme.textTheme.labelLarge,
                 ),
+                const SizedBox(height: 8),
+                Text(room.topic!),
+                const SizedBox(height: 16),
               ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  controller.joinRoomAction(room);
-                },
-                icon: const Icon(Icons.login_outlined),
-                label: Text(L10n.of(context).joinRoom),
+              Row(
+                children: [
+                  Icon(
+                    Icons.people_outline,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    L10n.of(context).countParticipants(room.numJoinedMembers),
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    controller.joinRoomAction(room);
+                  },
+                  icon: const Icon(Icons.login_outlined),
+                  label: Text(L10n.of(context).joinRoom),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
