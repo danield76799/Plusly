@@ -21,6 +21,7 @@ import 'package:extera_next/pages/chat_thread/thread.dart';
 import 'package:extera_next/pages/chat_threads/chat_threads.dart';
 import 'package:extera_next/pages/chat_widgets/chat_widgets.dart';
 import 'package:extera_next/pages/device_settings/device_settings.dart';
+import 'package:extera_next/pages/explore_rooms/explore_rooms.dart';
 import 'package:extera_next/pages/intro/intro_page.dart';
 import 'package:extera_next/pages/invitation_selection/invitation_selection.dart';
 import 'package:extera_next/pages/login/login.dart';
@@ -186,6 +187,12 @@ abstract class AppRoutes {
                 : ChatList(activeChat: state.pathParameters['roomid']),
           ),
           routes: [
+            GoRoute(
+              path: '/explore',
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, state, const ExploreRooms()),
+              redirect: loggedOutRedirect,
+            ),
             GoRoute(
               path: '/notifications',
               pageBuilder: (context, state) =>

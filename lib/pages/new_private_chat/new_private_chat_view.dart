@@ -179,6 +179,20 @@ class NewPrivateChatView extends StatelessWidget {
                                       onTap: () =>
                                           context.go('/rooms/newgroup'),
                                     ),
+                                    const ListDivider(),
+                                    ListTile(
+                                      leading: CircleAvatar(
+                                        backgroundColor: theme
+                                            .colorScheme
+                                            .secondaryContainer,
+                                        foregroundColor: theme
+                                            .colorScheme
+                                            .onSecondaryContainer,
+                                        child: const Icon(Icons.search),
+                                      ),
+                                      title: Text(L10n.of(context).publicRooms),
+                                      onTap: () => context.go('/rooms/explore'),
+                                    ),
                                     if (PlatformInfos.isMobile) ...[
                                       const ListDivider(),
                                       ListTile(

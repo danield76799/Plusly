@@ -1718,7 +1718,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "publicRooms": "Public Rooms",
+  "publicRooms": "Public rooms",
   "@publicRooms": {
     "type": "String",
     "placeholders": {}
