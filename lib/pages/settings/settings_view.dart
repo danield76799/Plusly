@@ -100,7 +100,7 @@ class SettingsView extends StatelessWidget {
                             Row(
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.all(32.0),
+                                  padding: const EdgeInsets.all(24.0),
                                   child: Stack(
                                     children: [
                                       Avatar(
@@ -134,85 +134,80 @@ class SettingsView extends StatelessWidget {
                                   ),
                                 ),
                                 Expanded(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      TextButton.icon(
-                                        onPressed:
-                                            controller.setDisplaynameAction,
-                                        icon: const Icon(
-                                          Icons.edit_outlined,
-                                          size: 16,
-                                        ),
-                                        style: TextButton.styleFrom(
-                                          foregroundColor:
-                                              theme.colorScheme.onSurface,
-                                          iconColor:
-                                              theme.colorScheme.onSurface,
-                                        ),
-                                        label: Text(
-                                          displayname,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            shadows: controller.hasBanner
-                                                ? [
-                                                    Shadow(
-                                                      offset: Offset(0.0, 0.0),
-                                                      blurRadius: 3,
-                                                      color:
-                                                          Theme.of(
-                                                                context,
-                                                              ).brightness ==
-                                                              Brightness.dark
-                                                          ? Colors.black
-                                                          : Colors.white,
-                                                    ),
-                                                  ]
-                                                : null,
+                                  child: Padding(
+                                    padding: const .only(right: 8),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      spacing: 4,
+                                      children: [
+                                        Material(
+                                          color: controller.hasBanner
+                                              ? theme.colorScheme.surface
+                                                    .withAlpha(127)
+                                              : null,
+                                          borderRadius: BorderRadius.circular(
+                                            24,
+                                          ),
+                                          clipBehavior: .hardEdge,
+                                          child: TextButton.icon(
+                                            onPressed:
+                                                controller.setDisplaynameAction,
+                                            icon: const Icon(
+                                              Icons.edit_outlined,
+                                              size: 16,
+                                            ),
+                                            style: TextButton.styleFrom(
+                                              foregroundColor:
+                                                  theme.colorScheme.onSurface,
+                                              iconColor:
+                                                  theme.colorScheme.onSurface,
+                                              minimumSize: const Size(0, 24),
+                                            ),
+                                            label: Text(
+                                              displayname,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(fontSize: 16),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      TextButton.icon(
-                                        onPressed: () =>
-                                            FluffyShare.share(mxid, context),
-                                        icon: const Icon(
-                                          Icons.copy_outlined,
-                                          size: 14,
-                                        ),
-                                        style: TextButton.styleFrom(
-                                          foregroundColor:
-                                              theme.colorScheme.secondary,
-                                          iconColor:
-                                              theme.colorScheme.secondary,
-                                        ),
-                                        label: Text(
-                                          mxid,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            shadows: controller.hasBanner
-                                                ? [
-                                                    Shadow(
-                                                      offset: Offset(0.0, 0.0),
-                                                      blurRadius: 3,
-                                                      color:
-                                                          Theme.of(
-                                                                context,
-                                                              ).brightness ==
-                                                              Brightness.dark
-                                                          ? Colors.black
-                                                          : Colors.white,
-                                                    ),
-                                                  ]
-                                                : null,
+                                        Material(
+                                          color: controller.hasBanner
+                                              ? theme.colorScheme.surface
+                                                    .withAlpha(127)
+                                              : null,
+                                          borderRadius: BorderRadius.circular(
+                                            24,
+                                          ),
+                                          clipBehavior: .hardEdge,
+                                          child: TextButton.icon(
+                                            onPressed: () => FluffyShare.share(
+                                              mxid,
+                                              context,
+                                            ),
+                                            icon: const Icon(
+                                              Icons.copy_outlined,
+                                              size: 14,
+                                            ),
+                                            style: TextButton.styleFrom(
+                                              foregroundColor:
+                                                  theme.colorScheme.secondary,
+                                              iconColor:
+                                                  theme.colorScheme.secondary,
+                                              minimumSize: const Size(0, 12),
+                                            ),
+                                            label: Text(
+                                              mxid,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ],
