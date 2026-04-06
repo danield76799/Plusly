@@ -200,63 +200,120 @@ class ProfileView extends StatelessWidget {
                                           : null,
                                     ),
                                   ),
-                                  ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      maxWidth: 256,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        displayname,
-                                        textAlign: TextAlign.center,
-                                        textScaler: const TextScaler.linear(
-                                          1.67,
+                                  Center(
+                                    child: Material(
+                                      color: controller.bannerUrl != null
+                                          ? theme.colorScheme.surface.withAlpha(
+                                              127,
+                                            )
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(24),
+                                      clipBehavior: Clip.hardEdge,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 4,
                                         ),
-                                        style: TextStyle(
-                                          shadows: controller.bannerUrl != null
-                                              ? [
-                                                  Shadow(
-                                                    offset: Offset(0.0, 0.0),
-                                                    blurRadius: 3,
-                                                    color:
-                                                        Theme.of(
-                                                              context,
-                                                            ).brightness ==
-                                                            Brightness.dark
-                                                        ? Colors.black
-                                                        : Colors.white,
-                                                  ),
-                                                ]
-                                              : null,
+                                        child: Text(
+                                          displayname,
+                                          textAlign: TextAlign.center,
+                                          textScaler: const TextScaler.linear(
+                                            1.67,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Center(
+                                    child: Material(
+                                      color: controller.bannerUrl != null
+                                          ? theme.colorScheme.surface.withAlpha(
+                                              127,
+                                            )
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(24),
+                                      clipBehavior: Clip.hardEdge,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 2,
+                                        ),
+                                        child: Text(
+                                          profile.userId,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: theme.colorScheme.secondary,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                   if (presenceText != null)
-                                    Text(
-                                      presenceText,
-                                      style: const TextStyle(fontSize: 10),
-                                      textAlign: TextAlign.center,
+                                    Center(
+                                      child: Material(
+                                        color: controller.bannerUrl != null
+                                            ? theme.colorScheme.surface
+                                                  .withAlpha(127)
+                                            : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(24),
+                                        clipBehavior: Clip.hardEdge,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 2,
+                                          ),
+                                          child: Text(
+                                            presenceText,
+                                            style: const TextStyle(
+                                              fontSize: 10,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   if (statusMsg != null)
-                                    SelectableLinkify(
-                                      text: statusMsg,
-                                      textScaleFactor: MediaQuery.textScalerOf(
-                                        context,
-                                      ).scale(1),
-                                      textAlign: TextAlign.center,
-                                      options: const LinkifyOptions(
-                                        humanize: false,
+                                    Center(
+                                      child: Material(
+                                        color: controller.bannerUrl != null
+                                            ? theme.colorScheme.surface
+                                                  .withAlpha(127)
+                                            : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(24),
+                                        clipBehavior: Clip.hardEdge,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 2,
+                                          ),
+                                          child: SelectableLinkify(
+                                            text: statusMsg,
+                                            textScaleFactor:
+                                                MediaQuery.textScalerOf(
+                                                  context,
+                                                ).scale(1),
+                                            textAlign: TextAlign.center,
+                                            options: const LinkifyOptions(
+                                              humanize: false,
+                                            ),
+                                            linkStyle: TextStyle(
+                                              color: theme.colorScheme.primary,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                              decorationColor:
+                                                  theme.colorScheme.primary,
+                                            ),
+                                            onOpen: (url) => UrlLauncher(
+                                              context,
+                                              url.url,
+                                            ).launchUrl(),
+                                          ),
+                                        ),
                                       ),
-                                      linkStyle: TextStyle(
-                                        color: theme.colorScheme.primary,
-                                        decoration: TextDecoration.underline,
-                                        decorationColor:
-                                            theme.colorScheme.primary,
-                                      ),
-                                      onOpen: (url) => UrlLauncher(
-                                        context,
-                                        url.url,
-                                      ).launchUrl(),
                                     ),
                                 ],
                               ),
