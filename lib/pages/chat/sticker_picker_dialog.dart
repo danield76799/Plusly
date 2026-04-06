@@ -27,10 +27,86 @@ class StickerPickerDialog extends StatefulWidget {
 
 class StickerPickerDialogState extends State<StickerPickerDialog> {
   String? searchFilter;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _favouriteKey = GlobalKey();
+  final GlobalKey _recentKey = GlobalKey();
+  final Map<String, GlobalKey> _packKeys = {};
+  String? _activePackId;
+
+  Map<String, ImagePackContent> stickerPacks = {};
+  List<ImagePackImageContent> recentStickers = [];
+  List<ImagePackImageContent> favouriteStickers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+
+    final client = widget.room.client;
+    stickerPacks = widget.room.getImagePacks(.sticker);
+
+    recentStickers = client.recentStickers;
+    favouriteStickers = client.favouriteStickers;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    String? newActiveId;
+    double closestDistance = double.infinity;
+
+    // Helper to check a key and id
+    void checkKey(GlobalKey key, String id) {
+      final ctx = key.currentContext;
+      if (ctx == null) return;
+      final box = ctx.findRenderObject() as RenderBox?;
+      if (box == null || !box.hasSize) return;
+      final position = box.localToGlobal(Offset.zero);
+      // Consider the section "active" if its top is at or above ~120px from top
+      // (accounting for app bar + tab bar height)
+      final topOffset = position.dy;
+      if (topOffset <= 180 && topOffset > -box.size.height) {
+        final distance = (topOffset - 120).abs();
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          newActiveId = id;
+        }
+      }
+    }
+
+    checkKey(_favouriteKey, '_favourite');
+    checkKey(_recentKey, '_recent');
+    for (final entry in _packKeys.entries) {
+      checkKey(entry.value, entry.key);
+    }
+
+    if (newActiveId != _activePackId) {
+      setState(() {
+        _activePackId = newActiveId;
+      });
+    }
+  }
 
   void _onStickerSelected(ImagePackImageContent sticker) {
     widget.room.client.addRecentSticker(sticker);
     widget.onSelected(sticker);
+  }
+
+  void _scrollToKey(GlobalKey key) {
+    final ctx = key.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        alignment: 0.0,
+      );
+    }
   }
 
   void _showStickerInfoDialog({
@@ -86,7 +162,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                   Material(
                     color: Theme.of(context).colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-                    clipBehavior: .hardEdge,
+                    clipBehavior: Clip.hardEdge,
                     child: Column(
                       children: [
                         ListTile(
@@ -199,46 +275,33 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final client = widget.room.client;
-
-    final stickerPacks = widget.room.getImagePacks(ImagePackUsage.sticker);
-    final packSlugs = stickerPacks.keys.toList();
-
-    final recentStickers = client.recentStickers;
-    final hasRecentStickers =
-        recentStickers.isNotEmpty && !(searchFilter?.isNotEmpty ?? false);
-
-    final favouriteStickers = client.favouriteStickers;
-    final hasFavouriteStickers =
-        favouriteStickers.isNotEmpty && !(searchFilter?.isNotEmpty ?? false);
-
-    // ignore: prefer_function_declarations_over_variables
-    final packBuilder = (BuildContext context, int packIndex) {
-      final pack = stickerPacks[packSlugs[packIndex]]!;
-      final filteredImagePackImageEntried = pack.images.entries.toList();
-      if (searchFilter?.isNotEmpty ?? false) {
-        filteredImagePackImageEntried.removeWhere(
-          (e) =>
-              !(e.key.toLowerCase().contains(searchFilter!.toLowerCase()) ||
-                  (e.value.body?.toLowerCase().contains(
-                        searchFilter!.toLowerCase(),
-                      ) ??
-                      false)),
-        );
-      }
-      final imageKeys = filteredImagePackImageEntried
-          .map((e) => e.key)
-          .toList();
-      if (imageKeys.isEmpty) {
-        return const SizedBox.shrink();
-      }
-      final packName = pack.pack.displayName ?? packSlugs[packIndex];
-      return Column(
+  Widget _buildPackWidget({
+    required ImagePackContent pack,
+    required String slug,
+    required bool hasRecentStickers,
+    required bool isFirst,
+  }) {
+    final filteredImagePackImageEntried = pack.images.entries.toList();
+    if (searchFilter?.isNotEmpty ?? false) {
+      filteredImagePackImageEntried.removeWhere(
+        (e) =>
+            !(e.key.toLowerCase().contains(searchFilter!.toLowerCase()) ||
+                (e.value.body?.toLowerCase().contains(
+                      searchFilter!.toLowerCase(),
+                    ) ??
+                    false)),
+      );
+    }
+    final imageKeys = filteredImagePackImageEntried.map((e) => e.key).toList();
+    if (imageKeys.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final packName = pack.pack.displayName ?? slug;
+    return Container(
+      key: _packKeys[slug],
+      child: Column(
         children: <Widget>[
-          if (packIndex != 0 || hasRecentStickers) const SizedBox(height: 20),
+          if (!isFirst || hasRecentStickers) const SizedBox(height: 20),
           if (packName != 'user')
             ListTile(
               leading: Avatar(
@@ -266,11 +329,9 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                   radius: AppConfig.borderRadius,
                   key: ValueKey(image.url.toString()),
                   onTap: () {
-                    // copy the image
                     final imageCopy = ImagePackImageContent.fromJson(
                       image.toJson().copy(),
                     );
-                    // set the body, if it doesn't exist, to the key
                     imageCopy.body ??= imageKeys[imageIndex];
                     _onStickerSelected(imageCopy);
                   },
@@ -281,7 +342,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                     stickerCopy.body ??= imageKeys[imageIndex];
                     _showStickerInfoDialog(
                       sticker: stickerCopy,
-                      packName: pack.pack.displayName ?? packSlugs[packIndex],
+                      packName: pack.pack.displayName ?? slug,
                       packAttribution: pack.pack.attribution,
                     );
                   },
@@ -301,21 +362,40 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
             },
           ),
         ],
-      );
-    };
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final packSlugs = stickerPacks.keys.toList();
+
+    final hasRecentStickers =
+        recentStickers.isNotEmpty && !(searchFilter?.isNotEmpty ?? false);
+
+    final hasFavouriteStickers =
+        favouriteStickers.isNotEmpty && !(searchFilter?.isNotEmpty ?? false);
+
+    // Ensure pack keys exist for all slugs
+    for (final slug in packSlugs) {
+      _packKeys.putIfAbsent(slug, () => GlobalKey());
+    }
 
     return Scaffold(
       backgroundColor: theme.colorScheme.onInverseSurface,
       body: SizedBox(
         width: double.maxFinite,
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: <Widget>[
             SliverAppBar(
               floating: true,
               pinned: true,
               scrolledUnderElevation: 0,
               automaticallyImplyLeading: false,
-              backgroundColor: Colors.transparent,
+              backgroundColor: theme.colorScheme.surfaceContainerLow,
               title: SizedBox(
                 height: 42,
                 child: TextField(
@@ -330,30 +410,102 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                 ),
               ),
             ),
+            // Sticky horizontal pack selector
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _PackTabBarDelegate(
+                child: Container(
+                  color: theme.colorScheme.surfaceContainerLow,
+                  height: 57,
+                  child: Column(
+                    crossAxisAlignment: .start,
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              const SizedBox(width: 4),
+                              if (hasFavouriteStickers)
+                                _PackTabItem(
+                                  onTap: () => _scrollToKey(_favouriteKey),
+                                  isActive: _activePackId == '_favourite',
+                                  child: const Icon(Icons.star, size: 28),
+                                ),
+                              if (hasRecentStickers)
+                                _PackTabItem(
+                                  onTap: () => _scrollToKey(_recentKey),
+                                  isActive: _activePackId == '_recent',
+                                  child: const Icon(Icons.history, size: 28),
+                                ),
+                              for (final slug in packSlugs)
+                                Builder(
+                                  builder: (context) {
+                                    final pack = stickerPacks[slug]!;
+                                    final firstImage =
+                                        pack.images.values.isNotEmpty
+                                        ? pack.images.values.first
+                                        : null;
+                                    return _PackTabItem(
+                                      onTap: () =>
+                                          _scrollToKey(_packKeys[slug]!),
+                                      isActive: _activePackId == slug,
+                                      child: firstImage != null
+                                          ? MxcImage(
+                                              uri: firstImage.url,
+                                              width: 36,
+                                              height: 36,
+                                              fit: BoxFit.contain,
+                                              isThumbnail: true,
+                                            )
+                                          : const Icon(Icons.image, size: 28),
+                                    );
+                                  },
+                                ),
+                              const SizedBox(width: 4),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const Divider(height: 1, thickness: 1),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             if (hasFavouriteStickers)
               SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons. /*WE ARE*/ star /* T RAIN*/),
-                      title: Text(L10n.of(context).favouriteStickers),
-                    ),
-                    const SizedBox(height: 6),
-                    _buildStickerGrid(favouriteStickers, isFromRecents: false),
-                  ],
+                child: Container(
+                  key: _favouriteKey,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons. /*WE ARE*/ star /* T RAIN*/),
+                        title: Text(L10n.of(context).favouriteStickers),
+                      ),
+                      const SizedBox(height: 6),
+                      _buildStickerGrid(
+                        favouriteStickers,
+                        isFromRecents: false,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             if (hasRecentStickers)
               SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.history),
-                      title: Text(L10n.of(context).recentStickers),
-                    ),
-                    const SizedBox(height: 6),
-                    _buildStickerGrid(recentStickers, isFromRecents: true),
-                  ],
+                child: Container(
+                  key: _recentKey,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.history),
+                        title: Text(L10n.of(context).recentStickers),
+                      ),
+                      const SizedBox(height: 6),
+                      _buildStickerGrid(recentStickers, isFromRecents: true),
+                    ],
+                  ),
                 ),
               ),
             if (packSlugs.isEmpty && !hasRecentStickers)
@@ -366,10 +518,19 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                 ),
               )
             else
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  packBuilder,
-                  childCount: packSlugs.length,
+              // Use a single SliverToBoxAdapter with a Column so all
+              // pack widgets and their GlobalKeys are always laid out
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    for (int i = 0; i < packSlugs.length; i++)
+                      _buildPackWidget(
+                        pack: stickerPacks[packSlugs[i]]!,
+                        slug: packSlugs[i],
+                        hasRecentStickers: hasRecentStickers,
+                        isFirst: i == 0,
+                      ),
+                  ],
                 ),
               ),
           ],
@@ -377,4 +538,63 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
       ),
     );
   }
+}
+
+/// A single tab item in the pack selector bar.
+class _PackTabItem extends StatelessWidget {
+  final VoidCallback onTap;
+  final Widget child;
+  final bool isActive;
+
+  const _PackTabItem({
+    required this.onTap,
+    required this.child,
+    this.isActive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: isActive ? theme.colorScheme.primary : Colors.transparent,
+              width: 3,
+            ),
+          ),
+        ),
+        child: SizedBox(width: 40, height: 36, child: Center(child: child)),
+      ),
+    );
+  }
+}
+
+/// Delegate for the sticky pack tab bar header.
+class _PackTabBarDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+
+  _PackTabBarDelegate({required this.child});
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return child;
+  }
+
+  @override
+  double get maxExtent => 57;
+
+  @override
+  double get minExtent => 57;
+
+  @override
+  bool shouldRebuild(covariant _PackTabBarDelegate oldDelegate) => true;
 }

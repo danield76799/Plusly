@@ -197,6 +197,7 @@ class ChatController extends State<ChatPageWithRoom>
   String pendingText = '';
 
   bool showEmojiPicker = false;
+  bool initiallyShowStickerPicker = false;
 
   void acceptInvite() async {
     final result = await showFutureLoadingDialog(
@@ -932,7 +933,10 @@ class ChatController extends State<ChatPageWithRoom>
       inputFocus.unfocus();
     }
     emojiPickerType = EmojiPickerType.keyboard;
-    setState(() => showEmojiPicker = !showEmojiPicker);
+    setState(() {
+      initiallyShowStickerPicker = sendController.text.isEmpty;
+      showEmojiPicker = !showEmojiPicker;
+    });
   }
 
   void _inputFocusListener() {
