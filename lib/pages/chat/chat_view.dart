@@ -506,6 +506,28 @@ class ChatView extends StatelessWidget {
                       ),
                     ),
 
+                    // Gradient
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: IgnorePointer(
+                        child: Container(
+                          height: 100,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                theme.colorScheme.surface.withValues(alpha: 0),
+                                theme.colorScheme.surface.withValues(alpha: 0.6),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
                     // Floating input bar
                     Positioned(
                       left: 0,
