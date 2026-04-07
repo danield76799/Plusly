@@ -1,4 +1,6 @@
 ## Extera 26.1.2
+- Translucency effect in chats behind a feature flag! (by @d2rkmean)
+- Store wallpaper settings locally.
 - Fix favourite stickers.
 - Make sending files non-blocking.
 - Improve sticker picker.
