@@ -417,6 +417,11 @@ class SettingsStyleView extends StatelessWidget {
                           title: L10n.of(context).enableGradient,
                           setting: AppSettings.enableGradient,
                         ),
+                        const ListDivider(),
+                        SettingsSwitchListTile.adaptive(
+                          title: L10n.of(context).enableChatFrostedGlass,
+                          setting: AppSettings.enableChatFrostedGlass,
+                        ),
                         if (!PlatformInfos.isMobile ||
                             AppSettings.twemojiFont.value) ...[
                           const ListDivider(),

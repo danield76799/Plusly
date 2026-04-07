@@ -76,11 +76,6 @@ class SettingsFeaturesView extends StatelessWidget {
                         title: L10n.of(context).enableAppBarCenterTitle,
                         setting: AppSettings.enableAppBarCenterTitle,
                       ),
-                      const ListDivider(),
-                      SettingsSwitchListTile.adaptive(
-                        title: L10n.of(context).enableChatFrostedGlass,
-                        setting: AppSettings.enableChatFrostedGlass,
-                      ),
                       if (PlatformInfos.isMobile) ...[
                         const ListDivider(),
                         SettingsSwitchListTile.adaptive(
