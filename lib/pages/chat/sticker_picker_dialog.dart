@@ -384,7 +384,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
     }
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.onInverseSurface,
+      backgroundColor: theme.colorScheme.surfaceContainerHigh,
       body: SizedBox(
         width: double.maxFinite,
         child: CustomScrollView(
@@ -395,15 +395,19 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
               pinned: true,
               scrolledUnderElevation: 0,
               automaticallyImplyLeading: false,
-              backgroundColor: theme.colorScheme.surfaceContainerLow,
+              backgroundColor: theme.colorScheme.surfaceContainerHigh,
               title: SizedBox(
-                height: 42,
+                height: 40,
                 child: TextField(
                   autofocus: false,
                   decoration: InputDecoration(
                     filled: true,
                     hintText: L10n.of(context).search,
-                    prefixIcon: const Icon(Icons.search_outlined),
+                    prefixIcon: const Icon(Icons.search, size: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    ),
                     contentPadding: EdgeInsets.zero,
                   ),
                   onChanged: (s) => setState(() => searchFilter = s),
@@ -415,7 +419,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
               pinned: true,
               delegate: _PackTabBarDelegate(
                 child: Container(
-                  color: theme.colorScheme.surfaceContainerLow,
+                  color: theme.colorScheme.surfaceContainerHigh,
                   height: 57,
                   child: Column(
                     crossAxisAlignment: .start,
