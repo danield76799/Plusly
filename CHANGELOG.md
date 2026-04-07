@@ -1,3 +1,11 @@
+## Extera 26.1.2
+- Fix favourite stickers.
+- Make sending files non-blocking.
+- Improve sticker picker.
+- Add explore rooms page.
+- Minor design changes.
+- Fix switching tabs when a space was selected.
+
 ## Extera 26.1.1
 - Fix replying with pasted image (desktop).
 - Add recent stickers feature.

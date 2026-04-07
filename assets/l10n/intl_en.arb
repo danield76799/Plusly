@@ -1718,7 +1718,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "publicRooms": "Public Rooms",
+  "publicRooms": "Public rooms",
   "@publicRooms": {
     "type": "String",
     "placeholders": {}
@@ -3620,5 +3620,6 @@
   "recentStickers": "Recent",
   "removeFromFavourites": "Remove from favourites",
   "addToFavourites": "Add to favourites",
-  "removeFromRecents": "Remove from recents"
+  "removeFromRecents": "Remove from recents",
+  "favouriteStickers": "Favourite"
 }
