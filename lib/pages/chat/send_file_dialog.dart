@@ -70,9 +70,6 @@ class SendFileDialogState extends State<SendFileDialog> {
       final maxUploadSize = clientConfig.mUploadSize ?? 100 * 1000 * 1000;
 
       if (mounted) {
-        setState(() {
-          isSending = false;
-        });
         Navigator.of(context, rootNavigator: false).pop();
       }
 
