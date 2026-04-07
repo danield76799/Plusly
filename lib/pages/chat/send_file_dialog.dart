@@ -69,6 +69,10 @@ class SendFileDialogState extends State<SendFileDialog> {
       final clientConfig = await widget.room.client.getConfig();
       final maxUploadSize = clientConfig.mUploadSize ?? 100 * 1000 * 1000;
 
+      if (mounted) {
+        Navigator.of(context, rootNavigator: false).pop();
+      }
+
       for (final xfile in widget.files) {
         final MatrixFile file;
         MatrixImageFile? thumbnail;
@@ -220,12 +224,6 @@ class SendFileDialogState extends State<SendFileDialog> {
         }
       }
       scaffoldMessenger.clearSnackBars();
-      if (mounted) {
-        setState(() {
-          isSending = false;
-        });
-        Navigator.of(context, rootNavigator: false).pop();
-      }
     } catch (e) {
       Logs().e('error on send', e);
       setState(() {

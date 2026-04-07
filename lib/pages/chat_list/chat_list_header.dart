@@ -39,6 +39,8 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
   final bool globalSearch;
   final double topPadding;
 
+  bool isShrink = false;
+
   static const double _titleHeight = 56.0;
   static const double _searchBarHeight = 48.0; // 40 + 8 padding
 

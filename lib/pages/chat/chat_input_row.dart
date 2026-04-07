@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/config/setting_keys.dart';
@@ -261,8 +262,12 @@ class ChatInputRow extends StatelessWidget {
                       tooltip: L10n.of(context).emojis,
                       color: theme.colorScheme.onSurface,
                       icon: Icon(
-                        controller.showEmojiPicker
-                            ? Icons.keyboard
+                        controller.sendController.text.isEmpty
+                            ? controller.showEmojiPicker
+                                  ? MdiIcons.sticker
+                                  : MdiIcons.stickerOutline
+                            : controller.showEmojiPicker
+                            ? Icons.add_reaction
                             : Icons.add_reaction_outlined,
                         key: ValueKey(controller.showEmojiPicker),
                       ),
