@@ -15,6 +15,9 @@ abstract class SettingKeys {
 
 enum AppSettings<T> {
   stickerScale<double>('xyz.extera.stickerScale', 2),
+  wallpaperPath<String>('xyz.extera.wallpaper_path', ''),
+  wallpaperOpacity<double>('xyz.extera.wallpaper_opacity', 0.5),
+  wallpaperBlur<double>('xyz.extera.wallpaper_blur', 0.0),
   experimentalJitsi<bool>('xyz.extera.jitsi', false),
   jitsiDomain<String>('xyz.extera.jitsi_domain', 'meet.jit.si'),
   applicationName<String>('xyz.extera.app_name', 'Extera'),

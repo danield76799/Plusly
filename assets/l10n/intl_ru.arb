@@ -3718,6 +3718,6 @@
   "addToFavourites": "Добавить в избранные",
   "removeFromRecents": "Убрать из недавних",
   "enableAppBarCenterTitle": "Отображать заголовок комнаты в центре",
-  "enableChatFrostedGlass": "Использовать эффект полупрозрачности для панелей чата",
+  "enableChatFrostedGlass": "Эффект полупрозрачности в чатах",
   "favouriteStickers": "Избранные"
 }

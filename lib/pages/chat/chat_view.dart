@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -19,13 +20,11 @@ import 'package:extera_next/pages/chat/jitsi_popup_button.dart';
 import 'package:extera_next/pages/chat/pinned_events.dart';
 import 'package:extera_next/pages/chat/reply_display.dart';
 import 'package:extera_next/pages/dialer/back_to_call_button.dart';
-import 'package:extera_next/utils/account_config.dart';
 import 'package:extera_next/utils/url_launcher.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/chat_settings_popup_menu.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:extera_next/widgets/mini_audio_player.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
 import 'package:extera_next/widgets/unread_rooms_badge.dart';
 import '../../utils/stream_extension.dart';
 import 'chat_emoji_picker.dart';
@@ -363,7 +362,7 @@ class ChatView extends StatelessWidget {
     final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 8.0;
     final scrollUpBannerEventId = controller.scrollUpBannerEventId;
 
-    final accountConfig = Matrix.of(context).client.applicationAccountConfig;
+    final wallpaperPath = AppSettings.wallpaperPath.value;
 
     return PopScope(
       canPop: controller.selectedEvents.isEmpty && !controller.showEmojiPicker,
@@ -476,22 +475,19 @@ class ChatView extends StatelessWidget {
                 onDragExited: controller.onDragExited,
                 child: Stack(
                   children: <Widget>[
-                    if (accountConfig.wallpaperUrl != null)
+                    if (wallpaperPath.isNotEmpty)
                       Opacity(
-                        opacity: accountConfig.wallpaperOpacity ?? 0.5,
+                        opacity: AppSettings.wallpaperOpacity.value,
                         child: ImageFiltered(
                           imageFilter: ui.ImageFilter.blur(
-                            sigmaX: accountConfig.wallpaperBlur ?? 0.0,
-                            sigmaY: accountConfig.wallpaperBlur ?? 0.0,
+                            sigmaX: AppSettings.wallpaperBlur.value,
+                            sigmaY: AppSettings.wallpaperBlur.value,
                           ),
-                          child: MxcImage(
-                            cacheKey: accountConfig.wallpaperUrl.toString(),
-                            uri: accountConfig.wallpaperUrl,
+                          child: Image.file(
+                            File(wallpaperPath),
                             fit: BoxFit.cover,
                             height: MediaQuery.sizeOf(context).height,
                             width: MediaQuery.sizeOf(context).width,
-                            isThumbnail: false,
-                            placeholder: (_) => Container(),
                           ),
                         ),
                       ),
@@ -520,7 +516,9 @@ class ChatView extends StatelessWidget {
                               end: Alignment.bottomCenter,
                               colors: [
                                 theme.colorScheme.surface.withValues(alpha: 0),
-                                theme.colorScheme.surface.withValues(alpha: 0.6),
+                                theme.colorScheme.surface.withValues(
+                                  alpha: 0.6,
+                                ),
                               ],
                             ),
                           ),

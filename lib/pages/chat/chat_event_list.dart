@@ -9,7 +9,6 @@ import 'package:extera_next/pages/chat/chat.dart';
 import 'package:extera_next/pages/chat/chat_input_row.dart';
 import 'package:extera_next/pages/chat/events/message.dart';
 import 'package:extera_next/pages/chat/typing_indicators.dart';
-import 'package:extera_next/utils/account_config.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
@@ -56,8 +55,7 @@ class ChatEventList extends StatelessWidget {
       thisEventsKeyMap[events[i].eventId] = i;
     }
 
-    final hasWallpaper =
-        controller.room.client.applicationAccountConfig.wallpaperUrl != null;
+    final hasWallpaper = AppSettings.wallpaperPath.value.isNotEmpty;
 
     final latestReadEventIndex = latestReadEvent != null
         ? events.indexWhere((event) => event.eventId == latestReadEvent)

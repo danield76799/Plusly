@@ -1,16 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/account_config.dart';
 import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
 import 'package:extera_next/utils/file_selector.dart';
 import 'package:extera_next/widgets/future_loading_dialog.dart';
 import 'package:extera_next/widgets/theme_builder.dart';
-import '../../widgets/matrix.dart';
 import 'settings_style_view.dart';
 
 class SettingsStyle extends StatefulWidget {
@@ -26,8 +27,27 @@ class SettingsStyleController extends State<SettingsStyle> {
     ThemeController.of(context).setPrimaryColor(color);
   }
 
+  String? _wallpaperPath;
+
+  /// The current local wallpaper path (null when no wallpaper is set).
+  String? get wallpaperPath => _wallpaperPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWallpaperConfig();
+  }
+
+  Future<void> _loadWallpaperConfig() async {
+    final path = AppSettings.wallpaperPath.value;
+    setState(() {
+      _wallpaperPath = path.isEmpty ? null : path;
+      _wallpaperOpacity = AppSettings.wallpaperOpacity.value;
+      _wallpaperBlur = AppSettings.wallpaperBlur.value;
+    });
+  }
+
   void setWallpaper() async {
-    final client = Matrix.of(context).client;
     final picked = await selectFiles(context, type: FileType.image);
     final pickedFile = picked.firstOrNull;
     if (pickedFile == null) return;
@@ -35,21 +55,22 @@ class SettingsStyleController extends State<SettingsStyle> {
     await showFutureLoadingDialog(
       context: context,
       future: () async {
-        final url = await client.uploadContent(
-          await pickedFile.readAsBytes(),
-          filename: pickedFile.name,
-        );
-        await client.updateApplicationAccountConfig(
-          ApplicationAccountConfig(wallpaperUrl: url),
-        );
+        final bytes = await pickedFile.readAsBytes();
+        final dir = await getApplicationDocumentsDirectory();
+        final fileName =
+            'wallpaper_${DateTime.now().millisecondsSinceEpoch}.${pickedFile.name.split('.').last}';
+        final fullPath = '${dir.path}/$fileName';
+        final file = File(fullPath);
+        await file.writeAsBytes(bytes);
+        await AppSettings.wallpaperPath.setItem(fullPath);
+        setState(() {
+          _wallpaperPath = fullPath;
+        });
       },
     );
   }
 
-  double get wallpaperOpacity =>
-      _wallpaperOpacity ??
-      Matrix.of(context).client.applicationAccountConfig.wallpaperOpacity ??
-      0.5;
+  double get wallpaperOpacity => _wallpaperOpacity ?? 0.5;
 
   double? _wallpaperOpacity;
 
@@ -114,17 +135,9 @@ class SettingsStyleController extends State<SettingsStyle> {
   }
 
   void saveWallpaperOpacity(double opacity) async {
-    final client = Matrix.of(context).client;
-    final result = await showFutureLoadingDialog(
-      context: context,
-      future: () => client.updateApplicationAccountConfig(
-        ApplicationAccountConfig(wallpaperOpacity: opacity),
-      ),
-    );
-    if (result.isValue) return;
-
+    await AppSettings.wallpaperOpacity.setItem(opacity);
     setState(() {
-      _wallpaperOpacity = client.applicationAccountConfig.wallpaperOpacity;
+      _wallpaperOpacity = opacity;
     });
   }
 
@@ -134,24 +147,13 @@ class SettingsStyleController extends State<SettingsStyle> {
     });
   }
 
-  double get wallpaperBlur =>
-      _wallpaperBlur ??
-      Matrix.of(context).client.applicationAccountConfig.wallpaperBlur ??
-      0.5;
+  double get wallpaperBlur => _wallpaperBlur ?? 0.0;
   double? _wallpaperBlur;
 
   void saveWallpaperBlur(double blur) async {
-    final client = Matrix.of(context).client;
-    final result = await showFutureLoadingDialog(
-      context: context,
-      future: () => client.updateApplicationAccountConfig(
-        ApplicationAccountConfig(wallpaperBlur: blur),
-      ),
-    );
-    if (result.isValue) return;
-
+    await AppSettings.wallpaperBlur.setItem(blur);
     setState(() {
-      _wallpaperBlur = client.applicationAccountConfig.wallpaperBlur;
+      _wallpaperBlur = blur;
     });
   }
 
@@ -161,12 +163,24 @@ class SettingsStyleController extends State<SettingsStyle> {
     });
   }
 
-  void deleteChatWallpaper() => showFutureLoadingDialog(
-    context: context,
-    future: () => Matrix.of(context).client.setApplicationAccountConfig(
-      const ApplicationAccountConfig(wallpaperUrl: null, wallpaperBlur: null),
-    ),
-  );
+  void deleteChatWallpaper() async {
+    // Delete the local wallpaper file if it exists.
+    final currentPath = _wallpaperPath;
+    if (currentPath != null) {
+      try {
+        final file = File(currentPath);
+        if (await file.exists()) await file.delete();
+      } catch (_) {}
+    }
+    await AppSettings.wallpaperPath.setItem('');
+    await AppSettings.wallpaperOpacity.setItem(0.5);
+    await AppSettings.wallpaperBlur.setItem(0.0);
+    setState(() {
+      _wallpaperPath = null;
+      _wallpaperOpacity = 0.5;
+      _wallpaperBlur = 0.0;
+    });
+  }
 
   ThemeMode get currentTheme => ThemeController.of(context).themeMode;
   Color? get currentColor => ThemeController.of(context).primaryColor;
