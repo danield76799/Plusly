@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/setting_keys.dart';
+// import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 
 class CuteContent extends StatefulWidget {
@@ -17,13 +17,13 @@ class CuteContent extends StatefulWidget {
 }
 
 class _CuteContentState extends State<CuteContent> {
-  static bool _isOverlayShown = false;
+  // static bool _isOverlayShown = false;
 
   @override
   void initState() {
-    if (AppSettings.autoplayImages.value && !_isOverlayShown) {
-      addOverlay();
-    }
+    // if (AppSettings.autoplayImages.value && !_isOverlayShown) {
+    //   addOverlay();
+    // }
     super.initState();
   }
 
@@ -50,7 +50,7 @@ class _CuteContentState extends State<CuteContent> {
   }
 
   Future<void> addOverlay() async {
-    _isOverlayShown = true;
+    // _isOverlayShown = true;
     await Future.delayed(const Duration(milliseconds: 50));
 
     OverlayEntry? overlay;
@@ -58,7 +58,7 @@ class _CuteContentState extends State<CuteContent> {
       builder: (context) => CuteEventOverlay(
         emoji: widget.event.text,
         onAnimationEnd: () {
-          _isOverlayShown = false;
+          // _isOverlayShown = false;
           overlay?.remove();
         },
       ),
@@ -66,7 +66,7 @@ class _CuteContentState extends State<CuteContent> {
     Overlay.of(context).insert(overlay);
   }
 
-  generateLabel(User? user) {
+  String? generateLabel(User? user) {
     switch (widget.event.content['cute_type']) {
       case 'googly_eyes':
         return L10n.of(context).googlyEyesContent(
@@ -87,6 +87,7 @@ class _CuteContentState extends State<CuteContent> {
               '',
         );
     }
+    return null;
   }
 }
 
