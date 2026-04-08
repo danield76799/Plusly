@@ -3621,5 +3621,7 @@
   "removeFromFavourites": "Remove from favourites",
   "addToFavourites": "Add to favourites",
   "removeFromRecents": "Remove from recents",
-  "favouriteStickers": "Favourite"
+  "favouriteStickers": "Favourite",
+  "showCameraButton": "Take photo/video",
+  "showCameraButtonDesc": "Show a button to take a photo/video in message composer"
 }
