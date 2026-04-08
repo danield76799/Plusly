@@ -128,6 +128,35 @@ abstract class AppRoutes {
         BootstrapDialog(wipe: state.uri.queryParameters['wipe'] == 'true'),
       ),
     ),
+    GoRoute(
+      path: '/addaccount',
+      redirect: loggedOutRedirect,
+      pageBuilder: (context, state) =>
+          defaultPageBuilder(context, state, const IntroPage()),
+      routes: [
+        GoRoute(
+          path: 'sign_in',
+          pageBuilder: (context, state) =>
+              defaultPageBuilder(context, state, SignInPage(signUp: false)),
+          redirect: loggedOutRedirect,
+        ),
+        GoRoute(
+          path: 'sign_up',
+          pageBuilder: (context, state) =>
+              defaultPageBuilder(context, state, SignInPage(signUp: true)),
+          redirect: loggedOutRedirect,
+        ),
+        GoRoute(
+          path: 'login',
+          pageBuilder: (context, state) => defaultPageBuilder(
+            context,
+            state,
+            Login(client: state.extra as Client),
+          ),
+          redirect: loggedOutRedirect,
+        ),
+      ],
+    ),
     ShellRoute(
       // Never use a transition on the shell route. Changing the PageBuilder
       // here based on a MediaQuery causes the child to briefly be rendered
@@ -353,41 +382,6 @@ abstract class AppRoutes {
                         const SettingsFeatures(),
                       ),
                       redirect: loggedOutRedirect,
-                    ),
-                    GoRoute(
-                      path: 'addaccount',
-                      redirect: loggedOutRedirect,
-                      pageBuilder: (context, state) =>
-                          defaultPageBuilder(context, state, const IntroPage()),
-                      routes: [
-                        GoRoute(
-                          path: 'sign_in',
-                          pageBuilder: (context, state) => defaultPageBuilder(
-                            context,
-                            state,
-                            SignInPage(signUp: false),
-                          ),
-                          redirect: loggedOutRedirect,
-                        ),
-                        GoRoute(
-                          path: 'sign_up',
-                          pageBuilder: (context, state) => defaultPageBuilder(
-                            context,
-                            state,
-                            SignInPage(signUp: true),
-                          ),
-                          redirect: loggedOutRedirect,
-                        ),
-                        GoRoute(
-                          path: 'login',
-                          pageBuilder: (context, state) => defaultPageBuilder(
-                            context,
-                            state,
-                            Login(client: state.extra as Client),
-                          ),
-                          redirect: loggedOutRedirect,
-                        ),
-                      ],
                     ),
                     GoRoute(
                       path: 'homeserver',

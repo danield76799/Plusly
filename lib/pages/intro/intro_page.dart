@@ -25,6 +25,12 @@ class IntroPage extends StatelessWidget {
     return LoginScaffold(
       appBar: AppBar(
         centerTitle: true,
+        leading: IconButton(
+          onPressed: () {
+            context.pushReplacement('/rooms');
+          },
+          icon: const Icon(Icons.arrow_back),
+        ),
         title: Text(
           addMultiAccount
               ? L10n.of(context).addAccount
