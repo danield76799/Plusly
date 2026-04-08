@@ -69,6 +69,14 @@ class SettingsChatView extends StatelessWidget {
                         subtitle: L10n.of(context).hideRedactedMessagesBody,
                         setting: AppSettings.hideRedactedEvents,
                       ),
+                      if (PlatformInfos.isMobile) ...[
+                        const ListDivider(),
+                        SettingsSwitchListTile.adaptive(
+                          title: L10n.of(context).showCameraButton,
+                          subtitle: L10n.of(context).showCameraButtonDesc,
+                          setting: AppSettings.showCameraButton,
+                        ),
+                      ],
                       const ListDivider(),
                       SettingsSwitchListTile.adaptive(
                         title: L10n.of(

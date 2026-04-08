@@ -206,7 +206,8 @@ class ChatInputRow extends StatelessWidget {
                           ],
                     ),
                   ),
-                  if (PlatformInfos.isMobile)
+                  if (PlatformInfos.isMobile &&
+                      AppSettings.showCameraButton.value)
                     AnimatedContainer(
                       duration: FluffyThemes.animationDuration,
                       curve: FluffyThemes.animationCurve,
