@@ -498,10 +498,13 @@ class ChatListController extends State<ChatList>
                   name: displayname,
                 ),
               const SizedBox(width: 12),
-              Text(
-                displayname,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
+              Expanded(
+                child: Text(
+                  displayname,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  overflow: .ellipsis,
                 ),
               ),
             ],
