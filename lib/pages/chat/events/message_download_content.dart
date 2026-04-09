@@ -11,6 +11,7 @@ import 'package:extera_next/pages/chat/events/html_message.dart';
 import 'package:extera_next/pages/download_manager/download_manager.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:extera_next/utils/url_launcher.dart';
+import 'package:open_file/open_file.dart';
 
 class MessageDownloadContent extends StatefulWidget {
   final Event event;
@@ -32,6 +33,7 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
   bool isDownloading = false;
   bool downloadSuccess = false;
   bool downloadError = false;
+  String? filePath;
   double downloadProgress = 0.0;
 
   DownloadEventSubscription? _downloadSubscription;
@@ -59,6 +61,7 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
             });
           case DownloadEndEvent(:final success, :final error):
             setState(() {
+              filePath = event.filePath;
               isDownloading = false;
               downloadError = !success && error != null;
               downloadSuccess = success;
@@ -111,6 +114,10 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
             borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
             onTap: () {
               if (isDownloading) return;
+              if (downloadSuccess) {
+                if (filePath != null) OpenFile.open(filePath);
+                return;
+              }
               if (event.canDownloadInBackground) {
                 event.downloadInBackground(context);
               } else {
