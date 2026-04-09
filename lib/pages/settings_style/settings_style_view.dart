@@ -224,18 +224,22 @@ class SettingsStyleView extends StatelessWidget {
                             alignment: Alignment.center,
                             children: [
                               if (hasWallpaper)
-                                Opacity(
-                                  opacity: controller.wallpaperOpacity,
-                                  child: ImageFiltered(
-                                    imageFilter: ImageFilter.blur(
-                                      sigmaX: controller.wallpaperBlur,
-                                      sigmaY: controller.wallpaperBlur,
-                                    ),
-                                    child: Image.file(
-                                      File(controller.wallpaperPath!),
-                                      fit: BoxFit.cover,
-                                      width: FluffyThemes.columnWidth * 2,
-                                      height: 212,
+                                Positioned.fill(
+                                  child: ClipRect(
+                                    child: Opacity(
+                                      opacity: controller.wallpaperOpacity,
+                                      child: ImageFiltered(
+                                        imageFilter: ImageFilter.blur(
+                                          sigmaX: controller.wallpaperBlur,
+                                          sigmaY: controller.wallpaperBlur,
+                                        ),
+                                        child: Image.file(
+                                          File(controller.wallpaperPath!),
+                                          fit: BoxFit.cover,
+                                          width: FluffyThemes.columnWidth * 2,
+                                          height: 212,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -244,7 +248,7 @@ class SettingsStyleView extends StatelessWidget {
                                 children: [
                                   const SizedBox(height: 16),
                                   Material(
-                                    color: theme.scaffoldBackgroundColor,
+                                    color: Colors.transparent,
                                     child: Column(
                                       children: [
                                         StateMessage(
