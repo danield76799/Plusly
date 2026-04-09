@@ -58,7 +58,11 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
     
   } else {
+    const gchar* hide_titlebar = g_getenv("EXTERA_HIDE_TITLEBAR");
     gtk_window_set_title(window, "Extera Next");
+    if (hide_titlebar != nullptr && g_strcmp0(hide_titlebar, "1") == 0) {
+        gtk_window_set_decorated(window, FALSE);
+    }
   }
 
   gtk_window_set_default_size(window, 864, 720);

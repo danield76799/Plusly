@@ -1,3 +1,6 @@
+## Extera 26.1.32
+- bugfixes and improvements
+
 ## Extera 26.1.31
 - Fix little typo in MSC4320 Rich Presence rendering.
 
