@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:collection/collection.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:highlight_selectable/highlight_selectable.dart';
 import 'package:highlight_selectable/theme_map.dart';
 import 'package:html/dom.dart' as dom;
@@ -359,9 +360,8 @@ class _HtmlMessageState extends State<HtmlMessage> {
         return isInline
             ? TextSpan(
                 text: node.text,
-                style: TextStyle(
+                style: GoogleFonts.robotoMono(
                   fontSize: fontSize,
-                  fontFamily: 'RobotoMono',
                   backgroundColor: const Color(0xff2d2b57),
                   color: const Color(0xffe3dfff),
                 ),
@@ -385,10 +385,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
                     horizontal: 8,
                     vertical: isInline ? 0 : 8,
                   ),
-                  textStyle: TextStyle(
-                    fontSize: fontSize,
-                    fontFamily: 'RobotoMono',
-                  ),
+                  textStyle: GoogleFonts.robotoMono(fontSize: fontSize),
                 ),
               );
       case 'img':
