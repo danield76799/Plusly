@@ -433,12 +433,12 @@ class ProfileView extends StatelessWidget {
                                   color: theme.colorScheme.surfaceContainerHigh,
                                   child:
                                       controller.richPresenceData!.containsKey(
-                                        'cover_url',
+                                        'cover_art',
                                       )
                                       ? MxcImage(
                                           uri: Uri.parse(
                                             controller
-                                                .richPresenceData!['cover_url'],
+                                                .richPresenceData!['cover_art'],
                                           ),
                                           width: 128,
                                           height: 128,
