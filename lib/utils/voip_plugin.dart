@@ -216,14 +216,19 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
 
   @override
   Future<void> handleNewCall(CallSession call) async {
+    if (call.direction == .kIncoming &&
+        call.remoteUserId == call.client.userID) {
+      Logs().w(
+        "Ignoring a call from ourselves, it's probably a call to someone else from different device.",
+      );
+      return;
+    }
+    if (call.direction == .kOutgoing &&
+        call.localParticipant?.deviceId != client.deviceID) {
+      Logs().w("Ignoring an outgoing call with different device ID");
+      return;
+    }
     if (PlatformInfos.isAndroid) {
-      if (call.direction == .kIncoming &&
-          call.remoteUserId == call.client.userID) {
-        Logs().w(
-          "Ignoring a call from ourselves, it's probably a call to someone else from different device.",
-        );
-        return;
-      }
       try {
         final wasForeground = await FlutterForegroundTask.isAppOnForeground;
 

@@ -786,7 +786,7 @@ class CallingView extends State<Calling> {
   @override
   Widget build(BuildContext context) {
     final voipPlugin = Matrix.of(context).voipPlugin;
-    if (voipPlugin!.overlayMinimised) return const SizedBox.shrink();
+    if (voipPlugin?.overlayMinimised ?? false) return const SizedBox.shrink();
 
     return PIPView(
       builder: (context, isFloating) {
