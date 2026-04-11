@@ -248,7 +248,9 @@ class SettingsStyleView extends StatelessWidget {
                                 children: [
                                   const SizedBox(height: 16),
                                   Material(
-                                    color: Colors.transparent,
+                                    color: hasWallpaper
+                                        ? Colors.transparent
+                                        : theme.scaffoldBackgroundColor,
                                     child: Column(
                                       children: [
                                         StateMessage(
