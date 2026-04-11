@@ -3739,5 +3739,29 @@
             "example": "1"
         }
     }
-  }
+  },
+  "loadImageNoSize": "Загрузить фото",
+  "loadImage": "Загрузить фото ({size})",
+  "@loadImage": {
+    "placeholders": {
+        "size": { "type": "String" }
+    }
+  },
+  "downloadVideoNoSize": "Скачать видео",
+  "downloadVideo": "Скачать видео ({size})",
+  "@downloadVideo": {
+    "placeholders": {
+        "size": { "type": "String" }
+    }
+  },
+  "playVideoNoSize": "Видео",
+  "playVideo": "Видео ({size})",
+  "@playVideo": {
+    "placeholders": {
+        "size": { "type": "String" }
+    }                   
+  },
+  "autoLoadMedia": "Предпросмотр медиа",
+  "autoLoadMediaLong": "Если отключено, медиафайлы не будут загружаться, пока Вы на них не нажмёте.",
+  "enablePeopleTab": "Вкладка \"Люди\""
 }

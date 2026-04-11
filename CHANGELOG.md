@@ -1,3 +1,7 @@
+## Extera 26.1.4
+- "People" tab (toggleable by a feature flag, enabled by default)
+- Option to turn off media preview (also configurable per chat)
+
 ## Extera 26.1.33
 - Remove duplicate close button in "loading" snackbars.
 

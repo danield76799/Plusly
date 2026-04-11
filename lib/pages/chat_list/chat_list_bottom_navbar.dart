@@ -1,4 +1,3 @@
-import 'package:extera_next/config/themes.dart';
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
