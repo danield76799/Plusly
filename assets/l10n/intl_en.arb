@@ -3594,8 +3594,17 @@
       }
     }
   },
-  "peopleOnline": "{count, plural, one{{count} person} other{{count} people}} online",
+  "peopleOnline": "Online - {count}",
   "@peopleOnline": {
+    "placeholders": {
+        "count": {
+            "type": "int",
+            "example": "1"
+        }
+    }
+  },
+  "peopleUnavailable": "Unavailable - {count}",
+  "@peopleUnavailable": {
     "placeholders": {
         "count": {
             "type": "int",
@@ -3655,5 +3664,6 @@
     }
   },
   "autoLoadMedia": "Preview media",
-  "autoLoadMediaLong": "If disabled, media won't load automatically until you click it."
+  "autoLoadMediaLong": "If disabled, media won't load automatically until you click it.",
+  "enablePeopleTab": "Enable \"People\" tab"
 }

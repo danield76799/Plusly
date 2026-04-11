@@ -14,6 +14,7 @@ abstract class SettingKeys {
 }
 
 enum AppSettings<T> {
+  enablePeopleTab<bool>('xyz.extera.enablePeopleTab', true),
   autoLoadMedia<bool>('xyz.extera.autoLoadMedia', false),
   showCameraButton<bool>('xyz.extera.cameraButton', true),
   stickerScale<double>('xyz.extera.stickerScale', 2),

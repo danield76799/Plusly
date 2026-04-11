@@ -3721,5 +3721,23 @@
   "enableChatFrostedGlass": "Эффект полупрозрачности",
   "favouriteStickers": "Избранные",
   "showCameraButton": "Сделать фото/видео",
-  "showCameraButtonDesc": "Показывать кнопку для фото/видео в поле сообщения"
+  "showCameraButtonDesc": "Показывать кнопку для фото/видео в поле сообщения",
+  "peopleOnline": "В сети - {count}",
+  "@peopleOnline": {
+    "placeholders": {
+        "count": {
+            "type": "int",
+            "example": "1"
+        }
+    }
+  },
+  "peopleUnavailable": "Недоступны - {count}",
+  "@peopleUnavailable": {
+    "placeholders": {
+        "count": {
+            "type": "int",
+            "example": "1"
+        }
+    }
+  }
 }

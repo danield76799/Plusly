@@ -29,7 +29,7 @@ class Avatar extends StatelessWidget {
     this.onTap,
     this.client,
     this.presenceUserId,
-    this.presenceBackgroundColor,
+    this.presenceBackgroundColor = Colors.transparent,
     this.borderRadius,
     this.border,
     this.icon,

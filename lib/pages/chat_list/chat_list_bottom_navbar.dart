@@ -1,3 +1,4 @@
+import 'package:extera_next/config/themes.dart';
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
@@ -35,12 +36,12 @@ class ChatListBottomNavbar extends StatelessWidget {
         ActiveFilter.messages
       else
         ActiveFilter.allChats,
-      ActiveFilter.groups,
+      if (AppSettings.separateChatTypes.value) ActiveFilter.groups,
       ActiveFilter.unread,
       if (spaceDelegateCandidates.isNotEmpty &&
           !controller.widget.displayNavigationRail)
         ActiveFilter.spaces,
-      ActiveFilter.people,
+      if (AppSettings.enablePeopleTab.value) ActiveFilter.people,
     ];
 
     final filterLambdas = {
