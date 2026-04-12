@@ -14,6 +14,8 @@ abstract class SettingKeys {
 }
 
 enum AppSettings<T> {
+  uiFont<String>('xyz.extera.uiFont', ''),
+  fallbackFonts<String>('xyz.extera.fallbackFonts', 'SystemFont,Roboto'),
   enablePeopleTab<bool>('xyz.extera.enablePeopleTab', true),
   autoLoadMedia<bool>('xyz.extera.autoLoadMedia', false),
   showCameraButton<bool>('xyz.extera.cameraButton', true),
