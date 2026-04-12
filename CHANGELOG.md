@@ -1,3 +1,8 @@
+## Extera 26.1.5
+- Preview media by default
+- Change font/font fallbacks through advanced config
+- Various bugfixes
+
 ## Extera 26.1.4
 - "People" tab (toggleable by a feature flag, enabled by default)
 - Option to turn off media preview (also configurable per chat)
