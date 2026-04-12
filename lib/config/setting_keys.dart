@@ -17,7 +17,7 @@ enum AppSettings<T> {
   uiFont<String>('xyz.extera.uiFont', ''),
   fallbackFonts<String>('xyz.extera.fallbackFonts', 'SystemFont,Roboto'),
   enablePeopleTab<bool>('xyz.extera.enablePeopleTab', true),
-  autoLoadMedia<bool>('xyz.extera.autoLoadMedia', false),
+  autoLoadMedia<bool>('xyz.extera.autoLoadMedia', true),
   showCameraButton<bool>('xyz.extera.cameraButton', true),
   stickerScale<double>('xyz.extera.stickerScale', 2),
   wallpaperPath<String>('xyz.extera.wallpaper_path', ''),
