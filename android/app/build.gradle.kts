@@ -30,7 +30,7 @@ dependencies {
 }
 
 android {
-    namespace = "nl.daan.extrachat"
+    namespace = "com.danield.extrachat"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "28.2.13676358"
 
@@ -67,7 +67,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "nl.daan.extrachat"
+        applicationId = "com.danield.extrachat"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

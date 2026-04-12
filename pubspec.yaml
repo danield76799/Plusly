@@ -151,7 +151,7 @@ msix_config:
   display_name: ExtraChat
   publisher_display_name: ExtraChat
   publisher: CN=Daan, O=ExtraChat, L=Laren, S=NH, C=NL
-  identity_name: nl.daan.extrachat
+  identity_name: com.danield.extrachat
   logo_path: assets\logo.png
   capabilities: internetClient, location, microphone, webcam
   protocol_activation: https

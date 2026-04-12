@@ -1,4 +1,4 @@
-package nl.daan.extrachat
+package com.danield.extrachat
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
