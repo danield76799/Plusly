@@ -1,6 +1,10 @@
 import 'package:matrix/matrix.dart';
 
 /// Known bridge bot suffixes/patterns for common Matrix bridges
+const _excludedBotPatterns = [
+  'extera',
+];
+
 const _bridgePatterns = [
   // Generic bot patterns
   'bot.signal',
@@ -54,6 +58,11 @@ const _bridgeStateEventTypes = [
 /// Checks if a user ID matches known bridge bot patterns
 bool isBridgeBotByUserId(String userId) {
   final lowerUserId = userId.toLowerCase();
+  for (final pattern in _excludedBotPatterns) {
+    if (lowerUserId.contains(pattern)) {
+      return false;
+    }
+  }
   for (final pattern in _bridgePatterns) {
     if (lowerUserId.contains(pattern)) {
       return true;
@@ -137,11 +146,15 @@ bool isBridgeRoom(Room room) {
   }
 
   // Check all room members via state events for bridge bot participation
-  final memberStates = room.states[EventTypes.RoomMember];
-  if (memberStates != null) {
-    for (final userId in memberStates.keys) {
-      if (isBridgeBotByUserId(userId)) {
-        return true;
+  // Only for small rooms (bridge DMs/groups) to avoid false positives from public rooms
+  final memberCount = room.summary.mJoinedMemberCount;
+  if ((memberCount ?? 0) <= 5) {
+    final memberStates = room.states[EventTypes.RoomMember];
+    if (memberStates != null) {
+      for (final userId in memberStates.keys) {
+        if (isBridgeBotByUserId(userId)) {
+          return true;
+        }
       }
     }
   }
