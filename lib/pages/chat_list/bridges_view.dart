@@ -8,7 +8,7 @@ import 'package:extera_next/pages/chat_list/chat_list.dart';
 import 'package:extera_next/utils/bridge_utils.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:extera_next/widgets/matrix.dart';
-import '../config/themes.dart';
+import '../../config/themes.dart';
 
 class BridgesView extends StatelessWidget {
   final void Function(Room) onChatTap;
