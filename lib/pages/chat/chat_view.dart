@@ -698,55 +698,56 @@ class ChatView extends StatelessWidget {
                         child: const Icon(Icons.upload_outlined, size: 100),
                       ),
 
-                    if (scrollUpBannerEventId != null)
-                      Positioned(
-                        top: 16,
-                        left: 0,
-                        right: 0,
-                        child: SizedBox(
-                          child: Align(
-                            alignment: .center,
-                            child: Row(
+                    Positioned(
+                      top: 16,
+                      left: 0,
+                      right: 0,
+                      child: SizedBox(
+                        child: Align(
+                          alignment: .center,
+                          child: Padding(
+                            padding: const .only(top: 48),
+                            child: Column(
                               mainAxisSize: .min,
                               children: [
-                                FilledButton(
-                                  onPressed: () {
-                                    controller.scrollToEventId(
-                                      scrollUpBannerEventId,
-                                    );
-                                    controller.discardScrollUpBannerEventId();
-                                    // controller.setReadMarker();
-                                  },
-                                  style: FilledButton.styleFrom(
-                                    shadowColor: Colors.black,
-                                    elevation: 4,
-                                  ),
-                                  child: Row(
+                                const BackToCallButton(),
+                                const MiniAudioPlayer(),
+                                if (scrollUpBannerEventId != null)
+                                  Row(
+                                    mainAxisSize: .min,
                                     children: [
-                                      const Icon(Icons.arrow_upward),
-                                      const SizedBox(width: 18),
-                                      Text(
-                                        L10n.of(context).jumpToLastReadMessage,
+                                      FilledButton(
+                                        onPressed: () {
+                                          controller.scrollToEventId(
+                                            scrollUpBannerEventId,
+                                          );
+                                          controller
+                                              .discardScrollUpBannerEventId();
+                                          // controller.setReadMarker();
+                                        },
+                                        style: FilledButton.styleFrom(
+                                          shadowColor: Colors.black,
+                                          elevation: 4,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            const Icon(Icons.arrow_upward),
+                                            const SizedBox(width: 18),
+                                            Text(
+                                              L10n.of(
+                                                context,
+                                              ).jumpToLastReadMessage,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),
-                                ),
                               ],
                             ),
                           ),
                         ),
                       ),
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: const BackToCallButton(),
-                    ),
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: const MiniAudioPlayer(),
                     ),
                   ],
                 ),

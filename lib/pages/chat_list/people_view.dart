@@ -214,6 +214,7 @@ class _PeopleViewState extends State<PeopleView> {
                   },
                 ),
               ),
+              SliverToBoxAdapter(child: const SizedBox(height: 172)),
             ],
           );
         },
