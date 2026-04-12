@@ -415,7 +415,7 @@ class ChatController extends State<ChatPageWithRoom>
       await loadTimelineFuture;
       if (initialEventId != null) scrollToEventId(initialEventId);
 
-      var readMarkerEventIndex = readMarkerEventId.isEmpty && timeline != null
+      var readMarkerEventIndex = readMarkerEventId.isEmpty || timeline == null
           ? -1
           : timeline!.events
                 .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
