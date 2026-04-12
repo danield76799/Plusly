@@ -48,7 +48,7 @@ bool isBridgeRoomByState(Room room) {
 
 /// Checks if a user ID is a known bridge bot
 /// Also checks direct chat matrix ID as bridge bots often initiate DM
-bool isBridgeBot(UserId userId, Room room) {
+bool isBridgeBot(String userId, Room room) {
   // Check by user ID pattern
   if (isBridgeBotByUserId(userId.toString())) {
     return true;
@@ -63,23 +63,32 @@ bool isBridgeBot(UserId userId, Room room) {
   return false;
 }
 
-/// Checks if a room is a bridge room (has bridge-related participants or state)
+/// Checks if a room is a bridge room (has bridge-related state or direct chat with bridge bot)
 bool isBridgeRoom(Room room) {
   // Check by room state events
   if (isBridgeRoomByState(room)) {
     return true;
   }
 
-  // Check if any participant is a bridge bot
-  for (final userId in room.joinMemberIds) {
-    if (isBridgeBotByUserId(userId.toString())) {
-      return true;
-    }
-  }
-
   // Check direct chat matrix ID
   final directChatMatrixId = room.directChatMatrixID;
   if (directChatMatrixId != null && isBridgeBotByUserId(directChatMatrixId)) {
+    return true;
+  }
+
+  // Check room name for bridge bot patterns as fallback
+  final roomName = room.name?.toLowerCase() ?? '';
+  final bridgeNamePatterns = [
+    'whatsapp',
+    'telegram',
+    'signal',
+    'discord',
+    'irc',
+    'slack',
+    'bridge',
+    'beeper',
+  ];
+  if (bridgeNamePatterns.any((pattern) => roomName.contains(pattern))) {
     return true;
   }
 
