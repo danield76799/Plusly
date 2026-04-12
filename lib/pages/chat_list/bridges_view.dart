@@ -220,7 +220,7 @@ class _BridgeAvatar extends StatelessWidget {
       width: Avatar.defaultSize,
       height: Avatar.defaultSize,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
+        color: color.withOpacity(0.2),
         borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       ),
       child: Icon(
