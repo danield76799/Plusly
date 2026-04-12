@@ -16,6 +16,12 @@ const _bridgePatterns = [
   'slackbot',
   'bridgebot',
   'relaybot',
+  // Bridge participant IDs (e.g. @whatsapp_12345:server)
+  'whatsapp_',
+  'telegram_',
+  'signal_',
+  'discord_',
+  'slack_',
   // Specific patterns
   'wa-bot:',
   'telegram-bot:',
@@ -98,8 +104,9 @@ bool isBridgeRoom(Room room) {
     return true;
   }
 
-  // Check room name for bridge bot patterns as fallback
+  // Check room name and topic for bridge bot patterns as fallback
   final roomName = room.name?.toLowerCase() ?? '';
+  final roomTopic = room.topic?.toLowerCase() ?? '';
   final bridgeNamePatterns = [
     'whatsapp',
     'telegram',
@@ -110,7 +117,8 @@ bool isBridgeRoom(Room room) {
     'bridge',
     'beeper',
   ];
-  if (bridgeNamePatterns.any((pattern) => roomName.contains(pattern))) {
+  if (bridgeNamePatterns.any((pattern) =>
+      roomName.contains(pattern) || roomTopic.contains(pattern))) {
     return true;
   }
 
@@ -147,23 +155,24 @@ bool isBridgeRoom(Room room) {
 String? getBridgeType(Room room) {
   final userId = room.directChatMatrixID ?? '';
   final roomName = room.name?.toLowerCase() ?? '';
+  final roomTopic = room.topic?.toLowerCase() ?? '';
 
-  if (userId.contains('wa-bot') || userId.contains('whappbot') || userId.contains('whatsapp') || userId.contains('bot.whatsapp') || roomName.contains('whatsapp')) {
+  if (userId.contains('wa-bot') || userId.contains('whappbot') || userId.contains('whatsapp') || userId.contains('bot.whatsapp') || userId.contains('whatsapp_') || roomName.contains('whatsapp') || roomTopic.contains('whatsapp')) {
     return 'whatsapp';
   }
-  if (userId.contains('telegram-bot') || userId.contains('telegram') || userId.contains('mautrix-telegram') || userId.contains('tgbot') || userId.contains('bot.telegram') || roomName.contains('telegram')) {
+  if (userId.contains('telegram-bot') || userId.contains('telegram') || userId.contains('mautrix-telegram') || userId.contains('tgbot') || userId.contains('bot.telegram') || userId.contains('telegram_') || roomName.contains('telegram') || roomTopic.contains('telegram')) {
     return 'telegram';
   }
-  if (userId.contains('signal-bot') || userId.contains('bot.signal')) {
+  if (userId.contains('signal-bot') || userId.contains('bot.signal') || userId.contains('signal_') || roomName.contains('signal') || roomTopic.contains('signal')) {
     return 'signal';
   }
-  if (userId.contains('discord-bot') || userId.contains('bot.discord')) {
+  if (userId.contains('discord-bot') || userId.contains('bot.discord') || userId.contains('discord_') || roomName.contains('discord') || roomTopic.contains('discord')) {
     return 'discord';
   }
-  if (userId.contains('irc-bot') || userId.contains('bot.irc')) {
+  if (userId.contains('irc-bot') || userId.contains('bot.irc') || roomName.contains('irc') || roomTopic.contains('irc')) {
     return 'irc';
   }
-  if (userId.contains('slack-bot') || userId.contains('bot.slack')) {
+  if (userId.contains('slack-bot') || userId.contains('bot.slack') || userId.contains('slack_') || roomName.contains('slack') || roomTopic.contains('slack')) {
     return 'slack';
   }
   if (userId.contains('hangouts-bot')) {
