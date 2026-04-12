@@ -173,6 +173,7 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
               mxContent: user?.avatarUrl,
               name: displayName,
               size: Avatar.defaultSize * 2,
+              borderRadius: BorderRadius.circular(32),
             ),
             const SizedBox(height: 16),
             Text(L10n.of(context).askVerificationRequest(displayName)),
@@ -205,7 +206,11 @@ class KeyVerificationPageState extends State<KeyVerificationDialog> {
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  Avatar(mxContent: user?.avatarUrl, name: displayName),
+                  Avatar(
+                    mxContent: user?.avatarUrl,
+                    name: displayName,
+                    borderRadius: BorderRadius.circular(32),
+                  ),
                   const SizedBox(
                     width: Avatar.defaultSize + 2,
                     height: Avatar.defaultSize + 2,

@@ -17,6 +17,8 @@ class DialogTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final int? maxLength;
   final bool autocorrect = true;
+  final void Function(String)? onSubmitted;
+  final TextInputAction? textInputAction;
 
   const DialogTextField({
     super.key,
@@ -33,6 +35,8 @@ class DialogTextField extends StatelessWidget {
     this.counterText,
     this.errorText,
     this.obscureText = false,
+    this.textInputAction,
+    this.onSubmitted,
   });
 
   @override
@@ -54,6 +58,8 @@ class DialogTextField extends StatelessWidget {
           maxLength: maxLength,
           keyboardType: keyboardType,
           autocorrect: autocorrect,
+          textInputAction: textInputAction,
+          onSubmitted: onSubmitted,
           decoration: InputDecoration(
             errorText: errorText,
             hintText: hintText,
@@ -79,6 +85,8 @@ class DialogTextField extends StatelessWidget {
               prefix: prefixText != null ? Text(prefixText) : null,
               suffix: suffixText != null ? Text(suffixText) : null,
               placeholder: labelText ?? hintText,
+              textInputAction: textInputAction,
+              onSubmitted: onSubmitted,
             ),
             if (errorText != null)
               Text(

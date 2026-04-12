@@ -464,10 +464,13 @@ class SendFileDialogState extends State<SendFileDialog> {
                       child: DialogTextField(
                         controller: _labelTextController,
                         labelText: L10n.of(context).optionalMessage,
-                        minLines: 1,
-                        maxLines: 3,
-                        maxLength: 255,
+                        keyboardType: .multiline,
+                        maxLength: 4096,
                         counterText: '',
+                        textInputAction: AppSettings.sendOnEnter.value
+                            ? .send
+                            : null,
+                        onSubmitted: (_) => _send(),
                       ),
                     ),
                   // Workaround for SwitchListTile.adaptive crashes in CupertinoDialog
