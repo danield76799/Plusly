@@ -3764,5 +3764,6 @@
   "autoLoadMedia": "Предпросмотр медиа",
   "autoLoadMediaLong": "Если отключено, медиафайлы не будут загружаться, пока Вы на них не нажмёте.",
   "enablePeopleTab": "Вкладка \"Люди\"",
-  "noDownloadsYet": "Нет загрузок."
+  "noDownloadsYet": "Нет загрузок.",
+  "joinRoomShort": "Войти"
 }

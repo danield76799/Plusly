@@ -236,7 +236,7 @@ class ExploreRoomsView extends StatelessWidget {
                             : FilledButton(
                                 onPressed: () =>
                                     controller.joinRoomAction(room),
-                                child: Text(L10n.of(context).joinRoom),
+                                child: Text(L10n.of(context).joinRoomShort),
                               ),
                         onTap: () => _showRoomDetails(context, room),
                       );

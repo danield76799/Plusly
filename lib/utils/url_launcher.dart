@@ -1,3 +1,4 @@
+import 'package:extera_next/widgets/future_loading_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart' show IterableExtension;
@@ -219,7 +220,7 @@ class UrlLauncher {
       // Default: show user profile
       final userId = primaryId;
       var noProfileWarning = false;
-      final profileResult = await showFutureLoadingDialog(
+      final profileResult = await showFutureLoadingSnackbar(
         context: context,
         future: () =>
             matrix.client.getProfileFromUserId(userId).catchError((_) {
@@ -243,7 +244,7 @@ class UrlLauncher {
 
       if (room == null && sigil == '#') {
         // Resolve alias
-        final response = await showFutureLoadingDialog(
+        final response = await showFutureLoadingSnackbar(
           context: context,
           future: () => matrix.client.getRoomIdByAlias(roomIdOrAlias),
         );
@@ -270,7 +271,7 @@ class UrlLauncher {
               ) ==
               OkCancelResult.ok) {
             final joinId = roomId ?? roomIdOrAlias;
-            final response = await showFutureLoadingDialog(
+            final response = await showFutureLoadingSnackbar(
               context: context,
               future: () => matrix.client.joinRoom(
                 joinId,
@@ -312,7 +313,7 @@ class UrlLauncher {
                   ).joinRoomByLinkConfirmation(roomIdOrAlias),
                 ) ==
                 OkCancelResult.ok) {
-              final response = await showFutureLoadingDialog(
+              final response = await showFutureLoadingSnackbar(
                 context: context,
                 future: () => matrix.client.joinRoom(
                   roomIdOrAlias,
@@ -378,7 +379,7 @@ class UrlLauncher {
       final servers = <String>{};
       if (room == null && roomIdOrAlias.sigil == '#') {
         // we were unable to find the room locally...so resolve it
-        final response = await showFutureLoadingDialog(
+        final response = await showFutureLoadingSnackbar(
           context: context,
           future: () => matrix.client.getRoomIdByAlias(roomIdOrAlias),
         );
@@ -422,7 +423,7 @@ class UrlLauncher {
             ) ==
             OkCancelResult.ok) {
           roomId = roomIdOrAlias;
-          final response = await showFutureLoadingDialog(
+          final response = await showFutureLoadingSnackbar(
             context: context,
             future: () => matrix.client.joinRoom(
               roomIdOrAlias,
@@ -450,7 +451,7 @@ class UrlLauncher {
     } else if (identityParts.primaryIdentifier.sigil == '@') {
       final userId = identityParts.primaryIdentifier;
       var noProfileWarning = false;
-      final profileResult = await showFutureLoadingDialog(
+      final profileResult = await showFutureLoadingSnackbar(
         context: context,
         future: () =>
             matrix.client.getProfileFromUserId(userId).catchError((_) {

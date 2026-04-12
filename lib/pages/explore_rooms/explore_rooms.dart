@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:extera_next/widgets/future_loading_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
@@ -111,11 +112,14 @@ class ExploreRoomsController extends State<ExploreRooms> {
 
     try {
       final roomId = room.roomId;
-      await client.joinRoom(roomId);
+      await showFutureLoadingSnackbar(
+        context: context,
+        future: () => client.joinRoom(roomId),
+      );
 
       if (mounted) {
         scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Joined ${room.name ?? room.roomId}')),
+          SnackBar(content: Text(L10n.of(context).youJoinedTheChat)),
         );
       }
     } catch (e) {
