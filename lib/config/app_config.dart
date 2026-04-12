@@ -7,8 +7,10 @@ abstract class AppConfig {
   static const String bannerProfileField = 'chat.commet.profile_banner';
 
   static const String aboutProfileField = 'xyz.extera.about';
-  static const String updateCheckUrl = 'https://extera.xyz/next/version.txt';
-  static const String downloadUpdateUrl = 'https://extera.xyz/';
+  static const String updateCheckUrl =
+      'https://raw.githubusercontent.com/danield76799/Extera/main/version.txt';
+  static const String downloadUpdateUrl =
+      'https://github.com/danield76799/Extera/releases';
 
   static const String appSsoUrlScheme = 'xyz.extera.auth';
 
@@ -45,14 +47,15 @@ abstract class AppConfig {
   static String _webBaseUrl = 'https://fluffychat.im/web';
 
   static String get webBaseUrl => _webBaseUrl;
-  static const String sourceCodeUrl = 'https://github.com/ExteraApp/Extera';
-  static const String supportUrl = 'https://github.com/ExteraApp/Extera/issues';
+  static const String sourceCodeUrl = 'https://github.com/danield76799/Extera';
+  static const String supportUrl =
+      'https://github.com/danield76799/Extera/issues';
   static const String changelogUrl =
-      'https://github.com/ExteraApp/Extera/blob/main/CHANGELOG.md';
+      'https://github.com/danield76799/Extera/blob/main/CHANGELOG.md';
   static final Uri newIssueUrl = Uri(
     scheme: 'https',
     host: 'github.com',
-    path: '/ExteraApp/Extera/issues',
+    path: '/danield76799/Extera/issues',
   );
 
   static const bool hideTypingUsernames = false;
