@@ -35,14 +35,6 @@ class ChatListViewBody extends StatelessWidget {
 
     final client = Matrix.of(context).client;
     final activeSpace = controller.activeSpaceId;
-    if (controller.activeFilter == .people) {
-      return PeopleView(
-        onBack: () => controller.activeFilter =
-            AppSettings.separateChatTypes.value ? .messages : .allChats,
-        onChatTap: (room) => controller.onChatTap(room),
-        chatListController: controller,
-      );
-    }
     if (activeSpace != null) {
       return SpaceView(
         key: ValueKey(activeSpace),
@@ -53,6 +45,14 @@ class ChatListViewBody extends StatelessWidget {
             controller.chatContextAction(room, context),
         activeChat: controller.activeChat,
         toParentSpace: controller.setActiveSpace,
+      );
+    }
+    if (controller.activeFilter == .people) {
+      return PeopleView(
+        onBack: () => controller.activeFilter =
+            AppSettings.separateChatTypes.value ? .messages : .allChats,
+        onChatTap: (room) => controller.onChatTap(room),
+        chatListController: controller,
       );
     }
     final spaces = client.rooms.where((r) => r.isSpace);
