@@ -4,6 +4,14 @@ import 'package:matrix/matrix.dart';
 const _bridgePatterns = [
   'wa-bot:',
   'telegram-bot:',
+  'telegrambot:',
+  'telegram:',
+  'mautrix-telegram:',
+  'tgbot:',
+  'tg-bot:',
+  'heisenbridge:',
+  'beeper:',
+  't2bot:',
   'whappbot:',
   'mx-puppet-bridge:',
   'mx-puppet:',
@@ -99,11 +107,12 @@ bool isBridgeRoom(Room room) {
 /// Returns null if not a bridge room
 String? getBridgeType(Room room) {
   final userId = room.directChatMatrixID ?? '';
+  final roomName = room.name?.toLowerCase() ?? '';
 
-  if (userId.contains('wa-bot') || userId.contains('whappbot') || userId.contains('whatsapp')) {
+  if (userId.contains('wa-bot') || userId.contains('whappbot') || userId.contains('whatsapp') || roomName.contains('whatsapp')) {
     return 'whatsapp';
   }
-  if (userId.contains('telegram-bot')) {
+  if (userId.contains('telegram-bot') || userId.contains('telegram') || userId.contains('mautrix-telegram') || userId.contains('tgbot') || roomName.contains('telegram')) {
     return 'telegram';
   }
   if (userId.contains('signal-bot')) {
