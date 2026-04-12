@@ -706,7 +706,9 @@ class ChatView extends StatelessWidget {
                         child: Align(
                           alignment: .center,
                           child: Padding(
-                            padding: const .only(top: 48),
+                            padding: .only(
+                              top: FluffyThemes.isColumnMode(context) ? 64 : 48,
+                            ),
                             child: Column(
                               mainAxisSize: .min,
                               children: [
