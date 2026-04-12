@@ -251,6 +251,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                 children: [
                   MxcImage(
                     uri: sticker.url,
+                    cacheKey: sticker.url.toString(),
                     isThumbnail: false,
                     width: 384,
                     fit: BoxFit.contain,
@@ -543,6 +544,7 @@ class StickerPickerDialogState extends State<StickerPickerDialog> {
                                           height: 36,
                                           fit: BoxFit.contain,
                                           isThumbnail: true,
+                                          cacheKey: firstImage.url.toString(),
                                         )
                                       : const Icon(Icons.image, size: 28),
                                 );
@@ -671,6 +673,7 @@ class _StickerTile extends StatelessWidget {
           absorbing: true,
           child: MxcImage(
             uri: image.url,
+            cacheKey: image.url.toString(),
             fit: BoxFit.contain,
             width: 128,
             height: 128,
