@@ -80,12 +80,12 @@
                 <data android:scheme="matrix" />
             </intent-filter>
 
-            <!-- App can open nl.daan.extrachat:// uris -->
+            <!-- App can open com.danield.extrachat:// uris -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="nl.daan.extrachat" android:host="chat" />
+                <data android:scheme="com.danield.extrachat" android:host="chat" />
             </intent-filter>
 
             <!-- App can receive shared text -->
@@ -116,7 +116,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="nl.daan.extrachat.auth" />
+                <data android:scheme="com.danield.extrachat.auth" />
             </intent-filter>
         </activity>
 
