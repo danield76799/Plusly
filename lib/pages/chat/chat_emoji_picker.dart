@@ -110,6 +110,13 @@ class ChatEmojiPicker extends StatelessWidget {
                                             entry.value.images.values.first.url,
                                         width: 32,
                                         height: 32,
+                                        cacheKey: entry
+                                            .value
+                                            .images
+                                            .values
+                                            .first
+                                            .url
+                                            .toString(),
                                       ),
                                       emojis: entry.value.images.map((
                                         name,
@@ -128,6 +135,7 @@ class ChatEmojiPicker extends StatelessWidget {
                                   uri: Uri.parse(name),
                                   width: 32,
                                   height: 32,
+                                  cacheKey: name,
                                   animated: true,
                                 );
                               },

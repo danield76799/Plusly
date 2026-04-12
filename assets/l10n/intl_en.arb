@@ -3661,9 +3661,10 @@
   "@playVideo": {
     "placeholders": {
         "size": { "type": "String" }
-    }
+    }                   
   },
   "autoLoadMedia": "Preview media",
   "autoLoadMediaLong": "If disabled, media won't load automatically until you click it.",
-  "enablePeopleTab": "Enable \"People\" tab"
+  "enablePeopleTab": "Enable \"People\" tab",
+  "noDownloadsYet": "No downloads yet."
 }
