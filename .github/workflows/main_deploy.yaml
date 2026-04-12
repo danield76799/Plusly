@@ -46,8 +46,6 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
-      - name: Set up Rust toolchain
-        uses: dtolnay/rust-action@stable
       - run: flutter pub get
       - run: flutter build apk --release
       - name: Upload APK Artifact
