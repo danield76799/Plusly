@@ -53,3 +53,19 @@ jobs:
         with:
           name: android-apk
           path: build/app/outputs/apk/release/app-release.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: extrachat-build-${{ github.run_number }}
+          name: ExtraChat Build ${{ github.run_number }}
+          body: |
+            Automated APK build for ExtraChat
+            - Run: ${{ github.run_number }}
+            - Commit: ${{ github.sha }}
+            - Package: com.danield.extrachat
+          files: build/app/outputs/apk/release/app-release.apk
+          prerelease: true
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
