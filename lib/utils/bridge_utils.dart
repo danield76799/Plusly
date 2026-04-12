@@ -109,22 +109,22 @@ String? getBridgeType(Room room) {
   final userId = room.directChatMatrixID ?? '';
   final roomName = room.name?.toLowerCase() ?? '';
 
-  if (userId.contains('wa-bot') || userId.contains('whappbot') || userId.contains('whatsapp') || roomName.contains('whatsapp')) {
+  if (userId.contains('wa-bot') || userId.contains('whappbot') || userId.contains('whatsapp') || userId.contains('bot.whatsapp') || roomName.contains('whatsapp')) {
     return 'whatsapp';
   }
-  if (userId.contains('telegram-bot') || userId.contains('telegram') || userId.contains('mautrix-telegram') || userId.contains('tgbot') || roomName.contains('telegram')) {
+  if (userId.contains('telegram-bot') || userId.contains('telegram') || userId.contains('mautrix-telegram') || userId.contains('tgbot') || userId.contains('bot.telegram') || roomName.contains('telegram')) {
     return 'telegram';
   }
-  if (userId.contains('signal-bot')) {
+  if (userId.contains('signal-bot') || userId.contains('bot.signal')) {
     return 'signal';
   }
-  if (userId.contains('discord-bot')) {
+  if (userId.contains('discord-bot') || userId.contains('bot.discord')) {
     return 'discord';
   }
   if (userId.contains('irc-bot')) {
     return 'irc';
   }
-  if (userId.contains('slack-bot')) {
+  if (userId.contains('slack-bot') || userId.contains('bot.slack')) {
     return 'slack';
   }
   if (userId.contains('hangouts-bot')) {
