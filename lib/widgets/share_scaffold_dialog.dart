@@ -73,104 +73,106 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
         )
         .toList();
     final filter = _filterController.text.trim().toLowerCase();
-    return Scaffold(
-      appBar: AppBar(
-        leading: Center(child: CloseButton(onPressed: context.pop)),
-        title: Text(L10n.of(context).share),
-      ),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            toolbarHeight: 72,
-            scrolledUnderElevation: 0,
-            backgroundColor: Colors.transparent,
-            automaticallyImplyLeading: false,
-            title: TextField(
-              controller: _filterController,
-              onChanged: (_) => setState(() {}),
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: theme.colorScheme.secondaryContainer,
-                border: OutlineInputBorder(
-                  borderSide: BorderSide.none,
-                  borderRadius: BorderRadius.circular(99),
-                ),
-                contentPadding: EdgeInsets.zero,
-                hintText: L10n.of(context).search,
-                hintStyle: TextStyle(
-                  color: theme.colorScheme.onSecondaryContainer,
-                  fontWeight: FontWeight.normal,
-                ),
-                floatingLabelBehavior: FloatingLabelBehavior.never,
-                prefixIcon: IconButton(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.search_outlined,
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          leading: Center(child: CloseButton(onPressed: context.pop)),
+          title: Text(L10n.of(context).share),
+        ),
+        body: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              floating: true,
+              toolbarHeight: 72,
+              scrolledUnderElevation: 0,
+              backgroundColor: Colors.transparent,
+              automaticallyImplyLeading: false,
+              title: TextField(
+                controller: _filterController,
+                onChanged: (_) => setState(() {}),
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: theme.colorScheme.secondaryContainer,
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                  hintText: L10n.of(context).search,
+                  hintStyle: TextStyle(
                     color: theme.colorScheme.onSecondaryContainer,
+                    fontWeight: FontWeight.normal,
+                  ),
+                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                  prefixIcon: IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.search_outlined,
+                      color: theme.colorScheme.onSecondaryContainer,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          SliverList.builder(
-            itemCount: rooms.length,
-            itemBuilder: (context, i) {
-              final room = rooms[i];
-              final displayname = room.getLocalizedDisplayname(
-                MatrixLocals(L10n.of(context)),
-              );
-              final value = selectedRoomId == room.id;
-              final filterOut = !displayname.toLowerCase().contains(filter);
-              if (!value && filterOut) {
-                return const SizedBox.shrink();
-              }
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Opacity(
-                  opacity: filterOut ? 0.5 : 1,
-                  child: CheckboxListTile.adaptive(
-                    checkboxShape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(90),
-                    ),
-                    controlAffinity: ListTileControlAffinity.trailing,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppConfig.borderRadius,
+            SliverList.builder(
+              itemCount: rooms.length,
+              itemBuilder: (context, i) {
+                final room = rooms[i];
+                final displayname = room.getLocalizedDisplayname(
+                  MatrixLocals(L10n.of(context)),
+                );
+                final value = selectedRoomId == room.id;
+                final filterOut = !displayname.toLowerCase().contains(filter);
+                if (!value && filterOut) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Opacity(
+                    opacity: filterOut ? 0.5 : 1,
+                    child: CheckboxListTile.adaptive(
+                      checkboxShape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(90),
                       ),
+                      controlAffinity: ListTileControlAffinity.trailing,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppConfig.borderRadius,
+                        ),
+                      ),
+                      secondary: Avatar(
+                        mxContent: room.avatar,
+                        name: displayname,
+                        size: Avatar.defaultSize * 0.75,
+                      ),
+                      title: Text(displayname),
+                      value: selectedRoomId == room.id,
+                      onChanged: (_) => _toggleRoom(room.id),
                     ),
-                    secondary: Avatar(
-                      mxContent: room.avatar,
-                      name: displayname,
-                      size: Avatar.defaultSize * 0.75,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        bottomNavigationBar: AnimatedSize(
+          duration: FluffyThemes.animationDuration,
+          curve: FluffyThemes.animationCurve,
+          child: selectedRoomId == null
+              ? const SizedBox.shrink()
+              : Material(
+                  elevation: 8,
+                  shadowColor: theme.appBarTheme.shadowColor,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ElevatedButton(
+                      onPressed: _forwardAction,
+                      child: Text(L10n.of(context).forward),
                     ),
-                    title: Text(displayname),
-                    value: selectedRoomId == room.id,
-                    onChanged: (_) => _toggleRoom(room.id),
                   ),
                 ),
-              );
-            },
-          ),
-        ],
-      ),
-      bottomNavigationBar: AnimatedSize(
-        duration: FluffyThemes.animationDuration,
-        curve: FluffyThemes.animationCurve,
-        child: selectedRoomId == null
-            ? const SizedBox.shrink()
-            : Material(
-                elevation: 8,
-                shadowColor: theme.appBarTheme.shadowColor,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    onPressed: _forwardAction,
-                    child: Text(L10n.of(context).forward),
-                  ),
-                ),
-              ),
+        ),
       ),
     );
   }
