@@ -229,6 +229,31 @@ class ChatListController extends State<ChatList>
     context,
   ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).toList();
 
+  List<Room> get searchRooms => Matrix.of(context).client.rooms.where((room) {
+    switch (activeFilter) {
+      case .allChats:
+        return !room.isSpace &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
+      case .messages:
+        return !room.isSpace &&
+            room.isDirectChat &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
+      case .groups:
+        return !room.isSpace &&
+            !room.isDirectChat &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
+      case .unread:
+        return room.isUnreadOrInvited;
+      case .spaces:
+        return room.isSpace;
+      case .people:
+        return false;
+    }
+  }).toList();
+
   bool isSearchMode = false;
   Future<QueryPublicRoomsResponse>? publicRoomsResponse;
   String? searchServer;
