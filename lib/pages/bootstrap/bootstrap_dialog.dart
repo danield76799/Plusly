@@ -492,32 +492,9 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                               if (!result.isError) _goBackAction(true);
                             },
                     ),
-                    const SizedBox(height: 16),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.errorContainer,
-                        foregroundColor: theme.colorScheme.onErrorContainer,
-                        iconColor: theme.colorScheme.onErrorContainer,
-                      ),
-                      icon: const Icon(Icons.delete_outlined),
-                      label: Text(L10n.of(context).recoveryKeyLost),
-                      onPressed: _recoveryKeyInputLoading
-                          ? null
-                          : () async {
-                              if (OkCancelResult.ok ==
-                                  await showOkCancelAlertDialog(
-                                    useRootNavigator: false,
-                                    context: context,
-                                    title: L10n.of(context).recoveryKeyLost,
-                                    message: L10n.of(context).wipeChatBackup,
-                                    okLabel: L10n.of(context).ok,
-                                    cancelLabel: L10n.of(context).cancel,
-                                    isDestructive: true,
-                                  )) {
-                                setState(() => _createBootstrap(true));
-                              }
-                            },
-                    ),
+                    // Wipe/recreate button hidden for safety
+                    // const SizedBox(height: 16),
+                    // ElevatedButton.icon(... recoveryKeyLost ...),
                   ],
                 ),
               ),
