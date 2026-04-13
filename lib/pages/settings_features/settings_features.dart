@@ -16,6 +16,7 @@ class SettingsFeaturesController extends State<SettingsFeatures> {
   void exportSettings() async {
     try {
       final path = await SettingsBackup.saveToAppFolder();
+      await SettingsBackup.shareExport(context);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
