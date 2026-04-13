@@ -138,7 +138,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
       return LoginScaffold(
         appBar: AppBar(
           centerTitle: true,
-          leading: CloseButton(onPressed: _cancelAction),
+          leading: const SizedBox.shrink(),
           title: Text(L10n.of(context).chatBackup),
         ),
         body: Center(
@@ -184,7 +184,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
       return LoginScaffold(
         appBar: AppBar(
           centerTitle: true,
-          leading: CloseButton(onPressed: _cancelAction),
+          leading: const SizedBox.shrink(),
           title: Text(L10n.of(context).recoveryKey),
         ),
         body: Center(
@@ -302,7 +302,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
           return LoginScaffold(
             appBar: AppBar(
               centerTitle: true,
-              leading: CloseButton(onPressed: _cancelAction),
+              leading: const SizedBox.shrink(),
               title: Text(L10n.of(context).setupChatBackup),
             ),
             body: Center(
@@ -588,7 +588,7 @@ class BootstrapDialogState extends State<BootstrapDialog> {
 
     return LoginScaffold(
       appBar: AppBar(
-        leading: CloseButton(onPressed: _cancelAction),
+        leading: const SizedBox.shrink(),
         title: Text(titleText ?? L10n.of(context).loadingPleaseWait),
       ),
       body: Center(
