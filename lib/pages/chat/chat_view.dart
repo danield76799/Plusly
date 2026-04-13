@@ -699,60 +699,51 @@ class ChatView extends StatelessWidget {
                       ),
 
                     Positioned(
-                      top: 16,
+                      top:
+                          80 +
+                          (controller.room.pinnedEventIds.isNotEmpty ? 48 : 0),
                       left: 0,
                       right: 0,
                       child: SizedBox(
                         child: Align(
                           alignment: .center,
-                          child: Padding(
-                            padding: .only(
-                              top:
-                                  (FluffyThemes.isColumnMode(context)
-                                      ? 64
-                                      : 48) +
-                                  (controller.room.pinnedEventIds.isNotEmpty
-                                      ? 48
-                                      : 0),
-                            ),
-                            child: Column(
-                              mainAxisSize: .min,
-                              children: [
-                                const BackToCallButton(),
-                                const MiniAudioPlayer(),
-                                if (scrollUpBannerEventId != null)
-                                  Row(
-                                    mainAxisSize: .min,
-                                    children: [
-                                      FilledButton(
-                                        onPressed: () {
-                                          controller.scrollToEventId(
-                                            scrollUpBannerEventId,
-                                          );
-                                          controller
-                                              .discardScrollUpBannerEventId();
-                                          // controller.setReadMarker();
-                                        },
-                                        style: FilledButton.styleFrom(
-                                          shadowColor: Colors.black,
-                                          elevation: 4,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            const Icon(Icons.arrow_upward),
-                                            const SizedBox(width: 18),
-                                            Text(
-                                              L10n.of(
-                                                context,
-                                              ).jumpToLastReadMessage,
-                                            ),
-                                          ],
-                                        ),
+                          child: Column(
+                            mainAxisSize: .min,
+                            children: [
+                              const BackToCallButton(),
+                              const MiniAudioPlayer(),
+                              if (scrollUpBannerEventId != null)
+                                Row(
+                                  mainAxisSize: .min,
+                                  children: [
+                                    FilledButton(
+                                      onPressed: () {
+                                        controller.scrollToEventId(
+                                          scrollUpBannerEventId,
+                                        );
+                                        controller
+                                            .discardScrollUpBannerEventId();
+                                        // controller.setReadMarker();
+                                      },
+                                      style: FilledButton.styleFrom(
+                                        shadowColor: Colors.black,
+                                        elevation: 4,
                                       ),
-                                    ],
-                                  ),
-                              ],
-                            ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(Icons.arrow_upward),
+                                          const SizedBox(width: 18),
+                                          Text(
+                                            L10n.of(
+                                              context,
+                                            ).jumpToLastReadMessage,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
                           ),
                         ),
                       ),
