@@ -960,7 +960,9 @@ class ChatListController extends State<ChatList>
         crossSigning == false;
     final isUnknownSession = client.isUnknownSession;
     if ((needsBootstrap || isUnknownSession) && mounted) {
-      context.go('/backup');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) context.go('/backup');
+      });
     }
   }
 
