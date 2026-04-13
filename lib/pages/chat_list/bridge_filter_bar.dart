@@ -54,6 +54,11 @@ class BridgeFilterBar extends StatelessWidget {
           final isSelected = visibleBridgeTypes.contains(type);
           final color = getBridgeTypeColor(type);
           return FilterChip(
+            avatar: Icon(
+              getBridgeTypeIcon(type),
+              size: 16,
+              color: isSelected ? color : theme.colorScheme.onSurface,
+            ),
             label: Text(getBridgeTypeLabel(type)),
             selected: isSelected,
             onSelected: (selected) {
