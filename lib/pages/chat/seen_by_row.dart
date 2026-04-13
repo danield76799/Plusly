@@ -22,7 +22,12 @@ class SeenByRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final receipts = controller.room.getReceipts(controller.timeline!);
+    final timeline = controller.timeline;
+    if (timeline == null) {
+      return const SizedBox.shrink();
+    }
+
+    final receipts = controller.room.getReceipts(timeline);
     const maxAvatars = 7;
     return Container(
       width: double.infinity,
@@ -37,8 +42,8 @@ class SeenByRow extends StatelessWidget {
             : FluffyThemes.animationDuration,
         curve: FluffyThemes.animationCurve,
         alignment:
-            controller.timeline!.events.isNotEmpty &&
-                controller.timeline!.events.first.senderId ==
+            timeline.events.isNotEmpty &&
+                timeline.events.first.senderId ==
                     Matrix.of(context).client.userID
             ? Alignment.topRight
             : Alignment.topLeft,
