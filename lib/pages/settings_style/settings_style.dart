@@ -1,8 +1,12 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:matrix/matrix.dart';
+import 'package:native_imaging/native_imaging.dart' as native;
 import 'package:path_provider/path_provider.dart';
 
 import 'package:extera_next/config/app_config.dart';
@@ -13,6 +17,69 @@ import 'package:extera_next/utils/file_selector.dart';
 import 'package:extera_next/widgets/future_loading_dialog.dart';
 import 'package:extera_next/widgets/theme_builder.dart';
 import 'settings_style_view.dart';
+
+/// Maximum dimension (width or height) for wallpaper images.
+/// 1920px is sufficient for virtually all mobile/tablet screens while
+/// keeping file size manageable.
+const int _wallpaperMaxDimension = 1920;
+
+/// JPEG quality for wallpaper compression (0–100).
+const int _wallpaperJpegQuality = 85;
+
+/// Compresses [rawBytes] of an image down to at most [_wallpaperMaxDimension]
+/// on the longest side and re-encodes as JPEG at [_wallpaperJpegQuality].
+///
+/// Returns the compressed JPEG bytes, or the original bytes if compression
+/// fails or the platform is unsupported.
+Future<Uint8List> _compressWallpaperBytes(Uint8List rawBytes) async {
+  try {
+    await native.init();
+
+    final codec = await instantiateImageCodec(rawBytes);
+    final frame = await codec.getNextFrame();
+    final rgbaData = await frame.image.toByteData();
+    if (rgbaData == null) return rawBytes;
+
+    final rgba = Uint8List.view(
+      rgbaData.buffer,
+      rgbaData.offsetInBytes,
+      rgbaData.lengthInBytes,
+    );
+
+    var width = frame.image.width;
+    var height = frame.image.height;
+
+    frame.image.dispose();
+    codec.dispose();
+
+    var nativeImg = native.Image.fromRGBA(width, height, rgba);
+
+    // Scale down if either dimension exceeds the limit.
+    if (width > _wallpaperMaxDimension || height > _wallpaperMaxDimension) {
+      final fit = applyBoxFit(
+        BoxFit.scaleDown,
+        Size(width.toDouble(), height.toDouble()),
+        Size(
+          _wallpaperMaxDimension.toDouble(),
+          _wallpaperMaxDimension.toDouble(),
+        ),
+      ).destination;
+      final newW = fit.width.round();
+      final newH = fit.height.round();
+
+      final scaled = nativeImg.resample(newW, newH, native.Transform.lanczos);
+      nativeImg.free();
+      nativeImg = scaled;
+    }
+
+    final compressed = await nativeImg.toJpeg(_wallpaperJpegQuality);
+    nativeImg.free();
+    return compressed;
+  } catch (e, s) {
+    Logs().e('Failed to compress wallpaper image', e, s);
+    return rawBytes;
+  }
+}
 
 class SettingsStyle extends StatefulWidget {
   const SettingsStyle({super.key});
@@ -55,13 +122,17 @@ class SettingsStyleController extends State<SettingsStyle> {
     await showFutureLoadingDialog(
       context: context,
       future: () async {
-        final bytes = await pickedFile.readAsBytes();
+        // Read the original file bytes.
+        final rawBytes = await pickedFile.readAsBytes();
+        // Compress and resize the image before saving.
+        final compressedBytes = await _compressWallpaperBytes(rawBytes);
+
         final dir = await getApplicationDocumentsDirectory();
         final fileName =
-            'wallpaper_${DateTime.now().millisecondsSinceEpoch}.${pickedFile.name.split('.').last}';
+            'wallpaper_${DateTime.now().millisecondsSinceEpoch}.jpg'; // always store as JPEG
         final fullPath = '${dir.path}/$fileName';
         final file = File(fullPath);
-        await file.writeAsBytes(bytes);
+        await file.writeAsBytes(compressedBytes);
         await AppSettings.wallpaperPath.setItem(fullPath);
         setState(() {
           _wallpaperPath = fullPath;

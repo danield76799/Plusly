@@ -1,4 +1,3 @@
-import 'package:extera_next/widgets/future_loading_snackbar.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart' show IterableExtension;
@@ -12,6 +11,7 @@ import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/utils/show_profile.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:extera_next/widgets/future_loading_dialog.dart';
+import 'package:extera_next/widgets/future_loading_snackbar.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import '../widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'platform_infos.dart';

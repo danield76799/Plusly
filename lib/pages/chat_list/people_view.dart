@@ -1,5 +1,10 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:flutter/material.dart';
+
+import 'package:go_router/go_router.dart';
+import 'package:matrix/matrix.dart';
+
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
@@ -13,9 +18,6 @@ import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/list_divider.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:extera_next/widgets/rich_presence_card.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:matrix/matrix.dart';
 
 class PeopleView extends StatefulWidget {
   final void Function() onBack;

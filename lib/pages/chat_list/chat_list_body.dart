@@ -1,4 +1,3 @@
-import 'package:extera_next/pages/chat_list/people_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +9,7 @@ import 'package:extera_next/pages/chat_list/chat_list.dart';
 import 'package:extera_next/pages/chat_list/chat_list_item.dart';
 import 'package:extera_next/pages/chat_list/chat_list_legacy_header.dart';
 import 'package:extera_next/pages/chat_list/dummy_chat_list_item.dart';
+import 'package:extera_next/pages/chat_list/people_view.dart';
 import 'package:extera_next/pages/chat_list/search_title.dart';
 import 'package:extera_next/pages/chat_list/space_view.dart';
 import 'package:extera_next/pages/chat_list/status_msg_list.dart';
