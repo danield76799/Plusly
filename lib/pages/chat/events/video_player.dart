@@ -122,7 +122,7 @@ class EventVideoPlayer extends StatelessWidget {
                   //       ? const Icon(Icons.play_arrow_outlined)
                   //       : const Icon(Icons.file_download_outlined),
                   // ),
-                  child: ElevatedButton(
+                  child: FilledButton.tonal(
                     onPressed: () => supportsVideoPlayer
                         ? showDialog(
                             context: context,

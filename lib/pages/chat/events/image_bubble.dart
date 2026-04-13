@@ -107,7 +107,7 @@ class ImageBubble extends StatelessWidget {
               fit: fit,
             ),
             Center(
-              child: ElevatedButton(
+              child: FilledButton.tonal(
                 onPressed: onLoadMedia,
                 child: Row(
                   mainAxisSize: .min,
