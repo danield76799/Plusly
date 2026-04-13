@@ -1,3 +1,4 @@
+import 'package:extera_next/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:cross_file/cross_file.dart';
@@ -11,21 +12,47 @@ import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
 
-abstract class ShareItem {}
+String generateAttributionString(Event evt) {
+  return "Forwarded from ${evt.senderId} - ${evt.getLink()}";
+}
+
+Map<String, Object?> sanitizeContent(Map<String, Object?> content) {
+  final allowedFields = [
+    'msgtype',
+    'body',
+    'format',
+    'formatted_body',
+    'filename',
+    'info',
+    'url',
+  ];
+  final newContent = <String, Object?>{};
+  for (final field in allowedFields) {
+    if (content.containsKey(field)) {
+      newContent[field] = content[field];
+    }
+  }
+  return newContent;
+}
+
+class ShareItem {
+  String? attribution;
+  ShareItem({this.attribution});
+}
 
 class TextShareItem extends ShareItem {
   final String value;
-  TextShareItem(this.value);
+  TextShareItem(this.value, {super.attribution});
 }
 
 class ContentShareItem extends ShareItem {
   final Map<String, Object?> value;
-  ContentShareItem(this.value);
+  ContentShareItem(this.value, {super.attribution});
 }
 
 class FileShareItem extends ShareItem {
   final XFile value;
-  FileShareItem(this.value);
+  FileShareItem(this.value, {super.attribution});
 }
 
 class ShareScaffoldDialog extends StatefulWidget {
@@ -39,6 +66,8 @@ class ShareScaffoldDialog extends StatefulWidget {
 
 class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
   final TextEditingController _filterController = TextEditingController();
+
+  bool includeAttribution = true;
 
   String? selectedRoomId;
 
@@ -57,6 +86,11 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
     }
     while (context.canPop()) {
       context.pop();
+    }
+    if (!includeAttribution) {
+      for (final item in widget.items) {
+        item.attribution = null;
+      }
     }
     context.go('/rooms/$roomId', extra: widget.items);
   }
@@ -166,9 +200,38 @@ class _ShareScaffoldDialogState extends State<ShareScaffoldDialog> {
                   shadowColor: theme.appBarTheme.shadowColor,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: ElevatedButton(
-                      onPressed: _forwardAction,
-                      child: Text(L10n.of(context).forward),
+                    child: Column(
+                      mainAxisSize: .min,
+                      spacing: 4,
+                      children: [
+                        Row(
+                          mainAxisSize: .max,
+                          children: [
+                            Expanded(
+                              child: Text(L10n.of(context).includeAttribution),
+                            ),
+                            Switch(
+                              value: includeAttribution,
+                              onChanged: (value) {
+                                setState(() {
+                                  includeAttribution = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        Row(
+                          mainAxisSize: .max,
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: _forwardAction,
+                                child: Text(L10n.of(context).forward),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),

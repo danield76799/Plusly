@@ -348,7 +348,23 @@ class ChatController extends State<ChatPageWithRoom>
     for (final item in shareItems) {
       if (item is FileShareItem) continue;
       if (item is TextShareItem) room.sendTextEvent(item.value);
-      if (item is ContentShareItem) room.sendEvent(item.value);
+      if (item is ContentShareItem) {
+        final value = item.value;
+
+        if (item.attribution != null) {
+          if (value['body'] is String) {
+            value['body'] = "${item.attribution}\n${value['body']}";
+          }
+          if (value['format'] == 'org.matrix.custom.html' &&
+              value['formatted_body'] is String) {
+            value['formatted_body'] =
+                "<strong>${item.attribution}</strong><blockquote>${value['formatted_body']}</blockquote>";
+          }
+          value['xyz.extera.forward'] = {'attribution': item.attribution};
+        }
+
+        room.sendEvent(value);
+      }
     }
     final files = shareItems
         .whereType<FileShareItem>()
@@ -1278,9 +1294,19 @@ class ChatController extends State<ChatPageWithRoom>
       context: context,
       builder: (context) => ShareScaffoldDialog(
         items: selectedEvents.isEmpty
-            ? [ContentShareItem(event!.content)]
+            ? [
+                ContentShareItem(
+                  sanitizeContent(event!.content),
+                  attribution: generateAttributionString(event),
+                ),
+              ]
             : selectedEvents
-                  .map((event) => ContentShareItem(event.content))
+                  .map(
+                    (event) => ContentShareItem(
+                      sanitizeContent(event.content),
+                      attribution: generateAttributionString(event),
+                    ),
+                  )
                   .toList(),
       ),
     );

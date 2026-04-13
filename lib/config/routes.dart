@@ -461,8 +461,6 @@ abstract class AppRoutes {
                     roomId: state.pathParameters['roomid']!,
                     shareItems: shareItems,
                     eventId: state.uri.queryParameters['event'],
-                    // showThreadRoots:
-                    //     state.uri.queryParameters['threads'] == 'true',
                   ),
                 );
               },
