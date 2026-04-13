@@ -41,12 +41,7 @@ class SeenByRow extends StatelessWidget {
             ? Duration.zero
             : FluffyThemes.animationDuration,
         curve: FluffyThemes.animationCurve,
-        alignment:
-            timeline.events.isNotEmpty &&
-                timeline.events.first.senderId ==
-                    Matrix.of(context).client.userID
-            ? Alignment.topRight
-            : Alignment.topLeft,
+        alignment: Alignment.topRight,
         padding: const EdgeInsets.only(left: 8, right: 8, bottom: 4),
         child: GestureDetector(
           onLongPress: () {
