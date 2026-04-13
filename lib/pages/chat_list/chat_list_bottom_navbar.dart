@@ -102,8 +102,8 @@ class ChatListBottomNavbar extends StatelessWidget {
                       borderRadius: currentBorderRadius,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                          horizontal: 8,
+                          vertical: 4,
                         ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -111,7 +111,7 @@ class ChatListBottomNavbar extends StatelessWidget {
                             if (isActive)
                               Icon(
                                 filter.toIconData(false),
-                                size: 20,
+                                size: 16,
                                 color: foregroundColor,
                               )
                             else
@@ -120,15 +120,15 @@ class ChatListBottomNavbar extends StatelessWidget {
                                 badgePosition: BadgePosition.topEnd(),
                                 child: Icon(
                                   filter.toIconData(true),
-                                  size: 20,
+                                  size: 16,
                                   color: foregroundColor,
                                 ),
                               ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 2),
                             Text(
                               filter.toLocalizedString(context),
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 11,
                                 color: foregroundColor,
                               ),
                               overflow: TextOverflow.ellipsis,
