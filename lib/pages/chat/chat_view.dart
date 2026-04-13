@@ -664,7 +664,6 @@ class ChatView extends StatelessWidget {
                                             : Column(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
-                                                  SeenByRow(controller),
                                                   ReplyDisplay(controller),
                                                   ChatInputRow(controller),
                                                   ChatEmojiPicker(controller),

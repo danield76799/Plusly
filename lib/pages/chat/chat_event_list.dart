@@ -7,6 +7,7 @@ import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/chat.dart';
 import 'package:extera_next/pages/chat/events/message.dart';
+import 'package:extera_next/pages/chat/seen_by_row.dart';
 import 'package:extera_next/pages/chat/typing_indicators.dart';
 import 'package:extera_next/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:extera_next/utils/platform_infos.dart';
@@ -67,13 +68,19 @@ class ChatEventList extends StatelessWidget {
           ? ScrollViewKeyboardDismissBehavior.onDrag
           : ScrollViewKeyboardDismissBehavior.manual,
       slivers: [
-        // Dynamic bottom spacer that adjusts to the input bar height.
+        // SeenByRow + dynamic bottom spacer that adjusts to the input bar height.
         // Because the list is reverse: true, this first sliver sits at
         // the visual bottom (just above the floating input bar).
         SliverToBoxAdapter(
           child: ValueListenableBuilder<double>(
             valueListenable: controller.inputBarHeight,
-            builder: (context, height, _) => SizedBox(height: height + 8),
+            builder: (context, height, _) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SeenByRow(controller),
+                SizedBox(height: height + 8),
+              ],
+            ),
           ),
         ),
         SliverPadding(
