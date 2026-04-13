@@ -117,58 +117,89 @@ class ChatListViewBody extends StatelessWidget {
                     if (controller.isSearchMode) ...[
                       Padding(
                         padding: const .all(8),
-                        child: SearchTitle(
-                          title: L10n.of(context).publicRooms,
-                          icon: const Icon(Icons.explore_outlined),
+                        child: Center(
+                          child: SegmentedButton<SearchScope>(
+                            segments: [
+                              ButtonSegment(
+                                value: SearchScope.local,
+                                label: Text(L10n.of(context).chats),
+                                icon: const Icon(Icons.chat_bubble_outline),
+                              ),
+                              ButtonSegment(
+                                value: SearchScope.public,
+                                label: Text(L10n.of(context).publicRooms),
+                                icon: const Icon(Icons.explore_outlined),
+                              ),
+                            ],
+                            selected: {controller.searchScope},
+                            onSelectionChanged:
+                                (Set<SearchScope> newSelection) {
+                              controller.setState(() {
+                                controller.searchScope = newSelection.first;
+                              });
+                              controller.triggerSearch();
+                            },
+                          ),
                         ),
                       ),
-                      PublicRoomsHorizontalList(publicRooms: publicRooms),
-                      Padding(
-                        padding: const .all(8),
-                        child: SearchTitle(
-                          title: L10n.of(context).publicSpaces,
-                          icon: const Icon(Icons.workspaces_outlined),
+                      if (controller.searchScope == SearchScope.public) ...[
+                        Padding(
+                          padding: const .all(8),
+                          child: SearchTitle(
+                            title: L10n.of(context).publicRooms,
+                            icon: const Icon(Icons.explore_outlined),
+                          ),
                         ),
-                      ),
-                      PublicRoomsHorizontalList(publicRooms: publicSpaces),
-                      Padding(
-                        padding: const .all(8),
-                        child: SearchTitle(
-                          title: L10n.of(context).users,
-                          icon: const Icon(Icons.group_outlined),
+                        PublicRoomsHorizontalList(publicRooms: publicRooms),
+                        Padding(
+                          padding: const .all(8),
+                          child: SearchTitle(
+                            title: L10n.of(context).publicSpaces,
+                            icon: const Icon(Icons.workspaces_outlined),
+                          ),
                         ),
-                      ),
-                      AnimatedContainer(
-                        clipBehavior: Clip.hardEdge,
-                        decoration: const BoxDecoration(),
-                        height:
-                            userSearchResult == null ||
-                                userSearchResult.results.isEmpty
-                            ? 0
-                            : 106,
-                        duration: FluffyThemes.animationDuration,
-                        curve: FluffyThemes.animationCurve,
-                        child: userSearchResult == null
-                            ? null
-                            : ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: userSearchResult.results.length,
-                                itemBuilder: (context, i) => _SearchItem(
-                                  title:
-                                      userSearchResult.results[i].displayName ??
-                                      userSearchResult
-                                          .results[i]
-                                          .userId
-                                          .localpart ??
-                                      L10n.of(context).unknownDevice,
-                                  avatar: userSearchResult.results[i].avatarUrl,
-                                  onPressed: () => showProfile(
-                                    context: context,
-                                    profile: userSearchResult.results[i],
+                        PublicRoomsHorizontalList(publicRooms: publicSpaces),
+                      ],
+                      if (controller.searchScope == SearchScope.local) ...[
+                        Padding(
+                          padding: const .all(8),
+                          child: SearchTitle(
+                            title: L10n.of(context).users,
+                            icon: const Icon(Icons.group_outlined),
+                          ),
+                        ),
+                        AnimatedContainer(
+                          clipBehavior: Clip.hardEdge,
+                          decoration: const BoxDecoration(),
+                          height:
+                              userSearchResult == null ||
+                                  userSearchResult.results.isEmpty
+                              ? 0
+                              : 106,
+                          duration: FluffyThemes.animationDuration,
+                          curve: FluffyThemes.animationCurve,
+                          child: userSearchResult == null
+                              ? null
+                              : ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: userSearchResult.results.length,
+                                  itemBuilder: (context, i) => _SearchItem(
+                                    title:
+                                        userSearchResult.results[i].displayName ??
+                                        userSearchResult
+                                            .results[i]
+                                            .userId
+                                            .localpart ??
+                                        L10n.of(context).unknownDevice,
+                                    avatar: userSearchResult.results[i].avatarUrl,
+                                    onPressed: () => showProfile(
+                                      context: context,
+                                      profile: userSearchResult.results[i],
+                                    ),
                                   ),
                                 ),
-                              ),
-                      ),
+                        ),
+                      ],
                     ],
                     if (!controller.isSearchMode &&
                         AppSettings.showPresences.value)

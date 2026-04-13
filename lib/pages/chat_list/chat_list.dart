@@ -47,6 +47,8 @@ enum PopupMenuAction {
 
 enum ActiveFilter { allChats, messages, groups, unread, spaces, people }
 
+enum SearchScope { local, public }
+
 extension LocalizedActiveFilter on ActiveFilter {
   String toLocalizedString(BuildContext context) {
     switch (this) {
@@ -262,7 +264,10 @@ class ChatListController extends State<ChatList>
   QueryPublicRoomsResponse? roomSearchResult;
 
   bool isSearching = false;
+  SearchScope searchScope = SearchScope.local;
   static const String _serverStoreNamespace = 'im.fluffychat.search.server';
+
+  void triggerSearch() => _search();
 
   void setServer() async {
     final newServer = await showTextInputDialog(
@@ -303,37 +308,41 @@ class ChatListController extends State<ChatList>
     QueryPublicRoomsResponse? roomSearchResult;
     final searchQuery = searchController.text.trim();
     try {
-      roomSearchResult = await client.queryPublicRooms(
-        server: searchServer,
-        filter: PublicRoomQueryFilter(genericSearchTerm: searchQuery),
-        limit: 20,
-      );
+      if (searchScope == SearchScope.public) {
+        roomSearchResult = await client.queryPublicRooms(
+          server: searchServer,
+          filter: PublicRoomQueryFilter(genericSearchTerm: searchQuery),
+          limit: 20,
+        );
 
-      if (searchQuery.isValidMatrixId &&
-          searchQuery.sigil == '#' &&
-          roomSearchResult.chunk.any(
-                (room) => room.canonicalAlias == searchQuery,
-              ) ==
-              false) {
-        final response = await client.getRoomIdByAlias(searchQuery);
-        final roomId = response.roomId;
-        if (roomId != null) {
-          roomSearchResult.chunk.add(
-            PublicRoomsChunk(
-              name: searchQuery,
-              guestCanJoin: false,
-              numJoinedMembers: 0,
-              roomId: roomId,
-              worldReadable: false,
-              canonicalAlias: searchQuery,
-            ),
-          );
+        if (searchQuery.isValidMatrixId &&
+            searchQuery.sigil == '#' &&
+            roomSearchResult.chunk.any(
+                  (room) => room.canonicalAlias == searchQuery,
+                ) ==
+                false) {
+          final response = await client.getRoomIdByAlias(searchQuery);
+          final roomId = response.roomId;
+          if (roomId != null) {
+            roomSearchResult.chunk.add(
+              PublicRoomsChunk(
+                name: searchQuery,
+                guestCanJoin: false,
+                numJoinedMembers: 0,
+                roomId: roomId,
+                worldReadable: false,
+                canonicalAlias: searchQuery,
+              ),
+            );
+          }
         }
       }
-      userSearchResult = await client.searchUserDirectory(
-        searchController.text,
-        limit: 20,
-      );
+      if (searchScope == SearchScope.local) {
+        userSearchResult = await client.searchUserDirectory(
+          searchController.text,
+          limit: 20,
+        );
+      }
     } catch (e, s) {
       Logs().w('Searching has crashed', e, s);
       ScaffoldMessenger.of(
