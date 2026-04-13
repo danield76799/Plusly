@@ -3235,6 +3235,8 @@
   "@open": {},
   "appIntroduction": "FluffyChat laat je chatten met je vrienden tussen verschillende chat-netwerken. Lees meer op https://matrix.org of tik *Continue*.",
   "@appIntroduction": {},
+  "appIntro": "Welkom bij Extera — een fork van FluffyChat, verbeterd voor een soepelere Matrix-ervaring. Een gedecentraliseerde chat-app voor [matrix]. Lees meer op https://matrix.org/",
+  "@appIntro": {},
   "completedKeyVerification": "{sender} ronde de sleutelverificatie af",
   "@completedKeyVerification": {
     "type": "String",
