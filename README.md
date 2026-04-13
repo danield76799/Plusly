@@ -1,6 +1,8 @@
-# Extera Next
+# ExtraChat
 
-A feature-rich Matrix client for mobile and desktop platforms built on [FluffyChat](https://github.com/krille-chan/fluffychat). Extera Next extends FluffyChat with additional features and improvements.
+A feature-rich Matrix client for mobile and desktop platforms.
+
+**This is a fork of [Extera Next](https://github.com/ExteraApp/Extera), which is itself based on [FluffyChat](https://github.com/krille-chan/fluffychat).** This repository contains personal modifications and experiments on top of Extera Next's foundation.
 
 ## Features
 
@@ -86,4 +88,5 @@ This project is licensed under the [AGPL-3.0 License](LICENSE). See the LICENSE 
 
 - [Matrix.org](https://matrix.org/) - The Matrix protocol specification
 - [FluffyChat](https://github.com/krille-chan/fluffychat) - The original FluffyChat project
+- [Extera Next](https://github.com/ExteraApp/Extera) - The upstream fork this project is based on
 - [matrix-dart-sdk](https://github.com/ExteraApp/matrix-dart-sdk) - Dart SDK for Matrix
