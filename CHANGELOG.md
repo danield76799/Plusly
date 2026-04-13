@@ -1,3 +1,8 @@
+## Extera 26.1.6
+- Wallpaper compression.
+- Forward message attribution (toggleable).
+- Design fixes.
+
 ## Extera 26.1.5
 - Preview media by default
 - Change font/font fallbacks through advanced config
