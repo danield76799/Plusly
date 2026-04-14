@@ -83,7 +83,8 @@ class LoginController extends State<Login> {
         initialDeviceDisplayName: PlatformInfos.clientName,
       );
       if (mounted) {
-        context.go('/backup');
+        // Skip bootstrap/backup flow for MVP - go directly to rooms
+        context.go('/rooms');
       }
     } on MatrixException catch (exception) {
       setState(() => passwordError = exception.errorMessage);
