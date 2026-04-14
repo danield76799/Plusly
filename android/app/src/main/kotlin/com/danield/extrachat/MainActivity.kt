@@ -4,6 +4,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 
 import android.content.Context
+import android.content.Intent
 
 class MainActivity : FlutterActivity() {
 
@@ -11,6 +12,26 @@ class MainActivity : FlutterActivity() {
         super.attachBaseContext(base)
     }
 
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
+        handleWidgetIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleWidgetIntent(intent)
+    }
+
+    private fun handleWidgetIntent(intent: Intent) {
+        if (intent.action == "com.danield.extrachat.OPEN_CHAT") {
+            val chatId = intent.getStringExtra("chatId")
+            if (chatId != null && engine != null) {
+                // Send message to Flutter to open this chat
+                val channel = io.flutter.plugin.common.MethodChannel(engine!!.dartExecutor.binaryMessenger, "com.danield.extrachat/widget")
+                channel.invokeMethod("openChat", chatId)
+            }
+        }
+    }
 
     override fun provideFlutterEngine(context: Context): FlutterEngine? {
         return provideEngine(this)
