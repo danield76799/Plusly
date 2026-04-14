@@ -1,12 +1,19 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:matrix/matrix.dart';
 
 /// Service to write recent chats data for the Android home screen widget
 class ChatWidgetService {
-  static const String _chatDataKey = 'chat_data';
+  static const String _chatDataFileName = 'chat_widget_data.json';
   static const int _maxChats = 6;
   static const int _maxMessageChars = 40;
+
+  /// Get the file where chat data is stored (accessible by widget)
+  static Future<File> _getChatDataFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/$_chatDataFileName');
+  }
 
   /// Update the widget with the latest chat data from all rooms
   static Future<void> updateWidgetData(List<Room> rooms) async {
@@ -53,14 +60,20 @@ class ChatWidgetService {
       };
     }).toList();
 
-    // Write to SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_chatDataKey, jsonEncode(chatData));
+    // Write to a file in the app's documents directory
+    final file = await _getChatDataFile();
+    await file.writeAsString(jsonEncode(chatData));
   }
 
   /// Clear the widget data
   static Future<void> clearWidgetData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_chatDataKey);
+    try {
+      final file = await _getChatDataFile();
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      // Ignore errors when clearing
+    }
   }
 }

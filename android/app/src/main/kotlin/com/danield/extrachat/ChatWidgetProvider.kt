@@ -3,13 +3,11 @@ package com.danield.extrachat
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
-import android.content.SharedPreferences
 import android.widget.RemoteViews
 import android.app.PendingIntent
 import android.content.Intent
 import org.json.JSONArray
 import java.io.File
-import android.util.TypedValue
 import android.view.View
 import android.graphics.Color
 
@@ -34,8 +32,7 @@ class ChatWidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
-        private const val PREFS_NAME = "ChatWidgetPrefs"
-        private const val KEY_CHAT_DATA = "chat_data"
+        private const val CHAT_DATA_FILE = "chat_widget_data.json"
         private const val MAX_CHARS = 40
         private const val MAX_CHATS = 6
 
@@ -46,9 +43,13 @@ class ChatWidgetProvider : AppWidgetProvider() {
         ) {
             val views = RemoteViews(context.packageName, R.layout.chat_widget)
 
-            // Read chat data from shared preferences (written by Flutter)
-            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val chatDataJson = prefs.getString(KEY_CHAT_DATA, "[]")
+            // Read chat data from file written by Flutter
+            val chatDataJson = try {
+                val file = File(context.filesDir, CHAT_DATA_FILE)
+                if (file.exists()) file.readText() else "[]"
+            } catch (e: Exception) {
+                "[]"
+            }
 
             try {
                 val chats = JSONArray(chatDataJson)
