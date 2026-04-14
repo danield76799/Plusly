@@ -3672,5 +3672,9 @@
   "hideBridgeBots": "Hide bridge bots",
   "@hideBridgeBots": {
     "description": "Setting to hide bridge bot accounts from the main chat list"
+  },
+  "continueAnyway": "Continue anyway",
+  "@continueAnyway": {
+    "description": "Button to skip waiting and continue"
   }
 }
