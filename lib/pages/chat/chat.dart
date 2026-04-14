@@ -26,6 +26,7 @@ import 'package:extera_next/pages/chat/message_edits_dialog.dart';
 import 'package:extera_next/pages/chat/recovered_event_dialog.dart';
 import 'package:extera_next/pages/chat/seen_by_row.dart';
 import 'package:extera_next/pages/chat/send_poll_dialog.dart';
+import 'package:extera_next/pages/chat/send_later_dialog.dart';
 import 'package:extera_next/pages/chat/translated_event_dialog.dart';
 import 'package:extera_next/pages/chat/vote_results_dialog.dart';
 import 'package:extera_next/pages/chat_details/chat_details.dart';
@@ -718,6 +719,28 @@ class ChatController extends State<ChatPageWithRoom>
           SendPollDialog(room: room, thread: thread, outerContext: context),
     );
     replyEvent = null;
+  }
+
+  void sendScheduleAction() async {
+    if (sendController.text.trim().isEmpty) return;
+    await showAdaptiveDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => SendLaterDialog(
+        room: room,
+        thread: thread,
+        outerContext: context,
+        text: sendController.text,
+        replyEvent: replyEvent,
+      ),
+    );
+    // Clear the input after scheduling
+    sendController.clear();
+    setState(() {
+      replyEvent = null;
+      editEvent = null;
+      _inputTextIsEmpty = true;
+    });
   }
 
   void sendFileAction({FileType type = .any}) async {
@@ -1676,6 +1699,9 @@ class ChatController extends State<ChatPageWithRoom>
     }
     if (choice == 'poll') {
       sendPollAction();
+    }
+    if (choice == 'schedule') {
+      sendScheduleAction();
     }
     if (choice == 'camera') {
       openCameraAction();

@@ -203,6 +203,20 @@ class ChatInputRow extends StatelessWidget {
                                 contentPadding: const EdgeInsets.all(0),
                               ),
                             ),
+                            PopupMenuItem<String>(
+                              value: 'schedule',
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor:
+                                      theme.colorScheme.onPrimaryContainer,
+                                  foregroundColor:
+                                      theme.colorScheme.primaryContainer,
+                                  child: const Icon(Icons.schedule_outlined),
+                                ),
+                                title: Text(L10n.of(context).sendLater),
+                                contentPadding: const EdgeInsets.all(0),
+                              ),
+                            ),
                           ],
                     ),
                   ),
