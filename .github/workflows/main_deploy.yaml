@@ -79,13 +79,30 @@ jobs:
         run: dart run flutter_native_splash:create
       - name: Build Android APK
         run: |
-          set -e
           echo "=== Starting Android APK Build ==="
           flutter build apk --release --target-platform android-arm64 2>&1 | tee build.log
-          echo "=== Build completed with exit code: $? ==="
+          BUILD_EXIT_CODE=${PIPESTATUS[0]}
+          echo "=== Build completed with exit code: $BUILD_EXIT_CODE ==="
           ls -la build/app/outputs/apk/release/ 2>/dev/null || ls -la build/app/outputs/ 2>/dev/null || ls -la build/app/ 2>/dev/null || echo "No build/app directory found"
           find . -name "*.apk" 2>/dev/null || echo "No APK files found"
-          if [ -f build/app/outputs/apk/release/app-release.apk ]; then echo "SUCCESS: APK found"; ls -la build/app/outputs/apk/release/; else echo "ERROR: APK NOT found - checking build logs"; cat build.log; exit 1; fi
+          if [ -f build/app/outputs/apk/release/app-release.apk ]; then
+            echo "SUCCESS: APK found"
+            ls -la build/app/outputs/apk/release/
+          else
+            echo "ERROR: APK NOT found"
+            echo "=== Last 100 lines of build.log ==="
+            tail -100 build.log
+            echo "=== Full build.log contents ==="
+            cat build.log
+          fi
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then exit 1; fi
+      - name: Upload Build Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-log
+          path: build.log
+          retention-days: 30
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
