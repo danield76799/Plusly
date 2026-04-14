@@ -353,7 +353,17 @@ class ChatController extends State<ChatPageWithRoom>
 
         if (item.attribution != null) {
           if (value['body'] is String) {
-            value['body'] = "${item.attribution}\n${value['body']}";
+            if ((['m.text', 'm.notice'].contains(value['msgtype'] as String) ||
+                value['filename'] is String)) {
+              value['body'] = "${item.attribution}\n${value['body']}";
+            } else if (![
+                  'm.text',
+                  'm.notice',
+                ].contains(value['msgtype'] as String) &&
+                value['filename'] is! String) {
+              value['filename'] = value['body'] as String;
+              value['body'] = item.attribution;
+            }
           }
           if (value['format'] == 'org.matrix.custom.html' &&
               value['formatted_body'] is String) {

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:extera_next/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -701,12 +700,10 @@ class ChatView extends StatelessWidget {
 
                     Positioned(
                       top:
-                          (PlatformInfos.isMobile
-                              ? 96
-                              : (FluffyThemes.isColumnMode(context)
-                                    ? 64
-                                    : 48)) +
-                          (controller.room.pinnedEventIds.isNotEmpty ? 48 : 0),
+                          MediaQuery.of(context).padding.top +
+                          kToolbarHeight +
+                          appbarBottomHeight +
+                          22,
                       left: 0,
                       right: 0,
                       child: SizedBox(
