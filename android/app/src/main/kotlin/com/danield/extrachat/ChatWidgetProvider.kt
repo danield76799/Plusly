@@ -45,8 +45,9 @@ class ChatWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.chat_widget)
 
             // Read chat data from file written by Flutter
+            // Using filesDir which is shared between Flutter getApplicationDocumentsDirectory() and Android
             val chatDataJson = try {
-                val file = File(context.cacheDir, CHAT_DATA_FILE)
+                val file = File(context.filesDir, CHAT_DATA_FILE)
                 if (file.exists()) file.readText() else "[]"
             } catch (e: Exception) {
                 Log.e("ChatWidget", "Error reading file: ${e.message}")
