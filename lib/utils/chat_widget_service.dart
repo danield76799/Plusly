@@ -6,7 +6,7 @@ import 'package:matrix/matrix.dart';
 /// Service to write recent chats data for the Android home screen widget
 class ChatWidgetService {
   static const String _chatDataFileName = 'chat_widget_data.json';
-  static const int _maxChats = 6;
+  static const int _maxChats = 4;
   static const int _maxMessageChars = 40;
 
   /// Update the widget with the latest chat data from all rooms
