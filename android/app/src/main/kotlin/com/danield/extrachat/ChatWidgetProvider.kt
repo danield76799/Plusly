@@ -42,77 +42,19 @@ class ChatWidgetProvider : AppWidgetProvider() {
             appWidgetManager: AppWidgetManager,
             appWidgetId: Int
         ) {
+            // Simple test: just show the widget with static text
             val views = RemoteViews(context.packageName, R.layout.chat_widget)
-
-            // Read chat data from file written by Flutter
-            // Using filesDir which is shared between Flutter getApplicationDocumentsDirectory() and Android
-            val chatDataJson = try {
-                val file = File(context.filesDir, CHAT_DATA_FILE)
-                if (file.exists()) file.readText() else "[]"
-            } catch (e: Exception) {
-                Log.e("ChatWidget", "Error reading file: ${e.message}")
-                "[]"
+            
+            // Show all chat rows as visible with test data
+            for (i in 1..MAX_CHATS) {
+                views.setViewVisibility(getChatRowId(i), View.VISIBLE)
+                views.setTextViewText(getNameId(i), "Chat $i")
+                views.setTextViewText(getMessageId(i), "Last message here")
+                views.setInt(getStatusId(i), "setColorFilter", Color.parseColor("#4CAF50"))
             }
-
-            try {
-                val chats = JSONArray(chatDataJson)
-                val chatCount = minOf(chats.length(), MAX_CHATS)
-
-                // Clear all chat views first
-                for (i in 1..MAX_CHATS) {
-                    views.setViewVisibility(getChatRowId(i), View.GONE)
-                }
-
-                // Populate chat views
-                for (i in 0 until chatCount) {
-                    val chat = chats.getJSONObject(i)
-                    val rowId = getChatRowId(i + 1)
-                    views.setViewVisibility(rowId, View.VISIBLE)
-
-                    // Name
-                    val name = chat.getString("name")
-                    views.setTextViewText(getNameId(i + 1), name)
-
-                    // Last message (truncated)
-                    var message = chat.getString("lastMessage")
-                    if (message.length > MAX_CHARS) {
-                        message = message.take(MAX_CHARS) + "…"
-                    }
-                    views.setTextViewText(getMessageId(i + 1), message)
-
-                    // Online indicator color
-                    val isOnline = chat.optBoolean("isOnline", false)
-                    val statusColor = if (isOnline) Color.parseColor("#4CAF50") else Color.parseColor("#9E9E9E")
-                    views.setInt(getStatusId(i + 1), "setColorFilter", statusColor)
-
-                    // Set click intent to open chat
-                    val chatId = chat.getString("chatId")
-                    val intent = Intent(context, MainActivity::class.java).apply {
-                        action = "com.danield.extrachat.OPEN_CHAT"
-                        putExtra("chatId", chatId)
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    }
-                    val pendingIntent = PendingIntent.getActivity(
-                        context,
-                        i,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                    )
-                    views.setOnClickPendingIntent(rowId, pendingIntent)
-                }
-
-                // Show/hide empty state
-                if (chatCount == 0) {
-                    views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
-                } else {
-                    views.setViewVisibility(R.id.widget_empty, View.GONE)
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
-            }
-
+            views.setViewVisibility(R.id.widget_empty, View.GONE)
+            views.setTextViewText(R.id.widget_header, "📱 ExteraChat Widget")
+            
             // Update the widget
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
