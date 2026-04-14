@@ -34,7 +34,7 @@ class ChatWidgetProvider : AppWidgetProvider() {
     companion object {
         private const val CHAT_DATA_FILE = "chat_widget_data.json"
         private const val MAX_CHARS = 40
-        private const val MAX_CHATS = 6
+        private const val MAX_CHATS = 4
 
         fun updateAppWidget(
             context: Context,
