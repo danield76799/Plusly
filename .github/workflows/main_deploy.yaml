@@ -19,6 +19,12 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+      - name: Debug Flutter environment
+        run: |
+          flutter doctor -v
+          flutter --version
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "GITHUB_SHA: $GITHUB_SHA"
       - run: flutter pub get
       - name: Generate launcher icons
         run: dart run flutter_launcher_icons
@@ -27,7 +33,11 @@ jobs:
       - name: Prepare web
         run: ./scripts/prepare-web.sh
       - name: Build Release Web
-        run: flutter build web --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ --release --source-maps --base-href "/extrachat/"
+        run: |
+          echo "=== Starting Web Build ==="
+          flutter build web --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ --release --source-maps --base-href "/extrachat/" --verbose 2>&1 | tee build.log
+          echo "=== Build completed with exit code: $? ==="
+          if [ -f build/web/index.html ]; then echo "SUCCESS: index.html found"; else echo "ERROR: index.html NOT found"; fi
       - run: mv build/web/ public
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -50,12 +60,25 @@ jobs:
         with:
           channel: stable
           cache: true
+      - name: Debug Flutter environment
+        run: |
+          flutter doctor -v
+          flutter --version
+          java -version
+          echo "ANDROID_HOME: $ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+          echo "JAVA_HOME: $JAVA_HOME"
       - run: flutter pub get
       - name: Generate launcher icons
         run: dart run flutter_launcher_icons
       - name: Generate native splash
         run: dart run flutter_native_splash:create
-      - run: flutter build apk --release --target-platform android-arm64
+      - name: Build Android APK
+        run: |
+          echo "=== Starting Android APK Build ==="
+          flutter build apk --release --target-platform android-arm64 2>&1 | tee build.log
+          echo "=== Build completed with exit code: $? ==="
+          if [ -f build/app/outputs/apk/release/app-release.apk ]; then echo "SUCCESS: APK found"; ls -la build/app/outputs/apk/release/; else echo "ERROR: APK NOT found"; cat build.log | tail -50; fi
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
