@@ -329,6 +329,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void _shareItems([_]) {
+    if (!mounted) return;
     final shareItems = widget.shareItems;
     if (shareItems == null || shareItems.isEmpty) return;
     if (!room.otherPartyCanReceiveMessages) {
