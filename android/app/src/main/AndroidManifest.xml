@@ -33,7 +33,6 @@
     <uses-sdk
         tools:overrideLibrary="io.wazo.callkeep, net.touchcapture.qr.flutterqr, com.cloudwebrtc.webrtc, org.webrtc, com.it_nomads.fluttersecurestorage, com.pichillilorenzo.flutter_inappwebview, com.example.video_compress, com.otaliastudios.transcoder, com.otaliastudios.opengl, com.kineapps.flutter_file_dialog, com.llfbandit.record, com.pravera.flutter_foreground_task" />
     <application
-        android:name=".ExteraChatApplication"
         android:label="ExtraChat"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
@@ -171,18 +170,6 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/chat_widget_info" />
-        </receiver>
-
-        <!-- Chat Glance Widget (Jetpack Glance) -->
-        <receiver
-            android:name=".ChatGlanceWidgetReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/chat_glance_widget_info" />
         </receiver>
 
         <!-- Don't delete the meta-data below.
