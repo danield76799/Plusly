@@ -146,11 +146,19 @@ class BootstrapDialogState extends State<BootstrapDialog> {
             stream: client.onSyncStatus.stream,
             builder: (context, snapshot) {
               final status = snapshot.data;
+              final isComplete = status?.progress != null && status!.progress >= 1.0;
               return Column(
                 mainAxisAlignment: .center,
                 children: [
                   CircularProgressIndicator.adaptive(value: status?.progress),
                   if (status != null) Text(status.calcLocalizedString(context)),
+                  if (isComplete) ...[
+                    const SizedBox(height: 24),
+                    TextButton(
+                      onPressed: () => _goBackAction(true),
+                      child: Text(L10n.of(context).continueAnyway),
+                    ),
+                  ],
                 ],
               );
             },

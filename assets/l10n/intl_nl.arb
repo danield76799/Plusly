@@ -3345,5 +3345,9 @@
   "notSupportedOnThisDevice": "Niet ondersteund op dit apparaat",
   "@notSupportedOnThisDevice": {},
   "commandHint_roomupgrade": "Upgradeer deze kamer naar de aangegeven kamerversie",
-  "@commandHint_roomupgrade": {}
+  "@commandHint_roomupgrade": {},
+  "continueAnyway": "Ga toch door",
+  "@continueAnyway": {
+    "description": "Button to skip waiting and continue"
+  }
 }
