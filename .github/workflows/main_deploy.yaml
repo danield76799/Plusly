@@ -73,6 +73,8 @@ jobs:
           flutter clean
           rm -rf build/
       - run: flutter pub get
+      - name: Generate l10n
+        run: flutter gen-l10n
       - name: Generate launcher icons
         run: dart run flutter_launcher_icons
       - name: Generate native splash
