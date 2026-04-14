@@ -443,7 +443,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                               label: L10n.of(context).reply,
                               onPressed: () {
                                 controller.closeMessageMenu();
-                                controller.replyAction(replyTo: event);
+                                controller.replyAction(event);
                               },
                             ),
                             const ListDivider(),

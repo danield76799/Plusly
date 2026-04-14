@@ -86,7 +86,7 @@ class ChatListBottomNavbar extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOut,
-                  clipBehavior: Clip.antiAlias,
+                  clipBehavior: Clip.hardEdge,
                   decoration: BoxDecoration(
                     color: backgroundColor,
                     borderRadius: currentBorderRadius,

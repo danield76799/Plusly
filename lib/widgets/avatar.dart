@@ -129,7 +129,7 @@ class _AvatarVisuals extends StatelessWidget {
           borderRadius: borderRadius,
           side: border ?? BorderSide.none,
         ),
-        clipBehavior: Clip.antiAlias,
+        clipBehavior: .hardEdge,
         child: MxcImage(
           client: client,
           borderRadius: borderRadius,

@@ -736,7 +736,7 @@ class _SpaceViewState extends State<SpaceView> {
                         );
                       },
                     ),
-                    const SliverPadding(padding: EdgeInsets.only(top: 32)),
+                    const SliverPadding(padding: EdgeInsets.only(top: 86)),
                   ],
                 );
               },

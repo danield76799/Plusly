@@ -86,7 +86,7 @@ class ChatInputRow extends StatelessWidget {
                                 height: height,
                                 child: TextButton(
                                   style: selectedTextButtonStyle,
-                                  onPressed: controller.replyAction,
+                                  onPressed: () => controller.replyAction(null),
                                   child: Row(
                                     children: <Widget>[
                                       Text(L10n.of(context).reply),

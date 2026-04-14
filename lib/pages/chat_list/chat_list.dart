@@ -117,11 +117,13 @@ class ChatListController extends State<ChatList>
     await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
 
     setState(() {
+      _cachedFilteredRooms = null;
       _activeSpaceId = spaceId;
     });
   }
 
   void clearActiveSpace() => setState(() {
+    _cachedFilteredRooms = null;
     _activeSpaceId = null;
   });
 
@@ -187,9 +189,14 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  List<Room> get filteredRooms => Matrix.of(
-    context,
-  ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).toList();
+  List<Room>? _cachedFilteredRooms;
+
+  List<Room> get filteredRooms {
+    _cachedFilteredRooms ??= Matrix.of(
+      context,
+    ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).toList();
+    return _cachedFilteredRooms!;
+  }
 
   bool isSearchMode = false;
   Future<QueryPublicRoomsResponse>? publicRoomsResponse;
@@ -415,6 +422,8 @@ class ChatListController extends State<ChatList>
     }
   }
 
+  StreamSubscription<SyncUpdate>? _syncSubscription;
+
   @override
   void initState() {
     _initReceiveSharingIntent();
@@ -439,6 +448,12 @@ class ChatListController extends State<ChatList>
       );
     });
 
+    _syncSubscription = Matrix.of(context).client.onSync.stream
+        .where((s) => s.hasRoomUpdate)
+        .listen((_) {
+          _cachedFilteredRooms = null;
+        });
+
     checkForUpdates(context);
 
     super.initState();
@@ -449,6 +464,7 @@ class ChatListController extends State<ChatList>
     _intentDataStreamSubscription?.cancel();
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();
+    _syncSubscription?.cancel();
     scrollController.removeListener(_onScroll);
     super.dispose();
   }
@@ -874,6 +890,7 @@ class ChatListController extends State<ChatList>
 
   void setActiveFilter(ActiveFilter filter) {
     setState(() {
+      _cachedFilteredRooms = null;
       activeFilter = filter;
       if (filter != .spaces && activeSpaceId != null) {
         _activeSpaceId = null;

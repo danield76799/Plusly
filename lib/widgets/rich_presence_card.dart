@@ -95,7 +95,7 @@ class RichPresenceContent extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Material(
-                        clipBehavior: Clip.antiAlias,
+                        clipBehavior: .hardEdge,
                         borderRadius: BorderRadius.circular(
                           AppConfig.borderRadius / 2,
                         ),
@@ -191,7 +191,7 @@ class RichPresenceContent extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Material(
-                        clipBehavior: Clip.antiAlias,
+                        clipBehavior: .hardEdge,
                         borderRadius: BorderRadius.circular(
                           AppConfig.borderRadius / 2,
                         ),

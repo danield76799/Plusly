@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
@@ -87,7 +85,7 @@ class _MiniPlayerContent extends StatelessWidget {
       shadowColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       color: colorScheme.surfaceContainerHigh,
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: .hardEdge,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

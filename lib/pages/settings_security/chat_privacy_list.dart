@@ -72,7 +72,7 @@ class ChatPrivacyList extends StatelessWidget {
     return Material(
       elevation: 8.0,
       borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: Clip.hardEdge,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

@@ -1,3 +1,6 @@
+## Extera 26.1.61
+- Optimizations and fixes.
+
 ## Extera 26.1.6
 - Wallpaper compression.
 - Forward message attribution (toggleable).

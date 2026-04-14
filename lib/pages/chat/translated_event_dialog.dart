@@ -37,7 +37,7 @@ class TranslatedEventDialogState extends State<TranslatedEventDialog> {
       onInfoTab: (Event ev) => {},
       onMention: () => {},
       onSelect: (Event ev, Offset? tapPosition) => {},
-      onSwipe: () => {},
+      onSwipe: (Event? ev) => {},
       scrollToEventId: (String p0) => {},
       timeline: timeline,
       animateIn: false,

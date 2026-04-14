@@ -87,7 +87,7 @@ class NotificationsView extends StatelessWidget {
                             );
                           }
                         },
-                        onSwipe: () => {},
+                        onSwipe: (Event? ev) => {},
                         scrollToEventId: (String p0) => {},
                         timeline: RoomTimeline(
                           room: room,

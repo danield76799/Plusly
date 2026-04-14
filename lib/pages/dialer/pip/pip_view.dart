@@ -223,7 +223,7 @@ class PIPViewState extends State<PIPView> with TickerProviderStateMixin {
                       elevation: 10,
                       borderRadius: BorderRadius.circular(borderRadius),
                       child: Container(
-                        clipBehavior: Clip.antiAlias,
+                        clipBehavior: Clip.hardEdge,
                         decoration: BoxDecoration(
                           color: Colors.transparent,
                           borderRadius: BorderRadius.circular(borderRadius),

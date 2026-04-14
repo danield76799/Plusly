@@ -771,7 +771,7 @@ class _FloatingInputShell extends StatelessWidget {
     return PhysicalModel(
       color: Colors.transparent,
       borderRadius: BorderRadius.circular(28),
-      clipBehavior: Clip.antiAlias,
+      clipBehavior: Clip.hardEdge,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
         child: BackdropFilter(

@@ -205,6 +205,42 @@ class ChatController extends State<ChatPageWithRoom>
   bool showEmojiPicker = false;
   bool initiallyShowStickerPicker = false;
 
+  List<Event>? _cachedFilteredEvents;
+  Map<String, int>? _cachedEventsKeyMap;
+  // Add a getter that the UI can use
+  List<Event> get filteredEvents {
+    if (_cachedFilteredEvents == null) {
+      _recalculateEventsCache();
+    }
+    return _cachedFilteredEvents!;
+  }
+
+  Map<String, int> get eventsKeyMap {
+    if (_cachedEventsKeyMap == null) {
+      _recalculateEventsCache();
+    }
+    return _cachedEventsKeyMap!;
+  }
+
+  void _recalculateEventsCache() {
+    if (timeline == null) {
+      _cachedFilteredEvents = [];
+      _cachedEventsKeyMap = {};
+      return;
+    }
+
+    final events = timeline!.events
+        .filterByThreaded(thread != null)
+        .filterByVisibleInGui();
+
+    _cachedFilteredEvents = events;
+
+    _cachedEventsKeyMap = <String, int>{};
+    for (var i = 0; i < _cachedFilteredEvents!.length; i++) {
+      _cachedEventsKeyMap![_cachedFilteredEvents![i].eventId] = i;
+    }
+  }
+
   void acceptInvite() async {
     final result = await showFutureLoadingDialog(
       context: context,
@@ -483,6 +519,8 @@ class ChatController extends State<ChatPageWithRoom>
     if (!mounted) return;
     setReadMarker();
     updateThreads();
+    _cachedFilteredEvents = null;
+    _cachedEventsKeyMap = null;
     setState(() {
       firstUpdateReceived = true;
     });
@@ -1338,7 +1376,7 @@ class ChatController extends State<ChatPageWithRoom>
     setState(() => selectedEvents.clear());
   }
 
-  void replyAction({Event? replyTo}) {
+  void replyAction(Event? replyTo) {
     setState(() {
       replyEvent = replyTo ?? selectedEvents.first;
       selectedEvents.clear();
@@ -1537,6 +1575,8 @@ class ChatController extends State<ChatPageWithRoom>
 
   void clearSelectedEvents() => setState(() {
     selectedEvents.clear();
+    _cachedFilteredEvents = null;
+    _cachedEventsKeyMap = null;
     showEmojiPicker = false;
   });
 

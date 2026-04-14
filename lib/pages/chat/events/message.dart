@@ -34,7 +34,7 @@ class Message extends StatefulWidget {
   final void Function(Event, Offset?) onSelect;
   final void Function(Event) onInfoTab;
   final void Function(String) scrollToEventId;
-  final void Function() onSwipe;
+  final void Function(Event) onSwipe;
   final void Function() onMention;
   final bool longPressSelect;
   final bool selected;
@@ -473,7 +473,7 @@ class _MessageState extends State<Message> {
                                 ? color.withValues(alpha: 0.7)
                                 : color,
                             borderRadius: borderRadius,
-                            clipBehavior: Clip.antiAlias,
+                            clipBehavior: Clip.hardEdge,
                             child: BubbleBackground(
                               colors: widget.colors,
                               ignore:
@@ -800,7 +800,7 @@ class _MessageState extends State<Message> {
           direction: AppSettings.swipeRightToLeftToReply.value
               ? SwipeDirection.endToStart
               : SwipeDirection.startToEnd,
-          onSwipe: (_) => widget.onSwipe(),
+          onSwipe: (_) => widget.onSwipe(event),
           child: Container(
             constraints: const BoxConstraints(
               maxWidth: FluffyThemes.columnWidth * 2.5,

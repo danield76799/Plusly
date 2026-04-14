@@ -8,7 +8,6 @@ import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/chat/chat.dart';
 import 'package:extera_next/pages/chat/events/message.dart';
 import 'package:extera_next/pages/chat/typing_indicators.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
 
@@ -37,22 +36,11 @@ class ChatEventList extends StatelessWidget {
 
     final horizontalPadding = FluffyThemes.isColumnMode(context) ? 8.0 : 0.0;
 
-    var events = timeline.events;
-
-    if (showThreadRoots) {
-      events = events.filterThreadRoots();
-    } else {
-      events = events.filterByThreaded(controller.thread != null);
-    }
-
-    events = events.filterByVisibleInGui();
+    final events = controller.filteredEvents;
 
     final threads = controller.room.threads;
 
-    final thisEventsKeyMap = <String, int>{};
-    for (var i = 0; i < events.length; i++) {
-      thisEventsKeyMap[events[i].eventId] = i;
-    }
+    final thisEventsKeyMap = controller.eventsKeyMap;
 
     final hasWallpaper = AppSettings.wallpaperPath.value.isNotEmpty;
 
@@ -169,7 +157,7 @@ class ChatEventList extends StatelessWidget {
                           controller.selectedEvents.length == 1 &&
                           controller.selectedEvents.first.eventId ==
                               event.eventId,
-                      onSwipe: () => controller.replyAction(replyTo: event),
+                      onSwipe: controller.replyAction,
                       hasBeenRead:
                           latestReadEventIndex != -1 &&
                           latestReadEventIndex <= i,
@@ -183,8 +171,7 @@ class ChatEventList extends StatelessWidget {
                       highlightMarker:
                           controller.scrollToEventIdMarker == event.eventId,
                       onSelect: controller.onSelectMessage,
-                      scrollToEventId: (String eventId) =>
-                          controller.scrollToEventId(eventId),
+                      scrollToEventId: controller.scrollToEventId,
                       longPressSelect: controller.selectedEvents.isNotEmpty,
                       selected: controller.selectedEvents.any(
                         (e) => e.eventId == event.eventId,
