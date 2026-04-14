@@ -10,15 +10,17 @@ class SendLaterDialog extends StatefulWidget {
   final Room room;
   final BuildContext outerContext;
   final Event? replyEvent;
-  final Map<String, dynamic> content;
+  final Map<String, dynamic>? content;
   final Thread? thread;
+  final String? text;
 
   const SendLaterDialog({
     required this.room,
     required this.thread,
-    required this.content,
+    this.content,
     required this.outerContext,
     this.replyEvent,
+    this.text,
     super.key,
   });
 
@@ -108,11 +110,20 @@ class SendLaterDialogState extends State<SendLaterDialog> {
                         );
                         return;
                       }
+                      // Build content if text was provided directly
+                      final messageContent = widget.content ??
+                          (widget.text != null
+                              ? {
+                                  'msgtype': 'm.text',
+                                  'body': widget.text!,
+                                }
+                              : throw Exception('No content or text provided'));
+
                       final delayMs = _selected!.difference(now).inMilliseconds;
                       final result = await showFutureLoadingDialog<String>(
                         context: context,
                         future: () => widget.room.scheduleDelayedEvent(
-                          widget.content,
+                          messageContent,
                           delay: delayMs,
                           inReplyTo: widget.replyEvent,
                           threadRootEventId: widget.thread?.rootEvent.eventId,

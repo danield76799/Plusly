@@ -37,6 +37,7 @@
   "atLeastTwoAnswersRequired": "At least two answers are required",
   "maxSelections": "Max selections",
   "createPoll": "Create poll",
+  "sendLater": "Send later",
   "@noSendPermission": {},
   "alwaysUse24HourFormat": "false",
   "@alwaysUse24HourFormat": {
