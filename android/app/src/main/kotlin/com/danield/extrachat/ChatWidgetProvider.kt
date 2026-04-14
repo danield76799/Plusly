@@ -8,6 +8,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import org.json.JSONArray
 import java.io.File
+import android.util.Log
 import android.view.View
 import android.graphics.Color
 
@@ -19,7 +20,7 @@ class ChatWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         for (appWidgetId in appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId)
+            Companion.updateAppWidget(context, appWidgetManager, appWidgetId)
         }
     }
 
@@ -48,6 +49,7 @@ class ChatWidgetProvider : AppWidgetProvider() {
                 val file = File(context.cacheDir, CHAT_DATA_FILE)
                 if (file.exists()) file.readText() else "[]"
             } catch (e: Exception) {
+                Log.e("ChatWidget", "Error reading file: ${e.message}")
                 "[]"
             }
 
