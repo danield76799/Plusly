@@ -4,13 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.widget.RemoteViews
-import android.app.PendingIntent
-import android.content.Intent
-import org.json.JSONArray
-import java.io.File
-import android.util.Log
 import android.view.View
-import android.graphics.Color
 
 class ChatWidgetProvider : AppWidgetProvider() {
 
@@ -43,6 +37,22 @@ class ChatWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int
         ) {
             val views = RemoteViews(context.packageName, R.layout.chat_widget)
+            
+            // Show test data - 4 chats
+            val testChats = listOf(
+                Pair("Chat 1", "Last message here"),
+                Pair("Chat 2", "Last message here"),
+                Pair("Chat 3", "Last message here"),
+                Pair("Chat 4", "Last message here")
+            )
+            
+            for ((i, chat) in testChats.withIndex()) {
+                val rowId = getChatRowId(i + 1)
+                views.setViewVisibility(rowId, View.VISIBLE)
+                views.setTextViewText(getNameId(i + 1), chat.first)
+                views.setTextViewText(getMessageId(i + 1), chat.second)
+            }
+            
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
@@ -52,8 +62,6 @@ class ChatWidgetProvider : AppWidgetProvider() {
                 2 -> R.id.chat_row_2
                 3 -> R.id.chat_row_3
                 4 -> R.id.chat_row_4
-                5 -> R.id.chat_row_5
-                6 -> R.id.chat_row_6
                 else -> 0
             }
         }
@@ -64,8 +72,6 @@ class ChatWidgetProvider : AppWidgetProvider() {
                 2 -> R.id.chat_name_2
                 3 -> R.id.chat_name_3
                 4 -> R.id.chat_name_4
-                5 -> R.id.chat_name_5
-                6 -> R.id.chat_name_6
                 else -> 0
             }
         }
@@ -76,20 +82,6 @@ class ChatWidgetProvider : AppWidgetProvider() {
                 2 -> R.id.chat_message_2
                 3 -> R.id.chat_message_3
                 4 -> R.id.chat_message_4
-                5 -> R.id.chat_message_5
-                6 -> R.id.chat_message_6
-                else -> 0
-            }
-        }
-
-        private fun getStatusId(index: Int): Int {
-            return when (index) {
-                1 -> R.id.chat_status_1
-                2 -> R.id.chat_status_2
-                3 -> R.id.chat_status_3
-                4 -> R.id.chat_status_4
-                5 -> R.id.chat_status_5
-                6 -> R.id.chat_status_6
                 else -> 0
             }
         }
