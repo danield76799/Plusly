@@ -281,6 +281,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
                 outerContext: context,
                 fontSize: fontSize,
                 color: linkStyle.color,
+                withEventLink: href.contains('/\$'),
               ),
             );
           }
@@ -582,6 +583,7 @@ class MatrixPill extends StatelessWidget {
   final String uri;
   final double? fontSize;
   final Color? color;
+  final bool withEventLink;
 
   const MatrixPill({
     super.key,
@@ -591,6 +593,7 @@ class MatrixPill extends StatelessWidget {
     required this.uri,
     required this.fontSize,
     required this.color,
+    this.withEventLink = false,
   });
 
   @override
@@ -617,6 +620,21 @@ class MatrixPill extends StatelessWidget {
                 height: 1.25,
               ),
             ),
+            if (withEventLink) ...[
+              WidgetSpan(
+                child: Padding(
+                  padding: const .only(right: 4),
+                  child: Row(
+                    mainAxisSize: .min,
+                    spacing: 2,
+                    children: [
+                      const Icon(Icons.chevron_right, size: 16),
+                      const Icon(Icons.messenger_outline, size: 16),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
