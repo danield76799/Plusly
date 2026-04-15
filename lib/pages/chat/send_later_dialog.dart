@@ -1,10 +1,11 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/msc4140_extension.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
+import 'package:extera_next/utils/scheduled_messages_service.dart';
 
 class SendLaterDialog extends StatefulWidget {
   final Room room;
@@ -116,63 +117,7 @@ class SendLaterDialogState extends State<SendLaterDialog> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () async {
-                      if (_selected == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please select date and time'),
-                          ),
-                        );
-                        return;
-                      }
-                      final now = DateTime.now();
-                      if (!_selected!.isAfter(now)) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Selected time is in the past'),
-                          ),
-                        );
-                        return;
-                      }
-                      // Build content from text field
-                      final text = _textController.text.trim();
-                      if (text.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please enter a message'),
-                          ),
-                        );
-                        return;
-                      }
-                      final messageContent = widget.content ?? {
-                        'msgtype': 'm.text',
-                        'body': text,
-                      };
-
-                      final delayMs = _selected!.difference(now).inMilliseconds;
-                      final result = await showFutureLoadingDialog<String>(
-                        context: context,
-                        future: () => widget.room.scheduleDelayedEvent(
-                          messageContent,
-                          delay: delayMs,
-                          inReplyTo: widget.replyEvent,
-                          threadRootEventId: widget.thread?.rootEvent.eventId,
-                          threadLastEventId: widget.thread?.lastEvent?.eventId,
-                        ),
-                      );
-                      if (result.isError) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              result.asError?.error.toString() ??
-                                  'An error occurred',
-                            ),
-                          ),
-                        );
-                        return;
-                      }
-                      Navigator.of(context).pop(result.asValue?.value);
-                    },
+                    onPressed: _scheduleMessage,
                     child: const Text('Schedule'),
                   ),
                 ),
@@ -182,5 +127,79 @@ class SendLaterDialogState extends State<SendLaterDialog> {
         ),
       ),
     );
+  }
+
+  Future<void> _scheduleMessage() async {
+    if (_selected == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select date and time'),
+        ),
+      );
+      return;
+    }
+
+    final now = DateTime.now();
+    if (!_selected!.isAfter(now)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selected time is in the past'),
+        ),
+      );
+      return;
+    }
+
+    final text = _textController.text.trim();
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a message'),
+        ),
+      );
+      return;
+    }
+
+    // Build message content
+    final messageContent = widget.content ?? {
+      'msgtype': 'm.text',
+      'body': text,
+    };
+
+    // Generate a unique ID for this scheduled message
+    final id = 'sched_${DateTime.now().millisecondsSinceEpoch}_${_generateRandomId()}';
+
+    // Create the scheduled message
+    final scheduledMessage = ScheduledMessage(
+      id: id,
+      roomId: widget.room.id,
+      senderId: widget.room.client.userID!,
+      content: messageContent,
+      scheduledAt: _selected!,
+      replyEventId: widget.replyEvent?.eventId,
+      threadRootEventId: widget.thread?.rootEvent.eventId,
+      threadLastEventId: widget.thread?.lastEvent?.eventId,
+    );
+
+    // Save to local storage
+    await ScheduledMessagesService.addScheduledMessage(scheduledMessage);
+
+    // Show success and close
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Message scheduled for ${_formatSelected()}',
+          ),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      Navigator.of(context).pop();
+    }
+  }
+
+  String _generateRandomId() {
+    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    final random = Random.secure();
+    return List.generate(8, (_) => chars[random.nextInt(chars.length)]).join();
   }
 }

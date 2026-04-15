@@ -17,6 +17,7 @@ import 'package:extera_next/widgets/background_audio_player.dart';
 import 'package:extera_next/widgets/theme_builder.dart';
 import '../config/app_config.dart';
 import '../utils/custom_scroll_behaviour.dart';
+import '../utils/scheduler_service.dart';
 import 'matrix.dart';
 
 class FluffyChatApp extends StatefulWidget {
@@ -63,6 +64,14 @@ class _FluffyChatAppState extends State<FluffyChatApp> {
   void initState() {
     super.initState();
     initPlatformState();
+    _startScheduler();
+  }
+
+  void _startScheduler() {
+    final client = widget.clients.firstOrNull;
+    if (client != null) {
+      SchedulerService.start(client);
+    }
   }
 
   static Future<ByteData> _readFileBytes(String path) async {
