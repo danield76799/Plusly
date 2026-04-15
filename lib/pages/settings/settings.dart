@@ -155,13 +155,12 @@ class SettingsController extends State<Settings> {
   }
 
   void logoutAction() async {
-    final noBackup = showChatBackupBanner == true;
     if (await showOkCancelAlertDialog(
           useRootNavigator: false,
           context: context,
           title: L10n.of(context).areYouSureYouWantToLogout,
           message: L10n.of(context).noBackupWarning,
-          isDestructive: noBackup,
+          isDestructive: false,
           okLabel: L10n.of(context).logout,
           cancelLabel: L10n.of(context).cancel,
         ) !=
