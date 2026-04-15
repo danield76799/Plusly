@@ -9,6 +9,9 @@ import android.widget.RemoteViews
 import android.app.PendingIntent
 import org.json.JSONArray
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ChatWidgetProvider : AppWidgetProvider() {
 
@@ -33,7 +36,8 @@ class ChatWidgetProvider : AppWidgetProvider() {
     companion object {
         private const val CHAT_DATA_FILE = "chat_widget_data.json"
         private const val COLOR_ONLINE = "#4CAF50"   // Green
-        private const val COLOR_OFFLINE = "#888888"   // Gray
+        private const val COLOR_OFFLINE = "#9E9E9E"  // Gray
+        private const val COLOR_HEADER = "#6750A4"    // Purple
 
         fun updateAppWidget(
             context: Context,
@@ -41,7 +45,6 @@ class ChatWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int
         ) {
             val views = RemoteViews(context.packageName, R.layout.extrachat_widget)
-            views.setTextViewText(R.id.widget_header, "Chats")
             
             // Create intent to open app
             val intent = Intent(context, MainActivity::class.java).apply {
@@ -90,9 +93,17 @@ class ChatWidgetProvider : AppWidgetProvider() {
                         3 -> R.id.chat_status_4
                         else -> 0
                     }
+                    val timeId = when (i) {
+                        0 -> R.id.chat_time_1
+                        1 -> R.id.chat_time_2
+                        2 -> R.id.chat_time_3
+                        3 -> R.id.chat_time_4
+                        else -> 0
+                    }
                     
                     views.setTextViewText(nameId, chat.first)
                     views.setTextViewText(messageId, chat.second)
+                    views.setTextViewText(timeId, chat.fourth)
                     val statusColor = if (chat.third) COLOR_ONLINE else COLOR_OFFLINE
                     views.setTextColor(statusId, Color.parseColor(statusColor))
                     views.setOnClickPendingIntent(rowId, pendingIntent)
@@ -100,8 +111,8 @@ class ChatWidgetProvider : AppWidgetProvider() {
             } else {
                 // Show welcome message
                 views.setTextViewText(R.id.chat_name_1, "💬 ExtraChat")
-                views.setTextViewText(R.id.chat_message_1, "Your chats appear here in 5 min")
-                views.setTextViewText(R.id.chat_status_1, "●")
+                views.setTextViewText(R.id.chat_message_1, "Open de app om chats te zien")
+                views.setTextViewText(R.id.chat_time_1, "")
                 views.setTextColor(R.id.chat_status_1, Color.parseColor(COLOR_ONLINE))
                 views.setOnClickPendingIntent(R.id.chat_row_1, pendingIntent)
                 
@@ -114,22 +125,24 @@ class ChatWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun readChatData(context: Context): List<Triple<String, String, Boolean>> {
+        private fun readChatData(context: Context): List<Quadruple<String, String, Boolean, String>> {
+            // Returns List of (name, message, isOnline, timestamp)
             return try {
                 val file = File(context.filesDir, CHAT_DATA_FILE)
                 if (!file.exists()) return emptyList()
                 
                 val json = file.readText()
                 val jsonArray = JSONArray(json)
-                val result = mutableListOf<Triple<String, String, Boolean>>()
+                val result = mutableListOf<Quadruple<String, String, Boolean, String>>()
                 
                 for (i in 0 until jsonArray.length()) {
                     val chat = jsonArray.getJSONObject(i)
                     val name = chat.optString("name", "")
                     val message = chat.optString("lastMessage", "")
                     val isOnline = chat.optBoolean("isOnline", false)
+                    val timestamp = chat.optString("timestamp", "")
                     if (name.isNotEmpty()) {
-                        result.add(Triple(name, message, isOnline))
+                        result.add(Quadruple(name, message, isOnline, timestamp))
                     }
                 }
                 result
@@ -139,3 +152,6 @@ class ChatWidgetProvider : AppWidgetProvider() {
         }
     }
 }
+
+// Simple quadruple class
+data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)

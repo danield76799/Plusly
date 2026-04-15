@@ -70,11 +70,31 @@ class ChatWidgetService {
       // Get online status (simplified - would need presence data for real online status)
       final isOnline = false; // Default to offline, can be enhanced with presence
 
+      // Format timestamp for widget
+      String timestamp = '';
+      if (lastEvent != null) {
+        final ts = lastEvent.originServerTs;
+        final now = DateTime.now();
+        final diff = now.difference(ts);
+        if (diff.inMinutes < 1) {
+          timestamp = 'now';
+        } else if (diff.inHours < 1) {
+          timestamp = '${diff.inMinutes}m';
+        } else if (diff.inHours < 24) {
+          timestamp = '${diff.inHours}h';
+        } else if (diff.inDays < 7) {
+          timestamp = '${diff.inDays}d';
+        } else {
+          timestamp = '${ts.day}/${ts.month}';
+        }
+      }
+
       return {
         'chatId': room.id,
         'name': room.getLocalizedDisplayname(),
         'lastMessage': lastMessage,
         'isOnline': isOnline,
+        'timestamp': timestamp,
       };
     }).toList();
 
