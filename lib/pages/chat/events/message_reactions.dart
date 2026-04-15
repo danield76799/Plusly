@@ -215,7 +215,7 @@ class _AdaptableReactorsDialog extends StatelessWidget {
                 client: client,
                 presenceUserId: reactor.stateKey,
               ),
-              label: Text(reactor.displayName!),
+              label: Text(reactor.displayName ?? reactor.id),
             ),
         ],
       ),

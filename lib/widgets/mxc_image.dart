@@ -60,6 +60,22 @@ class _MxcImageState extends State<MxcImage> {
   int _retryCount = 0;
   static const int _maxRetries = 3;
 
+  /// Derive a cache key from the widget properties so that event-based and
+  /// URI-based images also participate in the in-memory LRU cache even when
+  /// no explicit [MxcImage.cacheKey] is provided.
+  String? get _effectiveCacheKey {
+    if (widget.cacheKey != null) return widget.cacheKey;
+    if (widget.event != null) {
+      final suffix = widget.isThumbnail ? '_thumb' : '';
+      return '${widget.event!.eventId}$suffix';
+    }
+    if (widget.uri != null) {
+      final suffix = widget.isThumbnail ? '_thumb' : '';
+      return '${widget.uri}$suffix';
+    }
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -100,11 +116,12 @@ class _MxcImageState extends State<MxcImage> {
   }
 
   Uint8List? _getFromCache() {
-    if (widget.cacheKey != null) {
-      final data = _imageDataCache.remove(widget.cacheKey);
+    final key = _effectiveCacheKey;
+    if (key != null) {
+      final data = _imageDataCache.remove(key);
       if (data != null) {
         // Re-insert to mark as most recently used
-        _imageDataCache[widget.cacheKey!] = data;
+        _imageDataCache[key] = data;
       }
       return data;
     }
@@ -112,10 +129,11 @@ class _MxcImageState extends State<MxcImage> {
   }
 
   void _saveToCache(Uint8List data) {
-    if (widget.cacheKey != null) {
+    final key = _effectiveCacheKey;
+    if (key != null) {
       // Move to end (most recently used) if already exists
-      _imageDataCache.remove(widget.cacheKey!);
-      _imageDataCache[widget.cacheKey!] = data;
+      _imageDataCache.remove(key);
+      _imageDataCache[key] = data;
       // Evict oldest entries if over capacity
       while (_imageDataCache.length > _maxCacheSize) {
         _imageDataCache.remove(_imageDataCache.keys.first);
@@ -272,7 +290,7 @@ class _MxcImageState extends State<MxcImage> {
     );
 
     return ClipRRect(
-      key: ValueKey(widget.cacheKey ?? widget.uri),
+      key: ValueKey(_effectiveCacheKey ?? widget.uri),
       borderRadius: widget.borderRadius,
       child: imageWidget,
     );

@@ -307,9 +307,7 @@ class ChatController extends State<ChatPageWithRoom>
     if (_requestingFuture) return;
     _requestingFuture = true;
     Logs().v('Requesting future...');
-    final visibleEvents = timeline.events
-        .filterByThreaded(thread != null)
-        .filterByVisibleInGui();
+    final visibleEvents = filteredEvents;
     final mostRecentEvent = visibleEvents.firstOrNull;
 
     final anchorEventId = mostRecentEvent?.eventId;
@@ -322,9 +320,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     if (anchorEventId != null && scrollController.hasClients) {
-      final newVisibleEvents = timeline.events
-          .filterByThreaded(thread != null)
-          .filterByVisibleInGui();
+      final newVisibleEvents = filteredEvents;
       final anchorIndex = newVisibleEvents.indexWhere(
         (e) => e.eventId == anchorEventId,
       );
@@ -484,14 +480,12 @@ class ChatController extends State<ChatPageWithRoom>
       var readMarkerEventIndex = readMarkerEventId.isEmpty || timeline == null
           ? -1
           : timeline!.events
-                .filterByThreaded(thread != null)
                 .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
                 .indexWhere((e) => e.eventId == readMarkerEventId);
 
       if (readMarkerEventId.isNotEmpty && readMarkerEventIndex == -1) {
         await timeline?.requestHistory(historyCount: _loadHistoryCount);
         readMarkerEventIndex = timeline!.events
-            .filterByThreaded(thread != null)
             .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
             .indexWhere((e) => e.eventId == readMarkerEventId);
       }
@@ -529,11 +523,36 @@ class ChatController extends State<ChatPageWithRoom>
     if (!mounted) return;
     setReadMarker();
     updateThreads();
+
+    // Capture scroll state and event count before rebuilding.
+    final wasScrolledUp = _scrolledUp.value;
+    final oldEventCount = _cachedFilteredEvents?.length;
+    final oldMaxExtent = wasScrolledUp && scrollController.hasClients
+        ? scrollController.position.maxScrollExtent
+        : null;
+
+    // Invalidate caches so the UI reflects the latest timeline.
     _cachedFilteredEvents = null;
     _cachedEventsKeyMap = null;
     setState(() {
       firstUpdateReceived = true;
     });
+
+    // If we were scrolled up and new messages have been added, adjust the
+    // scroll offset to keep the user's reading position stable.
+    if (wasScrolledUp && oldMaxExtent != null && oldEventCount != null) {
+      final newEventCount = filteredEvents.length;
+      if (newEventCount > oldEventCount) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !scrollController.hasClients) return;
+          final newMaxExtent = scrollController.position.maxScrollExtent;
+          final delta = newMaxExtent - oldMaxExtent;
+          if (delta > 0) {
+            scrollController.jumpTo(scrollController.position.pixels + delta);
+          }
+        });
+      }
+    }
   }
 
   Future<void> updateThreads() async {
