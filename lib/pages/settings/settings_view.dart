@@ -499,12 +499,12 @@ class SettingsView extends StatelessWidget {
                             leading: CircleAvatar(
                               backgroundColor: theme.colorScheme.secondary,
                               child: Icon(
-                                Icons.vpn_key_outlined,
+                                Icons.key_outlined,
                                 color: theme.colorScheme.onSecondary,
                               ),
                             ),
-                            title: Text(L10n.of(context).chatBackup),
-                            subtitle: Text(L10n.of(context).chatBackupDescription),
+                            title: const Text('Recovery Phrase'),
+                            subtitle: const Text('Voer je recovery phrase in'),
                             onTap: () => controller.setRecoveryPhraseAction(),
                           ),
 
