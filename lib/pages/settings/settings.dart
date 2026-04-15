@@ -367,14 +367,18 @@ class SettingsController extends State<Settings> {
           if (bootstrap.newSsssKey == null) {
             throw Exception('Geen recovery key gevonden in je account');
           }
-          await Future.any([
-            bootstrap.newSsssKey!.unlock(keyOrPassphrase: recoveryKey),
-            Future.delayed(const Duration(seconds: 15), () => throw Exception('TIMEOUT')),
-          ]);
-          await Future.any([
-            bootstrap.openExistingSsss(),
-            Future.delayed(const Duration(seconds: 15), () => throw Exception('TIMEOUT')),
-          ]);
+          try {
+            await bootstrap.newSsssKey!.unlock(keyOrPassphrase: recoveryKey)
+                .timeout(const Duration(seconds: 15));
+          } on TimeoutException {
+            throw Exception('Server niet bereikbaar (timeout na 15s)');
+          }
+          try {
+            await bootstrap.openExistingSsss()
+                .timeout(const Duration(seconds: 15));
+          } on TimeoutException {
+            throw Exception('Server niet bereikbaar (timeout na 15s)');
+          }
         } catch (e) {
           Logs().e('Recovery failed', e);
           rethrow;
