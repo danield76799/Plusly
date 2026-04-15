@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.widget.RemoteViews
 import android.app.PendingIntent
 import org.json.JSONArray
@@ -31,6 +32,8 @@ class ChatWidgetProvider : AppWidgetProvider() {
 
     companion object {
         private const val CHAT_DATA_FILE = "chat_widget_data.json"
+        private const val COLOR_ONLINE = "#4CAF50"   // Green
+        private const val COLOR_OFFLINE = "#888888"    // Gray
 
         fun updateAppWidget(
             context: Context,
@@ -62,21 +65,42 @@ class ChatWidgetProvider : AppWidgetProvider() {
                         3 -> R.id.chat_message_4
                         else -> 0
                     }
+                    val statusId = when (i) {
+                        0 -> R.id.chat_status_1
+                        1 -> R.id.chat_status_2
+                        2 -> R.id.chat_status_3
+                        3 -> R.id.chat_status_4
+                        else -> 0
+                    }
                     if (nameId != 0) {
                         views.setTextViewText(nameId, chat.first)
                         views.setTextViewText(messageId, chat.second)
+                        // Set status dot color
+                        val statusColor = if (chat.third) COLOR_ONLINE else COLOR_OFFLINE
+                        views.setTextColor(statusId, Color.parseColor(statusColor))
                     }
                 }
             } else {
                 // Fallback to test data if no real data
                 views.setTextViewText(R.id.chat_name_1, "Alice")
                 views.setTextViewText(R.id.chat_message_1, "Hey, how are you?")
+                views.setTextViewText(R.id.chat_status_1, "●")
+                views.setTextColor(R.id.chat_status_1, Color.parseColor(COLOR_ONLINE))
+                
                 views.setTextViewText(R.id.chat_name_2, "Bob")
                 views.setTextViewText(R.id.chat_message_2, "See you tomorrow!")
+                views.setTextViewText(R.id.chat_status_2, "●")
+                views.setTextColor(R.id.chat_status_2, Color.parseColor(COLOR_OFFLINE))
+                
                 views.setTextViewText(R.id.chat_name_3, "Charlie")
                 views.setTextViewText(R.id.chat_message_3, "Thanks for the help")
+                views.setTextViewText(R.id.chat_status_3, "●")
+                views.setTextColor(R.id.chat_status_3, Color.parseColor(COLOR_ONLINE))
+                
                 views.setTextViewText(R.id.chat_name_4, "Diana")
                 views.setTextViewText(R.id.chat_message_4, "Meeting at 3pm")
+                views.setTextViewText(R.id.chat_status_4, "●")
+                views.setTextColor(R.id.chat_status_4, Color.parseColor(COLOR_OFFLINE))
             }
             
             // Make entire widget clickable to open app
@@ -94,21 +118,23 @@ class ChatWidgetProvider : AppWidgetProvider() {
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
 
-        private fun readChatData(context: Context): List<Pair<String, String>> {
+        private fun readChatData(context: Context): List<Triple<String, String, Boolean>> {
+            // Returns List of (name, message, isOnline)
             return try {
                 val file = File(context.filesDir, CHAT_DATA_FILE)
                 if (!file.exists()) return emptyList()
                 
                 val json = file.readText()
                 val jsonArray = JSONArray(json)
-                val result = mutableListOf<Pair<String, String>>()
+                val result = mutableListOf<Triple<String, String, Boolean>>()
                 
                 for (i in 0 until jsonArray.length()) {
                     val chat = jsonArray.getJSONObject(i)
                     val name = chat.optString("name", "")
                     val message = chat.optString("lastMessage", "")
+                    val isOnline = chat.optBoolean("isOnline", false)
                     if (name.isNotEmpty()) {
-                        result.add(Pair(name, message))
+                        result.add(Triple(name, message, isOnline))
                     }
                 }
                 result
