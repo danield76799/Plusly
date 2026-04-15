@@ -381,7 +381,8 @@ class SettingsController extends State<Settings> {
       future: () async {
         try {
           final bootstrap = matrix.client.encryption!.bootstrap();
-          await bootstrap.storeOrRecoverMasterKeyFromSSSS(recoveryKey: recoveryKey);
+          await bootstrap.newSsssKey!.unlock(keyOrPassphrase: recoveryKey);
+          await bootstrap.openExistingSsss();
         } catch (e) {
           Logs().e('Recovery failed', e);
           rethrow;
