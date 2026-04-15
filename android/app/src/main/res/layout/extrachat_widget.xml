@@ -26,10 +26,19 @@
         android:paddingVertical="4dp">
 
         <TextView
+            android:id="@+id/chat_status_1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="●"
+            android:textSize="8sp"
+            android:textColor="#4CAF50" />
+
+        <TextView
             android:id="@+id/chat_name_1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="6dp"
             android:textColor="#333333"
             android:textSize="13sp"
             android:textStyle="bold"
@@ -58,10 +67,19 @@
         android:paddingVertical="4dp">
 
         <TextView
+            android:id="@+id/chat_status_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="●"
+            android:textSize="8sp"
+            android:textColor="#4CAF50" />
+
+        <TextView
             android:id="@+id/chat_name_2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="6dp"
             android:textColor="#333333"
             android:textSize="13sp"
             android:textStyle="bold"
@@ -90,10 +108,19 @@
         android:paddingVertical="4dp">
 
         <TextView
+            android:id="@+id/chat_status_3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="●"
+            android:textSize="8sp"
+            android:textColor="#4CAF50" />
+
+        <TextView
             android:id="@+id/chat_name_3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="6dp"
             android:textColor="#333333"
             android:textSize="13sp"
             android:textStyle="bold"
@@ -122,10 +149,19 @@
         android:paddingVertical="4dp">
 
         <TextView
+            android:id="@+id/chat_status_4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="●"
+            android:textSize="8sp"
+            android:textColor="#4CAF50" />
+
+        <TextView
             android:id="@+id/chat_name_4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:layout_marginStart="6dp"
             android:textColor="#333333"
             android:textSize="13sp"
             android:textStyle="bold"
