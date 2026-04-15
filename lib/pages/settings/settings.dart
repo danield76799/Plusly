@@ -359,38 +359,18 @@ class SettingsController extends State<Settings> {
     );
     if (recoveryKey == null || recoveryKey.isEmpty) return;
 
-    try {
-      await showFutureLoadingDialog(
-        context: context,
-        future: () async {
+    await showFutureLoadingDialog(
+      context: context,
+      future: () async {
+        try {
           final bootstrap = matrix.client.encryption!.bootstrap();
-          if (bootstrap.newSsssKey == null) {
-            throw Exception('Geen recovery key gevonden in je account');
-          }
-          try {
-            await bootstrap.newSsssKey!.unlock(keyOrPassphrase: recoveryKey)
-                .timeout(const Duration(seconds: 15));
-          } on TimeoutException {
-            throw Exception('Server niet bereikbaar (timeout na 15s)');
-          }
-          try {
-            await bootstrap.openExistingSsss()
-                .timeout(const Duration(seconds: 15));
-          } on TimeoutException {
-            throw Exception('Server niet bereikbaar (timeout na 15s)');
-          }
-        },
-      );
-    } catch (e) {
-      Logs().e('Recovery action failed', e);
-      if (!mounted) return;
-      await showOkAlertDialog(
-        context: context,
-        title: 'Fout',
-        message: e.toString(),
-        okLabel: L10n.of(context).ok,
-      );
-    }
+          await bootstrap.storeOrRecoverMasterKeyFromSSSS(recoveryKey: recoveryKey);
+        } catch (e) {
+          Logs().e('Recovery failed', e);
+          rethrow;
+        }
+      },
+    );
   }
 
   @override
