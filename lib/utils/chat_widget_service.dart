@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:matrix/matrix.dart';
 
 /// Service to write recent chats data for the Android home screen widget
@@ -12,10 +13,13 @@ class ChatWidgetService {
   /// Get the directory where widget data is stored
   /// Uses filesDir which is shared between Flutter and Android in the same app
   static Future<Directory> _getWidgetDataDirectory() async {
-    // On Android, this returns /data/data/com.danield.extrachat/files/
-    // which is the same as Android's context.filesDir
-    final directory = await getApplicationDocumentsDirectory();
-    return directory;
+    // On Android, context.filesDir is /data/data/com.danield.extrachat/files/
+    // getApplicationSupportDirectory() returns the same path
+    // getApplicationDocumentsDirectory() returns app_flutter/ which is DIFFERENT
+    if (kIsWeb) {
+      return await getApplicationDocumentsDirectory();
+    }
+    return await getApplicationSupportDirectory();
   }
 
   /// Update the widget with the latest chat data from all rooms
