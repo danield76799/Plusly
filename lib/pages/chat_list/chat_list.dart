@@ -109,7 +109,7 @@ class ChatListController extends State<ChatList>
 
   StreamSubscription? _intentUriStreamSubscription;
 
-  StreamSubscription? _bootstrapCheckSubscription;
+
 
   ActiveFilter activeFilter = AppSettings.separateChatTypes.value
       ? ActiveFilter.messages
@@ -495,7 +495,6 @@ class ChatListController extends State<ChatList>
 
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
-    _startBootstrapCheck();
     _hackyWebRTCFixForWeb();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
@@ -524,7 +523,6 @@ class ChatListController extends State<ChatList>
     _intentDataStreamSubscription?.cancel();
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();
-    _bootstrapCheckSubscription?.cancel();
     scrollController.removeListener(_onScroll);
     super.dispose();
   }
@@ -946,13 +944,6 @@ class ChatListController extends State<ChatList>
         ),
       );
     }
-  }
-
-  void _startBootstrapCheck() {
-    // Bootstrap check DISABLED - was causing redirects to /backup on slow homeservers
-    // Recovery key flow is now completely disabled to prevent app hangs
-    _bootstrapCheckSubscription?.cancel();
-    // NO-OP: cross-signing bootstrap check removed entirely
   }
 
   void setActiveFilter(ActiveFilter filter) {

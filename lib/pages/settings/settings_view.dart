@@ -37,7 +37,7 @@ class SettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final borderRadius = BorderRadius.circular(AppConfig.borderRadius);
-    final showChatBackupBanner = controller.showChatBackupBanner;
+
     final activeRoute = GoRouter.of(
       context,
     ).routeInformationProvider.value.uri.path;
@@ -314,34 +314,7 @@ class SettingsView extends StatelessWidget {
                               );
                             },
                           ),
-                          if (showChatBackupBanner == null)
-                            ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: theme.colorScheme.secondary,
-                                child: Icon(
-                                  Icons.backup_outlined,
-                                  color: theme.colorScheme.onSecondary,
-                                ),
-                              ),
-                              title: Text(L10n.of(context).chatBackup),
-                              trailing:
-                                  const CircularProgressIndicator.adaptive(),
-                            )
-                          else
-                            SwitchListTile.adaptive(
-                              controlAffinity: ListTileControlAffinity.trailing,
-                              value: controller.showChatBackupBanner == false,
-                              secondary: CircleAvatar(
-                                backgroundColor: theme.colorScheme.secondary,
-                                child: Icon(
-                                  Icons.backup_outlined,
-                                  color: theme.colorScheme.onSecondary,
-                                ),
-                              ),
-                              title: Text(L10n.of(context).chatBackup),
-                              onChanged: controller.firstRunBootstrapAction,
-                            ),
-                          const ListDivider(),
+
                           ListTile(
                             title: Text(L10n.of(context).updateCheckTitle),
                             leading: CircleAvatar(

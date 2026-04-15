@@ -333,22 +333,8 @@ class SettingsController extends State<Settings> {
 
   @override
   void initState() {
-    // KEY RECOVERY DISABLED - was hanging on slow homeservers
-    // WidgetsBinding.instance.addPostFrameCallback((_) => checkBootstrap());
-
     super.initState();
   }
-
-  void checkBootstrap() async {
-    // Recovery key check DISABLED - was hanging on slow/unresponsive homeservers
-    // Cross-signing bootstrap removed entirely to prevent app freezes
-    if (mounted) {
-      setState(() => showChatBackupBanner = false);
-    }
-  }
-
-  bool? crossSigningCached;
-  bool? showChatBackupBanner;
 
   void setRecoveryPhraseAction() async {
     final matrix = Matrix.of(context);
@@ -379,20 +365,6 @@ class SettingsController extends State<Settings> {
         }
       },
     );
-  }
-
-  void firstRunBootstrapAction([dynamic _]) async {
-    if (showChatBackupBanner != true) {
-      showOkAlertDialog(
-        context: context,
-        title: L10n.of(context).chatBackup,
-        message: L10n.of(context).onlineKeyBackupEnabled,
-        okLabel: L10n.of(context).close,
-      );
-      return;
-    }
-    await context.push('/backup');
-    checkBootstrap();
   }
 
   @override
