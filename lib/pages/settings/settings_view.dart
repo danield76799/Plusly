@@ -497,6 +497,19 @@ class SettingsView extends StatelessWidget {
                           const ListDivider(),
                           ListTile(
                             leading: CircleAvatar(
+                              backgroundColor: theme.colorScheme.secondary,
+                              child: Icon(
+                                Icons.vpn_key_outlined,
+                                color: theme.colorScheme.onSecondary,
+                              ),
+                            ),
+                            title: Text(L10n.of(context).chatBackup),
+                            subtitle: Text(L10n.of(context).chatBackupDescription),
+                            onTap: () => controller.setRecoveryPhraseAction(),
+                          ),
+
+                          ListTile(
+                            leading: CircleAvatar(
                               backgroundColor: theme.colorScheme.tertiary,
                               child: Icon(
                                 Icons.info_outline,
