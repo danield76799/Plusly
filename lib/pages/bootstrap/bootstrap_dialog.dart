@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -37,6 +38,8 @@ class BootstrapDialogState extends State<BootstrapDialog> {
   Bootstrap? bootstrap;
 
   String? _recoveryKeyInputError;
+
+  String _currentStep = '';
 
   bool _recoveryKeyInputLoading = false;
 
@@ -371,17 +374,50 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                 _recoveryKeyInputError = null;
                                 _recoveryKeyInputLoading = true;
                               });
+                              
+                              // Progress tracking
+                              void updateStep(String step) {
+                                if (mounted) setState(() => _currentStep = step);
+                              }
+                              
                               try {
                                 final key = _recoveryKeyTextEditingController
                                     .text
                                     .trim();
-                                if (key.isEmpty) return;
+                                if (key.isEmpty) {
+                                  setState(() => _recoveryKeyInputLoading = false);
+                                  return;
+                                }
+                                
+                                // Step 1: Unlock with timeout
+                                updateStep('Validating key...');
                                 await bootstrap.newSsssKey!.unlock(
                                   keyOrPassphrase: key,
+                                ).timeout(
+                                  const Duration(seconds: 30),
+                                  onTimeout: () {
+                                    throw TimeoutException(
+                                      'Recovery key validation timed out. Server may be slow.',
+                                    );
+                                  },
                                 );
-                                await bootstrap.openExistingSsss();
+                                
+                                // Step 2: Open existing SSSS
+                                updateStep('Opening encrypted backup...');
+                                await bootstrap.openExistingSsss().timeout(
+                                  const Duration(seconds: 30),
+                                  onTimeout: () {
+                                    throw TimeoutException(
+                                      'Opening backup timed out. Please try again.',
+                                    );
+                                  },
+                                );
+                                
                                 Logs().d('SSSS unlocked');
+                                
+                                // Step 3: Self-sign if needed
                                 if (bootstrap.encryption.crossSigning.enabled) {
+                                  updateStep('Setting up cross-signing...');
                                   Logs().v(
                                     'Cross signing is already enabled. Try to self-sign',
                                   );
@@ -389,9 +425,22 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                       .client
                                       .encryption!
                                       .crossSigning
-                                      .selfSign(recoveryKey: key);
+                                      .selfSign(recoveryKey: key)
+                                      .timeout(
+                                        const Duration(seconds: 30),
+                                        onTimeout: () {
+                                          throw TimeoutException(
+                                            'Cross-signing setup timed out.',
+                                          );
+                                        },
+                                      );
                                   Logs().d('Successful selfsigned');
                                 }
+                              } on TimeoutException catch (e) {
+                                setState(
+                                  () => _recoveryKeyInputError = 
+                                    'Timeout: ${e.message}\n\nThe server is taking too long. Try again later or use "Transfer from another device".',
+                                );
                               } on InvalidPassphraseException catch (e) {
                                 setState(
                                   () => _recoveryKeyInputError = e
@@ -419,7 +468,20 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                               }
                             },
                       child: _recoveryKeyInputLoading
-                          ? const LinearProgressIndicator()
+                          ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const LinearProgressIndicator(),
+                                const SizedBox(height: 8),
+                                Text(
+                                  _currentStep,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
+                            )
                           : Row(
                               mainAxisSize: MainAxisSize.min,
                               spacing: lerpDouble(8, 4, scale)!,
