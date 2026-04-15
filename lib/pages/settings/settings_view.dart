@@ -499,25 +499,38 @@ class SettingsView extends StatelessWidget {
                             controlAffinity: ListTileControlAffinity.trailing,
                             value: controller.isRecoveryActive,
                             secondary: CircleAvatar(
-                              backgroundColor: controller.isRecoveryActive 
-                                  ? theme.colorScheme.primary 
-                                  : theme.colorScheme.secondary,
-                              child: Icon(
-                                controller.isRecoveryActive 
-                                    ? Icons.check_circle_outlined 
-                                    : Icons.cloud_upload_outlined,
-                                color: controller.isRecoveryActive
-                                    ? theme.colorScheme.onPrimary
-                                    : theme.colorScheme.onSecondary,
-                              ),
+                              backgroundColor: controller.showChatBackupBanner == null
+                                  ? theme.colorScheme.surfaceContainerHighest
+                                  : controller.isRecoveryActive 
+                                      ? theme.colorScheme.primary 
+                                      : theme.colorScheme.secondary,
+                              child: controller.showChatBackupBanner == null
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                      ),
+                                    )
+                                  : Icon(
+                                      controller.isRecoveryActive 
+                                          ? Icons.check_circle_outlined 
+                                          : Icons.cloud_upload_outlined,
+                                      color: controller.isRecoveryActive
+                                          ? theme.colorScheme.onPrimary
+                                          : theme.colorScheme.onSecondary,
+                                    ),
                             ),
                             title: Text(controller.isRecoveryActive 
                                 ? 'Recovery Active' 
                                 : L10n.of(context).chatBackup),
-                            subtitle: Text(controller.isRecoveryActive
-                                ? 'Your messages are secured and can be recovered'
-                                : L10n.of(context).chatBackupDescription),
-                            onChanged: controller.isRecoveryActive 
+                            subtitle: Text(controller.showChatBackupBanner == null
+                                ? 'Checking recovery status...'
+                                : controller.isRecoveryActive
+                                    ? 'Your messages are secured and can be recovered'
+                                    : L10n.of(context).chatBackupDescription),
+                            onChanged: controller.showChatBackupBanner == null || controller.isRecoveryActive 
                                 ? null 
                                 : (_) => controller.firstRunBootstrapAction(),
                           ),
