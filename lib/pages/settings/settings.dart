@@ -363,8 +363,9 @@ class SettingsController extends State<Settings> {
       context: context,
       future: () async {
         final bootstrap = matrix.client.encryption!.bootstrap();
+        await bootstrap.useExistingSsss();
         if (bootstrap.newSsssKey == null) {
-          throw Exception('Geen recovery key gevonden in je account');
+          throw Exception('Geen recovery key gevonden in je account. Is E2EE ingesteld?');
         }
         await bootstrap.newSsssKey!.unlock(keyOrPassphrase: recoveryKey);
         await bootstrap.openExistingSsss();
