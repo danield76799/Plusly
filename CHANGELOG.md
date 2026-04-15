@@ -1,3 +1,6 @@
+## Extera 26.1.62
+- Minor fixes and improvements.
+
 ## Extera 26.1.61
 - Optimizations and fixes.
 
