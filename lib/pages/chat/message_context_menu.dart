@@ -463,7 +463,8 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             const ListDivider(),
                           ],
                           if (room.canSendDefaultMessages &&
-                              event.senderId == client.userID!) ...[
+                              event.senderId == client.userID! &&
+                              event.type == EventTypes.Message) ...[
                             _buildMenuItem(
                               event: event,
                               icon: Icons.edit_outlined,
