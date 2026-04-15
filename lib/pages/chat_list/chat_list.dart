@@ -949,32 +949,10 @@ class ChatListController extends State<ChatList>
   }
 
   void _startBootstrapCheck() {
-    final client = Matrix.of(context).client;
-
+    // Bootstrap check DISABLED - was causing redirects to /backup on slow homeservers
+    // Recovery key flow is now completely disabled to prevent app hangs
     _bootstrapCheckSubscription?.cancel();
-    _bootstrapCheckSubscription = client.onSync.stream.listen((_) async {
-      if (!mounted) return;
-      if (!client.encryptionEnabled) return;
-      await client.accountDataLoading;
-      await client.userDeviceKeysLoading;
-      // Timeout after 10s to prevent app from hanging on slow homeserver
-      final crossSigning = await Future.any([
-        client.encryption?.crossSigning.isCached() ?? Future.value(false),
-        Future.delayed(const Duration(seconds: 10), () => null),
-      ]);
-      final needsBootstrap =
-          await client.encryption?.keyManager.isCached() == false ||
-          client.encryption?.crossSigning.enabled == false ||
-          crossSigning == null ||
-          crossSigning == false;
-      final isUnknownSession = client.isUnknownSession;
-      if (needsBootstrap || isUnknownSession) {
-        _bootstrapCheckSubscription?.cancel();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) context.go('/backup');
-        });
-      }
-    });
+    // NO-OP: cross-signing bootstrap check removed entirely
   }
 
   void setActiveFilter(ActiveFilter filter) {
