@@ -145,14 +145,10 @@ class EventVideoPlayer extends StatelessWidget {
                           supportsVideoPlayer
                               ? sizeInt == null
                                     ? L10n.of(context).playVideoNoSize
-                                    : L10n.of(
-                                        context,
-                                      ).playVideo(sizeInt.sizeString)
+                                    : sizeInt.sizeString
                               : sizeInt == null
                               ? L10n.of(context).downloadVideoNoSize
-                              : L10n.of(
-                                  context,
-                                ).downloadVideo(sizeInt.sizeString),
+                              : sizeInt.sizeString,
                         ),
                       ],
                     ),

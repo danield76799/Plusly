@@ -116,7 +116,7 @@ class ImageBubble extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       size != null
-                          ? L10n.of(context).loadImage(size.sizeString)
+                          ? size.sizeString
                           : L10n.of(context).loadImageNoSize,
                     ),
                   ],
