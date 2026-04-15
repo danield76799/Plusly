@@ -495,17 +495,19 @@ class SettingsView extends StatelessWidget {
 
 
                           const ListDivider(),
-                          ListTile(
-                            leading: CircleAvatar(
+                          SwitchListTile.adaptive(
+                            controlAffinity: ListTileControlAffinity.trailing,
+                            value: false,
+                            secondary: CircleAvatar(
                               backgroundColor: theme.colorScheme.secondary,
                               child: Icon(
-                                Icons.key_outlined,
+                                Icons.cloud_upload_outlined,
                                 color: theme.colorScheme.onSecondary,
                               ),
                             ),
-                            title: const Text('Recovery Phrase'),
-                            subtitle: const Text('Voer je recovery phrase in'),
-                            onTap: () => controller.setRecoveryPhraseAction(),
+                            title: Text(L10n.of(context).chatBackup),
+                            subtitle: Text(L10n.of(context).chatBackupDescription),
+                            onChanged: (_) => controller.setRecoveryPhraseAction(),
                           ),
 
                           ListTile(
