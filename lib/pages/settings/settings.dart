@@ -333,34 +333,17 @@ class SettingsController extends State<Settings> {
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) => checkBootstrap());
+    // KEY RECOVERY DISABLED - was hanging on slow homeservers
+    // WidgetsBinding.instance.addPostFrameCallback((_) => checkBootstrap());
 
     super.initState();
   }
 
   void checkBootstrap() async {
-    // Re-enable bootstrap check - check if cross-signing is enabled
-    try {
-      final matrix = Matrix.of(context);
-      if (matrix.client.encryption == null) {
-        setState(() => showChatBackupBanner = false);
-        return;
-      }
-      final crossSigning = matrix.client.encryption!.crossSigning;
-      
-      // Timeout after 10s to prevent app from hanging on slow homeserver
-      final cached = await Future.any([
-        crossSigning.isCached(),
-        Future.delayed(const Duration(seconds: 10), () => null),
-      ]);
-      
-      if (!mounted) return;
-      setState(() {
-        showChatBackupBanner = cached == false;
-        crossSigningCached = cached;
-      });
-    } catch (e) {
-      if (mounted) setState(() => showChatBackupBanner = false);
+    // Recovery key check DISABLED - was hanging on slow/unresponsive homeservers
+    // Cross-signing bootstrap removed entirely to prevent app freezes
+    if (mounted) {
+      setState(() => showChatBackupBanner = false);
     }
   }
 
