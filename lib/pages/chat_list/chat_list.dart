@@ -901,6 +901,7 @@ class ChatListController extends State<ChatList>
   void setActiveClient(Client client) {
     context.go('/rooms');
     setState(() {
+      _cachedFilteredRooms = null;
       activeFilter = ActiveFilter.allChats;
       _activeSpaceId = null;
       Matrix.of(context).setActiveClient(client);
@@ -911,6 +912,7 @@ class ChatListController extends State<ChatList>
   void setActiveBundle(String bundle) {
     context.go('/rooms');
     setState(() {
+      _cachedFilteredRooms = null;
       _activeSpaceId = null;
       Matrix.of(context).activeBundle = bundle;
       if (!Matrix.of(
