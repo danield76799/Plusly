@@ -307,7 +307,9 @@ class ChatController extends State<ChatPageWithRoom>
     if (_requestingFuture) return;
     _requestingFuture = true;
     Logs().v('Requesting future...');
-    final visibleEvents = timeline.events.filterByVisibleInGui();
+    final visibleEvents = timeline.events
+        .filterByThreaded(thread != null)
+        .filterByVisibleInGui();
     final mostRecentEvent = visibleEvents.firstOrNull;
 
     final anchorEventId = mostRecentEvent?.eventId;
@@ -320,7 +322,9 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     if (anchorEventId != null && scrollController.hasClients) {
-      final newVisibleEvents = timeline.events.filterByVisibleInGui();
+      final newVisibleEvents = timeline.events
+          .filterByThreaded(thread != null)
+          .filterByVisibleInGui();
       final anchorIndex = newVisibleEvents.indexWhere(
         (e) => e.eventId == anchorEventId,
       );
@@ -480,12 +484,14 @@ class ChatController extends State<ChatPageWithRoom>
       var readMarkerEventIndex = readMarkerEventId.isEmpty || timeline == null
           ? -1
           : timeline!.events
+                .filterByThreaded(thread != null)
                 .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
                 .indexWhere((e) => e.eventId == readMarkerEventId);
 
       if (readMarkerEventId.isNotEmpty && readMarkerEventIndex == -1) {
         await timeline?.requestHistory(historyCount: _loadHistoryCount);
         readMarkerEventIndex = timeline!.events
+            .filterByThreaded(thread != null)
             .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
             .indexWhere((e) => e.eventId == readMarkerEventId);
       }
@@ -1395,15 +1401,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void scrollToEventId(String eventId, {bool highlightEvent = true}) async {
-    final foundEvent = timeline!.events.firstWhereOrNull(
-      (event) => event.eventId == eventId,
-    );
-
-    final eventIndex = foundEvent == null
-        ? -1
-        : timeline!.events
-              .filterByVisibleInGui(exceptionEventId: eventId)
-              .indexOf(foundEvent);
+    final eventIndex = eventsKeyMap[eventId] ?? -1;
 
     if (eventIndex == -1) {
       setState(() {
@@ -1417,6 +1415,8 @@ class ChatController extends State<ChatPageWithRoom>
         );
       });
       await loadTimelineFuture;
+      _cachedFilteredEvents = null;
+      _cachedEventsKeyMap = null;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         scrollToEventId(eventId);
       });
@@ -1448,6 +1448,8 @@ class ChatController extends State<ChatPageWithRoom>
         );
       });
       await loadTimelineFuture;
+      _cachedFilteredEvents = null;
+      _cachedEventsKeyMap = null;
     }
     scrollController.jumpTo(0);
   }
