@@ -611,7 +611,6 @@ class MatrixPill extends StatelessWidget {
               ),
             ),
             TextSpan(
-              text: name,
               style: TextStyle(
                 color: color,
                 decorationColor: color,
@@ -619,22 +618,32 @@ class MatrixPill extends StatelessWidget {
                 fontSize: fontSize,
                 height: 1.25,
               ),
-            ),
-            if (withEventLink) ...[
-              WidgetSpan(
-                child: Padding(
-                  padding: const .only(right: 4),
-                  child: Row(
-                    mainAxisSize: .min,
-                    spacing: 2,
-                    children: [
-                      const Icon(Icons.chevron_right, size: 16),
-                      const Icon(Icons.messenger_outline, size: 16),
-                    ],
+              children: [
+                TextSpan(
+                  text: name,
+                  style: TextStyle(
+                    color: color,
+                    decorationColor: color,
+                    decoration: TextDecoration.underline,
+                    fontSize: fontSize,
+                    height: 1.25,
                   ),
                 ),
-              ),
-            ],
+                if (withEventLink)
+                  WidgetSpan(
+                    baseline: TextBaseline.alphabetic,
+                    alignment: PlaceholderAlignment.baseline,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 2,
+                      children: [
+                        Icon(Icons.chevron_right, size: 16, color: color),
+                        Icon(Icons.messenger_outline, size: 16, color: color),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
           ],
         ),
       ),
