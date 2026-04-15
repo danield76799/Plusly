@@ -121,7 +121,12 @@ abstract class AppRoutes {
     ),
     GoRoute(
       path: '/backup',
-      redirect: (context, state) => '/rooms',
+      redirect: loggedOutRedirect,
+      pageBuilder: (context, state) => defaultPageBuilder(
+        context,
+        state,
+        BootstrapDialog(wipe: state.uri.queryParameters['wipe'] == 'true'),
+      ),
     ),
     GoRoute(
       path: '/addaccount',

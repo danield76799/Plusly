@@ -507,7 +507,7 @@ class SettingsView extends StatelessWidget {
                             ),
                             title: Text(L10n.of(context).chatBackup),
                             subtitle: Text(L10n.of(context).chatBackupDescription),
-                            onChanged: (_) => controller.setRecoveryPhraseAction(),
+                            onChanged: (_) => controller.firstRunBootstrapAction(),
                           ),
 
                           ListTile(
