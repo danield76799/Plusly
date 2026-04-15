@@ -335,10 +335,6 @@ class SettingsController extends State<Settings> {
     super.initState();
   }
 
-  Future<void> firstRunBootstrapAction([dynamic _]) async {
-    await context.push('/backup');
-  }
-
   void setRecoveryPhraseAction() async {
     final matrix = Matrix.of(context);
     if (matrix.client.encryption == null) return;

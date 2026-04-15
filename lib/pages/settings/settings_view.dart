@@ -492,10 +492,8 @@ class SettingsView extends StatelessWidget {
                             onTap: () => launchUrlString(AppConfig.privacyUrl),
                           ),
                           const ListDivider(),
-                          SwitchListTile.adaptive(
-                            controlAffinity: ListTileControlAffinity.trailing,
-                            value: false,
-                            secondary: CircleAvatar(
+                          ListTile(
+                            leading: CircleAvatar(
                               backgroundColor: theme.colorScheme.secondary,
                               child: Icon(
                                 Icons.key_outlined,
@@ -503,7 +501,8 @@ class SettingsView extends StatelessWidget {
                               ),
                             ),
                             title: Text(L10n.of(context).chatBackup),
-                            onChanged: controller.firstRunBootstrapAction,
+                            subtitle: Text(L10n.of(context).chatBackupDescription),
+                            onTap: () => controller.setRecoveryPhraseAction(),
                           ),
 
                           const ListDivider(),
