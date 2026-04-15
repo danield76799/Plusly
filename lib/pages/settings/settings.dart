@@ -37,6 +37,9 @@ class SettingsController extends State<Settings> {
   bool isQueryingBanner = false;
   bool hasBanner = false;
 
+  bool? crossSigningCached;
+  bool? showChatBackupBanner;
+
   Future<String?> _getAbout() async {
     final client = Matrix.of(context).client;
     try {
@@ -333,6 +336,41 @@ class SettingsController extends State<Settings> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => checkBootstrap());
+  }
+
+  void checkBootstrap() async {
+    final client = Matrix.of(context).client;
+    if (!client.encryptionEnabled) return;
+    await client.accountDataLoading;
+    await client.userDeviceKeysLoading;
+    if (client.prevBatch == null) {
+      await client.onSync.stream.first;
+    }
+    final crossSigning =
+        await client.encryption?.crossSigning.isCached() ?? false;
+    final needsBootstrap =
+        client.encryption?.keyManager.isCached() == false ||
+            client.encryption?.crossSigning.enabled == false ||
+            crossSigning == false;
+    final isUnknownSession = client.isUnknownSession;
+    setState(() {
+      showChatBackupBanner = needsBootstrap || isUnknownSession;
+    });
+  }
+
+  void firstRunBootstrapAction([dynamic _]) async {
+    if (showChatBackupBanner != true) {
+      showOkAlertDialog(
+        context: context,
+        title: L10n.of(context).chatBackup,
+        message: L10n.of(context).onlineKeyBackupEnabled,
+        okLabel: L10n.of(context).close,
+      );
+      return;
+    }
+    await context.push('/backup');
+    checkBootstrap();
   }
 
   void setRecoveryPhraseAction() async {
