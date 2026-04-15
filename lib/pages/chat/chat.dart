@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' hide Category;
@@ -388,27 +389,30 @@ class ChatController extends State<ChatPageWithRoom>
         final value = item.value;
 
         if (item.attribution != null) {
-          if (value['body'] is String) {
-            if ((['m.text', 'm.notice'].contains(value['msgtype'] as String) ||
-                value['filename'] is String)) {
-              value['body'] = "${item.attribution}\n${value['body']}";
-            } else if (![
-                  'm.text',
-                  'm.notice',
-                ].contains(value['msgtype'] as String) &&
-                value['filename'] is! String) {
-              value['filename'] = value['body'] as String;
+          final originalBody = value['body'] as String?;
+          final originalFormattedBody = value['formatted_body'] as String?;
+
+          if (originalBody is String) {
+            if (['m.text', 'm.notice'].contains(value['msgtype'] as String) ||
+                value['filename'] is String) {
+              value['body'] = "${item.attribution}\n$originalBody";
+            } else {
+              value['filename'] = originalBody;
               value['body'] = item.attribution;
             }
           }
+
           if (value['format'] == 'org.matrix.custom.html' &&
-              value['formatted_body'] is String) {
+              originalFormattedBody is String) {
             value['formatted_body'] =
-                "<strong>${item.attribution}</strong><blockquote>${value['formatted_body']}</blockquote>";
+                "<strong>${item.attribution}</strong><blockquote>$originalFormattedBody</blockquote>";
+          } else if (originalBody is String) {
+            value['formatted_body'] =
+                "<strong>${item.attribution}</strong><blockquote>${HtmlEscape().convert(originalBody)}</blockquote>";
+            value['format'] = 'org.matrix.custom.html';
           }
           value['xyz.extera.forward'] = {'attribution': item.attribution};
         }
-
         room.sendEvent(value);
       }
     }
