@@ -82,7 +82,7 @@ class ChatWidgetProvider : AppWidgetProvider() {
                 }
             } else {
                 // Show welcome message if no real data
-                views.setTextViewText(R.id.chat_name_1, "ExtraChat")
+                views.setTextViewText(R.id.chat_name_1, "💬 ExtraChat")
                 views.setTextViewText(R.id.chat_message_1, "Your chats appear here in 5 min")
                 views.setTextViewText(R.id.chat_status_1, "●")
                 views.setTextColor(R.id.chat_status_1, Color.parseColor(COLOR_ONLINE))
