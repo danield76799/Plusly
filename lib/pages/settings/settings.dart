@@ -364,17 +364,12 @@ class SettingsController extends State<Settings> {
       future: () async {
         try {
           final bootstrap = matrix.client.encryption!.bootstrap();
-          try {
-            await bootstrap.newSsssKey!.unlock(keyOrPassphrase: recoveryKey)
-                .timeout(const Duration(seconds: 15));
-          } on TimeoutException {
-            throw Exception('Server niet bereikbaar (timeout)');
-          }
-          try {
-            await bootstrap.openExistingSsss()
-                .timeout(const Duration(seconds: 15));
-          } on TimeoutException {
-            throw Exception('Server niet bereikbaar (timeout)');
+          await bootstrap.newSsssKey!.unlock(keyOrPassphrase: recoveryKey);
+          await bootstrap.openExistingSsss();
+          Logs().d('SSSS unlocked via settings');
+          if (bootstrap.encryption.crossSigning.enabled) {
+            await bootstrap.client.encryption!.crossSigning.selfSign(recoveryKey: recoveryKey);
+            Logs().d('Successful selfsigned via settings');
           }
         } catch (e) {
           Logs().e('Recovery failed', e);
