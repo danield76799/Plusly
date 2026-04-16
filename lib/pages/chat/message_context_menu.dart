@@ -247,7 +247,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                           if (controller.localRecentEmojis.length > 50) {
                                             controller.localRecentEmojis = controller.localRecentEmojis.sublist(0, 50);
                                           }
-                                          controller._saveLocalRecentEmojis();
+                                          controller.saveLocalRecentEmojis();
                                           // Also try to add to SDK
                                           room.client.addRecentEmoji(emoji);
                                           event.room.sendReaction(
@@ -398,7 +398,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                   if (controller.localRecentEmojis.length > 50) {
                                     controller.localRecentEmojis = controller.localRecentEmojis.sublist(0, 50);
                                   }
-                                  await controller._saveLocalRecentEmojis();
+                                  await controller.saveLocalRecentEmojis();
                                   // Also try to add to SDK
                                   await room.client.addRecentEmoji(emoji);
                                   await event.room.sendReaction(
