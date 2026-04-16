@@ -211,6 +211,7 @@ class ChatController extends State<ChatPageWithRoom>
   List<String> _localRecentEmojis = [];
 
   List<String> get localRecentEmojis => _localRecentEmojis;
+  set localRecentEmojis(List<String> value) => _localRecentEmojis = value;
 
   Future<void> _loadLocalRecentEmojis() async {
     final prefs = await SharedPreferences.getInstance();
@@ -221,6 +222,9 @@ class ChatController extends State<ChatPageWithRoom>
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(_recentEmojisKey, _localRecentEmojis);
   }
+
+  // Public wrapper for saving emojis from other classes
+  Future<void> saveLocalRecentEmojis() async => _saveLocalRecentEmojis();
 
   void acceptInvite() async {
     final result = await showFutureLoadingDialog(
