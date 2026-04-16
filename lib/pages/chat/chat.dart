@@ -415,7 +415,7 @@ class ChatController extends State<ChatPageWithRoom>
 
       var readMarkerEventIndex = -1;
       if (readMarkerEventId.isNotEmpty && timeline != null) {
-        readMarkerEventIndex = timeline.events
+        readMarkerEventIndex = timeline!.events
             .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
             .indexWhere((e) => e.eventId == readMarkerEventId);
       }
