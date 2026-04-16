@@ -1409,6 +1409,8 @@ class ChatController extends State<ChatPageWithRoom>
 
   void onEmojiSelected(Category? _, PickerEmoji emoji) {
     room.client.addRecentEmoji(emoji.customData ?? emoji.standardEmoji!.char);
+    // Force rebuild to update recent emojis list
+    setState(() {});
     // print('selected emoji ${emoji.customData ?? emoji.standardEmoji!.char}');
     switch (emojiPickerType) {
       case EmojiPickerType.reaction:
