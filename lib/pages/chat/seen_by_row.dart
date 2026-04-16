@@ -27,7 +27,11 @@ class SeenByRow extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final receipts = controller.room.getReceipts(timeline);
+    // Get receipts for the most recent message (first event in reversed timeline)
+    final lastEvent = timeline.events.isNotEmpty ? timeline.events.first : null;
+    final receipts = lastEvent != null
+        ? controller.room.getReceipts(timeline, eventId: lastEvent.eventId)
+        : <Receipt>[];
     const maxAvatars = 7;
     return Container(
       width: double.infinity,
