@@ -20,6 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:extera_next/pages/chat/anchored_scroll_controller.dart';
 import 'package:extera_next/pages/chat/chat_view.dart';
 import 'package:extera_next/pages/chat/event_info_dialog.dart';
 import 'package:extera_next/pages/chat/message_context_menu.dart';
@@ -135,7 +136,8 @@ class ChatController extends State<ChatPageWithRoom>
   String get roomId => widget.room.id;
   String? get threadRootEventId => widget.thread?.rootEvent.eventId;
 
-  final AutoScrollController scrollController = AutoScrollController();
+  final AnchoredAutoScrollController scrollController =
+      AnchoredAutoScrollController();
 
   /// Tracks the actual rendered height of the floating input bar so the
   /// message list can reserve the correct amount of bottom padding.
@@ -179,7 +181,8 @@ class ChatController extends State<ChatPageWithRoom>
         MessageTypes.File,
       }.contains(selectedEvents.single.messageType);
 
-  void saveSelectedEvent(context) => selectedEvents.single.saveFile(context);
+  void saveSelectedEvent(BuildContext context) =>
+      selectedEvents.single.saveFile(context);
 
   List<Event> selectedEvents = [];
 
@@ -294,9 +297,18 @@ class ChatController extends State<ChatPageWithRoom>
 
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
+  bool _requestingHistory = false;
+
   void requestHistory([_]) async {
+    if (_requestingHistory) return;
+    if (timeline?.isRequestingHistory == true) return;
+    _requestingHistory = true;
     Logs().v('Requesting history...');
-    await timeline?.requestHistory(historyCount: _loadHistoryCount);
+    try {
+      await timeline?.requestHistory(historyCount: _loadHistoryCount);
+    } finally {
+      _requestingHistory = false;
+    }
   }
 
   bool _requestingFuture = false;
@@ -307,10 +319,9 @@ class ChatController extends State<ChatPageWithRoom>
     if (_requestingFuture) return;
     _requestingFuture = true;
     Logs().v('Requesting future...');
-    final visibleEvents = filteredEvents;
-    final mostRecentEvent = visibleEvents.firstOrNull;
+    final mostRecentEvent = filteredEvents.firstOrNull;
 
-    final anchorEventId = mostRecentEvent?.eventId;
+    scrollController.shouldAnchor = true;
 
     await timeline.requestFuture(historyCount: _loadHistoryCount);
 
@@ -318,28 +329,11 @@ class ChatController extends State<ChatPageWithRoom>
       _requestingFuture = false;
       return;
     }
-
-    if (anchorEventId != null && scrollController.hasClients) {
-      final newVisibleEvents = filteredEvents;
-      final anchorIndex = newVisibleEvents.indexWhere(
-        (e) => e.eventId == anchorEventId,
-      );
-      if (anchorIndex > 0) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted || !scrollController.hasClients) return;
-          scrollController.scrollToIndex(
-            anchorIndex + 1, // index 0 is the typing indicator
-            preferPosition: AutoScrollPosition.begin,
-            duration: Duration.zero,
-          );
-        });
-      }
-    }
+    _requestingFuture = false;
 
     if (mostRecentEvent != null) {
       setReadMarker(eventId: mostRecentEvent.eventId);
     }
-    _requestingFuture = false;
   }
 
   void _updateScrollController() {
@@ -483,7 +477,9 @@ class ChatController extends State<ChatPageWithRoom>
                 .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
                 .indexWhere((e) => e.eventId == readMarkerEventId);
 
-      if (readMarkerEventId.isNotEmpty && readMarkerEventIndex == -1) {
+      if (timeline != null &&
+          readMarkerEventId.isNotEmpty &&
+          readMarkerEventIndex == -1) {
         await timeline?.requestHistory(historyCount: _loadHistoryCount);
         readMarkerEventIndex = timeline!.events
             .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
@@ -524,35 +520,25 @@ class ChatController extends State<ChatPageWithRoom>
     setReadMarker();
     updateThreads();
 
-    // Capture scroll state and event count before rebuilding.
     final wasScrolledUp = _scrolledUp.value;
-    final oldEventCount = _cachedFilteredEvents?.length;
-    final oldMaxExtent = wasScrolledUp && scrollController.hasClients
-        ? scrollController.position.maxScrollExtent
-        : null;
+    final oldNewestEventId = _cachedFilteredEvents?.firstOrNull?.eventId;
 
-    // Invalidate caches so the UI reflects the latest timeline.
     _cachedFilteredEvents = null;
     _cachedEventsKeyMap = null;
+
+    if (wasScrolledUp &&
+        !_requestingFuture &&
+        oldNewestEventId != null &&
+        scrollController.hasClients) {
+      final newNewestEventId = filteredEvents.firstOrNull?.eventId;
+      if (newNewestEventId != oldNewestEventId) {
+        scrollController.shouldAnchor = true;
+      }
+    }
+
     setState(() {
       firstUpdateReceived = true;
     });
-
-    // If we were scrolled up and new messages have been added, adjust the
-    // scroll offset to keep the user's reading position stable.
-    if (wasScrolledUp && oldMaxExtent != null && oldEventCount != null) {
-      final newEventCount = filteredEvents.length;
-      if (newEventCount > oldEventCount) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted || !scrollController.hasClients) return;
-          final newMaxExtent = scrollController.position.maxScrollExtent;
-          final delta = newMaxExtent - oldMaxExtent;
-          if (delta > 0) {
-            scrollController.jumpTo(scrollController.position.pixels + delta);
-          }
-        });
-      }
-    }
   }
 
   Future<void> updateThreads() async {
@@ -1743,7 +1729,7 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  int? findChildIndexCallback(Key key, Map<String, int> thisEventsKeyMap) {
+  int? findChildIndexCallback(Key key) {
     // this method is called very often. As such, it has to be optimized for speed.
     if (key is! ValueKey) {
       return null;
@@ -1753,7 +1739,7 @@ class ChatController extends State<ChatPageWithRoom>
       return null;
     }
     // first fetch the last index the event was at
-    final index = thisEventsKeyMap[eventId];
+    final index = eventsKeyMap[eventId];
     if (index == null) {
       return null;
     }
@@ -1789,7 +1775,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  unpinEvent(String eventId) async {
+  void unpinEvent(String eventId) async {
     final response = await showOkCancelAlertDialog(
       context: context,
       title: L10n.of(context).unpin,

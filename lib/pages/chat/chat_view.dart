@@ -27,7 +27,6 @@ import 'package:extera_next/widgets/chat_settings_popup_menu.dart';
 import 'package:extera_next/widgets/matrix.dart';
 import 'package:extera_next/widgets/mini_audio_player.dart';
 import 'package:extera_next/widgets/unread_rooms_badge.dart';
-import '../../utils/stream_extension.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
 
@@ -379,226 +378,209 @@ class ChatView extends StatelessWidget {
           controller.emojiPickerAction();
         }
       },
-      child: StreamBuilder(
-        stream: controller.room.client.onRoomState.stream
-            .where((update) => update.roomId == controller.room.id)
-            .rateLimit(const Duration(seconds: 1)),
-        builder: (context, snapshot) => FutureBuilder(
-          future: controller.loadTimelineFuture,
-          builder: (BuildContext context, snapshot) {
-            var appbarBottomHeight = 0.0;
-            if (controller.room.pinnedEventIds.isNotEmpty) {
-              appbarBottomHeight += ChatAppBarListTile.fixedHeight;
-            }
-            return Scaffold(
-              extendBodyBehindAppBar: AppSettings.enableChatFrostedGlass.value,
-              appBar: AppBar(
-                backgroundColor: AppSettings.enableChatFrostedGlass.value
-                    ? Colors.transparent
-                    : null,
-                elevation: AppSettings.enableChatFrostedGlass.value ? 0 : null,
-                scrolledUnderElevation: AppSettings.enableChatFrostedGlass.value
-                    ? 0
-                    : null,
-                flexibleSpace: AppSettings.enableChatFrostedGlass.value
-                    ? ClipRect(
-                        child: BackdropFilter(
-                          filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surface.withAlpha(
-                                theme.brightness == Brightness.dark ? 180 : 200,
-                              ),
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: theme.colorScheme.outlineVariant
-                                      .withAlpha(80),
-                                  width: 0.5,
-                                ),
+      child: FutureBuilder(
+        future: controller.loadTimelineFuture,
+        builder: (BuildContext context, snapshot) {
+          var appbarBottomHeight = 0.0;
+          if (controller.room.pinnedEventIds.isNotEmpty) {
+            appbarBottomHeight += ChatAppBarListTile.fixedHeight;
+          }
+          return Scaffold(
+            extendBodyBehindAppBar: AppSettings.enableChatFrostedGlass.value,
+            appBar: AppBar(
+              backgroundColor: AppSettings.enableChatFrostedGlass.value
+                  ? Colors.transparent
+                  : null,
+              elevation: AppSettings.enableChatFrostedGlass.value ? 0 : null,
+              scrolledUnderElevation: AppSettings.enableChatFrostedGlass.value
+                  ? 0
+                  : null,
+              flexibleSpace: AppSettings.enableChatFrostedGlass.value
+                  ? ClipRect(
+                      child: BackdropFilter(
+                        filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surface.withAlpha(
+                              theme.brightness == Brightness.dark ? 180 : 200,
+                            ),
+                            border: Border(
+                              bottom: BorderSide(
+                                color: theme.colorScheme.outlineVariant
+                                    .withAlpha(80),
+                                width: 0.5,
                               ),
                             ),
                           ),
                         ),
-                      )
-                    : null,
-                actionsIconTheme: IconThemeData(
-                  color: controller.selectedEvents.isEmpty
-                      ? null
-                      : theme.colorScheme.tertiary,
-                ),
-                automaticallyImplyLeading: false,
-                centerTitle: AppSettings.enableAppBarCenterTitle.value,
-                leading: controller.selectMode
-                    ? IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: controller.clearSelectedEvents,
-                        tooltip: L10n.of(context).close,
-                        color: theme.colorScheme.tertiary,
-                      )
-                    : FluffyThemes.isColumnMode(context)
+                      ),
+                    )
+                  : null,
+              actionsIconTheme: IconThemeData(
+                color: controller.selectedEvents.isEmpty
                     ? null
-                    : StreamBuilder<Object>(
-                        stream: Matrix.of(context).client.onSync.stream.where(
-                          (syncUpdate) => syncUpdate.hasRoomUpdate,
-                        ),
-                        builder: (context, _) => UnreadRoomsBadge(
-                          filter: (r) => r.id != controller.roomId,
-                          badgePosition: BadgePosition.topEnd(end: 8, top: 4),
-                          child: const Center(child: BackButton()),
-                        ),
+                    : theme.colorScheme.tertiary,
+              ),
+              automaticallyImplyLeading: false,
+              centerTitle: AppSettings.enableAppBarCenterTitle.value,
+              leading: controller.selectMode
+                  ? IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: controller.clearSelectedEvents,
+                      tooltip: L10n.of(context).close,
+                      color: theme.colorScheme.tertiary,
+                    )
+                  : FluffyThemes.isColumnMode(context)
+                  ? null
+                  : StreamBuilder<Object>(
+                      stream: Matrix.of(context).client.onSync.stream.where(
+                        (syncUpdate) => syncUpdate.hasRoomUpdate,
                       ),
+                      builder: (context, _) => UnreadRoomsBadge(
+                        filter: (r) => r.id != controller.roomId,
+                        badgePosition: BadgePosition.topEnd(end: 8, top: 4),
+                        child: const Center(child: BackButton()),
+                      ),
+                    ),
 
-                titleSpacing: FluffyThemes.isColumnMode(context) ? 24 : 0,
-                title: ChatAppBarTitle(controller),
-                actions: _appBarActions(context),
-                bottom: PreferredSize(
-                  preferredSize: Size.fromHeight(appbarBottomHeight),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [PinnedEvents(controller)],
-                  ),
+              titleSpacing: FluffyThemes.isColumnMode(context) ? 24 : 0,
+              title: ChatAppBarTitle(controller),
+              actions: _appBarActions(context),
+              bottom: PreferredSize(
+                preferredSize: Size.fromHeight(appbarBottomHeight),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [PinnedEvents(controller)],
                 ),
               ),
-              floatingActionButton: ValueListenableBuilder<bool>(
-                valueListenable: controller.scrolledUpNotifier,
-                builder: (context, scrolledUp, _) {
-                  final show =
-                      (scrolledUp ||
-                          controller.timeline?.allowNewEvent == false) &&
-                      controller.selectedEvents.isEmpty;
-                  if (!show) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 56.0),
-                    child: FloatingActionButton(
-                      onPressed: controller.scrollDown,
-                      heroTag: null,
-                      mini: true,
-                      backgroundColor: theme.colorScheme.surface,
-                      foregroundColor: theme.colorScheme.onSurface,
-                      child: const Icon(Icons.arrow_downward_outlined),
-                    ),
-                  );
-                },
-              ),
-              body: DropTarget(
-                onDragDone: controller.onDragDone,
-                onDragEntered: controller.onDragEntered,
-                onDragExited: controller.onDragExited,
-                child: Stack(
-                  children: <Widget>[
-                    if (wallpaperPath.isNotEmpty)
-                      Positioned.fill(
-                        child: ClipRect(
-                          child: OverflowBox(
-                            alignment: Alignment.topCenter,
-                            maxHeight: screenHeight,
-                            maxWidth: screenWidth,
-                            child: Opacity(
-                              opacity: AppSettings.wallpaperOpacity.value,
-                              child: ImageFiltered(
-                                imageFilter: ui.ImageFilter.blur(
-                                  sigmaX: AppSettings.wallpaperBlur.value,
-                                  sigmaY: AppSettings.wallpaperBlur.value,
-                                ),
-                                child: Image.file(
-                                  File(wallpaperPath),
-                                  fit: BoxFit.cover,
-                                  height: screenHeight,
-                                  width: screenWidth,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    // Messages — full screen under AppBar and InputBar
+            ),
+            floatingActionButton: ValueListenableBuilder<bool>(
+              valueListenable: controller.scrolledUpNotifier,
+              builder: (context, scrolledUp, _) {
+                final show =
+                    (scrolledUp ||
+                        controller.timeline?.allowNewEvent == false) &&
+                    controller.selectedEvents.isEmpty;
+                if (!show) return const SizedBox.shrink();
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 56.0),
+                  child: FloatingActionButton(
+                    onPressed: controller.scrollDown,
+                    heroTag: null,
+                    mini: true,
+                    backgroundColor: theme.colorScheme.surface,
+                    foregroundColor: theme.colorScheme.onSurface,
+                    child: const Icon(Icons.arrow_downward_outlined),
+                  ),
+                );
+              },
+            ),
+            body: DropTarget(
+              onDragDone: controller.onDragDone,
+              onDragEntered: controller.onDragEntered,
+              onDragExited: controller.onDragExited,
+              child: Stack(
+                children: <Widget>[
+                  if (wallpaperPath.isNotEmpty)
                     Positioned.fill(
-                      child: GestureDetector(
-                        onTap: controller.clearSingleSelectedEvent,
-                        child: ChatEventList(
-                          controller: controller,
-                          showThreadRoots: controller.showThreadRoots,
-                        ),
-                      ),
-                    ),
-
-                    // Gradient
-                    if (controller.room.canSendDefaultMessages &&
-                        controller.room.membership == .join)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: IgnorePointer(
-                          child: Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  theme.colorScheme.surface.withValues(
-                                    alpha: 0,
-                                  ),
-                                  theme.colorScheme.surface.withValues(
-                                    alpha: 0.6,
-                                  ),
-                                ],
+                      child: ClipRect(
+                        child: OverflowBox(
+                          alignment: Alignment.topCenter,
+                          maxHeight: screenHeight,
+                          maxWidth: screenWidth,
+                          child: Opacity(
+                            opacity: AppSettings.wallpaperOpacity.value,
+                            child: ImageFiltered(
+                              imageFilter: ui.ImageFilter.blur(
+                                sigmaX: AppSettings.wallpaperBlur.value,
+                                sigmaY: AppSettings.wallpaperBlur.value,
+                              ),
+                              child: Image.file(
+                                File(wallpaperPath),
+                                fit: BoxFit.cover,
+                                height: screenHeight,
+                                width: screenWidth,
                               ),
                             ),
                           ),
                         ),
                       ),
+                    ),
+                  // Messages — full screen under AppBar and InputBar
+                  Positioned.fill(
+                    child: GestureDetector(
+                      onTap: controller.clearSingleSelectedEvent,
+                      child: ChatEventList(
+                        controller: controller,
+                        showThreadRoots: controller.showThreadRoots,
+                      ),
+                    ),
+                  ),
 
-                    // Floating input bar
+                  // Gradient
+                  if (controller.room.canSendDefaultMessages &&
+                      controller.room.membership == .join)
                     Positioned(
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      child: _MeasureSize(
-                        onChange: (size) {
-                          final oldHeight = controller.inputBarHeight.value;
-                          final newHeight = size.height;
-                          if (oldHeight == newHeight) return;
-                          controller.inputBarHeight.value = newHeight;
-                          // If the user is scrolled to the bottom (offset 0 in
-                          // a reversed list), keep them there so the input bar
-                          // doesn't obscure messages.
-                          final sc = controller.scrollController;
-                          if (sc.hasClients && sc.offset <= 0.0) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (sc.hasClients) sc.jumpTo(0.0);
-                            });
-                          }
-                        },
-                        child: SafeArea(
-                          top: false,
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: bottomSheetPadding,
-                              vertical: bottomSheetPadding / 2,
-                            ),
-                            child: Align(
-                              alignment: Alignment.center,
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: FluffyThemes.columnWidth * 2.5,
+                      child: IgnorePointer(
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                theme.colorScheme.surface.withValues(alpha: 0),
+                                theme.colorScheme.surface.withValues(
+                                  alpha: 0.6,
                                 ),
-                                child: controller.room.isExtinct
-                                    ? (AppSettings.enableChatFrostedGlass.value
-                                          ? _FloatingInputShell(
-                                              child: ElevatedButton.icon(
-                                                icon: const Icon(
-                                                  Icons.chevron_right,
-                                                ),
-                                                label: Text(
-                                                  L10n.of(context).enterNewChat,
-                                                ),
-                                                onPressed: controller
-                                                    .goToNewRoomAction,
-                                              ),
-                                            )
-                                          : ElevatedButton.icon(
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // Floating input bar
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    child: _MeasureSize(
+                      onChange: (size) {
+                        final oldHeight = controller.inputBarHeight.value;
+                        final newHeight = size.height;
+                        if (oldHeight == newHeight) return;
+                        controller.inputBarHeight.value = newHeight;
+                        // If the user is scrolled to the bottom (offset 0 in
+                        // a reversed list), keep them there so the input bar
+                        // doesn't obscure messages.
+                        final sc = controller.scrollController;
+                        if (sc.hasClients && sc.offset <= 0.0) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (sc.hasClients) sc.jumpTo(0.0);
+                          });
+                        }
+                      },
+                      child: SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: bottomSheetPadding,
+                            vertical: bottomSheetPadding / 2,
+                          ),
+                          child: Align(
+                            alignment: Alignment.center,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxWidth: FluffyThemes.columnWidth * 2.5,
+                              ),
+                              child: controller.room.isExtinct
+                                  ? (AppSettings.enableChatFrostedGlass.value
+                                        ? _FloatingInputShell(
+                                            child: ElevatedButton.icon(
                                               icon: const Icon(
                                                 Icons.chevron_right,
                                               ),
@@ -607,155 +589,160 @@ class ChatView extends StatelessWidget {
                                               ),
                                               onPressed:
                                                   controller.goToNewRoomAction,
-                                            ))
-                                    : controller.room.canSendDefaultMessages &&
-                                          controller.room.membership ==
-                                              Membership.join &&
-                                          !controller.showThreadRoots
-                                    ? (() {
-                                        final inputChild =
-                                            controller.room.isAbandonedDMRoom ==
-                                                true
-                                            ? Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceEvenly,
-                                                children: [
-                                                  TextButton.icon(
-                                                    style: TextButton.styleFrom(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                            16,
-                                                          ),
-                                                      foregroundColor: theme
-                                                          .colorScheme
-                                                          .error,
-                                                    ),
-                                                    icon: const Icon(
-                                                      Icons.archive_outlined,
-                                                    ),
-                                                    onPressed:
-                                                        controller.leaveChat,
-                                                    label: Text(
-                                                      L10n.of(context).leave,
-                                                    ),
+                                            ),
+                                          )
+                                        : ElevatedButton.icon(
+                                            icon: const Icon(
+                                              Icons.chevron_right,
+                                            ),
+                                            label: Text(
+                                              L10n.of(context).enterNewChat,
+                                            ),
+                                            onPressed:
+                                                controller.goToNewRoomAction,
+                                          ))
+                                  : controller.room.canSendDefaultMessages &&
+                                        controller.room.membership ==
+                                            Membership.join &&
+                                        !controller.showThreadRoots
+                                  ? (() {
+                                      final inputChild =
+                                          controller.room.isAbandonedDMRoom ==
+                                              true
+                                          ? Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                TextButton.icon(
+                                                  style: TextButton.styleFrom(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          16,
+                                                        ),
+                                                    foregroundColor:
+                                                        theme.colorScheme.error,
                                                   ),
-                                                  TextButton.icon(
-                                                    style: TextButton.styleFrom(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                            16,
-                                                          ),
-                                                    ),
-                                                    icon: const Icon(
-                                                      Icons.forum_outlined,
-                                                    ),
-                                                    onPressed:
-                                                        controller.recreateChat,
-                                                    label: Text(
-                                                      L10n.of(
-                                                        context,
-                                                      ).reopenChat,
-                                                    ),
+                                                  icon: const Icon(
+                                                    Icons.archive_outlined,
                                                   ),
-                                                ],
-                                              )
-                                            : Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  ReplyDisplay(controller),
-                                                  ChatInputRow(controller),
-                                                  ChatEmojiPicker(controller),
-                                                ],
-                                              );
-                                        return AppSettings
-                                                .enableChatFrostedGlass
-                                                .value
-                                            ? _FloatingInputShell(
-                                                child: inputChild,
-                                              )
-                                            : Material(
-                                                clipBehavior: Clip.hardEdge,
-                                                color: theme
-                                                    .colorScheme
-                                                    .surfaceContainerHigh,
-                                                borderRadius:
-                                                    BorderRadius.circular(24),
-                                                child: inputChild,
-                                              );
-                                      })()
-                                    : const SizedBox.shrink(),
-                              ),
+                                                  onPressed:
+                                                      controller.leaveChat,
+                                                  label: Text(
+                                                    L10n.of(context).leave,
+                                                  ),
+                                                ),
+                                                TextButton.icon(
+                                                  style: TextButton.styleFrom(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                          16,
+                                                        ),
+                                                  ),
+                                                  icon: const Icon(
+                                                    Icons.forum_outlined,
+                                                  ),
+                                                  onPressed:
+                                                      controller.recreateChat,
+                                                  label: Text(
+                                                    L10n.of(context).reopenChat,
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          : Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                ReplyDisplay(controller),
+                                                ChatInputRow(controller),
+                                                ChatEmojiPicker(controller),
+                                              ],
+                                            );
+                                      return AppSettings
+                                              .enableChatFrostedGlass
+                                              .value
+                                          ? _FloatingInputShell(
+                                              child: inputChild,
+                                            )
+                                          : Material(
+                                              clipBehavior: Clip.hardEdge,
+                                              color: theme
+                                                  .colorScheme
+                                                  .surfaceContainerHigh,
+                                              borderRadius:
+                                                  BorderRadius.circular(24),
+                                              child: inputChild,
+                                            );
+                                    })()
+                                  : const SizedBox.shrink(),
                             ),
                           ),
                         ),
                       ),
                     ),
-                    if (controller.dragging)
-                      Container(
-                        color: theme.scaffoldBackgroundColor.withAlpha(230),
-                        alignment: Alignment.center,
-                        child: const Icon(Icons.upload_outlined, size: 100),
-                      ),
+                  ),
+                  if (controller.dragging)
+                    Container(
+                      color: theme.scaffoldBackgroundColor.withAlpha(230),
+                      alignment: Alignment.center,
+                      child: const Icon(Icons.upload_outlined, size: 100),
+                    ),
 
-                    Positioned(
-                      top:
-                          MediaQuery.of(context).padding.top +
-                          kToolbarHeight +
-                          appbarBottomHeight +
-                          22,
-                      left: 0,
-                      right: 0,
-                      child: SizedBox(
-                        child: Align(
-                          alignment: .center,
-                          child: Column(
-                            mainAxisSize: .min,
-                            children: [
-                              const BackToCallButton(),
-                              const MiniAudioPlayer(),
-                              if (scrollUpBannerEventId != null)
-                                Row(
-                                  mainAxisSize: .min,
-                                  children: [
-                                    FilledButton(
-                                      onPressed: () {
-                                        controller.scrollToEventId(
-                                          scrollUpBannerEventId,
-                                        );
-                                        controller
-                                            .discardScrollUpBannerEventId();
-                                        // controller.setReadMarker();
-                                      },
-                                      style: FilledButton.styleFrom(
-                                        shadowColor: Colors.black,
-                                        elevation: 4,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          const Icon(Icons.arrow_upward),
-                                          const SizedBox(width: 18),
-                                          Text(
-                                            L10n.of(
-                                              context,
-                                            ).jumpToLastReadMessage,
-                                          ),
-                                        ],
-                                      ),
+                  Positioned(
+                    top:
+                        MediaQuery.of(context).padding.top +
+                        kToolbarHeight +
+                        appbarBottomHeight +
+                        22,
+                    left: 0,
+                    right: 0,
+                    child: SizedBox(
+                      child: Align(
+                        alignment: .center,
+                        child: Column(
+                          mainAxisSize: .min,
+                          children: [
+                            const BackToCallButton(),
+                            const MiniAudioPlayer(),
+                            if (scrollUpBannerEventId != null)
+                              Row(
+                                mainAxisSize: .min,
+                                children: [
+                                  FilledButton(
+                                    onPressed: () {
+                                      controller.scrollToEventId(
+                                        scrollUpBannerEventId,
+                                      );
+                                      controller.discardScrollUpBannerEventId();
+                                      // controller.setReadMarker();
+                                    },
+                                    style: FilledButton.styleFrom(
+                                      shadowColor: Colors.black,
+                                      elevation: 4,
                                     ),
-                                  ],
-                                ),
-                            ],
-                          ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.arrow_upward),
+                                        const SizedBox(width: 18),
+                                        Text(
+                                          L10n.of(
+                                            context,
+                                          ).jumpToLastReadMessage,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

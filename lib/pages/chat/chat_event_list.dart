@@ -40,8 +40,6 @@ class ChatEventList extends StatelessWidget {
 
     final threads = controller.room.threads;
 
-    final thisEventsKeyMap = controller.eventsKeyMap;
-
     final hasWallpaper = AppSettings.wallpaperPath.value.isNotEmpty;
 
     final latestReadEventIndex = latestReadEvent != null
@@ -190,8 +188,7 @@ class ChatEventList extends StatelessWidget {
                 );
               },
               childCount: events.length + 2,
-              findChildIndexCallback: (key) =>
-                  controller.findChildIndexCallback(key, thisEventsKeyMap),
+              findChildIndexCallback: controller.findChildIndexCallback,
             ),
           ),
         ),
