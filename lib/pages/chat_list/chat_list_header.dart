@@ -81,38 +81,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
         padding: EdgeInsets.only(top: topPadding),
         child: Column(
           children: [
-            SizedBox(
-              height: _titleHeight,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Text(
-                      AppConfig.applicationName,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (progress == 0.0 && !controller.isSearchMode)
-                      IconButton(
-                        onPressed: () {
-                          controller.scrollController.animateTo(
-                            0,
-                            duration: FluffyThemes.animationDuration,
-                            curve: FluffyThemes.animationCurve,
-                          );
-                          controller.isSearchMode = true;
-                          controller.searchFocusNode.requestFocus();
-                        },
-                        icon: const Icon(Icons.search),
-                      ),
-                    ClientChooserButton(controller),
-                  ],
-                ),
-              ),
-            ),
-
+            // Search bar FIRST (hoger op de pagina)
             ClipRect(
               child: Align(
                 alignment: Alignment.topCenter,
@@ -123,6 +92,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                     padding: const EdgeInsets.only(
                       left: 16,
                       right: 16,
+                      top: 8,
                       bottom: 8,
                     ),
                     child: StreamBuilder(
@@ -204,7 +174,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                                       child: Center(
                                         child:
                                             CircularProgressIndicator.adaptive(
-                                              constraints: const .tightFor(
+                                              constraints: const BoxConstraints.tightFor(
                                                 width: 24,
                                                 height: 32,
                                               ),
@@ -264,6 +234,39 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                       },
                     ),
                   ),
+                ),
+              ),
+            ),
+
+            // Title row SECOND (Plusly + avatar)
+            SizedBox(
+              height: _titleHeight,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Text(
+                      AppConfig.applicationName,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (progress == 0.0 && !controller.isSearchMode)
+                      IconButton(
+                        onPressed: () {
+                          controller.scrollController.animateTo(
+                            0,
+                            duration: FluffyThemes.animationDuration,
+                            curve: FluffyThemes.animationCurve,
+                          );
+                          controller.isSearchMode = true;
+                          controller.searchFocusNode.requestFocus();
+                        },
+                        icon: const Icon(Icons.search),
+                      ),
+                    ClientChooserButton(controller),
+                  ],
                 ),
               ),
             ),
