@@ -41,7 +41,8 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   bool isShrink = false;
 
-  static const double _headerHeight = 64.0; // Compacte hoogte
+  // 3 regels: branding (48) + search (52) + filters (44) + padding
+  static const double _headerHeight = 160.0;
 
   _ChatListHeaderDelegate({
     required this.controller,
@@ -75,180 +76,273 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
         padding: EdgeInsets.only(top: topPadding),
         child: SizedBox(
           height: _headerHeight,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                // Titel links
-                Text(
-                  AppConfig.applicationName,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                
-                // Kleinere zoekbalk in het midden
-                Expanded(
-                  child: StreamBuilder(
-                    stream: client.onSyncStatus.stream,
-                    builder: (context, snapshot) {
-                      final status =
-                          client.onSyncStatus.value ??
-                          const SyncStatusUpdate(
-                            SyncStatus.waitingForResponse,
-                          );
-                      final hide =
-                          client.onSync.value != null &&
-                          status.status != SyncStatus.error &&
-                          client.prevBatch != null;
-                      return SizedBox(
-                        height: 36, // Kleinere hoogte
-                        child: TextField(
-                          controller: controller.searchController,
-                          focusNode: controller.searchFocusNode,
-                          textInputAction: TextInputAction.search,
-                          style: const TextStyle(fontSize: 13),
-                          onChanged: (text) => controller.onSearchEnter(
-                            text,
-                            globalSearch: false,
-                          ),
-                          onSubmitted: (text) => controller.onSearchEnter(
-                            text,
-                            globalSearch: globalSearch,
-                          ),
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: theme.colorScheme.secondaryContainer,
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.circular(99),
-                            ),
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            hintText: hide
-                                ? L10n.of(context).searchChatsRooms
-                                : status.calcLocalizedString(context),
-                            hintStyle: TextStyle(
-                              fontSize: 13,
-                              color: status.error != null
-                                  ? theme.colorScheme.error
-                                  : theme.colorScheme.onSecondaryContainer,
-                              fontWeight: FontWeight.normal,
-                            ),
-                            prefixIcon: hide
-                                ? controller.isSearchMode
-                                      ? IconButton(
-                                          tooltip: L10n.of(context).cancel,
-                                          icon: const Icon(
-                                            Icons.close_outlined,
-                                            size: 18,
-                                          ),
-                                          onPressed: controller.cancelSearch,
-                                          color: theme
-                                              .colorScheme
-                                              .onSecondaryContainer,
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(
-                                            minWidth: 32,
-                                            minHeight: 32,
-                                          ),
-                                        )
-                                      : IconButton(
-                                          onPressed: controller.startSearch,
-                                          icon: Icon(
-                                            Icons.search_outlined,
-                                            size: 18,
-                                            color: theme
-                                                .colorScheme
-                                                .onSecondaryContainer,
-                                          ),
-                                          padding: EdgeInsets.zero,
-                                          constraints: const BoxConstraints(
-                                            minWidth: 32,
-                                            minHeight: 32,
-                                          ),
-                                        )
-                                : Container(
-                                    margin: const EdgeInsets.all(6),
-                                    width: 6,
-                                    height: 6,
-                                    child: Center(
-                                      child:
-                                          CircularProgressIndicator.adaptive(
-                                            constraints: const BoxConstraints.tightFor(
-                                              width: 20,
-                                              height: 20,
-                                            ),
-                                            strokeWidth: 2,
-                                            value: status.progress,
-                                            valueColor: status.error != null
-                                                ? AlwaysStoppedAnimation<
-                                                    Color
-                                                  >(theme.colorScheme.error)
-                                                : null,
-                                          ),
-                                    ),
-                                  ),
-                            suffixIcon:
-                                controller.isSearchMode && globalSearch
-                                ? controller.isSearching
-                                      ? const Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            vertical: 6.0,
-                                            horizontal: 8,
-                                          ),
-                                          child: SizedBox.square(
-                                            dimension: 16,
-                                            child:
-                                                CircularProgressIndicator.adaptive(
-                                                  strokeWidth: 2,
-                                                ),
-                                          ),
-                                        )
-                                      : TextButton.icon(
-                                          onPressed: controller.setServer,
-                                          style: TextButton.styleFrom(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(99),
-                                            ),
-                                            textStyle: const TextStyle(
-                                              fontSize: 10,
-                                            ),
-                                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                                            minimumSize: Size.zero,
-                                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                          ),
-                                          icon: const Icon(
-                                            Icons.edit_outlined,
-                                            size: 12,
-                                          ),
-                                          label: Text(
-                                            controller.searchServer ??
-                                                Matrix.of(
-                                                  context,
-                                                ).client.homeserver!.host,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        )
-                                : null,
-                          ),
+          child: Column(
+            children: [
+              // REGEL 1: Branding & Profiel (clean)
+              SizedBox(
+                height: 56,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      // Logo/links
+                      Text(
+                        AppConfig.applicationName,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
                         ),
-                      );
-                    },
+                      ),
+                      const Spacer(),
+                      // Profiel rechts
+                      ClientChooserButton(controller),
+                    ],
                   ),
                 ),
-                
-                const SizedBox(width: 8),
-                
-                // Avatar rechts
-                ClientChooserButton(controller),
-              ],
+              ),
+              
+              // REGEL 2: Zoekbalk (full width, subtiel)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: StreamBuilder(
+                  stream: client.onSyncStatus.stream,
+                  builder: (context, snapshot) {
+                    final status =
+                        client.onSyncStatus.value ??
+                        const SyncStatusUpdate(
+                          SyncStatus.waitingForResponse,
+                        );
+                    final hide =
+                        client.onSync.value != null &&
+                        status.status != SyncStatus.error &&
+                        client.prevBatch != null;
+                    return Container(
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+                          width: 0.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.shadow.withOpacity(0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: controller.searchController,
+                        focusNode: controller.searchFocusNode,
+                        textInputAction: TextInputAction.search,
+                        style: const TextStyle(fontSize: 15),
+                        onChanged: (text) => controller.onSearchEnter(
+                          text,
+                          globalSearch: false,
+                        ),
+                        onSubmitted: (text) => controller.onSearchEnter(
+                          text,
+                          globalSearch: globalSearch,
+                        ),
+                        decoration: InputDecoration(
+                          filled: false,
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 10,
+                          ),
+                          hintText: hide
+                              ? L10n.of(context).searchChatsRooms
+                              : status.calcLocalizedString(context),
+                          hintStyle: TextStyle(
+                            fontSize: 15,
+                            color: status.error != null
+                                ? theme.colorScheme.error
+                                : theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.normal,
+                          ),
+                          prefixIcon: hide
+                              ? controller.isSearchMode
+                                    ? IconButton(
+                                        tooltip: L10n.of(context).cancel,
+                                        icon: Icon(
+                                          Icons.close_outlined,
+                                          size: 20,
+                                          color: theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                        onPressed: controller.cancelSearch,
+                                        padding: EdgeInsets.zero,
+                                        constraints: const BoxConstraints(
+                                          minWidth: 40,
+                                          minHeight: 40,
+                                        ),
+                                      )
+                                    : Icon(
+                                        Icons.search_outlined,
+                                        size: 20,
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                      )
+                              : Container(
+                                  margin: const EdgeInsets.all(10),
+                                  width: 8,
+                                  height: 8,
+                                  child: Center(
+                                    child:
+                                        CircularProgressIndicator.adaptive(
+                                          constraints: const BoxConstraints.tightFor(
+                                            width: 20,
+                                            height: 20,
+                                          ),
+                                          strokeWidth: 2,
+                                          value: status.progress,
+                                          valueColor: status.error != null
+                                              ? AlwaysStoppedAnimation<
+                                                  Color
+                                                >(theme.colorScheme.error)
+                                              : null,
+                                        ),
+                                  ),
+                                ),
+                          suffixIcon:
+                              controller.isSearchMode && globalSearch
+                              ? controller.isSearching
+                                    ? const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                          vertical: 10.0,
+                                          horizontal: 12,
+                                        ),
+                                        child: SizedBox.square(
+                                          dimension: 18,
+                                          child:
+                                              CircularProgressIndicator.adaptive(
+                                                strokeWidth: 2,
+                                              ),
+                                        ),
+                                      )
+                                    : TextButton.icon(
+                                        onPressed: controller.setServer,
+                                        style: TextButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(99),
+                                          ),
+                                          textStyle: const TextStyle(
+                                            fontSize: 11,
+                                          ),
+                                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                                          minimumSize: Size.zero,
+                                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        ),
+                                        icon: const Icon(
+                                          Icons.edit_outlined,
+                                          size: 14,
+                                        ),
+                                        label: Text(
+                                          controller.searchServer ??
+                                              Matrix.of(
+                                                context,
+                                              ).client.homeserver!.host,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      )
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              // REGEL 3: Platform Filters (compacte pillen)
+              SizedBox(
+                height: 36,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    _FilterPill(
+                      label: 'All',
+                      isActive: controller.activeFilter == ActiveFilter.allChats,
+                      onTap: () => controller.activeFilter = ActiveFilter.allChats,
+                    ),
+                    _FilterPill(
+                      label: 'WhatsApp',
+                      isActive: false,
+                      onTap: () {},
+                    ),
+                    _FilterPill(
+                      label: 'Telegram',
+                      isActive: false,
+                      onTap: () {},
+                    ),
+                    _FilterPill(
+                      label: 'Signal',
+                      isActive: false,
+                      onTap: () {},
+                    ),
+                    _FilterPill(
+                      label: 'Groups',
+                      isActive: controller.activeFilter == ActiveFilter.groups,
+                      onTap: () => controller.activeFilter = ActiveFilter.groups,
+                    ),
+                    _FilterPill(
+                      label: 'People',
+                      isActive: controller.activeFilter == ActiveFilter.people,
+                      onTap: () => controller.activeFilter = ActiveFilter.people,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Compacte filter pill widget
+class _FilterPill extends StatelessWidget {
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _FilterPill({
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Material(
+        color: isActive 
+            ? theme.colorScheme.primaryContainer 
+            : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                color: isActive 
+                    ? theme.colorScheme.onPrimaryContainer 
+                    : theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ),
