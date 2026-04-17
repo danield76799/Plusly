@@ -282,42 +282,53 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
               
               const SizedBox(height: 12),
               
-              // REGEL 3: Platform Filters (compacte pillen)
+              // REGEL 3: Platform Filters (met officiële logo's)
               SizedBox(
-                height: 36,
+                height: 40,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   children: [
-                    _FilterPill(
+                    _FilterPillWithIcon(
                       label: 'All',
+                      icon: Icons.apps,
                       isActive: controller.activeFilter == ActiveFilter.allChats,
                       onTap: () => controller.activeFilter = ActiveFilter.allChats,
                     ),
-                    _FilterPill(
+                    _FilterPillWithIcon(
                       label: 'WhatsApp',
+                      icon: Icons.chat_bubble, // WhatsApp icon placeholder
+                      color: const Color(0xFF25D366),
                       isActive: false,
                       onTap: () {},
                     ),
-                    _FilterPill(
+                    _FilterPillWithIcon(
                       label: 'Telegram',
+                      icon: Icons.send, // Telegram icon placeholder
+                      color: const Color(0xFF0088cc),
                       isActive: false,
                       onTap: () {},
                     ),
-                    _FilterPill(
+                    _FilterPillWithIcon(
+                      label: 'Discord',
+                      icon: Icons.videogame_asset, // Discord icon placeholder
+                      color: const Color(0xFF5865F2),
+                      isActive: false,
+                      onTap: () {},
+                    ),
+                    _FilterPillWithIcon(
                       label: 'Signal',
+                      icon: Icons.security, // Signal icon placeholder
+                      color: const Color(0xFF3A76F0),
                       isActive: false,
                       onTap: () {},
                     ),
-                    _FilterPill(
-                      label: 'Groups',
-                      isActive: controller.activeFilter == ActiveFilter.groups,
-                      onTap: () => controller.activeFilter = ActiveFilter.groups,
-                    ),
-                    _FilterPill(
-                      label: 'People',
-                      isActive: controller.activeFilter == ActiveFilter.people,
-                      onTap: () => controller.activeFilter = ActiveFilter.people,
+                    _FilterPillWithIcon(
+                      label: 'Matrix',
+                      icon: Icons.grid_view, // Matrix icon
+                      color: const Color(0xFF0DBD8B),
+                      isActive: false,
+                      onTap: () {},
                     ),
                   ],
                 ),
@@ -330,14 +341,18 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-// Compacte filter pill widget
-class _FilterPill extends StatelessWidget {
+// Filter pill met icon
+class _FilterPillWithIcon extends StatelessWidget {
   final String label;
+  final IconData icon;
+  final Color? color;
   final bool isActive;
   final VoidCallback onTap;
 
-  const _FilterPill({
+  const _FilterPillWithIcon({
     required this.label,
+    required this.icon,
+    this.color,
     required this.isActive,
     required this.onTap,
   });
@@ -345,27 +360,39 @@ class _FilterPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final iconColor = color ?? theme.colorScheme.primary;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Material(
         color: isActive 
-            ? theme.colorScheme.primaryContainer 
+            ? iconColor.withOpacity(0.15)
             : theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
         borderRadius: BorderRadius.circular(20),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(20),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-                color: isActive 
-                    ? theme.colorScheme.onPrimaryContainer 
-                    : theme.colorScheme.onSurfaceVariant,
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 16,
+                  color: isActive ? iconColor : theme.colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                    color: isActive 
+                        ? iconColor 
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
