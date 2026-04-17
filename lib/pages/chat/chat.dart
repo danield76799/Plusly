@@ -378,13 +378,15 @@ class ChatController extends State<ChatPageWithRoom>
         .toList();
     if (files.isEmpty) return;
     if (!mounted) return;
+    final currentContext = context;
+    if (currentContext == null) return;
     showAdaptiveDialog(
-      context: context,
+      context: currentContext,
       builder: (c) => SendFileDialog(
         files: files,
         room: room,
         thread: thread,
-        outerContext: context,
+        outerContext: currentContext,
         replyEvent: replyEvent,
       ),
     );
