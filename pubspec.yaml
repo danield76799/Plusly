@@ -152,13 +152,13 @@ flutter_launcher_icons:
 flutter_native_splash:
   color: "#49AFC2"
   color_dark: "#49AFC2"
-  image: "assets/logo.png"
-  image_dark: "assets/logo.png"
+  image: "assets/plusly_icon_white.svg"
+  image_dark: "assets/plusly_icon_white.svg"
   android_12:
     color: "#49AFC2"
     color_dark: "#49AFC2"
-    image: "assets/logo.png"
-    image_dark: "assets/logo.png"
+    image: "assets/plusly_icon_white.svg"
+    image_dark: "assets/plusly_icon_white.svg"
   fullscreen: true
 
 flutter:
