@@ -141,6 +141,10 @@ class ChatListController extends State<ChatList>
         return;
       }
       context.go('/rooms/${room.id}');
+      // Force badge refresh after opening chat
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
       return;
     }
 
