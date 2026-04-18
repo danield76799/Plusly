@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
+import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
@@ -87,34 +89,10 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    // Logo + App name
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Plusly logo (turquoise circle with plus)
-                        Container(
-                          width: 32,
-                          height: 32,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF49AFC2),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          AppConfig.applicationName,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    // Plusly logo SVG
+                    SvgPicture.asset(
+                      'assets/plusly_header.svg',
+                      height: 40,
                     ),
                     const Spacer(),
                     if (progress == 0.0 && !controller.isSearchMode)
