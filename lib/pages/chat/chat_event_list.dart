@@ -116,9 +116,8 @@ class ChatEventList extends StatelessWidget {
           : ScrollViewKeyboardDismissBehavior.manual,
       slivers: [
         SliverPadding(
-          padding: EdgeInsets.only(
-            left: horizontalPadding,
-            right: horizontalPadding,
+          padding: .symmetric(
+            horizontal: horizontalPadding,
           ),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
