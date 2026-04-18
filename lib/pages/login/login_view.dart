@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/widgets/layouts/login_scaffold.dart';
@@ -35,7 +36,11 @@ class LoginView extends StatelessWidget {
               children: <Widget>[
                 Hero(
                   tag: 'info-logo',
-                  child: Image.asset('assets/logo.png'),
+                  child: SvgPicture.asset(
+                    'assets/plusly_icon_white.svg',
+                    height: 120,
+                    colorFilter: const ColorFilter.mode(Color(0xFF49AFC2), BlendMode.srcIn),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Padding(
@@ -52,11 +57,14 @@ class LoginView extends StatelessWidget {
                         ? null
                         : [AutofillHints.username],
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.account_box_outlined),
+                      prefixIcon: const Icon(Icons.account_box_outlined, color: Color(0xFF49AFC2)),
                       errorText: controller.usernameError,
                       errorStyle: const TextStyle(color: Colors.orange),
                       hintText: '@username:domain',
                       labelText: L10n.of(context).matrixId,
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF49AFC2)),
+                      ),
                     ),
                   ),
                 ),
@@ -74,7 +82,7 @@ class LoginView extends StatelessWidget {
                     obscureText: !controller.showPassword,
                     onSubmitted: (_) => controller.login(),
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.lock_outlined),
+                      prefixIcon: const Icon(Icons.lock_outlined, color: Color(0xFF49AFC2)),
                       errorText: controller.passwordError,
                       errorStyle: const TextStyle(color: Colors.orange),
                       suffixIcon: IconButton(
@@ -83,11 +91,14 @@ class LoginView extends StatelessWidget {
                           controller.showPassword
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: Colors.black,
+                          color: const Color(0xFF49AFC2),
                         ),
                       ),
                       hintText: '******',
                       labelText: L10n.of(context).password,
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF49AFC2)),
+                      ),
                     ),
                   ),
                 ),
@@ -96,8 +107,8 @@ class LoginView extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.primary,
-                      foregroundColor: theme.colorScheme.onPrimary,
+                      backgroundColor: const Color(0xFF49AFC2),
+                      foregroundColor: Colors.white,
                     ),
                     onPressed: controller.loading ? null : controller.login,
                     child: controller.loading
@@ -114,7 +125,7 @@ class LoginView extends StatelessWidget {
                           ? () {}
                           : controller.passwordForgotten,
                       style: TextButton.styleFrom(
-                        foregroundColor: theme.colorScheme.error,
+                        foregroundColor: const Color(0xFF49AFC2),
                       ),
                       child: Text(L10n.of(context).passwordForgotten),
                     ),
