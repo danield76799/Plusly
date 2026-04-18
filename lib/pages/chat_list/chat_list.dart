@@ -166,7 +166,19 @@ class ChatListController extends State<ChatList>
 
   Set<String> allBridgeTypes = {};
   Set<String> visibleBridgeTypes = {};
-  Map<String, int> unreadBridgeCounts = {};  // Ongelezen counts per bridge type
+  
+  // Real-time getter voor ongelezen counts - wordt altijd vers berekend
+  Map<String, int> get unreadBridgeCounts {
+    final client = Matrix.of(context).client;
+    final counts = <String, int>{};
+    for (final room in client.rooms) {
+      if (!room.isSpace && room.isUnreadOrInvited) {
+        final bridgeType = isBridgeRoom(room) ? (getBridgeType(room) ?? 'other') : 'matrix';
+        counts[bridgeType] = (counts[bridgeType] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }
 
   void _initVisibleBridgeTypes() {
     syncBridgeTypes();
@@ -190,14 +202,8 @@ class ChatListController extends State<ChatList>
     };
     allBridgeTypes = detectedTypes;
 
-    // Bereken ongelezen counts per bridge type
-    unreadBridgeCounts = {};
-    for (final room in client.rooms) {
-      if (!room.isSpace && room.isUnreadOrInvited) {
-        final bridgeType = isBridgeRoom(room) ? (getBridgeType(room) ?? 'other') : 'matrix';
-        unreadBridgeCounts[bridgeType] = (unreadBridgeCounts[bridgeType] ?? 0) + 1;
-      }
-    }
+    // Bereken ongelezen counts per bridge type - wordt nu real-time via getter
+    // unreadBridgeCounts is een getter die altijd vers berekent
   }
 
   bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
