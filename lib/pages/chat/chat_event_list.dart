@@ -21,6 +21,8 @@ class ChatEventList extends StatelessWidget {
     this.showThreadRoots = false,
   });
 
+  static const Key _centerKey = ValueKey('center-sliver');
+
   @override
   Widget build(BuildContext context) {
     final timeline = controller.timeline;
@@ -46,23 +48,91 @@ class ChatEventList extends StatelessWidget {
         ? events.indexWhere((event) => event.eventId == latestReadEvent)
         : -1;
 
+    final newEventCount = controller.newEventCount.clamp(0, events.length);
+    final centerEventCount = events.length - newEventCount;
+
+    // Builds a Message widget for the event at [eventIndex] in filteredEvents.
+    Widget buildEventTile(int eventIndex) {
+      final event = events[eventIndex];
+      final animateIn =
+          eventIndex == 0 &&
+          (DateTime.now().millisecondsSinceEpoch -
+                  event.originServerTs.millisecondsSinceEpoch) <
+              1000 &&
+          controller.firstUpdateReceived;
+
+      final thread = threads.containsKey(event.eventId)
+          ? threads[event.eventId]
+          : null;
+
+      return AutoScrollTag(
+        key: ValueKey(event.transactionId ?? event.eventId),
+        index: eventIndex,
+        controller: controller.scrollController,
+        child: RepaintBoundary(
+          child: Message(
+            event,
+            animateIn: animateIn,
+            thread: thread,
+            singleSelected:
+                controller.selectedEvents.length == 1 &&
+                controller.selectedEvents.first.eventId == event.eventId,
+            onSwipe: controller.replyAction,
+            hasBeenRead:
+                latestReadEventIndex != -1 &&
+                latestReadEventIndex <= eventIndex,
+            onInfoTab: controller.showEventInfo,
+            onMention: () => controller.sendController.text +=
+                '${event.senderFromMemoryOrFallback.mention} ',
+            highlightMarker: controller.scrollToEventIdMarker == event.eventId,
+            onSelect: controller.onSelectMessage,
+            scrollToEventId: controller.scrollToEventId,
+            longPressSelect: controller.selectedEvents.isNotEmpty,
+            selected: controller.selectedEvents.any(
+              (e) => e.eventId == event.eventId,
+            ),
+            timeline: timeline,
+            displayReadMarker:
+                eventIndex > 0 && controller.readMarkerEventId == event.eventId,
+            nextEvent: eventIndex + 1 < events.length
+                ? events[eventIndex + 1]
+                : null,
+            previousEvent: eventIndex > 0 ? events[eventIndex - 1] : null,
+            wallpaperMode: hasWallpaper,
+            colors: colors,
+            gradient: AppSettings.enableGradient.value,
+          ),
+        ),
+      );
+    }
+
     return CustomScrollView(
       controller: controller.scrollController,
       reverse: true,
+      center: _centerKey,
       keyboardDismissBehavior: PlatformInfos.isIOS
           ? ScrollViewKeyboardDismissBehavior.onDrag
           : ScrollViewKeyboardDismissBehavior.manual,
       slivers: [
-        // Dynamic bottom spacer that adjusts to the input bar height.
-        // Because the list is reverse: true, this first sliver sits at
-        // the visual bottom (just above the floating input bar).
-        SliverToBoxAdapter(
-          child: ValueListenableBuilder<double>(
-            valueListenable: controller.inputBarHeight,
-            builder: (context, height, _) => SizedBox(height: height + 8),
+        SliverPadding(
+          padding: EdgeInsets.only(
+            left: horizontalPadding,
+            right: horizontalPadding,
+          ),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int i) {
+                return buildEventTile(i);
+              },
+              childCount: newEventCount,
+              findChildIndexCallback:
+                  controller.findNewEventsChildIndexCallback,
+            ),
           ),
         ),
+
         SliverPadding(
+          key: _centerKey,
           padding: EdgeInsets.only(
             top: AppSettings.enableChatFrostedGlass.value
                 ? MediaQuery.of(context).padding.top + 16
@@ -74,6 +144,14 @@ class ChatEventList extends StatelessWidget {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int i) {
                 if (i == 0) {
+                  return ValueListenableBuilder<double>(
+                    valueListenable: controller.inputBarHeight,
+                    builder: (context, height, _) =>
+                        SizedBox(height: height + 8),
+                  );
+                }
+
+                if (i == 1) {
                   if (timeline.canRequestFuture) {
                     return Center(
                       child: ElevatedButton(
@@ -97,7 +175,7 @@ class ChatEventList extends StatelessWidget {
                   );
                 }
 
-                if (i == events.length + 1) {
+                if (i == centerEventCount + 2) {
                   if (timeline.canRequestHistory) {
                     WidgetsBinding.instance.addPostFrameCallback(
                       controller.requestHistory,
@@ -127,67 +205,14 @@ class ChatEventList extends StatelessWidget {
                   }
                   return const SizedBox.shrink();
                 }
-                i--;
 
-                final event = events[i];
-                final animateIn =
-                    i == 0 &&
-                    (DateTime.now().millisecondsSinceEpoch -
-                            event.originServerTs.millisecondsSinceEpoch) <
-                        1000 &&
-                    controller.firstUpdateReceived;
-
-                final thread = threads.containsKey(event.eventId)
-                    ? threads[event.eventId]
-                    : null;
-
-                return AutoScrollTag(
-                  key: ValueKey(event.transactionId ?? event.eventId),
-                  index: i,
-                  controller: controller.scrollController,
-                  child: RepaintBoundary(
-                    child: Message(
-                      event,
-                      // key: ValueKey(event.eventId),
-                      animateIn: animateIn,
-                      thread: thread,
-                      singleSelected:
-                          controller.selectedEvents.length == 1 &&
-                          controller.selectedEvents.first.eventId ==
-                              event.eventId,
-                      onSwipe: controller.replyAction,
-                      hasBeenRead:
-                          latestReadEventIndex != -1 &&
-                          latestReadEventIndex <= i,
-                      // onQuote: () {
-                      //   controller.replyAction(replyTo: event);
-                      //   controller.sendController.text = "> ";
-                      // },
-                      onInfoTab: controller.showEventInfo,
-                      onMention: () => controller.sendController.text +=
-                          '${event.senderFromMemoryOrFallback.mention} ',
-                      highlightMarker:
-                          controller.scrollToEventIdMarker == event.eventId,
-                      onSelect: controller.onSelectMessage,
-                      scrollToEventId: controller.scrollToEventId,
-                      longPressSelect: controller.selectedEvents.isNotEmpty,
-                      selected: controller.selectedEvents.any(
-                        (e) => e.eventId == event.eventId,
-                      ),
-                      timeline: timeline,
-                      displayReadMarker:
-                          i > 0 &&
-                          controller.readMarkerEventId == event.eventId,
-                      nextEvent: i + 1 < events.length ? events[i + 1] : null,
-                      previousEvent: i > 0 ? events[i - 1] : null,
-                      wallpaperMode: hasWallpaper,
-                      colors: colors,
-                      gradient: AppSettings.enableGradient.value,
-                    ),
-                  ),
-                );
+                // i in [1..centerEventCount]: event tiles.
+                // Maps to filteredEvents[newEventCount + (i - 1)].
+                final eventIndex = newEventCount + (i - 1);
+                return buildEventTile(eventIndex);
               },
-              childCount: events.length + 2,
+              // typing + centerEventCount events + history button
+              childCount: centerEventCount + 3,
               findChildIndexCallback: controller.findChildIndexCallback,
             ),
           ),

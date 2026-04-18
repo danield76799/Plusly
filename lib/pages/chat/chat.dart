@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' hide Category;
@@ -20,7 +19,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/anchored_scroll_controller.dart';
 import 'package:extera_next/pages/chat/chat_view.dart';
 import 'package:extera_next/pages/chat/event_info_dialog.dart';
 import 'package:extera_next/pages/chat/message_context_menu.dart';
@@ -136,8 +134,7 @@ class ChatController extends State<ChatPageWithRoom>
   String get roomId => widget.room.id;
   String? get threadRootEventId => widget.thread?.rootEvent.eventId;
 
-  final AnchoredAutoScrollController scrollController =
-      AnchoredAutoScrollController();
+  final AutoScrollController scrollController = AutoScrollController();
 
   /// Tracks the actual rendered height of the floating input bar so the
   /// message list can reserve the correct amount of bottom padding.
@@ -199,6 +196,21 @@ class ChatController extends State<ChatPageWithRoom>
       _scrolledUp.value || timeline?.allowNewEvent == false;
 
   ValueNotifier<bool> get scrolledUpNotifier => _scrolledUp;
+
+  /// The event ID of the newest visible event when the user scrolled up.
+  /// Used as the split point between the pre-center sliver (new events) and
+  /// the center sliver (existing events). Events before this anchor in
+  /// [filteredEvents] go into the pre-center sliver.
+  String? _scrollAnchorEventId;
+
+  /// Number of new events that arrived while the user was scrolled up,
+  /// derived from the anchor position in [filteredEvents].
+  int get newEventCount {
+    if (_scrollAnchorEventId == null) return 0;
+    final index = eventsKeyMap[_scrollAnchorEventId];
+    if (index == null) return 0;
+    return index;
+  }
 
   bool get selectMode => selectedEvents.isNotEmpty;
 
@@ -297,18 +309,9 @@ class ChatController extends State<ChatPageWithRoom>
 
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
-  bool _requestingHistory = false;
-
   void requestHistory([_]) async {
-    if (_requestingHistory) return;
-    if (timeline?.isRequestingHistory == true) return;
-    _requestingHistory = true;
     Logs().v('Requesting history...');
-    try {
-      await timeline?.requestHistory(historyCount: _loadHistoryCount);
-    } finally {
-      _requestingHistory = false;
-    }
+    await timeline?.requestHistory(historyCount: _loadHistoryCount);
   }
 
   bool _requestingFuture = false;
@@ -319,9 +322,10 @@ class ChatController extends State<ChatPageWithRoom>
     if (_requestingFuture) return;
     _requestingFuture = true;
     Logs().v('Requesting future...');
-    final mostRecentEvent = filteredEvents.firstOrNull;
+    final visibleEvents = timeline.events.filterByVisibleInGui();
+    final mostRecentEvent = visibleEvents.firstOrNull;
 
-    scrollController.shouldAnchor = true;
+    final anchorEventId = mostRecentEvent?.eventId;
 
     await timeline.requestFuture(historyCount: _loadHistoryCount);
 
@@ -329,11 +333,49 @@ class ChatController extends State<ChatPageWithRoom>
       _requestingFuture = false;
       return;
     }
-    _requestingFuture = false;
+
+    // Move the scroll anchor forward so that newly loaded future events
+    // are included in the center sliver (not the pre‑center sliver).
+    // The scrollToIndex call below handles visual scroll anchoring.
+    if (_scrollAnchorEventId != null && filteredEvents.isNotEmpty) {
+      _scrollAnchorEventId = filteredEvents.first.eventId;
+    }
+    // If the timeline is now live (caught up to present), clear the anchor
+    // and jump to the bottom — the user was actively loading to get to the
+    // latest messages.
+    if (timeline.allowNewEvent) {
+      _scrollAnchorEventId = null;
+      _scrolledUp.value = false;
+      _cachedFilteredEvents = null;
+      _cachedEventsKeyMap = null;
+      setState(() {});
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && scrollController.hasClients) {
+          scrollController.jumpTo(0);
+        }
+      });
+      setReadMarker();
+      _requestingFuture = false;
+      return;
+    }
+
+    if (anchorEventId != null && scrollController.hasClients) {
+      final newVisibleEvents = timeline.events.filterByVisibleInGui();
+      final anchorIndex = newVisibleEvents.indexWhere(
+        (e) => e.eventId == anchorEventId,
+      );
+      if (anchorIndex > 0) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !scrollController.hasClients) return;
+          scrollController.scrollToIndex(anchorIndex, preferPosition: .begin);
+        });
+      }
+    }
 
     if (mostRecentEvent != null) {
       setReadMarker(eventId: mostRecentEvent.eventId);
     }
+    _requestingFuture = false;
   }
 
   void _updateScrollController() {
@@ -344,8 +386,19 @@ class ChatController extends State<ChatPageWithRoom>
     if (timeline?.allowNewEvent == false ||
         scrollController.position.pixels > 0 && !_scrolledUp.value) {
       _scrolledUp.value = true;
+      // Capture the newest visible event as the scroll anchor when the user
+      // manually scrolls up in a live timeline. Everything before this anchor
+      // in filteredEvents will be rendered in the pre-center sliver.
+      // Do NOT set the anchor for fragmented timelines (allowNewEvent == false)
+      // — requestFuture handles its own scroll anchoring in that case.
+      if (_scrollAnchorEventId == null &&
+          scrollController.position.pixels > 0 &&
+          filteredEvents.isNotEmpty) {
+        _scrollAnchorEventId = filteredEvents.first.eventId;
+      }
     } else if (scrollController.position.pixels <= 0 && _scrolledUp.value) {
       _scrolledUp.value = false;
+      _scrollAnchorEventId = null;
       setReadMarker();
     }
   }
@@ -383,30 +436,27 @@ class ChatController extends State<ChatPageWithRoom>
         final value = item.value;
 
         if (item.attribution != null) {
-          final originalBody = value['body'] as String?;
-          final originalFormattedBody = value['formatted_body'] as String?;
-
-          if (originalBody is String) {
-            if (['m.text', 'm.notice'].contains(value['msgtype'] as String) ||
-                value['filename'] is String) {
-              value['body'] = "${item.attribution}\n$originalBody";
-            } else {
-              value['filename'] = originalBody;
+          if (value['body'] is String) {
+            if ((['m.text', 'm.notice'].contains(value['msgtype'] as String) ||
+                value['filename'] is String)) {
+              value['body'] = "${item.attribution}\n${value['body']}";
+            } else if (![
+                  'm.text',
+                  'm.notice',
+                ].contains(value['msgtype'] as String) &&
+                value['filename'] is! String) {
+              value['filename'] = value['body'] as String;
               value['body'] = item.attribution;
             }
           }
-
           if (value['format'] == 'org.matrix.custom.html' &&
-              originalFormattedBody is String) {
+              value['formatted_body'] is String) {
             value['formatted_body'] =
-                "<strong>${item.attribution}</strong><blockquote>$originalFormattedBody</blockquote>";
-          } else if (originalBody is String) {
-            value['formatted_body'] =
-                "<strong>${item.attribution}</strong><blockquote>${HtmlEscape().convert(originalBody)}</blockquote>";
-            value['format'] = 'org.matrix.custom.html';
+                "<strong>${item.attribution}</strong><blockquote>${value['formatted_body']}</blockquote>";
           }
           value['xyz.extera.forward'] = {'attribution': item.attribution};
         }
+
         room.sendEvent(value);
       }
     }
@@ -477,9 +527,7 @@ class ChatController extends State<ChatPageWithRoom>
                 .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
                 .indexWhere((e) => e.eventId == readMarkerEventId);
 
-      if (timeline != null &&
-          readMarkerEventId.isNotEmpty &&
-          readMarkerEventIndex == -1) {
+      if (readMarkerEventId.isNotEmpty && readMarkerEventIndex == -1) {
         await timeline?.requestHistory(historyCount: _loadHistoryCount);
         readMarkerEventIndex = timeline!.events
             .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
@@ -519,23 +567,8 @@ class ChatController extends State<ChatPageWithRoom>
     if (!mounted) return;
     setReadMarker();
     updateThreads();
-
-    final wasScrolledUp = _scrolledUp.value;
-    final oldNewestEventId = _cachedFilteredEvents?.firstOrNull?.eventId;
-
     _cachedFilteredEvents = null;
     _cachedEventsKeyMap = null;
-
-    if (wasScrolledUp &&
-        !_requestingFuture &&
-        oldNewestEventId != null &&
-        scrollController.hasClients) {
-      final newNewestEventId = filteredEvents.firstOrNull?.eventId;
-      if (newNewestEventId != oldNewestEventId) {
-        scrollController.shouldAnchor = true;
-      }
-    }
-
     setState(() {
       firstUpdateReceived = true;
     });
@@ -569,12 +602,16 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await room.getTimeline(
         onUpdate: updateView,
+        onNewEvent: _onNewEvent,
         eventContextId: eventContextId,
       );
     } catch (e, s) {
       Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
       if (!mounted) return;
-      timeline = await room.getTimeline(onUpdate: updateView);
+      timeline = await room.getTimeline(
+        onUpdate: updateView,
+        onNewEvent: _onNewEvent,
+      );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
         _showScrollUpMaterialBanner(eventContextId!);
@@ -592,6 +629,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
+        onNewEvent: _onNewEvent,
         eventContextId: eventContextId,
       );
       Logs().v("Thread timeline loaded");
@@ -602,7 +640,10 @@ class ChatController extends State<ChatPageWithRoom>
         s,
       );
       if (!mounted) return;
-      timeline = await thread!.getTimeline(onUpdate: updateView);
+      timeline = await thread!.getTimeline(
+        onUpdate: updateView,
+        onNewEvent: _onNewEvent,
+      );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
         _showScrollUpMaterialBanner(eventContextId!);
@@ -613,7 +654,14 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
+  void _onNewEvent() {
+    // The scroll anchor (_scrollAnchorEventId) is already set when the user
+    // scrolled up. New events will naturally appear before the anchor in
+    // filteredEvents, so newEventCount increases automatically.
+  }
+
   Future<void> _getTimeline({String? eventContextId}) async {
+    _scrollAnchorEventId = null;
     await Matrix.of(context).client.roomsLoading;
     await Matrix.of(context).client.accountDataLoading;
     if (eventContextId != null &&
@@ -1406,7 +1454,15 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void scrollToEventId(String eventId, {bool highlightEvent = true}) async {
-    final eventIndex = eventsKeyMap[eventId] ?? -1;
+    final foundEvent = timeline!.events.firstWhereOrNull(
+      (event) => event.eventId == eventId,
+    );
+
+    final eventIndex = foundEvent == null
+        ? -1
+        : timeline!.events
+              .filterByVisibleInGui(exceptionEventId: eventId)
+              .indexOf(foundEvent);
 
     if (eventIndex == -1) {
       setState(() {
@@ -1420,8 +1476,6 @@ class ChatController extends State<ChatPageWithRoom>
         );
       });
       await loadTimelineFuture;
-      _cachedFilteredEvents = null;
-      _cachedEventsKeyMap = null;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         scrollToEventId(eventId);
       });
@@ -1433,7 +1487,7 @@ class ChatController extends State<ChatPageWithRoom>
       });
     }
     await scrollController.scrollToIndex(
-      eventIndex + 1,
+      eventIndex,
       duration: FluffyThemes.animationDuration,
       preferPosition: AutoScrollPosition.middle,
     );
@@ -1441,6 +1495,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void scrollDown() async {
+    _scrollAnchorEventId = null;
     if (!timeline!.allowNewEvent) {
       setState(() {
         timeline = null;
@@ -1453,8 +1508,6 @@ class ChatController extends State<ChatPageWithRoom>
         );
       });
       await loadTimelineFuture;
-      _cachedFilteredEvents = null;
-      _cachedEventsKeyMap = null;
     }
     scrollController.jumpTo(0);
   }
@@ -1731,20 +1784,23 @@ class ChatController extends State<ChatPageWithRoom>
 
   int? findChildIndexCallback(Key key) {
     // this method is called very often. As such, it has to be optimized for speed.
-    if (key is! ValueKey) {
-      return null;
-    }
+    if (key is! ValueKey) return null;
     final eventId = key.value;
-    if (eventId is! String) {
-      return null;
-    }
-    // first fetch the last index the event was at
+    if (eventId is! String) return null;
     final index = eventsKeyMap[eventId];
-    if (index == null) {
-      return null;
-    }
-    // we need to +1 as 0 is the typing thing at the bottom
-    return index + 1;
+    final nec = newEventCount;
+    if (index == null || index < nec) return null;
+    // +2 -> child 0 = spacer, 1 = typing indicator
+    return (index - nec) + 2;
+  }
+
+  int? findNewEventsChildIndexCallback(Key key) {
+    if (key is! ValueKey) return null;
+    final eventId = key.value;
+    if (eventId is! String) return null;
+    final index = eventsKeyMap[eventId];
+    if (index == null || index >= newEventCount) return null;
+    return index;
   }
 
   void onInputBarSubmitted(_) {
