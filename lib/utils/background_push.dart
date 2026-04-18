@@ -157,23 +157,26 @@ class BackgroundPush {
   }
 
   factory BackgroundPush.clientOnly(Client client) {
-    return _instance ??= BackgroundPush._([client]);
+    // Always return existing instance if available
+    if (_instance != null) {
+      return _instance!;
+    }
+    return _instance = BackgroundPush._([client]);
   }
 
   factory BackgroundPush(
     MatrixState matrix, {
     final void Function(String errorMsg, {Uri? link})? onFcmError,
   }) {
-    // Prevent duplicate instances
+    // Always return existing instance if available
     if (_instance != null) {
       _instance!.matrix = matrix;
       _instance!.onFcmError = onFcmError;
       return _instance!;
     }
-    final instance = BackgroundPush.clientOnly(matrix.client);
-    instance.matrix = matrix;
-    instance.onFcmError = onFcmError;
-    return instance;
+    return _instance = BackgroundPush._([matrix.client])
+      ..matrix = matrix
+      ..onFcmError = onFcmError;
   }
 
   Future<void> cancelNotification(Client client, String roomId) async {
