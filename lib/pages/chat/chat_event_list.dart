@@ -53,6 +53,7 @@ class ChatEventList extends StatelessWidget {
 
     // Builds a Message widget for the event at [eventIndex] in filteredEvents.
     Widget buildEventTile(int eventIndex) {
+      print('Building event $eventIndex ${events[eventIndex].eventId}');
       final event = events[eventIndex];
       final animateIn =
           eventIndex == 0 &&
@@ -208,7 +209,7 @@ class ChatEventList extends StatelessWidget {
 
                 // i in [1..centerEventCount]: event tiles.
                 // Maps to filteredEvents[newEventCount + (i - 1)].
-                final eventIndex = newEventCount + (i - 1);
+                final eventIndex = newEventCount + (i - 2);
                 return buildEventTile(eventIndex);
               },
               // typing + centerEventCount events + history button
