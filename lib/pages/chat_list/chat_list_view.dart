@@ -94,8 +94,9 @@ class ChatListView extends StatelessWidget {
                               child: FloatingActionButton.extended(
                                 onPressed: () =>
                                     context.go('/rooms/newprivatechat'),
-                                icon: const Icon(Icons.chat_outlined),
-                                label: Text(L10n.of(context).newChat),
+                                icon: const Icon(Icons.chat_outlined, color: Colors.white),
+                                label: Text(L10n.of(context).newChat, style: const TextStyle(color: Colors.white)),
+                                backgroundColor: const Color(0xFF49AFC2),
                               ),
                             ),
 
@@ -119,8 +120,9 @@ class ChatListView extends StatelessWidget {
                         AppSettings.useLegacyNavBar.value
                     ? FloatingActionButton.extended(
                         onPressed: () => context.go('/rooms/newprivatechat'),
-                        icon: const Icon(Icons.chat_outlined),
-                        label: Text(L10n.of(context).newChat),
+                        icon: const Icon(Icons.chat_outlined, color: Colors.white),
+                        label: Text(L10n.of(context).newChat, style: const TextStyle(color: Colors.white)),
+                        backgroundColor: const Color(0xFF49AFC2),
                       )
                     : const SizedBox.shrink(),
                 floatingActionButtonLocation:
