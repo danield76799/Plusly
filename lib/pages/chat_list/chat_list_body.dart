@@ -213,6 +213,7 @@ class ChatListViewBody extends StatelessWidget {
                       BridgeFilterBar(
                         allBridgeTypes: controller.allBridgeTypes,
                         visibleBridgeTypes: controller.visibleBridgeTypes,
+                        unreadCounts: controller.unreadBridgeCounts,
                         onChanged: (newTypes) {
                           controller.setState(() {
                             controller.visibleBridgeTypes = newTypes;
