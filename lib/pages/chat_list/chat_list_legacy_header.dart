@@ -32,105 +32,116 @@ class ChatListLegacyHeader extends StatelessWidget
       scrolledUnderElevation: 0,
       backgroundColor: Colors.transparent,
       automaticallyImplyLeading: false,
-      title: StreamBuilder(
-        stream: client.onSyncStatus.stream,
-        builder: (context, snapshot) {
-          final status =
-              client.onSyncStatus.value ??
-              const SyncStatusUpdate(SyncStatus.waitingForResponse);
-          final hide =
-              client.onSync.value != null &&
-              status.status != SyncStatus.error &&
-              client.prevBatch != null;
-          return TextField(
-            controller: controller.searchController,
-            focusNode: controller.searchFocusNode,
-            textInputAction: TextInputAction.search,
-            onChanged: (text) =>
-                controller.onSearchEnter(text, globalSearch: false),
-            onSubmitted: (text) =>
-                controller.onSearchEnter(text, globalSearch: globalSearch),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: theme.colorScheme.secondaryContainer,
-              border: OutlineInputBorder(
-                borderSide: BorderSide.none,
-                borderRadius: BorderRadius.circular(99),
-              ),
-              contentPadding: EdgeInsets.zero,
-              hintText: hide
-                  ? L10n.of(context).searchChatsRooms
-                  : status.calcLocalizedString(context),
-              hintStyle: TextStyle(
-                color: status.error != null
-                    ? theme.colorScheme.error
-                    : theme.colorScheme.onSecondaryContainer,
-                fontWeight: FontWeight.normal,
-              ),
-              prefixIcon: hide
-                  ? controller.isSearchMode
-                        ? IconButton(
-                            tooltip: L10n.of(context).cancel,
-                            icon: const Icon(Icons.close_outlined),
-                            onPressed: controller.cancelSearch,
-                            color: theme.colorScheme.onSecondaryContainer,
-                          )
-                        : IconButton(
-                            onPressed: controller.startSearch,
-                            icon: Icon(
-                              Icons.search_outlined,
-                              color: theme.colorScheme.onSecondaryContainer,
-                            ),
-                          )
-                  : Container(
-                      margin: const EdgeInsets.all(12),
-                      width: 8,
-                      height: 8,
-                      child: Center(
-                        child: CircularProgressIndicator.adaptive(
-                          strokeWidth: 2,
-                          value: status.progress,
-                          valueColor: status.error != null
-                              ? AlwaysStoppedAnimation<Color>(
-                                  theme.colorScheme.error,
-                                )
-                              : null,
-                        ),
-                      ),
+      title: Row(
+        children: [
+          Expanded(
+            child: StreamBuilder(
+              stream: client.onSyncStatus.stream,
+              builder: (context, snapshot) {
+                final status =
+                    client.onSyncStatus.value ??
+                    const SyncStatusUpdate(SyncStatus.waitingForResponse);
+                final hide =
+                    client.onSync.value != null &&
+                    status.status != SyncStatus.error &&
+                    client.prevBatch != null;
+                return TextField(
+                  controller: controller.searchController,
+                  focusNode: controller.searchFocusNode,
+                  textInputAction: TextInputAction.search,
+                  onChanged: (text) =>
+                      controller.onSearchEnter(text, globalSearch: false),
+                  onSubmitted: (text) =>
+                      controller.onSearchEnter(text, globalSearch: globalSearch),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: theme.colorScheme.secondaryContainer,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(99),
                     ),
-              suffixIcon: controller.isSearchMode && globalSearch
-                  ? controller.isSearching
-                        ? const Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 10.0,
-                              horizontal: 12,
-                            ),
-                            child: SizedBox.square(
-                              dimension: 24,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    hintText: hide
+                        ? L10n.of(context).searchChatsRooms
+                        : status.calcLocalizedString(context),
+                    hintStyle: TextStyle(
+                      color: status.error != null
+                          ? theme.colorScheme.error
+                          : theme.colorScheme.onSecondaryContainer,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    prefixIcon: hide
+                        ? controller.isSearchMode
+                            ? IconButton(
+                                tooltip: L10n.of(context).cancel,
+                                icon: const Icon(Icons.close_outlined),
+                                onPressed: controller.cancelSearch,
+                                color: theme.colorScheme.onSecondaryContainer,
+                              )
+                            : IconButton(
+                                onPressed: controller.startSearch,
+                                icon: Icon(
+                                  Icons.search_outlined,
+                                  color: theme.colorScheme.onSecondaryContainer,
+                                ),
+                              )
+                        : Container(
+                            margin: const EdgeInsets.all(12),
+                            width: 8,
+                            height: 8,
+                            child: Center(
                               child: CircularProgressIndicator.adaptive(
                                 strokeWidth: 2,
+                                value: status.progress,
+                                valueColor: status.error != null
+                                    ? AlwaysStoppedAnimation<Color>(
+                                        theme.colorScheme.error,
+                                      )
+                                    : null,
                               ),
                             ),
-                          )
-                        : TextButton.icon(
-                            onPressed: controller.setServer,
-                            style: TextButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(99),
-                              ),
-                              textStyle: const TextStyle(fontSize: 12),
-                            ),
-                            icon: const Icon(Icons.edit_outlined, size: 16),
-                            label: Text(
-                              controller.searchServer ??
-                                  Matrix.of(context).client.homeserver!.host,
-                              maxLines: 2,
-                            ),
-                          )
-                  : SizedBox(width: 0, child: ClientChooserButton(controller)),
+                          ),
+                    suffixIcon: controller.isSearchMode && globalSearch
+                        ? controller.isSearching
+                            ? const Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 10.0,
+                                  horizontal: 12,
+                                ),
+                                child: SizedBox.square(
+                                  dimension: 24,
+                                  child: CircularProgressIndicator.adaptive(
+                                    strokeWidth: 2,
+                                  ),
+                                ),
+                              )
+                            : TextButton.icon(
+                                onPressed: controller.setServer,
+                                style: TextButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(99),
+                                  ),
+                                  textStyle: const TextStyle(fontSize: 12),
+                                ),
+                                icon: const Icon(Icons.edit_outlined, size: 16),
+                                label: Text(
+                                  controller.searchServer ??
+                                      Matrix.of(context).client.homeserver!.host,
+                                  maxLines: 2,
+                                ),
+                              )
+                        : null,
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+          // Profile button on the right
+          Padding(
+            padding: const EdgeInsets.only(left: 8),
+            child: ClientChooserButton(controller),
+          ),
+        ],
       ),
     );
   }
