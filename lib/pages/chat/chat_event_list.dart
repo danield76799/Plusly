@@ -53,7 +53,7 @@ class ChatEventList extends StatelessWidget {
 
     // Builds a Message widget for the event at [eventIndex] in filteredEvents.
     Widget buildEventTile(int eventIndex) {
-      print('Building event $eventIndex ${events[eventIndex].eventId}');
+      //print('Building event $eventIndex ${events[eventIndex].eventId}');
       final event = events[eventIndex];
       final animateIn =
           eventIndex == 0 &&
@@ -116,9 +116,7 @@ class ChatEventList extends StatelessWidget {
           : ScrollViewKeyboardDismissBehavior.manual,
       slivers: [
         SliverPadding(
-          padding: .symmetric(
-            horizontal: horizontalPadding,
-          ),
+          padding: .symmetric(horizontal: horizontalPadding),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int i) {

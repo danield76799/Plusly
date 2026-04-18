@@ -400,6 +400,7 @@ class ChatController extends State<ChatPageWithRoom>
       _scrolledUp.value = false;
       _scrollAnchorEventId = null;
       setReadMarker();
+      setState(() {});
     }
   }
 
@@ -1464,6 +1465,10 @@ class ChatController extends State<ChatPageWithRoom>
               .filterByVisibleInGui(exceptionEventId: eventId)
               .indexOf(foundEvent);
 
+    // invalidate cache
+    _cachedEventsKeyMap = null;
+    _cachedFilteredEvents = null;
+
     if (eventIndex == -1) {
       setState(() {
         timeline = null;
@@ -1496,6 +1501,10 @@ class ChatController extends State<ChatPageWithRoom>
 
   void scrollDown() async {
     _scrollAnchorEventId = null;
+
+    _cachedEventsKeyMap = null;
+    _cachedFilteredEvents = null;
+
     if (!timeline!.allowNewEvent) {
       setState(() {
         timeline = null;
