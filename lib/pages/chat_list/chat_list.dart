@@ -166,6 +166,7 @@ class ChatListController extends State<ChatList>
 
   Set<String> allBridgeTypes = {};
   Set<String> visibleBridgeTypes = {};
+  Map<String, int> unreadBridgeCounts = {};  // Ongelezen counts per bridge type
 
   void _initVisibleBridgeTypes() {
     syncBridgeTypes();
@@ -188,6 +189,15 @@ class ChatListController extends State<ChatList>
       ...detectedTypes.where((t) => !allBridgeTypes.contains(t)),
     };
     allBridgeTypes = detectedTypes;
+
+    // Bereken ongelezen counts per bridge type
+    unreadBridgeCounts = {};
+    for (final room in client.rooms) {
+      if (!room.isSpace && room.isUnreadOrInvited) {
+        final bridgeType = isBridgeRoom(room) ? (getBridgeType(room) ?? 'other') : 'matrix';
+        unreadBridgeCounts[bridgeType] = (unreadBridgeCounts[bridgeType] ?? 0) + 1;
+      }
+    }
   }
 
   bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
