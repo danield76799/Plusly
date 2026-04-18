@@ -97,13 +97,8 @@ class ClientChooserButton extends StatelessWidget {
           ],
         ),
       ),
-      // Section divider with subtle background
-      PopupMenuDivider(height: 8),
-      Container(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest?.withOpacity(0.5) ?? 
-               Colors.grey.withOpacity(0.1),
-        child: const SizedBox(height: 8, width: double.infinity),
-      ),
+      // Section divider
+      const PopupMenuDivider(height: 8),
       for (final bundle in bundles) ...[
         if (matrix.accountBundles[bundle]!.length != 1 ||
             matrix.accountBundles[bundle]!.single!.userID != bundle)
