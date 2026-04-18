@@ -6,9 +6,6 @@ import io.flutter.plugin.common.MethodChannel
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.os.Bundle
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 
 class MainActivity : FlutterActivity() {
 
@@ -17,10 +14,6 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Install splash screen for Android 12+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            installSplashScreen()
-        }
         super.onCreate(savedInstanceState)
         handleWidgetIntent(intent)
     }
