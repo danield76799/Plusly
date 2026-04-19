@@ -50,70 +50,70 @@ class ChatView extends StatefulWidget {
 
 class _ChatViewState extends State<ChatView> {
   // A shorthand so we don’t have to write `widget.controller` everywhere.
-  ChatController get _c => widget.controller;
+  ChatController get controller => widget.controller;
 
   List<Widget> _appBarActions(BuildContext context) {
-    if (_c.selectMode) {
+    if (controller.selectMode) {
       return [
-        if (_c.canEditSelectedEvents)
+        if (controller.canEditSelectedEvents)
           IconButton(
             icon: const Icon(Icons.edit_outlined),
             tooltip: L10n.of(context).edit,
-            onPressed: _c.editSelectedEventAction,
+            onPressed: controller.editSelectedEventAction,
           ),
         IconButton(
           icon: const Icon(Icons.copy_outlined),
           tooltip: L10n.of(context).copy,
-          onPressed: _c.copyEventsAction,
+          onPressed: controller.copyEventsAction,
         ),
-        if (_c.selectedEvents.length > 1)
+        if (controller.selectedEvents.length > 1)
           IconButton(
             icon: const Icon(Icons.link),
             tooltip: L10n.of(context).copyLink,
-            onPressed: _c.copyLinkAction,
+            onPressed: controller.copyLinkAction,
           ),
-        if (_c.canSaveSelectedEvent)
+        if (controller.canSaveSelectedEvent)
           Builder(
             builder: (context) => IconButton(
               icon: const Icon(Icons.download),
               tooltip: L10n.of(context).downloadFile,
-              onPressed: () => _c.saveSelectedEvent(context),
+              onPressed: () => controller.saveSelectedEvent(context),
             ),
           ),
-        if (_c.canPinSelectedEvents)
+        if (controller.canPinSelectedEvents)
           IconButton(
             icon: const Icon(Icons.push_pin_outlined),
-            onPressed: _c.pinEvent,
+            onPressed: controller.pinEvent,
             tooltip: L10n.of(context).pinMessage,
           ),
-        if (_c.canRedactSelectedEvents)
+        if (controller.canRedactSelectedEvents)
           IconButton(
             icon: const Icon(Icons.delete_outlined),
             tooltip: L10n.of(context).redactMessage,
-            onPressed: _c.redactEventsAction,
+            onPressed: controller.redactEventsAction,
           ),
-        if (_c.selectedEvents.length == 1)
+        if (controller.selectedEvents.length == 1)
           PopupMenuButton<_EventContextAction>(
             onSelected: (action) {
               switch (action) {
                 case _EventContextAction.info:
-                  _c.showEventInfo();
-                  _c.clearSelectedEvents();
+                  controller.showEventInfo();
+                  controller.clearSelectedEvents();
                   break;
                 case _EventContextAction.report:
-                  _c.reportEventAction();
+                  controller.reportEventAction();
                   break;
                 case _EventContextAction.recover:
-                  _c.recoverEventAction();
+                  controller.recoverEventAction();
                   break;
                 case _EventContextAction.copyLink:
-                  _c.copyLinkAction();
+                  controller.copyLinkAction();
                   break;
                 case _EventContextAction.endPoll:
-                  _c.endPollAction();
+                  controller.endPollAction();
                   break;
                 case _EventContextAction.readReceipts:
-                  _c.showReadReceipts();
+                  controller.showReadReceipts();
                   break;
               }
             },
@@ -147,20 +147,20 @@ class _ChatViewState extends State<ChatView> {
             ],
           ),
       ];
-    } else if (!_c.room.isArchived) {
+    } else if (!controller.room.isArchived) {
       return [
         if (AppSettings.experimentalVoip.value &&
             Matrix.of(context).voipPlugin != null &&
-            _c.room.isDirectChat)
+            controller.room.isDirectChat)
           IconButton(
-            onPressed: _c.onPhoneButtonTap,
+            onPressed: controller.onPhoneButtonTap,
             icon: const Icon(Icons.call_outlined),
             tooltip: L10n.of(context).placeCall,
           )
         else if (AppSettings.experimentalJitsi.value)
-          JitsiPopupButton(_c.room),
-        EncryptionButton(_c.room),
-        ChatSettingsPopupMenu(_c.room, true),
+          JitsiPopupButton(controller.room),
+        EncryptionButton(controller.room),
+        ChatSettingsPopupMenu(controller.room, true),
       ];
     }
     return [];
@@ -168,7 +168,7 @@ class _ChatViewState extends State<ChatView> {
 
   Widget _buildInviteView(BuildContext context) {
     final theme = Theme.of(context);
-    final room = _c.room;
+    final room = controller.room;
     final membershipEvent = room.getState(
       EventTypes.RoomMember,
       room.client.userID!,
@@ -176,12 +176,6 @@ class _ChatViewState extends State<ChatView> {
     final topic = room.topic;
     final reason = membershipEvent?.content.tryGet<String>('reason');
     final displayName = room.getLocalizedDisplayname();
-
-    if (screenWidth == null || screenHeight == null) {
-      final view = View.of(context);
-      screenWidth ??= view.physicalSize.width / view.devicePixelRatio;
-      screenHeight ??= view.physicalSize.height / view.devicePixelRatio;
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -310,7 +304,7 @@ class _ChatViewState extends State<ChatView> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
-                    onPressed: () => _c.acceptInvite(),
+                    onPressed: () => controller.acceptInvite(),
                     icon: const Icon(Icons.check_circle_outline),
                     label: Text(L10n.of(context).accept),
                   ),
@@ -319,7 +313,7 @@ class _ChatViewState extends State<ChatView> {
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.tonalIcon(
-                    onPressed: () => _c.declineInvite(),
+                    onPressed: () => controller.declineInvite(),
                     icon: const Icon(Icons.cancel_outlined),
                     label: Text(L10n.of(context).decline),
                     style: FilledButton.styleFrom(
@@ -332,7 +326,7 @@ class _ChatViewState extends State<ChatView> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton.icon(
-                    onPressed: () => _c.ignoreInvite(),
+                    onPressed: () => controller.ignoreInvite(),
                     icon: const Icon(Icons.block_outlined),
                     label: Text(L10n.of(context).block),
                     style: OutlinedButton.styleFrom(
@@ -361,30 +355,36 @@ class _ChatViewState extends State<ChatView> {
     final theme = Theme.of(context);
 
     // Invite view?
-    if (_c.room.membership == .invite) {
+    if (controller.room.membership == .invite) {
       return _buildInviteView(context);
     }
 
     final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 8.0;
-    final scrollUpBannerEventId = _c.scrollUpBannerEventId;
+    final scrollUpBannerEventId = controller.scrollUpBannerEventId;
 
     final wallpaperPath = AppSettings.wallpaperPath.value;
 
+    if (screenWidth == null || screenHeight == null) {
+      final view = View.of(context);
+      screenWidth ??= view.physicalSize.width / view.devicePixelRatio;
+      screenHeight ??= view.physicalSize.height / view.devicePixelRatio;
+    }
+
     return PopScope(
-      canPop: _c.selectedEvents.isEmpty && !_c.showEmojiPicker,
+      canPop: controller.selectedEvents.isEmpty && !controller.showEmojiPicker,
       onPopInvokedWithResult: (pop, _) async {
         if (pop) return;
-        if (_c.selectedEvents.isNotEmpty) {
-          _c.clearSelectedEvents();
-        } else if (_c.showEmojiPicker) {
-          _c.emojiPickerAction();
+        if (controller.selectedEvents.isNotEmpty) {
+          controller.clearSelectedEvents();
+        } else if (controller.showEmojiPicker) {
+          controller.emojiPickerAction();
         }
       },
       child: FutureBuilder(
-        future: _c.loadTimelineFuture,
+        future: controller.loadTimelineFuture,
         builder: (BuildContext context, snapshot) {
           var appbarBottomHeight = 0.0;
-          if (_c.room.pinnedEventIds.isNotEmpty) {
+          if (controller.room.pinnedEventIds.isNotEmpty) {
             appbarBottomHeight += ChatAppBarListTile.fixedHeight;
           }
 
@@ -420,16 +420,16 @@ class _ChatViewState extends State<ChatView> {
                     )
                   : null,
               actionsIconTheme: IconThemeData(
-                color: _c.selectedEvents.isEmpty
+                color: controller.selectedEvents.isEmpty
                     ? null
                     : theme.colorScheme.tertiary,
               ),
               automaticallyImplyLeading: false,
               centerTitle: AppSettings.enableAppBarCenterTitle.value,
-              leading: _c.selectMode
+              leading: controller.selectMode
                   ? IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: _c.clearSelectedEvents,
+                      onPressed: controller.clearSelectedEvents,
                       tooltip: L10n.of(context).close,
                       color: theme.colorScheme.tertiary,
                     )
@@ -440,33 +440,33 @@ class _ChatViewState extends State<ChatView> {
                           .where((s) => s.hasRoomUpdate)
                           .rateLimit(const Duration(seconds: 1)),
                       builder: (context, _) => UnreadRoomsBadge(
-                        filter: (r) => r.id != _c.roomId,
+                        filter: (r) => r.id != controller.roomId,
                         badgePosition: .topEnd(top: 4, end: 8),
                         child: const Center(child: BackButton()),
                       ),
                     ),
               titleSpacing: FluffyThemes.isColumnMode(context) ? 24 : 0,
-              title: ChatAppBarTitle(_c),
+              title: ChatAppBarTitle(controller),
               actions: _appBarActions(context),
               bottom: PreferredSize(
                 preferredSize: Size.fromHeight(appbarBottomHeight),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: [PinnedEvents(_c)],
+                  children: [PinnedEvents(controller)],
                 ),
               ),
             ),
             floatingActionButton: ValueListenableBuilder<bool>(
-              valueListenable: _c.scrolledUpNotifier,
+              valueListenable: controller.scrolledUpNotifier,
               builder: (context, scrolledUp, _) {
                 final show =
-                    (scrolledUp || _c.timeline?.allowNewEvent == false) &&
-                    _c.selectedEvents.isEmpty;
+                    (scrolledUp || controller.timeline?.allowNewEvent == false) &&
+                    controller.selectedEvents.isEmpty;
                 if (!show) return const SizedBox.shrink();
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 56.0),
                   child: FloatingActionButton(
-                    onPressed: _c.scrollDown,
+                    onPressed: controller.scrollDown,
                     heroTag: null,
                     mini: true,
                     backgroundColor: theme.colorScheme.surface,
@@ -477,9 +477,9 @@ class _ChatViewState extends State<ChatView> {
               },
             ),
             body: DropTarget(
-              onDragDone: _c.onDragDone,
-              onDragEntered: _c.onDragEntered,
-              onDragExited: _c.onDragExited,
+              onDragDone: controller.onDragDone,
+              onDragEntered: controller.onDragEntered,
+              onDragExited: controller.onDragExited,
               child: Stack(
                 children: <Widget>[
                   if (wallpaperPath.isNotEmpty)
@@ -509,16 +509,16 @@ class _ChatViewState extends State<ChatView> {
                     ),
                   Positioned.fill(
                     child: GestureDetector(
-                      onTap: _c.clearSingleSelectedEvent,
+                      onTap: controller.clearSingleSelectedEvent,
                       child: ChatEventList(
-                        controller: _c,
-                        showThreadRoots: _c.showThreadRoots,
+                        controller: controller,
+                        showThreadRoots: controller.showThreadRoots,
                       ),
                     ),
                   ),
 
-                  if (_c.room.canSendDefaultMessages &&
-                      _c.room.membership == Membership.join)
+                  if (controller.room.canSendDefaultMessages &&
+                      controller.room.membership == Membership.join)
                     Positioned(
                       left: 0,
                       right: 0,
@@ -548,15 +548,15 @@ class _ChatViewState extends State<ChatView> {
                     bottom: 0,
                     child: _MeasureSize(
                       onChange: (size) {
-                        final oldHeight = _c.inputBarHeight.value;
+                        final oldHeight = controller.inputBarHeight.value;
                         final newHeight = size.height;
                         if (oldHeight == newHeight) return;
-                        _c.inputBarHeight.value = newHeight;
+                        controller.inputBarHeight.value = newHeight;
 
                         // Keep the list scrolled to the bottom if we were already
                         // there, otherwise the newly‑added input bar would cover a
                         // message.
-                        final sc = _c.scrollController;
+                        final sc = controller.scrollController;
                         if (sc.hasClients && sc.offset <= 0.0) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
                             if (sc.hasClients) sc.jumpTo(0.0);
@@ -576,7 +576,7 @@ class _ChatViewState extends State<ChatView> {
                               constraints: const BoxConstraints(
                                 maxWidth: FluffyThemes.columnWidth * 2.5,
                               ),
-                              child: _c.room.isExtinct
+                              child: controller.room.isExtinct
                                   ? (AppSettings.enableChatFrostedGlass.value
                                         ? _FloatingInputShell(
                                             child: ElevatedButton.icon(
@@ -586,7 +586,7 @@ class _ChatViewState extends State<ChatView> {
                                               label: Text(
                                                 L10n.of(context).enterNewChat,
                                               ),
-                                              onPressed: _c.goToNewRoomAction,
+                                              onPressed: controller.goToNewRoomAction,
                                             ),
                                           )
                                         : ElevatedButton.icon(
@@ -596,14 +596,14 @@ class _ChatViewState extends State<ChatView> {
                                             label: Text(
                                               L10n.of(context).enterNewChat,
                                             ),
-                                            onPressed: _c.goToNewRoomAction,
+                                            onPressed: controller.goToNewRoomAction,
                                           ))
-                                  : _c.room.canSendDefaultMessages &&
-                                        _c.room.membership == Membership.join &&
-                                        !_c.showThreadRoots
+                                  : controller.room.canSendDefaultMessages &&
+                                        controller.room.membership == Membership.join &&
+                                        !controller.showThreadRoots
                                   ? (() {
                                       final inputChild =
-                                          _c.room.isAbandonedDMRoom == true
+                                          controller.room.isAbandonedDMRoom == true
                                           ? Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.spaceEvenly,
@@ -620,7 +620,7 @@ class _ChatViewState extends State<ChatView> {
                                                   icon: const Icon(
                                                     Icons.archive_outlined,
                                                   ),
-                                                  onPressed: _c.leaveChat,
+                                                  onPressed: controller.leaveChat,
                                                   label: Text(
                                                     L10n.of(context).leave,
                                                   ),
@@ -635,7 +635,7 @@ class _ChatViewState extends State<ChatView> {
                                                   icon: const Icon(
                                                     Icons.forum_outlined,
                                                   ),
-                                                  onPressed: _c.recreateChat,
+                                                  onPressed: controller.recreateChat,
                                                   label: Text(
                                                     L10n.of(context).reopenChat,
                                                   ),
@@ -645,9 +645,9 @@ class _ChatViewState extends State<ChatView> {
                                           : Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                ReplyDisplay(_c),
-                                                ChatInputRow(_c),
-                                                ChatEmojiPicker(_c),
+                                                ReplyDisplay(controller),
+                                                ChatInputRow(controller),
+                                                ChatEmojiPicker(controller),
                                               ],
                                             );
                                       return AppSettings
@@ -674,7 +674,7 @@ class _ChatViewState extends State<ChatView> {
                     ),
                   ),
 
-                  if (_c.dragging)
+                  if (controller.dragging)
                     Container(
                       color: theme.scaffoldBackgroundColor.withAlpha(230),
                       alignment: Alignment.center,
@@ -703,17 +703,18 @@ class _ChatViewState extends State<ChatView> {
                                 children: [
                                   FilledButton(
                                     onPressed: () {
-                                      _c.scrollToEventId(scrollUpBannerEventId);
-                                      _c.discardScrollUpBannerEventId();
+                                      controller.scrollToEventId(scrollUpBannerEventId);
+                                      controller.discardScrollUpBannerEventId();
                                     },
                                     style: FilledButton.styleFrom(
                                       shadowColor: Colors.black,
                                       elevation: 4,
                                     ),
                                     child: Row(
-                                      children: const [
+                                      children: [
                                         Icon(Icons.arrow_upward),
                                         SizedBox(width: 18),
+                                        Text(L10n.of(context).jumpToLastReadMessage)
                                       ],
                                     ),
                                   ),

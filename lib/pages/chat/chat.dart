@@ -656,9 +656,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void _onNewEvent() {
-    // The scroll anchor (_scrollAnchorEventId) is already set when the user
-    // scrolled up. New events will naturally appear before the anchor in
-    // filteredEvents, so newEventCount increases automatically.
+    
   }
 
   Future<void> _getTimeline({String? eventContextId}) async {
@@ -1496,7 +1494,7 @@ class ChatController extends State<ChatPageWithRoom>
     await scrollController.scrollToIndex(
       eventIndex,
       duration: FluffyThemes.animationDuration,
-      preferPosition: AutoScrollPosition.middle,
+      preferPosition: .middle,
     );
     _updateScrollController();
   }
@@ -1527,10 +1525,10 @@ class ChatController extends State<ChatPageWithRoom>
     room.client.addRecentEmoji(emoji.customData ?? emoji.standardEmoji!.char);
     // print('selected emoji ${emoji.customData ?? emoji.standardEmoji!.char}');
     switch (emojiPickerType) {
-      case EmojiPickerType.reaction:
+      case .reaction:
         senEmojiReaction(emoji);
         break;
-      case EmojiPickerType.keyboard:
+      case .keyboard:
         typeEmoji(emoji);
         onInputBarChanged(sendController.text);
         break;
