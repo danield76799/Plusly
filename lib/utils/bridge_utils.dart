@@ -362,5 +362,13 @@ String? getBridgeType(Room room) {
     }
   }
 
+  // ── Fallback: if isBridgeRoom returned true but we couldn't detect the specific
+  // type, return 'bridge' as a generic type to avoid the 'other' fallback in
+  // chat_list.dart. This handles rooms where isBridgeRoom detected bridge signals
+  // (e.g., room name/topic patterns) but getBridgeType didn't find a specific type.
+  if (isBridgeRoom(room)) {
+    return 'bridge';
+  }
+
   return null;
 }
