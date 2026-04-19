@@ -51,7 +51,7 @@ enum AppSettings<T> {
   unifiedPushEndpoint<String>('chat.fluffy.unifiedpush.endpoint', ''),
   showNoGoogle<bool>('chat.fluffy.show_no_google', false),
   twemojiFont<bool>('xyz.plusly.next.twemojiFont', false),
-  checkForUpdates<bool>('xyz.plusly.next.checkForUpdates', false),
+  checkForUpdates<bool>('xyz.plusly.next.checkForUpdates', true),
   colorSchemeSeed<int>('xyz.plusly.next.colorSchemeSeed', 0x49AFC2),
   hideAvatarsInInvites<bool>('xyz.plusly.next.hideAvatarsInInvites', true),
   displayNavigationRail<bool>('chat.fluffy.displayNavigationRail', true),
