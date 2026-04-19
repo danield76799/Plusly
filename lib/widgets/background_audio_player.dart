@@ -167,9 +167,12 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
   }
 
   void _onPlaybackCompleted() {
-    _position = Duration.zero;
-    positionNotifier.value = Duration.zero;
+    _position = .zero;
+    positionNotifier.value = .zero;
     _playingEvent = null;
+    _currentTrack = null;
+    trackNotifier.value = null;
+    _updateStatus(.idle);
   }
 
   /// Play an audio message from a Matrix event.
