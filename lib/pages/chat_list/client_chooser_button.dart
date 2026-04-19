@@ -38,16 +38,6 @@ class ClientChooserButton extends StatelessWidget {
         ),
       ),
       PopupMenuItem(
-        value: SettingsAction.setStatus,
-        child: Row(
-          children: [
-            const Icon(Icons.edit_outlined, color: Color(0xFF49AFC2)),
-            const SizedBox(width: 22),
-            Text(L10n.of(context).setStatus),
-          ],
-        ),
-      ),
-      PopupMenuItem(
         value: SettingsAction.invite,
         child: Row(
           children: [
@@ -256,9 +246,6 @@ class ClientChooserButton extends StatelessWidget {
         case SettingsAction.notifications:
           context.go('/rooms/notifications');
           break;
-        case SettingsAction.setStatus:
-          controller.setStatus();
-          break;
         case SettingsAction.downloads:
           DownloadManagerView.showDownloads(context);
           break;
@@ -270,7 +257,6 @@ class ClientChooserButton extends StatelessWidget {
 enum SettingsAction {
   addAccount,
   newGroup,
-  setStatus,
   downloads,
   invite,
   settings,
