@@ -9,19 +9,26 @@ import 'package:extera_next/pages/chat_list/chat_list.dart';
 import 'package:extera_next/widgets/unread_rooms_badge.dart';
 import '../../widgets/matrix.dart';
 
-class ChatListBottomNavbar extends StatelessWidget {
+class ChatListBottomNavbar extends StatefulWidget {
   final ChatListController controller;
 
   const ChatListBottomNavbar(this.controller, {super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<ChatListBottomNavbar> createState() => _ChatListBottomNavbarState();
+}
+
+class _ChatListBottomNavbarState extends State<ChatListBottomNavbar> {
+  ChatListController get _c => widget.controller;
+
+  List<Room> spaces = [];
+  Map<String, Room> spaceDelegateCandidates = {};
+
+  @override
+  void initState() {
     final client = Matrix.of(context).client;
-    final theme = Theme.of(context);
 
-    final spaces = client.rooms.where((r) => r.isSpace);
-    final spaceDelegateCandidates = <String, Room>{};
-
+    spaces = client.rooms.where((r) => r.isSpace).toList();
     for (final space in spaces) {
       for (final spaceChild in space.spaceChildren) {
         final roomId = spaceChild.roomId;
@@ -29,6 +36,13 @@ class ChatListBottomNavbar extends StatelessWidget {
         spaceDelegateCandidates[roomId] = space;
       }
     }
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
 
     final filters = [
       if (AppSettings.separateChatTypes.value)
@@ -38,7 +52,7 @@ class ChatListBottomNavbar extends StatelessWidget {
       if (AppSettings.separateChatTypes.value) ActiveFilter.groups,
       ActiveFilter.unread,
       if (spaceDelegateCandidates.isNotEmpty &&
-          !controller.widget.displayNavigationRail)
+          !_c.widget.displayNavigationRail)
         ActiveFilter.spaces,
       if (AppSettings.enablePeopleTab.value) ActiveFilter.people,
     ];
@@ -60,9 +74,8 @@ class ChatListBottomNavbar extends StatelessWidget {
         padding: const EdgeInsets.all(4),
         child: Row(
           children: filters.map((filter) {
-            final isActive = controller.activeFilter == filter;
+            final isActive = _c.activeFilter == filter;
 
-            // Pre-calculate styles
             final backgroundColor = isActive
                 ? theme.colorScheme.secondaryContainer
                 : Colors.transparent;
@@ -76,13 +89,9 @@ class ChatListBottomNavbar extends StatelessWidget {
             );
 
             return Expanded(
-              // Using a Key helps Flutter track that this is the same widget
-              // even if the list order were to change (good practice).
               key: ValueKey(filter),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 2),
-
-                // 1. The Container handles the Background Color & Shape Animation
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOut,
@@ -91,14 +100,10 @@ class ChatListBottomNavbar extends StatelessWidget {
                     color: backgroundColor,
                     borderRadius: currentBorderRadius,
                   ),
-
-                  // 2. The Material provides the canvas for the InkWell splash.
-                  // By being a child of the Container, it sits ON TOP of the background color.
                   child: Material(
                     type: MaterialType.transparency,
                     child: InkWell(
-                      onTap: () => controller.setActiveFilter(filter),
-                      // Pass the dynamic border radius so the ripple clips correctly
+                      onTap: () => _c.setActiveFilter(filter),
                       borderRadius: currentBorderRadius,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(

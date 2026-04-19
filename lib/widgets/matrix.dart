@@ -330,7 +330,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     }
 
     if (AppSettings.selectedAccount.value.isNotEmpty) {
-      final selectedClient = widget.clients.firstWhereOrNull((cl) => cl.clientName == AppSettings.selectedAccount.value);
+      final selectedClient = widget.clients.firstWhereOrNull(
+        (cl) => cl.clientName == AppSettings.selectedAccount.value,
+      );
       if (selectedClient != null) {
         setActiveClient(selectedClient);
       }
@@ -407,10 +409,22 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
 
-    onRoomKeyRequestSub.values.map((s) => s.cancel());
-    onKeyVerificationRequestSub.values.map((s) => s.cancel());
-    onLoginStateChanged.values.map((s) => s.cancel());
-    onNotification.values.map((s) => s.cancel());
+    for (final s in onRoomKeyRequestSub.values) {
+      s.cancel();
+    }
+
+    for (final s in onKeyVerificationRequestSub.values) {
+      s.cancel();
+    }
+
+    for (final s in onLoginStateChanged.values) {
+      s.cancel();
+    }
+
+    for (final s in onNotification.values) {
+      s.cancel();
+    }
+
     client.httpClient.close();
 
     linuxNotifications?.close();

@@ -12,7 +12,7 @@ import 'package:extera_next/utils/stream_extension.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
 
-class SpacesNavigationRail extends StatelessWidget {
+class SpacesNavigationRail extends StatefulWidget {
   final String? activeSpaceId;
   final void Function() onGoToChats;
   final void Function(String) onGoToSpaceId;
@@ -23,6 +23,35 @@ class SpacesNavigationRail extends StatelessWidget {
     required this.onGoToSpaceId,
     super.key,
   });
+
+  @override
+  State<SpacesNavigationRail> createState() => _SpacesNavigationRailState();
+}
+
+class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
+  List<Room>? _cachedRootSpaces;
+
+  List<Room> _computeRootSpaces(Client client) {
+    final allSpaces = client.rooms.where((room) => room.isSpace).toList();
+
+    // Build a set of all space IDs that are children of another space.
+    // This is O(n * m) where n = spaces, m = avg children per space,
+    // instead of the previous O(n^2 * m) nested .any() approach.
+    final childSpaceIds = <String>{};
+    for (final space in allSpaces) {
+      for (final child in space.spaceChildren) {
+        final roomId = child.roomId;
+        if (roomId != null) {
+          childSpaceIds.add(roomId);
+        }
+      }
+    }
+
+    // O(n) set lookup per space
+    return allSpaces
+        .where((space) => !childSpaceIds.contains(space.id))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,17 +68,12 @@ class SpacesNavigationRail extends StatelessWidget {
       stream: client.onSync.stream
           .where((s) => s.hasRoomUpdate)
           .rateLimit(const Duration(seconds: 1)),
-      builder: (context, _) {
-        final allSpaces = client.rooms.where((room) => room.isSpace);
-        final rootSpaces = allSpaces
-            .where(
-              (space) => !allSpaces.any(
-                (parentSpace) => parentSpace.spaceChildren.any(
-                  (child) => child.roomId == space.id,
-                ),
-              ),
-            )
-            .toList();
+      builder: (context, snapshot) {
+        // Only recompute when sync delivers new data or cache is empty
+        if (snapshot.hasData || _cachedRootSpaces == null) {
+          _cachedRootSpaces = _computeRootSpaces(client);
+        }
+        final rootSpaces = _cachedRootSpaces!;
 
         return Container(
           width: FluffyThemes.navRailWidth,
@@ -64,8 +88,9 @@ class SpacesNavigationRail extends StatelessWidget {
                     itemBuilder: (context, i) {
                       if (i == 0) {
                         return NaviRailItem(
-                          isSelected: activeSpaceId == null && !isSettings,
-                          onTap: onGoToChats,
+                          isSelected:
+                              widget.activeSpaceId == null && !isSettings,
+                          onTap: widget.onGoToChats,
                           icon: const Padding(
                             padding: EdgeInsets.all(10.0),
                             child: Icon(Icons.forum_outlined),
@@ -99,8 +124,8 @@ class SpacesNavigationRail extends StatelessWidget {
                           .toSet();
                       return NaviRailItem(
                         toolTip: displayname,
-                        isSelected: activeSpaceId == space.id,
-                        onTap: () => onGoToSpaceId(rootSpaces[i].id),
+                        isSelected: widget.activeSpaceId == space.id,
+                        onTap: () => widget.onGoToSpaceId(rootSpaces[i].id),
                         unreadBadgeFilter: (room) =>
                             spaceChildrenIds.contains(room.id),
                         icon: Avatar(

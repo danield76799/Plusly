@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -58,11 +59,56 @@ class _SpaceViewState extends State<SpaceView> {
   String? _nextBatch;
   bool _noMoreRooms = false;
   bool _isLoading = false;
+  Timer? _filterDebounce;
+  List<SpaceRoomsChunk$2>? _cachedFilteredChildren;
+  String _appliedFilter = '';
 
   @override
   void initState() {
     _loadHierarchy();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _filterDebounce?.cancel();
+    _filterController.dispose();
+    super.dispose();
+  }
+
+  void _onFilterChanged(String _) {
+    _filterDebounce?.cancel();
+    _filterDebounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted) return;
+      _invalidateFilterCache();
+      setState(() {});
+    });
+  }
+
+  void _invalidateFilterCache() {
+    _cachedFilteredChildren = null;
+  }
+
+  List<SpaceRoomsChunk$2> _getFilteredChildren(Room room) {
+    final filter = _filterController.text.trim().toLowerCase();
+    if (filter == _appliedFilter && _cachedFilteredChildren != null) {
+      return _cachedFilteredChildren!;
+    }
+    _appliedFilter = filter;
+    if (filter.isEmpty) {
+      _cachedFilteredChildren = _discoveredChildren;
+      return _cachedFilteredChildren!;
+    }
+    _cachedFilteredChildren = _discoveredChildren.where((item) {
+      final joinedRoom = room.client.getRoomById(item.roomId);
+      final displayname =
+          item.name ??
+          item.canonicalAlias ??
+          joinedRoom?.getLocalizedDisplayname() ??
+          '';
+      return displayname.toLowerCase().contains(filter);
+    }).toList();
+    return _cachedFilteredChildren!;
   }
 
   void _loadHierarchy() async {
@@ -109,6 +155,7 @@ class _SpaceViewState extends State<SpaceView> {
         _discoveredChildren.addAll(
           hierarchy.rooms.where((room) => room.roomId != widget.spaceId),
         );
+        _invalidateFilterCache();
         _isLoading = false;
       });
 
@@ -261,6 +308,7 @@ class _SpaceViewState extends State<SpaceView> {
     setState(() {
       _nextBatch = null;
       _discoveredChildren.clear();
+      _invalidateFilterCache();
     });
     _loadHierarchy();
   }
@@ -529,7 +577,10 @@ class _SpaceViewState extends State<SpaceView> {
                     })
                     .whereType<Room>()
                     .toList();
-                final filter = _filterController.text.trim().toLowerCase();
+                // Invalidate filter cache on sync updates so new
+                // room data is reflected in the filtered list.
+                if (snapshot.hasData) _invalidateFilterCache();
+                final filteredChildren = _getFilteredChildren(room);
                 return CustomScrollView(
                   slivers: [
                     SliverAppBar(
@@ -539,7 +590,7 @@ class _SpaceViewState extends State<SpaceView> {
                       automaticallyImplyLeading: false,
                       title: TextField(
                         controller: _filterController,
-                        onChanged: (_) => setState(() {}),
+                        onChanged: _onFilterChanged,
                         textInputAction: TextInputAction.search,
                         decoration: InputDecoration(
                           filled: true,
@@ -603,9 +654,9 @@ class _SpaceViewState extends State<SpaceView> {
                       },
                     ),
                     SliverList.builder(
-                      itemCount: _discoveredChildren.length + 1,
+                      itemCount: filteredChildren.length + 1,
                       itemBuilder: (context, i) {
-                        if (i == _discoveredChildren.length) {
+                        if (i == filteredChildren.length) {
                           if (_noMoreRooms) {
                             return const SizedBox.shrink();
                           }
@@ -622,7 +673,7 @@ class _SpaceViewState extends State<SpaceView> {
                             ),
                           );
                         }
-                        final item = _discoveredChildren[i];
+                        final item = filteredChildren[i];
                         var joinedRoom = room.client.getRoomById(item.roomId);
                         final displayname =
                             item.name ??
@@ -630,9 +681,6 @@ class _SpaceViewState extends State<SpaceView> {
                             joinedRoom?.getLocalizedDisplayname() ??
                             L10n.of(context).emptyChat;
                         final avatarUrl = item.avatarUrl ?? joinedRoom?.avatar;
-                        if (!displayname.toLowerCase().contains(filter)) {
-                          return const SizedBox.shrink();
-                        }
                         if (joinedRoom?.membership == .leave) {
                           joinedRoom = null;
                         }

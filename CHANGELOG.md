@@ -1,3 +1,6 @@
+## Extera 26.1.66
+- Optimisations and bugfixes.
+
 ## Extera 26.1.65
 - Bugfixes.
 

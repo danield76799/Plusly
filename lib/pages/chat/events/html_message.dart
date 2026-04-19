@@ -562,14 +562,22 @@ class _HtmlMessageState extends State<HtmlMessage> {
     }
   }
 
+  dom.Document? parsedDocument;
+
+  @override
+  void initState() {
+    parsedDocument = parser.parse(html);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     // Reset counters before each build so indices are assigned consistently.
     _detailsCounter = 0;
     _spoilerCounter = 0;
-
+  
     final textSpan = _renderHtml(
-      parser.parse(html).body ?? dom.Element.html(''),
+      parsedDocument?.body ?? dom.Element.html(''),
       context,
     );
     final textStyle = TextStyle(fontSize: fontSize, color: textColor);

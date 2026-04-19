@@ -1,3 +1,4 @@
+import 'package:extera_next/utils/stream_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
@@ -90,7 +91,7 @@ class ChatAppBarTitle extends StatelessWidget {
                   ],
                 ),
                 StreamBuilder(
-                  stream: room.client.onSyncStatus.stream,
+                  stream: room.client.onSyncStatus.stream.rateLimit(const Duration(seconds: 1)),
                   builder: (context, snapshot) {
                     final status =
                         room.client.onSyncStatus.value ??

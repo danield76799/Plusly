@@ -755,6 +755,8 @@ class ChatController extends State<ChatPageWithRoom>
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
     inputBarHeight.dispose();
+    scrollController.dispose();
+    sendController.dispose();
     if (currentlyTyping) room.setTyping(false);
     super.dispose();
   }
