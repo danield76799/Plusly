@@ -44,6 +44,7 @@ extension MatrixFileExtension on MatrixFile {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(L10n.of(context).fileHasBeenSavedAt(downloadPath)),
+        showCloseIcon: true,
       ),
     );
   }
