@@ -398,8 +398,14 @@ class _HtmlMessageState extends State<HtmlMessage> {
         final width = double.tryParse(node.attributes['width'] ?? '');
         final height = double.tryParse(node.attributes['height'] ?? '');
         const defaultDimension = 64.0;
-        final actualWidth = width ?? height ?? defaultDimension;
-        final actualHeight = height ?? width ?? defaultDimension;
+        var actualWidth = width ?? height ?? defaultDimension;
+        var actualHeight = height ?? width ?? defaultDimension;
+        
+        final ratio = actualWidth / actualHeight;
+        if (actualHeight > 256) {
+          actualHeight = 256;
+          actualWidth = actualHeight * ratio;
+        }
 
         return WidgetSpan(
           child: SizedBox(
