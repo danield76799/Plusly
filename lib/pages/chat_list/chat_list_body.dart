@@ -366,6 +366,7 @@ class _SearchItem extends StatelessWidget {
   final void Function() onPressed;
 
   const _SearchItem({
+    super.key,
     required this.title,
     this.avatar,
     required this.onPressed,
