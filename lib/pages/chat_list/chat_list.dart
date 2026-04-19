@@ -119,7 +119,9 @@ class ChatListController extends State<ChatList>
   String? get activeSpaceId => _activeSpaceId;
 
   void setActiveSpace(String spaceId) async {
-    await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
+    final room = Matrix.of(context).client.getRoomById(spaceId);
+    if (room == null) return;
+    await room.postLoad();
 
     setState(() {
       _activeSpaceId = spaceId;
@@ -432,7 +434,9 @@ class ChatListController extends State<ChatList>
   }
 
   void editSpace(BuildContext context, String spaceId) async {
-    await Matrix.of(context).client.getRoomById(spaceId)!.postLoad();
+    final room = Matrix.of(context).client.getRoomById(spaceId);
+    if (room == null) return;
+    await room.postLoad();
     if (mounted) {
       context.push('/rooms/$spaceId/details');
     }
@@ -544,6 +548,11 @@ class ChatListController extends State<ChatList>
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();
     scrollController.removeListener(_onScroll);
+    _clientStream?.close();
+    searchController.dispose();
+    searchFocusNode.dispose();
+    _coolDown?.cancel();
+    scrolledToTop.dispose();
     super.dispose();
   }
 
@@ -895,12 +904,17 @@ class ChatListController extends State<ChatList>
 
   void setStatus() async {
     final client = Matrix.of(context).client;
-    final currentPresence = await client.fetchCurrentPresence(client.userID!);
+    User? currentPresence;
+    try {
+      currentPresence = await client.fetchCurrentPresence(client.userID!);
+    } catch (e) {
+      Logs().w('Failed to fetch current presence', e);
+    }
     final input = await showStatusInputDialog(
       useRootNavigator: false,
       context: context,
-      initialText: currentPresence.statusMsg,
-      initialPresence: currentPresence.presence,
+      initialText: currentPresence?.statusMsg,
+      initialPresence: currentPresence?.presence,
     );
     if (input == null) return;
     if (!mounted) return;
@@ -1059,9 +1073,11 @@ class ChatListController extends State<ChatList>
 
   void resetActiveBundle() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      setState(() {
-        Matrix.of(context).activeBundle = null;
-      });
+      if (mounted) {
+        setState(() {
+          Matrix.of(context).activeBundle = null;
+        });
+      }
     });
   }
 
