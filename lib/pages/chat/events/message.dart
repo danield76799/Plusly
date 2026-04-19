@@ -187,6 +187,11 @@ class _MessageState extends State<Message> {
     }
   }
 
+  void _scrollToEvent(Event event) {
+    if (event.status == .error) return; // didn't load yet
+    widget.scrollToEventId(event.eventId);
+  }
+
   @override
   Widget build(BuildContext context) {
     final event = widget.event;
@@ -528,7 +533,7 @@ class _MessageState extends State<Message> {
                                                               'm.room.message',
                                                           room: event.room,
                                                           status:
-                                                              EventStatus.sent,
+                                                              .error,
                                                           originServerTs:
                                                               DateTime.now(),
                                                         );
@@ -548,10 +553,8 @@ class _MessageState extends State<Message> {
                                                         borderRadius:
                                                             ReplyContent
                                                                 .borderRadius,
-                                                        onTap: () => widget
-                                                            .scrollToEventId(
-                                                              replyEvent
-                                                                  .eventId,
+                                                        onTap: () => _scrollToEvent(
+                                                              replyEvent,
                                                             ),
                                                         child: AbsorbPointer(
                                                           child: ReplyContent(
