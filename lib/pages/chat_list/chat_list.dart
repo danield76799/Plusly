@@ -22,7 +22,6 @@ import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/show_scaffold_dialog.dart';
 import 'package:Pulsly/utils/show_update_snackbar.dart';
-import 'package:Pulsly/widgets/adaptive_dialogs/set_status_dialog.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -41,7 +40,6 @@ enum PopupMenuAction {
   invite,
   newGroup,
   newSpace,
-  setStatus,
   archive,
 }
 
@@ -900,27 +898,6 @@ class ChatListController extends State<ChatList>
       if (!mounted) return;
       setState(() {});
     }
-  }
-
-  void setStatus() async {
-    final client = Matrix.of(context).client;
-    final currentPresence = await client.fetchCurrentPresence(client.userID!);
-    final input = await showStatusInputDialog(
-      useRootNavigator: false,
-      context: context,
-      initialText: currentPresence.statusMsg,
-      initialPresence: currentPresence.presence,
-    );
-    if (input == null) return;
-    if (!mounted) return;
-    await showFutureLoadingSnackbar(
-      context: context,
-      future: () async {
-        client.syncPresence = input.$1;
-        AppSettings.presenceStatus.setItem(input.$1.name);
-        await client.setPresence(client.userID!, input.$1, statusMsg: input.$2);
-      },
-    );
   }
 
   bool waitForFirstSync = false;
