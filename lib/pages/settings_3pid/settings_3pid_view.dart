@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/settings_3pid/settings_3pid.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/settings_3pid/settings_3pid.dart';
+import 'package:Pulsly/widgets/layouts/max_width_body.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class Settings3PidView extends StatelessWidget {
   final Settings3PidController controller;

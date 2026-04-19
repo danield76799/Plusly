@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:emojis/emoji.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
 
 // ==========================================
 // 1. Data Models

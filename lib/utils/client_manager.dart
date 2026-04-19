@@ -11,14 +11,14 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/custom_http_client.dart';
-import 'package:extera_next/utils/custom_image_resizer.dart';
-import 'package:extera_next/utils/init_with_restore.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/poll_events.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/custom_http_client.dart';
+import 'package:Pulsly/utils/custom_image_resizer.dart';
+import 'package:Pulsly/utils/init_with_restore.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/poll_events.dart';
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 
 abstract class ClientManager {

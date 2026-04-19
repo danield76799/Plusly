@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/pages/image_viewer/image_viewer_view.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/show_scaffold_dialog.dart';
-import 'package:extera_next/widgets/share_scaffold_dialog.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/pages/image_viewer/image_viewer_view.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/show_scaffold_dialog.dart';
+import 'package:Pulsly/widgets/share_scaffold_dialog.dart';
 import '../../utils/matrix_sdk_extensions/event_extension.dart';
 
 class ImageViewer extends StatefulWidget {

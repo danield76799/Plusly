@@ -5,12 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat_encryption_settings/chat_encryption_settings.dart';
-import 'package:extera_next/utils/beautify_string_extension.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
-import 'package:extera_next/widgets/list_divider.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat_encryption_settings/chat_encryption_settings.dart';
+import 'package:Pulsly/utils/beautify_string_extension.dart';
+import 'package:Pulsly/widgets/layouts/max_width_body.dart';
+import 'package:Pulsly/widgets/list_divider.dart';
 
 class ChatEncryptionSettingsView extends StatelessWidget {
   final ChatEncryptionSettingsController controller;

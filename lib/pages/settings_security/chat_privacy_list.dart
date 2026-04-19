@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat_list/chat_list_item.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
 
 class ChatPrivacyList extends StatelessWidget {
   final Client client;

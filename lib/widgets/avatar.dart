@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/utils/string_color.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
-import 'package:extera_next/widgets/presence_builder.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/utils/string_color.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
+import 'package:Pulsly/widgets/presence_builder.dart';
 
 class Avatar extends StatelessWidget {
   final Uri? mxContent;

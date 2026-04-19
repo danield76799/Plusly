@@ -8,10 +8,10 @@ import 'package:matrix/matrix.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:universal_html/html.dart' as html;
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/size_string.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/size_string.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
 
 extension MatrixFileExtension on MatrixFile {
   void save(BuildContext context) async {

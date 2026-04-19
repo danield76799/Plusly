@@ -7,22 +7,22 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart' as sdk;
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat_list/unread_bubble.dart';
-import 'package:extera_next/utils/localized_exception_extension.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:extera_next/utils/stream_extension.dart';
-import 'package:extera_next/utils/string_color.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/public_room_dialog.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_modal_action_popup.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_text_input_dialog.dart';
-import 'package:extera_next/widgets/avatar.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
-import 'package:extera_next/widgets/hover_builder.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat_list/unread_bubble.dart';
+import 'package:Pulsly/utils/localized_exception_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:Pulsly/utils/stream_extension.dart';
+import 'package:Pulsly/utils/string_color.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/public_room_dialog.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_text_input_dialog.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/widgets/hover_builder.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 enum AddRoomType { chat, subspace }
 

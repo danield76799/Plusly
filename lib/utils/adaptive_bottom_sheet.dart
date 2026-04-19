@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/themes.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/themes.dart';
 
 Future<T?> showAdaptiveBottomSheet<T>({
   required BuildContext context,

@@ -4,15 +4,15 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/profile/profile_view.dart';
-import 'package:extera_next/utils/localized_exception_extension.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/msc2666_extension.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_modal_action_popup.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/profile/profile_view.dart';
+import 'package:Pulsly/utils/localized_exception_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/msc2666_extension.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class ProfilePage extends StatefulWidget {
   final Profile profile;

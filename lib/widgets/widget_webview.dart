@@ -7,8 +7,8 @@
 // import 'package:universal_html/html.dart' as html;
 // import 'package:webview_flutter/webview_flutter.dart';
 
-// import 'package:extera_next/utils/matrix_widget_api.dart';
-// import 'package:extera_next/utils/platform_infos.dart';
+// import 'package:Pulsly/utils/matrix_widget_api.dart';
+// import 'package:Pulsly/utils/platform_infos.dart';
 
 // /// A reusable WebView widget that implements the Matrix Widget API.
 // ///

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/settings_backup.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/settings_backup.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'settings_features_view.dart';
 
 class SettingsFeatures extends StatefulWidget {

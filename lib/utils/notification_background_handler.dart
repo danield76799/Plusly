@@ -9,13 +9,13 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/client_download_content_extension.dart';
-import 'package:extera_next/utils/client_manager.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/privacy_options.dart';
-import 'package:extera_next/utils/push_helper.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/client_download_content_extension.dart';
+import 'package:Pulsly/utils/client_manager.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/privacy_options.dart';
+import 'package:Pulsly/utils/push_helper.dart';
 import '../config/app_config.dart';
 
 bool _vodInitialized = false;

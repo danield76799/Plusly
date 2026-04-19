@@ -10,14 +10,14 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_shortcuts_new/flutter_shortcuts_new.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/client_download_content_extension.dart';
-import 'package:extera_next/utils/client_manager.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:extera_next/utils/notification_background_handler.dart';
-import 'package:extera_next/utils/platform_infos.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/client_download_content_extension.dart';
+import 'package:Pulsly/utils/client_manager.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:Pulsly/utils/notification_background_handler.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
 
 const notificationAvatarDimension = 128;
 

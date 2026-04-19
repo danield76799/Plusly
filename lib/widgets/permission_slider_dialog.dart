@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/dialog_text_field.dart';
 
 Future<int?> showPermissionChooser(
   BuildContext context, {

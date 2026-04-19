@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/favourite_stickers_extension.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/recent_stickers_extension.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/favourite_stickers_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/recent_stickers_extension.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
 import '../../widgets/avatar.dart';
 
 class StickerPickerDialog extends StatefulWidget {

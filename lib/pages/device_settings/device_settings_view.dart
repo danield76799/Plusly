@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/device_settings/device_settings.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
-import 'package:extera_next/widgets/list_divider.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/device_settings/device_settings.dart';
+import 'package:Pulsly/widgets/layouts/max_width_body.dart';
+import 'package:Pulsly/widgets/list_divider.dart';
 import 'user_device_list_item.dart';
 
 class DevicesSettingsView extends StatelessWidget {

@@ -5,20 +5,20 @@ import 'package:collection/collection.dart';
 import 'package:emojis/emoji.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/chat.dart';
-import 'package:extera_next/pages/download_manager/download_manager.dart';
-import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/room_status_extension.dart';
-import 'package:extera_next/widgets/emoji_picker.dart';
-import 'package:extera_next/widgets/list_divider.dart';
-import 'package:extera_next/widgets/matrix.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/pages/download_manager/download_manager.dart';
+import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/room_status_extension.dart';
+import 'package:Pulsly/widgets/emoji_picker.dart';
+import 'package:Pulsly/widgets/list_divider.dart';
+import 'package:Pulsly/widgets/matrix.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
 
 class MessageContextMenu extends StatefulWidget {
   final ChatController controller;

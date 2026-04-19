@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/chat.dart';
-import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
-import 'package:extera_next/utils/date_time_extension.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/room_status_extension.dart';
-import 'package:extera_next/widgets/avatar.dart';
-import 'package:extera_next/widgets/list_divider.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
+import 'package:Pulsly/utils/date_time_extension.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/room_status_extension.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/list_divider.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class SeenByRow extends StatelessWidget {
   final ChatController controller;

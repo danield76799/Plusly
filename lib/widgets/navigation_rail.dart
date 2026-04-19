@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat_list/navi_rail_item.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:extera_next/utils/stream_extension.dart';
-import 'package:extera_next/widgets/avatar.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat_list/navi_rail_item.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:Pulsly/utils/stream_extension.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class SpacesNavigationRail extends StatelessWidget {
   final String? activeSpaceId;

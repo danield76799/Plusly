@@ -4,14 +4,14 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/localized_exception_extension.dart';
-import 'package:extera_next/utils/url_launcher.dart';
-import 'package:extera_next/widgets/avatar.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
-import 'package:extera_next/widgets/list_divider.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/localized_exception_extension.dart';
+import 'package:Pulsly/utils/url_launcher.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/widgets/list_divider.dart';
 
 class InviteDialog extends StatelessWidget {
   final Room room;

@@ -6,9 +6,9 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:matrix/matrix.dart';
 import 'package:slugify/slugify.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/markdown_context_builder.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/markdown_context_builder.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
 import '../../widgets/avatar.dart';
 import '../../widgets/matrix.dart';
 import 'command_hints.dart';

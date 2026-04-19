@@ -1,18 +1,18 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat_list/chat_list.dart';
-import 'package:extera_next/pages/chat_list/chat_list_header.dart';
-import 'package:extera_next/pages/chat_list/chat_list_legacy_header.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/interesting_presences_extension.dart';
-import 'package:extera_next/utils/show_profile.dart';
-import 'package:extera_next/utils/stream_extension.dart';
-import 'package:extera_next/widgets/avatar.dart';
-import 'package:extera_next/widgets/list_divider.dart';
-import 'package:extera_next/widgets/matrix.dart';
-import 'package:extera_next/widgets/rich_presence_card.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat_list/chat_list.dart';
+import 'package:Pulsly/pages/chat_list/chat_list_header.dart';
+import 'package:Pulsly/pages/chat_list/chat_list_legacy_header.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/interesting_presences_extension.dart';
+import 'package:Pulsly/utils/show_profile.dart';
+import 'package:Pulsly/utils/stream_extension.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/list_divider.dart';
+import 'package:Pulsly/widgets/matrix.dart';
+import 'package:Pulsly/widgets/rich_presence_card.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';

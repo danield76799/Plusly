@@ -1,6 +1,6 @@
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
 
 extension PushRuleExtension on PushRule {
   String getPushRuleName(L10n l10n) {

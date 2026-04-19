@@ -9,18 +9,18 @@ import 'package:matrix/matrix.dart';
 import 'package:matrix/src/utils/markdown.dart';
 import 'package:mime/mime.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/clean_exif.dart';
-import 'package:extera_next/utils/loading_snackbar_extension.dart';
-import 'package:extera_next/utils/localized_exception_extension.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/matrix_file_extension.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/size_string.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/dialog_text_field.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/image_editor_dialog.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/clean_exif.dart';
+import 'package:Pulsly/utils/loading_snackbar_extension.dart';
+import 'package:Pulsly/utils/localized_exception_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/size_string.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/dialog_text_field.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/image_editor_dialog.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 import '../../utils/resize_video.dart';
 
 // ignore: implementation_imports

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/themes.dart';
+import 'package:Pulsly/config/themes.dart';
 
 class UnreadBubble extends StatelessWidget {
   final Room room;

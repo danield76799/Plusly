@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_text_input_dialog.dart';
-import 'package:extera_next/widgets/fluffy_chat_app.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_text_input_dialog.dart';
+import 'package:Pulsly/widgets/fluffy_chat_app.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 extension UiaRequestManager on MatrixState {
   Future uiaRequestHandler(UiaRequest uiaRequest) async {

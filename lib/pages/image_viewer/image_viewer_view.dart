@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/image_viewer/video_player.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/widgets/hover_builder.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/image_viewer/video_player.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/widgets/hover_builder.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
 import 'image_viewer.dart';
 
 class ImageViewerView extends StatefulWidget {

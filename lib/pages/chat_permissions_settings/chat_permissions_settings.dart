@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat_permissions_settings/chat_permissions_settings_view.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
-import 'package:extera_next/widgets/matrix.dart';
-import 'package:extera_next/widgets/permission_slider_dialog.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat_permissions_settings/chat_permissions_settings_view.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/widgets/matrix.dart';
+import 'package:Pulsly/widgets/permission_slider_dialog.dart';
 
 class ChatPermissionsSettings extends StatefulWidget {
   const ChatPermissionsSettings({super.key});

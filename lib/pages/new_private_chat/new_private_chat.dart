@@ -6,15 +6,15 @@ import 'package:flutter/services.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/new_private_chat/new_private_chat_view.dart';
-import 'package:extera_next/pages/new_private_chat/qr_scanner_modal.dart';
-import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
-import 'package:extera_next/utils/fluffy_share.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/show_profile.dart';
-import 'package:extera_next/utils/url_launcher.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/new_private_chat/new_private_chat_view.dart';
+import 'package:Pulsly/pages/new_private_chat/qr_scanner_modal.dart';
+import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
+import 'package:Pulsly/utils/fluffy_share.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/show_profile.dart';
+import 'package:Pulsly/utils/url_launcher.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class NewPrivateChat extends StatefulWidget {
   const NewPrivateChat({super.key});

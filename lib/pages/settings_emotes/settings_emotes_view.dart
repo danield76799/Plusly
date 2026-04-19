@@ -3,15 +3,15 @@ import 'package:flutter/services.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
-import 'package:extera_next/widgets/mxc_image_viewer.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
+import 'package:Pulsly/widgets/mxc_image_viewer.dart';
 import '../../widgets/matrix.dart';
 import 'settings_emotes.dart';
 
-// import 'package:extera_next/widgets/layouts/max_width_body.dart'; // Removed to fix layout error
+// import 'package:Pulsly/widgets/layouts/max_width_body.dart'; // Removed to fix layout error
 
 enum PopupMenuEmojiActions { import, export }
 

@@ -5,22 +5,22 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat_list/chat_list_item.dart';
-import 'package:extera_next/pages/profile/profile.dart';
-import 'package:extera_next/utils/date_time_extension.dart';
-import 'package:extera_next/utils/stream_extension.dart';
-import 'package:extera_next/utils/url_launcher.dart';
-import 'package:extera_next/widgets/avatar.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
-import 'package:extera_next/widgets/list_divider.dart';
-import 'package:extera_next/widgets/matrix.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
-import 'package:extera_next/widgets/mxc_image_viewer.dart';
-import 'package:extera_next/widgets/presence_builder.dart';
-import 'package:extera_next/widgets/rich_presence_card.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
+import 'package:Pulsly/pages/profile/profile.dart';
+import 'package:Pulsly/utils/date_time_extension.dart';
+import 'package:Pulsly/utils/stream_extension.dart';
+import 'package:Pulsly/utils/url_launcher.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/widgets/layouts/max_width_body.dart';
+import 'package:Pulsly/widgets/list_divider.dart';
+import 'package:Pulsly/widgets/matrix.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
+import 'package:Pulsly/widgets/mxc_image_viewer.dart';
+import 'package:Pulsly/widgets/presence_builder.dart';
+import 'package:Pulsly/widgets/rich_presence_card.dart';
 
 class ProfileView extends StatelessWidget {
   final ProfileController controller;

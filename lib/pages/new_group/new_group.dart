@@ -7,10 +7,10 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart' as sdk;
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/new_group/new_group_view.dart';
-import 'package:extera_next/utils/file_selector.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/new_group/new_group_view.dart';
+import 'package:Pulsly/utils/file_selector.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class NewGroup extends StatefulWidget {
   final CreateGroupType createGroupType;

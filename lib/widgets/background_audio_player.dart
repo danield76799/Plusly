@@ -10,7 +10,7 @@ import 'package:opus_caf_converter_dart/opus_caf_converter_dart.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
 
 enum BackgroundAudioStatus { idle, loading, playing, paused, completed }
 

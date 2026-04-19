@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/add_widget_tile_view.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/add_widget_tile_view.dart';
 
 class AddWidgetTile extends StatefulWidget {
   final Room room;

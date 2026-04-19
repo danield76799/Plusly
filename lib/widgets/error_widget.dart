@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/utils/error_reporter.dart';
+import 'package:Pulsly/utils/error_reporter.dart';
 
 class FluffyChatErrorWidget extends StatefulWidget {
   final FlutterErrorDetails details;

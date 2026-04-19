@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/add_widget_tile.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/add_widget_tile.dart';
 
 class AddWidgetTileView extends StatelessWidget {
   final AddWidgetTileState controller;

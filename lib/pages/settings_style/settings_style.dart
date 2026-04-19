@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
-import 'package:extera_next/utils/file_selector.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
-import 'package:extera_next/widgets/theme_builder.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
+import 'package:Pulsly/utils/file_selector.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/widgets/theme_builder.dart';
 import 'settings_style_view.dart';
 
 class SettingsStyle extends StatefulWidget {

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/invitation_selection/invitation_selection.dart';
-import 'package:extera_next/utils/show_profile.dart';
-import 'package:extera_next/widgets/avatar.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/invitation_selection/invitation_selection.dart';
+import 'package:Pulsly/utils/show_profile.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/layouts/max_width_body.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class InvitationSelectionView extends StatelessWidget {
   final InvitationSelectionController controller;

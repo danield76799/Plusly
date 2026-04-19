@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/widgets/layouts/login_scaffold.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/widgets/layouts/login_scaffold.dart';
 import 'login.dart';
 
 class LoginView extends StatelessWidget {

@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/pages/chat/chat.dart';
-import 'package:extera_next/widgets/avatar.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class TypingIndicators extends StatelessWidget {
   final ChatController controller;

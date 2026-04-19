@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/add_widget_tile.dart';
-import 'package:extera_next/pages/chat_widgets/chat_widgets.dart';
-import 'package:extera_next/utils/adaptive_bottom_sheet.dart';
-import 'package:extera_next/utils/stream_extension.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/add_widget_tile.dart';
+import 'package:Pulsly/pages/chat_widgets/chat_widgets.dart';
+import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
+import 'package:Pulsly/utils/stream_extension.dart';
+import 'package:Pulsly/widgets/layouts/max_width_body.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class ChatWidgetsView extends StatelessWidget {
   final ChatWidgetsController controller;

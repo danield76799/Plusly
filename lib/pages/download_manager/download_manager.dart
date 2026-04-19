@@ -6,8 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:matrix/matrix.dart';
 import 'package:provider/provider.dart';
 
-import 'package:extera_next/utils/downloads_directory.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/utils/downloads_directory.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 sealed class DownloadEvent {
   final String downloadName;

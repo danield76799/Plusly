@@ -4,10 +4,10 @@ import 'dart:ui';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/client_manager.dart';
-import 'package:extera_next/utils/platform_infos.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/client_manager.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
 
 class SessionBackup {
   final String? olmAccount;

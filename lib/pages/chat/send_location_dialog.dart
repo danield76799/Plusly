@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/events/map_bubble.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/events/map_bubble.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
 
 class SendLocationDialog extends StatefulWidget {
   final Room room;
