@@ -178,7 +178,7 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
               horizontal: 16.0,
               vertical: 8.0,
             ),
-            child: Linkify(
+            child: SelectableLinkify(
               text: fileDescription,
               textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
               style: TextStyle(
@@ -221,6 +221,7 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
                 decoration: TextDecoration.underline,
                 decorationColor: linkColor,
               ),
+              selectable: true,
               onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
               onCopy: () {
                 Clipboard.setData(ClipboardData(text: event.body));

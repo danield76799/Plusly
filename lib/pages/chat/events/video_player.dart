@@ -175,7 +175,7 @@ class EventVideoPlayer extends StatelessWidget {
             width: width,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Linkify(
+              child: SelectableLinkify(
                 text: fileDescription,
                 textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
                 style: TextStyle(
@@ -217,6 +217,7 @@ class EventVideoPlayer extends StatelessWidget {
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),
+                selectable: true,
                 onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
                 onCopy: () {
                   Clipboard.setData(ClipboardData(text: event.body));
