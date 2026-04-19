@@ -4,13 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:matrix/src/models/timeline_chunk.dart' show TimelineChunk;
 
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/events/message.dart';
-import 'package:extera_next/pages/chat_list/search_title.dart';
-import 'package:extera_next/pages/notifications/notifications.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/events/message.dart';
+import 'package:Pulsly/pages/chat_list/search_title.dart';
+import 'package:Pulsly/pages/notifications/notifications.dart';
+import 'package:Pulsly/widgets/layouts/max_width_body.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class NotificationsView extends StatelessWidget {
   final NotificationsController controller;

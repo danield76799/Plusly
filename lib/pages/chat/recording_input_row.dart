@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/chat_input_row.dart';
-import 'package:extera_next/pages/chat/recording_view_model.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/chat_input_row.dart';
+import 'package:Pulsly/pages/chat/recording_view_model.dart';
 
 class RecordingInputRow extends StatelessWidget {
   final RecordingViewModelState state;

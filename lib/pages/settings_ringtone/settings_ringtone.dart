@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/pages/settings_ringtone/settings_ringtone_view.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/pages/settings_ringtone/settings_ringtone_view.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class SettingsRingtone extends StatefulWidget {
   const SettingsRingtone({super.key});

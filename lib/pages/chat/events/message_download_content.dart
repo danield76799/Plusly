@@ -5,13 +5,13 @@ import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 import 'package:open_file/open_file.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/events/html_message.dart';
-import 'package:extera_next/pages/download_manager/download_manager.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:extera_next/utils/url_launcher.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/events/html_message.dart';
+import 'package:Pulsly/pages/download_manager/download_manager.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:Pulsly/utils/url_launcher.dart';
 
 class MessageDownloadContent extends StatefulWidget {
   final Event event;

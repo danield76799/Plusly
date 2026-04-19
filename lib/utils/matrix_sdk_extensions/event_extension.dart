@@ -7,9 +7,9 @@ import 'package:async/async.dart' as async;
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 
-import 'package:extera_next/pages/download_manager/download_manager.dart';
-import 'package:extera_next/utils/size_string.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/pages/download_manager/download_manager.dart';
+import 'package:Pulsly/utils/size_string.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import 'matrix_file_extension.dart';
 
 extension LocalizedBody on Event {

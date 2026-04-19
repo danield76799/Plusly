@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
 import '../../widgets/matrix.dart';
 
 class EncryptionButton extends StatelessWidget {

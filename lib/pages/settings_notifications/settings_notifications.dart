@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/settings_notifications/push_rule_extensions.dart';
-import 'package:extera_next/utils/localized_exception_extension.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_modal_action_popup.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/settings_notifications/push_rule_extensions.dart';
+import 'package:Pulsly/utils/localized_exception_extension.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import '../../widgets/matrix.dart';
 import 'settings_notifications_view.dart';
 

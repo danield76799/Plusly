@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/utils/bridge_utils.dart';
+import 'package:Pulsly/utils/bridge_utils.dart';
 
 class BridgeFilterBar extends StatelessWidget {
   final Set<String> allBridgeTypes;

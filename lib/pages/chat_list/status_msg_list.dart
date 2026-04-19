@@ -1,16 +1,16 @@
-import 'package:extera_next/utils/matrix_sdk_extensions/interesting_presences_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/interesting_presences_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/utils/show_profile.dart';
-import 'package:extera_next/utils/stream_extension.dart';
-import 'package:extera_next/widgets/avatar.dart';
-import 'package:extera_next/widgets/hover_builder.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/utils/show_profile.dart';
+import 'package:Pulsly/utils/stream_extension.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/hover_builder.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class StatusMessageList extends StatelessWidget {
   final void Function() onStatusEdit;

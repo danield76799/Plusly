@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/pages/chat_search/chat_search_view.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/pages/chat_search/chat_search_view.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class ChatSearchPage extends StatefulWidget {
   final String roomId;

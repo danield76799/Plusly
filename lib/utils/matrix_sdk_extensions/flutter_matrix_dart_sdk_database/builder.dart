@@ -8,10 +8,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:universal_html/html.dart' as html;
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/client_manager.dart';
-import 'package:extera_next/utils/platform_infos.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/client_manager.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
 import 'cipher.dart';
 
 import 'sqlcipher_stub.dart'

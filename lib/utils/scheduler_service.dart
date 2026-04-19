@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/utils/scheduled_messages_service.dart';
+import 'package:Pulsly/utils/scheduled_messages_service.dart';
 
 /// Service to handle background checking of scheduled messages
 class SchedulerService {

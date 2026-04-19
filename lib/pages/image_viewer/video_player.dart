@@ -9,11 +9,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:video_player/video_player.dart';
 
-import 'package:extera_next/pages/image_viewer/image_viewer.dart';
-import 'package:extera_next/utils/localized_exception_extension.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/widgets/blur_hash.dart';
+import 'package:Pulsly/pages/image_viewer/image_viewer.dart';
+import 'package:Pulsly/utils/localized_exception_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/widgets/blur_hash.dart';
 import '../../../utils/error_reporter.dart';
 import '../../widgets/mxc_image.dart';
 

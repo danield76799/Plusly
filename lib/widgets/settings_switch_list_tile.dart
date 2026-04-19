@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/config/setting_keys.dart';
+import 'package:Pulsly/config/setting_keys.dart';
 
 class SettingsSwitchListTile extends StatefulWidget {
   final AppSettings<bool> setting;

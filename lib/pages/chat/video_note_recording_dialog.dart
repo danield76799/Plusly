@@ -8,9 +8,9 @@ import 'package:matrix/matrix.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 
 /// A full-screen dialog for recording video notes, similar to Telegram.
 /// Shows camera preview with controls overlay.

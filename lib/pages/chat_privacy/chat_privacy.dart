@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/pages/chat_privacy/chat_privacy_view.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/pages/chat_privacy/chat_privacy_view.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class ChatPrivacy extends StatefulWidget {
   final String roomId;

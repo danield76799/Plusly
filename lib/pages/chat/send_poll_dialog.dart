@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
 
 class SendPollDialog extends StatefulWidget {
   final Room room;

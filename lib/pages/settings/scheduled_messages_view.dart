@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/scheduled_messages_service.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/scheduled_messages_service.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class ScheduledMessagesView extends StatelessWidget {
   const ScheduledMessagesView({super.key});

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:extera_next/utils/platform_infos.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
 
 String getDownloadsDirectory() {
   if (PlatformInfos.isAndroid) {

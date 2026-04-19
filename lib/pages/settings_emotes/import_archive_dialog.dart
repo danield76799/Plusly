@@ -7,11 +7,11 @@ import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/settings_emotes/settings_emotes.dart';
-import 'package:extera_next/utils/client_manager.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/settings_emotes/settings_emotes.dart';
+import 'package:Pulsly/utils/client_manager.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class ImportEmoteArchiveDialog extends StatefulWidget {
   final EmotesSettingsController controller;

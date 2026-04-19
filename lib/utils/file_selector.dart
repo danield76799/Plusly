@@ -3,8 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:file_selector/file_selector.dart';
 
-import 'package:extera_next/widgets/app_lock.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/widgets/app_lock.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
 
 Future<List<XFile>> selectFiles(
   BuildContext context, {

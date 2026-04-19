@@ -9,15 +9,15 @@ import 'package:image_picker/image_picker.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/file_selector.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_modal_action_popup.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_text_input_dialog.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/file_selector.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_text_input_dialog.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import '../../widgets/matrix.dart';
 import 'settings_view.dart';
 

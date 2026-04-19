@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
-import 'package:extera_next/widgets/list_divider.dart';
-import 'package:extera_next/widgets/settings_switch_list_tile.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/widgets/layouts/max_width_body.dart';
+import 'package:Pulsly/widgets/list_divider.dart';
+import 'package:Pulsly/widgets/settings_switch_list_tile.dart';
 import 'settings_features.dart';
 
 class SettingsFeaturesView extends StatelessWidget {

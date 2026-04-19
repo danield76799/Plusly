@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:extera_next/utils/platform_infos.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
 
 abstract class SettingKeys {
   static const String appLockKey = 'chat.fluffy.app_lock';

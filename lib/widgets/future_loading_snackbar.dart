@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 import 'package:async/async.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/localized_exception_extension.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/localized_exception_extension.dart';
 
 /// Displays a loading snackbar which reacts to the given [future]. Unlike
 /// [showFutureLoadingDialog], this does not block the UI — the user can

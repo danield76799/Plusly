@@ -4,12 +4,12 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/device_settings/device_settings_view.dart';
-import 'package:extera_next/pages/key_verification/key_verification_dialog.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_text_input_dialog.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/device_settings/device_settings_view.dart';
+import 'package:Pulsly/pages/key_verification/key_verification_dialog.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_text_input_dialog.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import '../../widgets/matrix.dart';
 
 class DevicesSettings extends StatefulWidget {

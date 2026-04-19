@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/url_launcher.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/url_launcher.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
 
 class RichPresenceContent extends StatelessWidget {
   final Map<String, dynamic> richPresenceData;

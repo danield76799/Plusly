@@ -5,12 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/intro/flows/restore_backup_flow.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/widgets/layouts/login_scaffold.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/intro/flows/restore_backup_flow.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/widgets/layouts/login_scaffold.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 /// Plusly theme colors for branding pages
 class PluslyColors {

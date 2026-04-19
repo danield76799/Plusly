@@ -4,17 +4,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/events/html_message.dart';
-import 'package:extera_next/pages/image_viewer/image_viewer.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/event_extension.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/size_string.dart';
-import 'package:extera_next/utils/url_launcher.dart';
-import 'package:extera_next/widgets/blur_hash.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/events/html_message.dart';
+import 'package:Pulsly/pages/image_viewer/image_viewer.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/size_string.dart';
+import 'package:Pulsly/utils/url_launcher.dart';
+import 'package:Pulsly/widgets/blur_hash.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
 
 class EventVideoPlayer extends StatelessWidget {
   final Event event;

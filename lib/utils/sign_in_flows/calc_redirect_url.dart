@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 
 import 'package:universal_html/html.dart' as html;
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/utils/platform_infos.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
 
 (Uri redirectUrl, String urlScheme) calcRedirectUrl({
   bool withAuthHtmlPath = false,

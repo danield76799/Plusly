@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/settings_password/settings_password.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/settings_password/settings_password.dart';
+import 'package:Pulsly/widgets/layouts/max_width_body.dart';
 
 class SettingsPasswordView extends StatelessWidget {
   final SettingsPasswordController controller;

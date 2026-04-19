@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/chat.dart';
-import 'package:extera_next/pages/chat/chat_app_bar_list_tile.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_modal_action_popup.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/pages/chat/chat_app_bar_list_tile.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
 
 class PinnedEvents extends StatelessWidget {
   final ChatController controller;

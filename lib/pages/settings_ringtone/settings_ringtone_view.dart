@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/config/app_config.dart';
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/settings_ringtone/settings_ringtone.dart';
-import 'package:extera_next/widgets/layouts/max_width_body.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/settings_ringtone/settings_ringtone.dart';
+import 'package:Pulsly/widgets/layouts/max_width_body.dart';
 
 class SettingsRingtoneView extends StatelessWidget {
   final SettingsRingtoneController controller;

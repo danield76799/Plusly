@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/chat.dart';
-import 'package:extera_next/widgets/matrix.dart';
-import 'package:extera_next/widgets/share_scaffold_dialog.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/widgets/matrix.dart';
+import 'package:Pulsly/widgets/share_scaffold_dialog.dart';
 
 class ThreadPage extends StatelessWidget {
   final String roomId;

@@ -4,12 +4,12 @@ import 'package:collection/collection.dart';
 import 'package:emojis/emoji.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/chat/sticker_picker_dialog.dart';
-import 'package:extera_next/widgets/emoji_picker.dart';
-import 'package:extera_next/widgets/matrix.dart';
-import 'package:extera_next/widgets/mxc_image.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/sticker_picker_dialog.dart';
+import 'package:Pulsly/widgets/emoji_picker.dart';
+import 'package:Pulsly/widgets/matrix.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
 import 'chat.dart';
 
 class ChatEmojiPicker extends StatelessWidget {

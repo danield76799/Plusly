@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import '../../config/themes.dart';
 import 'chat.dart';
 import 'events/reply_content.dart';

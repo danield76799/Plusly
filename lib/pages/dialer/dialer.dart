@@ -12,14 +12,14 @@ import 'package:hotkey_manager/hotkey_manager.dart';
 import 'package:matrix/matrix.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import 'package:extera_next/config/setting_keys.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/pages/dialer/task_handler.dart';
-import 'package:extera_next/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/voip/video_renderer.dart';
-import 'package:extera_next/widgets/avatar.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/dialer/task_handler.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/voip/video_renderer.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 import 'pip/pip_view.dart';
 
 // Add this outside of the Calling class

@@ -9,17 +9,17 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/encryption.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/themes.dart';
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/error_reporter.dart';
-import 'package:extera_next/utils/fluffy_share.dart';
-import 'package:extera_next/utils/localized_exception_extension.dart';
-import 'package:extera_next/utils/platform_infos.dart';
-import 'package:extera_next/utils/sync_status_localization.dart';
-import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:extera_next/widgets/future_loading_dialog.dart';
-import 'package:extera_next/widgets/layouts/login_scaffold.dart';
-import 'package:extera_next/widgets/matrix.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/error_reporter.dart';
+import 'package:Pulsly/utils/fluffy_share.dart';
+import 'package:Pulsly/utils/localized_exception_extension.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/sync_status_localization.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
+import 'package:Pulsly/widgets/future_loading_dialog.dart';
+import 'package:Pulsly/widgets/layouts/login_scaffold.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 import '../key_verification/key_verification_dialog.dart';
 
 /// Plusly theme for recovery key screens

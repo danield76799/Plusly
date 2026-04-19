@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/utils/url_launcher.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/url_launcher.dart';
 
 enum OkCancelResult { ok, cancel }
 

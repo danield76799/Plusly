@@ -32,11 +32,11 @@ import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 
-import 'package:extera_next/generated/l10n/l10n.dart';
-import 'package:extera_next/main.dart';
-import 'package:extera_next/utils/notification_background_handler.dart';
-import 'package:extera_next/utils/push_helper.dart';
-import 'package:extera_next/widgets/fluffy_chat_app.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/main.dart';
+import 'package:Pulsly/utils/notification_background_handler.dart';
+import 'package:Pulsly/utils/push_helper.dart';
+import 'package:Pulsly/widgets/fluffy_chat_app.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import '../widgets/matrix.dart';
