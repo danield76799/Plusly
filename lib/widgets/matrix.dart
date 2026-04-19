@@ -93,6 +93,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     final i = widget.clients.indexWhere((c) => c == cl);
     if (i != -1) {
       _activeClient = i;
+      AppSettings.selectedAccount.setItem(cl!.clientName);
       // TODO: Multi-client VoiP support
       createVoipPlugin();
     } else {
@@ -326,6 +327,13 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   void initMatrix() {
     for (final c in widget.clients) {
       _registerSubs(c.clientName);
+    }
+
+    if (AppSettings.selectedAccount.value.isNotEmpty) {
+      final selectedClient = widget.clients.firstWhereOrNull((cl) => cl.clientName == AppSettings.selectedAccount.value);
+      if (selectedClient != null) {
+        setActiveClient(selectedClient);
+      }
     }
 
     if (PlatformInfos.isMobile) {

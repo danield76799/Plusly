@@ -14,6 +14,7 @@ abstract class SettingKeys {
 }
 
 enum AppSettings<T> {
+  selectedAccount<String>('xyz.extera.selectedAccount', ''),
   uiFont<String>('xyz.extera.uiFont', ''),
   fallbackFonts<String>('xyz.extera.fallbackFonts', 'SystemFont,Roboto'),
   enablePeopleTab<bool>('xyz.extera.enablePeopleTab', true),
