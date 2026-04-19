@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
+import 'package:Pulsly/utils/check_updates.dart';
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
@@ -324,13 +325,11 @@ class SettingsView extends StatelessWidget {
                                 color: theme.colorScheme.onTertiary,
                               ),
                             ),
-                            trailing: Switch(
-                              value: AppSettings.checkForUpdates.value,
-                              onChanged: controller.setCheckForUpdates,
+                            trailing: IconButton(
+                              icon: const Icon(Icons.refresh),
+                              onPressed: () => checkForUpdates(context),
                             ),
-                            onTap: () => controller.setCheckForUpdates(
-                              !AppSettings.checkForUpdates.value,
-                            ),
+                            onTap: () => checkForUpdates(context),
                           ),
                         ],
                       ),
