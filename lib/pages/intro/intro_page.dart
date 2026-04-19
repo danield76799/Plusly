@@ -14,9 +14,10 @@ import 'package:Pulsly/widgets/matrix.dart';
 
 /// Plusly theme colors for branding pages
 class PluslyColors {
-  static const bgColor     = Color(0xFFFDF6F0);  // warm cream
-  static const textColor   = Color(0xFF2D1C16);  // dark brown
-  static const accentColor = Color(0xFF8B5E34);  // bronze
+  static const bgColor     = Color(0xFF0a0a0f);  // dark background
+  static const textColor   = Color(0xFFFFFFFF);  // white text
+  static const accentColor = Color(0xFF40E0D0);  // turquoise
+  static const secondaryColor = Color(0xFF00B4A6);  // dark turquoise
 }
 
 class IntroPage extends StatelessWidget {
@@ -31,15 +32,15 @@ class IntroPage extends StatelessWidget {
     return Theme(
       data: ThemeData(
         useMaterial3: true,
-        brightness: Brightness.light,
+        brightness: Brightness.dark,
         scaffoldBackgroundColor: PluslyColors.bgColor,
-        colorScheme: const ColorScheme.light(
+        colorScheme: const ColorScheme.dark(
           surface: PluslyColors.bgColor,
           onSurface: PluslyColors.textColor,
           primary: PluslyColors.accentColor,
           onPrimary: PluslyColors.bgColor,
-          secondary: PluslyColors.accentColor,
-          onSecondary: PluslyColors.bgColor,
+          secondary: PluslyColors.secondaryColor,
+          onSecondary: PluslyColors.textColor,
         ),
         textTheme: const TextTheme(
           bodyLarge:  TextStyle(color: PluslyColors.textColor),
