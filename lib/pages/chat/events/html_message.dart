@@ -415,7 +415,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
               uri: mxcUrl,
               width: actualWidth,
               height: actualHeight,
-              isThumbnail: (actualWidth * actualHeight) > (256 * 256),
+              isThumbnail: true,
             ),
           ),
         );
