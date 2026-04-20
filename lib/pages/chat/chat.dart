@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart' hide Category;
@@ -454,6 +455,10 @@ class ChatController extends State<ChatPageWithRoom>
               value['formatted_body'] is String) {
             value['formatted_body'] =
                 "<strong>${item.attribution}</strong><blockquote>${value['formatted_body']}</blockquote>";
+          } else {
+            value['format'] = 'org.matrix.custom.html';
+            value['formatted_body'] =
+                "<strong>${item.attribution}</strong><blockquote>${htmlEscape.convert(value['body'] as String)}</blockquote>";
           }
           value['xyz.extera.forward'] = {'attribution': item.attribution};
         }
@@ -655,9 +660,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
-  void _onNewEvent() {
-    
-  }
+  void _onNewEvent() {}
 
   Future<void> _getTimeline({String? eventContextId}) async {
     _scrollAnchorEventId = null;
