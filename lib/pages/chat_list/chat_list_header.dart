@@ -147,7 +147,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                             style: const TextStyle(fontSize: 14),
                             onChanged: (text) => controller.onSearchEnter(
                               text,
-                              globalSearch: false,
+                              globalSearch: true,
                             ),
                             onSubmitted: (text) => controller.onSearchEnter(
                               text,
