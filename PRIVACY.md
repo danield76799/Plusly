@@ -1,6 +1,6 @@
 # Privacy Policy for Plusly
 
-**Plusly** is a Matrix client developed by Daan D. (also known as krille-chan, the developer of FluffyChat).
+**Plusly** is a Matrix client developed by Daan D.
 
 ## Contact
 
@@ -8,7 +8,7 @@ For privacy concerns, contact us at: **danielplusly@gmail.com**
 
 ## About Plusly
 
-Plusly is a fork of [FluffyChat](https://fluffychat.im), developed by the same creator. Plusly builds on FluffyChat's features with additional enhancements.
+Plusly is a fork of [FluffyChat](https://fluffychat.im), developed by Daan D. Plusly builds on FluffyChat's features with additional enhancements.
 
 ## Data Handling
 
