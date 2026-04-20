@@ -95,6 +95,23 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                       height: 40,
                     ),
                     const Spacer(),
+                    // Tijd weergave
+                    StreamBuilder(
+                      stream: Stream.periodic(const Duration(seconds: 1)),
+                      builder: (context, snapshot) {
+                        final now = DateTime.now();
+                        final timeString = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+                        return Text(
+                          timeString,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 16),
                     if (progress == 0.0 && !controller.isSearchMode)
                       IconButton(
                         onPressed: () {
