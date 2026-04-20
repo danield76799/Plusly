@@ -1,5 +1,5 @@
 /*
-package com.danield.extrachat
+package com.danield.plusly
 
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
