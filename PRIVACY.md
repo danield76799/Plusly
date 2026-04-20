@@ -1,6 +1,6 @@
 # Privacy Policy for Plusly
 
-**Plusly** is a Matrix client developed by Daan D.
+**Plusly** is a Matrix client developed by **Daniel Plusly**.
 
 ## Contact
 
