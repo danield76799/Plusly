@@ -64,12 +64,19 @@ Future<GitHubRelease?> getLatestRelease() async {
           'Accept': 'application/vnd.github+json',
           'User-Agent': 'ExteraApp',
         },
+        // Timeout voor API call
+        sendTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
       ),
     );
 
     if (response.statusCode == 200) {
       return GitHubRelease.fromJson(response.data as Map<String, dynamic>);
+    } else {
+      Logs().w('GitHub API returned status ${response.statusCode}');
     }
+  } on DioException catch (e) {
+    Logs().e('Failed to fetch GitHub release', 'DioError: ${e.type} - ${e.message}');
   } catch (e) {
     Logs().e('Failed to fetch GitHub release', e);
   }
@@ -105,29 +112,47 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
   final l10n = L10n.of(context);
   final scaffold = ScaffoldMessenger.of(context);
 
+  // Progress state
+  var progress = 0.0;
+  var statusText = 'Downloaden...';
+
   try {
-    // Show downloading indicator
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.downloadUpdateButton),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(
-              'Downloaden...',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
+    // Show downloading indicator with progress
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(l10n.downloadUpdateButton),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(value: progress > 0 ? progress : null),
+                  const SizedBox(height: 16),
+                  Text(
+                    statusText,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  if (progress > 0)
+                    Text(
+                      '${(progress * 100).toStringAsFixed(0)}%',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                ],
+              ),
+            );
+          },
         ),
-      ),
-    );
+      );
+    }
 
     final tempDir = await getTemporaryDirectory();
     final fileName = url.split('/').last;
+    if (fileName.isEmpty) {
+      throw Exception('Ongeldige download URL');
+    }
     final filePath = '${tempDir.path}/$fileName';
 
     await Dio().download(
@@ -138,22 +163,100 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
           'Accept': 'application/vnd.android.package-archive',
           'User-Agent': 'ExteraApp',
         },
+        // 30 seconden timeout voor connect + receive
+        receiveTimeout: const Duration(seconds: 30),
+        sendTimeout: const Duration(seconds: 10),
       ),
+      onReceiveProgress: (received, total) {
+        if (total > 0) {
+          progress = received / total;
+          statusText = 'Downloaden... ${(progress * 100).toStringAsFixed(0)}%';
+        } else {
+          statusText = 'Downloaden... ${(received / 1024 / 1024).toStringAsFixed(1)} MB';
+        }
+        // Force dialog rebuild
+        if (context.mounted) {
+          (context as Element).markNeedsBuild();
+        }
+      },
     );
+
+    // Verify file exists and has content
+    final file = File(filePath);
+    if (!await file.exists()) {
+      throw Exception('Bestand niet gevonden na download');
+    }
+    final fileSize = await file.length();
+    if (fileSize == 0) {
+      throw Exception('Gedownload bestand is leeg');
+    }
 
     if (context.mounted) {
       // Close downloading dialog
       Navigator.of(context).pop();
     }
 
-    // Open the APK — Android will show the install prompt
-    await OpenFile.open(filePath);
-
-  } catch (e) {
+    // Show success message
     if (context.mounted) {
-      Navigator.of(context).pop(); // close dialog if still open
       scaffold.showSnackBar(
-        SnackBar(content: Text('Download mislukt: $e')),
+        SnackBar(
+          content: Text('Download compleet! Installeren...'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+
+    // Open the APK — Android will show the install prompt
+    final result = await OpenFile.open(filePath);
+    if (result.type != ResultType.done) {
+      throw Exception('Kon APK niet openen: ${result.message}');
+    }
+
+  } on DioException catch (e) {
+    // Handle Dio specific errors
+    if (context.mounted && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+    
+    String errorMsg;
+    switch (e.type) {
+      case DioExceptionType.connectionTimeout:
+      case DioExceptionType.sendTimeout:
+      case DioExceptionType.receiveTimeout:
+        errorMsg = 'Download timeout - check je internetverbinding';
+        break;
+      case DioExceptionType.badResponse:
+        errorMsg = 'Server fout: ${e.response?.statusCode ?? 'onbekend'}';
+        break;
+      case DioExceptionType.cancel:
+        errorMsg = 'Download geannuleerd';
+        break;
+      default:
+        errorMsg = 'Download mislukt: ${e.message}';
+    }
+    
+    if (context.mounted) {
+      scaffold.showSnackBar(
+        SnackBar(
+          content: Text(errorMsg),
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: 'OK',
+            onPressed: () {},
+          ),
+        ),
+      );
+    }
+  } catch (e) {
+    if (context.mounted && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+    if (context.mounted) {
+      scaffold.showSnackBar(
+        SnackBar(
+          content: Text('Download mislukt: $e'),
+          duration: const Duration(seconds: 5),
+        ),
       );
     }
   }
