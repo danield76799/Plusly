@@ -1,4 +1,4 @@
-package com.danield.extrachat
+package com.danield.plusly
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -25,11 +25,11 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun handleWidgetIntent(intent: Intent) {
-        if (intent.action == "com.danield.extrachat.OPEN_CHAT") {
+        if (intent.action == "com.danield.plusly.OPEN_CHAT") {
             val chatId = intent.getStringExtra("chatId")
             if (chatId != null && engine != null) {
                 // Send message to Flutter to open this chat
-                val channel = io.flutter.plugin.common.MethodChannel(engine!!.dartExecutor.binaryMessenger, "com.danield.extrachat/widget")
+                val channel = io.flutter.plugin.common.MethodChannel(engine!!.dartExecutor.binaryMessenger, "com.danield.plusly/widget")
                 channel.invokeMethod("openChat", chatId)
             }
         }
@@ -43,7 +43,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         
         // Register method channel for widget data path
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.danield.extrachat/widget_data").setMethodCallHandler { call, result ->
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.danield.plusly/widget_data").setMethodCallHandler { call, result ->
             when (call.method) {
                 "getWidgetDataPath" -> {
                     val path = filesDir.resolve("chat_widget_data.json").absolutePath
