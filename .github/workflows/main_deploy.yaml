@@ -103,12 +103,18 @@ jobs:
       - name: Setup Flutter
         run: |
           git clone https://github.com/flutter/flutter.git -b stable --depth 1
-          cmd /c "flutter\bin\flutter.bat doctor -v"
+          cmd /c "flutter\bin\flutter.bat doctor"
       - name: Build Windows
         run: |
           cmd /c "flutter\bin\flutter.bat pub get"
           cmd /c "flutter\bin\flutter.bat build windows --release"
+          cmd /c "dir build /s /b | findstr .exe"
+      - name: Find Windows exe
+        run: |
+          Get-ChildItem -Path . -Recurse -Filter "*.exe" | Select-Object FullName, Length
+          Get-ChildItem -Path build -Recurse -Filter "*.exe" | Select-Object FullName, Length
       - name: Upload Windows Artifact
+        if: Test-Path "build\windows\runner\Release\Plusly.exe"
         uses: actions/upload-artifact@v4
         with:
           name: windows-exe
