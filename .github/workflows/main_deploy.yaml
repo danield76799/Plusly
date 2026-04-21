@@ -151,9 +151,13 @@ jobs:
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
           flutter build windows --release 2>&1 | tee build_windows.log
-          if [ -f build/windows/runner/Release/Plusly.exe ]; then echo "SUCCESS: Windows exe found"; else echo "ERROR: Windows exe NOT found"; cat build_windows.log; fi
+          echo "=== Looking for Windows exe ==="
+          find build/windows -name "*.exe" 2>/dev/null || echo "No exe found via find"
+          ls -la build/windows/runner/Release/ 2>/dev/null || echo "Release directory not found"
+          if [ -f build/windows/runner/Release/Plusly.exe ]; then echo "SUCCESS: Plusly.exe found"; fi
+          if [ -f build/windows/runner/Release/*.exe ]; then echo "Found exe files"; ls -la build/windows/runner/Release/*.exe; fi
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-exe
-          path: build/windows/runner/Release/Plusly.exe
+          path: build/windows/runner/Release/
