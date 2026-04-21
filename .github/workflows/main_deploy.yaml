@@ -140,7 +140,7 @@ jobs:
       - name: Build Web
         run: |
           flutter pub get
-          flutter build web --release --base-href=/Plusly/plusly/ 2>&1 | tee build.log
+          flutter build web --release --base-href=/Plusly/ 2>&1 | tee build.log
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           echo "=== Build completed with exit code: $BUILD_EXIT_CODE ==="
           if [ $BUILD_EXIT_CODE -ne 0 ]; then
