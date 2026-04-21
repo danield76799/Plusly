@@ -1,11 +1,11 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var B,C,A={
-dE7(){return new A.MP(B.eq("de"))},
-MP:function MP(d){this.a=d}}
+dE7(){return new A.MQ(B.eq("de"))},
+MQ:function MQ(d){this.a=d}}
 B=c[0]
 C=c[52]
 A=a.updateHolder(c[11],A)
-A.MP.prototype={
+A.MQ.prototype={
 gtd(){return"No messages yet"},
 gpD(){return"New sub space"},
 gt4(){return"Move to different space"},
@@ -812,8 +812,8 @@ goZ(){return"If disabled, media won't load automatically until you click it."},
 grB(){return'Enable "People" tab'},
 E(d,e){return this.gbD(this).$1(e)}}
 var z=a.updateTypes([]);(function inheritance(){var x=a.inherit
-x(A.MP,C.bk)})()
-B.f0(b.typeUniverse,JSON.parse('{"MP":{"bk":[]}}'))
+x(A.MQ,C.bk)})()
+B.f0(b.typeUniverse,JSON.parse('{"MQ":{"bk":[]}}'))
 var y={b:"Die App versucht nun, deine Sitzung aus der Sicherung wiederherzustellen. Bitte melde diesen Fehler an die Entwickler unter "}};
-(a=>{a["miu0+bdOwVyJ+NbgHT/2QkWiF7Y="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["lGVGPzIpDilAajivbJCA8qPoo2Y="]=a.current})($__dart_deferred_initializers__);
 //# sourceMappingURL=main.dart.js_217.part.js.map
