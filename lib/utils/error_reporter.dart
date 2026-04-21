@@ -1,6 +1,6 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:matrix/matrix.dart';

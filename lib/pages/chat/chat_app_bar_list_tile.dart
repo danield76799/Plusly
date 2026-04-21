@@ -1,4 +1,4 @@
-import 'package:fluffychat/utils/url_launcher.dart';
+import 'package:plusly/utils/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 

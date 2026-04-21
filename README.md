@@ -1,14 +1,14 @@
 ![Screenshot](https://github.com/krille-chan/fluffychat/blob/main/assets/banner_transparent.png?raw=true)
 
-[FluffyChat](https://fluffy.chat) is an open source, nonprofit and cute [[matrix](https://matrix.org)] client written in [Flutter](https://flutter.dev). The goal of the app is to create an easy to use instant messenger which is open source and accessible for everyone.
+[Plusly](https://plusly.im) is an open source, nonprofit and cute [[matrix](https://matrix.org)] client written in [Flutter](https://flutter.dev). The goal of the app is to create an easy to use instant messenger which is open source and accessible for everyone.
 
 ### Links:
 
-- 🌐 [[Weblate] Translate FluffyChat into your language](https://hosted.weblate.org/projects/fluffychat/)
+- 🌐 [[Weblate] Translate Plusly into your language](https://hosted.weblate.org/projects/fluffychat/)
 - 🌍 [[m] Join the community](https://matrix.to/#/#fluffy-space:matrix.org)
 - 📰 [[Mastodon] Get updates on social media](https://troet.cafe/@krille)
 - 🖥️ [[Famedly] Server hosting and professional support](https://famedly.com/kontakt)
-- 💝 [[Liberapay] Support FluffyChat development](https://de.liberapay.com/KrilleChritzelius)
+- 💝 [[Liberapay] Support development](https://de.liberapay.com/KrilleChritzelius)
 
 <a href='https://ko-fi.com/C1C86VN53' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://storage.ko-fi.com/cdn/kofi5.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 
@@ -44,16 +44,16 @@
 
 Please visit the website for installation instructions:
 
-- https://fluffy.chat
+- https://plusly.im
 
 # How to build
 
-1. To build FluffyChat you need [Flutter](https://flutter.dev) and [Rust](https://www.rust-lang.org/tools/install)
+1. To build Plusly you need [Flutter](https://flutter.dev) and [Rust](https://www.rust-lang.org/tools/install)
 
 2. Clone the repo:
 ```
-git clone https://github.com/krille-chan/fluffychat.git
-cd fluffychat
+git clone https://github.com/danield76799/Plusly.git
+cd plusly
 ```
 3. Choose your target platform below and enable support for it.
 3.1 If you want, enable Googles Firebase Cloud Messaging:

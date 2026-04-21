@@ -1,6 +1,6 @@
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/widgets/future_loading_dialog.dart';
+import 'package:plusly/widgets/layouts/max_width_body.dart';
 import 'package:flutter/material.dart';
 
 import '../../widgets/matrix.dart';

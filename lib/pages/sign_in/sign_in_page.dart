@@ -1,13 +1,13 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/sign_in/view_model/model/public_homeserver_data.dart';
-import 'package:fluffychat/pages/sign_in/view_model/sign_in_view_model.dart';
-import 'package:fluffychat/utils/localized_exception_extension.dart';
-import 'package:fluffychat/utils/sign_in_flows/check_homeserver.dart';
-import 'package:fluffychat/widgets/layouts/login_scaffold.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/view_model_builder.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/config/themes.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/pages/sign_in/view_model/model/public_homeserver_data.dart';
+import 'package:plusly/pages/sign_in/view_model/sign_in_view_model.dart';
+import 'package:plusly/utils/localized_exception_extension.dart';
+import 'package:plusly/utils/sign_in_flows/check_homeserver.dart';
+import 'package:plusly/widgets/layouts/login_scaffold.dart';
+import 'package:plusly/widgets/matrix.dart';
+import 'package:plusly/widgets/view_model_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 

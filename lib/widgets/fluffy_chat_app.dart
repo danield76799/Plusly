@@ -1,10 +1,10 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/routes.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/widgets/app_lock.dart';
-import 'package:fluffychat/widgets/theme_builder.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/config/routes.dart';
+import 'package:plusly/config/setting_keys.dart';
+import 'package:plusly/config/themes.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/widgets/app_lock.dart';
+import 'package:plusly/widgets/theme_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';

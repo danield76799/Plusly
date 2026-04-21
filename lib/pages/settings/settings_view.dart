@@ -1,9 +1,9 @@
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/fluffy_share.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:plusly/config/setting_keys.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/utils/fluffy_share.dart';
+import 'package:plusly/utils/platform_infos.dart';
+import 'package:plusly/widgets/avatar.dart';
+import 'package:plusly/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';

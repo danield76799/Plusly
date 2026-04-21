@@ -1,8 +1,8 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/pages/chat/events/video_player.dart';
-import 'package:fluffychat/pages/chat_search/search_footer.dart';
-import 'package:fluffychat/pages/image_viewer/image_viewer.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/pages/chat/events/video_player.dart';
+import 'package:plusly/pages/chat_search/search_footer.dart';
+import 'package:plusly/pages/image_viewer/image_viewer.dart';
+import 'package:plusly/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';

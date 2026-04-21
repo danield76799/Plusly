@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:plusly/config/setting_keys.dart';
+import 'package:plusly/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

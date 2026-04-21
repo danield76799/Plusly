@@ -1,5 +1,5 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/themes.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/config/themes.dart';
 import 'package:flutter/material.dart';
 
 Future<T?> showScaffoldDialog<T>({

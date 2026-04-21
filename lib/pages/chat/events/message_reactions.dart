@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/widgets/avatar.dart';
+import 'package:plusly/widgets/future_loading_dialog.dart';
+import 'package:plusly/widgets/matrix.dart';
+import 'package:plusly/widgets/mxc_image.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

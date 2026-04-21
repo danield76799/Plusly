@@ -24,11 +24,11 @@ import 'dart:isolate';
 import 'dart:ui';
 
 //<GOOGLE_SERVICES>import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/main.dart';
-import 'package:fluffychat/utils/notification_background_handler.dart';
-import 'package:fluffychat/utils/push_helper.dart';
-import 'package:fluffychat/widgets/fluffy_chat_app.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/main.dart';
+import 'package:plusly/utils/notification_background_handler.dart';
+import 'package:plusly/utils/push_helper.dart';
+import 'package:plusly/widgets/fluffy_chat_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';

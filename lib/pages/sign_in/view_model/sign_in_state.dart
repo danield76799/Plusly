@@ -1,4 +1,4 @@
-import 'package:fluffychat/pages/sign_in/view_model/model/public_homeserver_data.dart';
+import 'package:plusly/pages/sign_in/view_model/model/public_homeserver_data.dart';
 import 'package:flutter/material.dart';
 
 class SignInState {

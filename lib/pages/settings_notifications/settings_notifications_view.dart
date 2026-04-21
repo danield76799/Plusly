@@ -1,7 +1,7 @@
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/settings_notifications/push_rule_extensions.dart';
-import 'package:fluffychat/widgets/layouts/max_width_body.dart';
+import 'package:plusly/config/themes.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/pages/settings_notifications/push_rule_extensions.dart';
+import 'package:plusly/widgets/layouts/max_width_body.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

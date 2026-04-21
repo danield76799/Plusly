@@ -1,4 +1,4 @@
-import 'package:fluffychat/widgets/lock_screen.dart';
+import 'package:plusly/widgets/lock_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:matrix/matrix.dart';

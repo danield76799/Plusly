@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/oidc_session_json_extension.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/sign_in_flows/calc_redirect_url.dart';
+import 'package:plusly/config/setting_keys.dart';
+import 'package:plusly/utils/matrix_sdk_extensions/oidc_session_json_extension.dart';
+import 'package:plusly/utils/platform_infos.dart';
+import 'package:plusly/utils/sign_in_flows/calc_redirect_url.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
