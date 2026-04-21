@@ -86,7 +86,7 @@ jobs:
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
           echo "=== Starting Android APK Build ==="
-          flutter build apk --release --target-platform android-arm64 2>&1 | tee build.log
+          flutter build apk --release --target-platform android-arm64,android-arm 2>&1 | tee build.log
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           echo "=== Build completed with exit code: $BUILD_EXIT_CODE ==="
           ls -la build/app/outputs/apk/release/ 2>/dev/null || ls -la build/app/outputs/ 2>/dev/null || ls -la build/app/ 2>/dev/null || echo "No build/app directory found"
@@ -109,11 +109,13 @@ jobs:
           name: android-build-log
           path: build.log
           retention-days: 30
-      - name: Upload APK Artifact
+      - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: build/app/outputs/apk/release/app-release.apk
+          path: |
+            build/app/outputs/apk/release/app-armeabi-v7a-release.apk
+            build/app/outputs/apk/release/app-arm64-v8a-release.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -125,7 +127,9 @@ jobs:
             - Run: ${{ github.run_number }}
             - Commit: ${{ github.sha }}
             - Package: com.danield.plusly
-          files: build/app/outputs/apk/release/app-release.apk
+          files: |
+            build/app/outputs/apk/release/app-armeabi-v7a-release.apk
+            build/app/outputs/apk/release/app-arm64-v8a-release.apk
           prerelease: true
           generate_release_notes: false
         env:
