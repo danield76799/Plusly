@@ -103,15 +103,22 @@ jobs:
       - name: Setup Flutter
         run: |
           git clone https://github.com/flutter/flutter.git -b stable --depth 1
-      - name: Verify Flutter
-        run: |
-          .\flutter\bin\flutter.cmd doctor -v
-          .\flutter\bin\flutter.cmd --version
-      - run: .\flutter\bin\flutter.cmd pub get
+          if (Test-Path ".\flutter\bin\flutter.cmd") {
+            Write-Host "Flutter cloned successfully"
+            .\flutter\bin\flutter.cmd doctor -v
+          } else {
+            Write-Host "ERROR: flutter.cmd not found"
+            Get-ChildItem -Recurse -Filter "*.cmd" | Select-Object FullName
+          }
       - name: Build Windows
         run: |
           .\flutter\bin\flutter.cmd pub get
           .\flutter\bin\flutter.cmd build windows --release 2>&1 | Tee-Object -FilePath build_windows.log
+          if (Test-Path "build\windows\runner\Release\Plusly.exe") {
+            Write-Host "SUCCESS: Plusly.exe found"
+          } else {
+            Write-Host "ERROR: Plusly.exe not found"
+          }
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
