@@ -1,4 +1,4 @@
-name: Main Deploy Workflow
+﻿name: Main Deploy Workflow
 
 on:
   push:
@@ -144,7 +144,7 @@ jobs:
         run: |
           .\flutter\bin\flutter.cmd doctor -v
           .\flutter\bin\flutter.cmd --version
-      - run: .lutter\bin\flutter.cmd pub get
+      - run: .\flutter\bin\flutter.cmd pub get
       - name: Build Windows
         run: |
           .\flutter\bin\flutter.cmd pub get
@@ -154,3 +154,5 @@ jobs:
         with:
           name: windows-exe
           path: build/windows/runner/Release/
+
+
