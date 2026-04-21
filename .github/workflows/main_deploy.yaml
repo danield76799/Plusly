@@ -136,7 +136,7 @@ jobs:
         run: |
           chmod +x scripts/prepare-web.sh
           ./scripts/prepare-web.sh
-          ls -la assets/js/package/
+          ls -la web/assets/assets/js/package/
       - name: Build Web
         run: |
           flutter pub get
