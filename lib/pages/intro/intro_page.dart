@@ -137,12 +137,26 @@ class IntroPage extends StatelessWidget {
                           Container(
                             alignment: Alignment.center,
                             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Hero(
-                              tag: 'info-logo',
-                              child: Image.asset(
-                                './assets/logo.png',
-                                fit: BoxFit.fitWidth,
-                              ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Plusly',
+                                  style: TextStyle(
+                                    fontSize: 48,
+                                    fontWeight: FontWeight.bold,
+                                    color: PluslyColors.accentColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'a fork of FluffyChat/Extera Next',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: PluslyColors.textColor,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 32),
