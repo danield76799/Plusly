@@ -121,7 +121,7 @@ jobs:
           tag_name: plusly-build-${{ github.run_number }}
           name: Plusly Build ${{ github.run_number }}
           body: |
-            Automated APK build for Plusly
+            Automated build for Plusly
             - Run: ${{ github.run_number }}
             - Commit: ${{ github.sha }}
             - Package: com.danield.plusly
@@ -130,3 +130,28 @@ jobs:
           generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build_windows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Flutter
+        run: |
+          git clone https://github.com/flutter/flutter.git -b stable --depth 1
+          echo "$PWD/flutter/bin" >> $GITHUB_PATH
+      - name: Verify Flutter
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter doctor -v
+          flutter --version
+      - run: export PATH="$PWD/flutter/bin:$PATH" && flutter pub get
+      - name: Build Windows
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter build windows --release 2>&1 | tee build_windows.log
+          if [ -f build/windows/runner/Release/Plusly.exe ]; then echo "SUCCESS: Windows exe found"; else echo "ERROR: Windows exe NOT found"; cat build_windows.log; fi
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: build/windows/runner/Release/Plusly.exe
