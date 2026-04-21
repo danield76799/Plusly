@@ -89,11 +89,11 @@ jobs:
           flutter build apk --release --target-platform android-arm64,android-arm 2>&1 | tee build.log
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           echo "=== Build completed with exit code: $BUILD_EXIT_CODE ==="
-          ls -la build/app/outputs/apk/release/ 2>/dev/null || ls -la build/app/outputs/ 2>/dev/null || ls -la build/app/ 2>/dev/null || echo "No build/app directory found"
+          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || ls -la build/app/outputs/ 2>/dev/null || ls -la build/app/ 2>/dev/null || echo "No build/app directory found"
           find . -name "*.apk" 2>/dev/null || echo "No APK files found"
-          if [ -f build/app/outputs/apk/release/app-release.apk ]; then
+          if [ -f build/app/outputs/flutter-apk/app-release.apk ]; then
             echo "SUCCESS: APK found"
-            ls -la build/app/outputs/apk/release/
+            ls -la build/app/outputs/flutter-apk/
           else
             echo "ERROR: APK NOT found"
             echo "=== Last 100 lines of build.log ==="
@@ -114,8 +114,7 @@ jobs:
         with:
           name: android-apk
           path: |
-            build/app/outputs/apk/release/app-armeabi-v7a-release.apk
-            build/app/outputs/apk/release/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-release.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -128,8 +127,7 @@ jobs:
             - Commit: ${{ github.sha }}
             - Package: com.danield.plusly
           files: |
-            build/app/outputs/apk/release/app-armeabi-v7a-release.apk
-            build/app/outputs/apk/release/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-release.apk
           prerelease: true
           generate_release_notes: false
         env:
