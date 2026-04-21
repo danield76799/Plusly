@@ -1,7 +1,7 @@
 {
 	"application_name": "Plusly",
 	"application_welcome_message": null,
-	"default_homeserver": "plusly.im",
+	"default_homeserver": "element.frei.chat",
 	"web_base_url": "https://fluffychat.im/web",
 	"privacy_url": "https://plusly.im/privacy",
 	"render_html": true,
