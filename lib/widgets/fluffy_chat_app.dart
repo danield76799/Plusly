@@ -12,6 +12,7 @@ import 'package:Pulsly/config/routes.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/download_manager/download_manager.dart';
+import 'package:Pulsly/utils/check_updates.dart';
 import 'package:Pulsly/widgets/app_lock.dart';
 import 'package:Pulsly/widgets/background_audio_player.dart';
 import 'package:Pulsly/widgets/theme_builder.dart';
@@ -65,6 +66,10 @@ class _FluffyChatAppState extends State<FluffyChatApp> {
     super.initState();
     initPlatformState();
     _startScheduler();
+    // Check for updates on app startup (with delay to let UI load)
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) checkForUpdates(context);
+    });
   }
 
   void _startScheduler() {
