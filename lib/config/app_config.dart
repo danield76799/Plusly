@@ -20,7 +20,7 @@ abstract class AppConfig {
   static String? _applicationWelcomeMessage;
 
   static String? get applicationWelcomeMessage => _applicationWelcomeMessage;
-  static String _defaultHomeserver = 'element.frei.chat';
+  static String _defaultHomeserver = 'matrix.org';
 
   static bool alreadyCheckedUpdates = false;
 
