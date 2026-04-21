@@ -1,11 +1,11 @@
 ((a,b)=>{a[b]=a[b]||{}})(self,"$__dart_deferred_initializers__")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var B,C,A={
-dEM(){return new A.Ns(B.eq("tr"))},
-Ns:function Ns(d){this.a=d}}
+dEM(){return new A.Nt(B.eq("tr"))},
+Nt:function Nt(d){this.a=d}}
 B=c[0]
 C=c[52]
 A=a.updateHolder(c[49],A)
-A.Ns.prototype={
+A.Nt.prototype={
 gtd(){return"No messages yet"},
 gpD(){return"New sub space"},
 gt4(){return"Move to different space"},
@@ -812,8 +812,8 @@ goZ(){return"If disabled, media won't load automatically until you click it."},
 grB(){return'Enable "People" tab'},
 E(d,e){return this.gbD(this).$1(e)}}
 var z=a.updateTypes([]);(function inheritance(){var x=a.inherit
-x(A.Ns,C.bk)})()
-B.f0(b.typeUniverse,JSON.parse('{"Ns":{"bk":[]}}'))
+x(A.Nt,C.bk)})()
+B.f0(b.typeUniverse,JSON.parse('{"Nt":{"bk":[]}}'))
 var y={c:" adresinde geli\u015ftiricilere bildirin. Hata mesaj\u0131: "}};
-(a=>{a["8ANiCqn3lOYnixMRONQCfKxFKnQ="]=a.current})($__dart_deferred_initializers__);
+(a=>{a["dRMLwkaJB49OOfnYLX2xse+4Ekk="]=a.current})($__dart_deferred_initializers__);
 //# sourceMappingURL=main.dart.js_289.part.js.map
