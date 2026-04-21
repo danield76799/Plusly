@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:matrix/matrix.dart';
@@ -53,9 +55,32 @@ class GitHubRelease {
   }
 }
 
-Future<GitHubRelease?> getLatestRelease() async {
+Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
   const repo = 'danield76799/Plusly';
   final url = 'https://api.github.com/repos/$repo/releases/latest';
+  const cacheKey = 'cached_github_release';
+  const cacheTimeKey = 'cached_github_release_time';
+  const cacheDuration = Duration(hours: 24);
+
+  // Try to get from cache first (if not forcing refresh)
+  if (!forceRefresh) {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedData = prefs.getString(cacheKey);
+      final cachedTime = prefs.getInt(cacheTimeKey);
+      
+      if (cachedData != null && cachedTime != null) {
+        final cacheAge = DateTime.now().millisecondsSinceEpoch - cachedTime;
+        if (cacheAge < cacheDuration.inMilliseconds) {
+          Logs().v('Using cached GitHub release info');
+          final json = jsonDecode(cachedData) as Map<String, dynamic>;
+          return GitHubRelease.fromJson(json);
+        }
+      }
+    } catch (e) {
+      Logs().v('Cache read failed: $e, fetching from GitHub');
+    }
+  }
 
   try {
     final response = await Dio().get(
@@ -63,16 +88,26 @@ Future<GitHubRelease?> getLatestRelease() async {
       options: Options(
         headers: {
           'Accept': 'application/vnd.github+json',
-          'User-Agent': 'ExteraApp',
+          'User-Agent': 'PluslyApp',
         },
-        // Timeout voor API call
         sendTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
       ),
     );
 
     if (response.statusCode == 200) {
-      return GitHubRelease.fromJson(response.data as Map<String, dynamic>);
+      final release = GitHubRelease.fromJson(response.data as Map<String, dynamic>);
+      
+      // Cache the response
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(cacheKey, response.data.toString());
+        await prefs.setInt(cacheTimeKey, DateTime.now().millisecondsSinceEpoch);
+      } catch (e) {
+        Logs().v('Failed to cache release info');
+      }
+      
+      return release;
     } else {
       Logs().w('GitHub API returned status ${response.statusCode}');
     }
