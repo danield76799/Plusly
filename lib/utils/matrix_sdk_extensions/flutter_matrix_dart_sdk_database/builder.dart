@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/client_manager.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/utils/client_manager.dart';
+import 'package:plusly/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:matrix/matrix.dart';
 import 'package:path/path.dart';

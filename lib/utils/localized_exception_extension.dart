@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/other_party_can_receive.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/utils/other_party_can_receive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';

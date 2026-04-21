@@ -1,11 +1,11 @@
 {
-    "name": "FluffyChat",
-    "short_name": "FluffyChat",
+    "name": "Plusly",
+    "short_name": "Plusly",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "The cutest messenger in the Matrix network",
+    "background_color": "#49AFC2",
+    "theme_color": "#49AFC2",
+    "description": "Plusly - A feature-rich Matrix client",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

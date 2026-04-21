@@ -1,6 +1,6 @@
-import 'package:fluffychat/utils/string_color.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
-import 'package:fluffychat/widgets/presence_builder.dart';
+import 'package:plusly/utils/string_color.dart';
+import 'package:plusly/widgets/mxc_image.dart';
+import 'package:plusly/widgets/presence_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

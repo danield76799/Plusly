@@ -1,4 +1,4 @@
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:plusly/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import 'mxc_image.dart';

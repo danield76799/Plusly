@@ -1,13 +1,13 @@
 import 'package:emoji_picker_flutter/locales/default_emoji_set_locale.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat/recording_input_row.dart';
-import 'package:fluffychat/pages/chat/recording_view_model.dart';
-import 'package:fluffychat/utils/other_party_can_receive.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/hover_builder.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:plusly/config/setting_keys.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/pages/chat/recording_input_row.dart';
+import 'package:plusly/pages/chat/recording_view_model.dart';
+import 'package:plusly/utils/other_party_can_receive.dart';
+import 'package:plusly/utils/platform_infos.dart';
+import 'package:plusly/widgets/avatar.dart';
+import 'package:plusly/widgets/hover_builder.dart';
+import 'package:plusly/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

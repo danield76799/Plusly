@@ -1,4 +1,4 @@
-import 'package:fluffychat/config/themes.dart';
+import 'package:plusly/config/themes.dart';
 import 'package:flutter/material.dart';
 
 import 'dismiss_keyboard.dart';

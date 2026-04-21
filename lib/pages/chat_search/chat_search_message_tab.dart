@@ -1,9 +1,9 @@
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/pages/chat_search/search_footer.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/url_launcher.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/pages/chat_search/search_footer.dart';
+import 'package:plusly/utils/date_time_extension.dart';
+import 'package:plusly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:plusly/utils/url_launcher.dart';
+import 'package:plusly/widgets/avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:go_router/go_router.dart';

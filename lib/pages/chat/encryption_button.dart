@@ -1,5 +1,5 @@
 import 'package:badges/badges.dart' as b;
-import 'package:fluffychat/l10n/l10n.dart';
+import 'package:plusly/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';

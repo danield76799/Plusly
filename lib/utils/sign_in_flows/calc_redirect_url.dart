@@ -1,5 +1,5 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/utils/platform_infos.dart';
 import 'package:flutter/foundation.dart';
 import 'package:universal_html/html.dart' as html;
 

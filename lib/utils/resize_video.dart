@@ -1,5 +1,5 @@
 import 'package:cross_file/cross_file.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:plusly/utils/platform_infos.dart';
 import 'package:matrix/matrix.dart';
 import 'package:video_compress/video_compress.dart';
 

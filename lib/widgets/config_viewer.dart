@@ -1,7 +1,7 @@
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/widgets/adaptive_dialogs/show_text_input_dialog.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:plusly/config/setting_keys.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/widgets/adaptive_dialogs/show_text_input_dialog.dart';
+import 'package:plusly/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';

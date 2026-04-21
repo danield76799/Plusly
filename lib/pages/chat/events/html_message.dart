@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
-import 'package:fluffychat/utils/code_highlight_theme.dart';
-import 'package:fluffychat/utils/event_checkbox_extension.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/future_loading_dialog.dart';
-import 'package:fluffychat/widgets/mxc_image.dart';
+import 'package:plusly/utils/code_highlight_theme.dart';
+import 'package:plusly/utils/event_checkbox_extension.dart';
+import 'package:plusly/widgets/avatar.dart';
+import 'package:plusly/widgets/future_loading_dialog.dart';
+import 'package:plusly/widgets/mxc_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';

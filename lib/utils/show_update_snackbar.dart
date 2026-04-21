@@ -1,6 +1,6 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/utils/platform_infos.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';

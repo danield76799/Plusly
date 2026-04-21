@@ -1,6 +1,6 @@
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/widgets/member_actions_popup_menu_button.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/widgets/member_actions_popup_menu_button.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

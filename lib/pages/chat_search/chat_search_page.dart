@@ -1,5 +1,5 @@
-import 'package:fluffychat/pages/chat_search/chat_search_view.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:plusly/pages/chat_search/chat_search_view.dart';
+import 'package:plusly/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 

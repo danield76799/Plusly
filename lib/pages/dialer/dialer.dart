@@ -19,11 +19,11 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/platform_infos.dart';
-import 'package:fluffychat/utils/voip/video_renderer.dart';
-import 'package:fluffychat/widgets/avatar.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:plusly/utils/platform_infos.dart';
+import 'package:plusly/utils/voip/video_renderer.dart';
+import 'package:plusly/widgets/avatar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

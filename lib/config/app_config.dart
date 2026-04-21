@@ -2,9 +2,9 @@ import 'dart:ui';
 
 abstract class AppConfig {
   // Const and final configuration values (immutable)
-  static const Color primaryColor = Color(0xFF5625BA);
-  static const Color primaryColorLight = Color(0xFFCCBDEA);
-  static const Color secondaryColor = Color(0xFF41a2bc);
+  static const Color primaryColor = Color(0xFF49AFC2);
+  static const Color primaryColorLight = Color(0xFF6FC5D8);
+  static const Color secondaryColor = Color(0xFF3A8FA0);
 
   static const Color chatColor = primaryColor;
   static const double messageFontSize = 16.0;
@@ -13,38 +13,38 @@ abstract class AppConfig {
   static const bool hideTypingUsernames = false;
 
   static const String inviteLinkPrefix = 'https://matrix.to/#/';
-  static const String deepLinkPrefix = 'im.fluffychat://chat/';
+  static const String deepLinkPrefix = 'com.danield.plusly://chat/';
   static const String schemePrefix = 'matrix:';
-  static const String pushNotificationsChannelId = 'fluffychat_push';
-  static const String pushNotificationsAppId = 'chat.fluffy.fluffychat';
+  static const String pushNotificationsChannelId = 'plusly_push';
+  static const String pushNotificationsAppId = 'com.danield.plusly';
   static const double borderRadius = 16.0;
   static const double spaceBorderRadius = 11.0;
   static const double columnWidth = 360.0;
 
   static const String enablePushTutorial =
-      'https://fluffychat.im/faq/#push_without_google_services';
+      'https://github.com/krille-chan/fluffychat/wiki/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =
-      'https://fluffychat.im/faq/#how_to_use_end_to_end_encryption';
+      'https://github.com/krille-chan/fluffychat/wiki/How-to-use-end-to-end-encryption-in-FluffyChat';
   static const String startChatTutorial =
-      'https://fluffychat.im/faq/#how_do_i_find_other_users';
+      'https://github.com/krille-chan/fluffychat/wiki/How-to-Find-Users-in-FluffyChat';
   static const String howDoIGetStickersTutorial =
       'https://fluffychat.im/faq/#how_do_i_get_stickers';
-  static const String appId = 'im.fluffychat.FluffyChat';
-  static const String appOpenUrlScheme = 'im.fluffychat';
-  static const String appSsoUrlScheme = 'im.fluffychat.auth';
+  static const String appId = 'com.danield.plusly';
+  static const String appOpenUrlScheme = 'com.danield.plusly';
+  static const String appSsoUrlScheme = 'com.danield.plusly.auth';
 
   static const String sourceCodeUrl =
-      'https://github.com/krille-chan/fluffychat';
+      'https://github.com/danield76799/Plusly';
   static const String supportUrl =
-      'https://github.com/krille-chan/fluffychat/issues';
-  static const String changelogUrl = 'https://fluffy.chat/en/changelog/';
+      'https://plusly.im/help';
+  static const String changelogUrl = 'https://plusly.im/changelog';
 
   static const Set<String> defaultReactions = {'👍', '❤️', '😂', '😮', '😢'};
 
   static final Uri newIssueUrl = Uri(
     scheme: 'https',
     host: 'github.com',
-    path: '/krille-chan/fluffychat/issues/new',
+    path: '/danield76799/Plusly/issues/new',
   );
 
   static final Uri homeserverList = Uri(

@@ -1,5 +1,5 @@
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/utils/date_time_extension.dart';
 import 'package:flutter/material.dart';
 
 class SearchFooter extends StatelessWidget {

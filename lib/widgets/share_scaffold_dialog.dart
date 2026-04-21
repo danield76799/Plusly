@@ -1,10 +1,10 @@
 import 'package:cross_file/cross_file.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/config/themes.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:plusly/widgets/avatar.dart';
+import 'package:plusly/widgets/matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';

@@ -1,17 +1,17 @@
 import 'dart:ui' as ui;
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:fluffychat/config/setting_keys.dart';
-import 'package:fluffychat/config/themes.dart';
-import 'package:fluffychat/l10n/l10n.dart';
-import 'package:fluffychat/utils/adaptive_bottom_sheet.dart';
-import 'package:fluffychat/utils/date_time_extension.dart';
-import 'package:fluffychat/utils/file_description.dart';
-import 'package:fluffychat/utils/matrix_sdk_extensions/matrix_locals.dart';
-import 'package:fluffychat/utils/string_color.dart';
-import 'package:fluffychat/widgets/avatar.dart';
-import 'package:fluffychat/widgets/matrix.dart';
-import 'package:fluffychat/widgets/member_actions_popup_menu_button.dart';
+import 'package:plusly/config/setting_keys.dart';
+import 'package:plusly/config/themes.dart';
+import 'package:plusly/l10n/l10n.dart';
+import 'package:plusly/utils/adaptive_bottom_sheet.dart';
+import 'package:plusly/utils/date_time_extension.dart';
+import 'package:plusly/utils/file_description.dart';
+import 'package:plusly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:plusly/utils/string_color.dart';
+import 'package:plusly/widgets/avatar.dart';
+import 'package:plusly/widgets/matrix.dart';
+import 'package:plusly/widgets/member_actions_popup_menu_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:matrix/matrix.dart';

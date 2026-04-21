@@ -1,7 +1,7 @@
 import 'package:badges/badges.dart';
-import 'package:fluffychat/config/app_config.dart';
-import 'package:fluffychat/widgets/hover_builder.dart';
-import 'package:fluffychat/widgets/unread_rooms_badge.dart';
+import 'package:plusly/config/app_config.dart';
+import 'package:plusly/widgets/hover_builder.dart';
+import 'package:plusly/widgets/unread_rooms_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
