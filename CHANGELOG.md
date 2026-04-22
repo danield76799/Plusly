@@ -1,3 +1,6 @@
+## Extera 26.1.68
+- (actually) fix forward attribution.
+
 ## Extera 26.1.67
 - Fixed forward attribution.
 
