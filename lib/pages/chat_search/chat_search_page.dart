@@ -28,10 +28,35 @@ class ChatSearchController extends State<ChatSearchPage>
   Stream<(List<Event>, String?)>? galleryStream;
   Stream<(List<Event>, String?)>? fileStream;
 
+  // Search filters
+  String? filterSenderId;
+  DateTime? filterFromDate;
+  DateTime? filterToDate;
+
+  List<Event> _applyFilters(List<Event> events) {
+    return events.where((event) {
+      if (filterSenderId != null && event.senderId != filterSenderId) return false;
+      if (filterFromDate != null && event.originServerTs.isBefore(filterFromDate!)) return false;
+      if (filterToDate != null && event.originServerTs.isAfter(filterToDate!)) return false;
+      return true;
+    }).toList();
+  }
+
+  List<Event> _applyTextFilter(List<Event> events, String query) {
+    if (query.isEmpty) return events;
+    final lower = query.toLowerCase();
+    return events.where((e) {
+      final body = e.body.toLowerCase();
+      final filename = e.content.tryGet<String>('filename') ?? '';
+      return body.contains(lower) || filename.toLowerCase().contains(lower);
+    }).toList();
+  }
+
   void restartSearch() {
     if (searchController.text.isEmpty) {
       setState(() {
         searchStream = null;
+        timeline = null; // Clear cache for fresh search
       });
       return;
     }
@@ -58,17 +83,25 @@ class ChatSearchController extends State<ChatSearchPage>
           .startSearch(
             searchTerm: searchController.text,
             prevBatch: prevBatch,
-            requestHistoryCount: 1000,
-            limit: 32,
+            requestHistoryCount: 200,
+            limit: 50,
           )
           .map(
-            (result) => (
-              [
-                if (previousSearchResult != null) ...previousSearchResult,
-                ...result.$1,
-              ],
-              result.$2,
-            ),
+            (result) {
+              var events = result.$1;
+              // Only filter new events, not all previous results
+              if (searchController.text.isNotEmpty) {
+                events = _applyTextFilter(events, searchController.text);
+              }
+              events = _applyFilters(events);
+              return (
+                [
+                  if (previousSearchResult != null) ...previousSearchResult,
+                  ...events,
+                ],
+                result.$2,
+              );
+            },
           )
           .asBroadcastStream();
     });
@@ -92,13 +125,20 @@ class ChatSearchController extends State<ChatSearchPage>
             limit: 32,
           )
           .map(
-            (result) => (
-              [
-                if (previousSearchResult != null) ...previousSearchResult,
-                ...result.$1,
-              ],
-              result.$2,
-            ),
+            (result) {
+              var events = result.$1;
+              if (searchController.text.isNotEmpty) {
+                events = _applyTextFilter(events, searchController.text);
+              }
+              events = _applyFilters(events);
+              return (
+                [
+                  if (previousSearchResult != null) ...previousSearchResult,
+                  ...events,
+                ],
+                result.$2,
+              );
+            },
           )
           .asBroadcastStream();
     });
@@ -122,13 +162,20 @@ class ChatSearchController extends State<ChatSearchPage>
             limit: 32,
           )
           .map(
-            (result) => (
-              [
-                if (previousSearchResult != null) ...previousSearchResult,
-                ...result.$1,
-              ],
-              result.$2,
-            ),
+            (result) {
+              var events = result.$1;
+              if (searchController.text.isNotEmpty) {
+                events = _applyTextFilter(events, searchController.text);
+              }
+              events = _applyFilters(events);
+              return (
+                [
+                  if (previousSearchResult != null) ...previousSearchResult,
+                  ...events,
+                ],
+                result.$2,
+              );
+            },
           )
           .asBroadcastStream();
     });
