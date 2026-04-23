@@ -49,22 +49,38 @@ jobs:
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
           echo "=== Starting Android APK Build ==="
+          echo "Flutter version:"
+          flutter --version
+          echo "Dart version:"
+          dart --version
+          echo "Pub cache location:"
+          flutter pub cache path
+          echo "=== Running flutter build apk ==="
           flutter build apk --release --target-platform android-arm64,android-arm --verbose 2>&1 | tee build.log
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           echo "=== Build completed with exit code: $BUILD_EXIT_CODE ==="
-          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || ls -la build/app/outputs/ 2>/dev/null || ls -la build/app/ 2>/dev/null || echo "No build/app directory found"
-          find . -name "*.apk" 2>/dev/null || echo "No APK files found"
+          echo "=== Directory structure ==="
+          ls -la build/ 2>/dev/null || echo "No build directory"
+          ls -la build/app/ 2>/dev/null || echo "No build/app directory"
+          ls -la build/app/outputs/ 2>/dev/null || echo "No build/app/outputs directory"
+          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "No build/app/outputs/flutter-apk directory"
+          ls -la build/app/outputs/apk/ 2>/dev/null || echo "No build/app/outputs/apk directory"
+          echo "=== Searching for APK files ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
           if [ -f build/app/outputs/flutter-apk/app-release.apk ]; then
-            echo "SUCCESS: APK found"
+            echo "SUCCESS: APK found at build/app/outputs/flutter-apk/app-release.apk"
             ls -la build/app/outputs/flutter-apk/
           else
-            echo "ERROR: APK NOT found"
-            echo "=== Last 100 lines of build.log ==="
-            tail -100 build.log
+            echo "ERROR: APK NOT found at expected location"
+            echo "=== Last 200 lines of build.log ==="
+            tail -200 build.log
             echo "=== Full build.log contents ==="
             cat build.log
           fi
-          if [ $BUILD_EXIT_CODE -ne 0 ]; then exit 1; fi
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then 
+            echo "Build failed with exit code $BUILD_EXIT_CODE"
+            exit 1
+          fi
       - name: Upload Build Log
         if: always()
         uses: actions/upload-artifact@v4
