@@ -119,7 +119,6 @@ dependencies:
   open_file: ^3.5.11
 
   html_unescape: any
-  fluffy_chat: any
 dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3
