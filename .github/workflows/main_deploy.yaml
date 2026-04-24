@@ -55,8 +55,8 @@ jobs:
           dart --version
           echo "=== Running flutter build apk ==="
           set -o pipefail
-          flutter build apk --release --target-platform android-arm64,android-arm --verbose 2>&1 | tee build.log || true
-          BUILD_EXIT_CODE=${PIPESTATUS[0]}
+          flutter build apk --release --target-platform android-arm64,android-arm --verbose 2>&1 | tee build.log
+          BUILD_EXIT_CODE=$?
           echo "=== Build completed with exit code: $BUILD_EXIT_CODE ==="
           if [ $BUILD_EXIT_CODE -ne 0 ]; then 
             echo "=== BUILD FAILED ==="
