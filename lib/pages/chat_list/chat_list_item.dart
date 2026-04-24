@@ -62,8 +62,10 @@ class ChatListItem extends StatelessWidget {
         ? theme.colorScheme.secondaryContainer
         : Colors.transparent;
     final displayname = room.getLocalizedDisplayname(
-      MatrixLocals(L10n.of(context)),
-    );
+    MatrixLocals(L10n.of(context)),
+  );
+  // Strip bridge type suffixes like "(WA)", "(TG)" from displayname
+  final cleanDisplayname = displayname.replaceAll(RegExp(r'\s*\((WA|TG|Signal|Discord|Slack|Matrix)\)\s*$'), '');
     final filter = this.filter;
     if (filter != null && !displayname.toLowerCase().contains(filter)) {
       return const SizedBox.shrink();
@@ -96,7 +98,7 @@ class ChatListItem extends StatelessWidget {
                   child: Avatar(
                     mxContent: room.avatar,
                     size: compactMode ? 28.0 : Avatar.defaultSize,
-                    name: displayname,
+                    name: cleanDisplayname,
                     presenceUserId: directChatMatrixId,
                     presenceBackgroundColor: backgroundColor,
                     onTap: () => onLongPress?.call(context),
@@ -107,7 +109,7 @@ class ChatListItem extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: Text(
-                      displayname,
+                      cleanDisplayname,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       softWrap: false,
