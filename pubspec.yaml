@@ -17,6 +17,7 @@ dependencies:
   archive: ^4.0.9
   async: ^2.13.0
   audioplayers: ^6.5.1
+  audioplayers_linux: ^4.2.1
   badges: ^3.1.2
   blurhash_dart: ^1.2.1
   camera: ^0.12.0+1
@@ -26,11 +27,11 @@ dependencies:
   cupertino_icons: any
   desktop_drop: ^0.7.0
   desktop_notifications: ^0.6.3
+  desktop_webview_window: ^0.2.3
   device_info_plus: ^12.3.0
+  dio: ^5.9.2
   dynamic_color: ^1.8.1
   emojis: ^0.9.9
-  highlight_selectable: ^0.2.1
-  #fcm_shared_isolate: ^0.2.0
   file_picker: ^10.3.10
   file_selector: ^1.1.0
   flutter:
@@ -45,6 +46,7 @@ dependencies:
   flutter_map: ^8.2.2
   flutter_new_badger: ^1.1.1
   flutter_openssl_crypto: ^0.5.0
+  flutter_ringtone_player: ^4.0.0+4
   flutter_rust_bridge: ^2.11.1
   flutter_secure_storage: ^10.0.0
   flutter_shortcuts_new: ^2.0.0
@@ -58,7 +60,9 @@ dependencies:
   flutter_webrtc: ^1.4.1
   geolocator: ^14.0.2
   go_router: ^17.1.0
+  google_fonts: ^8.0.2
   handy_window: ^0.4.0
+  highlight_selectable: ^0.2.1
   hotkey_manager: ^0.2.3
   html: ^0.15.4
   html_unescape: ^2.0.0
@@ -69,7 +73,9 @@ dependencies:
   latext: ^0.5.1
   latlong2: ^0.9.1
   linkify: ^5.0.0
+  marquee: ^2.3.0
   material: ^1.0.1
+  material_design_icons_flutter: ^7.0.7296
   matrix:
     # path: ../matrix-dart-sdk
     git:
@@ -77,13 +83,16 @@ dependencies:
       ref: main
   mime: ^2.0.0
   native_imaging: ^0.4.0
+  open_file: ^3.5.11
   opus_caf_converter_dart: ^1.0.1
   package_info_plus: ^9.0.0
+  particles_network: ^1.9.3
   pasteboard: ^0.5.0
   path: ^1.9.0
   path_provider: ^2.1.2
   permission_handler: ^12.0.1
   pretty_qr_code: ^3.6.0
+  pro_image_editor: ^12.1.0
   provider: ^6.0.2
   punycode: ^1.0.0
   qr_code_scanner_plus: ^2.1.1
@@ -101,27 +110,14 @@ dependencies:
   unifiedpush_ui: ^0.2.0
   universal_html: ^2.3.0
   url_launcher: ^6.3.2
+  uuid: ^4.5.3
   video_compress: ^3.1.4
   video_player: ^2.11.1
   vodozemac: ^0.5.0
   wakelock_plus: ^1.4.0
   webrtc_interface: ^1.4.0
   webview_flutter: ^4.10.0
-  desktop_webview_window: ^0.2.3
-  dio: ^5.9.2
-  uuid: ^4.5.3
-  flutter_ringtone_player: ^4.0.0+4
-  audioplayers_linux: ^4.2.1
-  pro_image_editor: ^12.1.0
-  google_fonts: ^8.0.2
-  marquee: ^2.3.0
-  particles_network: ^1.9.3
-  material_design_icons_flutter: ^7.0.7296
-  open_file: ^3.5.11
 
-  # Removed problematic packages that don't support null safety or cause conflicts
-  # html_unescape: any  # REMOVED - causes null safety issues
-  
 dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3
@@ -132,6 +128,7 @@ dev_dependencies:
   license_checker: ^1.6.2
   msix: ^3.6.13
   translations_cleaner: ^0.1.0
+
 flutter_launcher_icons:
   image_path: "assets/logo.png"
   android: true

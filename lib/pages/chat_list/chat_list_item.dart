@@ -72,7 +72,6 @@ class ChatListItem extends StatelessWidget {
     final needLastEventSender = lastEvent == null
         ? false
         : room.getState(EventTypes.RoomMember, lastEvent.senderId) == null;
-    final space = this.space;
 
     final borderRadius = BorderRadius.circular(12);
 
@@ -86,102 +85,21 @@ class ChatListItem extends StatelessWidget {
           future: room.name.isEmpty ? room.loadHeroUsers() : null,
           builder: (context, _) => HoverBuilder(
             builder: (context, listTileHovered) => ListTile(
-              visualDensity: VisualDensity(vertical: compactMode ? -1.5 : -0.5),
-              contentPadding: EdgeInsets.symmetric(horizontal: compactMode ? 4 : 8),
+              visualDensity: VisualDensity(vertical: compactMode ? -2.0 : -0.5),
+              contentPadding: EdgeInsets.symmetric(horizontal: compactMode ? 3 : 8),
               onLongPress: () => onLongPress?.call(context),
               leading: HoverBuilder(
                 builder: (context, hovered) => AnimatedScale(
                   duration: FluffyThemes.animationDuration,
                   curve: FluffyThemes.animationCurve,
                   scale: hovered ? 1.1 : 1.0,
-                  child: SizedBox(
-                    width: compactMode ? 36.0 : Avatar.defaultSize,
-                    height: compactMode ? 36.0 : Avatar.defaultSize,
-                    child: Stack(
-                      children: [
-                        if (space != null)
-                          Positioned(
-                            top: 0,
-                            left: 0,
-                            child: Avatar(
-                              border: BorderSide(
-                                width: 2,
-                                color: backgroundColor,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                              mxContent: space.avatar,
-                              size: compactMode ? 28.0 : Avatar.defaultSize * 0.75,
-                              name: space.getLocalizedDisplayname(),
-                              onTap: () => onLongPress?.call(context),
-                            ),
-                          ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Avatar(
-                            border: space == null
-                                ? room.isSpace
-                                      ? BorderSide(
-                                          width: 1,
-                                          color: theme.dividerColor,
-                                        )
-                                      : null
-                                : BorderSide(width: 2, color: backgroundColor),
-                            borderRadius: BorderRadius.circular(12),
-                            mxContent: room.avatar,
-                            size: space != null
-                                ? (compactMode ? 28.0 : Avatar.defaultSize * 0.75)
-                                : (compactMode ? 36.0 : Avatar.defaultSize),
-                            name: displayname,
-                            presenceUserId: directChatMatrixId,
-                            presenceBackgroundColor: backgroundColor,
-                            onTap: () => onLongPress?.call(context),
-                          ),
-                        ),
-                        Positioned(
-                          top: 0,
-                          right: 0,
-                          child: GestureDetector(
-                            onTap: () => onLongPress?.call(context),
-                            child: AnimatedScale(
-                              duration: FluffyThemes.animationDuration,
-                              curve: FluffyThemes.animationCurve,
-                              scale: listTileHovered ? 1.0 : 0.0,
-                              child: Material(
-                                color: backgroundColor,
-                                borderRadius: BorderRadius.circular(16),
-                                child: const Icon(
-                                  Icons.arrow_drop_down_circle_outlined,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (getBridgeType(room) != null)
-                          Positioned(
-                            bottom: -2,
-                            right: -2,
-                            child: Container(
-                              width: 18,
-                              height: 18,
-                              decoration: BoxDecoration(
-                                color: backgroundColor,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: Icon(
-                                getBridgeTypeIcon(getBridgeType(room)),
-                                size: compactMode ? 10 : 12,
-                                color: getBridgeTypeColor(getBridgeType(room)),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
+                  child: Avatar(
+                    mxContent: room.avatar,
+                    size: compactMode ? 28.0 : Avatar.defaultSize,
+                    name: displayname,
+                    presenceUserId: directChatMatrixId,
+                    presenceBackgroundColor: backgroundColor,
+                    onTap: () => onLongPress?.call(context),
                   ),
                 ),
               ),
@@ -193,8 +111,9 @@ class ChatListItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       softWrap: false,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
+                        fontSize: compactMode ? 13 : 14,
                         color: Colors.black,
                       ),
                     ),
@@ -234,7 +153,7 @@ class ChatListItem extends StatelessWidget {
                           context,
                         ),
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: compactMode ? 10 : 12,
                           color: theme.colorScheme.outline,
                         ),
                       ),
