@@ -12,6 +12,7 @@ import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/file_selector.dart';
+import 'package:Pulsly/utils/check_updates.dart' as check_updates;
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -422,6 +423,10 @@ class SettingsController extends State<Settings> {
         }
       },
     );
+  }
+
+  void checkForUpdates() {
+    check_updates.checkForUpdates(context);
   }
 
   @override
