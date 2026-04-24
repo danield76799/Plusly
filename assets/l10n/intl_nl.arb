@@ -3349,5 +3349,9 @@
   "continueAnyway": "Ga toch door",
   "@continueAnyway": {
     "description": "Button to skip waiting and continue"
-  }
+  },
+  "signIn": "Inloggen",
+  "@signIn": {},
+  "createNewAccount": "Aanmelden",
+  "@createNewAccount": {}
 }
