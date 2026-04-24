@@ -22,7 +22,7 @@ jobs:
           distribution: 'zulu'
       - name: Setup Flutter
         run: |
-          git clone https://github.com/flutter/flutter.git -b stable --depth 1
+          git clone https://github.com/flutter/flutter.git -b 3.27.1 --depth 1
           echo "$PWD/flutter/bin" >> $GITHUB_PATH
       - name: Verify Flutter
         run: |
