@@ -64,8 +64,8 @@ class ChatListItem extends StatelessWidget {
     final displayname = room.getLocalizedDisplayname(
     MatrixLocals(L10n.of(context)),
   );
-  // Strip bridge type suffixes like "(WA)", "(TG)" from displayname
-  final cleanDisplayname = displayname.replaceAll(RegExp(r'\s*\((WA|TG|Signal|Discord|Slack|Matrix)\)\s*$'), '');
+  // Strip bridge type suffixes like "(WA)", "(TG)", "(Telegram)" from displayname
+  final cleanDisplayname = displayname.replaceAll(RegExp(r'\s*\((WA|TG|Signal|Discord|Slack|Matrix|Telegram|WhatsApp)\)\s*$'), '').replaceAll(RegExp(r'^(Telegram|WhatsApp|Signal|Discord|Matrix)\s+'), '');
     final filter = this.filter;
     if (filter != null && !displayname.toLowerCase().contains(filter)) {
       return const SizedBox.shrink();
