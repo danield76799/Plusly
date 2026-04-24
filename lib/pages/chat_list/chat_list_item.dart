@@ -219,12 +219,7 @@ class ChatListItem extends StatelessWidget {
                                     hideEdit: true,
                                     plaintextBody: true,
                                     removeMarkdown: true,
-                                    withSenderNamePrefix:
-                                        (!isDirectChat ||
-                                            directChatMatrixId !=
-                                                room.lastEvent?.senderId) &&
-                                        getBridgeType(room) ==
-                                            null, // Hide prefix if bridge icon shown
+                                    withSenderNamePrefix: false, // Hide for all chats, name already shown above
                                   )
                                 : null,
                             initialData: lastEvent?.calcLocalizedBodyFallback(
@@ -233,7 +228,7 @@ class ChatListItem extends StatelessWidget {
                               hideEdit: true,
                               plaintextBody: true,
                               removeMarkdown: true,
-                              withSenderNamePrefix: !isDirectChat,
+                              withSenderNamePrefix: false, // Hide for all chats, name already shown above
                             ),
                             builder: (context, snapshot) => Row(
                               mainAxisSize: MainAxisSize.min,
