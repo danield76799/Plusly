@@ -1016,7 +1016,7 @@
       }
     }
   },
-  "isTyping": "is aan het typen…",
+  "isTyping": "is aan het typen...",
   "@isTyping": {
     "type": "String",
     "placeholders": {}
@@ -1102,12 +1102,12 @@
       }
     }
   },
-  "loadingPleaseWait": "Bezig met laden… Even geduld.",
+  "loadingPleaseWait": "Bezig met laden... Even geduld.",
   "@loadingPleaseWait": {
     "type": "String",
     "placeholders": {}
   },
-  "loadMore": "Meer laden…",
+  "loadMore": "Meer laden...",
   "@loadMore": {
     "type": "String",
     "placeholders": {}
@@ -1243,7 +1243,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "noRoomsFound": "Geen kamers gevonden …",
+  "noRoomsFound": "Geen kamers gevonden ...",
   "@noRoomsFound": {
     "type": "String",
     "placeholders": {}
@@ -1258,7 +1258,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "numUsersTyping": "{count} personen typen…",
+  "numUsersTyping": "{count} personen typen...",
   "@numUsersTyping": {
     "type": "String",
     "placeholders": {
@@ -1267,7 +1267,7 @@
       }
     }
   },
-  "obtainingLocation": "Locatie ophalen…",
+  "obtainingLocation": "Locatie ophalen...",
   "@obtainingLocation": {
     "type": "String",
     "placeholders": {}
@@ -1302,7 +1302,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "oopsSomethingWentWrong": "Oeps, er ging iets mis…",
+  "oopsSomethingWentWrong": "Oeps, er ging iets mis...",
   "@oopsSomethingWentWrong": {
     "type": "String",
     "placeholders": {}
@@ -1899,7 +1899,7 @@
       }
     }
   },
-  "userAndOthersAreTyping": "{username} en {count} anderen zijn aan het typen …",
+  "userAndOthersAreTyping": "{username} en {count} anderen zijn aan het typen ...",
   "@userAndOthersAreTyping": {
     "type": "String",
     "placeholders": {
@@ -1911,7 +1911,7 @@
       }
     }
   },
-  "userAndUserAreTyping": "{username} en {username2} zijn aan het typen …",
+  "userAndUserAreTyping": "{username} en {username2} zijn aan het typen ...",
   "@userAndUserAreTyping": {
     "type": "String",
     "placeholders": {
@@ -1923,7 +1923,7 @@
       }
     }
   },
-  "userIsTyping": "{username} is aan het typen …",
+  "userIsTyping": "{username} is aan het typen ...",
   "@userIsTyping": {
     "type": "String",
     "placeholders": {
@@ -2008,17 +2008,17 @@
     "type": "String",
     "placeholders": {}
   },
-  "waitingPartnerAcceptRequest": "Wachten tot partner het verzoek accepteert …",
+  "waitingPartnerAcceptRequest": "Wachten tot partner het verzoek accepteert ...",
   "@waitingPartnerAcceptRequest": {
     "type": "String",
     "placeholders": {}
   },
-  "waitingPartnerEmoji": "Wachten tot je partner de emoji accepteert…",
+  "waitingPartnerEmoji": "Wachten tot je partner de emoji accepteert...",
   "@waitingPartnerEmoji": {
     "type": "String",
     "placeholders": {}
   },
-  "waitingPartnerNumbers": "Wachten tot partner de nummers accepteert …",
+  "waitingPartnerNumbers": "Wachten tot partner de nummers accepteert ...",
   "@waitingPartnerNumbers": {
     "type": "String",
     "placeholders": {}
@@ -2063,7 +2063,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "writeAMessage": "Schrijf een bericht…",
+  "writeAMessage": "Schrijf een bericht...",
   "@writeAMessage": {
     "type": "String",
     "placeholders": {}
@@ -2934,7 +2934,7 @@
   },
   "wrongRecoveryKey": "Helaas... dit lijkt niet de correcte herstelsleutel.",
   "@wrongRecoveryKey": {},
-  "synchronizingPleaseWaitCounter": " Synchroniseren… ({percentage}%)",
+  "synchronizingPleaseWaitCounter": " Synchroniseren... ({percentage}%)",
   "@synchronizingPleaseWaitCounter": {
     "type": "String",
     "placeholders": {
@@ -3238,7 +3238,7 @@
   "@open": {},
   "appIntroduction": "FluffyChat laat je chatten met je vrienden tussen verschillende chat-netwerken. Lees meer op https://matrix.org of tik *Continue*.",
   "@appIntroduction": {},
-  "appIntro": "Welkom bij Extera — een fork van FluffyChat, verbeterd voor een soepelere Matrix-ervaring. Een gedecentraliseerde chat-app voor [matrix]. Lees meer op https://matrix.org/",
+  "appIntro": "Welkom bij Plusly - een fork van FluffyChat en Extera Next, verbeterd voor een soepelere Matrix-ervaring. Een gedecentraliseerde chat-app voor [matrix]. Lees meer op https://matrix.org/",
   "@appIntro": {},
   "completedKeyVerification": "{sender} ronde de sleutelverificatie af",
   "@completedKeyVerification": {
