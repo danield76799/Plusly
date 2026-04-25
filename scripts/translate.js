@@ -25,7 +25,7 @@ async function batchTranslate(amount) {
 
     for (const localeCode of humanMadeLocalizations) {
         const locale = getLocalization(localeCode);
-        modelInput = `Translation file intl_${localeCode}.arb:\n\`\`\`json\n${Object.fromEntries(Object.entries(locale).filter(x => k.includes(x[0]) || k.includes(`@${x[0]}`)))}\n\`\`\`\n---\n`;
+        modelInput = `Translation file intl_${localeCode}.arb:\n\`\`\`json\n${JSON.stringify(Object.fromEntries(Object.entries(locale).filter(x => k.includes(x[0]) || k.includes(`@${x[0]}`))), false, '\t')}\n\`\`\`\n---\n`;
     }
 
     modelInput = modelInput.trim();
@@ -68,6 +68,9 @@ Your output is expected to be a JSON object, which has exactly the same keys as 
         return console.error('content is not string');
     }
 
+    console.log(textResponse);
+    console.log(`[Token usage] prompt: ${jsonResponse.usage.prompt_tokens} | completion: ${jsonResponse.usage.completion_tokens} | total: ${jsonResponse.usage.total_tokens}`);
+
     const re = /```(json)?\n((.|\n)+)\n```/gm;
     const matches = Array.from(textResponse.matchAll(re));
 
@@ -79,9 +82,6 @@ Your output is expected to be a JSON object, which has exactly the same keys as 
         ...targetLocalization,
         ...translation
     };
-
-    console.log(textResponse);
-    console.log(`[Token usage] prompt: ${jsonResponse.usage.prompt_tokens} | completion: ${jsonResponse.usage.completion_tokens} | total: ${jsonResponse.usage.total_tokens}`);
 
     keys = keys.slice(amount);
 }
