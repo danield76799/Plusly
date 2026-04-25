@@ -506,7 +506,7 @@ class BackgroundPush {
       await _upUnregistered(i);
       return;
     }
-        'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify';
+    var endpoint = 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify';
     try {
       final url = Uri.parse(newEndpoint)
           .replace(path: '/_matrix/push/v1/notify', query: '')
