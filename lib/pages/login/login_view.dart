@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:go_router/go_router.dart';
+
 import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/widgets/layouts/login_scaffold.dart';
 import 'login.dart';
@@ -103,6 +105,38 @@ class LoginView extends StatelessWidget {
                     child: controller.loading
                         ? const LinearProgressIndicator()
                         : Text(L10n.of(context).login),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24.0),
+                      ),
+                    ),
+                    onPressed: controller.loading
+                        ? null
+                        : () {
+                            final currentPath = GoRouterState.of(
+                              context,
+                            ).uri.path;
+                            final segments = currentPath
+                                .split('/')
+                                .where((s) => s.isNotEmpty)
+                                .toList();
+                            if (segments.isNotEmpty) {
+                              segments.removeLast();
+                            }
+                            segments.add('register');
+                            context.go(
+                              '/${segments.join('/')}',
+                              extra: controller.widget.client,
+                            );
+                          },
+                    icon: const Icon(Icons.person_add_outlined),
+                    label: Text(L10n.of(context).createNewAccount),
                   ),
                 ),
                 const SizedBox(height: 16),

@@ -3668,5 +3668,86 @@
   "enablePeopleTab": "Enable \"People\" tab",
   "noDownloadsYet": "No downloads yet.",
   "joinRoomShort": "Join",
-  "includeAttribution": "Include attribution"
+  "includeAttribution": "Include attribution",
+  "usernameAlreadyTaken": "Username is already taken.",
+  "pleaseEnterUsername": "Please enter a username.",
+  "pleaseEnterPassword": "Please enter a password.",
+  "passwordMinLengthMessage": "Password must be at least 8 characters long.",
+  "registrationFailed": "Could not register. {message}",
+  "@registrationFailed": {
+    "placeholders": {
+        "message": {"type": "String"}
+    }
+  },
+  "invalidUsername": "Invalid username",
+  "invalidEmail": "Invalid email",
+  "emailAlreadyUsed": "This email address is already in use.",
+  "emailNotAllowed": "This email address is not allowed.",
+  "captchaFailed": "Captcha verification failed. Please try again.",
+  "requestAVerificationEmailFirst": "Please, request a verification email first.",
+  "phoneNumberAlreadyUsed": "This phone number is already in use.",
+  "requestAVerificationCodeFirst": "Please, request a verification code first.",
+  "setupProfile": "Set up profile",
+  "captcha": "Are you a human?",
+  "termsOfService": "Terms of Service",
+  "verifyEmail": "Verify email",
+  "verifyPhone": "Verify phone",
+  "pleaseWait": "Please, wait...",
+  "verification": "Verification",
+  "pleaseReviewAndAcceptPolicies": "Please, review and accept the following policies to continue:",
+  "noPolicies": "No specific policies to accept.",
+  "readPolicy": "Read policy",
+  "acceptAndContinue": "Accept and continue",
+  "pleaseEnterEmailAddress": "Please, enter an email address.",
+  "emailVerification": "Email verification",
+  "verificationEmailSent": "A verification email has been sent. Please, check your inbox, click the link, and press the button below to continue.",
+  "emailAddress": "Email address",
+  "sendVerificationEmail": "Send verification email",
+  "iHaveVerifiedMyEmail": "I have verified my email",
+  "useDifferentEmail": "Use different email",
+  "registerOn": "Register on {homeserver}",
+  "@registerOn": {
+    "placeholders": {
+        "homeserver": {"type": "String"}
+    }
+  },
+  "yourAccountWasCreated": "Your account has been created. Set up your profile to get started.",
+  "displayname": "Name",
+  "displaynameHint": "How others will see you",
+  "completeSetup": "Complete setup",
+  "additionalVerificationRequired": "Additional verification required",
+  "additionalVerificationText": "This server requires an additional verification step ({stageType}). Please, complete it in your browser.",
+  "@additionalVerificationText": {
+    "placeholders": {
+        "stageType": {"type": "String"}
+    }
+  },
+  "phoneNumber": "Phone number",
+  "sendVerificationCode": "Send verification code",
+  "verificationCodeSent": "We sent a verification message. Please check your phone and then tap the button below.",
+  "useDifferentNumber": "Use a different number",
+  "phoneVerification": "Phone verification",
+  "pleaseEnterPhoneNumber": "Please, enter a phone number.",
+  "pleaseEnterCountryCode": "Please, enter a country code.",
+  "invalidPhoneNumber": "Invalid phone number. Please include the country code (e.g. +44 7911 123456).",
+  "invalidVerificationCode": "Invalid verification code.",
+  "verificationCode": "Verification code",
+  "enterVerificationCode": "Enter the 6-digit code we sent to your phone.",
+  "verify": "Verify",
+  "resendCode": "Resend code",
+  "country": "Country",
+  "serverRequiresPhone": "This server requires a phone number for registration.",
+  "verificationCodeSent2": "A verification code has been sent to your phone number. Please, enter it below.",
+  "captchaLoadFailed": "Could not load CAPTCHA. {message}",
+  "@captchaLoadFailed": {
+    "placeholders": {
+        "message": {"type": "String"}
+    }
+  },
+  "pleaseCompleteCaptcha": "Please, complete the CAPTCHA to continue.",
+  "completeCaptchaInBrowser": "Captcha verification is required but cannot be displayed in-app on this platform. Please, complete it in your browser.",
+  "howWouldYouLikeToSignUp": "How would you like to sign up?",
+  "continueOIDC": "Continue with single sign-on",
+  "continueSSO": "Continue with SSO",
+  "registerWithPassword": "Register with a password"
 }

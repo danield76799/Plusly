@@ -1602,7 +1602,7 @@
 	},
 	"link": "Ссылка",
 	"@link": {},
-	"serverRequiresEmail": "Этот сервер должен подтвердить ваш адрес электронной почты для регистрации.",
+	"serverRequiresEmail": "Этот сервер должен подтвердить Ваш адрес электронной почты для регистрации.",
 	"@serverRequiresEmail": {},
 	"or": "Или",
 	"@or": {
@@ -3766,5 +3766,84 @@
   "enablePeopleTab": "Вкладка \"Люди\"",
   "noDownloadsYet": "Нет загрузок.",
   "joinRoomShort": "Войти",
-  "includeAttribution": "Указать авторство"
+  "includeAttribution": "Указать авторство",
+  "usernameAlreadyTaken": "Это имя уже занято.",
+  "pleaseEnterUsername": "Введите имя пользователя.",
+  "pleaseEnterPassword": "Введите пароль.",
+  "passwordMinLengthMessage": "Пароль должен быть не короче 8 символов.",
+  "registrationFailed": "Не удалось зарегистрироваться. {message}",
+  "@registrationFailed": {
+    "placeholders": {
+        "message": {"type": "String"}
+    }
+  },
+  "invalidUsername": "Неверное имя пользователя",
+  "invalidEmail": "Неверный email-адрес",
+  "emailAlreadyUsed": "Этот email-адрес уже используется.",
+  "emailNotAllowed": "Этот email-адрес не разрешён.",
+  "captchaFailed": "Не удалось подтвердить CAPTCHA. Повторите попытку.",
+  "requestAVerificationEmailFirst": "Сначала запросите письмо подтверждения.",
+  "phoneNumberAlreadyUsed": "Этот номер телефона уже используется.",
+  "requestAVerificationCodeFirst": "Сначала запросите код подтверждения.",
+  "setupProfile": "Настроить профиль",
+  "captcha": "Вы - человек?",
+  "termsOfService": "Условия использования",
+  "verifyEmail": "Подтверждение почты",
+  "verifyPhone": "Подтверждение телефона",
+  "pleaseWait": "Подождите...",
+  "verification": "Подтверждение",
+  "pleaseReviewAndAcceptPolicies": "Пожалуйста, ознакомьтесь с данными условиями:",
+  "noPolicies": "Нет условий для принятия.",
+  "readPolicy": "Прочитать",
+  "acceptAndContinue": "Принять и продолжить",
+  "pleaseEnterEmailAddress": "Введите email-адрес.",
+  "emailVerification": "Подтверждение email",
+  "verificationEmailSent": "Письмо для подтверждения отправлено. Проверьте входящие (и спам), откройте ссылку и нажмите кнопку ниже, чтобы продолжить.",
+  "emailAddress": "Email-адрес",
+  "sendVerificationEmail": "Отправить письмо",
+  "iHaveVerifiedMyEmail": "Я подтвердил, продолжить",
+  "useDifferentEmail": "Использовать другой email",
+  "registerOn": "Регистрация на {homeserver}",
+  "@registerOn": {
+    "placeholders": {
+        "homeserver": {"type": "String"}
+    }
+  },
+  "yourAccountWasCreated": "Ваш аккаунт создан. Настройте профиль, чтобы начать.",
+  "displayname": "Имя",
+  "displaynameHint": "Как другие будут Вас узнавать",
+  "completeSetup": "Завершить",
+  "additionalVerificationRequired": "Требуется подтверждение",
+  "additionalVerificationText": "Сервер требует дополнительный шаг подтверждения ({stageType}). Пожалуйста, пройдите его в браузере.",
+  "@additionalVerificationText": {
+    "placeholders": {
+        "stageType": {"type": "String"}
+    }
+  },
+  "phoneNumber": "Номер телефона",
+  "sendVerificationCode": "Отправить код",
+  "verificationCodeSent": "We sent a verification message. Please check your phone and then tap the button below.",
+  "useDifferentNumber": "Использовать другой номер",
+  "phoneVerification": "Подтверждение номера",
+  "pleaseEnterPhoneNumber": "Введите номер телефона.",
+  "invalidPhoneNumber": "Неверный номер телефона. Введите его в международном формате (пример: +44 7911 123456).",
+  "invalidVerificationCode": "Неверный код подтверждения.",
+  "verificationCode": "Код подтверждения",
+  "enterVerificationCode": "Введите шестизначный код подтверждения.",
+  "verify": "Подтвердить",
+  "resendCode": "Отправить код ещё раз",
+  "country": "Страна",
+  "serverRequiresPhone": "Этот сервер должен подтвердить Ваш номер телефона для регистрации.",
+  "captchaLoadFailed": "Не удалось загрузить CAPTCHA. {message}",
+  "@captchaLoadFailed": {
+    "placeholders": {
+        "message": {"type": "String"}
+    }
+  },
+  "pleaseCompleteCaptcha": "Завершите тест CAPTCHA, чтобы продолжить.",
+  "completeCaptchaInBrowser": "CAPTCHA-тест требуется для завершения регистрации, но его нельзя отобразить в приложении. Пожалуйста, перейдите в браузер.",
+  "howWouldYouLikeToSignUp": "Как Вы хотите зарегистрироваться?",
+  "continueOIDC": "Использовать single sign-on",
+  "continueSSO": "Продолжить с SSO",
+  "registerWithPassword": "Регистрация с паролем"
 }

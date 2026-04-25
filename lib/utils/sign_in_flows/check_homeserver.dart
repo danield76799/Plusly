@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/generated/l10n/l10n.dart';
@@ -12,6 +11,7 @@ import 'package:extera_next/utils/localized_exception_extension.dart';
 import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/utils/sign_in_flows/oidc_login.dart';
 import 'package:extera_next/utils/sign_in_flows/sso_login.dart';
+import 'package:extera_next/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:extera_next/widgets/matrix.dart';
 
@@ -52,14 +52,79 @@ Future<void> connectToHomeserverFlow(
     }
     if (!context.mounted) return;
 
-    if (authMetadata != null && AppSettings.enableMatrixNativeOIDC.value) {
-      await oidcLoginFlow(client, context, signUp);
-    } else if (supportsSso) {
-      await ssoLoginFlow(client, context, signUp, loginFlows);
-    } else {
-      if (signUp && regLink != null) {
-        await launchUrlString(regLink);
+    final hasOidc =
+        authMetadata != null && AppSettings.enableMatrixNativeOIDC.value;
+
+    if (signUp) {
+      // When signing up, the user may have multiple options available.
+      // Always advertise password-based registration alongside any SSO/OIDC.
+      const signUpOidc = 'oidc';
+      const signUpSso = 'sso';
+      const signUpPassword = 'password';
+
+      final actions = <AdaptiveModalAction<String>>[
+        if (hasOidc)
+          AdaptiveModalAction(
+            label: L10n.of(context).continueOIDC,
+            value: signUpOidc,
+            icon: const Icon(Icons.login_outlined),
+          ),
+        if (supportsSso)
+          AdaptiveModalAction(
+            label: L10n.of(context).continueSSO,
+            value: signUpSso,
+            icon: const Icon(Icons.login_outlined),
+          ),
+        AdaptiveModalAction(
+          label: L10n.of(context).registerWithPassword,
+          value: signUpPassword,
+          icon: const Icon(Icons.password_outlined),
+          isDefaultAction: !hasOidc && !supportsSso,
+        ),
+      ];
+
+      String? choice;
+      if (actions.length == 1) {
+        choice = actions.single.value;
+      } else {
+        if (!context.mounted) return;
+        choice = await showModalActionPopup<String>(
+          context: context,
+          title: L10n.of(context).howWouldYouLikeToSignUp,
+          actions: actions,
+          cancelLabel: l10n.cancel,
+        );
       }
+
+      if (choice == null) return;
+      if (!context.mounted) return;
+
+      switch (choice) {
+        case signUpOidc:
+          await oidcLoginFlow(client, context, true);
+          break;
+        case signUpSso:
+          await ssoLoginFlow(client, context, true, loginFlows);
+          break;
+        case signUpPassword:
+          if (!context.mounted) return;
+          final pathSegments = List.of(
+            GoRouter.of(
+              context,
+            ).routeInformationProvider.value.uri.pathSegments,
+          );
+          pathSegments.removeLast();
+          pathSegments.add('register');
+          context.go('/${pathSegments.join('/')}', extra: client);
+          await AppSettings.defaultHomeserver.setItem(homeserverInput);
+          setState(AsyncSnapshot.withData(ConnectionState.done, true));
+          return;
+      }
+    } else if (hasOidc) {
+      await oidcLoginFlow(client, context, false);
+    } else if (supportsSso) {
+      await ssoLoginFlow(client, context, false, loginFlows);
+    } else {
       if (!context.mounted) return;
       final pathSegments = List.of(
         GoRouter.of(context).routeInformationProvider.value.uri.pathSegments,

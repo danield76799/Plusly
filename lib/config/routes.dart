@@ -26,6 +26,7 @@ import 'package:extera_next/pages/intro/intro_page.dart';
 import 'package:extera_next/pages/invitation_selection/invitation_selection.dart';
 import 'package:extera_next/pages/login/login.dart';
 import 'package:extera_next/pages/new_group/new_group.dart';
+import 'package:extera_next/pages/register/register.dart';
 import 'package:extera_next/pages/new_private_chat/new_private_chat.dart';
 import 'package:extera_next/pages/notifications/notifications.dart';
 import 'package:extera_next/pages/profile/profile.dart';
@@ -107,6 +108,15 @@ abstract class AppRoutes {
           ),
           redirect: loggedInRedirect,
         ),
+        GoRoute(
+          path: 'register',
+          pageBuilder: (context, state) => defaultPageBuilder(
+            context,
+            state,
+            Register(client: state.extra as Client),
+          ),
+          redirect: loggedInRedirect,
+        ),
       ],
     ),
     GoRoute(
@@ -152,6 +162,15 @@ abstract class AppRoutes {
             context,
             state,
             Login(client: state.extra as Client),
+          ),
+          redirect: loggedOutRedirect,
+        ),
+        GoRoute(
+          path: 'register',
+          pageBuilder: (context, state) => defaultPageBuilder(
+            context,
+            state,
+            Register(client: state.extra as Client),
           ),
           redirect: loggedOutRedirect,
         ),
