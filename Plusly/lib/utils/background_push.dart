@@ -52,7 +52,8 @@ class BackgroundPush {
   static BackgroundPush? _instance;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-  List<Client> clients;
+  List<Client> clients = [];
+  Client? _singleClient; // Fallback if clients not yet set via setupPush
   MatrixState? matrix;
   String? _fcmToken;
   void Function(String errorMsg, {Uri? link})? onFcmError;
@@ -154,12 +155,13 @@ class BackgroundPush {
     }
   }
 
-  BackgroundPush._(this.clients) {
+  BackgroundPush._(this.clients, [Client? singleClient]) {
+    _singleClient = singleClient ?? (clients.isNotEmpty ? clients.first : null);
     _init();
   }
 
   factory BackgroundPush.clientOnly(Client client) {
-    return _instance ??= BackgroundPush._([client]);
+    return _instance ??= BackgroundPush._([client], client);
   }
 
   factory BackgroundPush(
@@ -532,7 +534,11 @@ class BackgroundPush {
       //<GOOGLE_SERVICES>final fcmToken = await firebase.getToken();
       //<GOOGLE_SERVICES>oldTokens.add(fcmToken);
     } catch (_) {}
-    final client = clientFromInstance(i, clients) ?? clients.first;
+    final client = clientFromInstance(i, clients) ?? _singleClient ?? (clients.isNotEmpty ? clients.first : null);
+    if (client == null) {
+      Logs().w('[Push] Could not find client for instance $i - no client available');
+      return;
+    }
     await setupPusher(
       gatewayUrl: endpoint,
       token: newEndpoint,
@@ -552,9 +558,9 @@ class BackgroundPush {
 
   Future<void> _upUnregistered(String i) async {
     upAction = true;
-    final client = clientFromInstance(i, clients);
+    final client = clientFromInstance(i, clients) ?? _singleClient ?? (clients.isNotEmpty ? clients.first : null);
     if (client == null) {
-      Logs().w('[Push] Could not find client for instance $i');
+      Logs().w('[Push] Could not find client for instance $i - no client available');
       return;
     }
     Logs().i(
