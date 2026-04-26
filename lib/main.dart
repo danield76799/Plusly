@@ -22,19 +22,56 @@ import 'widgets/fluffy_chat_app.dart';
 ReceivePort? mainIsolateReceivePort;
 
 void main() async {
+  // Initialize Flutter bindings first for error handling
+  WidgetsFlutterBinding.ensureInitialized();
+  
   try {
     await _initializeApp();
   } catch (e, s) {
     Logs().e('Fatal error during app initialization', e, s);
+    
+    // Log to console for debugging
+    debugPrint('FATAL ERROR: $e');
+    debugPrint('Stack trace: $s');
+    
     // Show error UI instead of crashing
-    WidgetsFlutterBinding.ensureInitialized();
     runApp(
       MaterialApp(
+        debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: Center(
-            child: Text(
-              'Failed to start ${AppConfig.applicationName}.\nError: $e',
-              textAlign: TextAlign.center,
+          backgroundColor: Colors.red[50],
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red, size: 64),
+                  SizedBox(height: 16),
+                  Text(
+                    'Oeps! Er is iets misgegaan',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '${AppConfig.applicationName} kon niet starten. Probeer de app opnieuw te starten.',
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 16),
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Error: $e',
+                      style: TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
