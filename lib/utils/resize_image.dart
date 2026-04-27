@@ -4,6 +4,8 @@ import 'package:image/image.dart' as img;
 import 'package:matrix/matrix.dart';
 import 'package:mime/mime.dart';
 
+import 'package:Pulsly/utils/client_manager.dart';
+
 /// Helper class to resize images before upload
 class ImageResizer {
   /// Max dimension (width or height) for resized images
@@ -35,6 +37,7 @@ class ImageResizer {
           bytes: bytes,
           name: xfile.name,
           mimeType: mimeType,
+          nativeImplementations: ClientManager.nativeImplementations,
         );
       }
 
@@ -68,7 +71,8 @@ class ImageResizer {
       return MatrixImageFile.create(
         bytes: Uint8List.fromList(resizedBytes),
         name: xfile.name,
-        mimeType: 'image/jpeg', // Always output as JPEG for size
+        mimeType: 'image/jpeg',
+        nativeImplementations: ClientManager.nativeImplementations,
       );
     } catch (e) {
       // If resize fails, return null to let caller handle it
