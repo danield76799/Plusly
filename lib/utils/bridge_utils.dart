@@ -189,9 +189,14 @@ bool isBridgeRoom(Room room) {
 
   // Check for phone numbers in room name (WhatsApp bridge indicator)
   // Phone number formats: +316..., +31 6..., 06..., etc.
-  final phoneNumberPattern = RegExp(r'^(\+\d{1,3}[\s\d]{7,}|\d{10,})$');
-  if (phoneNumberPattern.hasMatch(room.name ?? '')) {
-    return true;
+  final name = room.name;
+  if (name != null && name.isNotEmpty) {
+    // Simple phone number check: starts with + and has 10+ digits, or starts with 0 and has 10+ chars
+    final cleaned = name.replaceAll(RegExp(r'\s'), '');
+    if ((cleaned.startsWith('+') && cleaned.length >= 10 && cleaned.substring(1).split('').every((c) => RegExp(r'\d').hasMatch(c))) ||
+        (cleaned.startsWith('0') && cleaned.length >= 10 && cleaned.split('').every((c) => RegExp(r'\d').hasMatch(c)))) {
+      return true;
+    }
   }
 
   // Check canonical alias
@@ -296,9 +301,13 @@ String? getBridgeType(Room room) {
   }
   
   // Check for phone numbers (WhatsApp bridge indicator)
-  final phoneNumberPattern = RegExp(r'^(\+\d{1,3}[\s\d]{7,}|\d{10,})$');
-  if (phoneNumberPattern.hasMatch(room.name ?? '')) {
-    return 'whatsapp';
+  final name = room.name;
+  if (name != null && name.isNotEmpty) {
+    final cleaned = name.replaceAll(RegExp(r'\s'), '');
+    if ((cleaned.startsWith('+') && cleaned.length >= 10 && cleaned.substring(1).split('').every((c) => RegExp(r'\d').hasMatch(c))) ||
+        (cleaned.startsWith('0') && cleaned.length >= 10 && cleaned.split('').every((c) => RegExp(r'\d').hasMatch(c)))) {
+      return 'whatsapp';
+    }
   }
   
   if (roomName.contains('telegram_') || roomTopic.contains('telegram_')) {
