@@ -78,12 +78,13 @@ const _bridgePatterns = [
   'slackbot',
   'bridgebot',
   'relaybot',
-  // Bridge participant IDs (e.g. @whatsapp_12345:server)
+  // Bridge participant IDs
   'whatsapp_',
   'telegram_',
   'signal_',
   'discord_',
   'slack_',
+  'whatsapp_lid',
   // Specific patterns
   'wa-bot:',
   'telegram-bot:',
@@ -103,6 +104,12 @@ const _bridgePatterns = [
   'hangouts-bot:',
   'gitter-bot:',
   'bridged:',
+  // Additional patterns for better detection
+  '@whatsapp',
+  '@telegram',
+  '@signal',
+  '@discord',
+  '@slack',
 ];
 
 /// Known bridge state event types
@@ -216,10 +223,18 @@ bool isBridgeRoom(Room room) {
   }
 
   // Check room members for bridge bot participation
+  // Check ALL members, not just first 20, and also check display names
   final memberStates = room.states[EventTypes.RoomMember];
   if (memberStates != null) {
-    for (final userId in memberStates.keys.take(20)) {
+    for (final entry in memberStates.entries) {
+      final userId = entry.key;
       if (isBridgeBotByUserId(userId)) {
+        return true;
+      }
+      // Also check display name in the member event
+      final event = entry.value;
+      final displayName = event.content['displayname']?.toString().toLowerCase() ?? '';
+      if (displayName.contains('(wa)') || displayName.contains('whatsapp')) {
         return true;
       }
     }
@@ -341,15 +356,19 @@ String? getBridgeType(Room room) {
   }
 
   // 6. Check room members for bridge bot
+  // Check ALL members and their display names
   final memberStates = room.states[EventTypes.RoomMember];
   if (memberStates != null) {
-    for (final memberId in memberStates.keys.take(20)) {
-      final lowerId = memberId.toLowerCase();
-      if (lowerId.contains('whatsapp')) return 'whatsapp';
-      if (lowerId.contains('telegram')) return 'telegram';
-      if (lowerId.contains('signal')) return 'signal';
-      if (lowerId.contains('discord')) return 'discord';
-      if (lowerId.contains('slack')) return 'slack';
+    for (final entry in memberStates.entries) {
+      final memberId = entry.key.toLowerCase();
+      final event = entry.value;
+      final displayName = event.content['displayname']?.toString().toLowerCase() ?? '';
+      
+      if (memberId.contains('whatsapp') || displayName.contains('whatsapp') || displayName.contains('(wa)')) return 'whatsapp';
+      if (memberId.contains('telegram') || displayName.contains('telegram')) return 'telegram';
+      if (memberId.contains('signal') || displayName.contains('signal')) return 'signal';
+      if (memberId.contains('discord') || displayName.contains('discord')) return 'discord';
+      if (memberId.contains('slack') || displayName.contains('slack')) return 'slack';
     }
   }
 
