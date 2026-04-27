@@ -40,18 +40,22 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: build/app/outputs/flutter-apk/app-release.apk
-        tag_name: test-whatsapp-bridge-fix-${{ github.run_number }}
-        name: Test Build - WhatsApp Bridge Fix #${{ github.run_number }}
+        tag_name: v0.9.6-build${{ github.run_number }}
+        name: Plusly v0.9.6 (Build #${{ github.run_number }})
         body: |
-          ## Test Build - WhatsApp Bridge Detection Fix
+          ## Plusly v0.9.6
           
-          **Wijzigingen:**
-          - WhatsApp bridge detectie patronen uitgebreid
-          - Toegevoegd: `@whatsapp`, `@botwhatsapp`, `@bot.whatsapp`, `@whatsappbot`
-          - `android_system_font` plugin tijdelijk uitgeschakeld (Kotlin daemon crash)
+          **Belangrijke fixes:**
+          - WhatsApp bridge detectie verbeterd (server-onafhankelijk)
+          - Image resize voor snellere foto uploads (max 1200px, 40% JPEG)
+          - Fix voor MatrixImageFile nativeImplementations (onthoudingen/OCR)
+          - Phone number detectie voor WhatsApp chats
+          - Bot patronen herkenning (`@whatsapp`, `@botwhatsapp`, etc)
           
-          **Let op:** Dit is een test build. Gebruik op eigen risico.
+          **Build info:**
+          - Build nummer: ${{ github.run_number }}
+          - Commit: ${{ github.sha }}
         draft: false
-        prerelease: true
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
