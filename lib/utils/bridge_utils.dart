@@ -158,7 +158,7 @@ bool isBridgeBot(String userId, Room room) {
 
 /// Checks if a room is a bridge room (has bridge-related state or direct chat with bridge bot)
 bool isBridgeRoom(Room room) {
-  // Check by room state events
+  // Check by room state events FIRST (most reliable)
   if (isBridgeRoomByState(room)) {
     return true;
   }
@@ -169,9 +169,9 @@ bool isBridgeRoom(Room room) {
     return true;
   }
 
-  // Check room name and topic for bridge bot patterns as fallback
-  final roomName = room.name.toLowerCase() ?? '';
-  final roomTopic = room.topic.toLowerCase() ?? '';
+  // Check room name and topic for bridge bot patterns
+  final roomName = room.name?.toLowerCase() ?? '';
+  final roomTopic = room.topic?.toLowerCase() ?? '';
   final bridgeNamePatterns = [
     'whatsapp',
     'telegram',
@@ -179,6 +179,7 @@ bool isBridgeRoom(Room room) {
     'discord',
     'slack',
     'beeper',
+    'mautrix',
   ];
   if (bridgeNamePatterns.any(
     (pattern) => roomName.contains(pattern) || roomTopic.contains(pattern),
@@ -186,8 +187,8 @@ bool isBridgeRoom(Room room) {
     return true;
   }
 
-  // Check canonical alias for common bridge portal patterns
-  final canonicalAlias = room.canonicalAlias.toLowerCase() ?? '';
+  // Check canonical alias
+  final canonicalAlias = room.canonicalAlias?.toLowerCase() ?? '';
   final aliasPatterns = [
     'telegram_',
     'discord_',
@@ -202,8 +203,7 @@ bool isBridgeRoom(Room room) {
     return true;
   }
 
-  // Check all room members via state events for bridge bot participation
-  // Limit scan to first 50 members to avoid performance issues in huge public rooms
+  // Check room members for bridge bot participation
   final memberStates = room.states[EventTypes.RoomMember];
   if (memberStates != null) {
     for (final userId in memberStates.keys.take(20)) {
@@ -219,12 +219,32 @@ bool isBridgeRoom(Room room) {
 /// Gets the bridge type from a room (e.g., 'whatsapp', 'telegram')
 /// Returns null if not a bridge room
 String? getBridgeType(Room room) {
-  // Only check directChatMatrixID for actual bridge bot patterns
-  final userId = room.directChatMatrixID?.toLowerCase() ?? '';
-  final roomName = room.name.toLowerCase() ?? '';
-  final roomTopic = room.topic.toLowerCase() ?? '';
+  // 1. Check bridge state events FIRST (most reliable)
+  for (final eventType in _bridgeStateEventTypes) {
+    final stateEvent = room.getState(eventType);
+    if (stateEvent != null) {
+      final content = stateEvent.content;
+      final bridgeName =
+          content['bridge_name'] ?? content['name'] ?? content['service'] ?? content['type'];
+      if (bridgeName != null) {
+        final name = bridgeName.toString().toLowerCase();
+        if (name.contains('whatsapp')) return 'whatsapp';
+        if (name.contains('telegram')) return 'telegram';
+        if (name.contains('signal')) return 'signal';
+        if (name.contains('discord')) return 'discord';
+        if (name.contains('slack')) return 'slack';
+        return name;
+      }
+      return 'bridge';
+    }
+  }
 
-  // WhatsApp bridge patterns - be specific to avoid false positives
+  // 2. Check directChatMatrixID
+  final userId = room.directChatMatrixID?.toLowerCase() ?? '';
+  final roomName = room.name?.toLowerCase() ?? '';
+  final roomTopic = room.topic?.toLowerCase() ?? '';
+
+  // WhatsApp patterns
   if (userId.contains('wa-bot') ||
       userId.contains('whappbot') ||
       userId.contains('whatsapp_') ||
@@ -235,7 +255,7 @@ String? getBridgeType(Room room) {
       userId.contains('@whatsappbot')) {
     return 'whatsapp';
   }
-  // Telegram bridge patterns
+  // Telegram patterns
   if (userId.contains('telegram-bot') ||
       userId.contains('mautrix-telegram') ||
       userId.contains('tgbot') ||
@@ -243,52 +263,49 @@ String? getBridgeType(Room room) {
       userId.contains('telegram_')) {
     return 'telegram';
   }
-  // Signal bridge patterns
+  // Signal patterns
   if (userId.contains('signal-bot') ||
       userId.contains('bot.signal') ||
       userId.contains('signal_')) {
     return 'signal';
   }
-  // Discord bridge patterns
+  // Discord patterns
   if (userId.contains('discord-bot') ||
       userId.contains('bot.discord') ||
       userId.contains('discord_')) {
     return 'discord';
   }
-  // Slack bridge patterns
+  // Slack patterns
   if (userId.contains('slack-bot') ||
       userId.contains('bot.slack') ||
       userId.contains('slack_')) {
     return 'slack';
   }
-  // Other bridges
-  if (userId.contains('hangouts-bot')) {
-    return 'hangouts';
-  }
-  if (userId.contains('gitter-bot')) {
-    return 'gitter';
-  }
-  if (userId.contains('mx-puppet')) {
-    return 'puppet';
-  }
 
-  // Check room name/topic for bridge indicators (more specific)
-  if (roomName.contains('whatsapp_') || roomTopic.contains('whatsapp_')) {
+  // 3. Check room name/topic
+  if (roomName.contains('whatsapp_') || roomTopic.contains('whatsapp_') ||
+      roomName.contains('wa ') || roomTopic.contains('wa ')) {
     return 'whatsapp';
   }
   if (roomName.contains('telegram_') || roomTopic.contains('telegram_')) {
     return 'telegram';
   }
+  if (roomName.contains('signal_') || roomTopic.contains('signal_')) {
+    return 'signal';
+  }
+  if (roomName.contains('discord_') || roomTopic.contains('discord_')) {
+    return 'discord';
+  }
 
-  // Check canonical alias for portal patterns
-  final canonicalAlias = room.canonicalAlias.toLowerCase() ?? '';
+  // 4. Check canonical alias
+  final canonicalAlias = room.canonicalAlias?.toLowerCase() ?? '';
   if (canonicalAlias.contains('whatsapp')) return 'whatsapp';
   if (canonicalAlias.contains('telegram')) return 'telegram';
   if (canonicalAlias.contains('signal')) return 'signal';
   if (canonicalAlias.contains('discord')) return 'discord';
   if (canonicalAlias.contains('slack')) return 'slack';
 
-  // Check room creator for bridge bot type
+  // 5. Check room creator
   final createEvent = room.getState(EventTypes.RoomCreate);
   if (createEvent != null) {
     final creator =
@@ -300,7 +317,7 @@ String? getBridgeType(Room room) {
     if (creator.contains('slack')) return 'slack';
   }
 
-  // Check room members for bridge bot type (limit scan for performance)
+  // 6. Check room members for bridge bot
   final memberStates = room.states[EventTypes.RoomMember];
   if (memberStates != null) {
     for (final memberId in memberStates.keys.take(20)) {
@@ -313,23 +330,9 @@ String? getBridgeType(Room room) {
     }
   }
 
-  // Check state events
-  for (final eventType in _bridgeStateEventTypes) {
-    final stateEvent = room.getState(eventType);
-    if (stateEvent != null) {
-      // Try to extract bridge type from content
-      final content = stateEvent.content;
-      final bridgeName =
-          content['bridge_name'] ?? content['name'] ?? content['service'];
-      if (bridgeName != null) {
-        return bridgeName.toString().toLowerCase();
-      }
-      // Return generic bridge type based on event type
-      if (eventType == 'io.element.bridge') {
-        return 'element';
-      }
-      return 'bridge';
-    }
+    // If isBridgeRoom is true but we can't determine type, it's a generic bridge
+  if (isBridgeRoom(room)) {
+    return 'other';
   }
 
   return null;
