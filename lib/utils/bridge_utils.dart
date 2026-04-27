@@ -65,7 +65,7 @@ Color getBridgeTypeColor(String? type) {
 const _excludedBotPatterns = ['extera'];
 
 const _bridgePatterns = [
-  // Generic bot patterns
+  // Generic bot patterns (any server)
   'bot.signal',
   'bot.telegram',
   'bot.whatsapp',
@@ -78,33 +78,34 @@ const _bridgePatterns = [
   'slackbot',
   'bridgebot',
   'relaybot',
-  // Bridge participant IDs
+  'bridge bot',
+  // Bridge participant IDs (any server)
   'whatsapp_',
   'telegram_',
   'signal_',
   'discord_',
   'slack_',
   'whatsapp_lid',
-  // Specific patterns
-  'wa-bot:',
-  'telegram-bot:',
-  'mautrix-telegram:',
-  'tgbot:',
-  'tg-bot:',
-  'heisenbridge:',
-  'beeper:',
-  't2bot:',
-  'whappbot:',
-  'mx-puppet-bridge:',
-  'mx-puppet:',
-  'whatsapp-bot:',
-  'signal-bot:',
-  'discord-bot:',
-  'slack-bot:',
-  'hangouts-bot:',
-  'gitter-bot:',
-  'bridged:',
-  // Additional patterns for better detection
+  // Specific patterns (any server)
+  'wa-bot',
+  'telegram-bot',
+  'mautrix-telegram',
+  'tgbot',
+  'tg-bot',
+  'heisenbridge',
+  'beeper',
+  't2bot',
+  'whappbot',
+  'mx-puppet-bridge',
+  'mx-puppet',
+  'whatsapp-bot',
+  'signal-bot',
+  'discord-bot',
+  'slack-bot',
+  'hangouts-bot',
+  'gitter-bot',
+  'bridged',
+  // Server-independent patterns
   '@whatsapp',
   '@telegram',
   '@signal',
