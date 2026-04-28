@@ -97,6 +97,8 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
     });
     try {
       Logs().i('[Push] Manual push registration requested');
+      // Reset upAction to force re-registration
+      Matrix.of(context).backgroundPush?.upAction = false;
       await Matrix.of(context).backgroundPush?.setupPush(
         Matrix.of(context).widget.clients,
       );
