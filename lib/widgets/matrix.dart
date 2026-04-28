@@ -280,8 +280,11 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     onLoginStateChanged[name] ??= c.onLoginStateChanged.stream.listen((state) {
       if (state == LoginState.loggedIn) {
         // Re-setup push notifications for new login
-        backgroundPush?.upAction = false; // Reset UP action flag
-        backgroundPush?.setupPush(widget.clients);
+        // Delay to ensure client is fully initialized
+        Future.delayed(const Duration(seconds: 2), () {
+          backgroundPush?.upAction = false; // Reset UP action flag
+          backgroundPush?.setupPush(widget.clients);
+        });
       }
       final loggedInWithMultipleClients = widget.clients.length > 1;
       if (state == LoginState.loggedOut) {

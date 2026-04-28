@@ -298,7 +298,7 @@ class BackgroundPush {
   static bool _wentToRoomOnStartup = false;
 
   Future<void> setupPush(List<Client> clients) async {
-    Logs().d("SetupPush");
+    Logs().d("SetupPush called with ${clients.length} clients");
     this.clients = clients;
 
     {
@@ -326,13 +326,16 @@ class BackgroundPush {
         ) ||
         !PlatformInfos.isMobile ||
         matrix == null) {
+      Logs().w("SetupPush early return - not logged in or not mobile");
       return;
     }
     // Do not setup unifiedpush if this has been initialized by
     // an unifiedpush action
     if (upAction) {
+      Logs().w("SetupPush early return - upAction is true");
       return;
     }
+    Logs().i("Setting up push notifications...");
     if (!PlatformInfos.isIOS &&
         (await UnifiedPush.getDistributors()).isNotEmpty) {
       await setupUp();
