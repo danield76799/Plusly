@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -64,7 +63,6 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
       isLoading = true;
     });
     try {
-      // Add timeout to prevent hanging when server has issues
       final updateFromSync = Matrix.of(context).client.onSync.stream
           .where(
             (syncUpdate) =>
@@ -73,34 +71,17 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
                 ) ??
                 false,
           )
-          .first
-          .timeout(const Duration(seconds: 10));
-      
+          .first;
       await Matrix.of(
         context,
       ).client.setPushRuleEnabled(kind, pushRule.ruleId, !pushRule.enabled);
       await updateFromSync;
-    } on TimeoutException {
-      // Server didn't respond in time, but we can still update UI optimistically
-      Logs().w('Timeout waiting for push rules sync update');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Server reageert traag - wijziging is lokaal toegepast'),
-        ),
-      );
     } catch (e, s) {
       Logs().w('Unable to toggle push rule', e, s);
       if (!mounted) return;
-      // Show friendly message instead of error - the server has issues but we don't block UI
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(
-        const SnackBar(
-          content: Text('Notificatie wijziging opgeslagen (server sync later)'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+      ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
     } finally {
       if (mounted) {
         setState(() {
