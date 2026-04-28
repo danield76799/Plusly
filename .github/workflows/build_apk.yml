@@ -23,6 +23,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     
+    - name: Clean Flutter build
+      run: flutter clean
+    
     - name: Get dependencies
       run: flutter pub get
     
