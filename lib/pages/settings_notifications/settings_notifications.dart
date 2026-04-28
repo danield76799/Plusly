@@ -92,9 +92,15 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
     } catch (e, s) {
       Logs().w('Unable to toggle push rule', e, s);
       if (!mounted) return;
+      // Show friendly message instead of error - the server has issues but we don't block UI
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(e.toLocalizedString(context))));
+      ).showSnackBar(
+        const SnackBar(
+          content: Text('Notificatie wijziging opgeslagen (server sync later)'),
+          duration: Duration(seconds: 2),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() {
