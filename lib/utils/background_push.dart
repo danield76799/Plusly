@@ -486,9 +486,26 @@ class BackgroundPush {
 
     Logs().i('[Push] Saving UnifiedPush distributor: $selectedDistributor');
     await UnifiedPush.saveDistributor(selectedDistributor);
+    
+    // Check if we already have an endpoint for any client
+    var hasExistingEndpoint = false;
     for (final client in clients) {
       if (client.isLogged()) {
-        await UnifiedPush.register(instance: client.clientName);
+        final endpoint = matrix?.store.getString(
+          client.clientName + AppSettings.unifiedPushEndpoint.key,
+        );
+        if (endpoint != null && endpoint.isNotEmpty) {
+          hasExistingEndpoint = true;
+          // Re-register pusher with existing endpoint
+          await setupPusher(
+            gatewayUrl: 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify',
+            token: endpoint,
+            useDeviceSpecificAppId: true,
+            client: client,
+          );
+        } else {
+          await UnifiedPush.register(instance: client.clientName);
+        }
       }
     }
   }
