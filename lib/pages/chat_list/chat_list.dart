@@ -200,12 +200,13 @@ class ChatListController extends State<ChatList>
   }
 
   void syncBridgeTypes() {
-    // If we've never detected any bridge types, always try to detect
-    // (bridge state events may not have been loaded on first attempt)
-    // Only cache if we have successfully detected bridge types before
-    if (allBridgeTypes.isNotEmpty &&
-        DateTime.now().difference(_lastBridgeSync) < Duration(seconds: 5)) {
-      return;
+    // If allBridgeTypes is empty, we haven't detected any bridges yet - don't cache
+    // and keep trying on every call until we find something
+    // Once we have detected bridges, use a 2-second cache to avoid excessive recomputation
+    if (!allBridgeTypes.isEmpty) {
+      if (DateTime.now().difference(_lastBridgeSync) < const Duration(seconds: 2)) {
+        return;
+      }
     }
 
     final client = Matrix.of(context).client;
