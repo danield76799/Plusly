@@ -100,8 +100,6 @@ class ChatListController extends State<ChatList>
 
   StreamSubscription? _intentUriStreamSubscription;
 
-  StreamSubscription? _syncStreamSubscription;
-
   // Performance cache variables
   Set<String> _cachedBridgeTypes = {};
   DateTime _lastBridgeSync = DateTime(2000);
@@ -202,9 +200,8 @@ class ChatListController extends State<ChatList>
   }
 
   void syncBridgeTypes() {
-    // Cache for 5 seconds to avoid recomputation, but always sync if we haven't detected any bridge types yet
-    if (allBridgeTypes.isNotEmpty &&
-        DateTime.now().difference(_lastBridgeSync) < Duration(seconds: 5)) {
+    // Cache for 5 seconds to avoid recomputation
+    if (DateTime.now().difference(_lastBridgeSync) < Duration(seconds: 5)) {
       return;
     }
 
@@ -550,10 +547,6 @@ class ChatListController extends State<ChatList>
 
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
-    // Listen to sync events to re-detect bridge types
-    _syncStreamSubscription = Matrix.of(context).client.onSync.stream.listen((_) {
-      syncBridgeTypes();
-    });
     _hackyWebRTCFixForWeb();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
@@ -582,7 +575,6 @@ class ChatListController extends State<ChatList>
     _intentDataStreamSubscription?.cancel();
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();
-    _syncStreamSubscription?.cancel();
     scrollController.removeListener(_onScroll);
     _clientStream.close();
     searchController.dispose();
