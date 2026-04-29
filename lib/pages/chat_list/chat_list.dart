@@ -285,18 +285,8 @@ class ChatListController extends State<ChatList>
   }
 
   bool _isBridgeTypeVisible(Room room) {
-    // If visibleBridgeTypes is empty, show all rooms (no filtering)
-    // This happens on app startup before syncBridgeTypes() has run
-    if (visibleBridgeTypes.isEmpty) {
-      return true;
-    }
-    if (!isBridgeRoom(room)) {
-      return visibleBridgeTypes.contains('matrix');
-    }
-    final bridgeType = getBridgeType(room) ?? 'other';
-    final visible = visibleBridgeTypes.contains(bridgeType);
-    Logs().d('[Filter] Room ${room.name} bridgeType=$bridgeType visible=$visible visibleBridgeTypes=$visibleBridgeTypes');
-    return visible;
+    // Always show all rooms - filtering disabled for stability
+    return true;
   }
 
   // Cached filteredRooms - 500ms cache
