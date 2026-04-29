@@ -144,10 +144,10 @@ abstract class ClientManager {
       defaultNetworkRequestTimeout: const Duration(minutes: 30),
       enableDehydratedDevices: true,
       shareKeysWith:
-          ShareKeysWith.values.singleWhereOrNull(
+          .values.singleWhereOrNull(
             (share) => share.name == shareKeysWith,
           ) ??
-          ShareKeysWith.all,
+          .crossVerifiedIfEnabled,
       convertLinebreaksInFormatting: false,
       onSoftLogout: enableSoftLogout
           ? (client) => client.refreshAccessToken()

@@ -460,7 +460,8 @@ class _ChatViewState extends State<ChatView> {
               valueListenable: controller.scrolledUpNotifier,
               builder: (context, scrolledUp, _) {
                 final show =
-                    (scrolledUp || controller.timeline?.allowNewEvent == false) &&
+                    (scrolledUp ||
+                        controller.timeline?.allowNewEvent == false) &&
                     controller.selectedEvents.isEmpty;
                 if (!show) return const SizedBox.shrink();
                 return Padding(
@@ -586,7 +587,8 @@ class _ChatViewState extends State<ChatView> {
                                               label: Text(
                                                 L10n.of(context).enterNewChat,
                                               ),
-                                              onPressed: controller.goToNewRoomAction,
+                                              onPressed:
+                                                  controller.goToNewRoomAction,
                                             ),
                                           )
                                         : ElevatedButton.icon(
@@ -596,14 +598,17 @@ class _ChatViewState extends State<ChatView> {
                                             label: Text(
                                               L10n.of(context).enterNewChat,
                                             ),
-                                            onPressed: controller.goToNewRoomAction,
+                                            onPressed:
+                                                controller.goToNewRoomAction,
                                           ))
                                   : controller.room.canSendDefaultMessages &&
-                                        controller.room.membership == Membership.join &&
+                                        controller.room.membership ==
+                                            Membership.join &&
                                         !controller.showThreadRoots
                                   ? (() {
                                       final inputChild =
-                                          controller.room.isAbandonedDMRoom == true
+                                          controller.room.isAbandonedDMRoom ==
+                                              true
                                           ? Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.spaceEvenly,
@@ -620,7 +625,8 @@ class _ChatViewState extends State<ChatView> {
                                                   icon: const Icon(
                                                     Icons.archive_outlined,
                                                   ),
-                                                  onPressed: controller.leaveChat,
+                                                  onPressed:
+                                                      controller.leaveChat,
                                                   label: Text(
                                                     L10n.of(context).leave,
                                                   ),
@@ -635,7 +641,8 @@ class _ChatViewState extends State<ChatView> {
                                                   icon: const Icon(
                                                     Icons.forum_outlined,
                                                   ),
-                                                  onPressed: controller.recreateChat,
+                                                  onPressed:
+                                                      controller.recreateChat,
                                                   label: Text(
                                                     L10n.of(context).reopenChat,
                                                   ),
@@ -684,9 +691,10 @@ class _ChatViewState extends State<ChatView> {
                   Positioned(
                     top:
                         MediaQuery.of(context).padding.top +
-                        kToolbarHeight +
+                        (AppBarTheme.of(context).toolbarHeight ??
+                            kToolbarHeight) +
                         appbarBottomHeight +
-                        22,
+                        6,
                     left: 0,
                     right: 0,
                     child: SizedBox(
@@ -703,7 +711,9 @@ class _ChatViewState extends State<ChatView> {
                                 children: [
                                   FilledButton(
                                     onPressed: () {
-                                      controller.scrollToEventId(scrollUpBannerEventId);
+                                      controller.scrollToEventId(
+                                        scrollUpBannerEventId,
+                                      );
                                       controller.discardScrollUpBannerEventId();
                                     },
                                     style: FilledButton.styleFrom(
@@ -714,7 +724,11 @@ class _ChatViewState extends State<ChatView> {
                                       children: [
                                         Icon(Icons.arrow_upward),
                                         SizedBox(width: 18),
-                                        Text(L10n.of(context).jumpToLastReadMessage)
+                                        Text(
+                                          L10n.of(
+                                            context,
+                                          ).jumpToLastReadMessage,
+                                        ),
                                       ],
                                     ),
                                   ),

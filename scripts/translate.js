@@ -16,7 +16,7 @@ const humanMadeLocalizations = ['en', 'ru']; // we'll pass multiple localization
 var targetLocalization = getLocalization(TARGET_LANGUAGE);
 
 const locale = getLocalization(humanMadeLocalizations[0]);
-var keys = Object.keys(locale).filter(x => !x.startsWith('@'));
+var keys = Object.keys(locale).filter(x => !x.startsWith('@@') && !targetLocalization[x]);
 
 async function batchTranslate(amount) {
     const k = keys.slice(0, amount);
@@ -46,7 +46,9 @@ async function batchTranslate(amount) {
 You will be provided a JSON list of ${k.length} string keys. Each key has ${humanMadeLocalizations.length} values in different languages.
 Based on provided translations, you need to translate each string into ${TARGET_LANGUAGE_NAME ?? `language, which two-letter code is ${TARGET_LANGUAGE}`}.
 
-Your output is expected to be a JSON object, which has exactly the same keys as input JSON object. Wrap your JSON output in Markdown codeblock.`
+**Your output is expected to be a JSON object**, which has exactly the same keys as input JSON object. Wrap your JSON output in Markdown codeblock.
+
+You are not talking to a user, but an automated system which will detect your JSON response.`
                 },
                 {
                     role: 'user',

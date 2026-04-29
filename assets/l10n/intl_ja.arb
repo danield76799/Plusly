@@ -1,64 +1,64 @@
 {
 	"noSendPermission": "メッセージを送信する権限がありません",
-	"noMessagesYet": "メッセージはありません",
+	"noMessagesYet": "メッセージはまだありません",
 	"longPressToRecordVoiceMessage": "長押しして音声メッセージを録音します。",
 	"pause": "一時停止",
 	"newSubSpace": "新しいサブスペース",
 	"moveToDifferentSpace": "別のスペースに移動",
 	"moveUp": "上へ",
 	"moveDown": "下へ",
-	"removeFromSpaceDescription": "このルームはスペースから削除されますが、チャットリストには残ります。",
+	"removeFromSpaceDescription": "このルームはスペースから削除されますが、チャット一覧には残ります。",
 	"resume": "再開",
 	"anonymousPoll": "匿名",
 	"publicPoll": "公開",
-	"endedPoll": "終了済み",
+	"endedPoll": "終了",
 	"activePoll": "アクティブ",
 	"singleChoice": "単一選択",
 	"multipleChoice": "複数選択",
 	"vote": "投票",
 	"changeVote": "回答を変更",
-	"choicesSelected": "{max}件中{selected}件を選択",
-	"discuss": "議論する",
+	"choicesSelected": "{selected}/{max} 選択済み",
+	"discuss": "ディスカッション",
 	"pollType": "投票タイプ",
 	"question": "質問",
 	"answer": "回答",
 	"addAnswer": "回答を追加",
 	"pleaseEnterQuestion": "質問を入力してください",
 	"atLeastTwoAnswersRequired": "少なくとも2つの回答が必要です",
-	"maxSelections": "回答数",
+	"maxSelections": "選択数",
 	"endPoll": "投票を終了",
 	"createPoll": "投票を作成",
 	"alwaysUse24HourFormat": "いいえ",
 	"cleanExif": "EXIFを削除",
 	"cleanExifDescription": "送信前に画像からEXIFメタデータ（カメラモデル、位置情報、時刻）を削除します。",
 	"@@locale": "ja",
-	"@@last_modified": "2026-04-25T06:56:18.600Z",
+	"@@last_modified": "2026-04-25T07:39:29.392Z",
 	"doNotSendIfCantClean": "クリーンできない画像を送信しない",
 	"doNotSendIfCantCleanDescription": "EXIFメタデータを削除できない場合、画像を送信しません",
 	"repeatPassword": "パスワードを再入力",
 	"notAnImage": "これは画像ではありません。",
 	"setCustomPermissionLevel": "カスタム権限レベルを設定",
 	"setPermissionsLevelDescription": "以下のリストから役割を選択するか、カスタム権限レベルを指定してください。",
-	"ignoreUser": "無視する",
+	"ignoreUser": "無視",
 	"normalUser": "メンバー",
 	"remove": "削除",
 	"importNow": "今すぐインポート",
 	"importEmojis": "絵文字をインポート",
 	"displayNavigationRail": "サイドバーを常に表示",
 	"enableGradient": "メッセージの背景グラデーション",
-	"translationDisabledInE2e": "プライバシー保護のため、暗号化されたルームではクラウド翻訳を利用できません。個々の単語を選択して他のアプリで翻訳してください。",
+	"translationDisabledInE2e": "プライバシー保護のため、暗号化されたルームではクラウド翻訳を利用できません。個別の単語を選択して他のアプリで翻訳してください。",
 	"importFromZipFile": "ZIPファイルからインポート",
 	"exportEmotePack": "絵文字パックをZIPとしてエクスポート",
 	"replace": "置換",
-	"about": "このプロジェクトについて",
-	"aboutHomeserver": "{homeserver}について",
-	"accept": "承諾",
-	"acceptedTheInvitation": "👍 {username}が招待を承諾しました",
+	"about": "このアプリについて",
+	"aboutHomeserver": "ホームサーバー {homeserver} について",
+	"accept": "承認",
+	"acceptedTheInvitation": "👍 {username} が招待を承認しました",
 	"account": "アカウント",
-	"activatedEndToEndEncryption": "🔐 {username}がエンドツーエンド暗号化を有効にしました",
+	"activatedEndToEndEncryption": "🔐 {username} がエンドツーエンド暗号化を有効にしました",
 	"addEmail": "メールアドレスを追加",
 	"confirmMatrixId": "アカウントを削除するには、Matrix IDを確認してください。",
-	"supposedMxid": "これは{mxid}である必要があります",
+	"supposedMxid": "{mxid} である必要があります",
 	"addChatDescription": "チャットの説明を追加...",
 	"addToSpace": "スペースに追加",
 	"admin": "管理者",
@@ -68,29 +68,29 @@
 	"allChats": "すべてのチャット",
 	"commandHint_roomupgrade": "このルームをアップグレード",
 	"commandHint_googly": "ギョロ目を送信",
-	"commandHint_cuddle": "スマイルを送信",
+	"commandHint_cuddle": "なでなでを送信",
 	"commandHint_hug": "ハグを送信",
-	"googlyEyesContent": "{senderName}がギョロ目を送りました",
-	"cuddleContent": "{senderName}があなたに微笑みかけました",
-	"hugContent": "{senderName}があなたをハグしました",
-	"answeredTheCall": "{senderName}が通話に応答しました",
-	"anyoneCanJoin": "誰でも参加できます",
+	"googlyEyesContent": "{senderName} がギョロ目を送りました",
+	"cuddleContent": "{senderName} があなたをなでなでしました",
+	"hugContent": "{senderName} があなたをハグしました",
+	"answeredTheCall": "{senderName} が通話に応答しました",
+	"anyoneCanJoin": "誰でも参加可能",
 	"appLock": "アプリロック",
-	"appLockDescription": "使用していないときにアプリをロックするPINコード",
+	"appLockDescription": "PINコードで未使用時にアプリをロック",
 	"archive": "アーカイブ",
-	"areGuestsAllowedToJoin": "ゲストの参加を許可しますか",
+	"areGuestsAllowedToJoin": "ゲストの参加を許可するか",
 	"areYouSure": "よろしいですか？",
 	"areYouSureYouWantToLogout": "本当にログアウトしますか？",
 	"askSSSSSign": "他のユーザーの鍵に署名するには、パスフレーズまたはリカバリーキーを入力してください。",
-	"askVerificationRequest": "{username}からの認証リクエストを受け入れますか？",
+	"askVerificationRequest": "{username} からの認証リクエストを承認しますか？",
 	"autoplayImages": "アニメーションスタンプと絵文字を自動再生",
-	"badServerLoginTypesException": "ホームサーバーは以下のログインタイプをサポートしています：\n{serverVersions}\nしかし、このアプリは以下のみをサポートしています：\n{supportedVersions}",
+	"badServerLoginTypesException": "ホームサーバーがサポートするログインタイプ:\n{serverVersions}\nしかし、このアプリがサポートするのは:\n{supportedVersions}",
 	"sendTypingNotifications": "入力中通知を送信",
 	"swipeRightToLeftToReply": "右から左にスワイプして返信",
-	"sendOnEnter": "Enterで送信",
-	"badServerVersionsException": "ホームサーバーは以下の仕様バージョンをサポートしています：\n{serverVersions}\nしかし、このアプリは{supportedVersions}のみをサポートしています",
-	"countChatsAndCountParticipants": "{chats}件のチャットと{participants}人の参加者",
-	"noMoreChatsFound": "これ以上チャットは見つかりませんでした...",
+	"sendOnEnter": "Enterキーで送信",
+	"badServerVersionsException": "ホームサーバーがサポートする仕様バージョン:\n{serverVersions}\nしかし、このアプリがサポートするのは {supportedVersions} のみです",
+	"countChatsAndCountParticipants": "{chats} チャット、{participants} 参加者",
+	"noMoreChatsFound": "これ以上チャットが見つかりません...",
 	"noChatsFoundHere": "チャットが見つかりませんでした。下のボタンを押して新しいチャットを始めましょう。⤵️",
 	"joinedChats": "チャット",
 	"unread": "未読",
@@ -98,30 +98,30 @@
 	"spaces": "スペース",
 	"banFromChat": "チャットからBAN",
 	"banned": "BANされました",
-	"bannedUser": "{username}が{targetName}をBANしました",
+	"bannedUser": "{username} が {targetName} をBANしました",
 	"blockDevice": "デバイスをブロック",
 	"blocked": "ブロック済み",
-	"botMessages": "ボットのメッセージ",
+	"botMessages": "ボットメッセージ",
 	"cancel": "キャンセル",
-	"cantOpenUri": "URI {uri}を開けません",
+	"cantOpenUri": "URI {uri} を開けません",
 	"changeDeviceName": "デバイス名を変更",
-	"changedTheChatAvatar": "{username}がチャットのアバターを変更しました",
-	"changedTheChatDescriptionTo": "{username}がチャットの説明を「{description}」に変更しました",
-	"changedTheChatNameTo": "{username}がチャット名を「{chatname}」に変更しました",
-	"changedTheChatPermissions": "{username}がチャットの権限を変更しました",
-	"changedTheDisplaynameTo": "{username}が表示名を「{displayname}」に変更しました",
-	"changedTheGuestAccessRules": "{username}がゲストアクセスルールを変更しました",
-	"changedTheGuestAccessRulesTo": "{username}がゲストアクセスルールを{rules}に変更しました",
-	"changedTheHistoryVisibility": "{username}が履歴の公開範囲を変更しました",
-	"changedTheHistoryVisibilityTo": "{username}が履歴の公開範囲を{rules}に変更しました",
-	"changedTheJoinRules": "{username}が参加ルールを変更しました",
-	"changedTheJoinRulesTo": "{username}が参加ルールを{joinRules}に変更しました",
-	"changedTheProfileAvatar": "{username}がアバターを変更しました",
-	"changedTheRoomAliases": "{username}がルームのエイリアスを変更しました",
-	"changedTheRoomInvitationLink": "{username}が招待リンクを変更しました",
+	"changedTheChatAvatar": "{username} がチャットのアバターを変更しました",
+	"changedTheChatDescriptionTo": "{username} がチャットの説明を「{description}」に変更しました",
+	"changedTheChatNameTo": "{username} がチャット名を「{chatname}」に変更しました",
+	"changedTheChatPermissions": "{username} がチャットの権限を変更しました",
+	"changedTheDisplaynameTo": "{username} が表示名を「{displayname}」に変更しました",
+	"changedTheGuestAccessRules": "{username} がゲストアクセスルールを変更しました",
+	"changedTheGuestAccessRulesTo": "{username} がゲストアクセスルールを {rules} に変更しました",
+	"changedTheHistoryVisibility": "{username} が履歴の公開範囲を変更しました",
+	"changedTheHistoryVisibilityTo": "{username} が履歴の公開範囲を {rules} に変更しました",
+	"changedTheJoinRules": "{username} が参加ルールを変更しました",
+	"changedTheJoinRulesTo": "{username} が参加ルールを {joinRules} に変更しました",
+	"changedTheProfileAvatar": "{username} がアバターを変更しました",
+	"changedTheRoomAliases": "{username} がルームのエイリアスを変更しました",
+	"changedTheRoomInvitationLink": "{username} が招待リンクを変更しました",
 	"changePassword": "パスワードを変更",
 	"changeTheHomeserver": "ホームサーバーを変更",
-	"changeTheme": "カスタマイズ",
+	"changeTheme": "テーマを変更",
 	"changeTheNameOfTheGroup": "グループ名を変更",
 	"changeYourAvatar": "アバターを変更",
 	"channelCorruptedDecryptError": "暗号化が破損しています",
@@ -129,27 +129,27 @@
 	"chat": "チャット",
 	"yourChatBackupHasBeenSetUp": "鍵のバックアップが設定されました。",
 	"chatBackup": "鍵のバックアップ",
-	"chatBackupDescription": "キーのバックアップはリカバリーキーで保護されています。安全な場所に保管してください。",
-	"chatDetails": "チャット設定",
+	"chatBackupDescription": "鍵のバックアップはリカバリーキーで保護されています。安全な場所に保管してください。",
+	"chatDetails": "チャットの設定",
 	"chatHasBeenAddedToThisSpace": "チャットがこのスペースに追加されました",
 	"chats": "チャット",
 	"chooseAStrongPassword": "強力なパスワードを選択してください",
 	"clearArchive": "アーカイブをクリア",
 	"close": "閉じる",
-	"commandHint_markasdm": "ダイレクトメッセージルームとしてマーク",
+	"commandHint_markasdm": "ダイレクトメッセージとしてマーク",
 	"commandHint_markasgroup": "グループとしてマーク",
 	"commandHint_ban": "このルームからユーザーをBANする",
 	"commandHint_clearcache": "キャッシュをクリア",
-	"commandHint_create": "空のグループチャットを作成\n--no-encryptionで暗号化を無効にする",
+	"commandHint_create": "空のグループチャットを作成\n--no-encryption を使用して暗号化を無効にできます",
 	"commandHint_discardsession": "セッションを破棄",
-	"commandHint_dm": "ダイレクトチャットを開始\n--no-encryptionで暗号化を無効にする",
+	"commandHint_dm": "ダイレクトチャットを開始\n--no-encryption を使用して暗号化を無効にできます",
 	"commandHint_html": "HTML形式のテキストを送信",
 	"commandHint_invite": "指定したユーザーをこのルームに招待",
 	"commandHint_join": "指定したルームに参加",
-	"commandHint_kick": "指定したユーザーをこのルームから削除",
+	"commandHint_kick": "指定したユーザーをこのルームからキック",
 	"commandHint_leave": "このルームを退出",
-	"commandHint_me": "アクションを記述",
-	"commandHint_myroomavatar": "このルームのアバターを設定（アバター: mxc-uri）",
+	"commandHint_me": "アクションを説明",
+	"commandHint_myroomavatar": "このルームでの自分のアバターを設定（アバター: mxc-uri）",
 	"commandHint_myroomnick": "このルームでの表示名を設定",
 	"commandHint_op": "ユーザーの権限レベルを設定（デフォルト: 50）",
 	"commandHint_plain": "書式なしテキストを送信",
@@ -157,7 +157,7 @@
 	"commandHint_send": "テキストを送信",
 	"commandHint_unban": "このルームでユーザーのBANを解除",
 	"commandInvalid": "無効なコマンド",
-	"commandMissing": "{command}はコマンドではありません。",
+	"commandMissing": "{command} はコマンドではありません。",
 	"compareEmojiMatch": "絵文字を比較してください",
 	"compareNumbersMatch": "数字を比較してください",
 	"configureChat": "チャットを設定",
@@ -166,22 +166,22 @@
 	"contactHasBeenInvitedToTheGroup": "連絡先がグループに招待されました",
 	"containsDisplayName": "表示名を含む",
 	"containsUserName": "ユーザー名を含む",
-	"contentHasBeenReported": "報告が送信されました",
+	"contentHasBeenReported": "通報が送信されました",
 	"copiedToClipboard": "クリップボードにコピーしました",
 	"copy": "コピー",
 	"copyToClipboard": "クリップボードにコピー",
 	"couldNotDecryptMessage": "メッセージを復号できませんでした: {error}",
-	"countParticipants": "{count}人の参加者",
+	"countParticipants": "{count} 人の参加者",
 	"create": "作成",
-	"createdTheChat": "💬 {username}がチャットを作成しました",
+	"createdTheChat": "💬 {username} がチャットを作成しました",
 	"createGroup": "グループを作成",
 	"createNewSpace": "新しいスペース",
 	"currentlyActive": "オンライン",
 	"darkTheme": "ダーク",
-	"dateAndTimeOfDay": "{date} {timeOfDay}",
+	"dateAndTimeOfDay": "{timeOfDay}、{date}",
 	"dateWithoutYear": "{month}/{day}",
 	"dateWithYear": "{year}/{month}/{day}",
-	"deactivateAccountWarning": "アカウントが無効化されます。元に戻すことはできません！本当によろしいですか？",
+	"deactivateAccountWarning": "アカウントを無効にします。元に戻すことはできません！本当によろしいですか？",
 	"defaultPermissionLevel": "新しいユーザーのデフォルト権限レベル",
 	"delete": "削除",
 	"deleteAccount": "アカウントを削除",
@@ -197,30 +197,30 @@
 	"editBlockedServers": "ブロックされたサーバーを編集",
 	"chatPermissions": "チャットの権限",
 	"chatThreads": "スレッド",
-	"chatThreadsDescription": "このルームのすべてのスレッド一覧",
+	"chatThreadsDescription": "このルーム内のすべてのスレッド一覧",
 	"editDisplayname": "表示名",
 	"editRoomAliases": "ルームエイリアスを編集",
 	"editRoomAvatar": "ルームアバターを変更",
-	"emoteExists": "絵文字はすでに存在します！",
+	"emoteExists": "絵文字は既に存在します！",
 	"emoteInvalid": "無効な絵文字コードです！",
 	"emoteKeyboardNoRecents": "最近使用した絵文字がここに表示されます...",
 	"emotePacks": "ルームの絵文字パック",
-	"emoteSettings": "絵文字設定",
+	"emoteSettings": "絵文字の設定",
 	"globalChatId": "グローバルチャットID",
-	"accessAndVisibility": "アクセスと公開範囲",
-	"accessAndVisibilityDescription": "このチャットに参加できるユーザーと見つけ方",
+	"accessAndVisibility": "アクセスと公開設定",
+	"accessAndVisibilityDescription": "このチャットに参加できる人と、チャットの検索方法",
 	"calls": "通話",
-	"customEmojisAndStickers": "カスタム絵文字とスタンプ",
-	"customEmojisAndStickersBody": "どのチャットでも使用できるカスタム絵文字やスタンプを追加・共有できます。",
+	"customEmojisAndStickers": "カスタム絵文字とステッカー",
+	"customEmojisAndStickersBody": "どのチャットでも使用できるカスタム絵文字やステッカーを追加・共有します。",
 	"emoteShortcode": "絵文字コード",
 	"emoteWarnNeedToPick": "絵文字コードと画像を指定する必要があります！",
 	"emptyChat": "空のチャット",
-	"enableEmotesGlobally": "絵文字パックをグローバルに有効化",
+	"enableEmotesGlobally": "絵文字パックをグローバルに有効にする",
 	"enableEncryption": "暗号化を有効にする",
-	"enableEncryptionWarning": "暗号化を無効にすることはできません。本当によろしいですか？",
+	"enableEncryptionWarning": "暗号化を無効にすることはできなくなります。本当によろしいですか？",
 	"encrypted": "暗号化済み",
 	"encryption": "暗号化",
-	"encryptionNotEnabled": "暗号化が有効になっていません",
+	"encryptionNotEnabled": "暗号化は無効です",
 	"endedTheCall": "{senderName}が通話を終了しました",
 	"enterAnEmailAddress": "メールアドレスを入力してください",
 	"homeserver": "ホームサーバー",
@@ -234,7 +234,7 @@
 	"forward": "転送",
 	"fromJoining": "参加時から",
 	"fromTheInvitation": "招待時から",
-	"goToTheNewRoom": "新しいルームへ移動",
+	"goToTheNewRoom": "新しいルームへ",
 	"group": "グループ",
 	"chatDescription": "チャットの説明",
 	"chatDescriptionHasBeenChanged": "チャットの説明が変更されました",
@@ -247,14 +247,1929 @@
 	"help": "ヘルプ",
 	"hideRedactedEvents": "削除されたイベントを非表示",
 	"hideRedactedMessages": "削除されたメッセージを非表示",
-	"hideRedactedMessagesBody": "誰かがメッセージを削除した場合、チャットで非表示になります。",
+	"hideRedactedMessagesBody": "誰かがメッセージを削除すると、チャット内で非表示になります。",
 	"hideInvalidOrUnknownMessageFormats": "無効または不明なメッセージ形式を非表示",
 	"howOffensiveIsThisContent": "このコンテンツはどの程度不快ですか？",
 	"id": "ID",
 	"identity": "本人確認",
-	"block": "ミュート",
-	"blockedUsers": "ミュートしたユーザー",
-	"blockListDescription": "好みに応じてユーザーを無視できます。無視したユーザーのメッセージや招待は表示されなくなります。",
-	"blockUsername": "ユーザー名を無視",
-	"avatarBorderRadius": "アバターの角丸半径"
+	"block": "ブロック",
+	"blockedUsers": "ブロックされたユーザー",
+	"blockListDescription": "ユーザーを無視できます。無視したユーザーのメッセージや招待は表示されなくなります。",
+	"blockUsername": "ユーザー名をブロック",
+	"avatarBorderRadius": "アバターの角丸半径",
+	"iHaveClickedOnLink": "リンクをクリックしました",
+	"incorrectPassphraseOrKey": "パスフレーズまたは復旧キーが正しくありません",
+	"inoffensive": "無害",
+	"inviteContact": "連絡先を招待",
+	"inviteContactToGroupQuestion": "{contact}をチャット「{groupName}」に招待してよろしいですか？",
+	"inviteContactToGroup": "{groupName}に連絡先を招待",
+	"noChatDescriptionYet": "チャットの説明はまだありません。",
+	"tryAgain": "もう一度試す",
+	"invalidServerName": "無効なサーバー名",
+	"invited": "招待済み",
+	"redactMessageDescription": "メッセージはすべての参加者に対して削除されます。元に戻せません。",
+	"optionalRedactReason": "理由...（任意）",
+	"invitedUser": "📩 {username}が{targetName}を招待しました",
+	"invitedUsersOnly": "招待されたユーザーのみ",
+	"inviteForMe": "自分への招待",
+	"inviteText": "{username}がExteraに招待しました。\n1. https://extera.xyz/next/next.apk?_invite にアクセスしてアプリをインストール\n2. 登録またはログイン\n3. 招待リンクを開く:\n {link}",
+	"isTyping": "入力中…",
+	"joinedTheChat": "👋 {username}がチャットに参加しました",
+	"joinRoom": "ルームに参加",
+	"kicked": "👞 {username}が{targetName}を追放しました",
+	"kickedAndBanned": "🙅 {username}が{targetName}をBANしました",
+	"kickFromChat": "追放",
+	"lastActiveAgo": "最終アクティブ: {localizedTimeShort}",
+	"leave": "退出",
+	"leftTheChat": "チャットを退出",
+	"license": "ライセンス",
+	"lightTheme": "ライト",
+	"loadCountMoreParticipants": "さらに{count}人の参加者を読み込む",
+	"dehydrate": "セッションをエクスポートしてデバイスをクリア",
+	"dehydrateWarning": "この操作は元に戻せません。バックアップファイルを安全に保存したことを確認してください。",
+	"dehydrateTor": "TORユーザー: セッションのエクスポート",
+	"dehydrateTorLong": "TORユーザーの場合、ウィンドウを閉じる前にセッションをエクスポートすることをお勧めします。",
+	"hydrateTor": "TORユーザー: セッションエクスポートのインポート",
+	"hydrateTorLong": "前回TORでセッションをエクスポートしましたか？すぐにインポートしてチャットを続けましょう。",
+	"hydrate": "バックアップファイルから復元",
+	"loadingPleaseWait": "読み込み中... お待ちください。",
+	"loadMore": "もっと読み込む…",
+	"locationDisabledNotice": "位置情報サービスが無効です。位置情報を送信するには有効にしてください。",
+	"locationPermissionDeniedNotice": "位置情報の許可が拒否されました。位置情報を送信するには許可が必要です。",
+	"login": "ログイン",
+	"logInTo": "{homeserver}にログイン",
+	"logout": "ログアウト",
+	"memberChanges": "メンバーの変更",
+	"mention": "メンション",
+	"messages": "メッセージ",
+	"messagesStyle": "メッセージ:",
+	"moderator": "モデレーター",
+	"muteChat": "通知をミュート",
+	"needPantalaimonWarning": "エンドツーエンド暗号化を使用するにはPantalaimonが必要です。",
+	"newMessageInFluffyChat": "💬 Exteraに新しいメッセージ",
+	"newVerificationRequest": "新しい認証リクエスト！",
+	"next": "次へ",
+	"no": "いいえ",
+	"noConnectionToTheServer": "サーバーに接続できません",
+	"noEmotesFound": "絵文字が見つかりません 😕",
+	"noEncryptionForPublicRooms": "公開ルームでは暗号化を有効にできません。",
+	"noGoogleServicesWarning": "お使いのデバイスにはGoogle Playサービスがインストールされていません。素晴らしい選択です！プッシュ通知を受信するには、F-Droidからntfyをダウンロードしてください。お使いの端末がGMSに対応していない場合（例：Huawei）、Google Play Servicesの代わりにAurora StoreとmicroGを使用することもできます。",
+	"noMatrixServer": "{server1}はMatrixサーバーではありません。代わりに{server2}を使用しますか？",
+	"shareInviteLink": "招待リンクを共有",
+	"scanQrCode": "QRコードをスキャン",
+	"none": "なし",
+	"noPasswordRecoveryDescription": "パスワードの回復方法がまだ追加されていません。",
+	"noPermission": "権限がありません",
+	"noRoomsFound": "ルームが見つかりません…",
+	"notifications": "通知",
+	"notificationsEnabledForThisAccount": "このアカウントの通知が有効です",
+	"numUsersTyping": "{count}人のユーザーが入力中…",
+	"obtainingLocation": "位置情報を取得中…",
+	"offensive": "攻撃的",
+	"offline": "オフライン",
+	"ok": "OK",
+	"online": "オンライン",
+	"onlineKeyBackupEnabled": "オンラインキーバックアップが有効です",
+	"oopsPushError": "残念ながら、プッシュ通知の設定中にエラーが発生しました。",
+	"oopsSomethingWentWrong": "問題が発生しました…",
+	"openAppToReadMessages": "アプリを開いてメッセージを読む",
+	"openCamera": "カメラを開く",
+	"openVideoCamera": "ビデオカメラを開く",
+	"oneClientLoggedOut": "アカウントの1つがログアウトされました",
+	"addAccount": "アカウントを追加",
+	"editBundlesForAccount": "このアカウントのバンドルを編集",
+	"addToBundle": "バンドルに追加",
+	"removeFromBundle": "このバンドルから削除",
+	"bundleName": "バンドル名",
+	"enableMultiAccounts": "（ベータ）このデバイスで複数アカウントを有効にする",
+	"openInMaps": "地図で開く",
+	"link": "リンク",
+	"serverRequiresEmail": "このサーバーでは登録時にメールアドレスの確認が必要です。",
+	"or": "または",
+	"participant": "参加者",
+	"passphraseOrKey": "パスフレーズまたはリカバリーキー",
+	"password": "パスワード",
+	"passwordForgotten": "パスワードを忘れた",
+	"passwordHasBeenChanged": "パスワードが変更されました",
+	"hideMemberChangesInPublicChats": "公開チャットでメンバーの変更を非表示",
+	"hideMemberChangesInPublicChatsBody": "公開チャットでの入退室、表示名やアバターの変更を表示しません。",
+	"overview": "概要",
+	"notifyMeFor": "通知する項目",
+	"passwordRecoverySettings": "パスワード回復設定",
+	"passwordRecovery": "パスワードの回復",
+	"people": "ユーザー",
+	"pickImage": "画像を選択",
+	"pin": "ピン留め",
+	"play": "{fileName}を再生",
+	"pleaseChoose": "選択してください",
+	"pleaseChooseAPasscode": "パスコードを選択してください",
+	"pleaseClickOnLink": "続行するにはメール内のリンクを開いてください。",
+	"pleaseEnter4Digits": "PINコードを入力してください。アプリロックを無効にするには空欄のままにしてください。",
+	"pleaseEnterRecoveryKey": "リカバリーキーを入力してください：",
+	"pleaseEnterYourPassword": "パスワードを入力してください",
+	"pleaseEnterYourPin": "PINコードを入力してください",
+	"pleaseEnterYourUsername": "ユーザー名を入力してください",
+	"pleaseFollowInstructionsOnWeb": "ウェブサイトの指示に従い、「次へ」をタップしてください。",
+	"privacy": "プライバシー",
+	"publicRooms": "公開ルーム",
+	"pushRules": "プッシュルール",
+	"reason": "理由",
+	"recording": "録音中",
+	"redactedBy": "{username}がこのメッセージを削除しました",
+	"directChat": "ダイレクトチャット",
+	"redactedByBecause": "{username}がこのメッセージを削除しました。理由：「{reason}」",
+	"redactedAnEvent": "{username}がメッセージを削除しました",
+	"redactMessage": "メッセージを削除",
+	"register": "登録",
+	"reject": "拒否",
+	"rejectedTheInvitation": "{username}が招待を拒否しました",
+	"downloads": "ダウンロード",
+	"mentions": "メンション",
+	"pollHasBeenEnded": "投票は終了しました",
+	"startedAPoll": "{senderName}が投票を作成しました",
+	"rejoin": "再参加",
+	"removeAllOtherDevices": "他のすべてのデバイスを削除",
+	"removedBy": "{username}によって削除されました",
+	"removeDevice": "デバイスを削除",
+	"unbanFromChat": "BANを解除",
+	"removeYourAvatar": "アバターを削除",
+	"replaceRoomWithNewerVersion": "ルームを新しいバージョンに置き換える",
+	"reply": "返信",
+	"reportMessage": "通報",
+	"translateMessage": "メッセージを翻訳",
+	"translatedMessage": "翻訳されたメッセージ",
+	"errorTranslatingMessage": "メッセージの翻訳に失敗しました。",
+	"recoverMessage": "復元",
+	"recoveredMessage": "復元されたメッセージ",
+	"errorRecoveringMessage": "メッセージの復元に失敗しました。",
+	"errorRecoveringMessageNoAdmin": "この機能はSynapseサーバーの管理者のみが利用できます。",
+	"requestPermission": "権限をリクエスト",
+	"roomHasBeenUpgraded": "ルームがアップグレードされました",
+	"roomVersion": "ルームバージョン",
+	"saveFile": "ファイルを保存",
+	"retry": "再試行",
+	"search": "検索",
+	"security": "セキュリティ",
+	"recoveryKey": "リカバリーキー",
+	"recoveryKeyLost": "リカバリーキーを紛失しましたか？",
+	"seenByUser": "{username}が既読",
+	"send": "送信",
+	"sendAMessage": "メッセージを送信",
+	"sendAsText": "テキストとして送信",
+	"sendAudio": "音声を送信",
+	"sendFile": "ファイルを送信",
+	"sendImage": "画像を送信",
+	"sendImages": "{count}枚の画像を送信",
+	"sendMessages": "メッセージを送信",
+	"sendOriginal": "オリジナルを送信",
+	"sendSticker": "スタンプを送信",
+	"sendVideo": "動画を送信",
+	"sentAFile": "📁 {username}がファイルを送信しました",
+	"sentAnAudio": "🎤 {username}が音声を送信しました",
+	"sentAPicture": "🖼️ {username}が画像を送信しました",
+	"sentASticker": "😊 {username}がスタンプを送信しました",
+	"sentAVideo": "🎥 {username}が動画を送信しました",
+	"sentCallInformations": "{senderName}が通話情報を送信しました",
+	"separateChatTypes": "ダイレクトチャットとグループを分ける",
+	"setAsCanonicalAlias": "メインエイリアスとして設定",
+	"setCustomEmotes": "カスタム絵文字を設定",
+	"setChatDescription": "チャットの説明を設定",
+	"setInvitationLink": "招待リンクを設定",
+	"setPermissionsLevel": "権限レベルを設定",
+	"setStatus": "ステータスを設定",
+	"settings": "設定",
+	"share": "共有",
+	"sharedTheLocation": "{username}が位置情報を共有しました",
+	"shareLocation": "位置情報を共有",
+	"showPassword": "パスワードを表示",
+	"presenceStyle": "プレゼンス表示：",
+	"hideAvatarsInInvites": "招待でアバターを非表示にする",
+	"hideAvatarsInInvitesDescription": "招待でルームのアバターを表示しない",
+	"presencesToggle": "他のユーザーのステータスメッセージを表示する",
+	"pureBlackToggle": "黒背景（AMOLED）",
+	"singlesignon": "シングルサインオン",
+	"skip": "スキップ",
+	"sourceCode": "ソースコード",
+	"spaceIsPublic": "公開スペース",
+	"spaceName": "スペース名",
+	"startedACall": "{senderName}が通話を開始しました",
+	"startFirstChat": "最初のチャットを始めましょう",
+	"status": "ステータス",
+	"statusExampleMessage": "今日の調子はいかがですか？",
+	"submit": "送信",
+	"synchronizingPleaseWait": "同期中… しばらくお待ちください。",
+	"synchronizingPleaseWaitCounter": "同期中… ({percentage}%)",
+	"systemTheme": "システム",
+	"theyDontMatch": "一致しません",
+	"theyMatch": "一致しました",
+	"title": "Extera",
+	"toggleFavorite": "お気に入りを切り替え",
+	"toggleMuted": "ミュートを切り替え",
+	"toggleUnread": "既読/未読を切り替え",
+	"tooManyRequestsWarning": "リクエストが多すぎます。後でもう一度お試しください！",
+	"transferFromAnotherDevice": "別のデバイスから転送",
+	"tryToSendAgain": "もう一度送信してみてください",
+	"unavailable": "利用不可",
+	"unbannedUser": "{username}が{targetName}のBANを解除しました",
+	"unblockDevice": "デバイスのブロックを解除",
+	"unknownDevice": "不明なデバイス",
+	"unknownEncryptionAlgorithm": "不明な暗号化アルゴリズム",
+	"unknownEvent": "不明なイベント '{type}'",
+	"unmuteChat": "通知をオンにする",
+	"unpin": "ピン留めを解除",
+	"unreadChats": "{unreadCount, plural, other{{unreadCount}件の未読チャット}}",
+	"userAndOthersAreTyping": "{username}と他{count}人が入力中…",
+	"userAndUserAreTyping": "{username}と{username2}が入力中…",
+	"userIsTyping": "{username}が入力中…",
+	"userLeftTheChat": "🚪 {username}がチャットを退出しました",
+	"username": "ユーザー名",
+	"userSentUnknownEvent": "{username}がタイプ「{type}」のイベントを送信しました",
+	"unverified": "未検証",
+	"verified": "検証済み",
+	"verify": "検証",
+	"verifyStart": "検証を開始",
+	"verifySuccess": "検証に成功しました！",
+	"verifyTitle": "他のアカウントを検証",
+	"videoCall": "ビデオ通話",
+	"visibilityOfTheChatHistory": "チャット履歴の公開範囲",
+	"visibleForAllParticipants": "すべての参加者に表示",
+	"visibleForEveryone": "全員に表示",
+	"voiceMessage": "音声メッセージ",
+	"waitingPartnerAcceptRequest": "相手がリクエストを承認するのを待っています…",
+	"waitingPartnerEmoji": "相手が絵文字を承認するのを待っています…",
+	"waitingPartnerNumbers": "相手が数字を承認するのを待っています…",
+	"wallpaper": "壁紙：",
+	"warning": "警告！",
+	"weSentYouAnEmail": "メールを送信しました",
+	"whoCanPerformWhichAction": "誰がどのアクションを実行できるか",
+	"whoIsAllowedToJoinThisGroup": "このグループへの参加が許可されているユーザー",
+	"whyDoYouWantToReportThis": "通報する理由を教えてください",
+	"wipeChatBackup": "チャットのバックアップを削除して新しいリカバリーキーを作成しますか？",
+	"withTheseAddressesRecoveryDescription": "これらのアドレスでパスワードを復元できます。",
+	"writeAMessage": "メッセージを入力…",
+	"yes": "はい",
+	"you": "あなた",
+	"youAreNoLongerParticipatingInThisChat": "このチャットにはもう参加していません",
+	"youHaveBeenBannedFromThisChat": "このチャットからBANされました",
+	"yourPublicKey": "あなたの公開鍵",
+	"messageInfo": "メッセージ情報",
+	"time": "時刻",
+	"messageType": "メッセージタイプ",
+	"sender": "送信者",
+	"openGallery": "ギャラリーを開く",
+	"removeFromSpace": "スペースから削除",
+	"addToSpaceDescription": "このチャットを追加するスペースを選択してください。",
+	"start": "開始",
+	"pleaseEnterRecoveryKeyDescription": "古いメッセージのロックを解除するには、以前のセッションで生成されたリカバリーキーを入力してください。リカバリーキーはパスワードではありません。",
+	"publish": "公開",
+	"videoWithSize": "動画 ({size})",
+	"openChat": "チャットを開く",
+	"markAsRead": "既読にする",
+	"reportUser": "ユーザーを報告",
+	"dismiss": "閉じる",
+	"reactedWith": "{sender} がリアクションしました: {reaction}",
+	"pinMessage": "ルームにピン留め",
+	"confirmEventUnpin": "本当にこのイベントのピン留めを解除しますか？",
+	"emojis": "絵文字",
+	"placeCall": "通話する",
+	"voiceCall": "音声通話",
+	"unsupportedAndroidVersion": "サポートされていないAndroidバージョン",
+	"unsupportedAndroidVersionLong": "この機能にはより新しいバージョンのAndroidが必要です。アップデートの有無またはカスタムROMのサポートをご確認ください。",
+	"videoCallsBetaWarning": "ビデオ通話は現在ベータ版です。すべてのプラットフォームで期待通りに動作しない、またはまったく動作しない場合があります。",
+	"experimentalVideoCalls": "実験的なビデオ通話",
+	"emailOrUsername": "メールアドレスまたはユーザー名",
+	"indexedDbErrorTitle": "プライベートモードの問題",
+	"indexedDbErrorLong": "残念ながら、プライベートモードではメッセージストレージがデフォルトで有効になっていません。\n以下をお試しください:\n- about:config にアクセス\n- dom.indexedDB.privateBrowsing.enabled を true に設定\nそうしないと、Exteraを起動できません。",
+	"switchToAccount": "アカウント {number} に切り替え",
+	"nextAccount": "次のアカウント",
+	"previousAccount": "前のアカウント",
+	"addWidget": "ウィジェットを追加",
+	"widgetVideo": "動画",
+	"widgetEtherpad": "テキストメモ",
+	"widgetJitsi": "Jitsiビデオ通話",
+	"widgetCustom": "カスタム",
+	"widgetName": "名前",
+	"widgetUrlError": "このURLは無効です。",
+	"widgetNameError": "表示名を入力してください。",
+	"errorAddingWidget": "ウィジェットの追加中にエラーが発生しました。",
+	"youRejectedTheInvitation": "招待を拒否しました",
+	"youJoinedTheChat": "チャットに参加しました",
+	"youAcceptedTheInvitation": "👍 招待を承諾しました",
+	"youBannedUser": "{user} をBANしました",
+	"youHaveWithdrawnTheInvitationFor": "{user} への招待を取り消しました。",
+	"youInvitedToBy": "📩 以下のリンクから招待されました:\n{alias}",
+	"youInvitedBy": "{user} から招待されました",
+	"invitedBy": "{user} に招待されました",
+	"youInvitedUser": "📩 {user} を招待しました",
+	"youKicked": "👞 {user} をキックしました",
+	"youKickedAndBanned": "🙅 {user} をBANしました",
+	"youUnbannedUser": "{user} のBANを解除しました",
+	"hasKnocked": "🚪 {user} が参加をリクエストしました",
+	"usersMustKnock": "参加リクエスト制",
+	"noOneCanJoin": "誰も参加できません",
+	"userWouldLikeToChangeTheChat": "{user} がチャットへの参加を希望しています。",
+	"noPublicLinkHasBeenCreatedYet": "公開リンクはまだ作成されていません",
+	"knock": "参加をリクエスト",
+	"users": "ユーザー",
+	"unlockOldMessages": "古いメッセージのロックを解除",
+	"storeInSecureStorageDescription": "リカバリーキーをこのデバイスの安全なストレージに保存します。",
+	"saveKeyManuallyDescription": "システムの共有ダイアログまたはクリップボードを使用して、このキーを手動で保存してください。",
+	"storeInAndroidKeystore": "Android KeyStoreに保存",
+	"storeInAppleKeyChain": "Apple KeyChainに保存",
+	"storeSecurlyOnThisDevice": "このデバイスに安全に保存",
+	"countFiles": "{count} ファイル",
+	"user": "ユーザー",
+	"custom": "カスタム",
+	"foregroundServiceRunning": "この通知はフォアグラウンドサービスの実行中に表示されます。",
+	"screenSharingTitle": "画面共有",
+	"screenSharingDetail": "{name} と画面を共有しています",
+	"callingPermissions": "通話の権限",
+	"callingAccount": "通話アカウント",
+	"callingAccountDetails": "Exteraがシステムの電話アプリを使用することを許可します。",
+	"appearOnTop": "他のアプリの上に表示",
+	"appearOnTopDetails": "アプリを最前面に表示することを許可します（既にExteraを通話アカウントとして設定している場合は不要です）",
+	"otherCallingPermissions": "Exteraのマイク、カメラ、その他の権限",
+	"whyIsThisMessageEncrypted": "なぜこのメッセージは読めないのですか？",
+	"noKeyForThisMessage": "これは、このデバイスでアカウントにログインする前にメッセージが送信された場合に発生する可能性があります。\n\nまた、送信者があなたのデバイスをブロックしたか、インターネット接続に問題があった可能性もあります。\n\n別のセッションでメッセージを読むことはできますか？その場合、そのセッションからメッセージを転送できます！設定 > デバイスに移動し、デバイス同士が相互に検証されていることを確認してください。次にルームを開いたとき、両方のセッションが開いていれば、鍵が自動的に転送されます。\n\nログアウトやデバイスの切り替え時に鍵を失いたくない場合は、設定でチャットのバックアップを有効にしてください。",
+	"newGroup": "新しいグループ",
+	"newSpace": "新しいスペース",
+	"enterSpace": "スペースに入る",
+	"enterRoom": "ルームに入る",
+	"allSpaces": "すべてのスペース",
+	"numChats": "{number} チャット",
+	"hideUnimportantStateEvents": "重要でないステータスイベントを非表示",
+	"hidePresences": "プレゼンスリストを非表示にしますか？",
+	"doNotShowAgain": "今後表示しない",
+	"wasDirectChatDisplayName": "空のチャット（旧: {oldDisplayName}）",
+	"newSpaceDescription": "スペースを使うと、チャットをまとめたり、プライベートまたはパブリックなコミュニティを作成できます。",
+	"encryptThisChat": "このチャットを暗号化",
+	"disableEncryptionWarning": "セキュリティ上の理由から、一度有効にした暗号化を無効にすることはできません。",
+	"sorryThatsNotPossible": "申し訳ありませんが、それはできません",
+	"deviceKeys": "デバイスキー:",
+	"reopenChat": "チャットを再度開く",
+	"noBackupWarning": "警告！チャットのバックアップを有効にしないと、暗号化されたメッセージにアクセスできなくなります。ログアウトする前にバックアップを有効にすることを強くお勧めします。",
+	"noOtherDevicesFound": "他のデバイスが見つかりません",
+	"fileIsTooBigForServer": "送信に失敗しました！サーバーは最大 {max} までの添付ファイルのみサポートしています。",
+	"fileHasBeenSavedAt": "ファイルは {path} に保存されました",
+	"jumpToLastReadMessage": "未読メッセージに移動",
+	"newMessages": "新しいメッセージ",
+	"jump": "移動",
+	"openLinkInBrowser": "ブラウザでリンクを開く",
+	"reportErrorDescription": "😭 問題が発生しました。よろしければ、このエラーを開発者に報告してください。",
+	"report": "報告",
+	"signInWithPassword": "パスワードでサインイン",
+	"pleaseTryAgainLaterOrChooseDifferentServer": "後でもう一度試すか、別のサーバーを選択してください。",
+	"signInWith": "{provider} でサインイン",
+	"profileNotFound": "サーバー上にユーザーが見つかりません。接続の問題か、ユーザーが存在しない可能性があります。",
+	"setTheme": "テーマ:",
+	"setColorTheme": "カラーテーマ:",
+	"invite": "招待",
+	"inviteGroupChat": "📨 グループチャットへの招待",
+	"invitePrivateChat": "📨 プライベートチャットへの招待",
+	"invalidInput": "無効な入力です！",
+	"wrongPinEntered": "PINコードが間違っています！{seconds} 秒後に再試行してください...",
+	"pleaseEnterANumber": "0より大きい数字を入力してください",
+	"archiveRoomDescription": "チャットはアーカイブに移動します。他のユーザーには、あなたがチャットから退出したことが表示されます。",
+	"roomUpgradeDescription": "チャットは新しいルームバージョンで再作成されます。すべての参加者に新しいチャットへの移行が通知されます。ルームバージョンの詳細については https://spec.matrix.org/latest/rooms/ をご覧ください。",
+	"removeDevicesDescription": "このデバイスからログアウトされ、メッセージを受信できなくなります。",
+	"banUserDescription": "このユーザーをBANしてもよろしいですか？このチャットに再度参加できなくなります。理由を記載することもできます。",
+	"unbanUserDescription": "ユーザーは再びチャットに参加できるようになります。",
+	"doYouWantToKick": "{user} をキック",
+	"doYouWantToBan": "{user} をBAN",
+	"kickUserDescription": "このユーザーをキックしてもよろしいですか？チャットが公開の場合、再度参加できます。理由を記載することもできます。",
+	"makeAdminDescription": "このユーザーを管理者にすると、元に戻すことはできません。あなたと同じ権限を持つことになります。",
+	"pushNotificationsNotAvailable": "プッシュ通知は利用できません",
+	"learnMore": "詳しく見る",
+	"signInWithLabel": "サインイン先:",
+	"customReaction": "リアクションを追加",
+	"yourGlobalUserIdIs": "あなたのグローバルユーザーIDは ",
+	"noUsersFoundWithQuery": "残念ながら、「{query}」に一致するユーザーが見つかりませんでした。入力ミスがないかご確認ください。",
+	"knocking": "参加を申請しました",
+	"chatCanBeDiscoveredViaSearchOnServer": "{server}の検索でチャットを見つけることができます",
+	"searchChatsRooms": "#チャット、@ユーザーを検索...",
+	"nothingFound": "何も見つかりませんでした...",
+	"groupName": "グループ名",
+	"createGroupAndInviteUsers": "作成して招待",
+	"groupCanBeFoundViaSearch": "グループは検索で見つけることができます",
+	"wrongRecoveryKey": "申し訳ありません...リカバリーキーが正しくないようです。",
+	"startConversation": "会話を始める",
+	"commandHint_sendraw": "未加工のJSONを送信",
+	"databaseMigrationTitle": "データベースが最適化されました",
+	"databaseMigrationBody": "しばらくお待ちください。少し時間がかかる場合があります。",
+	"leaveEmptyToClearStatus": "ステータスをクリアするには、フィールドを空のままにしてください。",
+	"select": "選択",
+	"searchForUsers": "@ユーザーを検索...",
+	"pleaseEnterYourCurrentPassword": "現在のパスワードを入力してください",
+	"newPassword": "新しいパスワード",
+	"pleaseChooseAStrongPassword": "より強力なパスワードを選択してください",
+	"passwordsDoNotMatch": "パスワードが一致しません",
+	"passwordIsWrong": "パスワードが正しくありません",
+	"publicLink": "公開リンク",
+	"publicChatAddresses": "公開チャットアドレス",
+	"createNewAddress": "新しいアドレスを作成",
+	"joinSpace": "スペースに参加",
+	"publicSpaces": "公開スペース",
+	"addChatOrSubSpace": "チャットまたはサブスペースを追加",
+	"subspace": "サブスペース",
+	"decline": "拒否",
+	"thisDevice": "このデバイス:",
+	"initAppError": "アプリの起動中にエラーが発生しました",
+	"userRole": "ユーザーの役割",
+	"minimumPowerLevel": "{level}は最低権限レベルです。",
+	"searchIn": "「{chat}」内を検索...",
+	"searchMore": "もっと検索...",
+	"gallery": "ギャラリー",
+	"files": "ファイル",
+	"databaseBuildErrorBody": "SQliteデータベースを構築できません。アプリは古いデータベースの使用を試みます。このエラーを{url}の開発者に報告してください。エラーメッセージ: {error}",
+	"sessionLostBody": "セッションが失われました。このエラーを{url}の開発者に報告してください。エラーメッセージ: {error}",
+	"restoreSessionBody": "アプリはバックアップからセッションの復元を試みています。このエラーを{url}の開発者に報告してください。エラーメッセージ: {error}",
+	"forwardMessageTo": "{roomName}にメッセージを転送しますか？",
+	"sendReadReceipts": "既読通知を送信",
+	"sendTypingNotificationsDescription": "他のチャット参加者に、あなたが新しいメッセージを入力中であることが表示されます。",
+	"sendReadReceiptsDescription": "他のチャット参加者に、あなたがメッセージを既読したことが表示されます。",
+	"formattedMessages": "フォーマットされたメッセージ",
+	"formattedMessagesDescription": "メッセージ内のMarkdown書式（太字テキストなど）を表示します。",
+	"verifyOtherUser": "他のユーザーを検証",
+	"verifyOtherUserDescription": "他のユーザーを検証すると、実際に誰とやり取りしているかを確認できます。\n\n検証を開始すると、あなたと相手の両方のアプリにポップアップが表示されます。そこに表示される一連の数字や絵文字を互いに比較する必要があります。\n\n最善の方法は、実際に会うかビデオ通話で行うことです。もしディープフェイク技術が大幅に進歩した遠い未来にこれを読んでいるなら、ビデオ通話を信頼しない方がよいかもしれません。",
+	"verifyOtherDevice": "他のデバイスを検証",
+	"verifyOtherDeviceDescription": "他のデバイスを検証すると、デバイス間で鍵を交換でき、全体的なセキュリティが向上します。検証を開始すると、両方のデバイスのアプリにポップアップが表示されます。そこに表示される一連の数字や絵文字を互いに比較する必要があります。検証を始める前に、両方のデバイスを手元に用意しておくことをお勧めします。",
+	"acceptedKeyVerification": "{sender}が鍵の検証を承認しました",
+	"canceledKeyVerification": "{sender}が鍵の検証をキャンセルしました",
+	"completedKeyVerification": "{sender}が鍵の検証を完了しました",
+	"isReadyForKeyVerification": "{sender}が鍵の検証の準備ができました",
+	"requestedKeyVerification": "{sender}が鍵の検証をリクエストしました",
+	"startedKeyVerification": "{sender}が鍵の検証を開始しました",
+	"transparent": "透明",
+	"incomingMessages": "受信メッセージ",
+	"stickers": "スタンプ",
+	"discover": "探索",
+	"commandHint_ignore": "このMatrix IDを無視する",
+	"commandHint_unignore": "このMatrix IDの無視を解除する",
+	"unreadChatsInApp": "{appname}: 未読チャット {unread}件",
+	"noDatabaseEncryption": "このプラットフォームではデータベースの暗号化はサポートされていません",
+	"thereAreCountUsersBlocked": "{count}人のユーザーがブロックされています。",
+	"restricted": "制限付き",
+	"knockRestricted": "制限付き + リクエスト可",
+	"goToSpace": "スペースに移動: {space}",
+	"markAsUnread": "未読にする",
+	"spaceMemberOf": "スペース {spaces} のメンバー",
+	"spaceMemberOfCanKnock": "スペース {spaces} のメンバー（リクエスト可）",
+	"userLevel": "{level} - ユーザー",
+	"moderatorLevel": "{level} - モデレーター",
+	"adminLevel": "{level} - 管理者",
+	"changeGeneralChatSettings": "チャットの一般設定を変更",
+	"inviteOtherUsers": "他のユーザーをこのチャットに招待",
+	"changeTheChatPermissions": "チャットの権限を変更",
+	"changeTheVisibilityOfChatHistory": "チャット履歴の表示設定を変更",
+	"changeTheCanonicalRoomAlias": "チャットの主要な公開アドレスを変更",
+	"sendRoomNotifications": "@roomでメンション",
+	"changeTheDescriptionOfTheGroup": "チャットの説明を変更",
+	"chatPermissionsDescription": "このチャットで特定のアクションを実行するために必要な権限レベルを設定します。権限レベル0、50、100は通常、それぞれユーザー、モデレーター、管理者を表しますが、他のレベルも設定可能です。",
+	"updateInstalled": "🎉 バージョン{version}のアップデートが正常にインストールされました！",
+	"changelog": "変更履歴",
+	"sendCanceled": "送信がキャンセルされました",
+	"loginWithMatrixId": "Matrix IDでログイン",
+	"discoverHomeservers": "ホームサーバー一覧",
+	"whatIsAHomeserver": "ホームサーバーとは？",
+	"homeserverDescription": "すべてのデータはホームサーバーに保存されます。メールプロバイダーのようなものです。信頼するサーバーを選択でき、それでも全員と通信できます。詳しくは https://matrix.org をご覧ください。",
+	"doesNotSeemToBeAValidHomeserver": "有効なホームサーバーではないようです。URLに入力ミスはありませんか？",
+	"calculatingFileSize": "ファイルサイズを計算中...",
+	"prepareSendingAttachment": "添付ファイルの送信を準備中...",
+	"sendingAttachment": "添付ファイルを送信中...",
+	"generatingVideoThumbnail": "動画のサムネイルを生成中...",
+	"compressVideo": "動画を圧縮中...",
+	"sendingAttachmentCountOfCount": "送信中... {index} / {length}...",
+	"serverLimitReached": "リクエストが多すぎます。{seconds}秒後に再試行してください...",
+	"oneOfYourDevicesIsNotVerified": "お使いのデバイスの1つが検証されていません",
+	"noticeChatBackupDeviceVerification": "注意: すべてのデバイスを鍵バックアップに接続すると、自動的に検証されます。",
+	"continueText": "続行",
+	"welcomeText": "Exteraへようこそ - 巨大な分散型メッセージングネットワークMatrixのアプリです！",
+	"blur": "ぼかし:",
+	"opacity": "不透明度:",
+	"setWallpaper": "壁紙を設定",
+	"manageAccount": "アカウント管理",
+	"noContactInformationProvided": "サーバーは連絡先情報を提供していません",
+	"contactServerAdmin": "サーバー管理者",
+	"contactServerSecurity": "サーバーセキュリティ連絡先",
+	"supportPage": "サポート",
+	"serverInformation": "サーバー情報:",
+	"name": "名前",
+	"version": "バージョン",
+	"website": "ウェブサイト",
+	"compress": "圧縮",
+	"boldText": "太字",
+	"italicText": "斜体",
+	"strikeThrough": "取り消し線",
+	"pleaseFillOut": "入力してください",
+	"invalidUrl": "無効なURL",
+	"addLink": "リンクを追加",
+	"unableToJoinChat": "チャットに参加できません。相手側が既に会話を終了した可能性があります。",
+	"previous": "前へ",
+	"otherPartyNotLoggedIn": "相手はメッセージを受信できません。",
+	"appWantsToUseForLogin": "ログインに「{server}」を使用",
+	"appWantsToUseForLoginDescription": "アプリとウェブサイトがあなたの情報を共有することを許可します。",
+	"open": "開く",
+	"waitingForServer": "サーバーを待機中...",
+	"welcome": "ようこそ！",
+	"logInToYourAccount": "Matrixアカウントにログインしてチャットを始めましょう。",
+	"appIntroduction": "ExteraはMatrixチャットネットワークのクライアントです。詳しくは https://matrix.org をご覧いただくか、*続行*を押してください。",
+	"newChatRequest": "📩 新しいチャットリクエスト",
+	"contentNotificationSettings": "コンテンツ通知設定",
+	"generalNotificationSettings": "一般通知設定",
+	"roomNotificationSettings": "ルーム通知設定",
+	"userSpecificNotificationSettings": "ユーザー固有の通知設定",
+	"otherNotificationSettings": "その他の通知設定",
+	"notificationRuleContainsUserName": "ユーザー名を含む",
+	"notificationRuleContainsUserNameDescription": "メッセージにユーザー名が含まれている場合に通知します。",
+	"notificationRuleMaster": "すべての通知を無効にする",
+	"notificationRuleMasterDescription": "他のすべてのルールを上書きし、すべての通知を無効にします。",
+	"notificationRuleSuppressNotices": "自動メッセージを無効にする",
+	"notificationRuleSuppressNoticesDescription": "ボットからの通知を無効にします。",
+	"notificationRuleInviteForMe": "招待",
+	"notificationRuleInviteForMeDescription": "招待を受けた時に通知します。",
+	"notificationRuleMemberEvent": "メンバー変更",
+	"notificationRuleMemberEventDescription": "名前やアバターの変更に関する通知を無効にします。",
+	"notificationRuleIsUserMention": "ユーザーメンション",
+	"notificationRuleIsUserMentionDescription": "@メンションされた時に通知します。",
+	"notificationRuleContainsDisplayName": "表示名を含む",
+	"notificationRuleContainsDisplayNameDescription": "メッセージに表示名が含まれている場合に通知します。",
+	"notificationRuleIsRoomMention": "ルームメンション",
+	"notificationRuleIsRoomMentionDescription": "メッセージに「@room」が含まれている場合に通知します。",
+	"notificationRuleRoomnotif": "ルームメンション",
+	"notificationRuleRoomnotifDescription": "メッセージに「@room」が含まれている場合に通知します。",
+	"notificationRuleTombstone": "チャットの終了",
+	"notificationRuleTombstoneDescription": "チャットが終了した時に通知します。",
+	"notificationRuleReaction": "リアクション",
+	"notificationRuleReactionDescription": "リアクションの通知を無効にします。",
+	"notificationRuleRoomServerAcl": "ACL通知をミュート",
+	"notificationRuleRoomServerAclDescription": "ルームACLが変更された時に通知しません。",
+	"notificationRuleSuppressEdits": "編集をミュート",
+	"notificationRuleSuppressEditsDescription": "編集されたメッセージの通知を無効にします。",
+	"notificationRuleCall": "通話",
+	"notificationRuleCallDescription": "通話の通知を送信します。",
+	"notificationRuleEncryptedRoomOneToOne": "暗号化されたDM",
+	"notificationRuleEncryptedRoomOneToOneDescription": "暗号化されたダイレクトメッセージの通知を送信します。",
+	"notificationRuleRoomOneToOne": "ダイレクトメッセージ",
+	"notificationRuleRoomOneToOneDescription": "暗号化されていないダイレクトメッセージの通知を送信します。",
+	"notificationRuleMessage": "メッセージ",
+	"notificationRuleMessageDescription": "通常のチャットからの通知を送信します。",
+	"notificationRuleEncrypted": "暗号化されたメッセージ",
+	"notificationRuleEncryptedDescription": "暗号化されたチャットからの通知を送信します。",
+	"notificationRuleJitsi": "Jitsi",
+	"notificationRuleJitsiDescription": "Jitsiビデオ通話の通知を送信します。",
+	"notificationRuleServerAcl": "ACLイベントをミュート",
+	"notificationRuleServerAclDescription": "ACL変更の通知を送信しません。",
+	"unknownPushRule": "不明なプッシュ通知ルール「{rule}」",
+	"deletePushRuleCanNotBeUndone": "プッシュ通知ルールの削除は元に戻せません。",
+	"more": "もっと見る",
+	"shareKeysWith": "鍵を共有...",
+	"shareKeysWithDescription": "暗号化されたメッセージを読むことができる信頼済みデバイスはどれですか？",
+	"allDevices": "すべてのデバイス",
+	"crossVerifiedDevicesIfEnabled": "クロス署名で検証済みのデバイス（有効な場合）",
+	"crossVerifiedDevices": "クロス署名で検証済みのデバイス",
+	"verifiedDevicesOnly": "検証済みデバイスのみ",
+	"takeAPhoto": "写真を撮る",
+	"recordAVideo": "動画を撮る",
+	"optionalMessage": "キャプション（任意）...",
+	"notSupportedOnThisDevice": "このデバイスではサポートされていません",
+	"enterNewChat": "新しいチャットに移動",
+	"approve": "承認",
+	"youHaveKnocked": "参加リクエストを送信しました",
+	"pleaseWaitUntilInvited": "管理者がリクエストを承認するまでお待ちください。",
+	"backToMainChat": "メインチャットに戻る",
+	"saveChanges": "保存",
+	"createSticker": "スタンプまたは絵文字を作成",
+	"newStickerPack": "新しいスタンプパック",
+	"stickerPackNameAlreadyExists": "同じ名前のスタンプパックがすでに存在します",
+	"stickerPackName": "スタンプパック名",
+	"attribution": "帰属",
+	"useAsSticker": "スタンプ",
+	"useAsEmoji": "絵文字",
+	"mutualRooms": "共通のチャット",
+	"matrixId": "Matrix ID",
+	"copyLink": "リンクをコピー",
+	"aboutUser": "自己紹介",
+	"editAbout": "自己紹介を編集",
+	"editAboutDescription": "自分について数行追加できます。これは全員に表示されます。",
+	"aboutExample": "こんにちは！",
+	"notSet": "未設定",
+	"settingsStyleMessage1": "インスタントラーメンのタコが実はイカだって知ってた？",
+	"settingsStyleMessage2": "何の話？",
+	"settingsStyleMessage3": "ちょっと気になって調べてみたんだ。",
+	"incomingCall": "着信",
+	"outgoingCall": "発信",
+	"heldTheCall": "{user}が通話を保留にしました。",
+	"youHeldTheCall": "通話を保留にしました。",
+	"callConnected": "接続済み",
+	"callConnecting": "接続中",
+	"callEnded": "通話終了",
+	"callEnding": "終了中",
+	"callRinging": "呼び出し中...",
+	"callInviteSent": "招待を送信しました",
+	"readReceipts": "既読通知",
+	"translate": "翻訳",
+	"nViews": "{count, plural, =1{1 回閲覧} other{{count} 回閲覧}}",
+	"nEdits": "{count, plural, =1{1 回編集} other{{count} 回編集}}",
+	"backToCall": "通話に戻る",
+	"ringtone": "着信音",
+	"ringtoneDescription": "着信時に鳴る着信音を選択してください。",
+	"systemRingtone": "システム着信音",
+	"chooseRingtone": "着信音を選択",
+	"switchCamera": "カメラを切り替え",
+	"switchSpeaker": "スピーカーを切り替え",
+	"hangUp": "切断",
+	"answerCall": "応答",
+	"muteMic": "マイクをミュート",
+	"screenSharing": "画面共有",
+	"holdCall": "保留",
+	"muteCam": "カメラをオフ",
+	"ongoingCall": "通話中",
+	"ongoingCallDetail": "{name}と通話中です",
+	"chatPrivacy": "プライバシー",
+	"chatPrivacyDescription": "このチャットの個別設定を行います",
+	"chatPrivacyTitle": "チャットのプライバシー",
+	"skipChatBackup": "バックアップ",
+	"skipChatBackupWarning": "バックアップを設定せずに続行しますか？デバイスを変更した場合、暗号化されたメッセージにアクセスできなくなる可能性があります。",
+	"loadingMessages": "メッセージを読み込み中",
+	"setupChatBackup": "バックアップを設定",
+	"individualChatPrivacySettings": "チャット設定",
+	"individualChatPrivacySettingsDescription": "チャットごとに個別のプライバシー設定を行います。",
+	"updateAvailableTitle": "アップデートが利用可能",
+	"updateAvailable": "Extera {version} がダウンロードできます！アップデートにはバグ修正や新機能が含まれています。",
+	"downloadUpdateButton": "アップデートをダウンロード",
+	"changelogButton": "新着情報",
+	"updateCheckTitle": "アップデートの確認",
+	"updateCheckSubtitle": "",
+	"useTwemoji": "Twemojiを使用",
+	"callAction": "通話",
+	"resetPrivacy": "デフォルトにリセット",
+	"widgets": "ウィジェット",
+	"widgetsDescription": "このチャットにウィジェットを追加",
+	"widgetCreatorUser": "追加者",
+	"deleteWidget": "ウィジェットを削除",
+	"widgetType": "ウィジェットの種類",
+	"widget": "ウィジェット",
+	"incomingCallsOnLockScreenTitle": "ロック画面での着信",
+	"incomingCallsOnLockScreenSubtitle": "デバイスがロックされているときに着信を表示",
+	"pushToTalkHotkey": "マイク切替ボタン",
+	"pushToTalkHotkeyDescription": "Alt+Xを押してマイクのオン/オフを切り替え",
+	"roomAddress": "ルームアドレス",
+	"imageEditFailed": "画像の編集に失敗しました",
+	"autoMarkUnavailable": "自動で「不在」ステータスに設定",
+	"autoMarkUnavailableDescription": "アプリが最小化されているときに「不在」ステータスに設定",
+	"colorPalette": "カラーパレット",
+	"palette_tonalSpot": "トーナルスポット",
+	"palette_fidelity": "フィデリティ",
+	"palette_monochrome": "モノクロ",
+	"palette_neutral": "ニュートラル",
+	"palette_vibrant": "ビビッド",
+	"palette_expressive": "エクスプレッシブ",
+	"palette_content": "コンテンツ",
+	"palette_rainbow": "レインボー",
+	"palette_fruitSalad": "フルーツサラダ",
+	"listeningTo": "{mediaPlayer}で再生中",
+	"listeningToSomeTunes": "音楽を再生中",
+	"playing": "プレイ中",
+	"editedAt": "{when}に編集済み",
+	"showSpaceRoomsInGlobalList": "スペースのルームを全体リストに表示",
+	"newInvitation": "新しい招待",
+	"featureSwitches": "機能",
+	"useLegacyAppBar": "旧式の検索バー",
+	"useLegacyNavBar": "旧式のナビゲーションバー",
+	"appIntro": "こんにちは、Exteraです。[matrix]プロトコルに基づく分散型メッセンジャーです。詳しくは https://matrix.org/ をご覧ください。",
+	"signIn": "ログイン",
+	"createNewAccount": "新規登録",
+	"signUpGreeting": "Exteraは分散型です。サーバーを選択して始めましょう。",
+	"signInGreeting": "すでにMatrixアカウントをお持ちですか？おかえりなさい！",
+	"theProcessWasCanceled": "操作がキャンセルされました。",
+	"searchOrEnterHomeserverAddress": "サーバーアドレスを検索または入力",
+	"downloadFailed": "ダウンロードに失敗しました",
+	"downloadSuccess": "ファイルの保存に成功しました",
+	"audioMessage": "音声メッセージ",
+	"noCustomPrivacySettings": "カスタムプライバシー設定のあるチャットはありません",
+	"noCustomPrivacySettingsDetails": "カスタムプライバシー設定のあるチャットはここに表示されます。チャット設定ページの「プライバシー」セクションで設定できます。",
+	"selectPushDistributor": "プッシュ通知プロバイダーを選択",
+	"joinRoomByLinkConfirmation": "{room}に参加しますか？",
+	"translating": "メッセージを翻訳中...",
+	"messageTranslations": "メッセージの翻訳",
+	"latexMath": "LaTeX数式",
+	"setBanner": "バナーをアップロード",
+	"clearBanner": "バナーを削除",
+	"totalVotes": "総投票数: {count}",
+	"voteCount": "{count, plural, other{{count}票}}",
+	"pollResults": "投票結果",
+	"systemFont": "システムフォントを使用",
+	"setLowPriority": "低優先度に設定",
+	"unsetLowPriority": "低優先度を解除",
+	"jitsiFeatureFlag": "グループ通話 (Jitsi)",
+	"removeCallFromChat": "会議を削除",
+	"removeCallFromChatDescription": "この会議をチャットから削除してもよろしいですか？",
+	"removeCallForEveryone": "全員の会議を削除",
+	"startVoiceCall": "音声会議",
+	"startVideoCall": "ビデオ会議",
+	"joinVoiceCall": "音声会議",
+	"joinVideoCall": "ビデオ会議",
+	"live": "Live",
+	"noThreadsYet": "スレッドはありません",
+	"noThreadsYetLong": "このルームにはまだスレッドがありません。",
+	"stickerScale": "スタンプのサイズ",
+	"videoNote": "ビデオノート",
+	"videoNotes": "ビデオノート",
+	"enableVideoNotes": "ビデオノートを有効にする",
+	"longPressToRecordVideoNote": "長押ししてビデオノートを録画",
+	"tapToSwitchToVoice": "タップして音声メッセージに切り替え",
+	"tapToSwitchToVideo": "タップしてビデオノートに切り替え",
+	"sendVideoNote": "ビデオノートを送信",
+	"recentStickers": "最近使用",
+	"removeFromFavourites": "お気に入りから削除",
+	"addToFavourites": "お気に入りに追加",
+	"removeFromRecents": "最近の履歴から削除",
+	"enableAppBarCenterTitle": "ルーム名を中央に表示",
+	"enableChatFrostedGlass": "半透明エフェクト",
+	"favouriteStickers": "お気に入り",
+	"showCameraButton": "写真/動画を撮影",
+	"showCameraButtonDesc": "メッセージ入力欄にカメラボタンを表示",
+	"peopleOnline": "オンライン - {count}",
+	"peopleUnavailable": "不在 - {count}",
+	"loadImageNoSize": "画像を読み込む",
+	"loadImage": "画像を読み込む ({size})",
+	"downloadVideoNoSize": "動画をダウンロード",
+	"downloadVideo": "動画をダウンロード ({size})",
+	"playVideoNoSize": "動画",
+	"playVideo": "動画 ({size})",
+	"autoLoadMedia": "メディアのプレビュー",
+	"autoLoadMediaLong": "無効にすると、タップするまでメディアファイルは読み込まれません。",
+	"enablePeopleTab": "「ユーザー」タブ",
+	"noDownloadsYet": "ダウンロードはありません。",
+	"joinRoomShort": "参加",
+	"includeAttribution": "帰属を表示",
+	"usernameAlreadyTaken": "このユーザー名はすでに使用されています。",
+	"pleaseEnterUsername": "ユーザー名を入力してください。",
+	"pleaseEnterPassword": "パスワードを入力してください。",
+	"passwordMinLengthMessage": "パスワードは8文字以上にしてください。",
+	"registrationFailed": "登録に失敗しました。{message}",
+	"invalidUsername": "無効なユーザー名",
+	"invalidEmail": "無効なメールアドレス",
+	"emailAlreadyUsed": "このメールアドレスはすでに使用されています。",
+	"emailNotAllowed": "このメールアドレスは許可されていません。",
+	"captchaFailed": "CAPTCHAの確認に失敗しました。もう一度お試しください。",
+	"requestAVerificationEmailFirst": "まず確認メールをリクエストしてください。",
+	"phoneNumberAlreadyUsed": "この電話番号はすでに使用されています。",
+	"requestAVerificationCodeFirst": "まず確認コードをリクエストしてください。",
+	"setupProfile": "プロフィールを設定",
+	"captcha": "あなたは人間ですか？",
+	"termsOfService": "利用規約",
+	"verifyEmail": "メールアドレスの確認",
+	"verifyPhone": "電話番号の確認",
+	"pleaseWait": "お待ちください...",
+	"verification": "確認",
+	"pleaseReviewAndAcceptPolicies": "以下の利用規約をご確認ください：",
+	"noPolicies": "承認が必要な規約はありません。",
+	"readPolicy": "読む",
+	"acceptAndContinue": "同意して続行",
+	"pleaseEnterEmailAddress": "メールアドレスを入力してください。",
+	"emailVerification": "メール認証",
+	"verificationEmailSent": "認証メールを送信しました。受信トレイ（迷惑メールフォルダも含む）を確認し、リンクを開いてから下のボタンをタップして続行してください。",
+	"emailAddress": "メールアドレス",
+	"sendVerificationEmail": "認証メールを送信",
+	"iHaveVerifiedMyEmail": "認証完了、続行する",
+	"useDifferentEmail": "別のメールアドレスを使用",
+	"registerOn": "{homeserver} に登録",
+	"yourAccountWasCreated": "アカウントが作成されました。プロフィールを設定して始めましょう。",
+	"displayname": "表示名",
+	"displaynameHint": "他のユーザーに表示される名前",
+	"completeSetup": "セットアップを完了",
+	"additionalVerificationRequired": "追加の認証が必要です",
+	"additionalVerificationText": "サーバーが追加の認証ステップ（{stageType}）を要求しています。ブラウザで完了してください。",
+	"phoneNumber": "電話番号",
+	"sendVerificationCode": "認証コードを送信",
+	"verificationCodeSent": "認証メッセージを送信しました。お使いの電話を確認してから、下のボタンをタップしてください。",
+	"useDifferentNumber": "別の番号を使用",
+	"phoneVerification": "電話番号の認証",
+	"pleaseEnterPhoneNumber": "電話番号を入力してください。",
+	"invalidPhoneNumber": "無効な電話番号です。国際形式で入力してください（例：+81 90 1234 5678）。",
+	"invalidVerificationCode": "無効な認証コードです。",
+	"verificationCode": "認証コード",
+	"enterVerificationCode": "6桁の認証コードを入力してください。",
+	"resendCode": "コードを再送信",
+	"country": "国",
+	"serverRequiresPhone": "このサーバーでは登録時に電話番号の認証が必要です。",
+	"captchaLoadFailed": "CAPTCHAの読み込みに失敗しました。{message}",
+	"pleaseCompleteCaptcha": "続行するにはCAPTCHAテストを完了してください。",
+	"completeCaptchaInBrowser": "登録を完了するにはCAPTCHAテストが必要ですが、アプリ内では表示できません。ブラウザで開いてください。",
+	"howWouldYouLikeToSignUp": "どの方法で登録しますか？",
+	"continueOIDC": "シングルサインオンを使用",
+	"continueSSO": "SSOで続行",
+	"registerWithPassword": "パスワードで登録",
+	"@noSendPermission": {},
+	"@choicesSelected": {
+		"type": "String",
+		"placeholders": {
+			"selected": {
+				"type": "int"
+			},
+			"max": {
+				"type": "int"
+			}
+		}
+	},
+	"@alwaysUse24HourFormat": {
+		"description": "Set to true to always display time of day in 24 hour format."
+	},
+	"@cleanExif": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@cleanExifDescription": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@repeatPassword": {},
+	"@notAnImage": {},
+	"@remove": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@importNow": {},
+	"@importEmojis": {},
+	"@importFromZipFile": {},
+	"@exportEmotePack": {},
+	"@replace": {},
+	"@aboutHomeserver": {
+		"type": "String",
+		"placeholders": {
+			"homeserver": {
+				"type": "String"
+			}
+		}
+	},
+	"@accept": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@acceptedTheInvitation": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@account": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@activatedEndToEndEncryption": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@addEmail": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@confirmMatrixId": {},
+	"@supposedMxid": {
+		"type": "String",
+		"placeholders": {
+			"mxid": {
+				"type": "String"
+			}
+		}
+	},
+	"@addChatDescription": {},
+	"@addToSpace": {},
+	"@admin": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@alias": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@all": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@allChats": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@commandHint_googly": {},
+	"@commandHint_cuddle": {},
+	"@commandHint_hug": {},
+	"@googlyEyesContent": {
+		"type": "String",
+		"placeholders": {
+			"senderName": {
+				"type": "String"
+			}
+		}
+	},
+	"@cuddleContent": {
+		"type": "String",
+		"placeholders": {
+			"senderName": {
+				"type": "String"
+			}
+		}
+	},
+	"@hugContent": {
+		"type": "String",
+		"placeholders": {
+			"senderName": {
+				"type": "String"
+			}
+		}
+	},
+	"@answeredTheCall": {
+		"type": "String",
+		"placeholders": {
+			"senderName": {
+				"type": "String"
+			}
+		}
+	},
+	"@anyoneCanJoin": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@appLock": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@appLockDescription": {},
+	"@archive": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@areGuestsAllowedToJoin": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@areYouSure": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@areYouSureYouWantToLogout": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@askSSSSSign": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@askVerificationRequest": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@autoplayImages": {
+		"type": "String",
+		"placeholder": {}
+	},
+	"@badServerLoginTypesException": {
+		"type": "String",
+		"placeholders": {
+			"serverVersions": {
+				"type": "String"
+			},
+			"supportedVersions": {
+				"type": "String"
+			}
+		}
+	},
+	"@sendTypingNotifications": {},
+	"@swipeRightToLeftToReply": {},
+	"@sendOnEnter": {},
+	"@badServerVersionsException": {
+		"type": "String",
+		"placeholders": {
+			"serverVersions": {
+				"type": "String"
+			},
+			"supportedVersions": {
+				"type": "String"
+			}
+		}
+	},
+	"@countChatsAndCountParticipants": {
+		"type": "String",
+		"placeholders": {
+			"chats": {
+				"type": "int"
+			},
+			"participants": {
+				"type": "int"
+			}
+		}
+	},
+	"@banFromChat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@banned": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@bannedUser": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"targetName": {
+				"type": "String"
+			}
+		}
+	},
+	"@blockDevice": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@blocked": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@botMessages": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@cancel": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@cantOpenUri": {
+		"type": "String",
+		"placeholders": {
+			"uri": {
+				"type": "String"
+			}
+		}
+	},
+	"@changeDeviceName": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@changedTheChatAvatar": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheChatDescriptionTo": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"description": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheChatNameTo": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"chatname": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheChatPermissions": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheDisplaynameTo": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"displayname": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheGuestAccessRules": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheGuestAccessRulesTo": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"rules": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheHistoryVisibility": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheHistoryVisibilityTo": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"rules": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheJoinRules": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheJoinRulesTo": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"joinRules": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheProfileAvatar": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheRoomAliases": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@changedTheRoomInvitationLink": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@changePassword": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@changeTheHomeserver": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@changeTheme": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@changeTheNameOfTheGroup": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@changeYourAvatar": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@channelCorruptedDecryptError": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@chat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@yourChatBackupHasBeenSetUp": {},
+	"@chatBackup": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@chatBackupDescription": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@chatDetails": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@chatHasBeenAddedToThisSpace": {},
+	"@chats": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@chooseAStrongPassword": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@clearArchive": {},
+	"@close": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@commandHint_markasdm": {},
+	"@commandHint_markasgroup": {},
+	"@commandHint_ban": {
+		"type": "String",
+		"description": "/ban @student_a:nightcord.com"
+	},
+	"@commandHint_clearcache": {
+		"type": "String",
+		"description": "/clearcache"
+	},
+	"@commandHint_create": {
+		"type": "String",
+		"description": "/create [--no-encryption] <グループ名>"
+	},
+	"@commandHint_discardsession": {
+		"type": "String",
+		"description": "/discardsession <ルーム>"
+	},
+	"@commandHint_dm": {
+		"type": "String",
+		"description": "/dm [--no-encryption] <mxId>"
+	},
+	"@commandHint_html": {
+		"type": "String",
+		"description": "/html <HTML形式のメッセージ>"
+	},
+	"@commandHint_invite": {
+		"type": "String",
+		"description": "/invite <mxId>"
+	},
+	"@commandHint_join": {
+		"type": "String",
+		"description": "/join <ルーム>"
+	},
+	"@commandHint_kick": {
+		"type": "String",
+		"description": "/kick @student_a:nightcord.com"
+	},
+	"@commandHint_leave": {
+		"type": "String",
+		"description": "/leave"
+	},
+	"@commandHint_me": {
+		"type": "String",
+		"description": "/me アクション"
+	},
+	"@commandHint_myroomavatar": {
+		"type": "String",
+		"description": "/myroomavatar mxc://extera.xyz/SomeFileURL"
+	},
+	"@commandHint_myroomnick": {
+		"type": "String",
+		"description": "/myroomnick Amia"
+	},
+	"@commandHint_op": {
+		"type": "String",
+		"description": "/op @k:nightcord.com [100]"
+	},
+	"@commandHint_plain": {
+		"type": "String",
+		"description": "/plain プレーンテキストメッセージ"
+	},
+	"@commandHint_react": {
+		"type": "String",
+		"description": "/react すごい"
+	},
+	"@commandHint_send": {
+		"type": "String",
+		"description": "/send 任意のメッセージ"
+	},
+	"@commandHint_unban": {
+		"type": "String",
+		"description": "/unban @yuki:nightcord.com"
+	},
+	"@commandInvalid": {
+		"type": "String"
+	},
+	"@commandMissing": {
+		"type": "String",
+		"placeholders": {
+			"command": {
+				"type": "String"
+			}
+		},
+		"description": "State that {command} is not a valid /command."
+	},
+	"@compareEmojiMatch": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@compareNumbersMatch": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@configureChat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@confirm": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@connect": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@contactHasBeenInvitedToTheGroup": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@containsDisplayName": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@containsUserName": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@contentHasBeenReported": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@copiedToClipboard": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@copy": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@copyToClipboard": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@couldNotDecryptMessage": {
+		"type": "String",
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
+	"@countParticipants": {
+		"type": "String",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"@create": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@createdTheChat": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@createGroup": {},
+	"@createNewSpace": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@currentlyActive": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@darkTheme": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@dateAndTimeOfDay": {
+		"type": "String",
+		"placeholders": {
+			"date": {
+				"type": "String"
+			},
+			"timeOfDay": {
+				"type": "String"
+			}
+		}
+	},
+	"@dateWithoutYear": {
+		"type": "String",
+		"placeholders": {
+			"month": {
+				"type": "String"
+			},
+			"day": {
+				"type": "String"
+			}
+		}
+	},
+	"@dateWithYear": {
+		"type": "String",
+		"placeholders": {
+			"year": {
+				"type": "String"
+			},
+			"month": {
+				"type": "String"
+			},
+			"day": {
+				"type": "String"
+			}
+		}
+	},
+	"@deactivateAccountWarning": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@defaultPermissionLevel": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@delete": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@deleteAccount": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@deleteMessage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@device": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@deviceId": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@devices": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@directChats": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@allRooms": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@displaynameHasBeenChanged": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@downloadFile": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@edit": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@editBlockedServers": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@chatPermissions": {},
+	"@chatThreads": {},
+	"@editDisplayname": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@editRoomAliases": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@editRoomAvatar": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@emoteExists": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@emoteInvalid": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@emoteKeyboardNoRecents": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@emotePacks": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@emoteSettings": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@globalChatId": {},
+	"@accessAndVisibility": {},
+	"@accessAndVisibilityDescription": {},
+	"@calls": {},
+	"@customEmojisAndStickers": {},
+	"@customEmojisAndStickersBody": {},
+	"@emoteShortcode": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@emoteWarnNeedToPick": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@emptyChat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@enableEmotesGlobally": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@enableEncryption": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@enableEncryptionWarning": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@encrypted": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@encryption": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@encryptionNotEnabled": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@endedTheCall": {
+		"type": "String",
+		"placeholders": {
+			"senderName": {
+				"type": "String"
+			}
+		}
+	},
+	"@enterAnEmailAddress": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@homeserver": {},
+	"@enterYourHomeserver": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@errorObtainingLocation": {
+		"type": "String",
+		"placeholders": {
+			"error": {
+				"type": "String"
+			}
+		}
+	},
+	"@everythingReady": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@extremeOffensive": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@fileName": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@fluffychat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@fontSize": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@forward": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@fromJoining": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@fromTheInvitation": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@goToTheNewRoom": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@group": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@chatDescription": {},
+	"@chatDescriptionHasBeenChanged": {},
+	"@groupIsPublic": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@groups": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@groupWith": {
+		"type": "String",
+		"placeholders": {
+			"displayname": {
+				"type": "String"
+			}
+		}
+	},
+	"@guestsAreForbidden": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@guestsCanJoin": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@hasWithdrawnTheInvitationFor": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"targetName": {
+				"type": "String"
+			}
+		}
+	},
+	"@help": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@hideRedactedEvents": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@hideRedactedMessages": {},
+	"@hideRedactedMessagesBody": {},
+	"@hideInvalidOrUnknownMessageFormats": {},
+	"@howOffensiveIsThisContent": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@id": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@identity": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@block": {},
+	"@blockedUsers": {},
+	"@blockListDescription": {},
+	"@blockUsername": {},
+	"@iHaveClickedOnLink": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@incorrectPassphraseOrKey": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@inoffensive": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@inviteContact": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@inviteContactToGroupQuestion": {},
+	"@inviteContactToGroup": {
+		"type": "String",
+		"placeholders": {
+			"groupName": {
+				"type": "String"
+			}
+		}
+	},
+	"@noChatDescriptionYet": {},
+	"@tryAgain": {},
+	"@invalidServerName": {},
+	"@invited": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@redactMessageDescription": {},
+	"@optionalRedactReason": {},
+	"@invitedUser": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"targetName": {
+				"type": "String"
+			}
+		}
+	},
+	"@invitedUsersOnly": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@inviteForMe": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@inviteText": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"link": {
+				"type": "String"
+			}
+		}
+	},
+	"@isTyping": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@joinedTheChat": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@joinRoom": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@kicked": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"targetName": {
+				"type": "String"
+			}
+		}
+	},
+	"@kickedAndBanned": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"targetName": {
+				"type": "String"
+			}
+		}
+	},
+	"@kickFromChat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@lastActiveAgo": {
+		"type": "String",
+		"placeholders": {
+			"localizedTimeShort": {
+				"type": "String"
+			}
+		}
+	},
+	"@leave": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@leftTheChat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@license": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@lightTheme": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@loadCountMoreParticipants": {
+		"type": "String",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"@dehydrate": {},
+	"@dehydrateWarning": {},
+	"@dehydrateTor": {},
+	"@dehydrateTorLong": {},
+	"@hydrateTor": {},
+	"@hydrateTorLong": {},
+	"@hydrate": {},
+	"@loadingPleaseWait": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@loadMore": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@locationDisabledNotice": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@locationPermissionDeniedNotice": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@login": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@logInTo": {
+		"type": "String",
+		"placeholders": {
+			"homeserver": {
+				"type": "String"
+			}
+		}
+	},
+	"@logout": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@memberChanges": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@mention": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@messages": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@messagesStyle": {},
+	"@moderator": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@muteChat": {
+		"type": "String",
+		"placeholders": {}
+	}
 }

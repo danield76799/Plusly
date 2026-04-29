@@ -224,6 +224,8 @@ class _MessageState extends State<Message> {
     final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
     final hasBeenRead = widget.hasBeenRead;
 
+    
+
     var color = theme.colorScheme.surfaceContainerHigh;
     final displayTime =
         event.type == EventTypes.RoomCreate ||
