@@ -244,6 +244,16 @@ bool isBridgeRoom(Room room) {
     }
   }
 
+  // Fallback for groups: if we can't find the bridge bot in the loaded members
+  // (SDK only loads ~20), use group size as heuristic
+  // Small-to-medium groups without canonical alias are likely WhatsApp bridges
+  if (!room.isDirectChat && room.canonicalAlias == null) {
+    final memberCount = room.summary?.mJoinedMemberCount ?? room.members.length;
+    if (memberCount > 2 && memberCount < 100) {
+      return true;
+    }
+  }
+
   return false;
 }
 
@@ -376,6 +386,15 @@ String? getBridgeType(Room room) {
       if (memberId.contains('signal') || displayName.contains('signal')) return 'signal';
       if (memberId.contains('discord') || displayName.contains('discord')) return 'discord';
       if (memberId.contains('slack') || displayName.contains('slack')) return 'slack';
+    }
+  }
+
+  // Fallback for groups: if we can't find the bridge bot in loaded members
+  // but the room matches the fallback heuristic, assume WhatsApp
+  if (!room.isDirectChat && room.canonicalAlias == null) {
+    final memberCount = room.summary?.mJoinedMemberCount ?? room.members.length;
+    if (memberCount > 2 && memberCount < 100) {
+      return 'whatsapp';
     }
   }
 
