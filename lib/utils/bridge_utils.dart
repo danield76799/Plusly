@@ -74,6 +74,7 @@ const _bridgePatterns = [
   'signalbot',
   'telegrambot',
   'whatsappbot',
+  'botwhatsapp',
   'discordbot',
   'slackbot',
   'bridgebot',
@@ -275,6 +276,8 @@ String? getBridgeType(Room room) {
   // WhatsApp patterns
   if (userId.contains('wa-bot') ||
       userId.contains('whappbot') ||
+      userId.contains('whatsappbot') ||
+      userId.contains('botwhatsapp') ||
       userId.contains('whatsapp_') ||
       userId.contains('bot.whatsapp') ||
       userId.contains('@whatsapp') ||
