@@ -438,10 +438,24 @@ class BackgroundPush {
       return;
     }
 
-    // Always clear saved distributor to force fresh registration after phone restart
+    // Always clear saved distributor AND stored endpoint to force fresh registration
     // This ensures push works reliably without manual "Activeer" button
-    Logs().i('[Push] Clearing saved distributor to force re-registration');
+    Logs().i('[Push] Clearing saved distributor and endpoints to force re-registration');
     await UnifiedPush.saveDistributor('');
+    
+    // Also clear stored endpoints for all clients to force fresh registration
+    for (final client in clients) {
+      if (client.isLogged()) {
+        await matrix?.store.setString(
+          client.clientName + AppSettings.unifiedPushEndpoint.key,
+          '',
+        );
+        await matrix?.store.setBool(
+          client.clientName + AppSettings.unifiedPushRegistered.key,
+          false,
+        );
+      }
+    }
     
     String selectedDistributor;
     if (distributors.length == 1) {
