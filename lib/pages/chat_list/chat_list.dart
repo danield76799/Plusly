@@ -272,7 +272,7 @@ class ChatListController extends State<ChatList>
 
     _cachedFilteredRooms = Matrix.of(
       context,
-    ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).toList();
+    ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).where(_isBridgeTypeVisible).toList();
     _lastFilterCalc = now;
     _lastActiveFilter = activeFilter;
     return _cachedFilteredRooms;
