@@ -114,8 +114,8 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
       
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Push notificaties geregistreerd!'),
+        SnackBar(
+          content: Text(L10n.of(context).pushNotificationsRegistered),
         ),
       );
       // Refresh pusher list
@@ -127,7 +127,7 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Registratie mislukt: ${e.toLocalizedString(context)}'),
+          content: Text(L10n.of(context).pushRegistrationFailed(e.toLocalizedString(context))),
         ),
       );
     } finally {

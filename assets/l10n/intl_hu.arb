@@ -3085,5 +3085,29 @@
   "noMoreChatsFound": "Nincs több csevegés...",
   "@noMoreChatsFound": {},
   "joinedChats": "Csatlakozott csevegések",
-  "@joinedChats": {}
+  "@joinedChats": {},
+  "registerPushNotifications": "Register push notifications",
+  "registerPushSubtitle": "Manually re-register push notifications",
+  "pushNotificationsRegistered": "Push notifications registered!",
+  "pushRegistrationFailed": "Registration failed: {error}",
+  "@registerPushNotifications": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@registerPushSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@pushNotificationsRegistered": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@pushRegistrationFailed": {
+    "type": "String",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

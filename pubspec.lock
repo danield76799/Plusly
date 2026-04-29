@@ -1385,11 +1385,12 @@ packages:
   matrix:
     dependency: "direct main"
     description:
-      name: matrix
-      sha256: "0da5f65016c704bda81eae807cdadc18a046a444fa7e5cec83e60e5d04006d17"
-      url: "https://pub.dev"
-    source: hosted
-    version: "7.0.0"
+      path: "."
+      ref: main
+      resolved-ref: e8e4c74b8ca680c37c264e29b8424c102bdd5798
+      url: "https://github.com/ExteraApp/matrix-dart-sdk.git"
+    source: git
+    version: "6.2.0"
   meta:
     dependency: transitive
     description:

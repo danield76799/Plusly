@@ -3350,5 +3350,29 @@
   "enterNewChat": "Cuir isteach comhrá nua",
   "@enterNewChat": {},
   "commandHint_roomupgrade": "Uasghrádaigh an seomra seo go dtí an leagan seomra a thugtar",
-  "@commandHint_roomupgrade": {}
+  "@commandHint_roomupgrade": {},
+  "registerPushNotifications": "Register push notifications",
+  "registerPushSubtitle": "Manually re-register push notifications",
+  "pushNotificationsRegistered": "Push notifications registered!",
+  "pushRegistrationFailed": "Registration failed: {error}",
+  "@registerPushNotifications": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@registerPushSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@pushNotificationsRegistered": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@pushRegistrationFailed": {
+    "type": "String",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

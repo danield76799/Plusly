@@ -136,14 +136,14 @@ class SettingsNotificationsView extends StatelessWidget {
                           ),
                         ),
                         ListTile(
-                          title: const Text('Registreer push notificaties'),
-                          subtitle: const Text('Handmatig push registratie opnieuw uitvoeren'),
+                          title: Text(L10n.of(context).registerPushNotifications),
+                          subtitle: Text(L10n.of(context).registerPushSubtitle),
                           trailing: ElevatedButton.icon(
                             onPressed: controller.isLoading
                                 ? null
                                 : () => controller.registerPush(),
                             icon: const Icon(Icons.notifications_active),
-                            label: const Text('Activeer'),
+                            label: Text(L10n.of(context).enable),
                           ),
                         ),
                         const ListDivider(),

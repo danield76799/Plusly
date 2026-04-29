@@ -3190,5 +3190,29 @@
   "previous": "السابق",
   "@previous": {},
   "otherPartyNotLoggedIn": "لم يقم الطرف الآخر بتسجيل الدخول حالياً وبالتالي لا يمكنه تلقي الرسائل!",
-  "@otherPartyNotLoggedIn": {}
+  "@otherPartyNotLoggedIn": {},
+  "registerPushNotifications": "Register push notifications",
+  "registerPushSubtitle": "Manually re-register push notifications",
+  "pushNotificationsRegistered": "Push notifications registered!",
+  "pushRegistrationFailed": "Registration failed: {error}",
+  "@registerPushNotifications": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@registerPushSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@pushNotificationsRegistered": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@pushRegistrationFailed": {
+    "type": "String",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }
