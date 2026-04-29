@@ -211,12 +211,15 @@ class ChatListController extends State<ChatList>
 
     final client = Matrix.of(context).client;
     
-    // Pre-load room states to ensure bridge state events are available
-    // This is necessary because bridge detection depends on state events that
-    // may not be loaded on initial app start
+    // Pre-load room states AND request all members to ensure bridge state events are available
+    // This is necessary because bridge detection depends on state events and member list that
+    // may not be loaded on initial app start. room.postLoad() doesn't load all members.
     for (final room in client.rooms) {
       try {
         await room.postLoad();
+        // Request all members to ensure we can detect bridge bots in large groups
+        // The default room.states only contains first ~20 members
+        await room.requestMembers();
       } catch (_) {
         // Ignore errors for individual rooms
       }
