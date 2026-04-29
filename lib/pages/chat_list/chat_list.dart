@@ -210,6 +210,15 @@ class ChatListController extends State<ChatList>
     }
 
     final client = Matrix.of(context).client;
+    
+    // Debug: log all rooms and their bridge status
+    final bridgeRooms = client.rooms.where((room) => isBridgeRoom(room)).toList();
+    Logs().d('[BridgeSync] Total rooms: ${client.rooms.length}, Bridge rooms: ${bridgeRooms.length}');
+    for (final room in bridgeRooms) {
+      final bt = getBridgeType(room);
+      Logs().d('[BridgeSync] Room "${room.name}" isBridgeRoom=true bridgeType=${bt ?? 'null'}');
+    }
+    
     final hasMatrixRooms = client.rooms.any((room) => !isBridgeRoom(room));
     final detectedTypes = client.rooms
         .where((room) => isBridgeRoom(room))
@@ -218,6 +227,8 @@ class ChatListController extends State<ChatList>
     if (hasMatrixRooms) {
       detectedTypes.add('matrix');
     }
+    Logs().d('[BridgeSync] Detected types: $detectedTypes, allBridgeTypes was: $allBridgeTypes');
+    
     // Only auto-add types that were not previously known.
     // If a user manually removed a type, do not re-add it.
     visibleBridgeTypes = {
@@ -227,6 +238,7 @@ class ChatListController extends State<ChatList>
     allBridgeTypes = detectedTypes;
     _cachedBridgeTypes = detectedTypes;
     _lastBridgeSync = DateTime.now();
+    Logs().d('[BridgeSync] Final allBridgeTypes: $allBridgeTypes');
   }
 
   bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
