@@ -344,6 +344,23 @@ class BackgroundPush {
     Logs().i("Setting up push notifications...");
     if (!PlatformInfos.isIOS &&
         (await UnifiedPush.getDistributors()).isNotEmpty) {
+      // Check if saved distributor exists but endpoint is invalid (post-reset scenario)
+      // This forces the distributor picker to show again if push stopped working
+      final savedDistributor = await UnifiedPush.getDistributor();
+      if (savedDistributor != null) {
+        // Check if we have an endpoint for the first logged-in client
+        final firstLoggedIn = clients.firstWhere(
+          (c) => c.isLogged(),
+          orElse: () => clients.first,
+        );
+        final storedEndpoint = matrix?.store.getString(
+          firstLoggedIn.clientName + AppSettings.unifiedPushEndpoint.key,
+        );
+        if (storedEndpoint == null || storedEndpoint.isEmpty) {
+          Logs().i('[Push] Post-reset detected, clearing saved distributor to force re-setup');
+          await UnifiedPush.saveDistributor('');  // Clear to force picker
+        }
+      }
       await setupUp();
     } else {
       await setupFirebase();
