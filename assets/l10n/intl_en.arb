@@ -25,8 +25,12 @@
   "@choicesSelected": {
     "type": "String",
     "placeholders": {
-        "selected": { "type": "int" },
-        "max": { "type": "int" }
+      "selected": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
     }
   },
   "pollType": "Poll type",
@@ -68,7 +72,6 @@
   "enableGradient": "Enable bubble background gradient",
   "translationDisabledInE2e": "Cloud translation is disabled in encrypted rooms to preserve privacy. Select specific words and use system context menu to translate with apps that support it.",
   "remove": "Remove",
-
   "@remove": {
     "type": "String",
     "placeholders": {}
@@ -1420,7 +1423,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "newChat": "New chat",
   "@newChat": {
     "type": "String",
     "placeholders": {}
@@ -2107,13 +2109,13 @@
   },
   "hideAvatarsInInvites": "Hide avatars in invites",
   "@hideAvatarsInInvites": {
-	"type": "String",
-	"placeholders": {}
+    "type": "String",
+    "placeholders": {}
   },
   "hideAvatarsInInvitesDescription": "Do not show room avatars in invites",
   "@hideAvatarsInInvitesDescription": {
-	"type": "String",
-	"placeholders": {}
+    "type": "String",
+    "placeholders": {}
   },
   "presencesToggle": "Show status messages from other users",
   "@presencesToggle": {
@@ -2122,8 +2124,8 @@
   },
   "pureBlackToggle": "Pure Black",
   "@pureBlackToggle": {
-	"type": "String",
-	"placeholders": {}
+    "type": "String",
+    "placeholders": {}
   },
   "singlesignon": "Single Sign on",
   "@singlesignon": {
@@ -2746,9 +2748,9 @@
   "screenSharingDetail": "You are sharing your screen with {name}",
   "@screenSharingDetail": {
     "placeholders": {
-        "name": {
-            "type": "String"
-        }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "callingPermissions": "Calling permissions",
@@ -2900,18 +2902,18 @@
   "@doYouWantToKick": {
     "type": "String",
     "placeholders": {
-        "user": {
-            "type": "String"
-        }
+      "user": {
+        "type": "String"
+      }
     }
   },
   "doYouWantToBan": "Ban {user}",
   "@doYouWantToBan": {
     "type": "String",
     "placeholders": {
-        "user": {
-            "type": "String"
-        }
+      "user": {
+        "type": "String"
+      }
     }
   },
   "kickUserDescription": "Do you want to kick this user? If the room is public, they can rejoin anytime. You also can provide a reason.",
@@ -3470,9 +3472,9 @@
   "ongoingCallDetail": "You are talking with {name}",
   "@ongoingCallDetail": {
     "placeholders": {
-        "name": {
-            "type": "String"
-        }
+      "name": {
+        "type": "String"
+      }
     }
   },
   "chatPrivacy": "Privacy settings",
@@ -3488,9 +3490,9 @@
   "updateAvailable": "Plusly {version} is ready to be downloaded! New versions include additional features, fixes and more.",
   "@updateAvailable": {
     "placeholders": {
-        "version": {
-            "type": "String"
-        }
+      "version": {
+        "type": "String"
+      }
     }
   },
   "downloadUpdateButton": "Download",
@@ -3527,7 +3529,9 @@
   "listeningTo": "Listening to {mediaPlayer}",
   "@listeningTo": {
     "placeholders": {
-        "mediaPlayer": { "type": "String" }
+      "mediaPlayer": {
+        "type": "String"
+      }
     }
   },
   "listeningToSomeTunes": "Listening to some tunes",
@@ -3567,7 +3571,9 @@
   "@joinRoomByLinkConfirmation": {
     "type": "String",
     "placeholders": {
-        "room": { "type": "String" }
+      "room": {
+        "type": "String"
+      }
     }
   },
   "translating": "Translating...",
@@ -3583,10 +3589,13 @@
   "@totalVotes": {
     "type": "String",
     "placeholders": {
-        "count": {"type": "int", "example": "1"}
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
     }
   },
- "voteCount": "{count, plural, one{{count} vote} other{{count} votes}}",
+  "voteCount": "{count, plural, one{{count} vote} other{{count} votes}}",
   "@voteCount": {
     "placeholders": {
       "count": {
@@ -3598,19 +3607,19 @@
   "peopleOnline": "Online - {count}",
   "@peopleOnline": {
     "placeholders": {
-        "count": {
-            "type": "int",
-            "example": "1"
-        }
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
     }
   },
   "peopleUnavailable": "Unavailable - {count}",
   "@peopleUnavailable": {
     "placeholders": {
-        "count": {
-            "type": "int",
-            "example": "1"
-        }
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
     }
   },
   "pollResults": "Poll results",
@@ -3647,21 +3656,27 @@
   "loadImage": "Load image ({size})",
   "@loadImage": {
     "placeholders": {
-        "size": { "type": "String" }
+      "size": {
+        "type": "String"
+      }
     }
   },
   "downloadVideoNoSize": "Download video",
   "downloadVideo": "Download video ({size})",
   "@downloadVideo": {
     "placeholders": {
-        "size": { "type": "String" }
+      "size": {
+        "type": "String"
+      }
     }
   },
   "playVideoNoSize": "Play video",
   "playVideo": "Play video ({size})",
   "@playVideo": {
     "placeholders": {
-        "size": { "type": "String" }
+      "size": {
+        "type": "String"
+      }
     }
   },
   "autoLoadMedia": "Preview media",
@@ -3677,5 +3692,29 @@
   "continueAnyway": "Continue anyway",
   "@continueAnyway": {
     "description": "Button to skip waiting and continue"
+  },
+  "registerPushNotifications": "Register push notifications",
+  "@registerPushNotifications": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "registerPushSubtitle": "Manually re-register push notifications",
+  "@registerPushSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pushNotificationsRegistered": "Push notifications registered!",
+  "@pushNotificationsRegistered": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pushRegistrationFailed": "Registration failed: {error}",
+  "@pushRegistrationFailed": {
+    "type": "String",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   }
 }

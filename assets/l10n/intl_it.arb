@@ -3332,5 +3332,29 @@
   "previous": "Precedente",
   "@previous": {},
   "otherPartyNotLoggedIn": "L'altra parte non è attualmente connessa e quindi non può ricevere messaggi!",
-  "@otherPartyNotLoggedIn": {}
+  "@otherPartyNotLoggedIn": {},
+  "registerPushNotifications": "Register push notifications",
+  "registerPushSubtitle": "Manually re-register push notifications",
+  "pushNotificationsRegistered": "Push notifications registered!",
+  "pushRegistrationFailed": "Registration failed: {error}",
+  "@registerPushNotifications": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@registerPushSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@pushNotificationsRegistered": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "@pushRegistrationFailed": {
+    "type": "String",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -3353,5 +3353,29 @@
   "signIn": "Inloggen",
   "@signIn": {},
   "createNewAccount": "Aanmelden",
-  "@createNewAccount": {}
+  "@createNewAccount": {},
+  "registerPushNotifications": "Registreer push notificaties",
+  "@registerPushNotifications": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "registerPushSubtitle": "Handmatig push registratie opnieuw uitvoeren",
+  "@registerPushSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pushNotificationsRegistered": "Push notificaties geregistreerd!",
+  "@pushNotificationsRegistered": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pushRegistrationFailed": "Registratie mislukt: {error}",
+  "@pushRegistrationFailed": {
+    "type": "String",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }
