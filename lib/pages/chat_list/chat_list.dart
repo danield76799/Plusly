@@ -250,6 +250,11 @@ class ChatListController extends State<ChatList>
     _cachedBridgeTypes = detectedTypes;
     _lastBridgeSync = DateTime.now();
     Logs().d('[BridgeSync] Final allBridgeTypes: $allBridgeTypes');
+    
+    // Trigger UI rebuild after bridge types are updated
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
