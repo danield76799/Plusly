@@ -288,6 +288,11 @@ class ChatListController extends State<ChatList>
   }
 
   bool _isBridgeTypeVisible(Room room) {
+    // If no bridge types have been detected yet, show all rooms
+    // This prevents rooms from disappearing during initial load
+    if (allBridgeTypes.isEmpty) {
+      return true;
+    }
     if (!isBridgeRoom(room)) {
       return visibleBridgeTypes.contains('matrix');
     }
