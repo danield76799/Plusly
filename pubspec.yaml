@@ -108,6 +108,9 @@ dependencies:
   swipe_to_action: ^0.3.0
   unifiedpush: ^6.2.0
   unifiedpush_ui: ^0.2.0
+  firebase_core: ^2.29.0
+  firebase_messaging: ^14.7.0
+  fcm_shared_isolate: ^1.0.2
   universal_html: ^2.3.0
   url_launcher: ^6.3.2
   uuid: ^4.5.3
