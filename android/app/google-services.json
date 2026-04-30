@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "309257826946",
+    "project_id": "pulsly-e8257",
+    "storage_bucket": "pulsly-e8257.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:309257826946:android:ad3199a291c5df8708ba9b",
+        "android_client_info": {
+          "package_name": "com.danield.plusly"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEak-pQpKGt5iC5kissKlOcpTXXCruXiQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

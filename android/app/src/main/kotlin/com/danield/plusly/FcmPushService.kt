@@ -1,4 +1,4 @@
-/*package com.danield.extrachat
+package com.danield.plusly
 
 import com.famedly.fcm_shared_isolate.FcmSharedIsolateService
 
@@ -25,4 +25,3 @@ class FcmPushService : FcmSharedIsolateService() {
         }
     }
 }
-*/
