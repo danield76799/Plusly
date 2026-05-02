@@ -9,11 +9,13 @@ import 'package:extera_next/widgets/layouts/max_width_body.dart';
 
 class TranslatedEventDialog extends StatefulWidget {
   final Event event;
+  final String engine;
   final Timeline timeline;
 
   const TranslatedEventDialog({
     required this.event,
     required this.timeline,
+    required this.engine,
     super.key,
   });
 
@@ -24,6 +26,8 @@ class TranslatedEventDialog extends StatefulWidget {
 class TranslatedEventDialogState extends State<TranslatedEventDialog> {
   Event get event => widget.event;
   Timeline get timeline => widget.timeline;
+  String get engine => widget.engine;
+
   TranslatedEventDialogState();
   @override
   Widget build(BuildContext context) {
@@ -51,7 +55,15 @@ class TranslatedEventDialogState extends State<TranslatedEventDialog> {
 
     return Scaffold(
       appBar: AppBar(title: Text(L10n.of(context).translatedMessage)),
-      body: MaxWidthBody(child: message),
+      body: MaxWidthBody(
+        child: Column(
+          mainAxisSize: .max,
+          children: [
+            message,
+            Text(L10n.of(context).translatedWith(engine), style: TextStyle(color: theme.hintColor)),
+          ],
+        ),
+      ),
     );
   }
 }

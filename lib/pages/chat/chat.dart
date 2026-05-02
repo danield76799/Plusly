@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:extera_next/utils/neurogate.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,7 +45,6 @@ import 'package:extera_next/utils/platform_infos.dart';
 import 'package:extera_next/utils/privacy_options.dart';
 import 'package:extera_next/utils/room_status_extension.dart';
 import 'package:extera_next/utils/show_scaffold_dialog.dart';
-import 'package:extera_next/utils/translator.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:extera_next/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -1185,15 +1185,16 @@ class ChatController extends State<ChatPageWithRoom>
     ScaffoldMessenger.of(
       context,
     ).showLoadingSnackBar(L10n.of(context).translating);
-    var text = event.isRichMessage ? event.formattedText : event.text;
+    NeurogateTranslationResponse translation;
     final content = {...event.content};
     try {
-      text = await Translator.translate(
-        text,
+      translation = await Neurogate.translateText(
+        room.client,
+        event.isRichMessage ? event.formattedText : event.text,
+        'auto', // TODO select source language
         AppSettings.translationTargetLanguage.value.isEmpty
             ? PlatformDispatcher.instance.locale.languageCode
             : AppSettings.translationTargetLanguage.value,
-        AppSettings.exteraServiceUrl.value,
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1202,27 +1203,26 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
     if (event.isRichMessage) {
-      content['formatted_body'] = text;
+      content['formatted_body'] = translation.translation;
     } else {
-      content['body'] = text;
+      content['body'] = translation.translation;
     }
     content['xyz.extera.translated'] = true;
     ScaffoldMessenger.of(context).clearSnackBars();
     await showAdaptiveBottomSheet(
       context: context,
-      builder: (BuildContext ctx) {
-        return TranslatedEventDialog(
-          event: Event(
-            content: content,
-            type: 'm.room.message',
-            eventId: event!.eventId,
-            senderId: event.senderId,
-            originServerTs: event.originServerTs,
-            room: room,
-          ),
-          timeline: timeline!,
-        );
-      },
+      builder: (BuildContext ctx) => TranslatedEventDialog(
+        event: Event(
+          content: content,
+          type: 'm.room.message',
+          eventId: event!.eventId,
+          senderId: event.senderId,
+          originServerTs: event.originServerTs,
+          room: room,
+        ),
+        engine: translation.engine,
+        timeline: timeline!,
+      ),
     );
   }
 
