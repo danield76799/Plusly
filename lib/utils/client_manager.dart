@@ -140,13 +140,13 @@ abstract class ClientManager {
         AuthenticationTypes.sso,
       },
       nativeImplementations: nativeImplementations,
-      customImageResizer: PlatformInfos.isMobile ? customImageResizer : null,
+      customImageResizer: PlatformInfos.isMobile || kIsWeb
+          ? customImageResizer
+          : null,
       defaultNetworkRequestTimeout: const Duration(minutes: 30),
       enableDehydratedDevices: true,
       shareKeysWith:
-          .values.singleWhereOrNull(
-            (share) => share.name == shareKeysWith,
-          ) ??
+          .values.singleWhereOrNull((share) => share.name == shareKeysWith) ??
           .crossVerifiedIfEnabled,
       convertLinebreaksInFormatting: false,
       onSoftLogout: enableSoftLogout

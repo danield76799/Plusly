@@ -15,7 +15,8 @@ prime
 /node_modules
 
 # libolm package
-/assets/js/package
+web/Imaging.js
+web/Imaging.wasm
 /lib/generated
 
 /appimage/Extera.AppDir
