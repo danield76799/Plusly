@@ -167,19 +167,25 @@ class ChatListController extends State<ChatList>
         return (room) =>
             !room.isSpace &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
-                room.spaceParents.isEmpty);
+                room.spaceParents
+                    .where((space) => spacesIds.contains(space.roomId))
+                    .isEmpty);
       case .messages:
         return (room) =>
             !room.isSpace &&
             room.isDirectChat &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
-                room.spaceParents.isEmpty);
+                room.spaceParents
+                    .where((space) => spacesIds.contains(space.roomId))
+                    .isEmpty);
       case .groups:
         return (room) =>
             !room.isSpace &&
             !room.isDirectChat &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
-                room.spaceParents.isEmpty);
+                room.spaceParents
+                    .where((space) => spacesIds.contains(space.roomId))
+                    .isEmpty);
       case .unread:
         return (room) => room.isUnreadOrInvited;
       case .spaces:
@@ -351,9 +357,30 @@ class ChatListController extends State<ChatList>
     }
   }
 
+  void _recomputeCachedSpaces() {
+    _cachedSpaces = Matrix.of(
+      context,
+    ).client.rooms.where((r) => r.isSpace).toList();
+    _cachedSpacesIds = _cachedSpaces!.map((space) => space.id).toList();
+  }
+
+  List<String>? _cachedSpacesIds;
+  List<Room>? _cachedSpaces;
+
   // Needs to match GroupsSpacesEntry for 'separate group' checking.
-  List<Room> get spaces =>
-      Matrix.of(context).client.rooms.where((r) => r.isSpace).toList();
+  List<Room> get spaces {
+    if (_cachedSpaces == null) {
+      _recomputeCachedSpaces();
+    }
+    return _cachedSpaces ?? [];
+  }
+
+  List<String> get spacesIds {
+    if (_cachedSpacesIds == null) {
+      _recomputeCachedSpaces();
+    }
+    return _cachedSpacesIds ?? [];
+  }
 
   String? get activeChat => widget.activeChat;
 
@@ -452,6 +479,7 @@ class ChatListController extends State<ChatList>
         .where((s) => s.hasRoomUpdate)
         .listen((_) {
           _cachedFilteredRooms = null;
+          _cachedSpaces = null;
         });
 
     checkForUpdates(context);
