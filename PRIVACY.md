@@ -16,7 +16,7 @@ For convenience, one or more servers are set as default that the Extera Next dev
 Extera Next communicates with:
 1. the selected server
 2. [OpenStreetMap](https://openstreetmap.org) to display maps
-3. ecs.extera.xyz for message translation. The content for translation may be passed to, but not limited to Groq, DeepInfra, OpenAI or Google (from most to least). For security reasons, translation function isn't available in encrypted rooms.
+3. neurogate.extera.xyz for message translation. The content for translation may be passed to, but not limited to Groq, DeepInfra, OpenAI or Google (from most to least). For security reasons, translation function isn't available in encrypted rooms. Base URL for Extera's Neurogate service may be replaced through advanced config.
 
 More information is available at: [https://matrix.org](https://matrix.org)
 
