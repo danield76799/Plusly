@@ -272,7 +272,7 @@
 	"invitedUser": "📩 {username}が{targetName}を招待しました",
 	"invitedUsersOnly": "招待されたユーザーのみ",
 	"inviteForMe": "自分への招待",
-	"inviteText": "{username}がExteraに招待しました。\n1. https://extera.xyz/next/next.apk?_invite にアクセスしてアプリをインストール\n2. 登録またはログイン\n3. 招待リンクを開く:\n {link}",
+	"inviteText": "{username}がExteraに招待しました。\n1. https://extera.xyz/?utm_medium=invite にアクセスしてアプリをインストール\n2. 登録またはログイン\n3. 招待リンクを開く:\n {link}",
 	"isTyping": "入力中…",
 	"joinedTheChat": "👋 {username}がチャットに参加しました",
 	"joinRoom": "ルームに参加",
