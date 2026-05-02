@@ -13,7 +13,7 @@ import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
 
 String generateAttributionString(Event evt) {
-  return 'Forwarded from <a href="https://matrix.to/#/@${evt.senderId}">${evt.senderId}</a> - <a href="${evt.getLink()}">view original message</a>';
+  return 'Forwarded from <a href="https://matrix.to/#/${evt.senderId}">${evt.senderId}</a> - <a href="${evt.getLink()}">view original message</a>';
 }
 
 Map<String, Object?> sanitizeContent(Map<String, Object?> content) {
