@@ -825,6 +825,7 @@ class ChatController extends State<ChatPageWithRoom>
       inReplyTo: replyEvent,
       replyMention: replyMention,
       editEventId: editEvent?.eventId,
+      eventContent: editEvent?.content,
       parseCommands: parseCommands,
       threadRootEventId: thread?.rootEvent.eventId,
       threadLastEventId:
@@ -1601,10 +1602,10 @@ class ChatController extends State<ChatPageWithRoom>
 
   void emojiPickerBackspace() {
     sendController
-          ..text = sendController.text.characters.skipLast(1).toString()
-          ..selection = TextSelection.fromPosition(
-            TextPosition(offset: sendController.text.length),
-          );
+      ..text = sendController.text.characters.skipLast(1).toString()
+      ..selection = TextSelection.fromPosition(
+        TextPosition(offset: sendController.text.length),
+      );
   }
 
   void sendEmojiAction(String? emoji) async {
@@ -1637,17 +1638,15 @@ class ChatController extends State<ChatPageWithRoom>
     if (client == null) {
       return;
     }
+
+    final displayEvent = event.getDisplayEvent(timeline!);
     setSendingClient(client);
     setState(() {
       pendingText = sendController.text;
       editEvent = event;
-      sendController.text = editEvent!
-          .getDisplayEvent(timeline!)
-          .calcLocalizedBodyFallback(
-            MatrixLocals(L10n.of(context)),
-            withSenderNamePrefix: false,
-            hideReply: true,
-          );
+      sendController.text = displayEvent.isRichMessage
+          ? displayEvent.formattedText
+          : displayEvent.text;
       selectedEvents.clear();
     });
     inputFocus.requestFocus();
@@ -1662,7 +1661,7 @@ class ChatController extends State<ChatPageWithRoom>
           true,
           false,
         );
-        users.sort((a, b) => a.powerLevel.compareTo(b.powerLevel));
+        users.sort((a, b) => a.powerLevel.level.compareTo(b.powerLevel.level));
         final via = users
             .map((user) => user.id.domain)
             .whereType<String>()

@@ -110,11 +110,11 @@ void showMemberActionsPopupMenu({
               children: [
                 Text(L10n.of(context).chatPermissions),
                 Text(
-                  user.powerLevel < 50
-                      ? L10n.of(context).userLevel(user.powerLevel)
-                      : user.powerLevel < 100
-                      ? L10n.of(context).moderatorLevel(user.powerLevel)
-                      : L10n.of(context).adminLevel(user.powerLevel),
+                  user.powerLevel < PowerLevel.moderator
+                      ? L10n.of(context).userLevel(user.powerLevel.level)
+                      : user.powerLevel < PowerLevel.admin
+                      ? L10n.of(context).moderatorLevel(user.powerLevel.level)
+                      : L10n.of(context).adminLevel(user.powerLevel.level),
                   style: const TextStyle(fontSize: 10),
                 ),
               ],
@@ -196,8 +196,8 @@ void showMemberActionsPopupMenu({
     case _MemberActions.setRole:
       final power = await showPermissionChooser(
         context,
-        currentLevel: user.powerLevel,
-        maxLevel: user.room.ownPowerLevel,
+        currentLevel: user.powerLevel.level,
+        maxLevel: user.room.ownPowerLevel.level,
       );
       if (power == null) return;
       if (!context.mounted) return;

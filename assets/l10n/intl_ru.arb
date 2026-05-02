@@ -3851,5 +3851,6 @@
     "placeholder": {
         "engine": {"type": "String"}
     }
-  }
+  },
+  "owner": "Владелец"
 }
