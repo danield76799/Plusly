@@ -1415,14 +1415,14 @@ class ChatController extends State<ChatPageWithRoom>
         items: selectedEvents.isEmpty
             ? [
                 ContentShareItem(
-                  sanitizeContent(event!.content),
+                  sanitizeContent(event!.getDisplayEvent(timeline!).content),
                   attribution: generateAttributionString(event),
                 ),
               ]
             : selectedEvents
                   .map(
                     (event) => ContentShareItem(
-                      sanitizeContent(event.content),
+                      sanitizeContent(event.getDisplayEvent(timeline!).content),
                       attribution: generateAttributionString(event),
                     ),
                   )
