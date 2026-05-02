@@ -16,7 +16,7 @@ const humanMadeLocalizations = ['en', 'ru']; // we'll pass multiple localization
 var targetLocalization = getLocalization(TARGET_LANGUAGE);
 
 const locale = getLocalization(humanMadeLocalizations[0]);
-var keys = Object.keys(locale).filter(x => !x.startsWith('@@') && !targetLocalization[x]);
+var keys = Object.keys(locale).filter(x => !x.startsWith('@') && !targetLocalization[x]);
 
 async function batchTranslate(amount) {
     const k = keys.slice(0, amount);
@@ -88,14 +88,15 @@ You are not talking to a user, but an automated system which will detect your JS
     keys = keys.slice(amount);
 }
 
-const targetLen = Object.keys(getLocalization(humanMadeLocalizations[0])).length;
+const targetLen = Object.keys(getLocalization(humanMadeLocalizations[0])).filter(x => !x.startsWith('@')).length;
 
 async function translationLoop() {
-    if (Object.keys(targetLocalization).length == targetLen) {
+    const currentLen = Object.keys(targetLocalization).filter(x => !x.startsWith('@')).length;
+    if (currentLen == targetLen) {
         console.log('Done');
         process.exit(0);
     }
-    console.log(`Sending batch request...`);
+    console.log(`Sending batch request... [${currentLen} / ${targetLen}]`);
     await batchTranslate(128);
     targetLocalization['@@locale'] = TARGET_LANGUAGE;
     targetLocalization['@@last_modified'] = new Date().toISOString();

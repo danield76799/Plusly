@@ -32,7 +32,7 @@
 	"cleanExif": "EXIFを削除",
 	"cleanExifDescription": "送信前に画像からEXIFメタデータ（カメラモデル、位置情報、時刻）を削除します。",
 	"@@locale": "ja",
-	"@@last_modified": "2026-05-02T21:18:28.596Z",
+	"@@last_modified": "2026-05-02T21:22:05.662Z",
 	"doNotSendIfCantClean": "クリーンできない画像を送信しない",
 	"doNotSendIfCantCleanDescription": "EXIFメタデータを削除できない場合、画像を送信しません",
 	"repeatPassword": "パスワードを再入力",
@@ -2689,5 +2689,7 @@
 	"@downloads": {
 		"type": "String",
 		"placeholders": {}
-	}
+	},
+	"translatedWith": "{engine} で翻訳されています。不正確な場合があります。",
+	"owner": "オーナー"
 }
