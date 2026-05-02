@@ -381,6 +381,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                     return;
                                   }
                                   controller.closeMessageMenu();
+                                  room.client.addRecentEmoji(emoji);
                                   await event.room.sendReaction(
                                     event.eventId,
                                     emoji,

@@ -1529,30 +1529,8 @@ class ChatController extends State<ChatPageWithRoom>
 
   void onEmojiSelected(Category? _, PickerEmoji emoji) {
     room.client.addRecentEmoji(emoji.customData ?? emoji.standardEmoji!.char);
-    // print('selected emoji ${emoji.customData ?? emoji.standardEmoji!.char}');
-    switch (emojiPickerType) {
-      case .reaction:
-        senEmojiReaction(emoji);
-        break;
-      case .keyboard:
-        typeEmoji(emoji);
-        onInputBarChanged(sendController.text);
-        break;
-    }
-  }
-
-  void senEmojiReaction(PickerEmoji? emoji) {
-    setState(() => showEmojiPicker = false);
-    if (emoji == null) return;
-    // make sure we don't send the same emoji twice
-    if (_allReactionEvents.any(
-      (e) =>
-          e.content.tryGetMap('m.relates_to')?['key'] ==
-          (emoji.standardEmoji?.char ?? emoji.customData),
-    )) {
-      return;
-    }
-    return sendEmojiAction(emoji.standardEmoji?.char ?? emoji.customData);
+    typeEmoji(emoji);
+    onInputBarChanged(sendController.text);
   }
 
   void typeEmoji(PickerEmoji? emoji) {
@@ -1621,27 +1599,12 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  late Iterable<Event> _allReactionEvents;
-
   void emojiPickerBackspace() {
-    switch (emojiPickerType) {
-      case EmojiPickerType.reaction:
-        setState(() => showEmojiPicker = false);
-        break;
-      case EmojiPickerType.keyboard:
-        sendController
+    sendController
           ..text = sendController.text.characters.skipLast(1).toString()
           ..selection = TextSelection.fromPosition(
             TextPosition(offset: sendController.text.length),
           );
-        break;
-    }
-  }
-
-  void pickEmojiReactionAction(Iterable<Event> allReactionEvents) async {
-    _allReactionEvents = allReactionEvents;
-    emojiPickerType = EmojiPickerType.reaction;
-    setState(() => showEmojiPicker = true);
   }
 
   void sendEmojiAction(String? emoji) async {
