@@ -3749,5 +3749,11 @@
   "howWouldYouLikeToSignUp": "How would you like to sign up?",
   "continueOIDC": "Continue with single sign-on",
   "continueSSO": "Continue with SSO",
-  "registerWithPassword": "Register with a password"
+  "registerWithPassword": "Register with a password",
+  "translatedWith": "Translated with {engine}. For reference only.",
+  "@translatedWith": {
+    "placeholder": {
+        "engine": {"type": "String"}
+    }
+  }
 }

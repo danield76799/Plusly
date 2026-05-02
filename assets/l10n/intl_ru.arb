@@ -3845,5 +3845,11 @@
   "howWouldYouLikeToSignUp": "Как Вы хотите зарегистрироваться?",
   "continueOIDC": "Использовать single sign-on",
   "continueSSO": "Продолжить с SSO",
-  "registerWithPassword": "Регистрация с паролем"
+  "registerWithPassword": "Регистрация с паролем",
+  "translatedWith": "Переведено {engine}. Может содержать неточности.",
+  "@translatedWith": {
+    "placeholder": {
+        "engine": {"type": "String"}
+    }
+  }
 }
