@@ -100,7 +100,10 @@ async function translationLoop() {
     await batchTranslate(128);
     targetLocalization['@@locale'] = TARGET_LANGUAGE;
     targetLocalization['@@last_modified'] = new Date().toISOString();
-    fs.writeFileSync(`assets/l10n/intl_${TARGET_LANGUAGE}.arb`, JSON.stringify(targetLocalization, false, '\t'));
+    fs.writeFileSync(`assets/l10n/intl_${TARGET_LANGUAGE}.arb`, JSON.stringify({
+        ...targetLocalization,
+        ...Object.fromEntries(Object.entries(locale).filter(x => /^@\w/.test(x[0]))),
+    }, false, '\t'));
     console.log(`${Object.keys(targetLocalization).length} out of ${targetLen} keys translated.`);
     setTimeout(() => {
         translationLoop();
