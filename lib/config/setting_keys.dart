@@ -14,6 +14,9 @@ abstract class SettingKeys {
 }
 
 enum AppSettings<T> {
+  neurogateUrl<String>('xyz.extera.neurogateUrl', 'https://neurogate.extera.xyz'),
+  neurogateToken<String>('xyz.extera.neurogateToken', ''),
+  neurogateTokenExpiry<String>('xyz.extera.neurogateTokenExpiryDate', ''),
   selectedAccount<String>('xyz.extera.selectedAccount', ''),
   uiFont<String>('xyz.extera.uiFont', ''),
   fallbackFonts<String>('xyz.extera.fallbackFonts', 'SystemFont,Roboto'),
