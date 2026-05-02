@@ -32,7 +32,7 @@
 	"cleanExif": "EXIFを削除",
 	"cleanExifDescription": "送信前に画像からEXIFメタデータ（カメラモデル、位置情報、時刻）を削除します。",
 	"@@locale": "ja",
-	"@@last_modified": "2026-04-25T07:39:29.392Z",
+	"@@last_modified": "2026-05-02T21:18:28.596Z",
 	"doNotSendIfCantClean": "クリーンできない画像を送信しない",
 	"doNotSendIfCantCleanDescription": "EXIFメタデータを削除できない場合、画像を送信しません",
 	"repeatPassword": "パスワードを再入力",
@@ -305,7 +305,7 @@
 	"messagesStyle": "メッセージ:",
 	"moderator": "モデレーター",
 	"muteChat": "通知をミュート",
-	"needPantalaimonWarning": "エンドツーエンド暗号化を使用するにはPantalaimonが必要です。",
+	"needPantalaimonWarning": "エンドツーエンド暗号化を使用するにはPantalaimonが必要であることにご注意ください。",
 	"newMessageInFluffyChat": "💬 Exteraに新しいメッセージ",
 	"newVerificationRequest": "新しい認証リクエスト！",
 	"next": "次へ",
@@ -313,7 +313,7 @@
 	"noConnectionToTheServer": "サーバーに接続できません",
 	"noEmotesFound": "絵文字が見つかりません 😕",
 	"noEncryptionForPublicRooms": "公開ルームでは暗号化を有効にできません。",
-	"noGoogleServicesWarning": "お使いのデバイスにはGoogle Playサービスがインストールされていません。素晴らしい選択です！プッシュ通知を受信するには、F-Droidからntfyをダウンロードしてください。お使いの端末がGMSに対応していない場合（例：Huawei）、Google Play Servicesの代わりにAurora StoreとmicroGを使用することもできます。",
+	"noGoogleServicesWarning": "お使いのデバイスにはGoogle Playサービスがインストールされていません。素晴らしい選択です！プッシュ通知を受け取るには、F-Droidからntfyをダウンロードしてください。また、お使いのスマートフォンがGMSをサポートしていない場合（例：Huawei）、Google Playサービスの代わりにAurora StoreとmicroGを使用することもできます。",
 	"noMatrixServer": "{server1}はMatrixサーバーではありません。代わりに{server2}を使用しますか？",
 	"shareInviteLink": "招待リンクを共有",
 	"scanQrCode": "QRコードをスキャン",
@@ -330,8 +330,8 @@
 	"ok": "OK",
 	"online": "オンライン",
 	"onlineKeyBackupEnabled": "オンラインキーバックアップが有効です",
-	"oopsPushError": "残念ながら、プッシュ通知の設定中にエラーが発生しました。",
-	"oopsSomethingWentWrong": "問題が発生しました…",
+	"oopsPushError": "おっと！残念ながらプッシュ通知の設定中にエラーが発生しました。",
+	"oopsSomethingWentWrong": "おっと、何か問題が発生しました…",
 	"openAppToReadMessages": "アプリを開いてメッセージを読む",
 	"openCamera": "カメラを開く",
 	"openVideoCamera": "ビデオカメラを開く",
@@ -342,20 +342,20 @@
 	"removeFromBundle": "このバンドルから削除",
 	"bundleName": "バンドル名",
 	"enableMultiAccounts": "（ベータ）このデバイスで複数アカウントを有効にする",
-	"openInMaps": "地図で開く",
+	"openInMaps": "マップで開く",
 	"link": "リンク",
-	"serverRequiresEmail": "このサーバーでは登録時にメールアドレスの確認が必要です。",
+	"serverRequiresEmail": "このサーバーでは登録のためにメールアドレスの確認が必要です。",
 	"or": "または",
 	"participant": "参加者",
-	"passphraseOrKey": "パスフレーズまたはリカバリーキー",
+	"passphraseOrKey": "パスフレーズまたは回復キー",
 	"password": "パスワード",
-	"passwordForgotten": "パスワードを忘れた",
+	"passwordForgotten": "パスワードを忘れた場合",
 	"passwordHasBeenChanged": "パスワードが変更されました",
-	"hideMemberChangesInPublicChats": "公開チャットでメンバーの変更を非表示",
+	"hideMemberChangesInPublicChats": "公開チャットでメンバーの変更を非表示にする",
 	"hideMemberChangesInPublicChatsBody": "公開チャットでの入退室、表示名やアバターの変更を表示しません。",
 	"overview": "概要",
 	"notifyMeFor": "通知する項目",
-	"passwordRecoverySettings": "パスワード回復設定",
+	"passwordRecoverySettings": "パスワード回復の設定",
 	"passwordRecovery": "パスワードの回復",
 	"people": "ユーザー",
 	"pickImage": "画像を選択",
@@ -363,11 +363,11 @@
 	"play": "{fileName}を再生",
 	"pleaseChoose": "選択してください",
 	"pleaseChooseAPasscode": "パスコードを選択してください",
-	"pleaseClickOnLink": "続行するにはメール内のリンクを開いてください。",
-	"pleaseEnter4Digits": "PINコードを入力してください。アプリロックを無効にするには空欄のままにしてください。",
-	"pleaseEnterRecoveryKey": "リカバリーキーを入力してください：",
+	"pleaseClickOnLink": "続行するにはメールに記載されたリンクを開いてください。",
+	"pleaseEnter4Digits": "PINコードを入力してください。アプリのロックを無効にするには空欄のままにしてください。",
+	"pleaseEnterRecoveryKey": "回復キーを入力してください：",
 	"pleaseEnterYourPassword": "パスワードを入力してください",
-	"pleaseEnterYourPin": "PINコードを入力してください",
+	"pleaseEnterYourPin": "PINを入力してください",
 	"pleaseEnterYourUsername": "ユーザー名を入力してください",
 	"pleaseFollowInstructionsOnWeb": "ウェブサイトの指示に従い、「次へ」をタップしてください。",
 	"privacy": "プライバシー",
@@ -389,7 +389,7 @@
 	"startedAPoll": "{senderName}が投票を作成しました",
 	"rejoin": "再参加",
 	"removeAllOtherDevices": "他のすべてのデバイスを削除",
-	"removedBy": "{username}によって削除されました",
+	"removedBy": "{username}により削除されました",
 	"removeDevice": "デバイスを削除",
 	"unbanFromChat": "BANを解除",
 	"removeYourAvatar": "アバターを削除",
@@ -410,8 +410,8 @@
 	"retry": "再試行",
 	"search": "検索",
 	"security": "セキュリティ",
-	"recoveryKey": "リカバリーキー",
-	"recoveryKeyLost": "リカバリーキーを紛失しましたか？",
+	"recoveryKey": "回復キー",
+	"recoveryKeyLost": "回復キーを紛失しましたか？",
 	"seenByUser": "{username}が既読",
 	"send": "送信",
 	"sendAMessage": "メッセージを送信",
@@ -430,7 +430,7 @@
 	"sentASticker": "😊 {username}がスタンプを送信しました",
 	"sentAVideo": "🎥 {username}が動画を送信しました",
 	"sentCallInformations": "{senderName}が通話情報を送信しました",
-	"separateChatTypes": "ダイレクトチャットとグループを分ける",
+	"separateChatTypes": "ダイレクトチャットとグループを分離",
 	"setAsCanonicalAlias": "メインエイリアスとして設定",
 	"setCustomEmotes": "カスタム絵文字を設定",
 	"setChatDescription": "チャットの説明を設定",
@@ -2169,6 +2169,524 @@
 		"placeholders": {}
 	},
 	"@muteChat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@needPantalaimonWarning": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@newChat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@newMessageInFluffyChat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@newVerificationRequest": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@next": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@no": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@noConnectionToTheServer": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@noEmotesFound": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@noEncryptionForPublicRooms": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@noGoogleServicesWarning": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@noMatrixServer": {
+		"type": "String",
+		"placeholders": {
+			"server1": {
+				"type": "String"
+			},
+			"server2": {
+				"type": "String"
+			}
+		}
+	},
+	"@shareInviteLink": {},
+	"@scanQrCode": {},
+	"@none": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@noPasswordRecoveryDescription": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@noPermission": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@noRoomsFound": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@notifications": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@notificationsEnabledForThisAccount": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@numUsersTyping": {
+		"type": "String",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"@obtainingLocation": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@offensive": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@offline": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@ok": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@online": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@onlineKeyBackupEnabled": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@oopsPushError": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@oopsSomethingWentWrong": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@openAppToReadMessages": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@openCamera": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@openVideoCamera": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@oneClientLoggedOut": {},
+	"@addAccount": {},
+	"@editBundlesForAccount": {},
+	"@addToBundle": {},
+	"@removeFromBundle": {},
+	"@bundleName": {},
+	"@enableMultiAccounts": {},
+	"@openInMaps": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@link": {},
+	"@serverRequiresEmail": {},
+	"@or": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@participant": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@passphraseOrKey": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@password": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@passwordForgotten": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@passwordHasBeenChanged": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@hideMemberChangesInPublicChats": {},
+	"@hideMemberChangesInPublicChatsBody": {},
+	"@overview": {},
+	"@notifyMeFor": {},
+	"@passwordRecoverySettings": {},
+	"@passwordRecovery": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@people": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@pickImage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@pin": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@play": {
+		"type": "String",
+		"placeholders": {
+			"fileName": {
+				"type": "String"
+			}
+		}
+	},
+	"@pleaseChoose": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@pleaseChooseAPasscode": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@pleaseClickOnLink": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@pleaseEnter4Digits": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@pleaseEnterRecoveryKey": {},
+	"@pleaseEnterYourPassword": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@pleaseEnterYourPin": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@pleaseEnterYourUsername": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@pleaseFollowInstructionsOnWeb": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@privacy": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@publicRooms": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@pushRules": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@reason": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@recording": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@redactedBy": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@directChat": {},
+	"@redactedByBecause": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			},
+			"reason": {
+				"type": "String"
+			}
+		}
+	},
+	"@redactedAnEvent": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@redactMessage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@register": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@reject": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@rejectedTheInvitation": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@rejoin": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@removeAllOtherDevices": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@removedBy": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@removeDevice": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@unbanFromChat": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@removeYourAvatar": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@replaceRoomWithNewerVersion": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@reply": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@reportMessage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@translateMessage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@translatedMessage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@errorTranslatingMessage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@recoverMessage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@recoveredMessage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@errorRecoveringMessage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@errorRecoveringMessageNoAdmin": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@requestPermission": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@roomHasBeenUpgraded": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@roomVersion": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@saveFile": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@retry": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@search": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@security": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@recoveryKey": {},
+	"@recoveryKeyLost": {},
+	"@seenByUser": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@send": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@sendAMessage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@sendAsText": {
+		"type": "String"
+	},
+	"@sendAudio": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@sendFile": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@sendImage": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@sendImages": {
+		"type": "String",
+		"placeholders": {
+			"count": {
+				"type": "int"
+			}
+		}
+	},
+	"@sendMessages": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@sendOriginal": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@sendSticker": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@sendVideo": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@sentAFile": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@sentAnAudio": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@sentAPicture": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@sentASticker": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@sentAVideo": {
+		"type": "String",
+		"placeholders": {
+			"username": {
+				"type": "String"
+			}
+		}
+	},
+	"@sentCallInformations": {
+		"type": "String",
+		"placeholders": {
+			"senderName": {
+				"type": "String"
+			}
+		}
+	},
+	"@separateChatTypes": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@setAsCanonicalAlias": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@setCustomEmotes": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@setChatDescription": {},
+	"@setInvitationLink": {
+		"type": "String",
+		"placeholders": {}
+	},
+	"@downloads": {
 		"type": "String",
 		"placeholders": {}
 	}
