@@ -1,4 +1,9 @@
 # Translator
+
+> [!caution]
+> This document describes translator API for versions before 26.2.0.
+> Translator backend for 26.2.0+ is open sourced at https://codeberg.org/rustyraven/Neurogate
+
 The code below is responsible for translation:
 ```dart
 class Translator {

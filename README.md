@@ -1,63 +1,59 @@
-# Extera Next
+# Extera
 
-A feature-rich Matrix client for mobile and desktop platforms built on [FluffyChat](https://github.com/krille-chan/fluffychat). Extera Next extends FluffyChat with additional features and improvements.
+A FluffyChat fork on steroids, aimed at adding more features.
 
 ## Features
 
-### Core Messaging
-- Send all kinds of messages, images, and files
-- Voice messages
-- Location sharing
-- Message translation (built-in)
-- Unlimited private and public group chats
-- Public channels with thousands of participants
+### 🗨️ Core messaging
+- 📨 Send/receive all kinds of messages: text, images, videos, voice, files, polls...
+- 📍 Geolocation sharing with in-app map preview
+- 🔔 Push notifications
+- 🛠️ Room moderation
+- 😄 Custom emotes and stickers
+- 🌌 Spaces
+- 📞 1-to-1 voice/video calls
+- ☎️ Jitsi-powered group calls
 
-### Security & Privacy
-- End-to-end encryption
-- Encrypted chat backup
-- Emoji verification & cross-signing
-- Compatible with Element, Nheko, NeoChat, and all other Matrix clients
+### 🔒 Security and privacy
+- 🔑 E2EE encryption using Matrix's `libvodozemac`
+- 💼 Encrypted key backup
+- ✅ Emoji verification and cross-signing
 
-### UI & Design
-- Dark & AMOLED modes
-- Material You design
-- Custom emotes and stickers
-- Spaces support
-- Push notifications
+### 🪟 UI and design
+- 🌙 Dark mode
+- 🌑 AMOLED (pitch black) mode
+- 🎨 Customisable seed color & color scheme
+- 📱 Material You design, partially inspired by Material 3 Expressive
 
-### Moderation & Administration
-- Feature-rich group moderation (all Matrix features)
-- Discover and join public groups
-- Redacted message recovery (for Synapse admins)
+### 🧰 Moderation
+- 🔨 Feature-rich group moderation (all Matrix features)
+- 🔍 Redacted message recovery (for Synapse admins)
 
-### Extera Next Exclusives
-- Built-in message translation
-- "About" field in user profiles
-- Enhanced profile design with mutual rooms list
-- 1:1 voice/video call support
-
-## Prerequisites
-
-Before building, ensure you have:
-- Flutter SDK installed
-- The [matrix-dart-sdk](https://github.com/ExteraApp/matrix-dart-sdk) in the same directory as Extera Next
+### ✨ Extera Exclusives
+- 🌐 Built-in message translation (toggleable)
+- 🖌️ Built-in image editor
+- 🧰 More expressive profiles: "About", banner, Rich Presence (MSC4320)
 
 ## Building
+
+### Prerequisites
+Before building, you should have:
+1. Flutter SDK installed
+2. [matrix-dart-sdk](https://github.com/ExteraApp/matrix-dart-sdk) in the same directory as Extera
 
 ### Setup
 
 The `matrix` dependency can be configured in two ways:
 
-**Option 1: Directory-based (Recommended for development)**
-Ensure `matrix-dart-sdk` is cloned in the same parent directory:
+**Way 1: Directory-based (recommended when developing both app & sdk)**
+Make sure that you have `matrix-dart-sdk` cloned in the same parent directory.
 ```
-parent-directory/
-├── ExteraNext/
-└── matrix-dart-sdk/
+$ ls
+Extera    matrix-dart-sdk
 ```
 
 **Option 2: Git reference**
-Update `pubspec.yaml`:
+Make sure that `pubspec.yaml` has a Git reference like this:
 ```yaml
 matrix:
   git:
@@ -68,9 +64,6 @@ matrix:
 ### Build Commands
 
 Platform-specific build scripts are available in the `scripts/` directory:
-- `./scripts/build-macos.sh` - macOS
-- `./scripts/build-windows.ps1` - Windows
-- `./scripts/build-ios.sh` - iOS
 - `./scripts/build-appimage.sh` - AppImage (Linux)
 - `./scripts/build-linux.sh` - Linux (Run only after build-appimage.sh)
 
