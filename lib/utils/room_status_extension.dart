@@ -1,3 +1,4 @@
+import 'package:extera_next/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:matrix/matrix.dart';
@@ -75,7 +76,7 @@ extension RoomStatusExtension on Room {
 
   String? getLatestReadMessage(Timeline timeline) {
     if (timeline.events.isEmpty) return null;
-    for (final event in timeline.events) {
+    for (final event in timeline.events.filterByVisibleInGui()) {
       if (event.receipts
           .where((receipt) => receipt.user.id != client.userID!)
           .isNotEmpty) {
