@@ -44,18 +44,19 @@ class ReplyDisplay extends StatelessWidget {
                     controller.editEvent?.getDisplayEvent(controller.timeline!),
                   ),
           ),
-          Padding(
-            padding: const .symmetric(horizontal: 8),
-            child: IconButton(
-              tooltip: L10n.of(context).mention,
-              icon: controller.replyMention
-                  ? const Icon(Icons.notifications_active_outlined)
-                  : const Icon(Icons.notifications_off_outlined),
-              onPressed: () {
-                controller.setReplyMention(!controller.replyMention);
-              },
+          if (controller.replyEvent != null && controller.editEvent == null)
+            Padding(
+              padding: const .symmetric(horizontal: 8),
+              child: IconButton(
+                tooltip: L10n.of(context).mention,
+                icon: controller.replyMention
+                    ? const Icon(Icons.notifications_active_outlined)
+                    : const Icon(Icons.notifications_off_outlined),
+                onPressed: () {
+                  controller.setReplyMention(!controller.replyMention);
+                },
+              ),
             ),
-          ),
         ],
       ),
     );
