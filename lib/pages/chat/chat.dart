@@ -1471,27 +1471,23 @@ class ChatController extends State<ChatPageWithRoom>
     });
   }
 
-  bool _isVisibleInScroll(GlobalKey key, ScrollController controller) {
-    final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
-    if (renderBox == null) return false;
-
-    final offset = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
-
+  bool _isEventVisibleInScroll(String eventId) {
+    final eventIndex = eventsKeyMap[eventId];
+    if (eventIndex == null) return false;
+    final tagState = scrollController.tagMap[eventIndex];
+    final tagContext = tagState?.context;
+    if (tagContext == null) return false; // not currently laid out
+    final renderBox = tagContext.findRenderObject() as RenderBox?;
+    if (renderBox == null || !renderBox.attached) return false;
     final scrollRenderBox =
-        controller.position.context.storageContext.findRenderObject()
+        scrollController.position.context.storageContext.findRenderObject()
             as RenderBox?;
     if (scrollRenderBox == null) return false;
-
-    final scrollOffset = scrollRenderBox.localToGlobal(Offset.zero);
-    final viewportHeight = controller.position.viewportDimension;
-
-    final viewportTop = scrollOffset.dy;
-    final viewportBottom = viewportTop + viewportHeight;
-
-    final widgetTop = offset.dy;
-    final widgetBottom = widgetTop + size.height;
-
+    final viewportTop = scrollRenderBox.localToGlobal(Offset.zero).dy;
+    final viewportBottom =
+        viewportTop + scrollController.position.viewportDimension;
+    final widgetTop = renderBox.localToGlobal(Offset.zero).dy;
+    final widgetBottom = widgetTop + renderBox.size.height;
     return widgetBottom > viewportTop && widgetTop < viewportBottom;
   }
 
@@ -1539,8 +1535,7 @@ class ChatController extends State<ChatPageWithRoom>
     if ((eventsToScrollBackTo.isEmpty ||
             eventsToScrollBackTo.last != scrolledFromEventId) &&
         scrolledFromEventId != null) {
-      final key = GlobalObjectKey(scrolledFromEventId);
-      if (!_isVisibleInScroll(key, scrollController)) {
+      if (!_isEventVisibleInScroll(scrolledFromEventId)) {
         setState(() {
           eventsToScrollBackTo.add(scrolledFromEventId);
         });

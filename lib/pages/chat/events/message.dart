@@ -224,8 +224,6 @@ class _MessageState extends State<Message> {
     final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
     final hasBeenRead = widget.hasBeenRead;
 
-    
-
     var color = theme.colorScheme.surfaceContainerHigh;
     final displayTime =
         event.type == EventTypes.RoomCreate ||
@@ -534,8 +532,7 @@ class _MessageState extends State<Message> {
                                                           type:
                                                               'm.room.message',
                                                           room: event.room,
-                                                          status:
-                                                              .error,
+                                                          status: .error,
                                                           originServerTs:
                                                               DateTime.now(),
                                                         );
@@ -555,7 +552,8 @@ class _MessageState extends State<Message> {
                                                         borderRadius:
                                                             ReplyContent
                                                                 .borderRadius,
-                                                        onTap: () => _scrollToEvent(
+                                                        onTap: () =>
+                                                            _scrollToEvent(
                                                               replyEvent,
                                                               event,
                                                             ),
@@ -918,7 +916,11 @@ class __AnimateInState extends State<_AnimateIn> {
   bool _animationFinished = false;
   @override
   Widget build(BuildContext context) {
-    if (!widget.animateIn) return widget.child;
+    if (!widget.animateIn) {
+      return widget.halfOpacity
+          ? Opacity(opacity: 0.5, child: widget.child)
+          : widget.child;
+    }
     if (!_animationFinished) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() {
