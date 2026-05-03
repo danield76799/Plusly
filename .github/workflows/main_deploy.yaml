@@ -102,24 +102,25 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.9.2-build-477
-          name: Plusly v0.9.2 (Build #477 - Reference Build)
+          tag_name: v1.0.0
+          name: Plusly v1.0.0 (Stable Release)
           body: |
-            Plusly v0.9.2 - Reference Build #477
+            Plusly v1.0.0 - Stable Release
             
-            This is the reference build that has been in development for a long time.
+            This is the first stable release of Plusly!
             
-            - Version: 0.9.2
-            - Build: #477
+            - Version: 1.0.0
             - Commit: ${{ github.sha }}
             - Package: com.danield.plusly
             
             Changes in this version:
             - Performance fixes: reduced network timeout, improved error handling
             - Fixed Node.js 24 deprecation warning
+            - FCM push notifications with fallback
+            - Enhanced presence handling
           files: |
             build/app/outputs/flutter-apk/app-release.apk
-          prerelease: true
+          prerelease: false
           generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
