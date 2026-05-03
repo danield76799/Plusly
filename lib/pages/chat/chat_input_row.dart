@@ -455,30 +455,35 @@ class ChatInputRow extends StatelessWidget {
                                   : Icons.mic_none_outlined,
                             ),
                           )
-                        : IconButton(
-                            tooltip: L10n.of(context).send,
-                            onPressed: controller.send,
-                            onLongPress:
-                                controller.sendController.text.isNotEmpty
-                                ? () => controller.sendScheduleAction()
-                                : null,
-                            style: IconButton.styleFrom(
-                              backgroundColor: controller.sendController.text.isNotEmpty
-                                  ? theme.colorScheme.primary
-                                  : theme.bubbleColor,
-                              foregroundColor: controller.sendController.text.isNotEmpty
-                                  ? theme.colorScheme.onPrimary
-                                  : theme.onBubbleColor,
-                              minimumSize: const Size(48, 48),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24.0),
+                        : Container(
+                            height: 56,
+                            width: 56,
+                            alignment: Alignment.center,
+                            child: IconButton(
+                              tooltip: L10n.of(context).send,
+                              onPressed: controller.send,
+                              onLongPress:
+                                  controller.sendController.text.isNotEmpty
+                                  ? () => controller.sendScheduleAction()
+                                  : null,
+                              style: IconButton.styleFrom(
+                                backgroundColor: controller.sendController.text.isNotEmpty
+                                    ? theme.colorScheme.primary
+                                    : theme.bubbleColor,
+                                foregroundColor: controller.sendController.text.isNotEmpty
+                                    ? theme.colorScheme.onPrimary
+                                    : theme.onBubbleColor,
+                                minimumSize: const Size(48, 48),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24.0),
+                                ),
+                                elevation: controller.sendController.text.isNotEmpty ? 2.0 : 0.0,
+                                shadowColor: controller.sendController.text.isNotEmpty
+                                    ? theme.colorScheme.primary.withOpacity(0.3)
+                                    : Colors.transparent,
                               ),
-                              elevation: controller.sendController.text.isNotEmpty ? 2.0 : 0.0,
-                              shadowColor: controller.sendController.text.isNotEmpty
-                                  ? theme.colorScheme.primary.withOpacity(0.3)
-                                  : Colors.transparent,
+                              icon: const Icon(Icons.send_outlined),
                             ),
-                            icon: const Icon(Icons.send_outlined),
                           ),
                   ),
                 ],
