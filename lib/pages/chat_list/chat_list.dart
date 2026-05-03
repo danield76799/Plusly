@@ -337,9 +337,9 @@ class ChatListController extends State<ChatList>
   final ScrollController scrollController = ScrollController();
   final ValueNotifier<bool> scrolledToTop = ValueNotifier(true);
 
-  final StreamController<Client> _clientStream = StreamController.broadcast();
+  // final StreamController<Client> _clientStream = StreamController.broadcast();
 
-  Stream<Client> get clientStream => _clientStream.stream;
+  // Stream<Client> get clientStream => _clientStream.stream;
 
   void addAccountAction() => context.go('/addaccount');
 
@@ -366,8 +366,27 @@ class ChatListController extends State<ChatList>
 
   List<String>? _cachedSpacesIds;
   List<Room>? _cachedSpaces;
+  Map<String, Room>? _cachedSpaceDelegateCandidates;
 
-  // Needs to match GroupsSpacesEntry for 'separate group' checking.
+   void _recomputeSpaceDelegateCandidates() {
+    final spaceDelegateCandidates = <String, Room>{};
+    for (final space in spaces) {
+      for (final spaceChild in space.spaceChildren) {
+        final roomId = spaceChild.roomId;
+        if (roomId == null) continue;
+        spaceDelegateCandidates[roomId] = space;
+      }
+    }
+    _cachedSpaceDelegateCandidates = spaceDelegateCandidates;
+  }
+
+  Map<String, Room> get spaceDelegateCandidates {
+    if (_cachedSpaceDelegateCandidates == null) {
+      _recomputeSpaceDelegateCandidates();
+    }
+    return _cachedSpaceDelegateCandidates ?? {};
+  }
+
   List<Room> get spaces {
     if (_cachedSpaces == null) {
       _recomputeCachedSpaces();
@@ -936,7 +955,7 @@ class ChatListController extends State<ChatList>
       _activeSpaceId = null;
       Matrix.of(context).setActiveClient(client);
     });
-    _clientStream.add(client);
+    // _clientStream.add(client);
   }
 
   void setActiveBundle(String bundle) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:extera_next/utils/stream_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/config/app_config.dart';
@@ -19,16 +20,22 @@ class TypingIndicators extends StatelessWidget {
     const avatarSize = Avatar.defaultSize / 2;
 
     return StreamBuilder<Object>(
-      stream: controller.room.client.onSync.stream.where(
-        (syncUpdate) =>
-            syncUpdate.rooms?.join?[controller.room.id]?.ephemeral?.any(
-              (ephemeral) => ephemeral.type == 'm.typing',
-            ) ??
-            false,
-      ),
+      stream: controller.room.client.onSync.stream
+          .where(
+            (syncUpdate) =>
+                syncUpdate.rooms?.join?[controller.room.id]?.ephemeral?.any(
+                  (ephemeral) => ephemeral.type == 'm.typing',
+                ) ??
+                false,
+          )
+          .rateLimit(const Duration(seconds: 1)),
       builder: (context, _) {
         final typingUsers = controller.room.typingUsers
-          ..removeWhere((u) => u.stateKey == Matrix.of(context).client.userID);
+          ..removeWhere(
+            (u) =>
+                u.stateKey == Matrix.of(context).client.userID ||
+                Matrix.of(context).client.ignoredUsers.contains(u.stateKey), // I've noticed that I still see typing indicators from ignored users
+          );
 
         return Container(
           width: double.infinity,

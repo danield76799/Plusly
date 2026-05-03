@@ -55,15 +55,6 @@ class ChatListViewBody extends StatelessWidget {
         chatListController: controller,
       );
     }
-    final spaces = client.rooms.where((r) => r.isSpace);
-    final spaceDelegateCandidates = <String, Room>{};
-    for (final space in spaces) {
-      for (final spaceChild in space.spaceChildren) {
-        final roomId = spaceChild.roomId;
-        if (roomId == null) continue;
-        spaceDelegateCandidates[roomId] = space;
-      }
-    }
 
     final publicRooms = controller.roomSearchResult?.chunk
         .where((room) => room.roomType != 'm.space')
@@ -248,7 +239,7 @@ class ChatListViewBody extends StatelessWidget {
                     itemCount: rooms.length,
                     itemBuilder: (BuildContext context, int i) {
                       final room = rooms[i];
-                      final space = spaceDelegateCandidates[room.id];
+                      final space = controller.spaceDelegateCandidates[room.id];
                       return ChatListItem(
                         room,
                         space: space,

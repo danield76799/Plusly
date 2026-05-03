@@ -669,6 +669,7 @@ class ChatController extends State<ChatPageWithRoom>
     _scrollAnchorEventId = null;
     await Matrix.of(context).client.roomsLoading;
     await Matrix.of(context).client.accountDataLoading;
+    threads = null;
     if (eventContextId != null &&
         (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
       eventContextId = null;
@@ -761,6 +762,13 @@ class ChatController extends State<ChatPageWithRoom>
     inputBarHeight.dispose();
     scrollController.dispose();
     sendController.dispose();
+
+    WidgetsBinding.instance.removeObserver(this);
+
+    typingCoolDown?.cancel();
+    typingTimeout?.cancel();
+    _storeInputTimeoutTimer?.cancel();
+
     if (currentlyTyping) room.setTyping(false);
     super.dispose();
   }
