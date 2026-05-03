@@ -118,6 +118,7 @@ jobs:
             - Fixed Node.js 24 deprecation warning
             - FCM push notifications with fallback
             - Enhanced presence handling
+            - Fixed null check error in chat share dialog
           files: |
             build/app/outputs/flutter-apk/app-release.apk
           prerelease: false
