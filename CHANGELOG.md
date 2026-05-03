@@ -1,3 +1,6 @@
+## Extera 26.2.1
+- Fix: message appear animation played twice
+
 ## Extera 26.2.0
 - Scroll down button now will return to previous message (after opening a message from a reply).
 - Revamped lock screen design.
