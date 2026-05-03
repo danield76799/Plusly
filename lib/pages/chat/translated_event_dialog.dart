@@ -42,7 +42,7 @@ class TranslatedEventDialogState extends State<TranslatedEventDialog> {
       onMention: () => {},
       onSelect: (Event ev, Offset? tapPosition) => {},
       onSwipe: (Event? ev) => {},
-      scrollToEventId: (String p0) => {},
+      scrollToEventId: (String p0, String? p1) => {},
       timeline: timeline,
       animateIn: false,
       displayReadMarker: false,

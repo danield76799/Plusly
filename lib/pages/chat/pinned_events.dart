@@ -51,7 +51,7 @@ class PinnedEvents extends StatelessWidget {
                 .toList(),
           );
 
-    if (eventId != null) controller.scrollToEventId(eventId);
+    if (eventId != null) controller.scrollToEventId(eventId, null);
   }
 
   @override

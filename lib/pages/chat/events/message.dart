@@ -33,7 +33,7 @@ class Message extends StatefulWidget {
   final bool displayReadMarker;
   final void Function(Event, Offset?) onSelect;
   final void Function(Event) onInfoTab;
-  final void Function(String) scrollToEventId;
+  final void Function(String, String?) scrollToEventId;
   final void Function(Event) onSwipe;
   final void Function() onMention;
   final bool longPressSelect;
@@ -187,9 +187,9 @@ class _MessageState extends State<Message> {
     }
   }
 
-  void _scrollToEvent(Event event) {
+  void _scrollToEvent(Event event, Event? scrolledFrom) {
     if (event.status == .error) return; // didn't load yet
-    widget.scrollToEventId(event.eventId);
+    widget.scrollToEventId(event.eventId, scrolledFrom?.eventId);
   }
 
   @override
@@ -557,6 +557,7 @@ class _MessageState extends State<Message> {
                                                                 .borderRadius,
                                                         onTap: () => _scrollToEvent(
                                                               replyEvent,
+                                                              event,
                                                             ),
                                                         child: AbsorbPointer(
                                                           child: ReplyContent(

@@ -73,6 +73,7 @@ class ChatEventList extends StatelessWidget {
         child: RepaintBoundary(
           child: Message(
             event,
+            key: GlobalObjectKey(event.transactionId ?? event.eventId),
             animateIn: animateIn,
             thread: thread,
             singleSelected:

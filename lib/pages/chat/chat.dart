@@ -148,6 +148,8 @@ class ChatController extends State<ChatPageWithRoom>
   bool currentlyTyping = false;
   bool dragging = false;
 
+  List<String> eventsToScrollBackTo = [];
+
   void onDragEntered(_) => setState(() => dragging = true);
 
   void onDragExited(_) => setState(() => dragging = false);
@@ -528,7 +530,7 @@ class ChatController extends State<ChatPageWithRoom>
     Logs().v("Trying to load timeline...");
     try {
       await loadTimelineFuture;
-      if (initialEventId != null) scrollToEventId(initialEventId);
+      if (initialEventId != null) scrollToEventId(initialEventId, null);
 
       var readMarkerEventIndex = readMarkerEventId.isEmpty || timeline == null
           ? -1
@@ -545,7 +547,7 @@ class ChatController extends State<ChatPageWithRoom>
 
       if (readMarkerEventIndex > 1) {
         Logs().v('Scroll up to visible event', readMarkerEventId);
-        scrollToEventId(readMarkerEventId, highlightEvent: false);
+        scrollToEventId(readMarkerEventId, null, highlightEvent: false);
         return;
       } else if (readMarkerEventId.isNotEmpty && readMarkerEventIndex == -1) {
         _showScrollUpMaterialBanner(readMarkerEventId);
@@ -1469,7 +1471,35 @@ class ChatController extends State<ChatPageWithRoom>
     });
   }
 
-  void scrollToEventId(String eventId, {bool highlightEvent = true}) async {
+  bool _isVisibleInScroll(GlobalKey key, ScrollController controller) {
+    final renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return false;
+
+    final offset = renderBox.localToGlobal(Offset.zero);
+    final size = renderBox.size;
+
+    final scrollRenderBox =
+        controller.position.context.storageContext.findRenderObject()
+            as RenderBox?;
+    if (scrollRenderBox == null) return false;
+
+    final scrollOffset = scrollRenderBox.localToGlobal(Offset.zero);
+    final viewportHeight = controller.position.viewportDimension;
+
+    final viewportTop = scrollOffset.dy;
+    final viewportBottom = viewportTop + viewportHeight;
+
+    final widgetTop = offset.dy;
+    final widgetBottom = widgetTop + size.height;
+
+    return widgetBottom > viewportTop && widgetTop < viewportBottom;
+  }
+
+  void scrollToEventId(
+    String eventId,
+    String? scrolledFromEventId, {
+    bool highlightEvent = true,
+  }) async {
     final foundEvent = timeline!.events.firstWhereOrNull(
       (event) => event.eventId == eventId,
     );
@@ -1497,7 +1527,7 @@ class ChatController extends State<ChatPageWithRoom>
       });
       await loadTimelineFuture;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        scrollToEventId(eventId);
+        scrollToEventId(eventId, scrolledFromEventId);
       });
       return;
     }
@@ -1505,6 +1535,16 @@ class ChatController extends State<ChatPageWithRoom>
       setState(() {
         scrollToEventIdMarker = eventId;
       });
+    }
+    if ((eventsToScrollBackTo.isEmpty ||
+            eventsToScrollBackTo.last != scrolledFromEventId) &&
+        scrolledFromEventId != null) {
+      final key = GlobalObjectKey(scrolledFromEventId);
+      if (!_isVisibleInScroll(key, scrollController)) {
+        setState(() {
+          eventsToScrollBackTo.add(scrolledFromEventId);
+        });
+      }
     }
     await scrollController.scrollToIndex(
       eventIndex,
@@ -1519,6 +1559,14 @@ class ChatController extends State<ChatPageWithRoom>
 
     _cachedEventsKeyMap = null;
     _cachedFilteredEvents = null;
+
+    if (eventsToScrollBackTo.isNotEmpty) {
+      scrollToEventId(eventsToScrollBackTo.last, null);
+      setState(() {
+        eventsToScrollBackTo.removeLast();
+      });
+      return;
+    }
 
     if (!timeline!.allowNewEvent) {
       setState(() {

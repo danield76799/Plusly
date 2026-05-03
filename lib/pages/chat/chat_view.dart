@@ -461,7 +461,8 @@ class _ChatViewState extends State<ChatView> {
               builder: (context, scrolledUp, _) {
                 final show =
                     (scrolledUp ||
-                        controller.timeline?.allowNewEvent == false) &&
+                        controller.timeline?.allowNewEvent == false ||
+                        controller.eventsToScrollBackTo.isNotEmpty) &&
                     controller.selectedEvents.isEmpty;
                 if (!show) return const SizedBox.shrink();
                 return Padding(
@@ -713,6 +714,7 @@ class _ChatViewState extends State<ChatView> {
                                     onPressed: () {
                                       controller.scrollToEventId(
                                         scrollUpBannerEventId,
+                                        null,
                                       );
                                       controller.discardScrollUpBannerEventId();
                                     },

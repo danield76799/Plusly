@@ -88,7 +88,7 @@ class NotificationsView extends StatelessWidget {
                           }
                         },
                         onSwipe: (Event? ev) => {},
-                        scrollToEventId: (String p0) => {},
+                        scrollToEventId: (String p0, String? p1) => {},
                         timeline: RoomTimeline(
                           room: room,
                           chunk: TimelineChunk(events: [event]),
