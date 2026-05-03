@@ -35,6 +35,7 @@ class SettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final matrix = Matrix.of(context);
     final theme = Theme.of(context);
     final borderRadius = BorderRadius.circular(AppConfig.borderRadius);
     final showChatBackupBanner = controller.showChatBackupBanner;
@@ -48,6 +49,7 @@ class SettingsView extends StatelessWidget {
             activeSpaceId: null,
             onGoToChats: () => context.go('/rooms'),
             onGoToSpaceId: (spaceId) => context.go('/rooms?spaceId=$spaceId'),
+            rootSpaces: matrix.rootSpaces,
           ),
           Container(color: Theme.of(context).dividerColor, width: 1),
         ],

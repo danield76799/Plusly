@@ -19,7 +19,8 @@ class ChatListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final client = Matrix.of(context).client;
+    final matrix = Matrix.of(context);
+    final client = matrix.client;
     final theme = Theme.of(context);
 
     return PopScope(
@@ -43,6 +44,7 @@ class ChatListView extends StatelessWidget {
               activeSpaceId: controller.activeSpaceId,
               onGoToChats: controller.clearActiveSpace,
               onGoToSpaceId: controller.setActiveSpace,
+              rootSpaces: matrix.rootSpaces,
             ),
             Container(color: Theme.of(context).dividerColor, width: 1),
           ],

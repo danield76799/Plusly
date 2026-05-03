@@ -92,6 +92,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   void setActiveClient(Client? cl) {
     final i = widget.clients.indexWhere((c) => c == cl);
     if (i != -1) {
+      _cachedRootSpaces = null;
       _activeClient = i;
       AppSettings.selectedAccount.setItem(cl!.clientName);
       // TODO: Multi-client VoiP support
@@ -322,6 +323,34 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     onLoginStateChanged.remove(name);
     onNotification[name]?.cancel();
     onNotification.remove(name);
+  }
+
+
+
+  List<Room>? _cachedRootSpaces;
+
+  List<Room> _computeRootSpaces(Client client) {
+    final allSpaces = client.rooms.where((room) => room.isSpace).toList();
+
+    final childSpaceIds = <String>{};
+    for (final space in allSpaces) {
+      for (final child in space.spaceChildren) {
+        final roomId = child.roomId;
+        if (roomId != null) {
+          childSpaceIds.add(roomId);
+        }
+      }
+    }
+
+    return allSpaces
+        .where((space) => !childSpaceIds.contains(space.id))
+        .toList();
+  }
+
+  // ig it would fit more in ChatListController, but we use rootSpaces in settings view to build navrail
+  List<Room> get rootSpaces {
+    _cachedRootSpaces ??= _computeRootSpaces(client);
+    return _cachedRootSpaces!;
   }
 
   void initMatrix() {

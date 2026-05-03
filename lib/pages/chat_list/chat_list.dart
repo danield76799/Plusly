@@ -930,6 +930,8 @@ class ChatListController extends State<ChatList>
     context.go('/rooms');
     setState(() {
       _cachedFilteredRooms = null;
+      _cachedSpaces = null;
+      _cachedSpacesIds = null;
       activeFilter = ActiveFilter.allChats;
       _activeSpaceId = null;
       Matrix.of(context).setActiveClient(client);

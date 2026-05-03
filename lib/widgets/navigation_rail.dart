@@ -12,46 +12,19 @@ import 'package:extera_next/utils/stream_extension.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
 
-class SpacesNavigationRail extends StatefulWidget {
+class SpacesNavigationRail extends StatelessWidget {
   final String? activeSpaceId;
   final void Function() onGoToChats;
   final void Function(String) onGoToSpaceId;
+  final List<Room> rootSpaces;
 
   const SpacesNavigationRail({
     required this.activeSpaceId,
     required this.onGoToChats,
     required this.onGoToSpaceId,
+    required this.rootSpaces,
     super.key,
   });
-
-  @override
-  State<SpacesNavigationRail> createState() => _SpacesNavigationRailState();
-}
-
-class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
-  List<Room>? _cachedRootSpaces;
-
-  List<Room> _computeRootSpaces(Client client) {
-    final allSpaces = client.rooms.where((room) => room.isSpace).toList();
-
-    // Build a set of all space IDs that are children of another space.
-    // This is O(n * m) where n = spaces, m = avg children per space,
-    // instead of the previous O(n^2 * m) nested .any() approach.
-    final childSpaceIds = <String>{};
-    for (final space in allSpaces) {
-      for (final child in space.spaceChildren) {
-        final roomId = child.roomId;
-        if (roomId != null) {
-          childSpaceIds.add(roomId);
-        }
-      }
-    }
-
-    // O(n) set lookup per space
-    return allSpaces
-        .where((space) => !childSpaceIds.contains(space.id))
-        .toList();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,12 +42,6 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
           .where((s) => s.hasRoomUpdate)
           .rateLimit(const Duration(seconds: 1)),
       builder: (context, snapshot) {
-        // Only recompute when sync delivers new data or cache is empty
-        if (snapshot.hasData || _cachedRootSpaces == null) {
-          _cachedRootSpaces = _computeRootSpaces(client);
-        }
-        final rootSpaces = _cachedRootSpaces!;
-
         return Container(
           width: FluffyThemes.navRailWidth,
           color: Theme.of(context).scaffoldBackgroundColor,
@@ -89,8 +56,8 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
                       if (i == 0) {
                         return NaviRailItem(
                           isSelected:
-                              widget.activeSpaceId == null && !isSettings,
-                          onTap: widget.onGoToChats,
+                              activeSpaceId == null && !isSettings,
+                          onTap: onGoToChats,
                           icon: const Padding(
                             padding: EdgeInsets.all(10.0),
                             child: Icon(Icons.forum_outlined),
@@ -124,8 +91,8 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
                           .toSet();
                       return NaviRailItem(
                         toolTip: displayname,
-                        isSelected: widget.activeSpaceId == space.id,
-                        onTap: () => widget.onGoToSpaceId(rootSpaces[i].id),
+                        isSelected: activeSpaceId == space.id,
+                        onTap: () => onGoToSpaceId(rootSpaces[i].id),
                         unreadBadgeFilter: (room) =>
                             spaceChildrenIds.contains(room.id),
                         icon: Avatar(
@@ -164,3 +131,30 @@ class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
     );
   }
 }
+
+// class _SpacesNavigationRailState extends State<SpacesNavigationRail> {
+//   List<Room>? _cachedRootSpaces;
+
+//   List<Room> _computeRootSpaces(Client client) {
+//     final allSpaces = client.rooms.where((room) => room.isSpace).toList();
+
+//     // Build a set of all space IDs that are children of another space.
+//     // This is O(n * m) where n = spaces, m = avg children per space,
+//     // instead of the previous O(n^2 * m) nested .any() approach.
+//     final childSpaceIds = <String>{};
+//     for (final space in allSpaces) {
+//       for (final child in space.spaceChildren) {
+//         final roomId = child.roomId;
+//         if (roomId != null) {
+//           childSpaceIds.add(roomId);
+//         }
+//       }
+//     }
+
+//     // O(n) set lookup per space
+//     return allSpaces
+//         .where((space) => !childSpaceIds.contains(space.id))
+//         .toList();
+//   }
+
+// }
