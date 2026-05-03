@@ -1,3 +1,17 @@
+## Extera 26.2.0
+- Scroll down button now will return to previous message (after opening a message from a reply).
+- Revamped lock screen design.
+- Update translations for Spanish and Japanese (these are machine translations).
+- Ability to edit media captions.
+- Forwarding messages now respects message edits.
+- Replaced old closed-source translator backend to [Neurogate](https://codeberg.org/rustyraven/Neurogate).
+- Account registration using password.
+- Fix: stickers not being sent in threads.
+- Fix: additional "@" sign in forward attribution.
+- Fix: show spaces' rooms in global list regardless of settings, if current user does not participate in room's parent space
+- Fix: space navigation rail not being updated after switching accounts
+- Some optimisations
+
 ## Extera 26.1.68
 - (actually) fix forward attribution.
 
