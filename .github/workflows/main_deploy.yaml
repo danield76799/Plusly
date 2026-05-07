@@ -68,12 +68,15 @@ jobs:
       - name: Build Android APK
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
-          flutter build apk --release --target-platform android-arm64,android-arm --verbose 2>&1 | tee build.log
+          flutter build apk --release --target-platform android-arm64,android-arm 2>&1 | tee build.log
           BUILD_EXIT_CODE=$?
           if [ $BUILD_EXIT_CODE -ne 0 ]; then
             echo "=== BUILD FAILED ==="
-            echo "Last 200 lines of build log:"
-            tail -200 build.log
+            echo "Looking for Dart/Flutter errors in log:"
+            grep -E "(error:|Error:|FAILURE|Exception:)" build.log | head -50
+            echo ""
+            echo "Last 100 lines of build log:"
+            tail -100 build.log
             exit $BUILD_EXIT_CODE
           fi
 
