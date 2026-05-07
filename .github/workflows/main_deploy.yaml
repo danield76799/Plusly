@@ -68,7 +68,22 @@ jobs:
       - name: Build Android APK
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
-          flutter build apk --release --target-platform android-arm64,android-arm
+          flutter build apk --release --target-platform android-arm64,android-arm --verbose 2>&1 | tee build.log
+          BUILD_EXIT_CODE=$?
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "=== BUILD FAILED ==="
+            echo "Last 200 lines of build log:"
+            tail -200 build.log
+            exit $BUILD_EXIT_CODE
+          fi
+
+      - name: Upload Build Log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-build-log
+          path: build.log
+          retention-days: 3
 
       - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
