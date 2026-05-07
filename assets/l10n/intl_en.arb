@@ -3717,6 +3717,11 @@
       }
     }
   },
+  "startPoll": "Start poll",
+  "@startPoll": {
+    "type": "String",
+    "placeholders": {}
+  },
   "enable": "Enable",
   "@enable": {
     "type": "String",
