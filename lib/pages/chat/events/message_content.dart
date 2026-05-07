@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:linkify/linkify.dart' show linkify;
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
@@ -39,6 +40,10 @@ class MessageContent extends StatelessWidget {
   final bool loadMedia;
   final void Function()? onLoadMedia;
 
+  /// Optional trailing inline span appended to the end of plain text messages
+  /// (used to reserve space for the inline status row, Telegram-style).
+  final InlineSpan? trailingSpan;
+
   const MessageContent(
     this.event, {
     this.onInfoTab,
@@ -50,6 +55,7 @@ class MessageContent extends StatelessWidget {
     this.selectable = false,
     this.loadMedia = false,
     this.onLoadMedia,
+    this.trailingSpan,
   });
 
   void _verifyOrRequestKey(BuildContext context) async {
@@ -225,6 +231,7 @@ class MessageContent extends StatelessWidget {
                   textColor: textColor,
                   room: event.room,
                   selectable: selectable,
+                  trailingSpan: trailingSpan,
                   fontSize:
                       AppSettings.fontSizeFactor.value *
                       AppSettings.messageFontSize.value,
@@ -326,31 +333,29 @@ class MessageContent extends StatelessWidget {
               decoration: TextDecoration.underline,
               decorationColor: linkColor,
             );
+            final spanChildren = <InlineSpan>[
+              ...?buildTextSpanChildren(
+                linkify(
+                  messageText,
+                  options: const LinkifyOptions(humanize: false),
+                ),
+                style: messageStyle,
+                linkStyle: messageStyle.merge(messageLinkStyle),
+                onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
+                useMouseRegion: !selectable,
+              ),
+              ?trailingSpan,
+            ];
+            final richSpan = TextSpan(
+              style: messageStyle,
+              children: spanChildren,
+            );
+            final textScaler = MediaQuery.textScalerOf(context);
             return Padding(
-              padding: const .symmetric(horizontal: 16, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
               child: selectable
-                  ? SelectableLinkify(
-                      text: messageText,
-                      textScaleFactor: MediaQuery.textScalerOf(
-                        context,
-                      ).scale(1),
-                      style: messageStyle,
-                      options: const LinkifyOptions(humanize: false),
-                      linkStyle: messageLinkStyle,
-                      onOpen: (url) =>
-                          UrlLauncher(context, url.url).launchUrl(),
-                    )
-                  : Linkify(
-                      text: messageText,
-                      textScaleFactor: MediaQuery.textScalerOf(
-                        context,
-                      ).scale(1),
-                      style: messageStyle,
-                      options: const LinkifyOptions(humanize: false),
-                      linkStyle: messageLinkStyle,
-                      onOpen: (url) =>
-                          UrlLauncher(context, url.url).launchUrl(),
-                    ),
+                  ? SelectableText.rich(richSpan, textScaler: textScaler)
+                  : Text.rich(richSpan, textScaler: textScaler),
             );
         }
       case EventTypes.CallInvite:

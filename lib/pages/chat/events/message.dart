@@ -315,21 +315,21 @@ class _MessageState extends State<Message> {
       RelationshipTypes.reaction,
     );
 
-    final messageStatusRow = Row(
+    Widget buildStatusRow({required Color color}) => Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           event.originServerTs.localizedTimeOfDay(context),
-          style: TextStyle(color: statusColor, fontSize: 11),
+          style: TextStyle(color: color, fontSize: 11, height: 1.0),
         ),
         if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit))
           Padding(
-            padding: const EdgeInsets.only(left: 4.0),
-            child: Icon(Icons.edit_outlined, color: statusColor, size: 14),
+            padding: const EdgeInsets.only(left: 3.0),
+            child: Icon(Icons.edit_outlined, color: color, size: 12),
           ),
         if (ownMessage)
           Padding(
-            padding: const EdgeInsets.only(left: 4.0),
+            padding: const EdgeInsets.only(left: 3.0),
             child: Icon(
               event.status == EventStatus.sending
                   ? Icons.watch_later_outlined
@@ -338,11 +338,69 @@ class _MessageState extends State<Message> {
                   : hasBeenRead
                   ? Icons.done_all
                   : Icons.check,
-              color: statusColor,
-              size: 14,
+              color: color,
+              size: 13,
             ),
           ),
       ],
+    );
+
+    final messageStatusRow = buildStatusRow(color: statusColor);
+
+    // A "chip" version with translucent backdrop, used over media/HTML where
+    // we cannot inline the placeholder into the text flow.
+    final messageStatusChip = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: buildStatusRow(color: Colors.white),
+    );
+
+    // Decide where to place the status row.
+    //
+    // - inline (Telegram-style): for plain-text messages we append an invisible
+    //   trailing placeholder to the last text line and overlay the visible
+    //   status row exactly over that reserved space.
+    // - chip overlay: over noBubble media (image/sticker without description,
+    //   big emotes) we float a translucent pill on top of the content.
+    // - bottom row: for HTML, captions, redacted, audio/file/poll we render
+    //   the status as a real bottom-right row below the content. No overlap.
+    final isTextLike = {
+      MessageTypes.Text,
+      MessageTypes.Notice,
+      MessageTypes.Emote,
+      MessageTypes.None,
+    }.contains(event.messageType);
+    final isBigEmote =
+        noBubble &&
+        event.messageType == MessageTypes.Text &&
+        event.relationshipType == null &&
+        event.onlyEmotes;
+    // HTML is rendered by HtmlMessage with the same trailing-span trick as
+    // plain text, so it uses the inline overlay too.
+    final useInlineStatus = !noBubble && isTextLike && !event.redacted;
+    // Big emotes use a chip-styled status row below the emote (transparent
+    // bubble, so the chip provides its own backdrop). Image/sticker without
+    // description keep the chip overlay on top of the media (Telegram-style).
+    final useChipStatus = noBubble && !isBigEmote;
+    final useBottomChipStatus = isBigEmote;
+    final useBottomRowStatus =
+        !useInlineStatus && !useChipStatus && !useBottomChipStatus;
+
+    // Invisible widget of the exact same size as the visible status row, used
+    // as a trailing inline placeholder via WidgetSpan so the last text line
+    // reserves room for the overlayed status row.
+    final inlineStatusPlaceholder = WidgetSpan(
+      alignment: PlaceholderAlignment.middle,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 8, right: 2),
+        child: Opacity(
+          opacity: 0,
+          child: IgnorePointer(child: messageStatusRow),
+        ),
+      ),
     );
 
     final row = FutureBuilder<User?>(
@@ -537,13 +595,12 @@ class _MessageState extends State<Message> {
                                                               DateTime.now(),
                                                         );
                                                   return Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          left: 16,
-                                                          right: 16,
-                                                          top: 8,
-                                                          bottom: 8,
-                                                        ),
+                                                    padding: .only(
+                                                      left: 16,
+                                                      right: 16,
+                                                      top: 8,
+                                                      bottom: noBubble ? 8 : 0,
+                                                    ),
                                                     child: Material(
                                                       color: Colors.transparent,
                                                       borderRadius: ReplyContent
@@ -581,8 +638,9 @@ class _MessageState extends State<Message> {
                                                     }.contains(
                                                       event.messageType,
                                                     )
-                                                    ? 6
+                                                    ? 8
                                                     : 0,
+                                                bottom: useInlineStatus ? 8 : 0,
                                               ),
                                               child: MessageContent(
                                                 displayEvent,
@@ -601,26 +659,46 @@ class _MessageState extends State<Message> {
                                                     PlatformInfos.isMobile
                                                     ? widget.longPressSelect
                                                     : true,
+                                                trailingSpan: useInlineStatus
+                                                    ? inlineStatusPlaceholder
+                                                    : null,
                                               ),
                                             ),
-                                            Opacity(
-                                              opacity: 0,
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(
-                                                  right: 16,
-                                                  bottom: 6,
-                                                  left: 16,
+                                            // reserve vertical space for bottomrowstatus
+                                            if (useBottomRowStatus)
+                                              const SizedBox(height: 22),
+                                            if (useBottomChipStatus)
+                                              Padding(
+                                                padding: const .only(
+                                                  top: 4,
+                                                  left: 4,
                                                 ),
-                                                child: messageStatusRow,
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [messageStatusChip],
+                                                ),
                                               ),
-                                            ),
                                           ],
                                         ),
-                                        Positioned(
-                                          bottom: 6,
-                                          right: 16,
-                                          child: messageStatusRow,
-                                        ),
+                                        if (useInlineStatus)
+                                          Positioned(
+                                            bottom: 10,
+                                            right: 16,
+                                            child: messageStatusRow,
+                                          ),
+                                        if (useBottomRowStatus)
+                                          Positioned(
+                                            bottom: 6,
+                                            right: 12,
+                                            child: messageStatusRow,
+                                          ),
+                                        if (useChipStatus)
+                                          Positioned(
+                                            bottom: 6,
+                                            right: 6,
+                                            child: messageStatusChip,
+                                          ),
                                       ],
                                     ),
                                   ],

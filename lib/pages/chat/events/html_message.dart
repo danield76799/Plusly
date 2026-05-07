@@ -29,6 +29,10 @@ class HtmlMessage extends StatefulWidget {
 
   final bool selectable;
 
+  /// Optional trailing inline span appended to the end of the rendered HTML
+  /// (used to reserve space for an inline status row, Telegram-style).
+  final InlineSpan? trailingSpan;
+
   const HtmlMessage({
     super.key,
     required this.html,
@@ -39,6 +43,7 @@ class HtmlMessage extends StatefulWidget {
     required this.onOpen,
     required this.onCopy,
     this.selectable = false,
+    this.trailingSpan,
   });
 
   /// Keep in sync with: https://spec.matrix.org/latest/client-server-api/#mroommessage-msgtypes
@@ -400,7 +405,7 @@ class _HtmlMessageState extends State<HtmlMessage> {
         const defaultDimension = 64.0;
         var actualWidth = width ?? height ?? defaultDimension;
         var actualHeight = height ?? width ?? defaultDimension;
-        
+
         final ratio = actualWidth / actualHeight;
         if (actualHeight > 256) {
           actualHeight = 256;
@@ -575,11 +580,14 @@ class _HtmlMessageState extends State<HtmlMessage> {
     // Reset counters before each build so indices are assigned consistently.
     _detailsCounter = 0;
     _spoilerCounter = 0;
-  
-    final textSpan = _renderHtml(
+
+    final renderedSpan = _renderHtml(
       parsedDocument?.body ?? dom.Element.html(''),
       context,
     );
+    final textSpan = widget.trailingSpan == null
+        ? renderedSpan
+        : TextSpan(children: [renderedSpan, widget.trailingSpan!]);
     final textStyle = TextStyle(fontSize: fontSize, color: textColor);
 
     if (widget.selectable) {
