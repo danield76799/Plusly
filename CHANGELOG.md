@@ -1,3 +1,6 @@
+## Extera 26.2.2
+- Redesign message bottom status row.
+
 ## Extera 26.2.1
 - Fix: message appear animation played twice
 
