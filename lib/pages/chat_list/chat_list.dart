@@ -368,7 +368,7 @@ class ChatListController extends State<ChatList>
   List<Room>? _cachedSpaces;
   Map<String, Room>? _cachedSpaceDelegateCandidates;
 
-   void _recomputeSpaceDelegateCandidates() {
+  void _recomputeSpaceDelegateCandidates() {
     final spaceDelegateCandidates = <String, Room>{};
     for (final space in spaces) {
       for (final spaceChild in space.spaceChildren) {

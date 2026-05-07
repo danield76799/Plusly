@@ -1,8 +1,8 @@
-import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import 'package:phone_numbers_parser/phone_numbers_parser.dart';
 
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/register/register.dart';
 
 class MsisdnStage extends StatefulWidget {

@@ -60,7 +60,10 @@ class TranslatedEventDialogState extends State<TranslatedEventDialog> {
           mainAxisSize: .max,
           children: [
             message,
-            Text(L10n.of(context).translatedWith(engine), style: TextStyle(color: theme.hintColor)),
+            Text(
+              L10n.of(context).translatedWith(engine),
+              style: TextStyle(color: theme.hintColor),
+            ),
           ],
         ),
       ),

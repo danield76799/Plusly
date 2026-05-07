@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:extera_next/utils/stream_extension.dart';
 import 'package:flutter/material.dart';
 
 import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/themes.dart';
 import 'package:extera_next/pages/chat/chat.dart';
+import 'package:extera_next/utils/stream_extension.dart';
 import 'package:extera_next/widgets/avatar.dart';
 import 'package:extera_next/widgets/matrix.dart';
 
@@ -34,7 +34,9 @@ class TypingIndicators extends StatelessWidget {
           ..removeWhere(
             (u) =>
                 u.stateKey == Matrix.of(context).client.userID ||
-                Matrix.of(context).client.ignoredUsers.contains(u.stateKey), // I've noticed that I still see typing indicators from ignored users
+                Matrix.of(context).client.ignoredUsers.contains(
+                  u.stateKey,
+                ), // I've noticed that I still see typing indicators from ignored users
           );
 
         return Container(

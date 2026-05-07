@@ -325,8 +325,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     onNotification.remove(name);
   }
 
-
-
   List<Room>? _cachedRootSpaces;
 
   List<Room> _computeRootSpaces(Client client) {

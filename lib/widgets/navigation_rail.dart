@@ -55,8 +55,7 @@ class SpacesNavigationRail extends StatelessWidget {
                     itemBuilder: (context, i) {
                       if (i == 0) {
                         return NaviRailItem(
-                          isSelected:
-                              activeSpaceId == null && !isSettings,
+                          isSelected: activeSpaceId == null && !isSettings,
                           onTap: onGoToChats,
                           icon: const Padding(
                             padding: EdgeInsets.all(10.0),

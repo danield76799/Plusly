@@ -1,8 +1,8 @@
-import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
+import 'package:extera_next/generated/l10n/l10n.dart';
 import 'package:extera_next/pages/register/register.dart';
 import 'package:extera_next/pages/register/stages/email_stage.dart';
 import 'package:extera_next/pages/register/stages/fallback_stage.dart';
