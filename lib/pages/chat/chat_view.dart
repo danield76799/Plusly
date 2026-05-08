@@ -16,6 +16,8 @@ import 'package:Pulsly/pages/chat/chat.dart';
 import 'package:Pulsly/pages/chat/chat_app_bar_list_tile.dart';
 import 'package:Pulsly/pages/chat/chat_app_bar_title.dart';
 import 'package:Pulsly/pages/chat/chat_event_list.dart';
+import 'package:Pulsly/pages/chat/events/message_optimized.dart';
+import 'package:Pulsly/utils/user_cache.dart';
 import 'package:Pulsly/pages/chat/encryption_button.dart';
 import 'package:Pulsly/pages/chat/jitsi_popup_button.dart';
 import 'package:Pulsly/pages/chat/pinned_events.dart';
@@ -515,9 +517,12 @@ class ChatView extends StatelessWidget {
                     Positioned.fill(
                       child: GestureDetector(
                         onTap: controller.clearSingleSelectedEvent,
-                        child: ChatEventList(
-                          controller: controller,
-                          showThreadRoots: controller.showThreadRoots,
+                        child: UserCacheProvider(
+                          cache: UserCache(),
+                          child: ChatEventList(
+                            controller: controller,
+                            showThreadRoots: controller.showThreadRoots,
+                          ),
                         ),
                       ),
                     ),
