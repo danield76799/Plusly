@@ -7,7 +7,7 @@ import 'package:matrix/matrix.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';
-import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
+import 'package:Pulsly/widgets/chat_list_item_optimized.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_legacy_header.dart';
 import 'package:Pulsly/pages/chat_list/dummy_chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/search_title.dart';
@@ -20,9 +20,7 @@ import 'package:Pulsly/utils/stream_extension.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/mini_audio_player.dart';
-import '../../config/themes.dart';
-import '../../widgets/matrix.dart';
-import 'chat_list_header.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/room_ui_cache.dart';
 
 class ChatListViewBody extends StatelessWidget {
   final ChatListController controller;
@@ -82,6 +80,10 @@ class ChatListViewBody extends StatelessWidget {
           .rateLimit(const Duration(seconds: 1)),
       builder: (context, _) {
         controller.syncBridgeTypes();
+        // Invalidate UI cache for all rooms on sync update
+        for (final room in rooms) {
+          room.invalidateUICache();
+        }
         final rooms = controller.isSearchMode
             ? controller.searchRooms
             : controller.filteredRooms;
@@ -288,7 +290,7 @@ class ChatListViewBody extends StatelessWidget {
                     itemBuilder: (BuildContext context, int i) {
                       final room = rooms[i];
                       final space = spaceDelegateCandidates[room.id];
-                      return ChatListItem(
+                      return ChatListItemOptimized(
                         room,
                         space: space,
                         key: Key('chat_list_item_${room.id}'),

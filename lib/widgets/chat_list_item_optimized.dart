@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
-import 'package:Pulsly/generated/l10n/l10n.dart';
 
 import '../utils/bridge_utils.dart';
 import '../utils/matrix_sdk_extensions/matrix_locals.dart';
+import '../utils/matrix_sdk_extensions/room_ui_cache.dart';
 import 'avatar.dart';
 import 'hover_builder.dart';
+import '../generated/l10n/l10n.dart';
 
-/// Custom ChatListItem with platform icons and improved styling
-class ChatListItem extends StatelessWidget {
+/// Optimized ChatListItem that uses cached room properties
+/// to avoid expensive computations on every rebuild.
+class ChatListItemOptimized extends StatelessWidget {
   final Room room;
   final Room? space;
   final String? filter;
@@ -17,8 +19,9 @@ class ChatListItem extends StatelessWidget {
   final bool activeChat;
   final bool firstElement;
   final bool lastElement;
+  final bool compactMode;
 
-  const ChatListItem(
+  const ChatListItemOptimized(
     this.room, {
     this.space,
     this.filter,
@@ -27,6 +30,7 @@ class ChatListItem extends StatelessWidget {
     this.activeChat = false,
     this.firstElement = false,
     this.lastElement = false,
+    this.compactMode = false,
     super.key,
   });
 
@@ -34,53 +38,48 @@ class ChatListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final client = room.client;
-    final displayname = room.getLocalizedDisplayname(
+
+    // Use cached displayname instead of computing every time
+    final displayname = room.getCachedDisplayname(
       MatrixLocals(L10n.of(context)),
     );
 
-    // Check if this is a bridge room
-    final isBridge = isBridgeRoom(room);
-    final bridgeType = isBridge ? (getBridgeType(room) ?? 'other') : null;
-    final bridgeIcon = bridgeType != null
-        ? getBridgeTypeIcon(bridgeType)
-        : null;
-    final bridgeColor = bridgeType != null
-        ? getBridgeTypeColor(bridgeType)
-        : null;
+    // Use cached bridge detection
+    final isBridge = room.getCachedIsBridge();
+    final bridgeType = isBridge ? room.getCachedBridgeType() : null;
+    final bridgeIcon = bridgeType != null ? getBridgeTypeIcon(bridgeType) : null;
+    final bridgeColor = bridgeType != null ? getBridgeTypeColor(bridgeType) : null;
 
-    // Get last message preview
+    // Use cached last message
     final lastEvent = room.lastEvent;
-    String? lastMessage;
-    if (lastEvent != null) {
-      lastMessage = lastEvent.getLocalizedBody(
-        MatrixLocals(L10n.of(context)),
-        hideReply: true,
-        hideEdit: true,
-        plaintextBody: true,
-        removeMarkdown: true,
-      );
-    }
+    final lastMessage = room.getCachedLastMessage(
+      MatrixLocals(L10n.of(context)),
+      lastEvent,
+    );
 
-    // Check unread status
+    // Use cached unread count
     final isUnread = room.isUnreadOrInvited;
-    final unreadCount = room.notificationCount;
+    final unreadCount = room.getCachedUnreadCount();
+
+    // Use cached avatar
+    final avatarUri = room.getCachedAvatar();
 
     return HoverBuilder(
       builder: (context, isHovering) => Material(
         color: activeChat
             ? theme.colorScheme.primaryContainer
             : isHovering
-            ? theme.colorScheme.surfaceContainerHighest
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(12), // Consistent border-radius
+                ? theme.colorScheme.surfaceContainerHighest
+                : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress != null ? () => onLongPress!(context) : null,
           borderRadius: BorderRadius.circular(12),
           child: Container(
-            padding: const EdgeInsets.symmetric(
+            padding: EdgeInsets.symmetric(
               horizontal: 16,
-              vertical: 10, // Reduced from ~12 (15% less)
+              vertical: compactMode ? 8 : 10,
             ),
             child: Row(
               children: [
@@ -88,8 +87,12 @@ class ChatListItem extends StatelessWidget {
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    Avatar(mxContent: room.avatar, size: 48, name: displayname),
-                    // Platform icon overlay (bottom-right)
+                    Avatar(
+                      mxContent: avatarUri,
+                      size: compactMode ? 40 : 48,
+                      name: displayname,
+                      client: client,
+                    ),
                     if (bridgeIcon != null && bridgeColor != null)
                       Positioned(
                         right: -2,
@@ -128,9 +131,9 @@ class ChatListItem extends StatelessWidget {
                             child: Text(
                               displayname,
                               style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600, // Semi-bold
-                                color: Colors.black, // #000000
+                                fontSize: compactMode ? 14 : 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -148,9 +151,7 @@ class ChatListItem extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                unreadCount > 99
-                                    ? '99+'
-                                    : unreadCount.toString(),
+                                unreadCount > 99 ? '99+' : unreadCount.toString(),
                                 style: TextStyle(
                                   color: theme.colorScheme.onPrimary,
                                   fontSize: 12,
@@ -166,13 +167,11 @@ class ChatListItem extends StatelessWidget {
                         Text(
                           lastMessage,
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: compactMode ? 12 : 14,
                             fontWeight: isUnread
                                 ? FontWeight.w600
                                 : FontWeight.normal,
-                            color: const Color(
-                              0xFF4A4A4A,
-                            ), // Darker gray #4A4A4A
+                            color: const Color(0xFF4A4A4A),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

@@ -7,11 +7,13 @@ import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
 import 'package:Pulsly/pages/chat/events/message.dart';
+import 'package:Pulsly/pages/chat/events/message_optimized.dart';
 import 'package:Pulsly/pages/chat/seen_by_row.dart';
 import 'package:Pulsly/pages/chat/typing_indicators.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
+import 'package:Pulsly/widgets/input_bar_spacer.dart';
 
 class ChatEventList extends StatelessWidget {
   final ChatController controller;
@@ -72,15 +74,12 @@ class ChatEventList extends StatelessWidget {
         // Because the list is reverse: true, this first sliver sits at
         // the visual bottom (just above the floating input bar).
         SliverToBoxAdapter(
-          child: ValueListenableBuilder<double>(
-            valueListenable: controller.inputBarHeight,
-            builder: (context, height, _) => Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SeenByRow(controller),
-                SizedBox(height: height + 8),
-              ],
-            ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SeenByRow(controller),
+              InputBarSpacer(heightNotifier: controller.inputBarHeight),
+            ],
           ),
         ),
         SliverPadding(
@@ -167,7 +166,7 @@ class ChatEventList extends StatelessWidget {
                   index: i,
                   controller: controller.scrollController,
                   child: RepaintBoundary(
-                    child: Message(
+                    child: MessageOptimized(
                       event,
                       // key: ValueKey(event.eventId),
                       animateIn: animateIn,

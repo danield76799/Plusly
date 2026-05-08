@@ -7,7 +7,7 @@ import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
-import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
+import 'package:Pulsly/widgets/chat_list_item_optimized.dart';
 import 'package:Pulsly/pages/profile/profile.dart';
 import 'package:Pulsly/utils/date_time_extension.dart';
 import 'package:Pulsly/utils/stream_extension.dart';
@@ -19,7 +19,7 @@ import 'package:Pulsly/widgets/list_divider.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 import 'package:Pulsly/widgets/mxc_image_viewer.dart';
-import 'package:Pulsly/widgets/presence_builder.dart';
+import 'package:Pulsly/utils/presence_manager.dart';
 import 'package:Pulsly/widgets/rich_presence_card.dart';
 
 class ProfileView extends StatelessWidget {
@@ -87,7 +87,7 @@ class ProfileView extends StatelessWidget {
           itemCount: controller.mutualRooms.length,
           itemBuilder: (BuildContext context, int i) {
             final room = controller.mutualRooms[i];
-            return ChatListItem(
+            return ChatListItemOptimized(
               room,
               key: Key('mutual_chat_list_item_${room.id}'),
               // filter: filter,
@@ -160,7 +160,7 @@ class ProfileView extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        PresenceBuilder(
+                        PresenceBuilderOptimized(
                           userId: profile.userId,
                           client: Matrix.of(context).client,
                           builder: (context, presence) {
