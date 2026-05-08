@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/config/app_config.dart';
@@ -18,6 +17,7 @@ class AudioPlayerWidget extends StatefulWidget {
   final Color linkColor;
   final double fontSize;
   final Event event;
+  final InlineSpan? trailingSpan;
 
   static const int wavesCount = 40;
 
@@ -26,6 +26,7 @@ class AudioPlayerWidget extends StatefulWidget {
     required this.color,
     required this.linkColor,
     required this.fontSize,
+    this.trailingSpan,
     super.key,
   });
 
@@ -112,10 +113,17 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
     final theme = Theme.of(context);
     final waveform = _waveform;
     final player = _player;
+    final event = widget.event;
 
     final textColor = widget.color;
     final linkColor = widget.linkColor;
-    final fileDescription = widget.event.fileDescription;
+    final fileDescription = event.fileDescription == null
+        ? null
+        : AppSettings.renderHtml.value && event.isRichFileDescription
+        ? event.fileDescription
+        : event.fileDescription!
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;');
 
     // Use ValueListenableBuilders to reactively update UI from the background player
     return ValueListenableBuilder<AudioTrackInfo?>(
@@ -364,41 +372,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                   ),
                                 ),
                               ],
-                              if (fileDescription != null &&
-                                  !widget.event.isRichFileDescription) ...[
-                                const SizedBox(height: 8),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                  child: Linkify(
-                                    text: fileDescription,
-                                    textScaleFactor: MediaQuery.textScalerOf(
-                                      context,
-                                    ).scale(1),
-                                    style: TextStyle(
-                                      color: widget.color,
-                                      fontSize: widget.fontSize,
-                                    ),
-                                    options: const LinkifyOptions(
-                                      humanize: false,
-                                    ),
-                                    linkStyle: TextStyle(
-                                      color: widget.linkColor,
-                                      fontSize: widget.fontSize,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: widget.linkColor,
-                                    ),
-                                    onOpen: (url) => UrlLauncher(
-                                      context,
-                                      url.url,
-                                    ).launchUrl(),
-                                  ),
-                                ),
-                              ],
-                              if (fileDescription != null &&
-                                  widget.event.isRichFileDescription) ...[
+                              if (fileDescription != null) ...[
                                 const SizedBox(height: 8),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -409,6 +383,7 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                     html: fileDescription,
                                     textColor: textColor,
                                     room: widget.event.room,
+                                    trailingSpan: widget.trailingSpan,
                                     fontSize:
                                         AppSettings.fontSizeFactor.value *
                                         AppSettings.messageFontSize.value,

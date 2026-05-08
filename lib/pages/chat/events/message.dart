@@ -378,20 +378,17 @@ class _MessageState extends State<Message> {
         event.messageType == MessageTypes.Text &&
         event.relationshipType == null &&
         event.onlyEmotes;
-    // HTML is rendered by HtmlMessage with the same trailing-span trick as
-    // plain text, so it uses the inline overlay too.
-    final useInlineStatus = !noBubble && isTextLike && !event.redacted;
-    // Big emotes use a chip-styled status row below the emote (transparent
-    // bubble, so the chip provides its own backdrop). Image/sticker without
-    // description keep the chip overlay on top of the media (Telegram-style).
+
+    final useInlineStatus =
+        !noBubble &&
+        (isTextLike || event.fileDescription != null) &&
+        !event.redacted;
+
     final useChipStatus = noBubble && !isBigEmote;
     final useBottomChipStatus = isBigEmote;
     final useBottomRowStatus =
         !useInlineStatus && !useChipStatus && !useBottomChipStatus;
 
-    // Invisible widget of the exact same size as the visible status row, used
-    // as a trailing inline placeholder via WidgetSpan so the last text line
-    // reserves room for the overlayed status row.
     final inlineStatusPlaceholder = WidgetSpan(
       alignment: PlaceholderAlignment.middle,
       child: Padding(
@@ -559,15 +556,17 @@ class _MessageState extends State<Message> {
                                       FluffyThemes.columnWidth * 1.5,
                                 ),
                                 child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: .min,
+                                  crossAxisAlignment: .start,
                                   children: <Widget>[
                                     Stack(
                                       children: [
                                         Column(
-                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisSize: .min,
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              ownMessage && noBubble
+                                              ? .end
+                                              : .start,
                                           children: [
                                             if (_replyEventFuture != null)
                                               FutureBuilder<Event?>(
@@ -599,7 +598,16 @@ class _MessageState extends State<Message> {
                                                       left: 16,
                                                       right: 16,
                                                       top: 8,
-                                                      bottom: noBubble ? 8 : 0,
+                                                      bottom:
+                                                          noBubble ||
+                                                              (event.messageType !=
+                                                                      MessageTypes
+                                                                          .Text &&
+                                                                  event.messageType !=
+                                                                      MessageTypes
+                                                                          .Notice)
+                                                          ? 8
+                                                          : 0,
                                                     ),
                                                     child: Material(
                                                       color: Colors.transparent,

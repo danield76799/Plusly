@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/config/app_config.dart';
@@ -29,6 +28,7 @@ class ImageBubble extends StatelessWidget {
   final void Function()? onTap;
   final BorderRadius? borderRadius;
   final Timeline? timeline;
+  final InlineSpan? trailingSpan;
 
   final bool loadMedia;
   final void Function()? onLoadMedia;
@@ -50,6 +50,7 @@ class ImageBubble extends StatelessWidget {
     this.linkColor,
     this.loadMedia = false,
     this.onLoadMedia,
+    this.trailingSpan,
     super.key,
   });
 
@@ -151,7 +152,13 @@ class ImageBubble extends StatelessWidget {
     var borderRadius =
         this.borderRadius ?? BorderRadius.circular(AppConfig.borderRadius);
 
-    final fileDescription = event.fileDescription;
+    final fileDescription = event.fileDescription == null
+        ? null
+        : AppSettings.renderHtml.value && event.isRichFileDescription
+        ? event.fileDescription
+        : event.fileDescription!
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;');
     final textColor = this.textColor;
 
     if (fileDescription != null) {
@@ -210,38 +217,7 @@ class ImageBubble extends StatelessWidget {
             ),
           ),
         ),
-        if (fileDescription != null &&
-            textColor != null &&
-            !event.isRichFileDescription)
-          SizedBox(
-            width: width,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: SelectableLinkify(
-                text: fileDescription,
-                textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
-                style: TextStyle(
-                  color: textColor,
-                  fontSize:
-                      AppSettings.fontSizeFactor.value *
-                      AppSettings.messageFontSize.value,
-                ),
-                options: const LinkifyOptions(humanize: false),
-                linkStyle: TextStyle(
-                  color: linkColor,
-                  fontSize:
-                      AppSettings.fontSizeFactor.value *
-                      AppSettings.messageFontSize.value,
-                  decoration: TextDecoration.underline,
-                  decorationColor: linkColor,
-                ),
-                onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
-              ),
-            ),
-          ),
-        if (fileDescription != null &&
-            textColor != null &&
-            event.isRichFileDescription)
+        if (fileDescription != null && textColor != null)
           SizedBox(
             width: width,
             child: Padding(
@@ -253,6 +229,7 @@ class ImageBubble extends StatelessWidget {
                 fontSize:
                     AppSettings.fontSizeFactor.value *
                     AppSettings.messageFontSize.value,
+                trailingSpan: trailingSpan,
                 linkStyle: TextStyle(
                   color: linkColor,
                   fontSize:

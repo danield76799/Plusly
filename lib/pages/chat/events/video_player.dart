@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:extera_next/config/app_config.dart';
@@ -23,6 +22,7 @@ class EventVideoPlayer extends StatelessWidget {
   final Color linkColor;
   final BorderRadius? borderRadius;
   final bool loadThumbnail;
+  final InlineSpan? trailingSpan;
 
   const EventVideoPlayer(
     this.event,
@@ -30,6 +30,7 @@ class EventVideoPlayer extends StatelessWidget {
     this.linkColor, {
     this.timeline,
     this.borderRadius,
+    this.trailingSpan,
     this.loadThumbnail = false,
     super.key,
   });
@@ -49,7 +50,13 @@ class EventVideoPlayer extends StatelessWidget {
           'xyz.amorgan.blurhash',
         ) ??
         fallbackBlurHash;
-    final fileDescription = event.fileDescription;
+    final fileDescription = event.fileDescription == null
+        ? null
+        : AppSettings.renderHtml.value && event.isRichFileDescription
+        ? event.fileDescription
+        : event.fileDescription!
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;');
     final infoMap = event.content.tryGetMap<String, Object?>('info');
     final videoWidth = infoMap?.tryGet<int>('w') ?? 400;
     final videoHeight = infoMap?.tryGet<int>('h') ?? 300;
@@ -170,34 +177,7 @@ class EventVideoPlayer extends StatelessWidget {
             ),
           ),
         ),
-        if (fileDescription != null && !event.isRichFileDescription)
-          SizedBox(
-            width: width,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: SelectableLinkify(
-                text: fileDescription,
-                textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
-                style: TextStyle(
-                  color: textColor,
-                  fontSize:
-                      AppSettings.fontSizeFactor.value *
-                      AppSettings.messageFontSize.value,
-                ),
-                options: const LinkifyOptions(humanize: false),
-                linkStyle: TextStyle(
-                  color: linkColor,
-                  fontSize:
-                      AppSettings.fontSizeFactor.value *
-                      AppSettings.messageFontSize.value,
-                  decoration: TextDecoration.underline,
-                  decorationColor: linkColor,
-                ),
-                onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
-              ),
-            ),
-          ),
-        if (fileDescription != null && event.isRichFileDescription)
+        if (fileDescription != null)
           SizedBox(
             width: width,
             child: Padding(
@@ -217,6 +197,7 @@ class EventVideoPlayer extends StatelessWidget {
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
                 ),
+                trailingSpan: trailingSpan,
                 selectable: true,
                 onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
                 onCopy: () {

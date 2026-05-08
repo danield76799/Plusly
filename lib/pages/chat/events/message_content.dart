@@ -174,6 +174,7 @@ class MessageContent extends StatelessWidget {
               textColor: textColor,
               linkColor: linkColor,
               loadMedia: loadMedia,
+              trailingSpan: trailingSpan,
               onLoadMedia: onLoadMedia,
             );
           case CuteEventContent.eventType:
@@ -189,12 +190,14 @@ class MessageContent extends StatelessWidget {
                 color: textColor,
                 linkColor: linkColor,
                 fontSize: fontSize,
+                trailingSpan: trailingSpan,
               );
             }
             return MessageDownloadContent(
               event,
               textColor: textColor,
               linkColor: linkColor,
+              trailingSpan: trailingSpan,
             );
           case MessageTypes.Video:
             return EventVideoPlayer(
@@ -204,12 +207,14 @@ class MessageContent extends StatelessWidget {
               timeline: timeline,
               borderRadius: borderRadius,
               loadThumbnail: loadMedia,
+              trailingSpan: trailingSpan,
             );
           case MessageTypes.File:
             return MessageDownloadContent(
               event,
               textColor: textColor,
               linkColor: linkColor,
+              trailingSpan: trailingSpan,
             );
 
           case MessageTypes.Text:

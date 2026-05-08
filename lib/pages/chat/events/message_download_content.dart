@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 import 'package:open_file/open_file.dart';
 
@@ -17,11 +16,13 @@ class MessageDownloadContent extends StatefulWidget {
   final Event event;
   final Color textColor;
   final Color linkColor;
+  final InlineSpan? trailingSpan;
 
   const MessageDownloadContent(
     this.event, {
     required this.textColor,
     required this.linkColor,
+    this.trailingSpan,
     super.key,
   });
 
@@ -98,7 +99,13 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
                   ?.toUpperCase() ??
               'UNKNOWN');
     final sizeString = widget.event.sizeString ?? '?MB';
-    final fileDescription = widget.event.fileDescription;
+    final fileDescription = event.fileDescription == null
+        ? null
+        : AppSettings.renderHtml.value && event.isRichFileDescription
+        ? event.fileDescription
+        : event.fileDescription!
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;');
 
     final textColor = widget.textColor;
     final linkColor = widget.linkColor;
@@ -172,35 +179,7 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
             ),
           ),
         ),
-        if (fileDescription != null && !event.isRichFileDescription) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            child: SelectableLinkify(
-              text: fileDescription,
-              textScaleFactor: MediaQuery.textScalerOf(context).scale(1),
-              style: TextStyle(
-                color: textColor,
-                fontSize:
-                    AppSettings.fontSizeFactor.value *
-                    AppSettings.messageFontSize.value,
-              ),
-              options: const LinkifyOptions(humanize: false),
-              linkStyle: TextStyle(
-                color: linkColor,
-                fontSize:
-                    AppSettings.fontSizeFactor.value *
-                    AppSettings.messageFontSize.value,
-                decoration: TextDecoration.underline,
-                decorationColor: linkColor,
-              ),
-              onOpen: (url) => UrlLauncher(context, url.url).launchUrl(),
-            ),
-          ),
-        ],
-        if (fileDescription != null && event.isRichFileDescription) ...[
+        if (fileDescription != null) ...[
           Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 16.0,
@@ -210,6 +189,7 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
               html: fileDescription,
               textColor: textColor,
               room: event.room,
+              trailingSpan: widget.trailingSpan,
               fontSize:
                   AppSettings.fontSizeFactor.value *
                   AppSettings.messageFontSize.value,
