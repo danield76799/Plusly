@@ -88,6 +88,9 @@ class _MessageState extends State<Message> {
   late Future<User?> _senderUserFuture;
   Future<Event?>? _replyEventFuture;
   Future<User?>? _threadSenderFuture;
+  
+  // Cache the sender user to avoid rebuilding FutureBuilder
+  User? _cachedSenderUser;
 
   bool loadMedia = false;
 
@@ -117,6 +120,7 @@ class _MessageState extends State<Message> {
 
   void _initFutures() {
     _senderUserFuture = fetchSenderUser();
+    _cachedSenderUser = null; // Clear cache when re-initing
     _initReplyFuture();
     _initThreadFuture();
   }
@@ -346,9 +350,13 @@ class _MessageState extends State<Message> {
     final row = FutureBuilder<User?>(
       future: _senderUserFuture,
       builder: (context, snapshot) {
-        final user = snapshot.data ?? event.senderFromMemoryOrFallback;
+        // Cache the user to avoid rebuilding
+        if (snapshot.hasData && _cachedSenderUser == null) {
+          _cachedSenderUser = snapshot.data;
+        }
+        final user = _cachedSenderUser ?? event.senderFromMemoryOrFallback;
         final displayname =
-            snapshot.data?.calcDisplayname() ??
+            _cachedSenderUser?.calcDisplayname() ??
             event.senderFromMemoryOrFallback.calcDisplayname();
         return Stack(
           children: [
