@@ -389,7 +389,7 @@ class _ChatViewState extends State<ChatView> {
           }
 
           return Scaffold(
-            extendBodyBehindAppBar: AppSettings.enableChatFrostedGlass.value,
+            extendBodyBehindAppBar: true,
             appBar: AppBar(
               backgroundColor: AppSettings.enableChatFrostedGlass.value
                   ? Colors.transparent
@@ -698,46 +698,42 @@ class _ChatViewState extends State<ChatView> {
                         6,
                     left: 0,
                     right: 0,
-                    child: SizedBox(
-                      child: Align(
-                        alignment: Alignment.center,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const BackToCallButton(),
-                            const MiniAudioPlayer(),
-                            if (scrollUpBannerEventId != null)
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  FilledButton(
-                                    onPressed: () {
-                                      controller.scrollToEventId(
-                                        scrollUpBannerEventId,
-                                        null,
-                                      );
-                                      controller.discardScrollUpBannerEventId();
-                                    },
-                                    style: FilledButton.styleFrom(
-                                      shadowColor: Colors.black,
-                                      elevation: 4,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.arrow_upward),
-                                        SizedBox(width: 18),
-                                        Text(
-                                          L10n.of(
-                                            context,
-                                          ).jumpToLastReadMessage,
-                                        ),
-                                      ],
-                                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const BackToCallButton(),
+                          const MiniAudioPlayer(),
+                          if (scrollUpBannerEventId != null)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                FilledButton(
+                                  onPressed: () {
+                                    controller.scrollToEventId(
+                                      scrollUpBannerEventId,
+                                      null,
+                                    );
+                                    controller.discardScrollUpBannerEventId();
+                                  },
+                                  style: FilledButton.styleFrom(
+                                    shadowColor: Colors.black,
+                                    elevation: 4,
                                   ),
-                                ],
-                              ),
-                          ],
-                        ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.arrow_upward),
+                                      SizedBox(width: 18),
+                                      Text(
+                                        L10n.of(context).jumpToLastReadMessage,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
                       ),
                     ),
                   ),
