@@ -21,8 +21,8 @@ import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/member_actions_popup_menu_button.dart';
 import '../../../config/app_config.dart';
-import 'package:Pulsly/widgets/bubble_background_optimized.dart';
 import 'message_content.dart';
+import 'message_reactions.dart';
 import 'message_read_receipts.dart'; // NEW
 import 'reply_content.dart';
 import 'state_message.dart';
@@ -485,7 +485,7 @@ class _MessageState extends State<Message> {
                                 : color,
                             borderRadius: borderRadius,
                             clipBehavior: Clip.antiAlias,
-                            child: BubbleBackgroundOptimized(
+                            child: BubbleBackground(
                               colors: widget.colors,
                               ignore:
                                   noBubble ||
@@ -835,7 +835,82 @@ class _MessageState extends State<Message> {
       ),
     );
   }
-// BubbleBackground removed - use BubbleBackgroundOptimized instead
+}
+
+class BubbleBackground extends StatelessWidget {
+  const BubbleBackground({
+    super.key,
+    required this.colors,
+    required this.ignore,
+    required this.child,
+    this.scrollController,
+  });
+
+  final ScrollController? scrollController;
+  final List<Color> colors;
+  final bool ignore;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (ignore) return child;
+    return RepaintBoundary(
+      child: CustomPaint(
+        painter: BubblePainter(
+          repaint: scrollController,
+          colors: colors,
+          context: context,
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+class BubblePainter extends CustomPainter {
+  BubblePainter({
+    required this.context,
+    required this.colors,
+    required super.repaint,
+  });
+
+  final BuildContext context;
+  final List<Color> colors;
+  ScrollableState? _scrollable;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scrollable = _scrollable ??= Scrollable.of(context);
+    final scrollableBox = scrollable.context.findRenderObject() as RenderBox;
+    final scrollableRect = Offset.zero & scrollableBox.size;
+    final bubbleBox = context.findRenderObject() as RenderBox;
+
+    final origin = bubbleBox.localToGlobal(
+      Offset.zero,
+      ancestor: scrollableBox,
+    );
+    final paint = Paint()
+      ..shader = ui.Gradient.linear(
+        scrollableRect.topCenter,
+        scrollableRect.bottomCenter,
+        AppSettings.enableChatFrostedGlass.value
+            ? colors.map((x) => x.withValues(alpha: 0.7)).toList()
+            : colors,
+        [0.0, 1.0],
+        TileMode.clamp,
+        Matrix4.translationValues(-origin.dx, -origin.dy, 0.0).storage,
+      );
+    canvas.drawRect(Offset.zero & size, paint);
+  }
+
+  @override
+  bool shouldRepaint(BubblePainter oldDelegate) {
+    final scrollable = Scrollable.of(context);
+    final oldScrollable = _scrollable;
+    _scrollable = scrollable;
+    return scrollable.position != oldScrollable?.position;
+  }
+}
 
 class _AnimateIn extends StatefulWidget {
   final bool animateIn;
