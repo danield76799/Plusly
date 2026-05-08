@@ -1,3 +1,7 @@
+## Extera 26.2.3
+- Feature: swipeable drawer with spaces.
+- Fix: when chat frosted glass effect is disabled, floating elements had extra unneccessary padding.
+
 ## Extera 26.2.21
 - Fix edits.
 
