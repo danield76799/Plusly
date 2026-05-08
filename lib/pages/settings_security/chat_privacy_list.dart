@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
-import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
+import 'package:Pulsly/widgets/chat_list_item_optimized.dart';
 
 class ChatPrivacyList extends StatelessWidget {
   final Client client;
@@ -88,7 +88,7 @@ class ChatPrivacyList extends StatelessWidget {
                   final roomId = ids[index];
                   final room = client.getRoomById(roomId);
                   if (room == null) return const SizedBox.shrink();
-                  return ChatListItem(
+                  return ChatListItemOptimized(
                     room,
                     noBackgroundColor: true,
                     onTap: () {

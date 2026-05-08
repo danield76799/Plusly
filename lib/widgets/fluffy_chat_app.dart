@@ -17,12 +17,10 @@ import 'package:Pulsly/widgets/app_lock.dart';
 import 'package:Pulsly/widgets/background_audio_player.dart';
 import 'package:Pulsly/widgets/theme_builder.dart';
 import '../config/app_config.dart';
-import '../utils/custom_scroll_behaviour.dart';
-import '../utils/scheduler_service.dart';
-import 'matrix.dart';
+import 'package:Pulsly/utils/presence_manager.dart';
+import 'package:Pulsly/utils/user_cache.dart';
 
 class FluffyChatApp extends StatefulWidget {
-  final Widget? testWidget;
   final List<Client> clients;
   final String? pincode;
   final SharedPreferences store;
@@ -129,14 +127,18 @@ class _FluffyChatAppState extends State<FluffyChatApp> {
             builder: (context, child) => AppLockWidget(
               pincode: widget.pincode,
               clients: widget.clients,
-              // Need a navigator above the Matrix widget for
-              // displaying dialogs
               child: DownloadManager(
                 child: BackgroundAudioPlayer(
-                  child: Matrix(
-                    clients: widget.clients,
-                    store: widget.store,
-                    child: widget.testWidget ?? child,
+                  child: PresenceManagerProvider(
+                    manager: PresenceManager(widget.clients.first),
+                    child: UserCacheProvider(
+                      cache: UserCache(),
+                      child: Matrix(
+                        clients: widget.clients,
+                        store: widget.store,
+                        child: widget.testWidget ?? child,
+                      ),
+                    ),
                   ),
                 ),
               ),

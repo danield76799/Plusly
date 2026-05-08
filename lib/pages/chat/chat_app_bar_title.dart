@@ -12,7 +12,7 @@ import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/sync_status_localization.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/overflow_marquee.dart';
-import 'package:Pulsly/widgets/presence_builder.dart';
+import 'package:Pulsly/utils/presence_manager.dart';
 
 class ChatAppBarTitle extends StatelessWidget {
   final ChatController controller;
@@ -103,7 +103,7 @@ class ChatAppBarTitle extends StatelessWidget {
                     return AnimatedSize(
                       duration: FluffyThemes.animationDuration,
                       child: hide
-                          ? PresenceBuilder(
+                          ? PresenceBuilderOptimized(
                               userId: room.directChatMatrixID,
                               builder: (context, presence) {
                                 final lastActiveTimestamp =
@@ -223,7 +223,7 @@ class ChatAppBarTitle extends StatelessWidget {
                           return AnimatedSize(
                             duration: FluffyThemes.animationDuration,
                             child: hide
-                                ? PresenceBuilder(
+                                ? PresenceBuilderOptimized(
                                     userId: room.directChatMatrixID,
                                     builder: (context, presence) {
                                       final lastActiveTimestamp =

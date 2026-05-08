@@ -5,7 +5,7 @@ import 'package:matrix/matrix.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/utils/string_color.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
-import 'package:Pulsly/widgets/presence_builder.dart';
+import 'package:Pulsly/utils/presence_manager.dart';
 
 class Avatar extends StatelessWidget {
   final Uri? mxContent;
@@ -194,7 +194,7 @@ class _AvatarPresence extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PresenceBuilder(
+    return PresenceBuilderOptimized(
       client: client,
       userId: userId,
       builder: (context, presence) {

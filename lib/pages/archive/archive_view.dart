@@ -5,7 +5,7 @@ import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/archive/archive.dart';
-import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
+import 'package:Pulsly/widgets/chat_list_item_optimized.dart';
 import 'package:Pulsly/widgets/layouts/max_width_body.dart';
 
 class ArchiveView extends StatelessWidget {
@@ -57,7 +57,7 @@ class ArchiveView extends StatelessWidget {
                 }
                 return ListView.builder(
                   itemCount: controller.archive.length,
-                  itemBuilder: (BuildContext context, int i) => ChatListItem(
+                  itemBuilder: (BuildContext context, int i) => ChatListItemOptimized(
                     controller.archive[i],
                     onForget: () => controller.forgetRoomAction(i),
                     onTap: () => context.go(
