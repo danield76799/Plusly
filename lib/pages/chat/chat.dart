@@ -1695,9 +1695,7 @@ class ChatController extends State<ChatPageWithRoom>
     setState(() {
       pendingText = sendController.text;
       editEvent = event;
-      sendController.text = displayEvent.isRichMessage
-          ? displayEvent.formattedText
-          : displayEvent.text;
+      sendController.text = displayEvent.calcUnlocalizedBody(hideReply: true);
       selectedEvents.clear();
     });
     inputFocus.requestFocus();

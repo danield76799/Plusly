@@ -1,3 +1,6 @@
+## Extera 26.2.21
+- Fix edits.
+
 ## Extera 26.2.2
 - Redesign message bottom status row.
 
