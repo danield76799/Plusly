@@ -182,7 +182,7 @@ class ChatInputRow extends StatelessWidget {
                       button: true,
                       child: PopupMenuButton<String>(
                         icon: const Icon(Icons.add_circle_outline),
-                        color: theme.colorScheme.onSurface,
+                        color: theme.colorScheme.surface,
                         onSelected: controller.onAddPopupMenuButtonSelected,
                         itemBuilder: (BuildContext context) => [
                           PopupMenuItem(
