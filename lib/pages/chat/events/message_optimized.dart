@@ -1,25 +1,23 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
-import '../utils/user_cache.dart';
-import 'avatar.dart';
-import 'matrix.dart';
-import '../config/app_config.dart';
-import '../config/setting_keys.dart';
-import '../config/themes.dart';
-import '../generated/l10n/l10n.dart';
-import '../utils/date_time_extension.dart';
-import '../utils/platform_infos.dart';
-import '../utils/poll_events.dart';
-import '../utils/string_color.dart';
+import 'package:Pulsly/utils/user_cache.dart';
+import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/matrix.dart';
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/date_time_extension.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/poll_events.dart';
+import 'package:Pulsly/utils/string_color.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
 import 'message_read_receipts.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
-import 'swipe_to_action.dart';
+import 'package:swipe_to_action/swipe_to_action.dart';
 
 /// Optimized Message widget that uses UserCache instead of
 /// creating FutureBuilders for every message.
