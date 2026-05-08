@@ -119,43 +119,46 @@ class _Reaction extends StatelessWidget {
         ? theme.bubbleColor
         : theme.colorScheme.surfaceContainerHigh;
     Widget content;
-    if (reactionKey.startsWith('mxc://')) {
-      content = Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          MxcImage(
+
+    var renderKey = Characters(reactionKey);
+    if (renderKey.length > 10) {
+      renderKey = renderKey.getRange(0, 9) + Characters('…');
+    }
+
+    final reactionIcon = reactionKey.startsWith('mxc://')
+        ? MxcImage(
             uri: Uri.parse(reactionKey),
             width: 20,
             height: 20,
-            animated: false,
+            animated: true,
             isThumbnail: false,
-          ),
-          if (count > 1) ...[
-            const SizedBox(width: 4),
-            Text(
-              count.toString(),
-              style: TextStyle(
-                color: textColor,
-                fontSize: DefaultTextStyle.of(context).style.fontSize,
-              ),
+          )
+        : Text(
+            renderKey.toString(),
+            style: TextStyle(
+              color: reacted == true ? theme.onBubbleColor : textColor,
+              fontSize: DefaultTextStyle.of(context).style.fontSize,
             ),
-          ],
-        ],
-      );
-    } else {
-      var renderKey = Characters(reactionKey);
-      if (renderKey.length > 10) {
-        renderKey = renderKey.getRange(0, 9) + Characters('…');
-      }
-      content = Text(
-        renderKey.toString() + (count > 1 ? ' $count' : ''),
-        style: TextStyle(
-          color: reacted == true ? theme.onBubbleColor : textColor,
-          fontSize: DefaultTextStyle.of(context).style.fontSize,
+            textScaler: const TextScaler.linear(1.2),
+          );
+
+    content = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        reactionIcon,
+        const SizedBox(width: 8),
+        Text(
+          count.toString(),
+          style: TextStyle(
+            color: textColor,
+            fontSize: DefaultTextStyle.of(context).style.fontSize,
+            fontWeight: .bold,
+          ),
+          textScaler: const TextScaler.linear(1.1),
         ),
-        textScaler: const TextScaler.linear(1.15),
-      );
-    }
+      ],
+    );
+
     return InkWell(
       onTap: () => onTap != null ? onTap!() : null,
       onLongPress: () => onLongPress != null ? onLongPress!() : null,
@@ -165,7 +168,7 @@ class _Reaction extends StatelessWidget {
           color: color,
           borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: content,
       ),
     );
