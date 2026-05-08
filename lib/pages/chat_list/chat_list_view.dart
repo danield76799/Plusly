@@ -1,3 +1,4 @@
+import 'package:extera_next/widgets/drawer.dart';
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
@@ -54,6 +55,16 @@ class ChatListView extends StatelessWidget {
               excludeFromSemantics: true,
               behavior: HitTestBehavior.translucent,
               child: Scaffold(
+                drawer:
+                    FluffyThemes.isColumnMode(context) ||
+                        AppSettings.displayNavigationRail.value
+                    ? null
+                    : ExteraDrawer(
+                        activeSpaceId: controller.activeSpaceId,
+                        onGoToChats: controller.clearActiveSpace,
+                        onGoToSpaceId: controller.setActiveSpace,
+                        rootSpaces: matrix.rootSpaces,
+                      ),
                 body: Stack(
                   children: [
                     ChatListViewBody(controller),

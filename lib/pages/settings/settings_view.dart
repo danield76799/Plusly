@@ -1,3 +1,4 @@
+import 'package:extera_next/widgets/drawer.dart';
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
@@ -55,6 +56,17 @@ class SettingsView extends StatelessWidget {
         ],
         Expanded(
           child: Scaffold(
+            drawer:
+                FluffyThemes.isColumnMode(context) ||
+                    AppSettings.displayNavigationRail.value
+                ? null
+                : ExteraDrawer(
+                    activeSpaceId: null,
+                    onGoToChats: () => context.go('/rooms'),
+                    onGoToSpaceId: (spaceId) =>
+                        context.go('/rooms?spaceId=$spaceId'),
+                    rootSpaces: matrix.rootSpaces,
+                  ),
             appBar: FluffyThemes.isColumnMode(context)
                 ? null
                 : AppBar(
