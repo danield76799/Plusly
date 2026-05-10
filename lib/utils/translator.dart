@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class Translator {
+  static const String _deepLApiKey = '24be0b7a-6eba-4bc9-8a28-accc070fa881:fx';
+
   static Future<String> translate(
     String str,
     String targetLanguage,
@@ -14,7 +16,7 @@ class Translator {
       url,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'DeepL-Auth-Key ${const String.fromEnvironment("DEEPL_API_KEY", defaultValue: "")}',
+        'Authorization': 'DeepL-Auth-Key $_deepLApiKey',
       },
       body: {
         'text': str,
