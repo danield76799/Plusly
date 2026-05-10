@@ -1,22 +1,28 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class Translator {
-  static const String _deepLApiKey = '24be0b7a-6eba-4bc9-8a28-accc070fa881:fx';
-
   static Future<String> translate(
     String str,
     String targetLanguage,
     String baseUrl,
   ) async {
+    // Get API key from environment or secure storage
+    const apiKey = String.fromEnvironment('DEEPL_API_KEY');
+    
+    if (apiKey.isEmpty) {
+      throw Exception('DeepL API key not configured');
+    }
+
     // DeepL API format
     final url = Uri.parse('$baseUrl/v2/translate');
     final response = await http.post(
       url,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': 'DeepL-Auth-Key $_deepLApiKey',
+        'Authorization': 'DeepL-Auth-Key $apiKey',
       },
       body: {
         'text': str,

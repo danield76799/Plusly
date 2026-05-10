@@ -66,9 +66,11 @@ jobs:
           flutter pub run flutter_native_splash:create
 
       - name: Build Android APK
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
-          flutter build apk --release --target-platform android-arm64,android-arm 2>&1 | tee build.log
+          flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }} 2>&1 | tee build.log
           BUILD_EXIT_CODE=$?
           if [ $BUILD_EXIT_CODE -ne 0 ]; then
             echo "=== BUILD FAILED ==="
