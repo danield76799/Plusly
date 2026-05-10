@@ -4,18 +4,14 @@ import 'package:http/http.dart' as http;
 class Translator {
   static const Duration _timeout = Duration(seconds: 15);
   
+  // Hardcoded DeepL API key for testing
+  static const String _apiKey = '24be0b7a-6eba-4bc9-8a28-accc070fa881:fx';
+  
   static Future<String> translate(
     String str,
     String targetLanguage,
     String baseUrl,
   ) async {
-    // Get API key from environment variable
-    const apiKey = String.fromEnvironment('DEEPL_API_KEY', defaultValue: '');
-    
-    if (apiKey.isEmpty) {
-      throw Exception('DeepL API key not configured. Please update the app.');
-    }
-
     final uri = Uri.parse('$baseUrl/v2/translate');
     
     try {
@@ -23,10 +19,10 @@ class Translator {
         uri,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': 'DeepL-Auth-Key $apiKey',
+          'Authorization': 'DeepL-Auth-Key $_apiKey',
         },
         body: {
-          'text': str.length > 5000 ? str.substring(0, 5000) : str, // Limit to 5000 chars
+          'text': str.length > 5000 ? str.substring(0, 5000) : str,
           'target_lang': targetLanguage.toUpperCase(),
           'source_lang': 'auto',
         },
