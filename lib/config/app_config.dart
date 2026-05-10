@@ -33,7 +33,7 @@ abstract class AppConfig {
   static const Color primaryColor = Color(0xFF49AFC2);
   static const Color primaryColorLight = Color(0xFF6FC5D8);
   static const Color secondaryColor = Color(0xFF3A8FA0);
-  static final String _privacyUrl = 'https://plusly.im/privacy';
+  static final String _privacyUrl = 'https://github.com/danield76799/Plusly/blob/main/PRIVACY.md';
 
   static String get privacyUrl => _privacyUrl;
   static const String website = 'https://plusly.im';
@@ -49,8 +49,8 @@ abstract class AppConfig {
 
   static String get webBaseUrl => _webBaseUrl;
   static const String sourceCodeUrl = 'https://github.com/danield76799/Plusly';
-  static const String supportUrl = 'https://plusly.im/help';
-  static const String changelogUrl = 'https://plusly.im/changelog';
+  static const String supportUrl = 'https://github.com/danield76799/Plusly/issues';
+  static const String changelogUrl = 'https://github.com/danield76799/Plusly/blob/main/CHANGELOG.md';
   static final Uri newIssueUrl = Uri(
     scheme: 'https',
     host: 'github.com',
