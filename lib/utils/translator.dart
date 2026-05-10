@@ -8,15 +8,21 @@ class Translator {
     String targetLanguage,
     String baseUrl,
   ) async {
-    final url = Uri.parse('$baseUrl/translate/anything/auto/$targetLanguage');
+    // LibreTranslate API format
+    final url = Uri.parse('$baseUrl/translate');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'text': str}),
+      body: jsonEncode({
+        'q': str,
+        'source': 'auto',
+        'target': targetLanguage,
+        'format': 'text',
+      }),
     );
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
-      return responseData['text'] ?? '';
+      return responseData['translatedText'] ?? '';
     } else {
       throw Exception('Failed to translate text: ${response.statusCode}');
     }
