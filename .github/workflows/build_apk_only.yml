@@ -26,22 +26,40 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build Debug APK
-        run: flutter build apk --debug --target-platform android-arm64,android-arm
+      - name: Build Debug APK (64-bit)
+        run: flutter build apk --debug --target-platform android-arm64
 
-      - name: Build Release APK
-        run: flutter build apk --release --target-platform android-arm64,android-arm
+      - name: Build Debug APK (32-bit)
+        run: flutter build apk --debug --target-platform android-arm
 
-      - name: Upload Debug APK
+      - name: Build Release APK (64-bit)
+        run: flutter build apk --release --target-platform android-arm64
+
+      - name: Build Release APK (32-bit)
+        run: flutter build apk --release --target-platform android-arm
+
+      - name: Upload Debug APK (64-bit)
         uses: actions/upload-artifact@v4
         with:
-          name: debug-apk
+          name: debug-apk-64bit
           path: build/app/outputs/flutter-apk/app-debug.apk
 
-      - name: Upload Release APK
+      - name: Upload Debug APK (32-bit)
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
+          name: debug-apk-32bit
+          path: build/app/outputs/flutter-apk/app-debug.apk
+
+      - name: Upload Release APK (64-bit)
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-64bit
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload Release APK (32-bit)
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk-32bit
           path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: Create Release
