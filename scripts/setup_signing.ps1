@@ -8,9 +8,9 @@ Write-Host ""
 # Check of keytool beschikbaar is (onderdeel van Java)
 try {
     $keytool = Get-Command keytool -ErrorAction Stop
-    Write-Host "✓ keytool gevonden" -ForegroundColor Green
+    Write-Host "OK keytool gevonden" -ForegroundColor Green
 } catch {
-    Write-Host "✗ keytool niet gevonden. Installeer Java JDK:" -ForegroundColor Red
+    Write-Host "ERROR keytool niet gevonden. Installeer Java JDK:" -ForegroundColor Red
     Write-Host "  Download van: https://adoptium.net/" -ForegroundColor Yellow
     Write-Host "  Of via winget: winget install EclipseAdoptium.Temurin.17.JDK" -ForegroundColor Yellow
     exit 1
@@ -57,20 +57,20 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Write-Host "✓ Keystore gegenereerd: $keystoreFile" -ForegroundColor Green
+Write-Host "OK Keystore gegenereerd: $keystoreFile" -ForegroundColor Green
 
 # Base64 encode
 $bytes = [System.IO.File]::ReadAllBytes($keystoreFile)
 $b64 = [Convert]::ToBase64String($bytes)
 $b64 | Out-File -Encoding ASCII $keystoreB64
 
-Write-Host "✓ Base64 encoding gemaakt: $keystoreB64" -ForegroundColor Green
+Write-Host "OK Base64 encoding gemaakt: $keystoreB64" -ForegroundColor Green
 
 # Toon instructies voor GitHub secrets
 Write-Host ""
-Write-Host "✅ Setup voltooid!" -ForegroundColor Green
+Write-Host "Setup voltooid!" -ForegroundColor Green
 Write-Host ""
-Write-Host "⚠️  BELANGRIJK - Bewaar deze files veilig:" -ForegroundColor Yellow
+Write-Host "BELANGRIJK - Bewaar deze files veilig:" -ForegroundColor Yellow
 Write-Host "  - $keystoreFile (je signing key)"
 Write-Host "  - $keystoreB64 (base64 versie)"
 Write-Host ""
