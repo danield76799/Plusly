@@ -88,13 +88,15 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                               ? 'device'
                               : _selectedTranslationLang,
                           underline: const SizedBox(),
-                          onChanged: (String? newValue) {
+                          onChanged: (String? newValue) async {
                             if (newValue != null) {
                               final lang = newValue == 'device' ? '' : newValue;
-                              AppSettings.translationTargetLanguage.setItem(lang);
-                              setState(() {
-                                _selectedTranslationLang = lang;
-                              });
+                              await AppSettings.translationTargetLanguage.setItem(lang);
+                              if (mounted) {
+                                setState(() {
+                                  _selectedTranslationLang = lang;
+                                });
+                              }
                             }
                           },
                           items: const [
