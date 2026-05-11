@@ -35,14 +35,28 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          # Decode base64 keystore
-          echo "$KEYSTORE_BASE64" | tr -d '\n' | base64 -d > android/app/keystore.jks
+          # Create keystore directory
+          mkdir -p android/app
+          
+          # Decode base64 keystore using Python (more reliable)
+          python3 -c "
+import base64
+import sys
+keystore_b64 = '${{ secrets.KEYSTORE_BASE64 }}'
+# Remove any whitespace/newlines
+keystore_b64 = ''.join(keystore_b64.split())
+with open('android/app/keystore.jks', 'wb') as f:
+    f.write(base64.b64decode(keystore_b64))
+print('Keystore created successfully')
+"
           
           # Check if keystore is valid
           if [ ! -s android/app/keystore.jks ]; then
             echo "Error: Keystore file is empty or not created"
             exit 1
           fi
+          
+          echo "Keystore file size: $(wc -c < android/app/keystore.jks) bytes"
           
           # Sign APK
           jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
