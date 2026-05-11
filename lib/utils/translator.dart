@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class Translator {
   static const Duration _timeout = Duration(seconds: 15);
   
-  // Hardcoded DeepL API key for testing
+  // DeepL API key (free tier)
   static const String _apiKey = '24be0b7a-6eba-4bc9-8a28-accc070fa881:fx';
   
   static Future<String> translate(
@@ -13,15 +12,17 @@ class Translator {
     String targetLanguage,
     String baseUrl,
   ) async {
-    // Build the full URL
+    // Build full URL ensuring /v2/translate
     String fullUrl = baseUrl;
     if (!fullUrl.endsWith('/v2/translate')) {
-      fullUrl = fullUrl.endsWith('/') ? '${fullUrl}v2/translate' : '$fullUrl/v2/translate';
+      fullUrl = fullUrl.endsWith('/') 
+        ? '${fullUrl}v2/translate' 
+        : '$fullUrl/v2/translate';
     }
     
     final uri = Uri.parse(fullUrl);
     
-    // Build request body - source_lang=auto can cause issues with free API
+    // Build request body - no source_lang for free tier (auto-detect is built-in)
     final body = {
       'text': str.length > 5000 ? str.substring(0, 5000) : str,
       'target_lang': targetLanguage.toUpperCase(),
@@ -51,7 +52,7 @@ class Translator {
       throw Exception('Network error during translation: $e');
     } catch (e) {
       if (e.toString().contains('TimeoutException')) {
-        throw Exception('Translation timeout - DeepL may be slow. Try again.');
+        throw Exception('Translation timeout - try again.');
       }
       rethrow;
     }
