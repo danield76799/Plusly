@@ -34,7 +34,7 @@ enum AppSettings<T> {
   translationTargetLanguage<String>('xyz.plusly.translationTargetLanguage', ''),
   exteraServiceUrl<String>(
     'xyz.plusly.serviceUrl',
-    'http://38.124.152.103:5000', // LibreTranslate server
+    'https://libretranslate.de', // Publieke LibreTranslate server
   ),
   latexMath<bool>('xyz.plusly.latexMath', false),
   messageTranslation<bool>('xyz.plusly.messageTranslation', true),
