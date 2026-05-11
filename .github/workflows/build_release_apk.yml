@@ -38,21 +38,22 @@ jobs:
           # Create keystore directory
           mkdir -p android/app
           
-          # Decode base64 keystore using Python (more reliable)
-          python3 -c "
-import base64
-import sys
-keystore_b64 = '${{ secrets.KEYSTORE_BASE64 }}'
-# Remove any whitespace/newlines
-keystore_b64 = ''.join(keystore_b64.split())
-with open('android/app/keystore.jks', 'wb') as f:
-    f.write(base64.b64decode(keystore_b64))
-print('Keystore created successfully')
-"
+          # Save base64 to file first (avoid issues with special characters)
+          echo "$KEYSTORE_BASE64" > /tmp/keystore.b64
+          
+          # Check if secret is set
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "Error: KEYSTORE_BASE64 secret is not set or empty"
+            exit 1
+          fi
+          
+          # Decode base64 keystore
+          base64 -d /tmp/keystore.b64 > android/app/keystore.jks
           
           # Check if keystore is valid
           if [ ! -s android/app/keystore.jks ]; then
             echo "Error: Keystore file is empty or not created"
+            echo "Secret length: ${#KEYSTORE_BASE64} characters"
             exit 1
           fi
           
