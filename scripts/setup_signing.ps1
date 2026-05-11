@@ -1,98 +1,95 @@
-# Plusly Signing Key Setup voor Windows
-# Dit script genereert een signing key en toont instructies voor GitHub secrets
-
+# Plusly Signing Key Setup for Windows
 Write-Host "Plusly Signing Key Setup" -ForegroundColor Green
 Write-Host "========================" -ForegroundColor Green
 Write-Host ""
 
-# Check of keytool beschikbaar is (onderdeel van Java)
+# Check if keytool is available
 try {
     $keytool = Get-Command keytool -ErrorAction Stop
-    Write-Host "OK keytool gevonden" -ForegroundColor Green
+    Write-Host "OK keytool found" -ForegroundColor Green
 } catch {
-    Write-Host "ERROR keytool niet gevonden. Installeer Java JDK:" -ForegroundColor Red
-    Write-Host "  Download van: https://adoptium.net/" -ForegroundColor Yellow
-    Write-Host "  Of via winget: winget install EclipseAdoptium.Temurin.17.JDK" -ForegroundColor Yellow
+    Write-Host "ERROR keytool not found. Install Java JDK:" -ForegroundColor Red
+    Write-Host "  Download from: https://adoptium.net/" -ForegroundColor Yellow
     exit 1
 }
 
-# Vraag om repository
-$repo = Read-Host "GitHub repository (bijv. danield76799/Plusly)"
+# Ask for repository
+$repo = Read-Host "GitHub repository (e.g. danield76799/Plusly)"
 if ([string]::IsNullOrWhiteSpace($repo)) {
-    Write-Host "Error: Repository naam is verplicht" -ForegroundColor Red
+    Write-Host "Error: Repository name is required" -ForegroundColor Red
     exit 1
 }
 
-# Vraag om wachtwoord
-$password = Read-Host "Keystore wachtwoord (minimaal 6 karakters)" -AsSecureString
+# Ask for password
+$password = Read-Host "Keystore password (minimum 6 characters)" -AsSecureString
 $passwordPlain = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($password))
 
 if ($passwordPlain.Length -lt 6) {
-    Write-Host "Error: Wachtwoord moet minimaal 6 karakters zijn" -ForegroundColor Red
+    Write-Host "Error: Password must be at least 6 characters" -ForegroundColor Red
     exit 1
 }
 
-# Vraag om key alias
-$alias = Read-Host "Key alias (standaard: plusly)"
+# Ask for key alias
+$alias = Read-Host "Key alias (default: plusly)"
 if ([string]::IsNullOrWhiteSpace($alias)) {
     $alias = "plusly"
 }
 
-# Genereer keystore
+# Generate keystore
 Write-Host ""
-Write-Host "Keystore genereren..." -ForegroundColor Green
+Write-Host "Generating keystore..." -ForegroundColor Green
 
 $keystoreFile = "plusly-release.keystore"
 $keystoreB64 = "plusly-release.b64"
 
-# Verwijder oude files als ze bestaan
+# Remove old files if they exist
 if (Test-Path $keystoreFile) { Remove-Item $keystoreFile }
 if (Test-Path $keystoreB64) { Remove-Item $keystoreB64 }
 
-# Genereer keystore
+# Generate keystore
 & keytool -genkey -v -keystore $keystoreFile -alias $alias -keyalg RSA -keysize 2048 -validity 10000 -storepass $passwordPlain -keypass $passwordPlain -dname "CN=Plusly, OU=Development, O=Plusly, L=Unknown, ST=Unknown, C=NL"
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Error: Keystore genereren mislukt" -ForegroundColor Red
+    Write-Host "Error: Keystore generation failed" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "OK Keystore gegenereerd: $keystoreFile" -ForegroundColor Green
+Write-Host "OK Keystore generated: $keystoreFile" -ForegroundColor Green
 
 # Base64 encode
 $bytes = [System.IO.File]::ReadAllBytes($keystoreFile)
 $b64 = [Convert]::ToBase64String($bytes)
 $b64 | Out-File -Encoding ASCII $keystoreB64
 
-Write-Host "OK Base64 encoding gemaakt: $keystoreB64" -ForegroundColor Green
+Write-Host "OK Base64 encoding created: $keystoreB64" -ForegroundColor Green
 
-# Toon instructies voor GitHub secrets
+# Show instructions for GitHub secrets
 Write-Host ""
-Write-Host "Setup voltooid!" -ForegroundColor Green
+Write-Host "Setup complete!" -ForegroundColor Green
 Write-Host ""
-Write-Host "BELANGRIJK - Bewaar deze files veilig:" -ForegroundColor Yellow
-Write-Host "  - $keystoreFile (je signing key)"
-Write-Host "  - $keystoreB64 (base64 versie)"
+Write-Host "IMPORTANT - Keep these files safe:" -ForegroundColor Yellow
+Write-Host "  - $keystoreFile (your signing key)"
+Write-Host "  - $keystoreB64 (base64 version)"
 Write-Host ""
-Write-Host "Deze files staan in de huidige directory."
+Write-Host "These files are in the current directory."
 Write-Host ""
-Write-Host "Voeg deze secrets toe aan GitHub:" -ForegroundColor Cyan
-Write-Host "  1. Ga naar: https://github.com/$repo/settings/secrets/actions"
-Write-Host "  2. Klik 'New repository secret'"
+Write-Host "Add these secrets to GitHub:" -ForegroundColor Cyan
+Write-Host "  1. Go to: https://github.com/$repo/settings/secrets/actions"
+Write-Host "  2. Click 'New repository secret'"
 Write-Host ""
-Write-Host "  Secret naam: KEYSTORE_BASE64"
-Write-Host "  Secret waarde: (kopieer de inhoud van $keystoreB64)"
+Write-Host "  Secret name: KEYSTORE_BASE64"
+Write-Host "  Secret value: (copy contents of $keystoreB64)"
 Write-Host ""
-Write-Host "  Secret naam: KEYSTORE_PASSWORD"
-Write-Host "  Secret waarde: $passwordPlain"
+Write-Host "  Secret name: KEYSTORE_PASSWORD"
+Write-Host "  Secret value: $passwordPlain"
 Write-Host ""
-Write-Host "  Secret naam: KEY_ALIAS"
-Write-Host "  Secret waarde: $alias"
+Write-Host "  Secret name: KEY_ALIAS"
+Write-Host "  Secret value: $alias"
 Write-Host ""
-Write-Host "  Secret naam: KEY_PASSWORD"
-Write-Host "  Secret waarde: $passwordPlain"
+Write-Host "  Secret name: KEY_PASSWORD"
+Write-Host "  Secret value: $passwordPlain"
 Write-Host ""
-Write-Host "Als je de keystore verliest, kun je NOOIT meer updates uitbrengen voor je app!" -ForegroundColor Red
+Write-Host "WARNING: If you lose the keystore, you can NEVER release updates for your app!" -ForegroundColor Red
 Write-Host ""
-Write-Host "Druk op Enter om af te sluiten..."
+Write-Host "Press Enter to exit..."
 Read-Host
