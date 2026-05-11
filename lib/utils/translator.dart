@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class Translator {
@@ -12,7 +13,19 @@ class Translator {
     String targetLanguage,
     String baseUrl,
   ) async {
-    final uri = Uri.parse('$baseUrl/v2/translate');
+    // Build the full URL
+    String fullUrl = baseUrl;
+    if (!fullUrl.endsWith('/v2/translate')) {
+      fullUrl = fullUrl.endsWith('/') ? '${fullUrl}v2/translate' : '$fullUrl/v2/translate';
+    }
+    
+    final uri = Uri.parse(fullUrl);
+    
+    // Build request body - source_lang=auto can cause issues with free API
+    final body = {
+      'text': str.length > 5000 ? str.substring(0, 5000) : str,
+      'target_lang': targetLanguage.toUpperCase(),
+    };
     
     try {
       final response = await http.post(
@@ -21,11 +34,7 @@ class Translator {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Authorization': 'DeepL-Auth-Key $_apiKey',
         },
-        body: {
-          'text': str.length > 5000 ? str.substring(0, 5000) : str,
-          'target_lang': targetLanguage.toUpperCase(),
-          'source_lang': 'auto',
-        },
+        body: body,
       ).timeout(_timeout);
       
       if (response.statusCode == 200) {
