@@ -165,7 +165,7 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                         subtitle: const Text(
                           'Save to app folder and share to Downloads/Drive',
                         ),
-                        onTap: controller.exportSettings,
+                        onTap: widget.controller.exportSettings,
                       ),
                       const ListDivider(),
                       ListTile(
@@ -174,7 +174,7 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                         subtitle: const Text(
                           'Load preferences from a JSON file',
                         ),
-                        onTap: controller.restoreSettings,
+                        onTap: widget.controller.restoreSettings,
                       ),
                     ],
                   ),
