@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class Translator {
@@ -19,6 +20,10 @@ class Translator {
     String targetLanguage,
     String baseUrl,
   ) async {
+    // Log server URL for debugging
+    debugPrint('LibreTranslate URL: $baseUrl');
+    debugPrint('Target language: $targetLanguage');
+    
     final uri = Uri.parse('$baseUrl/translate');
     
     final body = {
@@ -35,11 +40,14 @@ class Translator {
         body: jsonEncode(body),
       ).timeout(_timeout);
       
+      debugPrint('LibreTranslate response status: ${response.statusCode}');
+      debugPrint('LibreTranslate response body: ${response.body}');
+      
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         return responseData['translatedText'] ?? '';
       } else {
-        throw Exception('LibreTranslate error: ${response.statusCode}');
+        throw Exception('LibreTranslate error: ${response.statusCode} - ${response.body}');
       }
     } on http.ClientException catch (e) {
       throw Exception('Network error during translation: $e');
