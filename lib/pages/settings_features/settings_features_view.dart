@@ -62,6 +62,43 @@ class SettingsFeaturesView extends StatelessWidget {
                         setting: AppSettings.messageTranslation,
                       ),
                       const ListDivider(),
+                      ListTile(
+                        leading: const Icon(Icons.translate_outlined),
+                        title: const Text('Translation language'),
+                        subtitle: Text(
+                          AppSettings.translationTargetLanguage.value.isEmpty
+                              ? 'Device language'
+                              : AppSettings.translationTargetLanguage.value.toUpperCase(),
+                        ),
+                        trailing: DropdownButton<String>(
+                          value: AppSettings.translationTargetLanguage.value.isEmpty
+                              ? 'device'
+                              : AppSettings.translationTargetLanguage.value,
+                          underline: const SizedBox(),
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              AppSettings.translationTargetLanguage.setItem(
+                                newValue == 'device' ? '' : newValue,
+                              );
+                            }
+                          },
+                          items: const [
+                            DropdownMenuItem(value: 'device', child: Text('Device')),
+                            DropdownMenuItem(value: 'en', child: Text('EN')),
+                            DropdownMenuItem(value: 'nl', child: Text('NL')),
+                            DropdownMenuItem(value: 'de', child: Text('DE')),
+                            DropdownMenuItem(value: 'fr', child: Text('FR')),
+                            DropdownMenuItem(value: 'es', child: Text('ES')),
+                            DropdownMenuItem(value: 'it', child: Text('IT')),
+                            DropdownMenuItem(value: 'pt', child: Text('PT')),
+                            DropdownMenuItem(value: 'ru', child: Text('RU')),
+                            DropdownMenuItem(value: 'zh', child: Text('ZH')),
+                            DropdownMenuItem(value: 'ja', child: Text('JA')),
+                            DropdownMenuItem(value: 'ko', child: Text('KO')),
+                          ],
+                        ),
+                      ),
+                      const ListDivider(),
                       SettingsSwitchListTile.adaptive(
                         title: L10n.of(context).latexMath,
                         setting: AppSettings.latexMath,
