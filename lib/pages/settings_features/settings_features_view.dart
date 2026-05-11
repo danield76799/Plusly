@@ -10,9 +10,22 @@ import 'package:Pulsly/widgets/list_divider.dart';
 import 'package:Pulsly/widgets/settings_switch_list_tile.dart';
 import 'settings_features.dart';
 
-class SettingsFeaturesView extends StatelessWidget {
+class SettingsFeaturesView extends StatefulWidget {
   final SettingsFeaturesController controller;
   const SettingsFeaturesView(this.controller, {super.key});
+
+  @override
+  State<SettingsFeaturesView> createState() => _SettingsFeaturesViewState();
+}
+
+class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
+  String _selectedTranslationLang = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTranslationLang = AppSettings.translationTargetLanguage.value;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,20 +79,22 @@ class SettingsFeaturesView extends StatelessWidget {
                         leading: const Icon(Icons.translate_outlined),
                         title: const Text('Translation language'),
                         subtitle: Text(
-                          AppSettings.translationTargetLanguage.value.isEmpty
+                          _selectedTranslationLang.isEmpty
                               ? 'Device language'
-                              : AppSettings.translationTargetLanguage.value.toUpperCase(),
+                              : _selectedTranslationLang.toUpperCase(),
                         ),
                         trailing: DropdownButton<String>(
-                          value: AppSettings.translationTargetLanguage.value.isEmpty
+                          value: _selectedTranslationLang.isEmpty
                               ? 'device'
-                              : AppSettings.translationTargetLanguage.value,
+                              : _selectedTranslationLang,
                           underline: const SizedBox(),
                           onChanged: (String? newValue) {
                             if (newValue != null) {
-                              AppSettings.translationTargetLanguage.setItem(
-                                newValue == 'device' ? '' : newValue,
-                              );
+                              final lang = newValue == 'device' ? '' : newValue;
+                              AppSettings.translationTargetLanguage.setItem(lang);
+                              setState(() {
+                                _selectedTranslationLang = lang;
+                              });
                             }
                           },
                           items: const [
