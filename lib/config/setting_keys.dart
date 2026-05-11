@@ -34,7 +34,7 @@ enum AppSettings<T> {
   translationTargetLanguage<String>('xyz.plusly.translationTargetLanguage', ''),
   exteraServiceUrl<String>(
     'xyz.plusly.serviceUrl',
-    'https://api-free.deepl.com', // DeepL API (free tier)
+    'http://YOUR_LIBRETRANSLATE_SERVER:5000', // LibreTranslate server URL
   ),
   latexMath<bool>('xyz.plusly.latexMath', false),
   messageTranslation<bool>('xyz.plusly.messageTranslation', true),
