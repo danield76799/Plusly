@@ -1,1 +1,28 @@
-LyoKcGFja2FnZSBjb20uZGFuaWVsZC5wbHVzbHkuYXBwCgppbXBvcnQgaW8uZmx1dHRlci5lbWJlZGRpbmcuZW5naW5lLkZsdXR0ZXJFbmdpbmUKaW1wb3J0IGlvLmZsdXR0ZXIuZW1iZWRkaW5nLmVuZ2luZS5kYXJ0LkRhcnRFeGVjdXRvcgppbXBvcnQgb3JnLnVuaWZpZWRwdXNoLmZsdXR0ZXIuY29ubmVjdG9yLlVuaWZpZWRQdXNoUmVjZWl2ZXIKCmltcG9ydCBhbmRyb2lkLmNvbnRlbnQuQ29udGV4dAoKY2xhc3MgVW5pZmllZFB1c2hSZWNlaXZlciA6IFVuaWZpZWRQdXNoUmVjZWl2ZXIoKSB7CiAgICBvdmVycmlkZSBmdW4gZ2V0RW5naW5lKGNvbnRleHQ6IENvbnRleHQpOiBGbHV0dGVyRW5naW5lIHsKICAgICAgICB2YXIgZW5naW5lID0gTWFpbkFjdGl2aXR5LmVuZ2luZQogICAgICAgIGlmIChlbmdpbmUgPT0gbnVsbCkgewogICAgICAgICAgICBlbmdpbmUgPSBNYWluQWN0aXZpdHkucHJvdmlkZUVuZ2luZShjb250ZXh0KQogICAgICAgICAgICBlbmdpbmUubG9jYWxpemF0aW9uUGx1Z2luLnNlbmRMb2NhbGVzVG9GbHV0dGVyKAogICAgICAgICAgICAgICAgY29udGV4dC5yZXNvdXJjZXMuY29uZmlndXJhdGlvbgogICAgICAgICAgICApCiAgICAgICAgICAgIGVuZ2luZS5kYXJ0RXhlY3V0b3IuZXhlY3V0ZURhcnRFbnRyeXBvaW50KAogICAgICAgICAgICAgICAgRGFydEV4ZWN1dG9yLkRhcnRFbnRyeXBvaW50LmNyZWF0ZURlZmF1bHQoKQogICAgICAgICAgICApCiAgICAgICAgfQogICAgICAgIHJldHVybiBlbmdpbmUKICAgIH0KfQoqLwo=
+/*
+package com.danield.plusly.app
+
+
+packagage com.danield.plusly.app
+
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.dart.DartExecutor
+import org.unifiedpush.flutter.connector.UnifiedPushReceiver
+
+import android.context.Context
+
+class UnifiedPushReceiver : UnifiedPushReceiver {
+    override fun getEngine(context: Context): FlutterEngine {
+        var engine = MainActivity.engine
+        if (engine == null) {
+            engine = MainActivity.provideEngine(context)
+            engine.localizationPlugin.sendLocalesToFlutter(
+                context.resources.configuration
+            )
+            engine.dartExecutor.executeDartEntrypoint(
+                DartExecutor.DartEntrypoint.createDefault()
+            )
+        }
+        return engine
+    }
+}
+*/
