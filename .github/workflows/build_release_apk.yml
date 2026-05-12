@@ -83,8 +83,12 @@ jobs:
 
       - name: Align APK
         run: |
+          # Find zipalign path
+          ZIPALIGN=$(find ${ANDROID_HOME}/build-tools -name zipalign | sort -V | tail -1)
+          echo "Using zipalign: $ZIPALIGN"
+          
           # Zip align for optimal performance
-          ${ANDROID_HOME}/build-tools/*/zipalign -v 4 \
+          $ZIPALIGN -v 4 \
             build/app/outputs/flutter-apk/app-release.apk \
             build/app/outputs/flutter-apk/app-release-aligned.apk
           
