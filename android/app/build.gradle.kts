@@ -33,7 +33,7 @@ dependencies {
 }
 
 android {
-    namespace = "com.danield.plusly"
+    namespace = "com.danield.plusly.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "28.2.13676358"
 
@@ -70,7 +70,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.danield.plusly"
+        applicationId = "com.danield.plusly.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
