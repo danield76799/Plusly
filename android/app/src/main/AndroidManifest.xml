@@ -164,7 +164,7 @@
 
         <!-- Chat Widget Provider (Legacy) -->
         <receiver
-            android:name="com.danield.plusly.ChatWidgetProvider"
+            android:name="com.danield.plusly.app.ChatWidgetProvider"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -181,4 +181,3 @@
             android:value="2" />
     </application>
 </manifest>
-
