@@ -1,35 +1,69 @@
-name: Build Release APK for Google Play
+name: Build Signed APK (Working Version)
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
-  build-release:
+  build_android_apk:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - run: cat .github/workflows/versions.env >> $GITHUB_ENV
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'zulu'
+          cache: 'gradle'
 
       - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+        run: |
+          git clone --depth 1 https://github.com/flutter/flutter.git -b stable
+          echo "$PWD/flutter/bin" >> $GITHUB_PATH
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          path: |
+            ~/.pub-cache
+            ~/.gradle/caches
+          key: flutter-deps-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            flutter-deps-${{ runner.os }}-
+
+      - name: Verify Flutter
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter --version
 
       - name: Clean Flutter build
-        run: flutter clean
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter clean
 
-      - name: Get dependencies
-        run: flutter pub get
+      - name: Generate localization
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter gen-l10n
 
-      - name: Build APK (unsigned first)
-        run: flutter build apk --release --target-platform android-arm64,android-arm
+      - name: Generate assets
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter pub run flutter_launcher_icons:main
+          flutter pub run flutter_native_splash:create
+
+      - name: Build Android APK
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
 
       - name: Sign APK
         env:
@@ -41,7 +75,7 @@ jobs:
           # Decode keystore
           echo "$KEYSTORE_BASE64" | base64 -d > /tmp/keystore.jks
           
-          # Sign the APK
+          # Sign with jarsigner
           jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
             -keystore /tmp/keystore.jks \
             -storepass "$KEYSTORE_PASSWORD" \
@@ -51,25 +85,18 @@ jobs:
           # Verify
           jarsigner -verify build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Upload APK
+      - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
+          name: android-apk-signed
           path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 30
+          retention-days: 7
 
-      - name: Create Release
-        if: github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v1
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          files: build/app/outputs/flutter-apk/app-release.apk
           tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
-          body: |
-            ## Changes in this release
-            - Automated release build
-            - See commit history for details
-          draft: true
-          prerelease: false
+          name: Plusly v${{ github.run_number }}
+          files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
