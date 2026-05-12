@@ -1,1 +1,55 @@
-cGFja2FnZSBjb20uZGFuaWVsZC5wbHVzbHkuYXBwCgppbXBvcnQgaW8uZmx1dHRlci5lbWJlZGRpbmcuYW5kcm9pZC5GbHV0dGVyQWN0aXZpdHkKaW1wb3J0IGlvLmZsdXR0ZXIuZW1iZWRkaW5nLmVuZ2luZS5GbHV0dGVyRW5naW5lCmltcG9ydCBpby5mbHV0dGVyLnBsdWdpbi5jb21tb24uTWV0aG9kQ2hhbm5lbAoKaW1wb3J0IGFuZHJvaWQuY29udGVudC5Db250ZXh0CmltcG9ydCBhbmRyb2lkLmNvbnRlbnQuSW50ZW50CmltcG9ydCBhbmRyb2lkLm9zLkJ1bmRsZQoKY2xhc3MgTWFpbkFjdGl2aXR5IDogRmx1dHRlckFjdGl2aXR5KCkgewogICAgb3ZlcnJpZGUgZnVuIGF0dGFjaEJhc2VDb250ZXh0KGJhc2U6IENvbnRleHQpIHsKICAgICAgICBzdXBlci5hdHRhY2hCYXNlQ29udGV4dChiYXNlKQogICAgfQogICAgb3ZlcnJpZGUgZnVuIG9uQ3JlYXRlKHNhdmVkSW5zdGFuY2VTdGF0ZTogQnVuZGxlPykgewogICAgICAgIHN1cGVyLm9uQ3JlYXRlKHNhdmVkSW5zdGFuY2VTdGF0ZSkKICAgICAgICBoYW5kbGVXaWRnZXRJbnRlbnQoaW50ZW50KQogICAgfQogICAgb3ZlcnJpZGUgZnVuIG9uTmV3SW50ZW50KGludGVudDogSW50ZW50KSB7CiAgICAgICAgc3VwZXIub25OZXdJbnRlbnQoaW50ZW50KQogICAgICAgIGhhbmRsZVdpZGdldEludGVudChpbnRlbnQpCiAgICB9CiAgICBwcml2YXRlIGZ1biBoYW5kbGVXaWRnZXRJbnRlbnQoaW50ZW50OiBJbnRlbnQpIHsKICAgICAgICBpZiAoaW50ZW50LmFjdGlvbiA9PSAiY29tLmRhbmllbGQucGx1c2x5LmFwcC5PUEVOX0NIQVQiKSB7CiAgICAgICAgICAgIHZhbCBjaGF0SWQgPSBpbnRlbnQuZ2V0U3RyaW5nRXh0cmEoImNoYXRJZCIpCiAgICAgICAgICAgIGlmIChjaGF0SWQgIT0gbnVsbCAmJiBlbmdpbmUgIT0gbnVsbCkgewogICAgICAgICAgICAgICAgdmFsIGNoYW5uZWwgPSBpby5mbHV0dGVyLnBsdWdpbi5jb21tb24uTWV0aG9kQ2hhbm5lbChlbmdpbmUhIS5kYXJ0RXhlY3V0b3IuYmluYXJ5TWVzc2VuZ2VyLCAiY29tLmRhbmllbGQucGx1c2x5LmFwcC93aWRnZXQiKQogICAgICAgICAgICAgICAgY2hhbm5lbC5pbnZva2VNZXRob2QoIm9wZW5DaGF0IiwgY2hhdElkKQogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQogICAgb3ZlcnJpZGUgZnVuIHByb3ZpZGVGbHV0dGVyRW5naW5lKGNvbnRleHQ6IENvbnRleHQpOiBGbHV0dGVyRW5naW5lPyB7CiAgICAgICAgcmV0dXJuIHByb3ZpZGVFbmdpbmUodGhpcykKICAgIH0KICAgIG92ZXJyaWRlIGZ1biBjb25maWd1cmVGbHV0dGVyRW5naW5lKGZsdXR0ZXJFbmdpbmU6IEZsdXR0ZXJFbmdpbmUpIHsKICAgICAgICBzdXBlci5jb25maWd1cmVGbHV0dGVyRW5naW5lKGZsdXR0ZXJFbmdpbmUpCiAgICAgICAgTWV0aG9kQ2hhbm5lbChmbHV0dGVyRW5naW5lLmRhcnRFeGVjdXRvci5iaW5hcnlNZXNzZW5nZXIsICJjb20uZGFuaWVsZC5wbHVzbHkuYXBwL3dpZGdldF9kYXRhIikuc2V0TWV0aG9kQ2FsbEhhbmRsZXIgeyBjYWxsLCByZXN1bHQgLT4KICAgICAgICAgICAgd2hlbiAoY2FsbC5tZXRob2QpIHsKICAgICAgICAgICAgICAgICJnZXRXaWRnZXREYXRhUGF0aCIgLT4gewogICAgICAgICAgICAgICAgICAgIHZhbCBwYXRoID0gZmlsZXNEaXIucmVzb2x2ZSgiY2hhdF93aWRnZXRfZGF0YS5qc29uIikuYWJzb2x1dGVQYXRoCiAgICAgICAgICAgICAgICAgICAgcmVzdWx0LnN1Y2Nlc3MocGF0aCkKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIGVsc2UgLT4gcmVzdWx0Lm5vdEltcGxlbWVudGVkKCkKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KICAgIGNvbXBhbmlvbiBvYmplY3QgewogICAgICAgIHZhciBlbmdpbmU6IEZsdXR0ZXJFbmdpbmU/ID0gbnVsbAogICAgICAgIGZ1biBwcm92aWRlRW5naW5lKGNvbnRleHQ6IENvbnRleHQpOiBGbHV0dGVyRW5naW5lIHsKICAgICAgICAgICAgdmFsIGVuZyA9IGVuZ2luZSA/OiBGbHV0dGVyRW5naW5lKGNvbnRleHQsIGVtcHR5QXJyYXkoKSwgdHJ1ZSwgZmFsc2UpCiAgICAgICAgICAgIGVuZ2luZSA9IGVuZwogICAgICAgICAgICByZXR1cm4gZW5nCiAgICAgICAgfQogICAgfQp9Cg==
+package com.danield.plusly.app
+
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+
+class MainActivity : FlutterActivity() {
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        handleWidgetIntent(intent)
+    }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleWidgetIntent(intent)
+    }
+    private fun handleWidgetIntent(intent: Intent) {
+        if (intent.action == "com.danield.plusly.app.OPEN_CHAT") {
+            val chatId = intent.getStringExtra("chatId")
+            if (chatId != null && engine != null) {
+                val channel = io.flutter.plugin.common.MethodChannel(engine!!.dartExecutor.binaryMessenger, "com.danield.plusly.app/widget")
+                channel.invokeMethod("openChat", chatId)
+            }
+        }
+    }
+    override fun provideFlutterEngine(context: Context): FlutterEngine? {
+        return provideEngine(this)
+    }
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.danield.plusly.app/widget_data").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getWidgetDataPath" -> {
+                    val path = filesDir.resolve("chat_widget_data.json").absolutePath
+                    result.success(path)
+                }
+                else -> result.notImplemented()
+            }
+        }
+    }
+    companion object {
+        var engine: FlutterEngine? = null
+        fun provideEngine(context: Context): FlutterEngine {
+            val eng = engine ?: FlutterEngine(context, emptyArray(), true, false)
+            engine = eng
+            return eng
+        }
+    }
+}
