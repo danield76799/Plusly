@@ -58,12 +58,8 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build release APK (no minification)
-        run: |
-          # Temporarily disable minification for debugging
-          sed -i 's/isMinifyEnabled = true/isMinifyEnabled = false/' android/app/build.gradle.kts
-          sed -i 's/isShrinkResources = true/isShrinkResources = false/' android/app/build.gradle.kts
-          flutter build apk --release
+      - name: Build debug APK for testing
+        run: flutter build apk --debug
 
       - name: Verify APK signature
         run: |
