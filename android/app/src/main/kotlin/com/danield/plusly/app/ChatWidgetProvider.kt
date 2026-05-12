@@ -1,1 +1,89 @@
-cGFja2FnZSBjb20uZGFuaWVsZC5wbHVzbHkuYXBwCgppbXBvcnQgYW5kcm9pZC5hcHB3aWRnZXQuQXBwV2lkZ2V0TWFuYWdlcgppbXBvcnQgYW5kcm9pZC5hcHB3aWRnZXQuQXBwV2lkZ2V0UHJvdmlkZXIKaW1wb3J0IGFuZHJvaWQuY29udGVudC5Db250ZXh0CmltcG9ydCBhbmRyb2lkLmNvbnRlbnQuSW50ZW50CmltcG9ydCBhbmRyb2lkLmdyYXBoaWNzLkNvbG9yCmltcG9ydCBhbmRyb2lkLndpZGdldC5SZW1vdGVWaWV3cwppbXBvcnQgYW5kcm9pZC5hcHAuUGVuZGluZ0ludGVudAppbXBvcnQgb3JnLmpzb24uSlNPTkFycmF5CmltcG9ydCBqYXZhLmlvLkZpbGUKaW1wb3J0IGphdmEudGV4dC5TaW1wbGVEYXRlRm9ybWF0CmltcG9ydCBqYXZhLnV0aWwuRGF0ZQppbXBvcnQgamF2YS51dGlsLkxvY2FsZQoKY2xhc3MgQ2hhdFdpZGdldFByb3ZpZGVyIDogQXBwV2lkZ2V0UHJvdmlkZXIoKSB7CiAgICBvdmVycmlkZSBmdW4gb25VcGRhdGUoCiAgICAgICAgY29udGV4dDogQ29udGV4dCwKICAgICAgICBhcHBXaWRnZXRNYW5hZ2VyOiBBcHBXaWRnZXRNYW5hZ2VyLAogICAgICAgIGFwcFdpZGdldElkczogSW50QXJyYXkKICAgICkgewogICAgICAgIGZvciAoYXBwV2lkZ2V0SWQgaW4gYXBwV2lkZ2V0SWRzKSB7CiAgICAgICAgICAgIENvbXBhbmlvbi51cGRhdGVBcHBXaWRnZXQoY29udGV4dCwgYXBwV2lkZ2V0TWFuYWdlciwgYXBwV2lkZ2V0SWQpCiAgICAgICAgfQogICAgfQogICAgb3ZlcnJpZGUgZnVuIG9uRW5hYmxlZChjb250ZXh0OiBDb250ZXh0KSB7CiAgICAgICAgLy8gV2lkZ2V0IGlzIGFkZGVkIGZvciB0aGUgZmlyc3QgdGltZQogICAgfQogICAgb3ZlcnJpZGUgZnVuIG9uRGlzYWJsZWQoY29udGV4dDogQ29udGV4dCkgewogICAgICAgIC8vIFdpZGdldCBpcyByZW1vdmVkCiAgICB9CiAgICBjb21wYW5pb24gb2JqZWN0IHsKICAgICAgICBwcml2YXRlIGNvbnN0IHZhbCBDSEFUX0RBVEFfRklMRSA9ICJjaGF0X3dpZGdldF9kYXRhLmpzb24iCiAgICAgICAgcHJpdmF0ZSBjb25zdCB2YWwgQ09MT1JfT05MSU5FID0gIiM0Q0FGNTAiICAgLy8gR3JlZW4KICAgICAgICBwcml2YXRlIGNvbnN0IHZhbCBDT0xPUl9PRkZMSU5FID0gIiM5RTlFOUUiICAvLyBHcmF5CiAgICAgICAgcHJpdmF0ZSBjb25zdCB2YWwgQ09MT1JfSEVBREVSID0gIiM2NzUwQTQiICAgIC8vIFB1cnBsZQoKICAgICAgICBmdW4gdXBkYXRlQXBwV2lkZ2V0KAogICAgICAgICAgICBjb250ZXh0OiBDb250ZXh0LAogICAgICAgICAgICBhcHBXaWRnZXRNYW5hZ2VyOiBBcHBXaWRnZXRNYW5hZ2VyLAogICAgICAgICAgICBhcHBXaWRnZXRJZDogSW50CiAgICAgICAgKSB7CiAgICAgICAgICAgIHZhbCB2aWV3cyA9IFJlbW90ZVZpZXdzKGNvbnRleHQucGFja2FnZU5hbWUsIFIubGF5b3V0LnBsdXNseV93aWRnZXQpCiAgICAgICAgICAgIAogICAgICAgICAgICAvLyBDcmVhdGUgaW50ZW50IHRvIG9wZW4gYXBwCiAgICAgICAgICAgIHZhbCBpbnRlbnQgPSBJbnRlbnQoY29udGV4dCwgTWFpbkFjdGl2aXR5OjpjbGFzcy5qYXZhKS5hcHBseSB7CiAgICAgICAgICAgICAgICBmbGFncyA9IEludGVudC5GTEFHX0FDVElWSVRZX05FV19UQVNLIG9yIEludGVudC5GTEFHX0FDVElWSVRZX0NMRUFSX1RPUAogICAgICAgICAgICB9CiAgICAgICAgICAgIHZhbCBwZW5kaW5nSW50ZW50ID0gUGVuZGluZ0ludGVudC5nZXRBY3Rpdml0eSgKICAgICAgICAgICAgICAgIGNvbnRleHQsCiAgICAgICAgICAgICAgICAwLAogICAgICAgICAgICAgICAgaW50ZW50LAogICAgICAgICAgICAgICAgUGVuZGluZ0ludGVudC5GTEFHX1VQREFURV9DVVJSRU5UIG9yIFBlbmRpbmdJbnRlbnQuRkxBR19JTU1VVEFCTEUKICAgICAgICAgICAgKQogICAgICAgICAgICAKICAgICAgICAgICAgLy8gVHJ5IHRvIHJlYWQgcmVhbCBjaGF0IGRhdGEgZnJvbSBmaWxlCiAgICAgICAgICAgIHZhbCBjaGF0RGF0YSA9IHJlYWRDaGF0RGF0YShjb250ZXh0KQogICAgICAgICAgICAKICAgICAgICAgICAgaWYgKGNoYXREYXRhLmlzTm90RW1wdHkoKSkgewogICAgICAgICAgICAgICAgLy8gU2hvdyByZWFsIGNoYXQgZGF0YQogICAgICAgICAgICAgICAgZm9yIChpIGluIGNoYXREYXRhLmluZGljZXMpIHsKICAgICAgICAgICAgICAgICAgICBpZiAoaSA+PSA0KSBicmVhawogICAgICAgICAgICAgICAgICAgIHZhbCBjaGF0ID0gY2hhdERhdGFbaV0KICAgICAgICAgICAgICAgICAgICB2YWwgcm93SWQgPSB3aGVuIChpKSB7CiAgICAgICAgICAgICAgICAgICAgICAgIDAgLT4gUi5pZC5jaGF0X3Jvd18xCiAgICAgICAgICAgICAgICAgICAgICAgIDEgLT4gUi5pZC5jaGF0X3Jvd18yCiAgICAgICAgICAgICAgICAgICAgICAgIDIgLT4gUi5pZC5jaGF0X3Jvd18zCiAgICAgICAgICAgICAgICAgICAgICAgIDMgLT4gUi5pZC5jaGF0X3Jvd180CiAgICAgICAgICAgICAgICAgICAgICAgIGVsc2UgLT4gY29udGludWUKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgdmFsIG5hbWVJZCA9IHdoZW4gKGkpIHsKICAgICAgICAgICAgICAgICAgICAgICAgMCAtPiBSLmlkLmNoYXRfbmFtZV8xCiAgICAgICAgICAgICAgICAgICAgICAgIDEgLT4gUi5pZC5jaGF0X25hbWVfMgogICAgICAgICAgICAgICAgICAgICAgICAyIC0+IFIuaWQuY2hhdF9uYW1lXzMKICAgICAgICAgICAgICAgICAgICAgICAgMyAtPiBSLmlkLmNoYXRfbmFtZV80CiAgICAgICAgICAgICAgICAgICAgICAgIGVsc2UgLT4gMAogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICB2YWwgbWVzc2FnZUlkID0gd2hlbiAoaSkgewogICAgICAgICAgICAgICAgICAgICAgICAwIC0+IFIuaWQuY2hhdF9tZXNzYWdlXzEKICAgICAgICAgICAgICAgICAgICAgICAgMSAtPiBSLmlkLmNoYXRfbWVzc2FnZV8yCiAgICAgICAgICAgICAgICAgICAgICAgIDIgLT4gUi5pZC5jaGF0X21lc3NhZ2VfMwogICAgICAgICAgICAgICAgICAgICAgICAzIC0+IFIuaWQuY2hhdF9tZXNzYWdlXzQKICAgICAgICAgICAgICAgICAgICAgICAgZWxzZSAtPiAwCiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgICAgIHZhbCBzdGF0dXNJZCA9IHdoZW4gKGkpIHsKICAgICAgICAgICAgICAgICAgICAgICAgMCAtPiBSLmlkLmNoYXRfc3RhdHVzXzEKICAgICAgICAgICAgICAgICAgICAgICAgMSAtPiBSLmlkLmNoYXRfc3RhdHVzXzIKICAgICAgICAgICAgICAgICAgICAgICAgMiAtPiBSLmlkLmNoYXRfc3RhdHVzXzMKICAgICAgICAgICAgICAgICAgICAgICAgMyAtPiBSLmlkLmNoYXRfc3RhdHVzXzQKICAgICAgICAgICAgICAgICAgICAgICAgZWxzZSAtPiAwCiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgICAgIHZhbCB0aW1lSWQgPSB3aGVuIChpKSB7CiAgICAgICAgICAgICAgICAgICAgICAgIDAgLT4gUi5pZC5jaGF0X3RpbWVfMQogICAgICAgICAgICAgICAgICAgICAgICAxIC0+IFIuaWQuY2hhdF90aW1lXzIKICAgICAgICAgICAgICAgICAgICAgICAgMiAtPiBSLmlkLmNoYXRfdGltZV8zCiAgICAgICAgICAgICAgICAgICAgICAgIDMgLT4gUi5pZC5jaGF0X3RpbWVfNAogICAgICAgICAgICAgICAgICAgICAgICBlbHNlIC0+IDAKICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgdmlld3Muc2V0VGV4dFZpZXdUZXh0KG5hbWVJZCwgY2hhdC5maXJzdCkKICAgICAgICAgICAgICAgICAgICB2aWV3cy5zZXRUZXh0Vmlld1RleHQobWVzc2FnZUlkLCBjaGF0LnNlY29uZCkKICAgICAgICAgICAgICAgICAgICB2aWV3cy5zZXRUZXh0Vmlld1RleHQodGltZUlkLCBjaGF0LmZvdXJ0aCkKICAgICAgICAgICAgICAgICAgICB2YWwgc3RhdHVzQ29sb3IgPSBpZiAoY2hhdC50aGlyZCkgQ09MT1JfT05MSU5FIGVsc2UgQ09MT1JfT0ZGTElORQogICAgICAgICAgICAgICAgICAgIHZpZXdzLnNldFRleHRDb2xvcihzdGF0dXNJZCwgQ29sb3IucGFyc2VDb2xvcihzdGF0dXNDb2xvcikpCiAgICAgICAgICAgICAgICAgICAgdmlld3Muc2V0T25DbGlja1BlbmRpbmdJbnRlbnQocm93SWQsIHBlbmRpbmdJbnRlbnQpCiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgICAgICAvLyBTaG93IHdlbGNvbWUgbWVzc2FnZQogICAgICAgICAgICAgICAgdmlld3Muc2V0VGV4dFZpZXdUZXh0KFIuaWQuY2hhdF9uYW1lXzEsICLwn5KsIFBsdXNseSIpCiAgICAgICAgICAgICAgICB2aWV3cy5zZXRUZXh0Vmlld1RleHQoUi5pZC5jaGF0X21lc3NhZ2VfMSwgIk9wZW4gZGUgYXBwIG9tIGNoYXRzIHRlIHppZW4iKQogICAgICAgICAgICAgICAgdmlld3Muc2V0VGV4dFZpZXdUZXh0KFIuaWQuY2hhdF90aW1lXzEsICIiKQogICAgICAgICAgICAgICAgdmlld3Muc2V0VGV4dENvbG9yKFIuaWQuY2hhdF9zdGF0dXNfMSwgQ29sb3IucGFyc2VDb2xvcihDT0xPUl9PTkxJTkUpKQogICAgICAgICAgICAgICAgdmlld3Muc2V0T25DbGlja1BlbmRpbmdJbnRlbnQoUi5pZC5jaGF0X3Jvd18xLCBwZW5kaW5nSW50ZW50KQogICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAvLyBIaWRlIG90aGVyIHJvd3MKICAgICAgICAgICAgICAgIHZpZXdzLnNldFZpZXdWaXNpYmlsaXR5KFIuaWQuY2hhdF9yb3dfMiwgYW5kcm9pZC52aWV3LlZpZXcuR09ORSkKICAgICAgICAgICAgICAgIHZpZXdzLnNldFZpZXdWaXNpYmlsaXR5KFIuaWQuY2hhdF9yb3dfMywgYW5kcm9pZC52aWV3LlZpZXcuR09ORSkKICAgICAgICAgICAgICAgIHZpZXdzLnNldFZpZXdWaXNpYmlsaXR5KFIuaWQuY2hhdF9yb3dfNCwgYW5kcm9pZC52aWV3LlZpZXcuR09ORSkKICAgICAgICAgICAgfQogICAgICAgICAgICAKICAgICAgICAgICAgYXBwV2lkZ2V0TWFuYWdlci51cGRhdGVBcHBXaWRnZXQoYXBwV2lkZ2V0SWQsIHZpZXdzKQogICAgICAgIH0KICAgICAgICBwcml2YXRlIGZ1biByZWFkQ2hhdERhdGEoY29udGV4dDogQ29udGV4dCk6IExpc3Q8UXVhZHJ1cGxlPFN0cmluZywgU3RyaW5nLCBCb29sZWFuLCBTdHJpbmc+PiB7CiAgICAgICAgICAgIC8vIFJldHVybnMgTGlzdCBvZiAobmFtZSwgbWVzc2FnZSwgaXNPbmxpbmUsIHRpbWVzdGFtcCkKICAgICAgICAgICAgcmV0dXJuIHRyeSB7CiAgICAgICAgICAgICAgICB2YWwgZmlsZSA9IEZpbGUoY29udGV4dC5maWxlc0RpciwgQ0hBVF9EQVRBX0ZJTEUpCiAgICAgICAgICAgICAgICBpZiAoIWZpbGUuZXhpc3RzKCkpIHJldHVybiBlbXB0eUxpc3QoKQogICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICB2YWwganNvbiA9IGZpbGUucmVhZFRleHQoKQogICAgICAgICAgICAgICAgdmFsIGpzb25BcnJheSA9IEpTT05BcnJheShqc29uKQogICAgICAgICAgICAgICAgdmFsIHJlc3VsdCA9IG11dGFibGVMaXN0T2Y8UXVhZHJ1cGxlPFN0cmluZywgU3RyaW5nLCBCb29sZWFuLCBTdHJpbmc+PigpCiAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgIGZvciAoaSBpbiAwIHVudGlsIGpzb25BcnJheS5sZW5ndGgoKSkgewogICAgICAgICAgICAgICAgICAgIHZhbCBjaGF0ID0ganNvbkFycmF5LmdldEpTT05PYmplY3QoaSkKICAgICAgICAgICAgICAgICAgICB2YWwgbmFtZSA9IGNoYXQub3B0U3RyaW5nKCJuYW1lIiwgIiIpCiAgICAgICAgICAgICAgICAgICAgdmFsIG1lc3NhZ2UgPSBjaGF0Lm9wdFN0cmluZygibGFzdE1lc3NhZ2UiLCAiIikKICAgICAgICAgICAgICAgICAgICB2YWwgaXNPbmxpbmUgPSBjaGF0Lm9wdEJvb2xlYW4oImlzT25saW5lIiwgZmFsc2UpCiAgICAgICAgICAgICAgICAgICAgdmFsIHRpbWVzdGFtcCA9IGNoYXQub3B0U3RyaW5nKCJ0aW1lc3RhbXAiLCAiIikKICAgICAgICAgICAgICAgICAgICBpZiAobmFtZS5pc05vdEVtcHR5KCkpIHsKICAgICAgICAgICAgICAgICAgICAgICAgcmVzdWx0LmFkZChRdWFkcnVwbGUobmFtZSwgbWVzc2FnZSwgaXNPbmxpbmUsIHRpbWVzdGFtcCkpCiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgcmVzdWx0CiAgICAgICAgICAgIH0gY2F0Y2ggKGU6IEV4Y2VwdGlvbikgewogICAgICAgICAgICAgICAgZW1wdHlMaXN0KCkKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KfQovLyBTaW1wbGUgcXVhZHJ1cGxlIGNsYXNzCmRhdGEgY2xhc3MgUXVhZHJ1cGxlPEEsIEIsIEMsIEQ+KHZhbCBmaXJzdDogQSwgdmFsIHNlY29uZDogQiwgdmFsIHRoaXJkOiBDLCB2YWwgZm91cnRoOiBEKQo=
+package com.danield.plusly.app
+
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProvider
+import android.content.Context
+import android.content.Intent
+import android.graphics.Color
+import android.widget.RemoteViews
+import android.app.PendingIntent
+import org.json.JSONArray
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+class ChatWidgetProvider : AppWidgetProvider() {
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray
+    ) {
+        for (appWidgetId in appWidgetIds) {
+            Companion.updateAppWidget(context, appWidgetManager, appWidgetId)
+        }
+    }
+    override fun onEnabled(context: Context) { }
+    override fun onDisabled(context: Context) { }
+    companion object {
+        private const val CHAT_DATA_FILE = "chat_widget_data.json"
+        private const val COLOR_ONLINE = "#4CAF50"
+        private const val COLOR_OFFLINE = "#9E9E9E"
+        private const val COLOR_HEADER = "#6750A4"
+
+        fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
+            val views = RemoteViews(context.packageName, R.layout.plusly_widget)
+            val intent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            val chatData = readChatData(context)
+            if (chatData.isNotEmpty()) {
+                for (i in chatData.indices) {
+                    if (i >= 4) break
+                    val chat = chatData[i]
+                    val rowId = when (i) { 0 -> R.id.chat_row_1; 1 -> R.id.chat_row_2; 2 -> R.id.chat_row_3; 3 -> R.id.chat_row_4; else -> continue }
+                    val nameId = when (i) { 0 -> R.id.chat_name_1; 1 -> R.id.chat_name_2; 2 -> R.id.chat_name_3; 3 -> R.id.chat_name_4; else -> 0 }
+                    val messageId = when (i) { 0 -> R.id.chat_message_1; 1 -> R.id.chat_message_2; 2 -> R.id.chat_message_3; 3 -> R.id.chat_message_4; else -> 0 }
+                    val statusId = when (i) { 0 -> R.id.chat_status_1; 1 -> R.id.chat_status_2; 2 -> R.id.chat_status_3; 3 -> R.id.chat_status_4; else -> 0 }
+                    val timeId = when (i) { 0 -> R.id.chat_time_1; 1 -> R.id.chat_time_2; 2 -> R.id.chat_time_3; 3 -> R.id.chat_time_4; else -> 0 }
+                    views.setTextViewText(nameId, chat.first)
+                    views.setTextViewText(messageId, chat.second)
+                    views.setTextViewText(timeId, chat.fourth)
+                    val statusColor = if (chat.third) COLOR_ONLINE else COLOR_OFFLINE
+                    views.setTextColor(statusId, Color.parseColor(statusColor))
+                    views.setOnClickPendingIntent(rowId, pendingIntent)
+                }
+            } else {
+                views.setTextViewText(R.id.chat_name_1, "Plusly")
+                views.setTextViewText(R.id.chat_message_1, "Open de app om chats te zien")
+                views.setTextViewText(R.id.chat_time_1, "")
+                views.setTextColor(R.id.chat_status_1, Color.parseColor(COLOR_ONLINE))
+                views.setOnClickPendingIntent(R.id.chat_row_1, pendingIntent)
+                views.setViewVisibility(R.id.chat_row_2, android.view.View.GONE)
+                views.setViewVisibility(R.id.chat_row_3, android.view.View.GONE)
+                views.setViewVisibility(R.id.chat_row_4, android.view.View.GONE)
+            }
+            appWidgetManager.updateAppWidget(appWidgetId, views)
+        }
+        private fun readChatData(context: Context): List<Quadruple<String, String, Boolean, String>> {
+            return try {
+                val file = File(context.filesDir, CHAT_DATA_FILE)
+                if (!file.exists()) return emptyList()
+                val json = file.readText()
+                val jsonArray = JSONArray(json)
+                val result = mutableListOf<Quadruple<String, String, Boolean, String>>()
+                for (i in 0 until jsonArray.length()) {
+                    val chat = jsonArray.getJSONObject(i)
+                    val name = chat.optString("name", "")
+                    val message = chat.optString("lastMessage", "")
+                    val isOnline = chat.optBoolean("isOnline", false)
+                    val timestamp = chat.optString("timestamp", "")
+                    if (name.isNotEmpty()) result.add(Quadruple(name, message, isOnline, timestamp))
+                }
+                result
+            } catch (e: Exception) { emptyList() }
+        }
+    }
+}
+data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
