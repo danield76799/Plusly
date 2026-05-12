@@ -58,8 +58,8 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build debug APK for testing
-        run: flutter build apk --debug
+      - name: Build release APK for arm64 only
+        run: flutter build apk --release --target-platform android-arm64
 
       - name: Verify APK signature
         run: |
