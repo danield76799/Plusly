@@ -28,8 +28,8 @@ jobs:
     - name: Get dependencies
       run: flutter pub get
     
-    - name: Build APK
-      run: flutter build apk --release --target-platform android-arm64,android-arm
+    - name: Build APK (arm64 only)
+      run: flutter build apk --release --target-platform android-arm64
     
     - name: Sign APK
       env:
