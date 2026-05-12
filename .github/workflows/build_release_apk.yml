@@ -22,50 +22,34 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          # Decode base64 keystore
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
-          
-          # Verify keystore
-          if [ ! -s android/app/keystore.jks ]; then
-            echo "❌ Error: Keystore file is empty"
-            exit 1
-          fi
-          echo "✅ Keystore created"
-
-      - name: Create key.properties
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          # Get absolute path to keystore
-          KEYSTORE_PATH=$(realpath android/app/keystore.jks)
-          echo "Keystore path: $KEYSTORE_PATH"
-          
-          cat > android/key.properties << EOF
-          storePassword=$KEYSTORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=$KEY_ALIAS
-          storeFile=$KEYSTORE_PATH
-          EOF
-          echo "✅ key.properties created"
-          cat android/key.properties
+      - name: Clean Flutter build
+        run: flutter clean
 
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build release APK (fat APK for all architectures)
-        run: flutter build apk --release
+      - name: Build APK (unsigned first)
+        run: flutter build apk --release --target-platform android-arm64,android-arm
 
-      - name: Verify APK signature
+      - name: Sign APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          # Check if APK is properly signed
-          jarsigner -verify -verbose build/app/outputs/flutter-apk/app-release.apk | head -20
-          echo "✅ APK signature verified"
+          # Decode keystore
+          echo "$KEYSTORE_BASE64" | base64 -d > /tmp/keystore.jks
+          
+          # Sign the APK
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore /tmp/keystore.jks \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            build/app/outputs/flutter-apk/app-release.apk "$KEY_ALIAS"
+          
+          # Verify
+          jarsigner -verify build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
