@@ -42,13 +42,18 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          # Get absolute path to keystore
+          KEYSTORE_PATH=$(realpath android/app/keystore.jks)
+          echo "Keystore path: $KEYSTORE_PATH"
+          
           cat > android/key.properties << EOF
           storePassword=$KEYSTORE_PASSWORD
           keyPassword=$KEY_PASSWORD
           keyAlias=$KEY_ALIAS
-          storeFile=keystore.jks
+          storeFile=$KEYSTORE_PATH
           EOF
           echo "✅ key.properties created"
+          cat android/key.properties
 
       - name: Get dependencies
         run: flutter pub get
