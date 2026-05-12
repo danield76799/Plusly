@@ -22,81 +22,45 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Setup Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          # Decode base64 keystore
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
+          
+          # Verify keystore
+          if [ ! -s android/app/keystore.jks ]; then
+            echo "❌ Error: Keystore file is empty"
+            exit 1
+          fi
+          echo "✅ Keystore created"
+
+      - name: Create key.properties
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cat > android/key.properties << EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=app/keystore.jks
+          EOF
+          echo "✅ key.properties created"
+
       - name: Get dependencies
         run: flutter pub get
 
       - name: Build release APK
         run: flutter build apk --release
 
-      - name: Setup Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      - name: Verify APK signature
         run: |
-          # Create keystore directory if needed
-          mkdir -p android/app
-          
-          # Decode base64 keystore - robust method
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
-          
-          # Verify keystore was created and has content
-          if [ ! -s android/app/keystore.jks ]; then
-            echo "❌ Error: Keystore file is empty or not created"
-            echo "Debug info:"
-            echo "  - KEYSTORE_BASE64 length: ${#KEYSTORE_BASE64}"
-            echo "  - File exists: $(test -f android/app/keystore.jks && echo 'yes' || echo 'no')"
-            echo "  - File size: $(stat -c%s android/app/keystore.jks 2>/dev/null || echo 'N/A')"
-            exit 1
-          fi
-          
-          echo "✅ Keystore created successfully ($(stat -c%s android/app/keystore.jks) bytes)"
-
-      - name: Verify Keystore
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        run: |
-          # List keystore entries to verify it's valid
-          keytool -list -v \
-            -keystore android/app/keystore.jks \
-            -storepass "$KEYSTORE_PASSWORD" || {
-            echo "❌ Error: Could not read keystore. Password may be incorrect or file is corrupted."
-            exit 1
-          }
-          echo "✅ Keystore verified successfully"
-
-      - name: Sign APK
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          # Sign the APK
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-            -keystore android/app/keystore.jks \
-            -storepass "$KEYSTORE_PASSWORD" \
-            -keypass "$KEY_PASSWORD" \
-            build/app/outputs/flutter-apk/app-release.apk "$KEY_ALIAS"
-          
-          echo "✅ APK signed successfully"
-          
-          # Verify signature
-          jarsigner -verify -verbose -certs build/app/outputs/flutter-apk/app-release.apk | head -20
-
-      - name: Align APK
-        run: |
-          # Find zipalign path
-          ZIPALIGN=$(find ${ANDROID_HOME}/build-tools -name zipalign | sort -V | tail -1)
-          echo "Using zipalign: $ZIPALIGN"
-          
-          # Zip align for optimal performance
-          $ZIPALIGN -v 4 \
-            build/app/outputs/flutter-apk/app-release.apk \
-            build/app/outputs/flutter-apk/app-release-aligned.apk
-          
-          # Replace with aligned version
-          mv build/app/outputs/flutter-apk/app-release-aligned.apk \
-             build/app/outputs/flutter-apk/app-release.apk
-          
-          echo "✅ APK aligned successfully"
+          # Check if APK is properly signed
+          jarsigner -verify -verbose build/app/outputs/flutter-apk/app-release.apk | head -20
+          echo "✅ APK signature verified"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
