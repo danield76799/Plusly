@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plusly - Feature-rich Matrix Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 100px 20px;
+            color: white;
+        }
+        
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .tagline {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: #fff;
+            color: #667eea;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 10px;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .features {
+            background: white;
+            padding: 80px 20px;
+        }
+        
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: #333;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: transform 0.3s;
+        }
+        
+        .feature:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .screenshots {
+            background: #f8f9fa;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        
+        .screenshots h2 {
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+        }
+        
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .screenshot {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .screenshot img {
+            width: 100%;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Plusly</h1>
+            <p class="tagline">Een feature-rich Matrix client voor veilige, gedecentraliseerde communicatie</p>
+            <a href="#download" class="download-btn">Download APK</a>
+            <a href="https://github.com/danield76799/Plusly" class="download-btn">GitHub</a>
+        </div>
+    </header>
+
+    <section class="features">
+        <div class="container">
+            <h2>Features</h2>
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Veilige Messaging</h3>
+                    <p>End-to-end encryptie voor al je gesprekken. Jouw privacy staat voorop.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Gedecentraliseerd</h3>
+                    <p>Geen centrale server. Jij beheert je eigen data en communicatie.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Vertalingen</h3>
+                    <p>Real-time berichtvertaling met LibreTranslate. Communiceer in elke taal.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h3>Cross-Platform</h3>
+                    <p>Beschikbaar op Android, iOS, desktop en web. Overal en altijd.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Aanpasbaar</h3>
+                    <p>Personaliseer je ervaring met themes en instellingen naar jouw smaak.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💜</div>
+                    <h3>Open Source</h3>
+                    <p>Volledig transparant. Geen verborgen agenda's, geen data verkoop.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="screenshots">
+        <div class="container">
+            <h2>Screenshots</h2>
+            <div class="screenshot-grid">
+                <div class="screenshot">
+                    <img src="screenshot1.png" alt="Plusly Chat">
+                    <p>Chat Interface</p>
+                </div>
+                <div class="screenshot">
+                    <img src="screenshot2.png" alt="Plusly Settings">
+                    <p>Instellingen</p>
+                </div>
+                <div class="screenshot">
+                    <img src="screenshot3.png" alt="Plusly Translator">
+                    <p>Vertaler</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>Made with 💜 by <a href="https://github.com/danield76799">Daan</a></p>
+            <p>Plusly is open source software onder de AGPL-3.0 licentie</p>
+            <p><a href="https://github.com/danield76799/Plusly">GitHub</a> | <a href="https://github.com/danield76799/Plusly/issues">Support</a></p>
+        </div>
+    </footer>
+</body>
+</html>
