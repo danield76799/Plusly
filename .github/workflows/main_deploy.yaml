@@ -81,6 +81,10 @@ jobs:
             tail -100 build.log
             exit $BUILD_EXIT_CODE
           fi
+          # Copy APK to known location
+          mkdir -p output
+          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
+          ls -la output/
 
       - name: Upload Build Log
         uses: actions/upload-artifact@v4
@@ -94,14 +98,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: output/plusly-release.apk
           retention-days: 7
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.6
-          name: Plusly v1.0.6
-          files: build/app/outputs/flutter-apk/app-release.apk
+          tag_name: v1.0.7
+          name: Plusly v1.0.7
+          files: output/plusly-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
