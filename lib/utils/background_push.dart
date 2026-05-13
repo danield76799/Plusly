@@ -350,19 +350,25 @@ class BackgroundPush {
       // Check if saved distributor exists but endpoint is invalid (post-reset scenario)
       // This forces the distributor picker to show again if push stopped working
       final savedDistributor = await UnifiedPush.getDistributor();
-      if (savedDistributor != null) {
-        // Check if we have an endpoint for the first logged-in client
-        final firstLoggedIn = clients.firstWhere(
-          (c) => c.isLogged(),
-          orElse: () => clients.first,
-        );
-        final storedEndpoint = matrix?.store.getString(
-          firstLoggedIn.clientName + AppSettings.unifiedPushEndpoint.key,
-        );
-        if (storedEndpoint == null || storedEndpoint.isEmpty) {
-          Logs().i('[Push] Post-reset detected, clearing saved distributor to force re-setup');
-          await UnifiedPush.saveDistributor('');  // Clear to force picker
+      
+      // Check if we have an endpoint for any logged-in client
+      var hasValidEndpoint = false;
+      for (final client in clients) {
+        if (client.isLogged()) {
+          final storedEndpoint = matrix?.store.getString(
+            client.clientName + AppSettings.unifiedPushEndpoint.key,
+          );
+          if (storedEndpoint != null && storedEndpoint.isNotEmpty) {
+            hasValidEndpoint = true;
+            break;
+          }
         }
+      }
+      
+      // If no valid endpoint found, or no saved distributor, force re-setup
+      if (!hasValidEndpoint || savedDistributor == null || savedDistributor.isEmpty) {
+        Logs().i('[Push] Post-reset or missing registration detected, clearing to force re-setup');
+        await UnifiedPush.saveDistributor('');  // Clear to force picker
       }
       await setupUp();
     } else {
