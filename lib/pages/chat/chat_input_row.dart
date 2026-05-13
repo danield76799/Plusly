@@ -458,10 +458,15 @@ class ChatInputRow extends StatelessWidget {
                                       ? () => controller.sendScheduleAction()
                                       : null,
                                   child: Container(
-                                    height: 56,
-                                    width: 56,
+                                    height: 48,
+                                    width: 48,
                                     alignment: Alignment.center,
-                                    padding: const EdgeInsets.all(18.0),
+                                    decoration: BoxDecoration(
+                                      color: controller.sendController.text.isNotEmpty
+                                          ? const Color(0xFF00A884)  // WhatsApp green
+                                          : Colors.transparent,
+                                      shape: BoxShape.circle,
+                                    ),
                                     child: AnimatedSwitcher(
                                       duration: MediaQuery.of(context).disableAnimations
                                           ? Duration.zero
@@ -472,7 +477,7 @@ class ChatInputRow extends StatelessWidget {
                                         color: controller.sendController.text.isNotEmpty
                                             ? Colors.white
                                             : theme.onBubbleColor,
-                                        size: 18,
+                                        size: 20,
                                       ),
                                     ),
                                   ),
