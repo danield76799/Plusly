@@ -173,7 +173,22 @@ class ChatInputRow extends StatelessWidget {
                       alignment: Alignment.center,
                       child: _ChatAccountPicker(controller),
                     ),
-                  // Attachment menu (WhatsApp style - plus icon only)
+                  // Camera button (direct photo)
+                  Container(
+                    height: height,
+                    width: height,
+                    alignment: Alignment.center,
+                    child: Semantics(
+                      label: 'Take photo',
+                      button: true,
+                      child: IconButton(
+                        icon: const Icon(Icons.camera_alt_outlined),
+                        color: Theme.of(context).colorScheme.onSurface,
+                        onPressed: () => controller.onAddPopupMenuButtonSelected('camera'),
+                      ),
+                    ),
+                  ),
+                  // Attachment menu (WhatsApp style - plus icon)
                   Container(
                     height: height,
                     width: height,
