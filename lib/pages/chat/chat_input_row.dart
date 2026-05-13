@@ -193,10 +193,31 @@ class ChatInputRow extends StatelessWidget {
                             ),
                           ),
                           PopupMenuItem(
+                            value: 'camera',
+                            child: ListTile(
+                              leading: const Icon(Icons.camera_alt_outlined),
+                              title: Text(L10n.of(context).openCamera),
+                            ),
+                          ),
+                          PopupMenuItem(
                             value: 'video',
                             child: ListTile(
-                              leading: const Icon(Icons.video_camera_back_outlined),
+                              leading: const Icon(Icons.video_library_outlined),
                               title: Text(L10n.of(context).sendVideo),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'camera-video',
+                            child: ListTile(
+                              leading: const Icon(Icons.videocam_outlined),
+                              title: Text(L10n.of(context).openVideoCamera),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'location',
+                            child: ListTile(
+                              leading: const Icon(Icons.location_on_outlined),
+                              title: Text(L10n.of(context).shareLocation),
                             ),
                           ),
                           PopupMenuItem(
@@ -211,13 +232,6 @@ class ChatInputRow extends StatelessWidget {
                             child: ListTile(
                               leading: const Icon(Icons.poll_outlined),
                               title: Text(L10n.of(context).startPoll),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'location',
-                            child: ListTile(
-                              leading: const Icon(Icons.location_on_outlined),
-                              title: Text(L10n.of(context).shareLocation),
                             ),
                           ),
                         ],
