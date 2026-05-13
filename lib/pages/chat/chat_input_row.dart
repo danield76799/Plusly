@@ -232,12 +232,12 @@ class ChatInputRow extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 2),
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
+                        horizontal: 4.0,
+                        vertical: 8.0,
                       ),
                       child: Container(
                         decoration: BoxDecoration(
@@ -281,10 +281,10 @@ class ChatInputRow extends StatelessWidget {
                               controller: controller.sendController,
                               decoration: InputDecoration(
                                 contentPadding: const EdgeInsets.only(
-                                  left: 16.0,
-                                  right: 16.0,
-                                  bottom: 12.0,
-                                  top: 12.0,
+                                  left: 12.0,
+                                  right: 12.0,
+                                  bottom: 8.0,
+                                  top: 8.0,
                                 ),
                                 counter: const SizedBox.shrink(),
                                 hintText: L10n.of(context).writeAMessage,
