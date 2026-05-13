@@ -441,22 +441,42 @@ class BackgroundPush {
       return;
     }
 
-    // Always clear saved distributor AND stored endpoint to force fresh registration
-    // This ensures push works reliably without manual "Activeer" button
-    Logs().i('[Push] Clearing saved distributor and endpoints to force re-registration');
-    await UnifiedPush.saveDistributor('');
+    // Only clear saved distributor if we detect a problem (no valid endpoint)
+    // Don't clear on every app start to avoid unnecessary re-registration
+    Logs().i('[Push] Checking existing push registration...');
     
-    // Also clear stored endpoints for all clients to force fresh registration
+    var needsReRegistration = false;
     for (final client in clients) {
       if (client.isLogged()) {
-        await matrix?.store.setString(
+        final endpoint = matrix?.store.getString(
           client.clientName + AppSettings.unifiedPushEndpoint.key,
-          '',
         );
-        await matrix?.store.setBool(
+        final registered = matrix?.store.getBool(
           client.clientName + AppSettings.unifiedPushRegistered.key,
-          false,
-        );
+        ) ?? false;
+        
+        if (endpoint == null || endpoint.isEmpty || !registered) {
+          needsReRegistration = true;
+          Logs().i('[Push] Client ${client.clientName} needs re-registration');
+        }
+      }
+    }
+    
+    if (needsReRegistration) {
+      Logs().i('[Push] Clearing saved distributor to force re-registration');
+      await UnifiedPush.saveDistributor('');
+      
+      for (final client in clients) {
+        if (client.isLogged()) {
+          await matrix?.store.setString(
+            client.clientName + AppSettings.unifiedPushEndpoint.key,
+            '',
+          );
+          await matrix?.store.setBool(
+            client.clientName + AppSettings.unifiedPushRegistered.key,
+            false,
+          );
+        }
       }
     }
     
