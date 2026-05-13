@@ -59,11 +59,11 @@ class ChatInputRow extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
                   children: [
-                    _buildChip(context, '/image gen', Icons.image_outlined),
+                    _buildChip(context, '/image gen', Icons.image_outlined, controller),
                     const SizedBox(width: 8),
-                    _buildChip(context, '/summarize', Icons.summarize_outlined),
+                    _buildChip(context, '/summarize', Icons.summarize_outlined, controller),
                     const SizedBox(width: 8),
-                    _buildChip(context, '/translate', Icons.translate_outlined),
+                    _buildChip(context, '/translate', Icons.translate_outlined, controller),
                   ],
                 ),
               ),
@@ -461,14 +461,14 @@ class ChatInputRow extends StatelessWidget {
     );
   }
 
-  Widget _buildChip(BuildContext context, String label, IconData icon) {
+  Widget _buildChip(BuildContext context, String label, IconData icon, ChatController chipController) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
           // Handle chip tap
-          controller.sendController.text = label + ' ';
-          controller.inputFocus.requestFocus();
+          chipController.sendController.text = label + ' ';
+          chipController.inputFocus.requestFocus();
         },
         borderRadius: BorderRadius.circular(16),
         child: Container(
