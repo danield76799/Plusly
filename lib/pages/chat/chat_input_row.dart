@@ -173,7 +173,82 @@ class ChatInputRow extends StatelessWidget {
                       alignment: Alignment.center,
                       child: _ChatAccountPicker(controller),
                     ),
-                  // Text field with attachment and camera inside (WhatsApp style)
+                  // Camera button (direct photo)
+                  Container(
+                    height: height,
+                    width: height,
+                    alignment: Alignment.center,
+                    child: Semantics(
+                      label: 'Take photo',
+                      button: true,
+                      child: IconButton(
+                        icon: const Icon(Icons.camera_alt_outlined),
+                        color: Theme.of(context).colorScheme.onSurface,
+                        onPressed: () => controller.onAddPopupMenuButtonSelected('camera'),
+                      ),
+                    ),
+                  ),
+                  // Attachment menu
+                  Container(
+                    height: height,
+                    width: height,
+                    alignment: Alignment.center,
+                    child: Semantics(
+                      label: 'Add attachment',
+                      button: true,
+                      child: PopupMenuButton<String>(
+                        icon: const Icon(Icons.add_circle_outline),
+                        color: theme.colorScheme.surface,
+                        onSelected: controller.onAddPopupMenuButtonSelected,
+                        itemBuilder: (BuildContext context) => [
+                          PopupMenuItem(
+                            value: 'image',
+                            child: ListTile(
+                              leading: const Icon(Icons.photo_outlined),
+                              title: Text(L10n.of(context).sendImage),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'video',
+                            child: ListTile(
+                              leading: const Icon(Icons.video_library_outlined),
+                              title: Text(L10n.of(context).sendVideo),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'camera-video',
+                            child: ListTile(
+                              leading: const Icon(Icons.videocam_outlined),
+                              title: Text(L10n.of(context).openVideoCamera),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'location',
+                            child: ListTile(
+                              leading: const Icon(Icons.location_on_outlined),
+                              title: Text(L10n.of(context).shareLocation),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'file',
+                            child: ListTile(
+                              leading: const Icon(Icons.attachment_outlined),
+                              title: Text(L10n.of(context).sendFile),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'poll',
+                            child: ListTile(
+                              leading: const Icon(Icons.poll_outlined),
+                              title: Text(L10n.of(context).startPoll),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16.0,
@@ -197,110 +272,45 @@ class ChatInputRow extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: Row(
-                          children: [
-                            // Attachment menu inside text field (WhatsApp style)
-                            PopupMenuButton<String>(
-                              icon: const Icon(Icons.attach_file),
-                              color: theme.colorScheme.surface,
-                              onSelected: controller.onAddPopupMenuButtonSelected,
-                              itemBuilder: (BuildContext context) => [
-                                PopupMenuItem(
-                                  value: 'image',
-                                  child: ListTile(
-                                    leading: const Icon(Icons.photo_outlined),
-                                    title: Text(L10n.of(context).sendImage),
-                                  ),
+                        child: Semantics(
+                          label: 'Paste image from clipboard',
+                          button: true,
+                          child: ChatPasteShortcut(
+                            onPaste: () {
+                              controller.sendImageFromClipBoard(null);
+                            },
+                            child: InputBar(
+                              room: controller.room,
+                              minLines: 1,
+                              maxLines: 8,
+                              autofocus: !PlatformInfos.isMobile,
+                              keyboardType: TextInputType.multiline,
+                              textInputAction:
+                                  AppSettings.sendOnEnter.value &&
+                                      PlatformInfos.isMobile
+                                  ? TextInputAction.send
+                                  : null,
+                              onSubmitted: controller.onInputBarSubmitted,
+                              onSubmitImage: controller.sendImageFromClipBoard,
+                              focusNode: controller.inputFocus,
+                              controller: controller.sendController,
+                              decoration: InputDecoration(
+                                contentPadding: const EdgeInsets.only(
+                                  left: 16.0,
+                                  right: 16.0,
+                                  bottom: 12.0,
+                                  top: 12.0,
                                 ),
-                                PopupMenuItem(
-                                  value: 'video',
-                                  child: ListTile(
-                                    leading: const Icon(Icons.video_library_outlined),
-                                    title: Text(L10n.of(context).sendVideo),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'camera',
-                                  child: ListTile(
-                                    leading: const Icon(Icons.camera_alt_outlined),
-                                    title: Text(L10n.of(context).openCamera),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'camera-video',
-                                  child: ListTile(
-                                    leading: const Icon(Icons.videocam_outlined),
-                                    title: Text(L10n.of(context).openVideoCamera),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'location',
-                                  child: ListTile(
-                                    leading: const Icon(Icons.location_on_outlined),
-                                    title: Text(L10n.of(context).shareLocation),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'file',
-                                  child: ListTile(
-                                    leading: const Icon(Icons.attachment_outlined),
-                                    title: Text(L10n.of(context).sendFile),
-                                  ),
-                                ),
-                                PopupMenuItem(
-                                  value: 'poll',
-                                  child: ListTile(
-                                    leading: const Icon(Icons.poll_outlined),
-                                    title: Text(L10n.of(context).startPoll),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            // Text input
-                            Expanded(
-                              child: InputBar(
-                                room: controller.room,
-                                minLines: 1,
-                                maxLines: 8,
-                                autofocus: !PlatformInfos.isMobile,
-                                keyboardType: TextInputType.multiline,
-                                textInputAction:
-                                    AppSettings.sendOnEnter.value &&
-                                        PlatformInfos.isMobile
-                                    ? TextInputAction.send
-                                    : null,
-                                onSubmitted: controller.onInputBarSubmitted,
-                                onSubmitImage: controller.sendImageFromClipBoard,
-                                focusNode: controller.inputFocus,
-                                controller: controller.sendController,
-                                decoration: InputDecoration(
-                                  contentPadding: const EdgeInsets.only(
-                                    left: 4.0,
-                                    right: 4.0,
-                                    bottom: 8.0,
-                                    top: 8.0,
-                                  ),
-                                  counter: const SizedBox.shrink(),
-                                  hintText: L10n.of(context).writeAMessage,
-                                  hintMaxLines: 1,
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  filled: false,
-                                ),
-                                onChanged: controller.onInputBarChanged,
+                                counter: const SizedBox.shrink(),
+                                hintText: L10n.of(context).writeAMessage,
+                                hintMaxLines: 1,
+                                border: InputBorder.none,
+                                enabledBorder: InputBorder.none,
+                                filled: false,
                               ),
+                              onChanged: controller.onInputBarChanged,
                             ),
-                            // Camera button inside text field (WhatsApp style)
-                            Semantics(
-                              label: 'Take photo',
-                              button: true,
-                              child: IconButton(
-                                icon: const Icon(Icons.camera_alt_outlined),
-                                color: Theme.of(context).colorScheme.onSurface,
-                                onPressed: () => controller.onAddPopupMenuButtonSelected('camera'),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
