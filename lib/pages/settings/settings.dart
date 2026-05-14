@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:extera_next/utils/clean_exif.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -226,13 +228,20 @@ class SettingsController extends State<Settings> {
         imageQuality: 50,
       );
       if (result == null) return;
-      file = MatrixFile(bytes: await result.readAsBytes(), name: result.path);
+      file = MatrixFile(
+        bytes: Uint8List.fromList(
+          ExifCleaner.removeExifData(await result.readAsBytes()),
+        ),
+        name: result.path,
+      );
     } else {
       final result = await selectFiles(context, type: FileType.image);
       final pickedFile = result.firstOrNull;
       if (pickedFile == null) return;
       file = MatrixFile(
-        bytes: await pickedFile.readAsBytes(),
+        bytes: Uint8List.fromList(
+          ExifCleaner.removeExifData(await pickedFile.readAsBytes()),
+        ),
         name: pickedFile.name,
       );
     }

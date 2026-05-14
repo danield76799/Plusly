@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
+import 'package:extera_next/utils/clean_exif.dart';
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
@@ -568,7 +570,9 @@ class RegisterController extends State<Register> {
       }
 
       if (avatarFile != null) {
-        final bytes = await avatarFile!.readAsBytes();
+        final bytes = Uint8List.fromList(
+          ExifCleaner.removeExifData(await avatarFile!.readAsBytes()),
+        );
         final mimeType = avatarFile!.mimeType ?? 'image/png';
         final uploaded = await client.uploadContent(
           bytes,

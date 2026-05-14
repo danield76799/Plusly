@@ -11,7 +11,7 @@ class ExifCleaner {
 
     if (image == null) {
       if (AppSettings.doNotSendIfCantClean.value) {
-        throw Exception('Failed to decode image');
+        throw Exception('Failed to clean image metadata');
       } else {
         return imageBytes;
       }

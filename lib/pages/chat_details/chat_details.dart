@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+
+import 'package:extera_next/utils/clean_exif.dart';
 import 'package:flutter/material.dart';
 
 import 'package:collection/collection.dart';
@@ -149,7 +152,12 @@ class ChatDetailsController extends State<ChatDetails> {
         imageQuality: 50,
       );
       if (result == null) return;
-      file = MatrixFile(bytes: await result.readAsBytes(), name: result.path);
+      file = MatrixFile(
+        bytes: Uint8List.fromList(
+          ExifCleaner.removeExifData(await result.readAsBytes()),
+        ),
+        name: result.path,
+      );
     } else {
       final picked = await selectFiles(
         context,
@@ -159,7 +167,7 @@ class ChatDetailsController extends State<ChatDetails> {
       final pickedFile = picked.firstOrNull;
       if (pickedFile == null) return;
       file = MatrixFile(
-        bytes: await pickedFile.readAsBytes(),
+        bytes: Uint8List.fromList(await pickedFile.readAsBytes()),
         name: pickedFile.name,
       );
     }
