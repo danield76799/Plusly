@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart';
 import 'package:matrix/matrix.dart';
 
-import 'package:extera_next/config/app_config.dart';
 import 'package:extera_next/config/setting_keys.dart';
 import 'package:extera_next/pages/chat_list/chat_list.dart';
 import 'package:extera_next/widgets/unread_rooms_badge.dart';
@@ -11,8 +10,9 @@ import '../../widgets/matrix.dart';
 
 class ChatListBottomNavbar extends StatefulWidget {
   final ChatListController controller;
+  final Widget? fab;
 
-  const ChatListBottomNavbar(this.controller, {super.key});
+  const ChatListBottomNavbar(this.controller, {this.fab, super.key});
 
   @override
   State<ChatListBottomNavbar> createState() => _ChatListBottomNavbarState();
@@ -66,90 +66,90 @@ class _ChatListBottomNavbarState extends State<ChatListBottomNavbar> {
       ActiveFilter.people: (Room room) => false,
     };
 
-    return Material(
-      borderRadius: BorderRadius.circular(AppConfig.borderRadius),
-      clipBehavior: Clip.hardEdge,
-      color: theme.colorScheme.surfaceContainerHigh,
-      child: Padding(
-        padding: const EdgeInsets.all(4),
-        child: Row(
-          children: filters.map((filter) {
-            final isActive = _c.activeFilter == filter;
+    return Row(
+      mainAxisSize: .max,
+      spacing: 8,
+      children: [
+        Flexible(
+          flex: 1,
+          child: Material(
+            borderRadius: BorderRadius.circular(128),
+            clipBehavior: Clip.hardEdge,
+            color: theme.colorScheme.surfaceContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Row(
+                children: filters.map((filter) {
+                  final isActive = _c.activeFilter == filter;
 
-            final backgroundColor = isActive
-                ? theme.colorScheme.secondaryContainer
-                : Colors.transparent;
+                  final backgroundColor = isActive
+                      ? theme.colorScheme.surfaceContainerHighest
+                      : Colors.transparent;
 
-            final foregroundColor = isActive
-                ? theme.colorScheme.onSecondaryContainer
-                : theme.colorScheme.onSurfaceVariant;
+                  final foregroundColor = isActive
+                      ? theme.colorScheme.onSecondaryContainer
+                      : theme.colorScheme.onSurfaceVariant;
 
-            final currentBorderRadius = BorderRadius.circular(
-              isActive ? AppConfig.borderRadius - 4 : AppConfig.borderRadius,
-            );
+                  final currentBorderRadius = BorderRadius.circular(
+                    isActive ? 124 : 128,
+                  );
 
-            return Expanded(
-              key: ValueKey(filter),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                    color: backgroundColor,
-                    borderRadius: currentBorderRadius,
-                  ),
-                  child: Material(
-                    type: MaterialType.transparency,
-                    child: InkWell(
-                      onTap: () => _c.setActiveFilter(filter),
-                      borderRadius: currentBorderRadius,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
+                  return Expanded(
+                    key: ValueKey(filter),
+                    child: Padding(
+                      padding: const .all(8),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInOut,
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(
+                          color: backgroundColor,
+                          borderRadius: currentBorderRadius,
                         ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (isActive)
-                              Icon(
-                                filter.toIconData(false),
-                                size: 20,
-                                color: foregroundColor,
-                              )
-                            else
-                              UnreadRoomsBadge(
-                                filter: filterLambdas[filter]!,
-                                badgePosition: BadgePosition.topEnd(),
-                                child: Icon(
-                                  filter.toIconData(true),
-                                  size: 20,
-                                  color: foregroundColor,
-                                ),
+                        child: Material(
+                          type: MaterialType.transparency,
+                          child: InkWell(
+                            onTap: () => _c.setActiveFilter(filter),
+                            borderRadius: currentBorderRadius,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 8,
                               ),
-                            const SizedBox(height: 4),
-                            Text(
-                              filter.toLocalizedString(context),
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: foregroundColor,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (isActive)
+                                    Icon(
+                                      filter.toIconData(false),
+                                      size: 20,
+                                      color: foregroundColor,
+                                    )
+                                  else
+                                    UnreadRoomsBadge(
+                                      filter: filterLambdas[filter]!,
+                                      badgePosition: BadgePosition.topEnd(),
+                                      child: Icon(
+                                        filter.toIconData(true),
+                                        size: 20,
+                                        color: foregroundColor,
+                                      ),
+                                    ),
+                                ],
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                }).toList(),
               ),
-            );
-          }).toList(),
+            ),
+          ),
         ),
-      ),
+        widget.fab ?? const SizedBox.shrink(),
+      ],
     );
   }
 }

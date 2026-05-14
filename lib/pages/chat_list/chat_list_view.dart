@@ -24,6 +24,17 @@ class ChatListView extends StatelessWidget {
     final client = matrix.client;
     final theme = Theme.of(context);
 
+    final fab = AppSettings.useLegacyNavBar.value
+        ? FloatingActionButton.extended(
+            onPressed: () => context.go('/rooms/newprivatechat'),
+            icon: const Icon(Icons.chat_outlined),
+            label: Text(L10n.of(context).newChat),
+          )
+        : FloatingActionButton(
+            onPressed: () => context.go('/rooms/newprivatechat'),
+            child: const Icon(Icons.chat_outlined),
+          );
+
     return PopScope(
       canPop: !controller.isSearchMode && controller.activeSpaceId == null,
       onPopInvokedWithResult: (pop, _) {
@@ -96,30 +107,14 @@ class ChatListView extends StatelessWidget {
                     SafeArea(
                       child: Stack(
                         children: [
-                          if (!controller.isSearchMode &&
-                              controller.activeSpaceId == null &&
-                              !AppSettings.useLegacyNavBar.value)
-                            Positioned(
-                              right: 16,
-                              bottom: client.rooms.isNotEmpty
-                                  ? 88 // height of navbar + padding + gap
-                                  : 16,
-                              child: FloatingActionButton.extended(
-                                onPressed: () =>
-                                    context.go('/rooms/newprivatechat'),
-                                icon: const Icon(Icons.chat_outlined),
-                                label: Text(L10n.of(context).newChat),
-                              ),
-                            ),
-
                           if (client.rooms.isNotEmpty &&
                               !controller.isSearchMode &&
                               !AppSettings.useLegacyNavBar.value)
                             Positioned(
-                              left: 16,
-                              right: 16,
+                              left: 32,
+                              right: 32,
                               bottom: 16,
-                              child: ChatListBottomNavbar(controller),
+                              child: ChatListBottomNavbar(controller, fab: fab),
                             ),
                         ],
                       ),
@@ -130,11 +125,7 @@ class ChatListView extends StatelessWidget {
                     !controller.isSearchMode &&
                         controller.activeSpaceId == null &&
                         AppSettings.useLegacyNavBar.value
-                    ? FloatingActionButton.extended(
-                        onPressed: () => context.go('/rooms/newprivatechat'),
-                        icon: const Icon(Icons.chat_outlined),
-                        label: Text(L10n.of(context).newChat),
-                      )
+                    ? fab
                     : const SizedBox.shrink(),
                 floatingActionButtonLocation:
                     FloatingActionButtonLocation.endFloat,

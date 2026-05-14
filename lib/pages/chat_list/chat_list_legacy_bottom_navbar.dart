@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 import 'package:badges/badges.dart';
@@ -10,18 +8,28 @@ import 'package:extera_next/pages/chat_list/chat_list.dart';
 import 'package:extera_next/widgets/unread_rooms_badge.dart';
 import '../../widgets/matrix.dart';
 
-class ChatListLegacyBottomNavbar extends StatelessWidget {
+class ChatListLegacyBottomNavbar extends StatefulWidget {
   final ChatListController controller;
 
   const ChatListLegacyBottomNavbar(this.controller, {super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final client = Matrix.of(context).client;
-    final theme = Theme.of(context);
+  State<ChatListLegacyBottomNavbar> createState() =>
+      _ChatListLegacyBottomNavbarState();
+}
 
-    final spaces = client.rooms.where((r) => r.isSpace);
-    final spaceDelegateCandidates = <String, Room>{};
+class _ChatListLegacyBottomNavbarState
+    extends State<ChatListLegacyBottomNavbar> {
+  ChatListController get _c => widget.controller;
+
+  List<Room> spaces = [];
+  Map<String, Room> spaceDelegateCandidates = {};
+
+  @override
+  void initState() {
+    final client = Matrix.of(context).client;
+
+    spaces = client.rooms.where((r) => r.isSpace).toList();
     for (final space in spaces) {
       for (final spaceChild in space.spaceChildren) {
         final roomId = spaceChild.roomId;
@@ -30,16 +38,22 @@ class ChatListLegacyBottomNavbar extends StatelessWidget {
       }
     }
 
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final filters = [
       if (AppSettings.separateChatTypes.value)
         ActiveFilter.messages
       else
         ActiveFilter.allChats,
-      ActiveFilter.groups,
+      if (AppSettings.separateChatTypes.value) ActiveFilter.groups,
       ActiveFilter.unread,
       if (spaceDelegateCandidates.isNotEmpty &&
-          !controller.widget.displayNavigationRail)
+          !_c.widget.displayNavigationRail)
         ActiveFilter.spaces,
+      if (AppSettings.enablePeopleTab.value) ActiveFilter.people,
     ];
 
     final filterLambdas = {
@@ -48,30 +62,29 @@ class ChatListLegacyBottomNavbar extends StatelessWidget {
       ActiveFilter.groups: (Room room) => !room.isDirectChat,
       ActiveFilter.unread: (Room room) => room.isUnread,
       ActiveFilter.spaces: (Room room) => false,
+      ActiveFilter.people: (Room room) => false,
     };
 
-    return BottomNavigationBar(
-      currentIndex: max(0, filters.indexOf(controller.activeFilter)),
-      backgroundColor: theme.colorScheme.surfaceContainer,
-      selectedItemColor: theme.colorScheme.primary,
-      unselectedItemColor: theme.colorScheme.secondary,
-      enableFeedback: true,
-      onTap: (index) {
-        controller.setActiveFilter(filters[index]);
+    return NavigationBar(
+      height: 64,
+      onDestinationSelected: (filterIndex) {
+        setState(() {
+          _c.setActiveFilter(filters[filterIndex]);
+        });
       },
-      items: filters
-          .map(
-            (filter) => BottomNavigationBarItem(
-              icon: UnreadRoomsBadge(
-                filter: filterLambdas[filter]!,
-                badgePosition: BadgePosition.topEnd(),
-                child: Icon(filter.toIconData(true)),
-              ),
-              activeIcon: Icon(filter.toIconData(false)),
-              label: filter.toLocalizedString(context),
-            ),
-          )
-          .toList(),
+      selectedIndex: filters.indexOf(_c.activeFilter),
+      destinations: filters.map((filter) {
+        return NavigationDestination(
+          selectedIcon: Icon(filter.toIconData(false)),
+          icon: UnreadRoomsBadge(
+            filter: filterLambdas[filter]!,
+            badgePosition: BadgePosition.topEnd(),
+            child: Icon(filter.toIconData(true)),
+          ),
+          label: filter.toLocalizedString(context),
+          key: ValueKey(filter.name),
+        );
+      }).toList(),
     );
   }
 }
