@@ -50,11 +50,6 @@ jobs:
           export PATH="$PWD/flutter/bin:$PATH"
           flutter --version
 
-      - name: Get Flutter dependencies
-        run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter pub get
-
       - name: Clean Flutter build
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
@@ -85,7 +80,7 @@ jobs:
           storePassword=$KEYSTORE_PASSWORD
           keyPassword=$KEY_PASSWORD
           keyAlias=$KEY_ALIAS
-          storeFile=../upload-keystore.jks
+          storeFile=upload-keystore.jks
           EOF
           echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
           cd ..
@@ -111,11 +106,17 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
+        working-directory: android
+
+      - name: Install bundle dependencies
+        working-directory: android
+        run: |
+          gem install bundler:2.5.22
+          bundle install
 
       - name: Deploy to Play Store
-        run: |
-          cd android
-          bundle exec fastlane deploy_internal_test
+        working-directory: android
+        run: bundle exec fastlane deploy_internal_test
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
