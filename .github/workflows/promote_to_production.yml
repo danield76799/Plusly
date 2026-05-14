@@ -1,0 +1,52 @@
+name: Promote to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_track:
+        description: 'Source track to promote from'
+        required: true
+        default: 'internal'
+        type: choice
+        options:
+          - internal
+          - beta
+      target_track:
+        description: 'Target track to promote to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - beta
+          - production
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Ruby & Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+        working-directory: android
+
+      - name: Setup Play Store key
+        env:
+          PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
+        run: |
+          cd android
+          echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
+
+      - name: Promote release
+        working-directory: android
+        run: |
+          bundle exec fastlane supply \
+            --track ${{ github.event.inputs.source_track }} \
+            --track_promote_to ${{ github.event.inputs.target_track }} \
+            --json_key keys.json \
+            --package_name com.danield.plusly.app
