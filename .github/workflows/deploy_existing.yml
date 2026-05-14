@@ -50,6 +50,11 @@ jobs:
           export PATH="$PWD/flutter/bin:$PATH"
           flutter --version
 
+      - name: Get Flutter dependencies
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter pub get
+
       - name: Clean Flutter build
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
