@@ -80,12 +80,12 @@ jobs:
           PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
         run: |
           cd android
-          echo "$KEYSTORE_BASE64" | base64 -d > upload-keystore.jks
+          echo "$KEYSTORE_BASE64" | base64 -d > app/upload-keystore.jks
           cat > key.properties << EOF
           storePassword=$KEYSTORE_PASSWORD
           keyPassword=$KEY_PASSWORD
           keyAlias=$KEY_ALIAS
-          storeFile=upload-keystore.jks
+          storeFile=app/upload-keystore.jks
           EOF
           echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
           cd ..
