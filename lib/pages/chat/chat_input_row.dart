@@ -175,18 +175,6 @@ class ChatInputRow extends StatelessWidget {
                     ),
                   // Camera button (direct photo)
                   Container(
-                    height: height,
-                    width: height,
-                    alignment: Alignment.center,
-                    child: Semantics(
-                      label: 'Take photo',
-                      button: true,
-                      child: IconButton(
-                        icon: const Icon(Icons.camera_alt_outlined),
-                        color: Theme.of(context).colorScheme.onSurface,
-                        onPressed: () => controller.onAddPopupMenuButtonSelected('camera'),
-                      ),
-                    ),
                   ),
                   // Attachment menu
                   Container(
@@ -201,6 +189,13 @@ class ChatInputRow extends StatelessWidget {
                         color: theme.colorScheme.surface,
                         onSelected: controller.onAddPopupMenuButtonSelected,
                         itemBuilder: (BuildContext context) => [
+                          PopupMenuItem(
+                            value: 'camera',
+                            child: ListTile(
+                              leading: const Icon(Icons.camera_alt_outlined),
+                              title: Text(L10n.of(context).openCamera),
+                            ),
+                          ),
                           PopupMenuItem(
                             value: 'image',
                             child: ListTile(
