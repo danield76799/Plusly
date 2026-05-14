@@ -90,10 +90,6 @@ class _ChatListBottomNavbarState extends State<ChatListBottomNavbar> {
                       ? theme.colorScheme.onSecondaryContainer
                       : theme.colorScheme.onSurfaceVariant;
 
-                  final currentBorderRadius = BorderRadius.circular(
-                    isActive ? 124 : 128,
-                  );
-
                   return Expanded(
                     key: ValueKey(filter),
                     child: Padding(
@@ -104,13 +100,13 @@ class _ChatListBottomNavbarState extends State<ChatListBottomNavbar> {
                         clipBehavior: Clip.hardEdge,
                         decoration: BoxDecoration(
                           color: backgroundColor,
-                          borderRadius: currentBorderRadius,
+                          borderRadius: BorderRadius.circular(124),
                         ),
                         child: Material(
                           type: MaterialType.transparency,
                           child: InkWell(
                             onTap: () => _c.setActiveFilter(filter),
-                            borderRadius: currentBorderRadius,
+                            borderRadius: BorderRadius.circular(124),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 4,
