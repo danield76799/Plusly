@@ -1,0 +1,185 @@
+name: Main Deploy Workflow
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: main_deploy
+  cancel-in-progress: true
+
+jobs:
+  build_android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - run: cat .github/workflows/versions.env >> $GITHUB_ENV
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'zulu'
+          cache: 'gradle'
+
+      - name: Setup Flutter
+        run: |
+          git clone --depth 1 https://github.com/flutter/flutter.git -b stable
+          echo "$PWD/flutter/bin" >> $GITHUB_PATH
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ~/.gradle/caches
+          key: flutter-deps-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            flutter-deps-${{ runner.os }}-
+
+      - name: Verify Flutter
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter --version
+
+      - name: Clean Flutter build
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter clean
+
+      - name: Generate localization
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter gen-l10n
+
+      - name: Generate assets
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter pub run flutter_launcher_icons:main
+          flutter pub run flutter_native_splash:create
+
+      # === APK BUILD ===
+      - name: Build Android APK
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }} 2>&1 | tee build.log
+          BUILD_EXIT_CODE=$?
+          if [ $BUILD_EXIT_CODE -ne 0 ]; then
+            echo "=== BUILD FAILED ==="
+            echo "Looking for Dart/Flutter errors in log:"
+            grep -E "(error:|Error:|FAILURE|Exception:)" build.log | head -50
+            echo ""
+            echo "Last 100 lines of build log:"
+            tail -100 build.log
+            exit $BUILD_EXIT_CODE
+          fi
+          mkdir -p output
+          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
+          ls -la output/
+
+      # === AAB BUILD + SIGNING ===
+      - name: Setup Play Store signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
+        run: |
+          cd android
+          echo "$KEYSTORE_BASE64" | base64 -d > upload-keystore.jks
+          cat > key.properties << EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=upload-keystore.jks
+          EOF
+          echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
+          cd ..
+
+      - name: Get next build number from Play Store
+        id: build_number
+        working-directory: android
+        run: |
+          bundle install
+          bundle exec fastlane run google_play_track_version_codes track:internal json_key:keys.json > /tmp/version_codes.txt
+          LAST_VERSION=$(grep -o '[0-9]\+' /tmp/version_codes.txt | head -1)
+          NEXT_VERSION=$((LAST_VERSION + 1))
+          echo "last_version=$LAST_VERSION" >> $GITHUB_OUTPUT
+          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "Last Play Store version: $LAST_VERSION"
+          echo "Next version: $NEXT_VERSION"
+
+      - name: Update pubspec version
+        run: |
+          NEXT_VERSION=${{ steps.build_number.outputs.next_version }}
+          sed -i "s/^version: .*/version: 1.1.0+$NEXT_VERSION/" pubspec.yaml
+          cat pubspec.yaml | grep "^version:"
+
+      - name: Build Android App Bundle
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter build appbundle \
+            --release \
+            --target-platform android-arm,android-arm64,android-x64 \
+            --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
+          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
+
+      # === UPLOAD ARTIFACTS ===
+      - name: Upload Build Log
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-build-log
+          path: build.log
+          retention-days: 3
+
+      - name: Upload APK Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: output/plusly-release.apk
+          retention-days: 7
+
+      - name: Upload AAB Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: output/plusly-release.aab
+          retention-days: 7
+
+      # === PLAY STORE DEPLOY ===
+      - name: Setup Ruby & Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+        working-directory: android
+
+      - name: Deploy to Play Store
+        working-directory: android
+        run: bundle exec fastlane deploy_internal_test
+
+      # === GITHUB RELEASE ===
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.1.0
+          name: Plusly v1.1.0
+          files: |
+            output/plusly-release.apk
+            output/plusly-release.aab
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
