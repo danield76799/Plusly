@@ -118,6 +118,7 @@ jobs:
         working-directory: android
 
       - name: Upload AAB artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: plusly-aab-playstore
