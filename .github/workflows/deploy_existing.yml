@@ -109,14 +109,14 @@ jobs:
         working-directory: android
 
       - name: Install bundle dependencies
-        working-directory: android
         run: |
           gem install bundler:2.5.22
           bundle install
+        working-directory: android
 
       - name: Deploy to Play Store
-        working-directory: android
         run: bundle exec fastlane deploy_internal_test
+        working-directory: android
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
