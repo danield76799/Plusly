@@ -197,7 +197,7 @@ class ChatInputRow extends StatelessWidget {
                       label: 'Add attachment',
                       button: true,
                       child: PopupMenuButton<String>(
-                        icon: const Icon(Icons.add_circle_outline),
+                        icon: const Icon(Icons.attach_file),
                         color: theme.colorScheme.surface,
                         onSelected: controller.onAddPopupMenuButtonSelected,
                         itemBuilder: (BuildContext context) => [
