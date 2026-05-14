@@ -469,7 +469,7 @@ class ProfileView extends StatelessWidget {
                   const SizedBox(height: 8),
                   if (profile.userId != client.userID &&
                       !controller.isQueryingMutualRooms &&
-                      controller.mutualRooms.isNotEmpty)
+                      controller.mutualRooms.isNotEmpty) ...[
                     Material(
                       clipBehavior: .hardEdge,
                       color: theme.colorScheme.surfaceContainerHigh,
@@ -492,6 +492,8 @@ class ProfileView extends StatelessWidget {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 8),
+                  ],
                 ],
               ),
             ),
