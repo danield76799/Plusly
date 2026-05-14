@@ -25,7 +25,7 @@ extension MatrixFileExtension on MatrixFile {
             suggestedName: name,
             confirmButtonText: L10n.of(context).saveFile,
           ))?.path
-        : await FilePicker.platform.saveFile(
+        : await FilePicker.saveFile(
             dialogTitle: L10n.of(context).saveFile,
             fileName: name,
             type: filePickerFileType,

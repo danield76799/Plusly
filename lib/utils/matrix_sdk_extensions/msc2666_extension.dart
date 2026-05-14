@@ -5,14 +5,26 @@ import 'package:matrix/matrix.dart' as matrix;
 
 extension Msc2666Extension on matrix.Client {
   Future<bool> isMsc2666Supported() async {
+    final versions = await getVersions();
+    return versions
+                .unstableFeatures?['uk.half-shot.msc2666.query_mutual_rooms'] ==
+            true ||
+        versions.unstableFeatures?['uk.half-shot.msc2666.query_mutual_rooms.stable'] ==
+            true;
+  }
+
+  Future<bool> isMsc2666StableSupported() async {
     return (await getVersions())
-            .unstableFeatures?['uk.half-shot.msc2666.query_mutual_rooms'] ==
+            .unstableFeatures?['uk.half-shot.msc2666.query_mutual_rooms.stable'] ==
         true;
   }
 
   Future<List<String>> queryMutualRoomsIds(String userId) async {
+    final msc2666Stable = await isMsc2666StableSupported();
+
     final requestUri = Uri(
-      path: '/_matrix/client/unstable/uk.half-shot.msc2666/user/mutual_rooms',
+      path:
+          '/_matrix/client/${msc2666Stable ? 'v1' : 'unstable/uk.half-shot.msc2666/user'}/mutual_rooms',
       query: 'user_id=$userId',
     );
 
