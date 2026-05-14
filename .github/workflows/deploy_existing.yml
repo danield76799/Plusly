@@ -88,7 +88,7 @@ jobs:
       - name: Update version code
         run: |
           VERSION_CODE=${{ github.event.inputs.version_code }}
-          sed -i "s/^version: .*/version: 1.1.0+$VERSION_CODE/" pubspec.yaml
+          sed -i "s/^version: .*/version: 1.1.1+$VERSION_CODE/" pubspec.yaml
           cat pubspec.yaml | grep "^version:"
 
       - name: Build Android App Bundle
