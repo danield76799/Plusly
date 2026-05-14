@@ -80,7 +80,7 @@ jobs:
           storePassword=$KEYSTORE_PASSWORD
           keyPassword=$KEY_PASSWORD
           keyAlias=$KEY_ALIAS
-          storeFile=upload-keystore.jks
+          storeFile=../upload-keystore.jks
           EOF
           echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
           cd ..
