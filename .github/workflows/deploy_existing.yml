@@ -106,7 +106,6 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
-        working-directory: android
 
       - name: Install bundle dependencies
         run: |
