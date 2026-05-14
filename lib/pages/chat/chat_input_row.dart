@@ -246,8 +246,8 @@ class ChatInputRow extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 12.0,
+                        horizontal: 4.0,
+                        vertical: 8.0,
                       ),
                       child: Container(
                         decoration: BoxDecoration(
