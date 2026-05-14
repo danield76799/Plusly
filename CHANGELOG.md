@@ -1,3 +1,11 @@
+## Extera 26.2.4
+- Redesign navigation bar.
+- Make legacy navigation bar more Material 3 compliant.
+- Added support for stable MSC2666 (Mutual rooms).
+- Added EXIF cleaning when uploading avatars and banners.
+- Added file sending status icons.
+- Fixed message edits sometimes being not handled.
+
 ## Extera 26.2.3
 - Feature: swipeable drawer with spaces.
 - Fix: when chat frosted glass effect is disabled, floating elements had extra unneccessary padding.
