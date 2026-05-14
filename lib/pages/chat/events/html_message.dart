@@ -568,17 +568,24 @@ class _HtmlMessageState extends State<HtmlMessage> {
     }
   }
 
-  dom.Document? parsedDocument;
+  dom.Document? _cachedParsedDocument;
+  String? _cachedParsedHtml;
+
+  dom.Document? get parsedDocument {
+    if (_cachedParsedHtml != html) {
+      _cachedParsedHtml = html;
+      _cachedParsedDocument = parser.parse(html);
+    }
+    return _cachedParsedDocument;
+  }
 
   @override
   void initState() {
-    parsedDocument = parser.parse(html);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Reset counters before each build so indices are assigned consistently.
     _detailsCounter = 0;
     _spoilerCounter = 0;
 
