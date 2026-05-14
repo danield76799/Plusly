@@ -41,10 +41,15 @@ jobs:
           cd android
           echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
 
+      - name: Install Fastlane
+        run: |
+          cd android
+          gem install fastlane
+
       - name: Promote release
         run: |
           cd android
-          bundle exec fastlane supply \
+          fastlane supply \
             --track ${{ github.event.inputs.source_track }} \
             --track_promote_to ${{ github.event.inputs.target_track }} \
             --json_key keys.json \
