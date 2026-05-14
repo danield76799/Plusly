@@ -106,11 +106,11 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
-        working-directory: android
 
       - name: Deploy to Play Store
-        working-directory: android
-        run: bundle exec fastlane deploy_internal_test
+        run: |
+          cd android
+          bundle exec fastlane deploy_internal_test
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
