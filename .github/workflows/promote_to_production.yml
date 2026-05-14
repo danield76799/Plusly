@@ -40,6 +40,14 @@ jobs:
         run: |
           cd android
           echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
+          # Verify the key file is valid JSON
+          if [ -s keys.json ] && head -1 keys.json | grep -q '{'; then
+            echo "✓ Play Store key file created successfully"
+            ls -la keys.json
+          else
+            echo "✗ Play Store key file is empty or invalid"
+            exit 1
+          fi
 
       - name: Install Fastlane
         run: |
