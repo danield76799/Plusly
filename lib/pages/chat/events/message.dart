@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:extera_next/pages/chat/events/file_sending_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -330,17 +331,23 @@ class _MessageState extends State<Message> {
         if (ownMessage)
           Padding(
             padding: const EdgeInsets.only(left: 3.0),
-            child: Icon(
-              event.status == EventStatus.sending
-                  ? Icons.watch_later_outlined
-                  : event.status == EventStatus.error
-                  ? Icons.error_outline
-                  : hasBeenRead
-                  ? Icons.done_all
-                  : Icons.check,
-              color: color,
-              size: 13,
-            ),
+            child: event.fileSendingStatus != null
+                ? FileSendingStatusIndicator(
+                    event.fileSendingStatus!,
+                    color: color,
+                    size: 13,
+                  )
+                : Icon(
+                    event.status == .sending
+                        ? Icons.watch_later_outlined
+                        : event.status == EventStatus.error
+                        ? Icons.error_outline
+                        : hasBeenRead
+                        ? Icons.done_all
+                        : Icons.check,
+                    color: color,
+                    size: 13,
+                  ),
           ),
       ],
     );
