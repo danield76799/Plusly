@@ -33,7 +33,6 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
-        working-directory: android
 
       - name: Setup Play Store key
         env:
@@ -43,8 +42,8 @@ jobs:
           echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
 
       - name: Promote release
-        working-directory: android
         run: |
+          cd android
           bundle exec fastlane supply \
             --track ${{ github.event.inputs.source_track }} \
             --track_promote_to ${{ github.event.inputs.target_track }} \
