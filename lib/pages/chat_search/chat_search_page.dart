@@ -87,7 +87,7 @@ class ChatSearchController extends State<ChatSearchPage>
           .startSearch(
             searchTerm: searchController.text,
             prevBatch: prevBatch,
-            requestHistoryCount: 5000,
+            requestHistoryCount: 3500,
             limit: 200,
           )
           .map((result) {
