@@ -1,0 +1,63 @@
+name: Build AAB with Signing
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_android_aab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - run: cat .github/workflows/versions.env >> $GITHUB_ENV
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'zulu'
+          cache: 'gradle'
+
+      - name: Setup Flutter
+        run: |
+          git clone --depth 1 https://github.com/flutter/flutter.git -b stable
+          echo "$PWD/flutter/bin" >> $GITHUB_PATH
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ~/.gradle/caches
+          key: flutter-deps-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            flutter-deps-${{ runner.os }}-
+
+      - name: Build Android App Bundle
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter build appbundle --release --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
+
+      - name: Sign AAB
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > /tmp/keystore.jks
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore /tmp/keystore.jks \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            build/app/outputs/bundle/release/app-release.aab "$KEY_ALIAS"
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab-signed
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 7
