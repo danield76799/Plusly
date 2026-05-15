@@ -239,15 +239,8 @@ class ChatInputRow extends StatelessWidget {
                           PopupMenuItem(
                             value: 'emoji',
                             child: ListTile(
-                              leading: Icon(Icons.emoji_emotions_outlined),
-                              title: Text(L10n.of(context).emojis),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'sticker',
-                            child: ListTile(
-                              leading: Icon(MdiIcons.stickerOutline),
-                              title: Text("Sticker"),
+                              leading: Icon(MdiIcons.stickerEmojiOutline),
+                              title: Text("Emoji & Stickers"),
                             ),
                           ),
                         ],
