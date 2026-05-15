@@ -1777,9 +1777,6 @@ class ChatController extends State<ChatPageWithRoom>
     if (choice == 'emoji') {
       emojiPickerAction();
     }
-    if (choice == 'sticker') {
-      // TODO: Add sticker action
-    }
   }
 
   Future<void> unpinEvent(String eventId) async {
