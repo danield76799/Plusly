@@ -24,16 +24,6 @@ jobs:
           git clone --depth 1 https://github.com/flutter/flutter.git -b stable
           echo "$PWD/flutter/bin" >> $GITHUB_PATH
 
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            ~/.gradle/caches
-          key: flutter-deps-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            flutter-deps-${{ runner.os }}-
-
       - name: Build Android App Bundle
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
