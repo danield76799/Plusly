@@ -35,7 +35,7 @@ dependencies {
 android {
     namespace = "com.danield.plusly.app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "28.2.13676358"
+    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -71,7 +71,7 @@ android {
 
     defaultConfig {
         applicationId = "com.danield.plusly.app"
-        minSdk = flutter.minSdkVersion
+        minSdk = 24  // Required for modern features
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -80,8 +80,8 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
     }
