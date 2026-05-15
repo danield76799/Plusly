@@ -116,7 +116,7 @@ class ChatListItem extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: compactMode ? 13 : 14,
-                        color: Colors.black,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -277,9 +277,7 @@ class ChatListItem extends StatelessWidget {
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
                                       color: unread || room.hasNewMessages
-                                          ? const Color(
-                                              0xFF4A4A4A,
-                                            ) // Darker gray #4A4A4A
+                                          ? theme.colorScheme.onSurface
                                           : theme.colorScheme.outline,
                                       decoration:
                                           room.lastEvent?.redacted == true
