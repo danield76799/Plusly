@@ -134,9 +134,7 @@ class ChatInputRow extends StatelessWidget {
                         ? Duration.zero
                         : FluffyThemes.animationDuration,
                     curve: FluffyThemes.animationCurve,
-                    width: controller.sendController.text.isNotEmpty
-                        ? 0
-                        : height,
+                    width: 0, // hide emoji button
                     child: controller.sendController.text.isNotEmpty
                         ? const SizedBox.shrink()
                         : Semantics(
@@ -236,6 +234,20 @@ class ChatInputRow extends StatelessWidget {
                             child: ListTile(
                               leading: const Icon(Icons.poll_outlined),
                               title: Text(L10n.of(context).startPoll),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'emoji',
+                            child: ListTile(
+                              leading: const Icon(Icons.emoji_emotions_outlined),
+                              title: Text(L10n.of(context).emojis),
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'sticker',
+                            child: ListTile(
+                              leading: const Icon(Icons.sticker_outlined),
+                              title: Text(L10n.of(context).sticker),
                             ),
                           ),
                         ],
