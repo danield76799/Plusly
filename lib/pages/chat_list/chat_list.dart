@@ -309,6 +309,7 @@ class ChatListController extends State<ChatList>
   Timer? _coolDown;
   SearchUserDirectoryResponse? userSearchResult;
   QueryPublicRoomsResponse? roomSearchResult;
+  List<sdk.Event>? allMessagesSearchResult;
 
   bool isSearching = false;
   SearchScope searchScope = SearchScope.local;
@@ -389,6 +390,8 @@ class ChatListController extends State<ChatList>
           searchController.text,
           limit: 20,
         );
+        // Also search all messages across chats
+        allMessagesSearchResult = await _searchAllMessages(searchQuery);
       }
     } catch (e, s) {
       Logs().w('Searching has crashed', e, s);
@@ -402,6 +405,29 @@ class ChatListController extends State<ChatList>
       this.roomSearchResult = roomSearchResult;
       this.userSearchResult = userSearchResult;
     });
+  }
+
+  Future<List<sdk.Event>> _searchAllMessages(String query) async {
+    if (query.isEmpty) return [];
+    final client = Matrix.of(context).client;
+    final lowerQuery = query.toLowerCase();
+    final results = <sdk.Event>[];
+    final rooms = client.rooms.where((room) => !room.isSpace).toList();
+    
+    for (final room in rooms) {
+      try {
+        final timeline = await room.getTimeline();
+        final events = timeline.events
+            .where((e) => e.body.toLowerCase().contains(lowerQuery))
+            .take(10)
+            .toList();
+        results.addAll(events);
+        if (results.length >= 100) break; // Limit results
+      } catch (_) {
+        // Skip rooms that fail
+      }
+    }
+    return results;
   }
 
   void onSearchEnter(String text, {bool globalSearch = true}) {
@@ -433,6 +459,7 @@ class ChatListController extends State<ChatList>
       searchController.clear();
       isSearchMode = false;
       roomSearchResult = userSearchResult = null;
+      allMessagesSearchResult = null;
       isSearching = false;
     });
     if (unfocus) searchFocusNode.unfocus();
