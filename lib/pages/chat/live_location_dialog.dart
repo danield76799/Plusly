@@ -110,7 +110,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
       };
       
       // Send beacon_info event
-      final result = await showFutureLoadingDialog(
+      final result = await showFutureLoadingDialog<Event>(
         context: context,
         future: () => widget.room.sendEvent(
           beaconInfoContent,
@@ -118,9 +118,10 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
         ),
       );
       
-      _beaconInfoEventId = result.result?.eventId;
-      
-      if (_beaconInfoEventId != null) {
+      final eventId = result.result?.eventId;
+      if (eventId != null) {
+        _beaconInfoEventId = eventId;
+        
         // Send the first beacon location event
         await showFutureLoadingDialog(
           context: context,
