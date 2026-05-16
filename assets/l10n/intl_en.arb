@@ -2097,6 +2097,16 @@
     "type": "String",
     "placeholders": {}
   },
+  "shareLiveLocation": "Share live location",
+  "@shareLiveLocation": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "startLiveLocation": "Start live location",
+  "@startLiveLocation": {
+    "type": "String",
+    "placeholders": {}
+  },
   "showPassword": "Show password",
   "@showPassword": {
     "type": "String",

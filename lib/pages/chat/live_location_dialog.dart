@@ -88,7 +88,6 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
     setState(() => _isStarting = true);
 
     try {
-      // Send location as regular m.location message
       final body = 'https://www.openstreetmap.org/?mlat=${_position!.latitude}&mlon=${_position!.longitude}#map=16/${_position!.latitude}/${_position!.longitude}';
       final uri = 'geo:${_position!.latitude},${_position!.longitude};u=${_position!.accuracy}';
 
@@ -101,13 +100,11 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
         type: EventTypes.Message,
       );
 
-      // Send info message
       final endTime = DateTime.now().add(Duration(minutes: _selectedMinutes));
       await widget.room.sendTextEvent(
         '📍 Live locatie actief voor ${_selectedMinutes} minuten (tot ${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')})',
       );
 
-      // Start periodic updates
       _locationUpdateTimer = Timer.periodic(
         const Duration(seconds: 30),
         (_) => _sendLocationUpdate(),
