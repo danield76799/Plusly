@@ -104,8 +104,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v1.0.7
-          name: Plusly v1.0.7
+          tag_name: v1.0.8
+          name: Plusly v1.0.8
           files: output/plusly-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
