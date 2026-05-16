@@ -1,0 +1,58 @@
+name: Build Web Version
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.x'
+          channel: 'stable'
+
+      - name: Enable web
+        run: flutter config --enable-web
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build web release
+        run: flutter build web --release
+        continue-on-error: true
+
+      - name: Create ZIP archive
+        if: success()
+        run: |
+          cd build/web
+          zip -r ../../plusly-web.zip .
+
+      - name: Upload web build
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plusly-web
+          path: plusly-web.zip
+
+      - name: Deploy to GitHub Pages
+        if: success() && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+
+      - name: Create Release
+        if: success() && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: web-${{ github.run_number }}
+          name: Plusly Web Build ${{ github.run_number }}
+          files: plusly-web.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
