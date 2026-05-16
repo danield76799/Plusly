@@ -1,4 +1,4 @@
-name: Build Web Version
+name: Build Web Version (Hack)
 
 on:
   push:
@@ -20,9 +20,9 @@ jobs:
       - name: Enable web
         run: flutter config --enable-web
 
-      - name: Create web-compatible pubspec
+      - name: Hack pubspec for web
         run: |
-          # Remove mobile-only dependencies from pubspec
+          # Remove mobile-only dependencies
           sed -i '/^  camera:/d' pubspec.yaml
           sed -i '/^  flutter_foreground_task:/d' pubspec.yaml
           sed -i '/^  flutter_local_notifications:/d' pubspec.yaml
@@ -47,12 +47,26 @@ jobs:
           sed -i '/^  desktop_webview_window:/d' pubspec.yaml
           sed -i '/^  hotkey_manager:/d' pubspec.yaml
           sed -i '/^  handy_window:/d' pubspec.yaml
-          sed -i '/^  msix:/d' pubspec.yaml
-          sed -i '/^  flutter_launcher_icons:/d' pubspec.yaml
-          sed -i '/^  flutter_native_splash:/d' pubspec.yaml
-          sed -i '/^  import_sorter:/d' pubspec.yaml
-          sed -i '/^  license_checker:/d' pubspec.yaml
-          sed -i '/^  translations_cleaner:/d' pubspec.yaml
+
+      - name: Create stub packages
+        run: |
+          mkdir -p stubs
+          for pkg in camera flutter_foreground_task flutter_local_notifications flutter_secure_storage geolocator permission_handler video_compress firebase_core firebase_messaging fcm_shared_isolate unifiedpush unifiedpush_ui local_auth flutter_new_badger flutter_ringtone_player receive_sharing_intent qr_code_scanner_plus audioplayers_linux record_linux desktop_drop desktop_notifications desktop_webview_window hotkey_manager handy_window; do
+            mkdir -p stubs/$pkg/lib
+            echo "library $pkg;" > stubs/$pkg/lib/$pkg.dart
+            echo "name: $pkg" > stubs/$pkg/pubspec.yaml
+            echo "version: 1.0.0" >> stubs/$pkg/pubspec.yaml
+            echo "environment:" >> stubs/$pkg/pubspec.yaml
+            echo "  sdk: '>=3.0.0 <4.0.0'" >> stubs/$pkg/pubspec.yaml
+          done
+          
+          # Add path dependencies to pubspec
+          echo "" >> pubspec.yaml
+          echo "dependency_overrides:" >> pubspec.yaml
+          for pkg in camera flutter_foreground_task flutter_local_notifications flutter_secure_storage geolocator permission_handler video_compress firebase_core firebase_messaging fcm_shared_isolate unifiedpush unifiedpush_ui local_auth flutter_new_badger flutter_ringtone_player receive_sharing_intent qr_code_scanner_plus audioplayers_linux record_linux desktop_drop desktop_notifications desktop_webview_window hotkey_manager handy_window; do
+            echo "  $pkg:" >> pubspec.yaml
+            echo "    path: stubs/$pkg" >> pubspec.yaml
+          done
 
       - name: Get dependencies
         run: flutter pub get
