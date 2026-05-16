@@ -42,8 +42,8 @@ Communicatie
 matrix, messaging, privacy, encryptie, chat, open source, gedecentraliseerd
 
 ## Contactgegevens
-Website: https://mtux.nl
-Privacybeleid: https://mtux.nl/privacy
+Website: https://plusly.im
+Privacybeleid: https://plusly.im/privacy
 Support: https://github.com/danield76799/Plusly/issues
 
 ## Prijs
