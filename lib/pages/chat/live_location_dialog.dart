@@ -7,7 +7,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
-import 'package:Pulsly/widgets/future_loading_dialog.dart';
 
 class LiveLocationDialog extends StatefulWidget {
   final Room room;
@@ -29,7 +28,6 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
   static const int _defaultTimeoutMinutes = 30;
   int _selectedMinutes = _defaultTimeoutMinutes;
   Timer? _locationUpdateTimer;
-  String? _beaconInfoEventId;
 
   @override
   void initState() {
@@ -91,39 +89,31 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
     setState(() => _isStarting = true);
     
     try {
-      // Step 1: Create the beacon_info event (MSC3489)
       final timeoutMs = _selectedMinutes * 60 * 1000;
-      final beaconInfoContent = {
-        'description': 'Live Location',
-        'timeout': timeoutMs,
-        'live': true,
-      };
-      
-      // Send the initial location as the first beacon
       final uri = 'geo:${_position!.latitude},${_position!.longitude};u=${_position!.accuracy}';
-      final beaconContent = {
-        'uri': uri,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'accuracy': _position!.accuracy,
-        'altitude': _position!.altitude,
-        'speed': _position!.speed,
-      };
       
       try {
-        // Send beacon_info event
-        final beaconInfoEvent = await widget.room.sendEvent(
-          beaconInfoContent,
+        // Try to send beacon_info event
+        await widget.room.sendEvent(
+          {
+            'description': 'Live Location',
+            'timeout': timeoutMs,
+            'live': true,
+          },
           type: 'm.beacon_info.imou',
         );
-        _beaconInfoEventId = beaconInfoEvent;
         
-        // Send the first beacon location event
+        // Send first beacon location
         await widget.room.sendEvent(
-          beaconContent,
+          {
+            'uri': uri,
+            'timestamp': DateTime.now().millisecondsSinceEpoch,
+            'accuracy': _position!.accuracy,
+          },
           type: 'm.beacon',
         );
       } catch (e) {
-        // Beacon events may not be supported, fall back to regular location
+        // Fall back to regular location if beacon not supported
         final body = 'https://www.openstreetmap.org/?mlat=${_position!.latitude}&mlon=${_position!.longitude}#map=16/${_position!.latitude}/${_position!.longitude}';
         await widget.room.sendEvent(
           {
@@ -134,13 +124,12 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
           type: EventTypes.Message,
         );
       }
-        
-        // Start periodic updates (every 30 seconds)
-        _locationUpdateTimer = Timer.periodic(
-          const Duration(seconds: 30),
-          (_) => _sendLocationUpdate(),
-        );
-      }
+      
+      // Start periodic updates (every 30 seconds)
+      _locationUpdateTimer = Timer.periodic(
+        const Duration(seconds: 30),
+        (_) => _sendLocationUpdate(),
+      );
       
       if (!mounted) return;
       Navigator.of(context, rootNavigator: false).pop();
@@ -162,40 +151,16 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
       );
       
       final uri = 'geo:${position.latitude},${position.longitude};u=${position.accuracy}';
-      final beaconContent = {
-        'uri': uri,
-        'timestamp': DateTime.now().millisecondsSinceEpoch,
-        'accuracy': position.accuracy,
-        'altitude': position.altitude,
-        'speed': position.speed,
-      };
-      
       await widget.room.sendEvent(
-        beaconContent,
+        {
+          'uri': uri,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+          'accuracy': position.accuracy,
+        },
         type: 'm.beacon',
       );
     } catch (e) {
       // Silently fail for updates
-    }
-  }
-
-  Future<void> _stopLiveLocation() async {
-    _locationUpdateTimer?.cancel();
-    
-    if (_beaconInfoEventId != null) {
-      // Send final beacon_info with live=false
-      try {
-        await widget.room.sendEvent(
-          {
-            'description': 'Live Location',
-            'timeout': 0,
-            'live': false,
-          },
-          type: 'm.beacon_info.imou',
-        );
-      } catch (e) {
-        // Ignore
-      }
     }
   }
 
@@ -208,7 +173,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
       contentWidget = Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Map preview (reuse existing MapBubble widget)
+          // Map preview placeholder
           Container(
             height: 200,
             width: double.infinity,
@@ -252,7 +217,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Je locatie wordt gedeeld tot ${DateTime.now().add(Duration(minutes: _selectedMinutes)).hour}:${DateTime.now().add(Duration(minutes: _selectedMinutes)).minute.toString().padLeft(2, '0')}',
+            'Je locatie wordt gedeeld tot ${_getEndTime()}',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: Colors.grey,
             ),
@@ -334,5 +299,10 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
           ),
       ],
     );
+  }
+  
+  String _getEndTime() {
+    final endTime = DateTime.now().add(Duration(minutes: _selectedMinutes));
+    return '${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}';
   }
 }
