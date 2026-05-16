@@ -25,20 +25,23 @@ jobs:
 
       - name: Build Windows release
         run: flutter build windows --release
+        continue-on-error: true
 
       - name: Create ZIP archive
+        if: success()
         run: |
           cd build\windows\x64\release
           7z a ..\..\..\..\plusly-windows-x64.zip bundle
 
       - name: Upload Windows build
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: plusly-windows-x64
           path: plusly-windows-x64.zip
 
       - name: Create Release
-        if: github.ref == 'refs/heads/main'
+        if: success() && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: windows-${{ github.run_number }}

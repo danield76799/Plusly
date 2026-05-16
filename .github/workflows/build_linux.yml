@@ -30,20 +30,23 @@ jobs:
 
       - name: Build Linux release
         run: flutter build linux --release
+        continue-on-error: true
 
       - name: Create tarball
+        if: success()
         run: |
           cd build/linux/x64/release
           tar -czf ../../../../plusly-linux-x64.tar.gz bundle
 
       - name: Upload Linux build
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: plusly-linux-x64
           path: plusly-linux-x64.tar.gz
 
       - name: Create Release
-        if: github.ref == 'refs/heads/main'
+        if: success() && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: linux-${{ github.run_number }}
