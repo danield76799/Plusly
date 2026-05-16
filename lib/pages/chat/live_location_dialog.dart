@@ -89,43 +89,27 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
     setState(() => _isStarting = true);
     
     try {
-      final timeoutMs = _selectedMinutes * 60 * 1000;
+      // Send location as a regular message with timeout info
+      final body = 'https://www.openstreetmap.org/?mlat=${_position!.latitude}&mlon=${_position!.longitude}#map=16/${_position!.latitude}/${_position!.longitude}';
       final uri = 'geo:${_position!.latitude},${_position!.longitude};u=${_position!.accuracy}';
       
-      try {
-        // Try to send beacon_info event
-        await widget.room.sendEvent(
-          {
-            'description': 'Live Location',
-            'timeout': timeoutMs,
-            'live': true,
-          },
-          type: 'm.beacon_info.imou',
-        );
-        
-        // Send first beacon location
-        await widget.room.sendEvent(
-          {
-            'uri': uri,
-            'timestamp': DateTime.now().millisecondsSinceEpoch,
-            'accuracy': _position!.accuracy,
-          },
-          type: 'm.beacon',
-        );
-      } catch (e) {
-        // Fall back to regular location if beacon not supported
-        final body = 'https://www.openstreetmap.org/?mlat=${_position!.latitude}&mlon=${_position!.longitude}#map=16/${_position!.latitude}/${_position!.longitude}';
-        await widget.room.sendEvent(
-          {
-            'msgtype': 'm.location',
-            'body': body,
-            'geo_uri': uri,
-          },
-          type: EventTypes.Message,
-        );
-      }
+      // Send location message
+      await widget.room.sendEvent(
+        {
+          'msgtype': 'm.location',
+          'body': body,
+          'geo_uri': uri,
+        },
+        type: EventTypes.Message,
+      );
       
-      // Start periodic updates (every 30 seconds)
+      // Send a follow-up message with live location info
+      final endTime = DateTime.now().add(Duration(minutes: _selectedMinutes));
+      await widget.room.sendTextMessage(
+        '📍 Live locatie actief voor ${_selectedMinutes} minuten (tot ${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')})',
+      );
+      
+      // Start periodic updates (every 30 seconds) - only send location updates
       _locationUpdateTimer = Timer.periodic(
         const Duration(seconds: 30),
         (_) => _sendLocationUpdate(),
@@ -150,14 +134,17 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
         ),
       );
       
+      // Send updated location
+      final body = 'https://www.openstreetmap.org/?mlat=${position.latitude}&mlon=${position.longitude}#map=16/${position.latitude}/${position.longitude}';
       final uri = 'geo:${position.latitude},${position.longitude};u=${position.accuracy}';
+      
       await widget.room.sendEvent(
         {
-          'uri': uri,
-          'timestamp': DateTime.now().millisecondsSinceEpoch,
-          'accuracy': position.accuracy,
+          'msgtype': 'm.location',
+          'body': body,
+          'geo_uri': uri,
         },
-        type: 'm.beacon',
+        type: EventTypes.Message,
       );
     } catch (e) {
       // Silently fail for updates
