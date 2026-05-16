@@ -1,0 +1,48 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.x'
+          channel: 'stable'
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Create ZIP archive
+        run: |
+          cd build\windows\x64\release
+          tar -acf ..\..\..\..\plusly-windows-x64.zip bundle
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: plusly-windows-x64
+          path: plusly-windows-x64.zip
+
+      - name: Create Release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: windows-${{ github.run_number }}
+          name: Plusly Windows Build ${{ github.run_number }}
+          files: plusly-windows-x64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
