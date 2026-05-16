@@ -23,10 +23,11 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
   bool _isStarting = false;
   Position? _position;
   Object? _error;
-
+  
   static const int _defaultTimeoutMinutes = 30;
   int _selectedMinutes = _defaultTimeoutMinutes;
   Timer? _locationUpdateTimer;
+  int _updateCount = 0;
 
   @override
   void initState() {
@@ -122,6 +123,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
 
   Future<void> _sendLocationUpdate() async {
     try {
+      _updateCount++;
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.best,
@@ -139,6 +141,11 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
           'geo_uri': uri,
         },
         type: EventTypes.Message,
+      );
+
+      // Also send update notification
+      await widget.room.sendTextEvent(
+        '📍🔴 LIVE update #$_updateCount ontvangen',
       );
     } catch (e) {
       // Silently fail for updates
