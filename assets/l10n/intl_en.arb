@@ -2097,31 +2097,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "shareLiveLocation": "Share live location",
-  "@shareLiveLocation": {
-    "type": "String",
-    "placeholders": {}
-  },
-  "startLiveLocation": "Start live location",
-  "@startLiveLocation": {
-    "type": "String",
-    "placeholders": {}
-  },
-  "stopLiveLocation": "Stop live location",
-  "@stopLiveLocation": {
-    "type": "String",
-    "placeholders": {}
-  },
-  "liveLocationActive": "Live location active",
-  "@liveLocationActive": {
-    "type": "String",
-    "placeholders": {}
-  },
-  "liveLocationEnded": "Live location ended",
-  "@liveLocationEnded": {
-    "type": "String",
-    "placeholders": {}
-  },
   "showPassword": "Show password",
   "@showPassword": {
     "type": "String",
