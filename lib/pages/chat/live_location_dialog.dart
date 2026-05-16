@@ -23,11 +23,12 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
   bool _isStarting = false;
   Position? _position;
   Object? _error;
-  
+
   static const int _defaultTimeoutMinutes = 30;
   int _selectedMinutes = _defaultTimeoutMinutes;
   Timer? _locationUpdateTimer;
   int _updateCount = 0;
+  bool _isLive = false;
 
   @override
   void initState() {
@@ -106,6 +107,12 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
         '📍🔴 LIVE - Locatie wordt gedeeld voor ${_selectedMinutes} min (tot ${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')})',
       );
 
+      // Start live tracking
+      setState(() {
+        _isLive = true;
+        _updateCount = 0;
+      });
+
       _locationUpdateTimer = Timer.periodic(
         const Duration(seconds: 30),
         (_) => _sendLocationUpdate(),
@@ -119,6 +126,11 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
         _isStarting = false;
       });
     }
+  }
+
+  Future<void> _stopLiveLocation() async {
+    _locationUpdateTimer?.cancel();
+    setState(() => _isLive = false);
   }
 
   Future<void> _sendLocationUpdate() async {
@@ -143,7 +155,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
         type: EventTypes.Message,
       );
 
-      // Also send update notification
+      // Send update notification
       await widget.room.sendTextEvent(
         '📍🔴 LIVE update #$_updateCount ontvangen',
       );
@@ -177,19 +189,19 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
                     '${_position!.latitude.toStringAsFixed(6)}, ${_position!.longitude.toStringAsFixed(6)}',
                     style: TextStyle(color: Colors.grey[400], fontSize: 12),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
                       color: Colors.red.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.circle, color: Colors.red, size: 8),
-                        SizedBox(width: 4),
-                        Text('🔴 LIVE', style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold)),
+                        _PulsingDot(),
+                        const SizedBox(width: 8),
+                        const Text('🔴 LIVE', style: TextStyle(color: Colors.red, fontSize: 14, fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -269,14 +281,19 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
       ),
       content: contentWidget,
       actions: [
+        if (_isLive)
+          TextButton(
+            onPressed: _stopLiveLocation,
+            child: const Text('STOP', style: TextStyle(color: Colors.red)),
+          ),
         AdaptiveDialogAction(
           onPressed: () {
             _locationUpdateTimer?.cancel();
             Navigator.of(context, rootNavigator: false).pop();
           },
-          child: Text(L10n.of(context).cancel),
+          child: Text(_isLive ? 'Sluiten' : L10n.of(context).cancel),
         ),
-        if (_position != null)
+        if (_position != null && !_isLive)
           AdaptiveDialogAction(
             onPressed: _isStarting ? null : _startLiveLocation,
             child: _isStarting
@@ -290,5 +307,49 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
   String _getEndTime() {
     final endTime = DateTime.now().add(Duration(minutes: _selectedMinutes));
     return '${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+/// Pulsing red dot animation
+class _PulsingDot extends StatefulWidget {
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: this,
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.3, end: 1.0).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.red.withOpacity(_animation.value),
+          ),
+        );
+      },
+    );
   }
 }
