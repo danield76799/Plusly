@@ -1,4 +1,7 @@
-# Plusly v1.0.7
+# Plusly v1.1.3
+
+## New Features
+- **Default Homeserver**: Changed default homeserver from plusly.im to mtux.nl for improved user experience
 
 ## Performance Improvements
 - **Message Widget Optimization**: Added user caching to prevent unnecessary FutureBuilder rebuilds in chat messages
@@ -9,5 +12,6 @@
 - Cleaned up incomplete optimization files that caused compilation failures
 
 ## Notes
-- This release focuses on stability and performance improvements
-- All previous features from v1.0.6 remain intact
+- All previous features from v1.1.2 remain intact
+- Privacy policy, website, and contact links still point to plusly.im
+- Version code 863 for Play Store upload
