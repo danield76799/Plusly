@@ -88,7 +88,6 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
     setState(() => _isStarting = true);
 
     try {
-      // Send location as regular m.location message
       final body = 'https://www.openstreetmap.org/?mlat=${_position!.latitude}&mlon=${_position!.longitude}#map=16/${_position!.latitude}/${_position!.longitude}';
       final uri = 'geo:${_position!.latitude},${_position!.longitude};u=${_position!.accuracy}';
 
@@ -101,13 +100,11 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
         type: EventTypes.Message,
       );
 
-      // Send info message
       final endTime = DateTime.now().add(Duration(minutes: _selectedMinutes));
       await widget.room.sendTextEvent(
-        '📍 Live locatie actief voor ${_selectedMinutes} minuten (tot ${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')})',
+        '📍🔴 LIVE - Locatie wordt gedeeld voor ${_selectedMinutes} min (tot ${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')})',
       );
 
-      // Start periodic updates
       _locationUpdateTimer = Timer.periodic(
         const Duration(seconds: 30),
         (_) => _sendLocationUpdate(),
@@ -172,6 +169,22 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
                   Text(
                     '${_position!.latitude.toStringAsFixed(6)}, ${_position!.longitude.toStringAsFixed(6)}',
                     style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.circle, color: Colors.red, size: 8),
+                        SizedBox(width: 4),
+                        Text('🔴 LIVE', style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
                   ),
                 ],
               ),
