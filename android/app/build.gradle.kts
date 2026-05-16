@@ -89,13 +89,13 @@ android {
     // Play Store requires app bundles instead of APKs
     bundle {
         language {
-            enableSplit = true
+            enableSplit = false
         }
         density {
-            enableSplit = true
+            enableSplit = false
         }
         abi {
-            enableSplit = true
+            enableSplit = false
         }
     }
 }
