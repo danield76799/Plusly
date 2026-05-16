@@ -1,0 +1,92 @@
+name: Build Web Version
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.x'
+          channel: 'stable'
+
+      - name: Enable web
+        run: flutter config --enable-web
+
+      - name: Create web-compatible pubspec
+        run: |
+          # Remove mobile-only dependencies from pubspec
+          sed -i '/^  camera:/d' pubspec.yaml
+          sed -i '/^  flutter_foreground_task:/d' pubspec.yaml
+          sed -i '/^  flutter_local_notifications:/d' pubspec.yaml
+          sed -i '/^  flutter_secure_storage:/d' pubspec.yaml
+          sed -i '/^  geolocator:/d' pubspec.yaml
+          sed -i '/^  permission_handler:/d' pubspec.yaml
+          sed -i '/^  video_compress:/d' pubspec.yaml
+          sed -i '/^  firebase_core:/d' pubspec.yaml
+          sed -i '/^  firebase_messaging:/d' pubspec.yaml
+          sed -i '/^  fcm_shared_isolate:/d' pubspec.yaml
+          sed -i '/^  unifiedpush:/d' pubspec.yaml
+          sed -i '/^  unifiedpush_ui:/d' pubspec.yaml
+          sed -i '/^  local_auth:/d' pubspec.yaml
+          sed -i '/^  flutter_new_badger:/d' pubspec.yaml
+          sed -i '/^  flutter_ringtone_player:/d' pubspec.yaml
+          sed -i '/^  receive_sharing_intent:/d' pubspec.yaml
+          sed -i '/^  qr_code_scanner_plus:/d' pubspec.yaml
+          sed -i '/^  audioplayers_linux:/d' pubspec.yaml
+          sed -i '/^  record_linux:/d' pubspec.yaml
+          sed -i '/^  desktop_drop:/d' pubspec.yaml
+          sed -i '/^  desktop_notifications:/d' pubspec.yaml
+          sed -i '/^  desktop_webview_window:/d' pubspec.yaml
+          sed -i '/^  hotkey_manager:/d' pubspec.yaml
+          sed -i '/^  handy_window:/d' pubspec.yaml
+          sed -i '/^  msix:/d' pubspec.yaml
+          sed -i '/^  flutter_launcher_icons:/d' pubspec.yaml
+          sed -i '/^  flutter_native_splash:/d' pubspec.yaml
+          sed -i '/^  import_sorter:/d' pubspec.yaml
+          sed -i '/^  license_checker:/d' pubspec.yaml
+          sed -i '/^  translations_cleaner:/d' pubspec.yaml
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build web release
+        run: flutter build web --release
+        continue-on-error: true
+
+      - name: Create ZIP archive
+        if: success()
+        run: |
+          cd build/web
+          zip -r ../../plusly-web.zip .
+
+      - name: Upload web build
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plusly-web
+          path: plusly-web.zip
+
+      - name: Deploy to GitHub Pages
+        if: success() && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+
+      - name: Create Release
+        if: success() && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: web-${{ github.run_number }}
+          name: Plusly Web Build ${{ github.run_number }}
+          files: plusly-web.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
