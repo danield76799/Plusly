@@ -235,10 +235,10 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
           const SizedBox(height: 8),
           SegmentedButton<int>(
             segments: const [
+              ButtonSegment(value: 5, label: Text('5m')),
               ButtonSegment(value: 15, label: Text('15m')),
               ButtonSegment(value: 30, label: Text('30m')),
               ButtonSegment(value: 60, label: Text('1u')),
-              ButtonSegment(value: 240, label: Text('4u')),
             ],
             selected: {_selectedMinutes},
             onSelectionChanged: (selection) {
