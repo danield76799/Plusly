@@ -105,7 +105,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
       
       // Send a follow-up message with live location info
       final endTime = DateTime.now().add(Duration(minutes: _selectedMinutes));
-      await widget.room.sendTextMessage(
+      await widget.room.sendTextEvent(
         '📍 Live locatie actief voor ${_selectedMinutes} minuten (tot ${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')})',
       );
       
