@@ -75,7 +75,16 @@ jobs:
           cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
           ls -la output/
 
-      - name: Sign AAB
+      - name: Verify AAB signing
+        run: |
+          jarsigner -verify -verbose output/plusly-release.aab
+          
+      - name: Check AAB contents
+        run: |
+          # List the contents of the AAB to verify it has the right structure
+          unzip -l output/plusly-release.aab | head -30
+
+      - name: Sign AAB with release keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -83,12 +92,24 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           echo "$KEYSTORE_BASE64" | base64 -d > /tmp/keystore.jks
+          # Sign the AAB
           jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
             -keystore /tmp/keystore.jks \
             -storepass "$KEYSTORE_PASSWORD" \
             -keypass "$KEY_PASSWORD" \
             output/plusly-release.aab "$KEY_ALIAS"
+          # Verify signing
           jarsigner -verify output/plusly-release.aab
+          # Check SHA1 fingerprint
+          keytool -list -v -keystore /tmp/keystore.jks -storepass "$KEYSTORE_PASSWORD" | grep "SHA1"
+
+      - name: Verify AAB structure
+        run: |
+          echo "=== AAB Contents ==="
+          unzip -l output/plusly-release.aab | head -40
+          echo ""
+          echo "=== Checking for native libraries ==="
+          unzip -l output/plusly-release.aab | grep -E "\.so$" | head -20
 
       - name: Upload Build Log
         uses: actions/upload-artifact@v4
