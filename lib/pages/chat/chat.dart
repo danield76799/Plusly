@@ -58,6 +58,7 @@ import '../../utils/localized_exception_extension.dart';
 import '../../utils/resize_video.dart';
 import 'send_file_dialog.dart';
 import 'send_location_dialog.dart';
+import 'live_location_dialog.dart';
 
 class ChatPage extends StatelessWidget {
   final String roomId;
@@ -1014,6 +1015,14 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
+  void sendLiveLocationAction() async {
+    await showAdaptiveDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => LiveLocationDialog(room: room),
+    );
+  }
+
   String _getSelectedEventString() {
     var copyString = '';
     if (selectedEvents.length == 1) {
@@ -1773,6 +1782,9 @@ class ChatController extends State<ChatPageWithRoom>
     }
     if (choice == 'location') {
       sendLocationAction();
+    }
+    if (choice == 'live_location') {
+      sendLiveLocationAction();
     }
     if (choice == 'emoji') {
       emojiPickerAction();
