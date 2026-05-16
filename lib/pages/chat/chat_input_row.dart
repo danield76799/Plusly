@@ -223,6 +223,13 @@ class ChatInputRow extends StatelessWidget {
                             ),
                           ),
                           PopupMenuItem(
+                            value: 'live_location',
+                            child: ListTile(
+                              leading: const Icon(Icons.my_location, color: Colors.red),
+                              title: Text(L10n.of(context).shareLiveLocation),
+                            ),
+                          ),
+                          PopupMenuItem(
                             value: 'file',
                             child: ListTile(
                               leading: const Icon(Icons.attachment_outlined),
