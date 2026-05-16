@@ -109,27 +109,31 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
         'speed': _position!.speed,
       };
       
-      // Send beacon_info event
-      final result = await showFutureLoadingDialog<Event>(
-        context: context,
-        future: () => widget.room.sendEvent(
+      try {
+        // Send beacon_info event
+        final beaconInfoEvent = await widget.room.sendEvent(
           beaconInfoContent,
           type: 'm.beacon_info.imou',
-        ),
-      );
-      
-      final eventId = result.result?.eventId;
-      if (eventId != null) {
-        _beaconInfoEventId = eventId;
+        );
+        _beaconInfoEventId = beaconInfoEvent;
         
         // Send the first beacon location event
-        await showFutureLoadingDialog(
-          context: context,
-          future: () => widget.room.sendEvent(
-            beaconContent,
-            type: 'm.beacon',
-          ),
+        await widget.room.sendEvent(
+          beaconContent,
+          type: 'm.beacon',
         );
+      } catch (e) {
+        // Beacon events may not be supported, fall back to regular location
+        final body = 'https://www.openstreetmap.org/?mlat=${_position!.latitude}&mlon=${_position!.longitude}#map=16/${_position!.latitude}/${_position!.longitude}';
+        await widget.room.sendEvent(
+          {
+            'msgtype': 'm.location',
+            'body': body,
+            'geo_uri': uri,
+          },
+          type: EventTypes.Message,
+        );
+      }
         
         // Start periodic updates (every 30 seconds)
         _locationUpdateTimer = Timer.periodic(
