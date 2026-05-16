@@ -36,7 +36,7 @@ abstract class AppConfig {
   static final String _privacyUrl = 'https://github.com/danield76799/Plusly/blob/main/PRIVACY.md';
 
   static String get privacyUrl => _privacyUrl;
-  static const String website = 'https://plusly.im';
+  static const String website = 'https://mtux.nl';
   static const String enablePushTutorial =
       'https://github.com/krille-chan/fluffychat/wiki/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =
