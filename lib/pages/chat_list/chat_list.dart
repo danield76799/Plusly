@@ -257,7 +257,8 @@ class ChatListController extends State<ChatList>
       case .people:
         return (room) => false;
       case .favorites:
-        return (room) => true; // ⭐ Favorieten toont alle rooms (placeholder)
+        return false; // ⭐ Favorieten: geen rooms tonen, aparte pagina
+        return (room) => false; // ⭐ Favorieten: geen rooms tonen, aparte pagina
     }
   }
 
@@ -307,6 +308,7 @@ class ChatListController extends State<ChatList>
       case .people:
         return false;
       case .favorites:
+        return false; // ⭐ Favorieten: geen rooms tonen, aparte pagina
         return true; // ⭐ Favorieten toont alle rooms (placeholder)
     }
   }).toList();
