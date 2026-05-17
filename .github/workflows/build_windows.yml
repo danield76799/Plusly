@@ -16,7 +16,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.5'
+        flutter-version: '3.41.9'
         channel: 'stable'
         
     - name: Enable Windows Desktop
@@ -24,6 +24,16 @@ jobs:
       
     - name: Get dependencies
       run: flutter pub get
+      
+    - name: Fix CMake for Firebase
+      run: |
+        $cmakeFile = "build/windows/x64/extracted/firebase_cpp_sdk_windows/CMakeLists.txt"
+        if (Test-Path $cmakeFile) {
+          $content = Get-Content $cmakeFile -Raw
+          $content = $content -replace 'cmake_minimum_required\\(VERSION 3.1\\)', 'cmake_minimum_required(VERSION 3.5)'
+          $content | Set-Content $cmakeFile
+          Write-Host "Fixed CMake version in Firebase SDK"
+        }
       
     - name: Build Windows
       run: flutter build windows --release
