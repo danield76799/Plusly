@@ -41,6 +41,7 @@ class ChatListBottomNavbar extends StatelessWidget {
           !controller.widget.displayNavigationRail)
         ActiveFilter.spaces,
       if (AppSettings.enablePeopleTab.value) ActiveFilter.people,
+      ActiveFilter.favorites, // ⭐ Favorieten tab
     ];
 
     final filterLambdas = {

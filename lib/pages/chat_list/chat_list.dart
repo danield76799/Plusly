@@ -57,23 +57,26 @@ extension LocalizedActiveFilter on ActiveFilter {
         return L10n.of(context).people;
       case ActiveFilter.favorites:
         return "Favorieten"; // ⭐ Favorieten
-      case ActiveFilter.favorites:
-        return Icons.star_outline; // ⭐ Favorieten icoon
     }
+  }
+
+  IconData toIconData(bool outline) {
     switch (this) {
-      case .allChats:
-      case .messages:
+      case ActiveFilter.allChats:
+      case ActiveFilter.messages:
         return outline ? Icons.chat_bubble_outline : Icons.chat_bubble;
-      case .unread:
+      case ActiveFilter.unread:
         return outline
             ? Icons.mark_unread_chat_alt_outlined
             : Icons.mark_unread_chat_alt;
-      case .groups:
+      case ActiveFilter.groups:
         return outline ? Icons.people_outline : Icons.people;
-      case .spaces:
+      case ActiveFilter.spaces:
         return outline ? Icons.grid_view_outlined : Icons.grid_view_rounded;
-      case .people:
+      case ActiveFilter.people:
         return Icons.people_outline;
+      case ActiveFilter.favorites:
+        return Icons.star_outline; // ⭐ Favorieten icoon
     }
   }
 }
@@ -253,6 +256,8 @@ class ChatListController extends State<ChatList>
         return (room) => room.isSpace;
       case .people:
         return (room) => false;
+      case .favorites:
+        return (room) => false; // ⭐ Favorieten filter
     }
   }
 
@@ -301,6 +306,8 @@ class ChatListController extends State<ChatList>
         return room.isSpace;
       case .people:
         return false;
+      case .favorites:
+        return false; // ⭐ Favorieten filter
     }
   }).toList();
 

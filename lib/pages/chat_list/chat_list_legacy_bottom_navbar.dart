@@ -49,6 +49,7 @@ class ChatListLegacyBottomNavbar extends StatelessWidget {
       ActiveFilter.unread: (Room room) => room.isUnread,
       ActiveFilter.spaces: (Room room) => false,
       ActiveFilter.people: (Room room) => false,
+      ActiveFilter.favorites: (Room room) => false, // ⭐ Favorieten filter
     };
 
     return BottomNavigationBar(
