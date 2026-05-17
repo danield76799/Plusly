@@ -1,4 +1,5 @@
 import 'package:Pulsly/pages/chat_list/people_view.dart';
+import 'package:Pulsly/pages/favorites/favorites_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -42,6 +43,9 @@ class ChatListViewBody extends StatelessWidget {
         onChatTap: (room) => controller.onChatTap(room),
         chatListController: controller,
       );
+    }
+    if (controller.activeFilter == .favorites) {
+      return const FavoritesPage(); // ⭐ Favorieten pagina
     }
     if (activeSpace != null) {
       return SpaceView(
