@@ -25,46 +25,65 @@ class SavedMessage {
   };
 
   factory SavedMessage.fromJson(Map<String, dynamic> json) => SavedMessage(
-    id: json['id'],
-    roomId: json['roomId'],
-    sender: json['sender'],
-    content: json['content'],
-    savedAt: DateTime.parse(json['savedAt']),
+    id: json['id'] ?? '',
+    roomId: json['roomId'] ?? '',
+    sender: json['sender'] ?? 'Unknown',
+    content: json['content'] ?? '',
+    savedAt: DateTime.tryParse(json['savedAt'] ?? '') ?? DateTime.now(),
   );
 }
 
 class FavoritesService {
   static const String _key = 'saved_messages';
+  static List<SavedMessage> _cache = [];
+  static bool _initialized = false;
+
+  static Future<void> _init() async {
+    if (_initialized) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? data = prefs.getString(_key);
+      if (data != null && data.isNotEmpty) {
+        final List<dynamic> jsonList = jsonDecode(data);
+        _cache = jsonList.map((e) => SavedMessage.fromJson(e)).toList();
+      }
+    } catch (e) {
+      print('Favorites init error: $e');
+      _cache = [];
+    }
+    _initialized = true;
+  }
 
   static Future<List<SavedMessage>> getFavorites() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? data = prefs.getString(_key);
-    if (data == null) return [];
-    
-    final List<dynamic> jsonList = jsonDecode(data);
-    return jsonList.map((e) => SavedMessage.fromJson(e)).toList();
+    await _init();
+    return List.from(_cache);
   }
 
   static Future<void> saveMessage(SavedMessage message) async {
-    final prefs = await SharedPreferences.getInstance();
-    final favorites = await getFavorites();
-    favorites.add(message);
-    
-    final String data = jsonEncode(favorites.map((e) => e.toJson()).toList());
-    await prefs.setString(_key, data);
+    await _init();
+    _cache.add(message);
+    await _persist();
   }
 
   static Future<void> removeMessage(String id) async {
-    final prefs = await SharedPreferences.getInstance();
-    final favorites = await getFavorites();
-    favorites.removeWhere((msg) => msg.id == id);
-    
-    final String data = jsonEncode(favorites.map((e) => e.toJson()).toList());
-    await prefs.setString(_key, data);
+    await _init();
+    _cache.removeWhere((msg) => msg.id == id);
+    await _persist();
+  }
+
+  static Future<void> _persist() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String data = jsonEncode(_cache.map((e) => e.toJson()).toList());
+      await prefs.setString(_key, data);
+    } catch (e) {
+      print('Favorites persist error: $e');
+    }
   }
 
   static Future<List<SavedMessage>> searchFavorites(String query) async {
     final favorites = await getFavorites();
+    if (query.isEmpty) return favorites;
     return favorites.where((msg) => 
       msg.content.toLowerCase().contains(query.toLowerCase()) ||
       msg.sender.toLowerCase().contains(query.toLowerCase())

@@ -618,16 +618,22 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             label: '⭐ Opslaan als favoriet',
                             color: Colors.amber,
                             onPressed: () async {
-                              await FavoritesService.saveMessage(SavedMessage(
-                                id: event.eventId,
-                                roomId: room.id,
-                                sender: event.senderFromMemoryOrFallback.displayName ?? event.senderId,
-                                content: event.plaintextBody,
-                                savedAt: DateTime.now(),
-                              ));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('⭐ Bericht opgeslagen als favoriet!')),
-                              );
+                              try {
+                                await FavoritesService.saveMessage(SavedMessage(
+                                  id: event.eventId,
+                                  roomId: room.id,
+                                  sender: event.senderFromMemoryOrFallback.displayName ?? event.senderId,
+                                  content: event.plaintextBody ?? 'Geen tekst',
+                                  savedAt: DateTime.now(),
+                                ));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('⭐ Bericht opgeslagen!')),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('❌ Fout: $e')),
+                                );
+                              }
                               Navigator.of(context).pop();
                             },
                           ),
