@@ -36,7 +36,7 @@ import '../../widgets/matrix.dart';
 
 enum PopupMenuAction { settings, invite, newGroup, newSpace, archive }
 
-enum ActiveFilter { allChats, messages, groups, unread, spaces, people }
+enum ActiveFilter { allChats, messages, groups, unread, spaces, people, favorites }
 
 enum SearchScope { local, public }
 
@@ -55,10 +55,11 @@ extension LocalizedActiveFilter on ActiveFilter {
         return L10n.of(context).spaces;
       case ActiveFilter.people:
         return L10n.of(context).people;
+      case ActiveFilter.favorites:
+        return "Favorieten"; // ⭐ Favorieten
+      case ActiveFilter.favorites:
+        return Icons.star_outline; // ⭐ Favorieten icoon
     }
-  }
-
-  IconData toIconData(bool outline) {
     switch (this) {
       case .allChats:
       case .messages:
