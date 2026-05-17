@@ -9,6 +9,7 @@ import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/services/favorites_service.dart';
 import 'package:Pulsly/pages/download_manager/download_manager.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
@@ -613,19 +614,21 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                           const ListDivider(),
                           _buildMenuItem(
                             event: event,
-                            icon: Icons.copy_outlined,
-                            label: L10n.of(context).copy,
-                            onPressed: () {
-                              controller.closeMessageMenu();
-                              Clipboard.setData(
-                                ClipboardData(
-                                  text: event
-                                      .getDisplayEvent(timeline!)
-                                      .calcLocalizedBodyFallback(
-                                        MatrixLocals(L10n.of(context)),
-                                      ),
-                                ),
+                            icon: Icons.star_outline,
+                            label: '⭐ Opslaan als favoriet',
+                            color: Colors.amber,
+                            onPressed: () async {
+                              await FavoritesService.saveMessage(SavedMessage(
+                                id: event.eventId,
+                                roomId: room.id,
+                                sender: event.senderFromMemoryOrFallback.displayName ?? event.senderId,
+                                content: event.plaintextBody,
+                                savedAt: DateTime.now(),
+                              ));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('⭐ Bericht opgeslagen als favoriet!')),
                               );
+                              Navigator.of(context).pop();
                             },
                           ),
                           const ListDivider(),
