@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:Pulsly/services/favorites_service.dart';
 
 class FavoritesPage extends StatefulWidget {
@@ -106,6 +107,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
                 _loadFavorites();
               },
             ),
+            onTap: () {
+              // Open de chat waar dit bericht vandaan komt
+              context.go('/rooms/${msg.roomId}');
+            },
           ),
         );
       },
