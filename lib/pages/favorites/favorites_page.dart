@@ -109,7 +109,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             ),
             onTap: () {
               // Open de chat en scroll naar het specifieke bericht
-              context.go('/rooms/${msg.roomId}?eventId=${msg.id}');
+              context.go('/rooms/${msg.roomId}?event=${msg.id}');
             },
           ),
         );
