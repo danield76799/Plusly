@@ -47,6 +47,9 @@ class ChatListViewBody extends StatelessWidget {
     if (controller.activeFilter == .favorites) {
       return const FavoritesPage(); // ⭐ Favorieten pagina
     }
+    if (controller.activeFilter == .favorites) {
+      return const FavoritesPage(); // ⭐ Favorieten pagina
+    }
     if (activeSpace != null) {
       return SpaceView(
         key: ValueKey(activeSpace),
