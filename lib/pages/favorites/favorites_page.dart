@@ -14,12 +14,22 @@ class _FavoritesPageState extends State<FavoritesPage> {
   bool _isLoading = true;
   String _error = '';
 
-  // Plusly brand colors
-  static const Color pluslyBlue = Color(0xFF49AFC2);
-  static const Color darkBackground = Color(0xFF333333);
-  static const Color cardBackground = Color(0xFF3D3D3D);
-  static const Color textGray = Color(0xFF999999);
-  static const Color warmRed = Color(0xFFE74C3C);
+  // Exact colors from the reference image
+  static const Color tealPrimary = Color(0xFF4DB6AC);
+  static const Color backgroundDark = Color(0xFF121212);
+  static const Color cardDark = Color(0xFF1E1E1E);
+  static const Color textSecondary = Color(0xFF9E9E9E);
+  static const Color redAccent = Color(0xFFEF5350);
+  static const Color bottomNavBg = Color(0xFF2C2C2C);
+  static const Color avatarBg = Color(0xFF4DB6AC);
+
+  // Spacing constants
+  static const double screenPadding = 12.0;
+  static const double cardBorderRadius = 12.0;
+  static const double cardPadding = 16.0;
+  static const double avatarSize = 48.0;
+  static const double cardSpacing = 8.0;
+  static const double headerHeight = 110.0;
 
   @override
   void initState() {
@@ -49,41 +59,49 @@ class _FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkBackground,
-      appBar: AppBar(
-        backgroundColor: pluslyBlue,
-        elevation: 0,
-        title: Row(
-          children: [
-            const Icon(Icons.star, color: Colors.white, size: 24),
-            const SizedBox(width: 8),
-            const Text(
-              'Favorieten',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Roboto',
-              ),
+      backgroundColor: backgroundDark,
+      body: Column(
+        children: [
+          // Header with teal background
+          Container(
+            height: headerHeight,
+            color: tealPrimary,
+            padding: const EdgeInsets.only(left: 16, bottom: 16),
+            alignment: Alignment.bottomLeft,
+            child: Row(
+              children: [
+                const Icon(Icons.star, color: Colors.amber, size: 24),
+                const SizedBox(width: 12),
+                const Text(
+                  'Favorieten',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
-            onPressed: () {
-              // TODO: Implement search
-            },
+          ),
+          // List content
+          Expanded(
+            child: _buildBody(),
           ),
         ],
       ),
-      body: _buildBody(),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           context.go('/rooms/newprivatechat');
         },
-        backgroundColor: pluslyBlue,
-        child: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+        backgroundColor: tealPrimary,
+        icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
+        label: const Text(
+          'New chat',
+          style: TextStyle(color: Colors.white),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
       ),
     );
   }
@@ -92,7 +110,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(pluslyBlue),
+          valueColor: AlwaysStoppedAnimation<Color>(tealPrimary),
         ),
       );
     }
@@ -102,12 +120,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_error, style: const TextStyle(color: warmRed)),
+            Text(_error, style: const TextStyle(color: redAccent)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadFavorites,
               style: ElevatedButton.styleFrom(
-                backgroundColor: pluslyBlue,
+                backgroundColor: tealPrimary,
               ),
               child: const Text('Opnieuw proberen'),
             ),
@@ -124,24 +142,22 @@ class _FavoritesPageState extends State<FavoritesPage> {
             Icon(
               Icons.star_outline,
               size: 64,
-              color: textGray.withOpacity(0.5),
+              color: textSecondary.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             const Text(
               'Geen favorieten yet',
               style: TextStyle(
-                color: textGray,
+                color: textSecondary,
                 fontSize: 16,
-                fontFamily: 'Roboto',
               ),
             ),
             const SizedBox(height: 8),
             const Text(
               '⭐ Lang druk op een bericht om op te slaan',
               style: TextStyle(
-                color: textGray,
+                color: textSecondary,
                 fontSize: 14,
-                fontFamily: 'Roboto',
               ),
             ),
           ],
@@ -150,7 +166,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.all(screenPadding),
       itemCount: _favorites.length,
       itemBuilder: (context, index) {
         final msg = _favorites[index];
@@ -161,28 +177,28 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   Widget _buildFavoriteCard(SavedMessage msg) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      color: cardBackground,
+      margin: const EdgeInsets.only(bottom: cardSpacing),
+      color: cardDark,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(cardBorderRadius),
       ),
       child: InkWell(
         onTap: () {
           context.go('/rooms/${msg.roomId}?event=${msg.id}');
         },
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(cardBorderRadius),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(cardPadding),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar
+              // Avatar circle
               Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: pluslyBlue,
+                width: avatarSize,
+                height: avatarSize,
+                decoration: const BoxDecoration(
+                  color: avatarBg,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -190,9 +206,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     msg.sender.isNotEmpty ? msg.sender[0].toUpperCase() : '?',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Roboto',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
@@ -203,63 +218,50 @@ class _FavoritesPageState extends State<FavoritesPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      msg.sender,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Roboto',
-                      ),
+                    // Name row with delete icon
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            msg.sender,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          color: redAccent,
+                          iconSize: 24,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () async {
+                            await FavoritesService.removeMessage(msg.id);
+                            _loadFavorites();
+                          },
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 4),
+                    // Message preview
                     Text(
                       msg.content,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: textGray,
+                        color: textSecondary,
                         fontSize: 14,
-                        fontFamily: 'Roboto',
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatDate(msg.savedAt),
-                      style: TextStyle(
-                        color: textGray.withOpacity(0.7),
-                        fontSize: 12,
-                        fontFamily: 'Roboto',
                       ),
                     ),
                   ],
                 ),
-              ),
-              // Delete button
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                color: warmRed,
-                onPressed: () async {
-                  await FavoritesService.removeMessage(msg.id);
-                  _loadFavorites();
-                },
               ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
-    
-    if (diff.inMinutes < 1) return 'Zojuist';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m geleden';
-    if (diff.inHours < 24) return '${diff.inHours}u geleden';
-    if (diff.inDays < 7) return '${diff.inDays}d geleden';
-    
-    return '${date.day}/${date.month}/${date.year}';
   }
 }
