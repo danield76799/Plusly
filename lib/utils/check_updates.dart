@@ -320,7 +320,182 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
 }
 
 void checkForUpdates(BuildContext context) async {
-  if (!AppSettings.checkForUpdates.value || AppConfig.alreadyCheckedUpdates) {
+  // Reset the check flag so we can check again
+  AppConfig.alreadyCheckedUpdates = false;
+  
+  if (!AppSettings.checkForUpdates.value) {
+    return;
+  }
+  
+  Logs().v('Checking updates via GitHub Releases...');
+  
+  try {
+    final currentVersion = await PlatformInfos.getVersion();
+    final release = await getLatestRelease();
+    
+    if (release == null) {
+      Logs().v('No release found or failed to fetch');
+      return;
+    }
+    
+    final latestVersion = release.tagName;
+    Logs().v(
+      'Latest version: $latestVersion | Current version: $currentVersion',
+    );
+    
+    if (!isNewerVersion(latestVersion, currentVersion)) return;
+    
+    AppConfig.alreadyCheckedUpdates = true;
+    
+    if (!context.mounted) return;
+    
+    final l10n = L10n.of(context);
+    
+    await showAdaptiveBottomSheet(
+      context: context,
+      useRootNavigator: false,
+      builder: (ctx) {
+        return Scaffold(
+          appBar: AppBar(title: Text(l10n.updateAvailableTitle)),
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(l10n.updateAvailable(latestVersion)),
+              ),
+              const Divider(),
+              if (release.downloadUrl.isNotEmpty)
+                ListTile(
+                  leading: const Icon(Icons.android),
+                  title: const Text('Download & installeer APK'),
+                  subtitle: const Text('GitHub Releases'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    downloadAndInstallApk(context, release.downloadUrl);
+                  },
+                ),
+              ListTile(
+                leading: const Icon(Icons.open_in_browser),
+                title: const Text('Open GitHub releasepagina'),
+                subtitle: const Text('Direct downloaden via browser'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  launchUrlString(
+                    'https://github.com/danield76799/Plusly/releases',
+                  );
+                },
+              ),
+              if (release.browserDownloadUrl.isNotEmpty)
+                ListTile(
+                  leading: const Icon(Icons.source),
+                  title: const Text('Download source code'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    launchUrlString(release.browserDownloadUrl);
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  } catch (e) {
+    Logs().e('Failed to check for updates', e);
+  }
+}
+  // Reset the check flag so we can check again
+  AppConfig.alreadyCheckedUpdates = false;
+  
+  if (!AppSettings.checkForUpdates.value) {
+    return;
+  }
+  
+  Logs().v('Checking updates via GitHub Releases...');
+  
+  try {
+    final currentVersion = await PlatformInfos.getVersion();
+    final release = await getLatestRelease();
+    
+    if (release == null) {
+      Logs().v('No release found or failed to fetch');
+      return;
+    }
+    
+    final latestVersion = release.tagName;
+    Logs().v(
+      'Latest version: $latestVersion | Current version: $currentVersion',
+    );
+    
+    if (!isNewerVersion(latestVersion, currentVersion)) return;
+    
+    AppConfig.alreadyCheckedUpdates = true;
+    
+    if (!context.mounted) return;
+    
+    final l10n = L10n.of(context);
+    
+    await showAdaptiveBottomSheet(
+      context: context,
+      useRootNavigator: false,
+      builder: (ctx) {
+        return Scaffold(
+          appBar: AppBar(title: Text(l10n.updateAvailableTitle)),
+          body: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(l10n.updateAvailable(latestVersion)),
+              ),
+              const Divider(),
+              if (release.downloadUrl.isNotEmpty)
+                ListTile(
+                  leading: const Icon(Icons.android),
+                  title: const Text('Download & installeer APK'),
+                  subtitle: const Text('GitHub Releases'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    downloadAndInstallApk(context, release.downloadUrl);
+                  },
+                ),
+              ListTile(
+                leading: const Icon(Icons.open_in_browser),
+                title: const Text('Open GitHub releasepagina'),
+                subtitle: const Text('Direct downloaden via browser'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.of(ctx).pop();
+                  launchUrlString(
+                    'https://github.com/danield76799/Plusly/releases',
+                  );
+                },
+              ),
+              if (release.browserDownloadUrl.isNotEmpty)
+                ListTile(
+                  leading: const Icon(Icons.source),
+                  title: const Text('Download source code'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    launchUrlString(release.browserDownloadUrl);
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  } catch (e) {
+    Logs().e('Failed to check for updates', e);
+  }
+}
+  // Reset the check flag so we can check again
+  AppConfig.alreadyCheckedUpdates = false;
+  
+  if (!AppSettings.checkForUpdates.value) {
     return;
   }
 
