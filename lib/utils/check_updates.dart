@@ -135,8 +135,11 @@ bool isNewerVersion(String latest, String current) {
   final latestBuildMatch = RegExp(r'(\d+)$').firstMatch(latest);
   final currentBuildMatch = RegExp(r'(\d+)$').firstMatch(current);
 
-  if (currentBuildMatch != null) {
-    // Current has a build suffix (e.g., "1.1.3+863")
+  // Check for actual Plusly build suffix (+ or build) vs semantic version trailing digit
+  final currentHasBuildSuffix = current.contains('+') || current.contains('build');
+
+  if (currentHasBuildSuffix && currentBuildMatch != null) {
+    // Current has a build suffix (e.g., "1.1.3+863" or "v0.9.9-build397")
     // Compare build numbers only
     final latestBuild = latestBuildMatch != null
         ? int.tryParse(latestBuildMatch.group(1) ?? '0') ?? 0
