@@ -57,7 +57,7 @@ class ChatListBottomNavbar extends StatelessWidget {
     return Material(
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       clipBehavior: Clip.hardEdge,
-      color: const Color(0xFF2C2C2C), // Bottom nav dark background
+      color: theme.colorScheme.surfaceContainerHigh,
       child: Padding(
         padding: const EdgeInsets.all(4),
         child: Row(
