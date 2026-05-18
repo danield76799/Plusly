@@ -135,8 +135,12 @@ bool isNewerVersion(String latest, String current) {
   final latestBuildMatch = RegExp(r'(\d+)$').firstMatch(latest);
   final currentBuildMatch = RegExp(r'(\d+)$').firstMatch(current);
 
-  if (latestBuildMatch != null && currentBuildMatch != null) {
-    final latestBuild = int.tryParse(latestBuildMatch.group(1) ?? '0') ?? 0;
+  if (currentBuildMatch != null) {
+    // Current has a build suffix (e.g., "1.1.3+863")
+    // Compare build numbers only
+    final latestBuild = latestBuildMatch != null
+        ? int.tryParse(latestBuildMatch.group(1) ?? '0') ?? 0
+        : 0;
     final currentBuild = int.tryParse(currentBuildMatch.group(1) ?? '0') ?? 0;
     return latestBuild > currentBuild;
   }
