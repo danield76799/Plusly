@@ -14,14 +14,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
   bool _isLoading = true;
   String _error = '';
 
-  // Exact colors from the reference image
-  static const Color tealPrimary = Color(0xFF4DB6AC);
-  static const Color backgroundDark = Color(0xFF121212);
-  static const Color cardDark = Color(0xFF1E1E1E);
-  static const Color textSecondary = Color(0xFF9E9E9E);
-  static const Color redAccent = Color(0xFFEF5350);
-  static const Color bottomNavBg = Color(0xFF2C2C2C);
-  static const Color avatarBg = Color(0xFF4DB6AC);
+  // Plusly brand colors from branding guidelines
+  static const Color pluslyBlue = Color(0xFF49AFC2);
+  static const Color darkBackground = Color(0xFF333333);
+  static const Color cardBackground = Color(0xFF3D3D3D);
+  static const Color textGray = Color(0xFF999999);
+  static const Color warmRed = Color(0xFFE74C3C);
 
   // Spacing constants
   static const double screenPadding = 12.0;
@@ -59,13 +57,13 @@ class _FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundDark,
+      backgroundColor: darkBackground,
       body: Column(
         children: [
-          // Header with teal background
+          // Header with Plusly blue background
           Container(
             height: headerHeight,
-            color: tealPrimary,
+            color: pluslyBlue,
             padding: const EdgeInsets.only(left: 16, bottom: 16),
             alignment: Alignment.bottomLeft,
             child: Row(
@@ -93,7 +91,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
         onPressed: () {
           context.go('/rooms/newprivatechat');
         },
-        backgroundColor: tealPrimary,
+        backgroundColor: pluslyBlue,
         icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
         label: const Text(
           'New chat',
@@ -110,7 +108,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(tealPrimary),
+          valueColor: AlwaysStoppedAnimation<Color>(pluslyBlue),
         ),
       );
     }
@@ -120,12 +118,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_error, style: const TextStyle(color: redAccent)),
+            Text(_error, style: const TextStyle(color: warmRed)),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadFavorites,
               style: ElevatedButton.styleFrom(
-                backgroundColor: tealPrimary,
+                backgroundColor: pluslyBlue,
               ),
               child: const Text('Opnieuw proberen'),
             ),
@@ -142,13 +140,13 @@ class _FavoritesPageState extends State<FavoritesPage> {
             Icon(
               Icons.star_outline,
               size: 64,
-              color: textSecondary.withOpacity(0.5),
+              color: textGray.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             const Text(
               'Geen favorieten yet',
               style: TextStyle(
-                color: textSecondary,
+                color: textGray,
                 fontSize: 16,
               ),
             ),
@@ -156,7 +154,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             const Text(
               '⭐ Lang druk op een bericht om op te slaan',
               style: TextStyle(
-                color: textSecondary,
+                color: textGray,
                 fontSize: 14,
               ),
             ),
@@ -178,7 +176,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   Widget _buildFavoriteCard(SavedMessage msg) {
     return Card(
       margin: const EdgeInsets.only(bottom: cardSpacing),
-      color: cardDark,
+      color: cardBackground,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(cardBorderRadius),
@@ -193,12 +191,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar circle
+              // Avatar circle with Plusly blue
               Container(
                 width: avatarSize,
                 height: avatarSize,
                 decoration: const BoxDecoration(
-                  color: avatarBg,
+                  color: pluslyBlue,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -233,7 +231,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete_outline),
-                          color: redAccent,
+                          color: warmRed,
                           iconSize: 24,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
@@ -251,7 +249,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: textSecondary,
+                        color: textGray,
                         fontSize: 14,
                       ),
                     ),
