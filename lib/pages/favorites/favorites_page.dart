@@ -87,20 +87,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          context.go('/rooms/newprivatechat');
-        },
-        backgroundColor: pluslyBlue,
-        icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
-        label: const Text(
-          'New chat',
-          style: TextStyle(color: Colors.white),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-      ),
+      floatingActionButton: null, // Geen FAB op Favorieten pagina
     );
   }
 
