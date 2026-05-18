@@ -44,18 +44,18 @@ jobs:
         # Check keystore
         keytool -list -v -keystore /tmp/keystore.jks -storepass "$KEYSTORE_PASSWORD" | grep "Alias name"
         
-        # Sign the APK with apksigner (modern method)
-        ${ANDROID_HOME}/build-tools/*/apksigner sign \
-          --ks /tmp/keystore.jks \
-          --ks-pass pass:"$KEYSTORE_PASSWORD" \
-          --key-pass pass:"$KEY_PASSWORD" \
-          --ks-key-alias "$KEY_ALIAS" \
-          --v1-signing-enabled true \
-          --v2-signing-enabled true \
-          build/app/outputs/flutter-apk/app-release.apk
+        # Sign the APK with jarsigner (reliable method)
+        jarsigner \
+          -keystore /tmp/keystore.jks \
+          -storepass "$KEYSTORE_PASSWORD" \
+          -keypass "$KEY_PASSWORD" \
+          -sigalg SHA256withRSA \
+          -digestalg SHA-256 \
+          build/app/outputs/flutter-apk/app-release.apk \
+          "$KEY_ALIAS"
         
         # Verify
-        ${ANDROID_HOME}/build-tools/*/apksigner verify -v build/app/outputs/flutter-apk/app-release.apk
+        jarsigner -verify -verbose -certs build/app/outputs/flutter-apk/app-release.apk
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
