@@ -27,7 +27,7 @@ class ThemeBuilder extends StatefulWidget {
   const ThemeBuilder({
     required this.builder,
     this.themeModeSettingsKey = 'xyz.extera.next.themeMode',
-    this.primaryColorSettingsKey = 'xyz.extera.next.colorSchemeSeed',
+    this.primaryColorSettingsKey = 'xyz.plusly.next.colorSchemeSeed',
     this.pureBlackSettingsKey = 'xyz.extera.next.pureBlack',
     this.twemojiSettingsKey = 'xyz.extera.next.twemojiFont',
     this.schemeVariantSettingsKey = 'xyz.extera.next.schemeVariant',
