@@ -1115,7 +1115,7 @@ class ChatController extends State<ChatPageWithRoom>
         AppSettings.translationTargetLanguage.value.isEmpty
             ? PlatformDispatcher.instance.locale.languageCode
             : AppSettings.translationTargetLanguage.value,
-        AppSettings.exteraServiceUrl.value,
+        AppSettings.pluslyServiceUrl.value,
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
