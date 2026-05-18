@@ -66,11 +66,11 @@ class ChatListBottomNavbar extends StatelessWidget {
 
             // Pre-calculate styles
             final backgroundColor = isActive
-                ? const Color(0xFF4DB6AC).withOpacity(0.2)
+                ? const Color(0xFF49AFC2).withOpacity(0.2)
                 : Colors.transparent;
 
             final foregroundColor = isActive
-                ? const Color(0xFF4DB6AC) // Teal for active
+                ? const Color(0xFF49AFC2) // Plusly blue for active
                 : const Color(0xFF757575); // Gray for inactive
 
             final currentBorderRadius = BorderRadius.circular(
