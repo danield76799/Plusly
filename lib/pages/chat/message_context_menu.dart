@@ -614,6 +614,24 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                           const ListDivider(),
                           _buildMenuItem(
                             event: event,
+                            icon: Icons.copy_outlined,
+                            label: L10n.of(context).copy,
+                            onPressed: () {
+                              controller.closeMessageMenu();
+                              Clipboard.setData(
+                                ClipboardData(
+                                  text: event
+                                      .getDisplayEvent(timeline!)
+                                      .calcLocalizedBodyFallback(
+                                        MatrixLocals(L10n.of(context)),
+                                      ),
+                                ),
+                              );
+                            },
+                          ),
+                          const ListDivider(),
+                          _buildMenuItem(
+                            event: event,
                             icon: Icons.star_outline,
                             label: '⭐ Opslaan als favoriet',
                             color: Colors.amber,
