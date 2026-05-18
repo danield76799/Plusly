@@ -24,9 +24,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
   // Spacing constants
   static const double screenPadding = 12.0;
   static const double cardBorderRadius = 12.0;
-  static const double cardPadding = 16.0;
+  static const double cardPadding = 12.0; // Was 16.0, nu compacter
   static const double avatarSize = 48.0;
-  static const double cardSpacing = 8.0;
+  static const double cardSpacing = 4.0; // Was 8.0, nu compacter
   static const double headerHeight = 110.0;
 
   @override
