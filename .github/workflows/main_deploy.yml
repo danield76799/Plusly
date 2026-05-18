@@ -165,8 +165,6 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
-        working-directory: android
-
       - name: Deploy to Play Store
         run: bundle exec fastlane deploy_internal_test
         working-directory: android
