@@ -68,7 +68,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             alignment: Alignment.bottomLeft,
             child: Row(
               children: [
-                const Icon(Icons.star, color: Colors.amber, size: 24),
+                const Icon(Icons.star, color: Colors.amber, size: 28),
                 const SizedBox(width: 12),
                 const Text(
                   'Favorieten',
