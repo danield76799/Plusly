@@ -168,8 +168,8 @@ jobs:
         working-directory: android
 
       - name: Deploy to Play Store
-        working-directory: android
         run: bundle exec fastlane deploy_internal_test
+        working-directory: android
 
       # === GITHUB RELEASE ===
       - name: Create GitHub Release
