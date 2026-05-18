@@ -57,7 +57,7 @@ class ChatListBottomNavbar extends StatelessWidget {
     return Material(
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       clipBehavior: Clip.hardEdge,
-      color: theme.colorScheme.surfaceContainerHigh,
+      color: const Color(0xFF2C2C2C), // Bottom nav dark background
       child: Padding(
         padding: const EdgeInsets.all(4),
         child: Row(
@@ -66,27 +66,21 @@ class ChatListBottomNavbar extends StatelessWidget {
 
             // Pre-calculate styles
             final backgroundColor = isActive
-                ? const Color(0xFF49AFC2).withOpacity(
-                    0.1,
-                  ) // Light turquoise 10%
+                ? const Color(0xFF4DB6AC).withOpacity(0.2)
                 : Colors.transparent;
 
             final foregroundColor = isActive
-                ? const Color(0xFF49AFC2) // Turquoise for active
-                : theme.colorScheme.onSurfaceVariant;
+                ? const Color(0xFF4DB6AC) // Teal for active
+                : const Color(0xFF757575); // Gray for inactive
 
             final currentBorderRadius = BorderRadius.circular(
               isActive ? AppConfig.borderRadius - 4 : AppConfig.borderRadius,
             );
 
             return Expanded(
-              // Using a Key helps Flutter track that this is the same widget
-              // even if the list order were to change (good practice).
               key: ValueKey(filter),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 2),
-
-                // 1. The Container handles the Background Color & Shape Animation
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOut,
@@ -95,14 +89,10 @@ class ChatListBottomNavbar extends StatelessWidget {
                     color: backgroundColor,
                     borderRadius: currentBorderRadius,
                   ),
-
-                  // 2. The Material provides the canvas for the InkWell splash.
-                  // By being a child of the Container, it sits ON TOP of the background color.
                   child: Material(
                     type: MaterialType.transparency,
                     child: InkWell(
                       onTap: () => controller.setActiveFilter(filter),
-                      // Pass the dynamic border radius so the ripple clips correctly
                       borderRadius: currentBorderRadius,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -117,7 +107,7 @@ class ChatListBottomNavbar extends StatelessWidget {
                               badgePosition: BadgePosition.topEnd(),
                               child: Icon(
                                 filter.toIconData(!isActive),
-                                size: 20, // 25% larger
+                                size: 20,
                                 color: foregroundColor,
                               ),
                             ),
