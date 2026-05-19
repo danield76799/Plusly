@@ -133,6 +133,11 @@ bool isNewerVersion(String latest, String current) {
   final latestIsBuildTag = latest.contains('+') || latest.contains('build') || latest.startsWith('playstore-') || latest.startsWith('playstore-v');
   final currentIsBuildTag = current.contains('+') || current.contains('build');
 
+  // Special case: playstore- tags are always newer than + build tags (Play Store releases vs GitHub builds)
+  if ((latest.startsWith('playstore-') || latest.startsWith('playstore-v')) && current.contains('+')) {
+    return true;
+  }
+
   // If BOTH are build tags, compare build numbers
   if (latestIsBuildTag && currentIsBuildTag) {
     // Extract build number: handles "playstore-240", "0.9.9-build421", "1.4.0+928"
