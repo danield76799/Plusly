@@ -770,6 +770,8 @@ class ChatController extends State<ChatPageWithRoom>
     );
     // Clear the input after scheduling
     sendController.clear();
+    // Force rebuild of InputBar by resetting the controller
+    sendController.value = TextEditingValue.empty;
     setState(() {
       replyEvent = null;
       editEvent = null;
