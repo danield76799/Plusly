@@ -129,25 +129,50 @@ bool isNewerVersion(String latest, String current) {
   latest = latest.startsWith('v') ? latest.substring(1) : latest;
   current = current.startsWith('v') ? current.substring(1) : current;
 
-  // Handle Plusly build tags like "plusly-build-337"
-  // Extract the build number for comparison
-  final latestBuildMatch = RegExp(r'(\d+)$').firstMatch(latest);
-  final currentBuildMatch = RegExp(r'(\d+)$').firstMatch(current);
+  // Check if versions look like Plusly build tags (e.g., "0.9.9-build421", "1.1.3+863")
+  final latestIsBuildTag = latest.contains('+') || latest.contains('build');
+  final currentIsBuildTag = current.contains('+') || current.contains('build');
 
-  // Check for actual Plusly build suffix (+ or build) vs semantic version trailing digit
-  final currentHasBuildSuffix = current.contains('+') || current.contains('build');
-
-  if (currentHasBuildSuffix && currentBuildMatch != null) {
-    // Current has a build suffix (e.g., "1.1.3+863" or "v0.9.9-build397")
-    // Compare build numbers only
-    final latestBuild = latestBuildMatch != null
-        ? int.tryParse(latestBuildMatch.group(1) ?? '0') ?? 0
-        : 0;
-    final currentBuild = int.tryParse(currentBuildMatch.group(1) ?? '0') ?? 0;
-    return latestBuild > currentBuild;
+  // If BOTH are build tags, compare build numbers
+  if (latestIsBuildTag && currentIsBuildTag) {
+    final latestBuildMatch = RegExp(r'(\d+)$').firstMatch(latest);
+    final currentBuildMatch = RegExp(r'(\d+)$').firstMatch(current);
+    
+    if (latestBuildMatch != null && currentBuildMatch != null) {
+      final latestBuild = int.tryParse(latestBuildMatch.group(1) ?? '0') ?? 0;
+      final currentBuild = int.tryParse(currentBuildMatch.group(1) ?? '0') ?? 0;
+      return latestBuild > currentBuild;
+    }
   }
 
-  // Fall back to semantic version comparison
+  // If latest is NOT a build tag (i.e., proper semantic like "1.5.1"), always compare semantically
+  // This handles cases like current="1.4.0+928" vs latest="1.5.1"
+  if (!latestIsBuildTag) {
+    final latestParts = latest
+        .split('.')
+        .map((e) => int.tryParse(e) ?? 0)
+        .toList();
+    final currentParts = current
+        .split('.')
+        .map((e) => int.tryParse(e) ?? 0)
+        .toList();
+
+    // Pad with zeros
+    while (latestParts.length < currentParts.length) {
+      latestParts.add(0);
+    }
+    while (currentParts.length < latestParts.length) {
+      currentParts.add(0);
+    }
+
+    for (var i = 0; i < latestParts.length; i++) {
+      if (latestParts[i] > currentParts[i]) return true;
+      if (latestParts[i] < currentParts[i]) return false;
+    }
+    return false;
+  }
+
+  // Fallback: semantic version comparison for mixed cases
   final latestParts = latest
       .split('.')
       .map((e) => int.tryParse(e) ?? 0)
@@ -157,7 +182,6 @@ bool isNewerVersion(String latest, String current) {
       .map((e) => int.tryParse(e) ?? 0)
       .toList();
 
-  // Pad with zeros
   while (latestParts.length < currentParts.length) {
     latestParts.add(0);
   }
