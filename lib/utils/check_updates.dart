@@ -402,7 +402,8 @@ void checkForUpdates(BuildContext context) async {
 
   try {
     final currentVersion = await PlatformInfos.getVersion();
-    final release = await getLatestRelease();
+    // Force refresh to bypass cache - ensures we always get latest
+    final release = await getLatestRelease(forceRefresh: true);
 
     if (release == null) {
       Logs().v('No release found or failed to fetch');
