@@ -129,18 +129,36 @@ bool isNewerVersion(String latest, String current) {
   latest = latest.startsWith('v') ? latest.substring(1) : latest;
   current = current.startsWith('v') ? current.substring(1) : current;
 
-  // Check if versions look like Plusly build tags (e.g., "0.9.9-build421", "1.1.3+863")
-  final latestIsBuildTag = latest.contains('+') || latest.contains('build');
+  // Check if versions look like Plusly build tags (e.g., "0.9.9-build421", "1.1.3+863", "playstore-240")
+  final latestIsBuildTag = latest.contains('+') || latest.contains('build') || latest.startsWith('playstore-');
   final currentIsBuildTag = current.contains('+') || current.contains('build');
 
   // If BOTH are build tags, compare build numbers
   if (latestIsBuildTag && currentIsBuildTag) {
-    final latestBuildMatch = RegExp(r'(\d+)$').firstMatch(latest);
-    final currentBuildMatch = RegExp(r'(\d+)$').firstMatch(current);
+    // Extract build number: handles "playstore-240", "0.9.9-build421", "1.4.0+928"
+    int? latestBuild;
+    int? currentBuild;
     
-    if (latestBuildMatch != null && currentBuildMatch != null) {
-      final latestBuild = int.tryParse(latestBuildMatch.group(1) ?? '0') ?? 0;
-      final currentBuild = int.tryParse(currentBuildMatch.group(1) ?? '0') ?? 0;
+    // Try playstore- format first
+    final playstoreMatch = RegExp(r'playstore-(\d+)');
+    final latestPlaystoreMatch = playstoreMatch.firstMatch(latest);
+    final currentPlaystoreMatch = playstoreMatch.firstMatch(current);
+    
+    if (latestPlaystoreMatch != null) {
+      latestBuild = int.tryParse(latestPlaystoreMatch.group(1) ?? '0');
+    } else {
+      final latestBuildMatch = RegExp(r'(\d+)$').firstMatch(latest);
+      latestBuild = latestBuildMatch != null ? int.tryParse(latestBuildMatch.group(1) ?? '0') : null;
+    }
+    
+    if (currentPlaystoreMatch != null) {
+      currentBuild = int.tryParse(currentPlaystoreMatch.group(1) ?? '0');
+    } else {
+      final currentBuildMatch = RegExp(r'(\d+)$').firstMatch(current);
+      currentBuild = currentBuildMatch != null ? int.tryParse(currentBuildMatch.group(1) ?? '0') : null;
+    }
+    
+    if (latestBuild != null && currentBuild != null) {
       return latestBuild > currentBuild;
     }
   }
