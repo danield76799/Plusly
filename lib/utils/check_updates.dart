@@ -279,13 +279,16 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
     }
     final filePath = '${tempDir.path}/$fileName';
 
+    Logs().v('Starting download from: $url');
+    Logs().v('Saving to: $filePath');
+
     await Dio().download(
       url,
       filePath,
       options: Options(
         headers: {
-          'Accept': 'application/vnd.android.package-archive',
-          'User-Agent': 'ExteraApp',
+          'Accept': 'application/vnd.android.package-archive, application/octet-stream, */*',
+          'User-Agent': 'PluslyApp',
         },
         // 30 seconden timeout voor connect + receive
         receiveTimeout: const Duration(seconds: 30),
@@ -299,9 +302,13 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
           statusText =
               'Downloaden... ${(received / 1024 / 1024).toStringAsFixed(1)} MB';
         }
-        // Force dialog rebuild
+        // Force dialog rebuild safely
         if (context.mounted) {
-          (context as Element).markNeedsBuild();
+          try {
+            (context as Element).markNeedsBuild();
+          } catch (_) {
+            // Ignore if context is no longer valid
+          }
         }
       },
     );
@@ -315,6 +322,8 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
     if (fileSize == 0) {
       throw Exception('Gedownload bestand is leeg');
     }
+
+    Logs().v('Download complete: $fileSize bytes');
 
     // Check if it's an AAB file - redirect to browser for manual install
     if (fileName.endsWith('.aab')) {
@@ -356,8 +365,12 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
     }
   } on DioException catch (e) {
     // Handle Dio specific errors
-    if (context.mounted && Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
+    try {
+      if (context.mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+    } catch (_) {
+      // Ignore navigation errors
     }
 
     String errorMsg;
@@ -368,7 +381,11 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
         errorMsg = 'Download timeout - check je internetverbinding';
         break;
       case DioExceptionType.badResponse:
-        errorMsg = 'Server fout: ${e.response?.statusCode ?? 'onbekend'}';
+        if (e.response?.statusCode == 404) {
+          errorMsg = 'Download link niet gevonden (404). Probeer de browser optie.';
+        } else {
+          errorMsg = 'Server fout: ${e.response?.statusCode ?? 'onbekend'}';
+        }
         break;
       case DioExceptionType.cancel:
         errorMsg = 'Download geannuleerd';
@@ -377,24 +394,38 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
         errorMsg = 'Download mislukt: ${e.message}';
     }
 
+    Logs().e('Download failed: $errorMsg', e);
+
     if (context.mounted) {
       scaffold.showSnackBar(
         SnackBar(
           content: Text(errorMsg),
           duration: const Duration(seconds: 5),
-          action: SnackBarAction(label: 'OK', onPressed: () {}),
+          action: SnackBarAction(
+            label: 'Open Pagina',
+            onPressed: () => launchUrlString('https://github.com/danield76799/Plusly/releases'),
+          ),
         ),
       );
     }
   } catch (e) {
-    if (context.mounted && Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
+    try {
+      if (context.mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+    } catch (_) {
+      // Ignore navigation errors
     }
+    Logs().e('Download failed: $e');
     if (context.mounted) {
       scaffold.showSnackBar(
         SnackBar(
           content: Text('Download mislukt: $e'),
           duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: 'Open Pagina',
+            onPressed: () => launchUrlString('https://github.com/danield76799/Plusly/releases'),
+          ),
         ),
       );
     }
