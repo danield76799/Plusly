@@ -274,8 +274,8 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
       filePath,
       options: Options(
         headers: {
-          'Accept': 'application/vnd.android.package-archive, application/octet-stream, */*',
-          'User-Agent': 'PluslyApp',
+          'Accept': 'application/vnd.android.package-archive',
+          'User-Agent': 'ExteraApp',
         },
         // 30 seconden timeout voor connect + receive
         receiveTimeout: const Duration(seconds: 30),
@@ -289,13 +289,9 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
           statusText =
               'Downloaden... ${(received / 1024 / 1024).toStringAsFixed(1)} MB';
         }
-        // Force dialog rebuild safely
+        // Force dialog rebuild
         if (context.mounted) {
-          try {
-            (context as Element).markNeedsBuild();
-          } catch (_) {
-            // Ignore if context is no longer valid
-          }
+          (context as Element).markNeedsBuild();
         }
       },
     );
@@ -350,12 +346,8 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
     }
   } on DioException catch (e) {
     // Handle Dio specific errors
-    try {
-      if (context.mounted && Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-    } catch (_) {
-      // Ignore navigation errors
+    if (context.mounted && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
     }
 
     String errorMsg;
@@ -366,11 +358,7 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
         errorMsg = 'Download timeout - check je internetverbinding';
         break;
       case DioExceptionType.badResponse:
-        if (e.response?.statusCode == 404) {
-          errorMsg = 'Download link niet gevonden (404). Probeer de browser optie.';
-        } else {
-          errorMsg = 'Server fout: ${e.response?.statusCode ?? 'onbekend'}';
-        }
+        errorMsg = 'Server fout: ${e.response?.statusCode ?? 'onbekend'}';
         break;
       case DioExceptionType.cancel:
         errorMsg = 'Download geannuleerd';
@@ -389,12 +377,8 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
       );
     }
   } catch (e) {
-    try {
-      if (context.mounted && Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-    } catch (_) {
-      // Ignore navigation errors
+    if (context.mounted && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
     }
     if (context.mounted) {
       scaffold.showSnackBar(
