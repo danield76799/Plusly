@@ -1,6 +1,6 @@
-# Extera
+# Plusly
 
-A FluffyChat fork on steroids, aimed at adding more features.
+A FluffyChat/ Extera Next fork on steroids, aimed at adding more features.
 
 ## Features
 
