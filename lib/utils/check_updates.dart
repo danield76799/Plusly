@@ -268,7 +268,7 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
               label: 'Open Pagina',
-              onPressed: () => launchUrlString(release.browserDownloadUrl),
+              onPressed: () => launchUrlString(url),
             ),
           ),
         );
