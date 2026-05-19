@@ -221,7 +221,7 @@ class ChatListItem extends StatelessWidget {
                                     hideEdit: true,
                                     plaintextBody: true,
                                     removeMarkdown: true,
-                                    withSenderNamePrefix: false, // Hide for all chats, name already shown above
+                                    withSenderNamePrefix: true, // Show sender name in message preview
                                   )
                                 : null,
                             initialData: lastEvent?.calcLocalizedBodyFallback(
@@ -230,7 +230,7 @@ class ChatListItem extends StatelessWidget {
                               hideEdit: true,
                               plaintextBody: true,
                               removeMarkdown: true,
-                              withSenderNamePrefix: false, // Hide for all chats, name already shown above
+                              withSenderNamePrefix: true, // Show sender name in message preview
                             ),
                             builder: (context, snapshot) => Row(
                               mainAxisSize: MainAxisSize.min,
