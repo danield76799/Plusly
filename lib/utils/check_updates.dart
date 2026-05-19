@@ -403,11 +403,16 @@ void checkForUpdates(BuildContext context) async {
 
   try {
     final currentVersion = await PlatformInfos.getVersion();
+    Logs().v('Current version: $currentVersion');
+    
     // Force refresh to bypass cache - ensures we always get latest
     final release = await getLatestRelease(forceRefresh: true);
 
     if (release == null) {
       Logs().v('No release found or failed to fetch');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Debug: No release found')),
+      );
       return;
     }
 
@@ -415,8 +420,24 @@ void checkForUpdates(BuildContext context) async {
     Logs().v(
       'Latest version: $latestVersion | Current version: $currentVersion',
     );
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Debug: Latest=$latestVersion, Current=$currentVersion')),
+    );
 
-    if (!isNewerVersion(latestVersion, currentVersion)) return;
+    final isNewer = isNewerVersion(latestVersion, currentVersion);
+    Logs().v('Is newer: $isNewer');
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Debug: isNewer=$isNewer')),
+    );
+
+    if (!isNewer) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Debug: No update available')),
+      );
+      return;
+    }
 
     AppConfig.alreadyCheckedUpdates = true;
 
