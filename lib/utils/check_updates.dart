@@ -133,8 +133,9 @@ bool isNewerVersion(String latest, String current) {
   final latestIsBuildTag = latest.contains('+') || latest.contains('build') || latest.startsWith('playstore-') || latest.startsWith('playstore-v');
   final currentIsBuildTag = current.contains('+') || current.contains('build');
 
-  // Special case: playstore- tags are always newer than + build tags (Play Store releases vs GitHub builds)
-  if ((latest.startsWith('playstore-') || latest.startsWith('playstore-v')) && (current.contains('+') || current.contains('build'))) {
+  // Special case: playstore- tags are always newer than regular semver versions
+  // (Play Store releases should always prompt for update)
+  if (latest.startsWith('playstore-') || latest.startsWith('playstore-v')) {
     return true;
   }
 
@@ -403,16 +404,11 @@ void checkForUpdates(BuildContext context) async {
 
   try {
     final currentVersion = await PlatformInfos.getVersion();
-    Logs().v('Current version: $currentVersion');
-    
     // Force refresh to bypass cache - ensures we always get latest
     final release = await getLatestRelease(forceRefresh: true);
 
     if (release == null) {
       Logs().v('No release found or failed to fetch');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Debug: No release found')),
-      );
       return;
     }
 
@@ -420,24 +416,8 @@ void checkForUpdates(BuildContext context) async {
     Logs().v(
       'Latest version: $latestVersion | Current version: $currentVersion',
     );
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Debug: Latest=$latestVersion, Current=$currentVersion')),
-    );
 
-    final isNewer = isNewerVersion(latestVersion, currentVersion);
-    Logs().v('Is newer: $isNewer');
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Debug: isNewer=$isNewer')),
-    );
-
-    if (!isNewer) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Debug: No update available')),
-      );
-      return;
-    }
+    if (!isNewerVersion(latestVersion, currentVersion)) return;
 
     AppConfig.alreadyCheckedUpdates = true;
 
