@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
@@ -150,8 +149,8 @@ class ChatInputRow extends StatelessWidget {
                                 icon: Icon(
                                   controller.sendController.text.isEmpty
                                       ? controller.showEmojiPicker
-                                            ? MdiIcons.sticker
-                                            : MdiIcons.stickerOutline
+                                            ? Icons.emoji_emotions
+                                            : Icons.emoji_emotions_outlined
                                       : controller.showEmojiPicker
                                       ? Icons.add_reaction
                                       : Icons.add_reaction_outlined,

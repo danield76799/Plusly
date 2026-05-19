@@ -75,7 +75,7 @@ dependencies:
   linkify: ^5.0.0
   marquee: ^2.3.0
   material: ^1.0.1
-  material_design_icons_flutter: ^7.0.7296
+  # material_design_icons_flutter: ^7.0.7296  # DISABLED - incompatible with Flutter 3.41+
   matrix:
     # path: ../matrix-dart-sdk
     git:
