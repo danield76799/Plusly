@@ -29,26 +29,25 @@ class GitHubRelease {
   });
 
   factory GitHubRelease.fromJson(Map<String, dynamic> json) {
-    var apkUrl = '';
+    var downloadUrl = '';
     var browserUrl = '';
 
-    // Find the first APK asset
+    // Find the first APK or AAB asset
     final assets = json['assets'] as List<dynamic>? ?? [];
     for (final asset in assets) {
       final name = (asset['name'] as String? ?? '').toLowerCase();
-      if (name.endsWith('.apk')) {
-        apkUrl = asset['browser_download_url'] as String? ?? '';
+      if (name.endsWith('.apk') || name.endsWith('.aab')) {
+        downloadUrl = asset['browser_download_url'] as String? ?? '';
         break;
       }
     }
 
-    // Fall back to tarball/zipball URL if no APK found
-    browserUrl =
-        json['tarball_url'] as String? ?? json['zipball_url'] as String? ?? '';
+    // Use release page URL as fallback
+    browserUrl = json['html_url'] as String? ?? '';
 
     return GitHubRelease(
       tagName: json['tag_name'] as String? ?? '',
-      downloadUrl: apkUrl,
+      downloadUrl: downloadUrl,
       browserDownloadUrl: browserUrl,
     );
   }
@@ -257,6 +256,24 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
     final fileSize = await file.length();
     if (fileSize == 0) {
       throw Exception('Gedownload bestand is leeg');
+    }
+
+    // Check if it's an AAB file - redirect to browser for manual install
+    if (fileName.endsWith('.aab')) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Text('AAB bestand vereist Play Store of bundletool. Open de release pagina voor installatie instructies.'),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Open Pagina',
+              onPressed: () => launchUrlString(release.browserDownloadUrl),
+            ),
+          ),
+        );
+      }
+      return;
     }
 
     if (context.mounted) {
