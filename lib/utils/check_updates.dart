@@ -130,7 +130,7 @@ bool isNewerVersion(String latest, String current) {
   current = current.startsWith('v') ? current.substring(1) : current;
 
   // Check if versions look like Plusly build tags (e.g., "0.9.9-build421", "1.1.3+863", "playstore-240")
-  final latestIsBuildTag = latest.contains('+') || latest.contains('build') || latest.startsWith('playstore-');
+  final latestIsBuildTag = latest.contains('+') || latest.contains('build') || latest.startsWith('playstore-') || latest.startsWith('playstore-v');
   final currentIsBuildTag = current.contains('+') || current.contains('build');
 
   // If BOTH are build tags, compare build numbers
@@ -139,8 +139,8 @@ bool isNewerVersion(String latest, String current) {
     int? latestBuild;
     int? currentBuild;
     
-    // Try playstore- format first
-    final playstoreMatch = RegExp(r'playstore-(\d+)');
+    // Try playstore- format first (handles both playstore-240 and playstore-v240)
+    final playstoreMatch = RegExp(r'playstore-v?(\d+)');
     final latestPlaystoreMatch = playstoreMatch.firstMatch(latest);
     final currentPlaystoreMatch = playstoreMatch.firstMatch(current);
     
