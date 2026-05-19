@@ -155,6 +155,8 @@ class ScheduledMessagesService {
       if (message.scheduledAt.isBefore(now) ||
           message.scheduledAt.isAtSameMomentAs(now) ||
           message.scheduledAt.isBefore(now.add(const Duration(minutes: 1)))) {
+        // Check if already being sent to prevent duplicates
+        if (message.isSent) continue;
         // Message is due - send it
         await _sendScheduledMessage(client, message);
       }
@@ -166,6 +168,11 @@ class ScheduledMessagesService {
     Client client,
     ScheduledMessage message,
   ) async {
+    // Prevent double-sending by marking as sent before async operations
+    if (message.isSent) return true;
+    message.isSent = true;
+    await _saveScheduledMessages();
+
     try {
       final room = client.getRoomById(message.roomId);
       if (room == null) {
@@ -188,14 +195,16 @@ class ScheduledMessagesService {
         await room.sendEvent(message.content);
       }
 
-      // Mark as sent
-      message.isSent = true;
-      await _saveScheduledMessages();
+      // Remove from scheduled messages after successful send
+      await removeScheduledMessage(message.id);
 
       Logs().d('Scheduled message sent successfully: ${message.id}');
       return true;
     } catch (e) {
       Logs().e('Failed to send scheduled message: ${message.id}', e);
+      // Reset isSent flag on failure so it can be retried
+      message.isSent = false;
+      await _saveScheduledMessages();
       return false;
     }
   }
