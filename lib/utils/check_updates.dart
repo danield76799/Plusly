@@ -21,26 +21,35 @@ class GitHubRelease {
   final String tagName;
   final String downloadUrl;
   final String browserDownloadUrl;
+  final bool hasApk;
 
   GitHubRelease({
     required this.tagName,
     required this.downloadUrl,
     required this.browserDownloadUrl,
+    this.hasApk = false,
   });
 
   factory GitHubRelease.fromJson(Map<String, dynamic> json) {
     var downloadUrl = '';
     var browserUrl = '';
+    var apkUrl = '';
+    var aabUrl = '';
 
     // Find the first APK or AAB asset
     final assets = json['assets'] as List<dynamic>? ?? [];
     for (final asset in assets) {
       final name = (asset['name'] as String? ?? '').toLowerCase();
-      if (name.endsWith('.apk') || name.endsWith('.aab')) {
-        downloadUrl = asset['browser_download_url'] as String? ?? '';
-        break;
+      final url = asset['browser_download_url'] as String? ?? '';
+      if (name.endsWith('.apk')) {
+        apkUrl = url;
+      } else if (name.endsWith('.aab')) {
+        aabUrl = url;
       }
     }
+
+    // Prefer APK over AAB for direct download
+    downloadUrl = apkUrl.isNotEmpty ? apkUrl : aabUrl;
 
     // Use release page URL as fallback
     browserUrl = json['html_url'] as String? ?? '';
@@ -49,6 +58,7 @@ class GitHubRelease {
       tagName: json['tag_name'] as String? ?? '',
       downloadUrl: downloadUrl,
       browserDownloadUrl: browserUrl,
+      hasApk: apkUrl.isNotEmpty,
     );
   }
 }
@@ -441,13 +451,24 @@ void checkForUpdates(BuildContext context) async {
               const Divider(),
               if (release.downloadUrl.isNotEmpty)
                 ListTile(
-                  leading: const Icon(Icons.android),
-                  title: const Text('Download & installeer APK'),
-                  subtitle: const Text('GitHub Releases'),
+                  leading: Icon(release.hasApk ? Icons.android : Icons.warning),
+                  title: Text(release.hasApk ? 'Download & installeer APK' : 'Download beschikbaar (geen APK)'),
+                  subtitle: Text(release.hasApk ? 'Directe installatie' : 'Alleen AAB beschikbaar - gebruik browser'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    Navigator.of(ctx).pop();
-                    downloadAndInstallApk(context, release.downloadUrl);
+                    if (release.hasApk) {
+                      Navigator.of(ctx).pop();
+                      downloadAndInstallApk(context, release.downloadUrl);
+                    } else {
+                      // No APK available, show message
+                      Navigator.of(ctx).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Geen APK beschikbaar voor directe download. Gebruik de browser optie.'),
+                          duration: Duration(seconds: 5),
+                        ),
+                      );
+                    }
                   },
                 ),
               ListTile(
