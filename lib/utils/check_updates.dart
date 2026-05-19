@@ -134,7 +134,7 @@ bool isNewerVersion(String latest, String current) {
   final currentIsBuildTag = current.contains('+') || current.contains('build');
 
   // Special case: playstore- tags are always newer than + build tags (Play Store releases vs GitHub builds)
-  if ((latest.startsWith('playstore-') || latest.startsWith('playstore-v')) && current.contains('+')) {
+  if ((latest.startsWith('playstore-') || latest.startsWith('playstore-v')) && (current.contains('+') || current.contains('build'))) {
     return true;
   }
 
@@ -394,9 +394,10 @@ void checkForUpdates(BuildContext context) async {
   // Reset the check flag so we can check again
   AppConfig.alreadyCheckedUpdates = false;
   
-  if (!AppSettings.checkForUpdates.value) {
-    return;
-  }
+  // Always check for updates regardless of setting (for testing)
+  // if (!AppSettings.checkForUpdates.value) {
+  //   return;
+  // }
 
   Logs().v('Checking updates via GitHub Releases...');
 
