@@ -31,7 +31,8 @@ jobs:
     - name: Build APK
       run: flutter build apk --release --target-platform android-arm64,android-arm
     
-    - name: Upload APK to Release
+    - name: Upload APK to Release (only on release events)
+      if: github.event_name == 'release'
       uses: softprops/action-gh-release@v1
       with:
         files: build/app/outputs/flutter-apk/app-release.apk
@@ -39,8 +40,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Upload APK Artifact
+    - name: Upload APK Artifact (always)
       uses: actions/upload-artifact@v4
       with:
-        name: release-apk-${{ github.event.release.tag_name }}
+        name: release-apk
         path: build/app/outputs/flutter-apk/app-release.apk
