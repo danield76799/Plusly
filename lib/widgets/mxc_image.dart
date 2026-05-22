@@ -159,8 +159,8 @@ class _MxcImageState extends State<MxcImage> {
 
         loadedBytes = await client.downloadMxcCached(
           uri,
-          width: realWidth,
-          height: realHeight,
+          width: realWidth ?? 800,
+          height: realHeight ?? 600,
           thumbnailMethod: widget.thumbnailMethod,
           isThumbnail: widget.isThumbnail,
           animated: widget.animated,
