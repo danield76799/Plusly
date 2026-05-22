@@ -86,6 +86,13 @@ jobs:
           cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
           ls -la output/
 
+      # === SETUP RUBY & FASTLANE (needed for Play Store operations) ===
+      - name: Setup Ruby & Fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
       # === AAB BUILD + SIGNING ===
       - name: Setup Play Store signing
         env:
@@ -110,7 +117,6 @@ jobs:
         id: build_number
         working-directory: android
         run: |
-          bundle install
           bundle exec fastlane run google_play_track_version_codes track:internal json_key:keys.json > /tmp/version_codes.txt
           LAST_VERSION=$(grep -o '[0-9]\+' /tmp/version_codes.txt | head -1)
           NEXT_VERSION=$((LAST_VERSION + 1))
@@ -160,11 +166,6 @@ jobs:
           retention-days: 7
 
       # === PLAY STORE DEPLOY ===
-      - name: Setup Ruby & Fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
       - name: Deploy to Play Store
         run: bundle exec fastlane deploy_internal_test
         working-directory: android
