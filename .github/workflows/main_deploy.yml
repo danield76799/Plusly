@@ -201,7 +201,7 @@ jobs:
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "full_version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Create GitHub Release
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version_name }}
@@ -209,7 +209,25 @@ jobs:
           files: |
             output/plusly-release.apk
             output/plusly-release.aab
-          generate_release_notes: true
+          body: |
+            ## Plusly v${{ steps.version.outputs.version_name }}
+            
+            **Build info:**
+            - Version: ${{ steps.version.outputs.full_version }}
+            - Build number: ${{ github.run_number }}
+            - Commit: ${{ github.sha }}
+            
+            **Wijzigingen in deze build:**
+            - APK build verbeterd voor directe installatie
+            - Play Store AAB beschikbaar voor store upload
+            - Signing configuratie geoptimaliseerd
+            
+            **Installatie opties:**
+            - Download APK voor directe installatie (Android)
+            - Download AAB voor Play Store upload
+            
+            **Let op:** Dit is een automatische build.
+          generate_release_notes: false
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
