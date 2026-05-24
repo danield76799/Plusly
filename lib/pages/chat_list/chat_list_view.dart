@@ -8,6 +8,7 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_bottom_navbar.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_legacy_bottom_navbar.dart';
+import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/navigation_rail.dart';
 import 'chat_list_body.dart';

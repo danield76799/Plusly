@@ -34,7 +34,7 @@ import '../../utils/bridge_utils.dart';
 import '../../utils/url_launcher.dart';
 import '../../widgets/matrix.dart';
 
-enum PopupMenuAction { settings, invite, newGroup, newSpace, archive }
+enum PopupMenuAction { settings, invite, newGroup, newSpace, archive, syncDebug }
 
 enum ActiveFilter { allChats, messages, groups, unread, spaces, people, favorites }
 
