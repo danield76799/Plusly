@@ -762,6 +762,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   void sendScheduleAction() async {
     final prefs = await SharedPreferences.getInstance();
+    _storeInputTimeoutTimer?.cancel();
     await showAdaptiveDialog(
       context: context,
       useRootNavigator: false,
@@ -774,6 +775,7 @@ class ChatController extends State<ChatPageWithRoom>
       ),
     );
     // Clear the input after scheduling
+    _storeInputTimeoutTimer?.cancel();
     sendController.clear();
     // Force rebuild of InputBar by resetting the controller
     sendController.value = TextEditingValue.empty;
