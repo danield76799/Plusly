@@ -11,6 +11,42 @@ import 'package:Pulsly/utils/client_download_content_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
+/// Semaphore to limit concurrent image downloads and prevent server overload
+class ImageDownloadSemaphore {
+  static const int maxConcurrentDownloads = 4;
+  static int _activeDownloads = 0;
+  static final Queue<_PendingDownload> _pendingQueue = Queue();
+
+  /// Acquire a download slot. Returns true if download can proceed immediately.
+  /// If false is returned, the download has been queued and will be started when a slot is available.
+  static bool tryAcquire(void Function() onCanProceed) {
+    if (_activeDownloads < maxConcurrentDownloads) {
+      _activeDownloads++;
+      return true;
+    }
+    _pendingQueue.add(_PendingDownload(onCanProceed));
+    return false;
+  }
+
+  /// Release a download slot and start next pending download if any
+  static void release() {
+    if (_pendingQueue.isNotEmpty) {
+      final next = _pendingQueue.removeFirst();
+      next.onCanProceed();
+    } else {
+      _activeDownloads--;
+    }
+  }
+
+  static int get activeDownloads => _activeDownloads;
+  static int get pendingCount => _pendingQueue.length;
+}
+
+class _PendingDownload {
+  final void Function() onCanProceed;
+  _PendingDownload(this.onCanProceed);
+}
+
 class MxcImage extends StatefulWidget {
   final Uri? uri;
   final Event? event;
@@ -55,6 +91,7 @@ class _MxcImageState extends State<MxcImage> {
 
   Uint8List? _currentData;
   bool _isLoading = false;
+  bool _isQueued = false;
 
   // FIX: Track retry attempts to prevent infinite loops
   int _retryCount = 0;
@@ -69,7 +106,7 @@ class _MxcImageState extends State<MxcImage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_currentData == null && !_isLoading) {
+    if (_currentData == null && !_isLoading && !_isQueued) {
       _load();
     }
   }
@@ -134,8 +171,31 @@ class _MxcImageState extends State<MxcImage> {
       return;
     }
 
+    // Try to acquire a download slot
+    bool acquired = false;
+    void startDownload() {
+      acquired = true;
+      _doLoad();
+    }
+
+    if (!ImageDownloadSemaphore.tryAcquire(startDownload)) {
+      // Queued - will be called when slot available
+      setState(() {
+        _isLoading = true;
+        _isQueued = true;
+      });
+      return;
+    }
+
+    // Only start download if we acquired a slot
+    if (!acquired) return;
+    _doLoad();
+  }
+
+  Future<void> _doLoad() async {
     setState(() {
       _isLoading = true;
+      _isQueued = false;
     });
 
     try {
@@ -174,7 +234,10 @@ class _MxcImageState extends State<MxcImage> {
         }
       }
 
-      if (!mounted) return;
+      if (!mounted) {
+        ImageDownloadSemaphore.release();
+        return;
+      }
 
       if (loadedBytes != null && loadedBytes.isNotEmpty) {
         _saveToCache(loadedBytes);
@@ -185,21 +248,27 @@ class _MxcImageState extends State<MxcImage> {
         });
       } else {
         _scheduleRetry();
+        return; // Don't release semaphore - retry will call _doLoad again
       }
     } on IOException catch (_) {
       _scheduleRetry();
+      return; // Don't release semaphore - retry will call _doLoad again
     } catch (e, s) {
       Logs().d('Unexpected error loading mxc image', e, s);
       if (mounted) {
         setState(() => _isLoading = false);
       }
-      // Depending on the error (e.g. 404), you might NOT want to retry here.
-      // If you do want to retry generic errors, call _scheduleRetry() instead.
     }
+    
+    // Release semaphore on success or final failure
+    ImageDownloadSemaphore.release();
   }
 
   void _scheduleRetry() {
-    if (!mounted) return;
+    if (!mounted) {
+      ImageDownloadSemaphore.release();
+      return;
+    }
 
     setState(() => _isLoading = false);
 
@@ -209,6 +278,8 @@ class _MxcImageState extends State<MxcImage> {
     final delay = widget.retryDuration * pow(2, _retryCount - 1);
 
     Future.delayed(delay, () {
+      // Release semaphore before retry
+      ImageDownloadSemaphore.release();
       if (mounted && _currentData == null) {
         _load();
       }
