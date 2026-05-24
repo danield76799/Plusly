@@ -132,26 +132,17 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
           continue;
         }
         
-        // Prefer releases with APK, but accept any semver release if no APK release found
+        // Only accept releases with APK - skip AAB-only releases
         if (release.hasApk) {
           latestSemverRelease = release;
           break; // First semver release with APK is the latest
-        } else if (latestSemverRelease == null) {
-          latestSemverRelease = release;
         }
       }
 
-      if (latestSemverRelease != null) {
-        // Cache the response
-        try {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString(cacheKey, jsonEncode(latestSemverRelease.toJson()));
-          await prefs.setInt(cacheTimeKey, DateTime.now().millisecondsSinceEpoch);
-        } catch (e) {
-          Logs().v('Failed to cache release info');
-        }
-
-        return latestSemverRelease;
+      // If no release with APK found, return null (no update available)
+      if (latestSemverRelease == null) {
+        Logs().v('No semver release with APK found');
+        return null;
       }
     } else {
       Logs().w('GitHub API returned status ${response.statusCode}');
