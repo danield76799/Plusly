@@ -92,7 +92,7 @@ jobs:
           storePassword=$KEYSTORE_PASSWORD
           keyPassword=$KEY_PASSWORD
           keyAlias=$KEY_ALIAS
-          storeFile=app/upload-keystore.jks
+          storeFile=upload-keystore.jks
           EOF
           # Only create keys.json if PLAYSTORE_DEPLOY_KEY is set
           if [ -n "$PLAYSTORE_DEPLOY_KEY" ]; then
