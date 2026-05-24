@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:matrix/matrix.dart';
 
@@ -149,7 +150,7 @@ class _SyncDebugScreenState extends State<SyncDebugScreen> {
             icon: const Icon(Icons.copy),
             onPressed: () {
               final logs = _debugger.getLogsAsText();
-              // Clipboard.setData(ClipboardData(text: logs));
+              Clipboard.setData(ClipboardData(text: logs));
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Logs copied to clipboard')),
               );
