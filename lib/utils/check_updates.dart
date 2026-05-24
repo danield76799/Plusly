@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -408,6 +409,17 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
           duration: const Duration(seconds: 3),
         ),
       );
+    }
+
+    // Check and request install packages permission on Android
+    if (PlatformInfos.isAndroid) {
+      final status = await Permission.requestInstallPackages.status;
+      if (!status.isGranted) {
+        final result = await Permission.requestInstallPackages.request();
+        if (!result.isGranted) {
+          throw Exception('Permission denied: android.permission.REQUEST_INSTALL_PACKAGES');
+        }
+      }
     }
 
     // Open the APK — Android will show the install prompt
