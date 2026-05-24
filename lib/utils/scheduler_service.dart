@@ -8,7 +8,7 @@ import 'package:Pulsly/utils/scheduled_messages_service.dart';
 /// Service to handle background checking of scheduled messages
 class SchedulerService {
   static Timer? _checkTimer;
-  static const Duration _checkInterval = Duration(minutes: 1);
+  static const Duration _checkInterval = Duration(seconds: 30);
 
   /// Start the scheduler service
   static void start(Client client) {
