@@ -114,20 +114,39 @@ jobs:
           keyAlias=$KEY_ALIAS
           storeFile=upload-keystore.jks
           EOF
-          echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
+          # Only create keys.json if PLAYSTORE_DEPLOY_KEY is set
+          if [ -n "$PLAYSTORE_DEPLOY_KEY" ]; then
+            echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
+            echo "has_playstore_key=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_playstore_key=false" >> $GITHUB_OUTPUT
+          fi
           cd ..
 
       - name: Get next build number from Play Store
         id: build_number
         working-directory: android
         run: |
-          bundle exec fastlane run google_play_track_version_codes track:internal json_key:keys.json > /tmp/version_codes.txt
-          LAST_VERSION=$(grep -o '[0-9]\+' /tmp/version_codes.txt | head -1)
-          NEXT_VERSION=$((LAST_VERSION + 1))
-          echo "last_version=$LAST_VERSION" >> $GITHUB_OUTPUT
-          echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
-          echo "Last Play Store version: $LAST_VERSION"
-          echo "Next version: $NEXT_VERSION"
+          # Check if we have a Play Store key
+          if [ -f keys.json ] && [ -s keys.json ]; then
+            bundle exec fastlane run google_play_track_version_codes track:internal json_key:keys.json > /tmp/version_codes.txt
+            LAST_VERSION=$(grep -o '[0-9]\+' /tmp/version_codes.txt | head -1)
+            NEXT_VERSION=$((LAST_VERSION + 1))
+            echo "last_version=$LAST_VERSION" >> $GITHUB_OUTPUT
+            echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+            echo "Last Play Store version: $LAST_VERSION"
+            echo "Next version: $NEXT_VERSION"
+          else
+            # Fallback: use current pubspec build number + 1
+            CURRENT_BUILD=$(grep "^version:" ../pubspec.yaml | grep -o '+[0-9]\+' | tr -d '+')
+            if [ -z "$CURRENT_BUILD" ]; then
+              CURRENT_BUILD=0
+            fi
+            NEXT_VERSION=$((CURRENT_BUILD + 1))
+            echo "last_version=$CURRENT_BUILD" >> $GITHUB_OUTPUT
+            echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+            echo "No Play Store key found, using local build: $NEXT_VERSION"
+          fi
 
       - name: Update pubspec version
         run: |
