@@ -109,6 +109,10 @@ jobs:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
+          # Debug: Check if keystore exists
+          ls -la android/app/upload-keystore.jks || echo "Keystore not found!"
+          cat android/key.properties || echo "key.properties not found!"
+          # Build APK
           flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
           mkdir -p output
           cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
