@@ -140,16 +140,8 @@ class _AvatarVisuals extends StatelessWidget {
           fit: BoxFit.cover,
           width: size,
           height: size,
-          // Optimization: Extract placeholder to method to keep indentation clean
-          placeholder: (_) => hasNoPic
-              ? _buildFallback(theme)
-              : Center(
-                  child: Icon(
-                    Icons.person_2,
-                    color: theme.colorScheme.tertiary,
-                    size: size / 1.5,
-                  ),
-                ),
+          // Optimization: Show fallback immediately for avatars without image
+          placeholder: (_) => _buildFallback(theme),
         ),
       ),
     );
