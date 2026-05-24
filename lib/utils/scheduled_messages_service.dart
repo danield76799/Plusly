@@ -146,20 +146,20 @@ class ScheduledMessagesService {
     return messages.where((m) => m.roomId == roomId && !m.isSent).toList();
   }
 
-  /// Check and send any messages that are due (within 30 seconds of scheduled time)
+  /// Check and send any messages that are due (within 60 seconds of scheduled time)
   static Future<void> checkAndSendDueMessages(Client client) async {
     final pending = await getPendingMessages();
     final now = DateTime.now();
 
     for (final message in pending) {
-      // Only send messages scheduled within the last 30 seconds
+      // Only send messages scheduled within the last 60 seconds
       // This prevents all "missed" messages from being sent at once
       final diff = now.difference(message.scheduledAt);
-      if (diff.inSeconds.abs() <= 30) {
+      if (diff.inSeconds.abs() <= 60) {
         // Message is due now - send it
         await _sendScheduledMessage(client, message);
-      } else if (message.scheduledAt.isBefore(now.subtract(const Duration(minutes: 1)))) {
-        // Message is more than 1 minute in the past - mark as missed
+      } else if (message.scheduledAt.isBefore(now.subtract(const Duration(minutes: 2)))) {
+        // Message is more than 2 minutes in the past - mark as missed
         Logs().w('Scheduled message ${message.id} is in the past, marking as missed');
         message.isSent = true; // Mark as processed
         await _saveScheduledMessages();
