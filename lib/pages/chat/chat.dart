@@ -695,15 +695,18 @@ class ChatController extends State<ChatPageWithRoom>
     Matrix.of(context).setActiveClient(c);
   });
 
+  bool _isSending = false;
+
   Future<void> send() async {
     if (sendController.text.trim().isEmpty) return;
     if (inputFocus.hasFocus) {
       inputFocus.unfocus();
     }
     FocusScope.of(context).requestFocus(inputFocus);
+    _isSending = true;
     _storeInputTimeoutTimer?.cancel();
     final prefs = await SharedPreferences.getInstance();
-    prefs.remove('draft_$roomId');
+    await prefs.remove('draft_$roomId');
     var parseCommands = true;
 
     final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
@@ -738,6 +741,7 @@ class ChatController extends State<ChatPageWithRoom>
     );
 
     setState(() {
+      _isSending = false;
       sendController.text = pendingText;
       _inputTextIsEmpty = pendingText.isEmpty;
       replyEvent = null;
@@ -1831,6 +1835,8 @@ class ChatController extends State<ChatPageWithRoom>
         _inputTextIsEmpty = text.isEmpty;
       });
     }
+
+    if (_isSending) return;
 
     _storeInputTimeoutTimer?.cancel();
     _storeInputTimeoutTimer = Timer(_storeInputTimeout, () async {
