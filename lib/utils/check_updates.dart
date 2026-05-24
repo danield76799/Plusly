@@ -173,6 +173,13 @@ bool isNewerVersion(String latest, String current) {
   latest = latest.startsWith('v') ? latest.substring(1) : latest;
   current = current.startsWith('v') ? current.substring(1) : current;
 
+  // Strip build metadata (+929) from current version for comparison
+  // e.g., "1.4.1+929" -> "1.4.1"
+  final currentPlusIndex = current.indexOf('+');
+  if (currentPlusIndex != -1) {
+    current = current.substring(0, currentPlusIndex);
+  }
+
   // Check if versions look like Plusly build tags (e.g., "0.9.9-build421", "1.1.3+863", "playstore-240")
   final latestIsBuildTag = latest.contains('+') || latest.contains('build') || latest.startsWith('playstore-') || latest.startsWith('playstore-v');
   final currentIsBuildTag = current.contains('+') || current.contains('build');
