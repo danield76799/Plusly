@@ -172,24 +172,14 @@ class _MxcImageState extends State<MxcImage> {
     }
 
     // Try to acquire a download slot
-    bool acquired = false;
-    void startDownload() {
-      acquired = true;
-      _doLoad();
-    }
-
-    if (!ImageDownloadSemaphore.tryAcquire(startDownload)) {
+    final gotSlot = ImageDownloadSemaphore.tryAcquire(_doLoad);
+    if (!gotSlot) {
       // Queued - will be called when slot available
       setState(() {
         _isLoading = true;
         _isQueued = true;
       });
-      return;
     }
-
-    // Only start download if we acquired a slot
-    if (!acquired) return;
-    _doLoad();
   }
 
   Future<void> _doLoad() async {
