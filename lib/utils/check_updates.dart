@@ -61,11 +61,20 @@ class GitHubRelease {
       hasApk: apkUrl.isNotEmpty,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'tag_name': tagName,
+      'download_url': downloadUrl,
+      'browser_download_url': browserDownloadUrl,
+      'has_apk': hasApk,
+    };
+  }
 }
 
 Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
   const repo = 'danield76799/Plusly';
-  final url = 'https://api.github.com/repos/$repo/releases/latest';
+  const url = 'https://api.github.com/repos/$repo/releases';
   const cacheKey = 'cached_github_release';
   const cacheTimeKey = 'cached_github_release_time';
   const cacheDuration = Duration(hours: 24);
@@ -91,6 +100,7 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
   }
 
   try {
+    // Fetch all releases and find the latest semver release with APK
     final response = await Dio().get(
       url,
       options: Options(
@@ -103,21 +113,45 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
       ),
     );
 
-    if (response.statusCode == 200) {
-      final release = GitHubRelease.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-
-      // Cache the response
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(cacheKey, response.data.toString());
-        await prefs.setInt(cacheTimeKey, DateTime.now().millisecondsSinceEpoch);
-      } catch (e) {
-        Logs().v('Failed to cache release info');
+    if (response.statusCode == 200 && response.data is List) {
+      final releases = response.data as List<dynamic>;
+      
+      // Find the latest semver release (not playstore-vNNN tags)
+      // Prefer releases with APK assets
+      GitHubRelease? latestSemverRelease;
+      
+      for (final releaseData in releases) {
+        if (releaseData is! Map<String, dynamic>) continue;
+        
+        final release = GitHubRelease.fromJson(releaseData);
+        final tagName = release.tagName;
+        
+        // Skip playstore-vNNN tags - these are Play Store only, not for APK updates
+        if (tagName.startsWith('playstore-') || tagName.startsWith('playstore-v')) {
+          continue;
+        }
+        
+        // Prefer releases with APK, but accept any semver release if no APK release found
+        if (release.hasApk) {
+          latestSemverRelease = release;
+          break; // First semver release with APK is the latest
+        } else if (latestSemverRelease == null) {
+          latestSemverRelease = release;
+        }
       }
 
-      return release;
+      if (latestSemverRelease != null) {
+        // Cache the response
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(cacheKey, jsonEncode(latestSemverRelease.toJson()));
+          await prefs.setInt(cacheTimeKey, DateTime.now().millisecondsSinceEpoch);
+        } catch (e) {
+          Logs().v('Failed to cache release info');
+        }
+
+        return latestSemverRelease;
+      }
     } else {
       Logs().w('GitHub API returned status ${response.statusCode}');
     }
@@ -143,10 +177,21 @@ bool isNewerVersion(String latest, String current) {
   final latestIsBuildTag = latest.contains('+') || latest.contains('build') || latest.startsWith('playstore-') || latest.startsWith('playstore-v');
   final currentIsBuildTag = current.contains('+') || current.contains('build');
 
-  // Special case: playstore- tags are always newer than regular semver versions
-  // (Play Store releases should always prompt for update)
+  // Special case: playstore- tags are only newer if current is also a playstore tag
+  // and the build number is higher. Otherwise, compare semver normally.
   if (latest.startsWith('playstore-') || latest.startsWith('playstore-v')) {
-    return true;
+    // If current is also a playstore tag, compare build numbers
+    if (current.startsWith('playstore-') || current.startsWith('playstore-v')) {
+      final latestMatch = RegExp(r'playstore-v?(\d+)').firstMatch(latest);
+      final currentMatch = RegExp(r'playstore-v?(\d+)').firstMatch(current);
+      if (latestMatch != null && currentMatch != null) {
+        final latestBuild = int.tryParse(latestMatch.group(1) ?? '0') ?? 0;
+        final currentBuild = int.tryParse(currentMatch.group(1) ?? '0') ?? 0;
+        return latestBuild > currentBuild;
+      }
+    }
+    // If current is semver, playstore tag is NOT newer (we only use semver for updates)
+    return false;
   }
 
   // If BOTH are build tags, compare build numbers
