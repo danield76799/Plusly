@@ -658,6 +658,7 @@ class ChatController extends State<ChatPageWithRoom>
   @override
   void dispose() {
     _updateViewDebounce?.cancel();
+    scrollController.removeListener(_updateScrollController);
     _scrolledUp.dispose();
     timeline?.cancelSubscriptions();
     timeline = null;
