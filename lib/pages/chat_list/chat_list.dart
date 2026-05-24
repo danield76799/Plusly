@@ -445,9 +445,12 @@ class ChatListController extends State<ChatList>
       return;
     }
 
-    setState(() {
-      isSearchMode = true;
-    });
+    // Only trigger rebuild if not already in search mode
+    if (!isSearchMode) {
+      setState(() {
+        isSearchMode = true;
+      });
+    }
     _coolDown?.cancel();
     if (globalSearch) {
       _coolDown = Timer(const Duration(milliseconds: 500), _search);
