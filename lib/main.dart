@@ -11,6 +11,7 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
@@ -132,6 +133,10 @@ Future<void> _initializeApp() async {
     client.syncPresence = PresenceType.values.firstWhere(
       (x) => x.name == AppSettings.presenceStatus.value,
     );
+    // Start sync debugging for first client
+    if (client == clients.first) {
+      SyncDebugger().startMonitoring(client);
+    }
   }
 
   // Started in foreground mode.
