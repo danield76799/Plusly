@@ -49,7 +49,14 @@ class SyncDebugger {
           'timestamp': DateTime.now().toIso8601String(),
           'type': 'sync_update',
           'nextBatch': syncUpdate.nextBatch,
-          'rooms': syncUpdate.rooms?.join(', ') ?? 'none',
+          'rooms': syncUpdate.rooms != null
+              ? [
+                  ...?syncUpdate.rooms!.join?.keys,
+                  ...?syncUpdate.rooms!.invite?.keys,
+                  ...?syncUpdate.rooms!.leave?.keys,
+                  ...?syncUpdate.rooms!.knock?.keys,
+                ].join(', ')
+              : 'none',
           'userId': client.userID,
         };
         _syncLogs.add(log);
@@ -79,12 +86,12 @@ class SyncDebugger {
         'timestamp': DateTime.now().toIso8601String(),
         'type': 'connection_check',
         'isLoggedIn': client.isLogged(),
-        'backgroundSync': client.backgroundSync,
+        'backgroundSync': 'N/A', // backgroundSync not available in this SDK version
         'syncPresence': client.syncPresence.toString(),
         'userId': client.userID,
       };
       _syncLogs.add(log);
-      Logs().i('[SyncDebugger] Connection check - loggedIn: ${client.isLogged()}, backgroundSync: ${client.backgroundSync}');
+      Logs().i('[SyncDebugger] Connection check - loggedIn: ${client.isLogged()}');
     });
   }
 
