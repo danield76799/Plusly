@@ -93,6 +93,10 @@ jobs:
           ruby-version: '3.3'
           bundler-cache: true
 
+      - name: Install gems
+        working-directory: android
+        run: bundle install
+
       # === AAB BUILD + SIGNING ===
       - name: Setup Play Store signing
         env:
