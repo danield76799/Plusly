@@ -210,5 +210,6 @@ jobs:
             output/plusly-release.apk
             output/plusly-release.aab
           generate_release_notes: true
+          fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
