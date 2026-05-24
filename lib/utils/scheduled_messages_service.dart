@@ -16,6 +16,8 @@ class ScheduledMessage {
   final String? threadRootEventId;
   final String? threadLastEventId;
   bool isSent;
+  bool isMissed;
+  DateTime? missedAt;
 
   ScheduledMessage({
     required this.id,
@@ -27,6 +29,8 @@ class ScheduledMessage {
     this.threadRootEventId,
     this.threadLastEventId,
     this.isSent = false,
+    this.isMissed = false,
+    this.missedAt,
   });
 
   factory ScheduledMessage.fromJson(Map<String, dynamic> json) {
@@ -40,6 +44,8 @@ class ScheduledMessage {
       threadRootEventId: json['thread_root_event_id'] as String?,
       threadLastEventId: json['thread_last_event_id'] as String?,
       isSent: json['is_sent'] as bool? ?? false,
+      isMissed: json['is_missed'] as bool? ?? false,
+      missedAt: json['missed_at'] != null ? DateTime.parse(json['missed_at'] as String) : null,
     );
   }
 
@@ -54,6 +60,8 @@ class ScheduledMessage {
       'thread_root_event_id': threadRootEventId,
       'thread_last_event_id': threadLastEventId,
       'is_sent': isSent,
+      'is_missed': isMissed,
+      'missed_at': missedAt?.toIso8601String(),
     };
   }
 }
@@ -161,7 +169,8 @@ class ScheduledMessagesService {
       } else if (message.scheduledAt.isBefore(now.subtract(const Duration(minutes: 2)))) {
         // Message is more than 2 minutes in the past - mark as missed
         Logs().w('Scheduled message ${message.id} is in the past, marking as missed');
-        message.isSent = true; // Mark as processed
+        message.isMissed = true;
+        message.missedAt = now;
         await _saveScheduledMessages();
       }
     }
@@ -213,8 +222,20 @@ class ScheduledMessagesService {
     }
   }
 
-  /// Clear the cache (useful after app restart)
-  static void clearCache() {
-    _cachedMessages = null;
+  /// Get all missed scheduled messages
+  static Future<List<ScheduledMessage>> getMissedMessages() async {
+    final messages = await loadScheduledMessages();
+    return messages.where((m) => m.isMissed && !m.isSent).toList();
+  }
+
+  /// Manually send a missed message
+  static Future<bool> sendMissedMessage(Client client, String messageId) async {
+    final messages = await loadScheduledMessages();
+    final message = messages.firstWhere(
+      (m) => m.id == messageId && m.isMissed,
+      orElse: () => throw Exception('Missed message not found: $messageId'),
+    );
+    
+    return await _sendScheduledMessage(client, message);
   }
 }

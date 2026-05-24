@@ -4,91 +4,168 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/scheduled_messages_service.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
-class ScheduledMessagesView extends StatelessWidget {
+class ScheduledMessagesView extends StatefulWidget {
   const ScheduledMessagesView({super.key});
+
+  @override
+  State<ScheduledMessagesView> createState() => _ScheduledMessagesViewState();
+}
+
+class _ScheduledMessagesViewState extends State<ScheduledMessagesView> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(L10n.of(context).chatBackup)),
-      body: FutureBuilder<List<ScheduledMessage>>(
-        future: ScheduledMessagesService.loadScheduledMessages(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator.adaptive());
-          }
-
-          final messages = snapshot.data ?? [];
-          final pendingMessages = messages.where((m) => !m.isSent).toList();
-
-          if (pendingMessages.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.schedule_outlined,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No scheduled messages',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Messages you schedule will appear here',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return ListView.builder(
-            itemCount: pendingMessages.length,
-            itemBuilder: (context, index) {
-              final message = pendingMessages[index];
-              return _ScheduledMessageTile(message: message);
-            },
-          );
-        },
+      appBar: AppBar(
+        title: Text(L10n.of(context).chatBackup),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Gepland', icon: Icon(Icons.schedule)),
+            Tab(text: 'Gemist', icon: Icon(Icons.error_outline)),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: const [
+          _PendingMessagesTab(),
+          _MissedMessagesTab(),
+        ],
       ),
     );
   }
 }
 
-class _ScheduledMessageTile extends StatelessWidget {
+class _PendingMessagesTab extends StatelessWidget {
+  const _PendingMessagesTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<ScheduledMessage>>(
+      future: ScheduledMessagesService.loadScheduledMessages(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator.adaptive());
+        }
+
+        final messages = snapshot.data ?? [];
+        final pendingMessages = messages.where((m) => !m.isSent && !m.isMissed).toList();
+
+        if (pendingMessages.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.schedule_outlined,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No scheduled messages',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Messages you schedule will appear here',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: pendingMessages.length,
+          itemBuilder: (context, index) {
+            final message = pendingMessages[index];
+            return _ScheduledMessageTile(message: message);
+          },
+        );
+      },
+    );
+  }
+}
+
+class _MissedMessagesTab extends StatelessWidget {
+  const _MissedMessagesTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<ScheduledMessage>>(
+      future: ScheduledMessagesService.loadScheduledMessages(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator.adaptive());
+        }
+
+        final messages = snapshot.data ?? [];
+        final missedMessages = messages.where((m) => m.isMissed && !m.isSent).toList();
+
+        if (missedMessages.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.check_circle_outline,
+                  size: 64,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Geen gemiste berichten',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Alle geplande berichten zijn verstuurd',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          itemCount: missedMessages.length,
+          itemBuilder: (context, index) {
+            final message = missedMessages[index];
+            return _MissedMessageTile(message: message);
+          },
+        );
+      },
+    );
+  }
+}
+
+class _MissedMessageTile extends StatelessWidget {
   final ScheduledMessage message;
 
-  const _ScheduledMessageTile({required this.message});
+  const _MissedMessageTile({required this.message});
 
-  String _formatScheduledTime(BuildContext context) {
-    final scheduled = message.scheduledAt;
-    final now = DateTime.now();
-    final diff = scheduled.difference(now);
-
-    if (diff.isNegative) {
-      return 'Due now';
-    }
-
-    if (diff.inMinutes < 60) {
-      return 'In ${diff.inMinutes} minutes';
-    }
-
-    if (diff.inHours < 24) {
-      return 'In ${diff.inHours} hours';
-    }
-
-    if (diff.inDays < 7) {
-      return 'In ${diff.inDays} days';
-    }
-
-    // Format as date
-    return '${scheduled.day}/${scheduled.month}/${scheduled.year} at ${scheduled.hour}:${scheduled.minute.toString().padLeft(2, '0')}';
+  String _formatMissedTime(BuildContext context) {
+    final missed = message.missedAt ?? message.scheduledAt;
+    return '${missed.day}/${missed.month}/${missed.year} at ${missed.hour}:${missed.minute.toString().padLeft(2, '0')}';
   }
 
   String _getRoomName(BuildContext context) {
@@ -111,10 +188,10 @@ class _ScheduledMessageTile extends StatelessWidget {
 
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: theme.colorScheme.primaryContainer,
+        backgroundColor: theme.colorScheme.errorContainer,
         child: Icon(
-          Icons.schedule,
-          color: theme.colorScheme.onPrimaryContainer,
+          Icons.error_outline,
+          color: theme.colorScheme.onErrorContainer,
         ),
       ),
       title: Text(
@@ -137,14 +214,14 @@ class _ScheduledMessageTile extends StatelessWidget {
               Icon(
                 Icons.access_time,
                 size: 14,
-                color: theme.colorScheme.primary,
+                color: theme.colorScheme.error,
               ),
               const SizedBox(width: 4),
               Text(
-                _formatScheduledTime(context),
+                'Gemist: ${_formatMissedTime(context)}',
                 style: TextStyle(
                   fontSize: 12,
-                  color: theme.colorScheme.primary,
+                  color: theme.colorScheme.error,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -152,38 +229,70 @@ class _ScheduledMessageTile extends StatelessWidget {
           ),
         ],
       ),
-      trailing: IconButton(
-        icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-        onPressed: () async {
-          final confirm = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Cancel scheduled message?'),
-              content: const Text('This message will not be sent.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Keep'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(color: theme.colorScheme.error),
-                  ),
-                ),
-              ],
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ElevatedButton.icon(
+            onPressed: () async {
+              try {
+                final client = Matrix.of(context).client;
+                final success = await ScheduledMessagesService.sendMissedMessage(client, message.id);
+                if (success && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Bericht handmatig verstuurd!')),
+                  );
+                  // Force rebuild
+                  (context as Element).markNeedsBuild();
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Fout bij versturen: $e')),
+                  );
+                }
+              }
+            },
+            icon: const Icon(Icons.send, size: 16),
+            label: const Text('Verstuur'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
             ),
-          );
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Gemist bericht verwijderen?'),
+                  content: const Text('Dit bericht wordt niet verstuurd.'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('Annuleren'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text(
+                        'Verwijderen',
+                        style: TextStyle(color: theme.colorScheme.error),
+                      ),
+                    ),
+                  ],
+                ),
+              );
 
-          if (confirm == true) {
-            await ScheduledMessagesService.removeScheduledMessage(message.id);
-            // Force rebuild
-            if (context.mounted) {
-              (context as Element).markNeedsBuild();
-            }
-          }
-        },
+              if (confirm == true) {
+                await ScheduledMessagesService.removeScheduledMessage(message.id);
+                if (context.mounted) {
+                  (context as Element).markNeedsBuild();
+                }
+              }
+            },
+          ),
+        ],
       ),
       isThreeLine: true,
     );
