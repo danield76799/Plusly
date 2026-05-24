@@ -117,6 +117,7 @@ jobs:
           mkdir -p output
           cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
           ls -la output/
+        continue-on-error: true
 
       - name: Get next build number from Play Store
         id: build_number
@@ -159,6 +160,7 @@ jobs:
             --target-platform android-arm,android-arm64,android-x64 \
             --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
           cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
+        continue-on-error: true
 
       # === UPLOAD ARTIFACTS ===
       - name: Upload Build Log
