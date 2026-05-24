@@ -757,6 +757,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void sendScheduleAction() async {
+    final prefs = await SharedPreferences.getInstance();
     await showAdaptiveDialog(
       context: context,
       useRootNavigator: false,
@@ -772,6 +773,8 @@ class ChatController extends State<ChatPageWithRoom>
     sendController.clear();
     // Force rebuild of InputBar by resetting the controller
     sendController.value = TextEditingValue.empty;
+    // Clear the draft so it doesn't reappear when chat is reopened
+    await prefs.remove('draft_$roomId');
     setState(() {
       replyEvent = null;
       editEvent = null;
