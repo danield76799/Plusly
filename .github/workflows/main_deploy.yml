@@ -65,27 +65,6 @@ jobs:
           flutter pub run flutter_launcher_icons:main
           flutter pub run flutter_native_splash:create
 
-      # === APK BUILD ===
-      - name: Build Android APK
-        env:
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
-        run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }} 2>&1 | tee build.log
-          BUILD_EXIT_CODE=$?
-          if [ $BUILD_EXIT_CODE -ne 0 ]; then
-            echo "=== BUILD FAILED ==="
-            echo "Looking for Dart/Flutter errors in log:"
-            grep -E "(error:|Error:|FAILURE|Exception:)" build.log | head -50
-            echo ""
-            echo "Last 100 lines of build log:"
-            tail -100 build.log
-            exit $BUILD_EXIT_CODE
-          fi
-          mkdir -p output
-          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
-          ls -la output/
-
       # === SETUP RUBY & FASTLANE (needed for Play Store operations) ===
       - name: Setup Ruby & Fastlane
         uses: ruby/setup-ruby@v1
@@ -123,6 +102,17 @@ jobs:
             echo "has_playstore_key=false" >> $GITHUB_OUTPUT
           fi
           cd ..
+
+      # === APK BUILD (after signing setup) ===
+      - name: Build Signed Android APK
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
+          mkdir -p output
+          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
+          ls -la output/
 
       - name: Get next build number from Play Store
         id: build_number
