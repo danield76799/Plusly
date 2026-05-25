@@ -96,7 +96,7 @@ class SendFileDialogState extends State<SendFileDialog> {
             length > minSizeToCompress &&
             compress) {
           // Resize image before upload (much faster sending)
-          scaffoldMessenger.showLoadingSnackBar(l10n.compressVideo);
+          scaffoldMessenger.showLoadingSnackBar(l10n.compress);
           final resizedImage = await ImageResizer.resizeImage(xfile);
           if (resizedImage != null) {
             file = resizedImage;
@@ -148,9 +148,11 @@ class SendFileDialogState extends State<SendFileDialog> {
           throw FileTooBigMatrixException(length, maxUploadSize);
         }
 
+        // Video thumbnail alleen genereren als expliciet gewenst (bespaart tijd)
         if (PlatformInfos.isMobile &&
             mimeType != null &&
-            mimeType.startsWith('video')) {
+            mimeType.startsWith('video') &&
+            compress) {
           try {
             scaffoldMessenger.showLoadingSnackBar(
               l10n.generatingVideoThumbnail,
