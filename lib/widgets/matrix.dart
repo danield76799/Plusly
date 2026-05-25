@@ -404,6 +404,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
           }
         },
       );
+      backgroundPush?.setupPush(widget.clients);
     }
   }
 
