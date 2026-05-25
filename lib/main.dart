@@ -11,10 +11,11 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
-import 'package:Pulsly/utils/sync_debugger.dart';
+import 'package:Pulsly/config/feature_flags.dart';
 import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/error_widget.dart';
 import 'config/setting_keys.dart';
 import 'utils/background_push.dart';
@@ -82,6 +83,10 @@ void main() async {
 }
 
 Future<void> _initializeApp() async {
+  // 🆕 Initialiseer feature flags vroeg in de startup
+  await FeatureFlags.init();
+  Logs().i('[FeatureFlags] Initialized. useNewPushSystem=${FeatureFlags.useNewPushSystem}');
+
   Logs().i('Welcome to ${AppConfig.applicationName}! Wonderhoy!!');
 
   if (PlatformInfos.isAndroid) {
