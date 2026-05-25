@@ -1763,6 +1763,12 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void onAddPopupMenuButtonSelected(String choice) {
+    if (choice == 'emoji') {
+      emojiPickerAction();
+    }
+    if (choice == 'sticker') {
+      emojiPickerAction();
+    }
     if (choice == 'file') {
       sendFileAction();
     }
