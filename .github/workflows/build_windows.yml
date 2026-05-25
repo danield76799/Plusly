@@ -1,8 +1,10 @@
 name: Build Windows Desktop
 
+# NOTE: Windows build disabled - not needed for Plusly
+# To enable: uncomment the 'push' trigger below
 on:
-  push:
-    branches: [ main, master, dev ]
+  # push:
+  #   branches: [ main, master, dev ]
   workflow_dispatch:
 
 jobs:
