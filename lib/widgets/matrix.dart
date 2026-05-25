@@ -28,7 +28,9 @@ import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart
 import 'package:Pulsly/widgets/fluffy_chat_app.dart';
 import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import '../config/app_config.dart';
+import '../config/feature_flags.dart';
 import '../config/setting_keys.dart';
+import '../features/push/push_module.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
@@ -72,6 +74,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   bool? loginRegistrationSupported;
 
   BackgroundPush? backgroundPush;
+
+  /// 🆕 Nieuwe push controller (achter feature flag)
+  PushController? _pushController;
 
   Client get client {
     if (_activeClient < 0 || _activeClient >= widget.clients.length) {
@@ -350,35 +355,51 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     }
 
     if (PlatformInfos.isMobile) {
-      backgroundPush = BackgroundPush(
-        this,
-        onFcmError: (errorMsg, {Uri? link}) async {
-          final result = await showOkCancelAlertDialog(
-            context:
-                FluffyChatApp
-                    .router
-                    .routerDelegate
-                    .navigatorKey
-                    .currentContext ??
-                context,
-            title: L10n.of(context).pushNotificationsNotAvailable,
-            message: errorMsg,
-            okLabel: link == null
-                ? L10n.of(context).ok
-                : L10n.of(context).learnMore,
-            cancelLabel: L10n.of(context).doNotShowAgain,
-          );
-          if (result == OkCancelResult.ok && link != null) {
-            launchUrlString(
-              link.toString(),
-              mode: LaunchMode.externalApplication,
+      // 🆕 Feature flag check: nieuw vs legacy push systeem
+      await FeatureFlags.init();
+
+      if (FeatureFlags.useNewPushSystem) {
+        // NIEUWE push architectuur
+        Logs().i('[Matrix] Using NEW push system (feature flag ON)');
+        _pushController = PushController(widget.store, widget.clients);
+        await _pushController!.initialize();
+
+        // TODO: Koppel _pushController aan notificatie handlers
+        // Voor nu: fallback naar legacy voor daadwerkelijke notificaties
+        backgroundPush = BackgroundPush(this);
+      } else {
+        // LEGACY push — onaangeraakt!
+        Logs().i('[Matrix] Using LEGACY push system (default)');
+        backgroundPush = BackgroundPush(
+          this,
+          onFcmError: (errorMsg, {Uri? link}) async {
+            final result = await showOkCancelAlertDialog(
+              context:
+                  FluffyChatApp
+                      .router
+                      .routerDelegate
+                      .navigatorKey
+                      .currentContext ??
+                  context,
+              title: L10n.of(context).pushNotificationsNotAvailable,
+              message: errorMsg,
+              okLabel: link == null
+                  ? L10n.of(context).ok
+                  : L10n.of(context).learnMore,
+              cancelLabel: L10n.of(context).doNotShowAgain,
             );
-          }
-          if (result == OkCancelResult.cancel) {
-            AppSettings.showNoGoogle.setItem(true);
-          }
-        },
-      );
+            if (result == OkCancelResult.ok && link != null) {
+              launchUrlString(
+                link.toString(),
+                mode: LaunchMode.externalApplication,
+              );
+            }
+            if (result == OkCancelResult.cancel) {
+              AppSettings.showNoGoogle.setItem(true);
+            }
+          },
+        );
+      }
     }
 
     createVoipPlugin();
