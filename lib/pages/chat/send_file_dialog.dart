@@ -117,7 +117,7 @@ class SendFileDialogState extends State<SendFileDialog> {
             throw FileTooBigMatrixException(length, maxUploadSize);
           }
 
-          scaffoldMessenger.showLoadingSnackBar(l10n.removingExif);
+          scaffoldMessenger.showLoadingSnackBar(l10n.prepareSendingAttachment);
           file = MatrixFile(
             bytes: Uint8List.fromList(
               ExifCleaner.removeExifData(await xfile.readAsBytes()),
