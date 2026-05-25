@@ -74,20 +74,9 @@ jobs:
           flutter pub run flutter_launcher_icons:main
           flutter pub run flutter_native_splash:create
 
-      - name: Setup Release Signing
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
-          cat > android/key.properties << EOF
-          storePassword=$KEYSTORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=$KEY_ALIAS
-          storeFile=app/release.keystore
-          EOF
+      # NOTE: key.properties and keystore are already in the repo
+      # No need for secrets - signing is configured in android/key.properties
+      # Keystore: android/app/plusly-upload.keystore
 
       - name: Build Android APK
         env:
