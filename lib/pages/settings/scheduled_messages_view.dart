@@ -50,13 +50,22 @@ class _ScheduledMessagesViewState extends State<ScheduledMessagesView> with Sing
   }
 }
 
-class _PendingMessagesTab extends StatelessWidget {
+class _PendingMessagesTab extends StatefulWidget {
   const _PendingMessagesTab();
+
+  @override
+  State<_PendingMessagesTab> createState() => _PendingMessagesTabState();
+}
+
+class _PendingMessagesTabState extends State<_PendingMessagesTab> {
+  Future<List<ScheduledMessage>> _loadMessages() async {
+    return await ScheduledMessagesService.loadScheduledMessages();
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<ScheduledMessage>>(
-      future: ScheduledMessagesService.loadScheduledMessages(),
+      future: _loadMessages(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator.adaptive());
@@ -96,7 +105,10 @@ class _PendingMessagesTab extends StatelessWidget {
           itemCount: pendingMessages.length,
           itemBuilder: (context, index) {
             final message = pendingMessages[index];
-            return _ScheduledMessageTile(message: message);
+            return _ScheduledMessageTile(
+              message: message,
+              onCancel: () => setState(() {}),  // ← Ververs de lijst!
+            );
           },
         );
       },
@@ -301,8 +313,9 @@ class _MissedMessageTile extends StatelessWidget {
 
 class _ScheduledMessageTile extends StatelessWidget {
   final ScheduledMessage message;
+  final VoidCallback? onCancel;
 
-  const _ScheduledMessageTile({required this.message});
+  const _ScheduledMessageTile({required this.message, this.onCancel});
 
   String _formatScheduledTime(BuildContext context) {
     final scheduled = message.scheduledAt;
@@ -416,10 +429,8 @@ class _ScheduledMessageTile extends StatelessWidget {
 
           if (confirm == true) {
             await ScheduledMessagesService.removeScheduledMessage(message.id);
-            // Force rebuild
-            if (context.mounted) {
-              (context as Element).markNeedsBuild();
-            }
+            // Roep de callback aan om de lijst te verversen
+            onCancel?.call();
           }
         },
       ),
