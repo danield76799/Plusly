@@ -128,6 +128,7 @@ class ChatInputRow extends StatelessWidget {
                 ]
               : <Widget>[
                   const SizedBox(width: 4),
+                  // Emoji knop (los, zoals het hoort)
                   AnimatedContainer(
                     duration: MediaQuery.of(context).disableAnimations
                         ? Duration.zero
@@ -136,7 +137,28 @@ class ChatInputRow extends StatelessWidget {
                     width: controller.sendController.text.isNotEmpty
                         ? 0
                         : height,
-                    child: const SizedBox.shrink(),
+                    child: controller.sendController.text.isNotEmpty
+                        ? const SizedBox.shrink()
+                        : Semantics(
+                            label: 'Open emoji picker',
+                            button: true,
+                            child: Container(
+                              height: height,
+                              width: height,
+                              alignment: Alignment.center,
+                              child: IconButton(
+                                tooltip: L10n.of(context).emojis,
+                                color: theme.colorScheme.onSurface,
+                                icon: Icon(
+                                  controller.showEmojiPicker
+                                      ? Icons.emoji_emotions
+                                      : Icons.emoji_emotions_outlined,
+                                  key: ValueKey(controller.showEmojiPicker),
+                                ),
+                                onPressed: controller.emojiPickerAction,
+                              ),
+                            ),
+                          ),
                   ),
                   if (Matrix.of(context).isMultiAccount &&
                       Matrix.of(context).hasComplexBundles &&
@@ -163,13 +185,6 @@ class ChatInputRow extends StatelessWidget {
                         color: theme.colorScheme.surface,
                         onSelected: controller.onAddPopupMenuButtonSelected,
                         itemBuilder: (BuildContext context) => [
-                          PopupMenuItem(
-                            value: 'emoji',
-                            child: ListTile(
-                              leading: const Icon(Icons.emoji_emotions_outlined),
-                              title: Text(L10n.of(context).emojis),
-                            ),
-                          ),
                           PopupMenuItem(
                             value: 'sticker',
                             child: ListTile(
@@ -224,13 +239,6 @@ class ChatInputRow extends StatelessWidget {
                             child: ListTile(
                               leading: const Icon(Icons.poll_outlined),
                               title: Text(L10n.of(context).startPoll),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'emoji',
-                            child: ListTile(
-                              leading: Icon(Icons.insert_emoticon),
-                              title: Text("Emoji & Stickers"),
                             ),
                           ),
                         ],
