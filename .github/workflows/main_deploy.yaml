@@ -110,11 +110,12 @@ jobs:
           path: output/plusly-release.apk
           retention-days: 7
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.1.2
-          name: Plusly v1.1.2
-          files: output/plusly-release.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # NOTE: Play Store deploy disabled - missing service account key
+      # To enable: add android/keys.json (Google Play service account)
+      # and uncomment the step below
+      # 
+      # - name: Deploy to Play Store
+      #   run: |
+      #     cd android
+      #     bundle install
+      #     bundle exec fastlane deploy_internal_test
