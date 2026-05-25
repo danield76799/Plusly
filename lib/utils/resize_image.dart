@@ -32,12 +32,8 @@ class ImageResizer {
 
       // Check if resize is needed
       if (image.width <= maxDimension && image.height <= maxDimension) {
-        // No resize needed, return original
-        return MatrixImageFile.create(
-          bytes: bytes,
-          name: xfile.name,
-          mimeType: mimeType,
-        );
+        // No resize needed, return original directly (skip MatrixImageFile.create)
+        return null; // Let caller use original file directly
       }
 
       // Calculate new dimensions maintaining aspect ratio
