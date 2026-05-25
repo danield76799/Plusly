@@ -104,7 +104,7 @@ class UnifiedPushProvider implements PushProvider {
 
   // ─── Interne handlers ───
 
-  Future<void> _onNewEndpoint(PushEndpoint endpoint, String instance) async {
+  Future<void> _onNewEndpoint(up.PushEndpoint endpoint, String instance) async {
     final url = endpoint.url;
     if (url.isEmpty) {
       await _onUnregistered(instance);
