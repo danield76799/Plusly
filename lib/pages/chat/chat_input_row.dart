@@ -128,51 +128,7 @@ class ChatInputRow extends StatelessWidget {
                 ]
               : <Widget>[
                   const SizedBox(width: 4),
-                  // Emoji knop (los, zoals het hoort)
-                  AnimatedContainer(
-                    duration: MediaQuery.of(context).disableAnimations
-                        ? Duration.zero
-                        : FluffyThemes.animationDuration,
-                    curve: FluffyThemes.animationCurve,
-                    width: controller.sendController.text.isNotEmpty
-                        ? 0
-                        : height,
-                    child: controller.sendController.text.isNotEmpty
-                        ? const SizedBox.shrink()
-                        : Semantics(
-                            label: 'Open emoji picker',
-                            button: true,
-                            child: Container(
-                              height: height,
-                              width: height,
-                              alignment: Alignment.center,
-                              child: IconButton(
-                                tooltip: L10n.of(context).emojis,
-                                color: theme.colorScheme.onSurface,
-                                icon: Icon(
-                                  controller.showEmojiPicker
-                                      ? Icons.emoji_emotions
-                                      : Icons.emoji_emotions_outlined,
-                                  key: ValueKey(controller.showEmojiPicker),
-                                ),
-                                onPressed: controller.emojiPickerAction,
-                              ),
-                            ),
-                          ),
-                  ),
-                  if (Matrix.of(context).isMultiAccount &&
-                      Matrix.of(context).hasComplexBundles &&
-                      Matrix.of(context).currentBundle!.length > 1)
-                    Container(
-                      height: height,
-                      width: height,
-                      alignment: Alignment.center,
-                      child: _ChatAccountPicker(controller),
-                    ),
-                  // Camera button (direct photo)
-                  Container(
-                  ),
-                  // Attachment menu
+                  // Attachment menu (links)
                   Container(
                     height: height,
                     width: height,
@@ -246,6 +202,7 @@ class ChatInputRow extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
+                  // Input bar met emoji knop erin (WhatsApp stijl)
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -270,45 +227,83 @@ class ChatInputRow extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: Semantics(
-                          label: 'Paste image from clipboard',
-                          button: true,
-                          child: ChatPasteShortcut(
-                            onPaste: () {
-                              controller.sendImageFromClipBoard(null);
-                            },
-                            child: InputBar(
-                              room: controller.room,
-                              minLines: 2,
-                              maxLines: 8,
-                              autofocus: !PlatformInfos.isMobile,
-                              keyboardType: TextInputType.multiline,
-                              textInputAction:
-                                  AppSettings.sendOnEnter.value &&
-                                      PlatformInfos.isMobile
-                                  ? TextInputAction.send
-                                  : null,
-                              onSubmitted: controller.onInputBarSubmitted,
-                              onSubmitImage: controller.sendImageFromClipBoard,
-                              focusNode: controller.inputFocus,
-                              controller: controller.sendController,
-                              decoration: InputDecoration(
-                                contentPadding: const EdgeInsets.only(
-                                  left: 16.0,
-                                  right: 16.0,
-                                  bottom: 12.0,
-                                  top: 12.0,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Semantics(
+                                label: 'Paste image from clipboard',
+                                button: true,
+                                child: ChatPasteShortcut(
+                                  onPaste: () {
+                                    controller.sendImageFromClipBoard(null);
+                                  },
+                                  child: InputBar(
+                                    room: controller.room,
+                                    minLines: 1,
+                                    maxLines: 5,
+                                    autofocus: !PlatformInfos.isMobile,
+                                    keyboardType: TextInputType.multiline,
+                                    textInputAction:
+                                        AppSettings.sendOnEnter.value &&
+                                            PlatformInfos.isMobile
+                                        ? TextInputAction.send
+                                        : null,
+                                    onSubmitted: controller.onInputBarSubmitted,
+                                    onSubmitImage: controller.sendImageFromClipBoard,
+                                    focusNode: controller.inputFocus,
+                                    controller: controller.sendController,
+                                    decoration: InputDecoration(
+                                      contentPadding: const EdgeInsets.only(
+                                        left: 16.0,
+                                        right: 8.0,
+                                        bottom: 12.0,
+                                        top: 12.0,
+                                      ),
+                                      counter: const SizedBox.shrink(),
+                                      hintText: L10n.of(context).writeAMessage,
+                                      hintMaxLines: 1,
+                                      border: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                      filled: false,
+                                    ),
+                                    onChanged: controller.onInputBarChanged,
+                                  ),
                                 ),
-                                counter: const SizedBox.shrink(),
-                                hintText: L10n.of(context).writeAMessage,
-                                hintMaxLines: 1,
-                                border: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                                filled: false,
                               ),
-                              onChanged: controller.onInputBarChanged,
                             ),
-                          ),
+                            // Emoji knop IN de input bar (rechts)
+                            AnimatedContainer(
+                              duration: MediaQuery.of(context).disableAnimations
+                                  ? Duration.zero
+                                  : FluffyThemes.animationDuration,
+                              curve: FluffyThemes.animationCurve,
+                              width: controller.sendController.text.isNotEmpty
+                                  ? 0
+                                  : height,
+                              child: controller.sendController.text.isNotEmpty
+                                  ? const SizedBox.shrink()
+                                  : Semantics(
+                                      label: 'Open emoji picker',
+                                      button: true,
+                                      child: Container(
+                                        height: height,
+                                        width: height,
+                                        alignment: Alignment.center,
+                                        child: IconButton(
+                                          tooltip: L10n.of(context).emojis,
+                                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                          icon: Icon(
+                                            controller.showEmojiPicker
+                                                ? Icons.emoji_emotions
+                                                : Icons.emoji_emotions_outlined,
+                                            key: ValueKey(controller.showEmojiPicker),
+                                          ),
+                                          onPressed: controller.emojiPickerAction,
+                                        ),
+                                      ),
+                                    ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
