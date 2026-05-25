@@ -370,9 +370,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       _pushController = PushController(widget.store, widget.clients);
       await _pushController!.initialize();
 
-      // TODO: Koppel _pushController aan notificatie handlers
-      // Voor nu: fallback naar legacy voor daadwerkelijke notificaties
-      backgroundPush = BackgroundPush(this);
+      // Legacy push is UITGESCHAKELD — nieuwe controller handelt alles af
+      // backgroundPush = BackgroundPush(this);  // ← UITGESCHAKELD
     } else {
       // LEGACY push — onaangeraakt!
       Logs().i('[Matrix] Using LEGACY push system (default)');
