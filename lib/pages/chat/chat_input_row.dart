@@ -142,13 +142,6 @@ class ChatInputRow extends StatelessWidget {
                         onSelected: controller.onAddPopupMenuButtonSelected,
                         itemBuilder: (BuildContext context) => [
                           PopupMenuItem(
-                            value: 'sticker',
-                            child: ListTile(
-                              leading: const Icon(Icons.sticky_note_2_outlined),
-                              title: Text(L10n.of(context).stickers),
-                            ),
-                          ),
-                          PopupMenuItem(
                             value: 'camera',
                             child: ListTile(
                               leading: const Icon(Icons.camera_alt_outlined),
