@@ -206,7 +206,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           await widget.room.sendFileEvent(
             file,
             thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 1600 : null,
+            shrinkImageMaxDimension: compress ? 2048 : null,
             extraContent: extraContent,
             threadLastEventId:
                 widget.thread?.lastEvent?.eventId ??
@@ -236,7 +236,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           await widget.room.sendFileEvent(
             file,
             thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 1600 : null,
+            shrinkImageMaxDimension: compress ? 2048 : null,
             extraContent: extraContent,
             threadLastEventId:
                 widget.thread?.lastEvent?.eventId ??

@@ -7,10 +7,12 @@ import 'package:mime/mime.dart';
 /// Helper class to resize images before upload
 class ImageResizer {
   /// Max dimension (width or height) for resized images
-  static const int maxDimension = 1200;
+  /// 2048px = 2K voor goede kwaliteit maar nog steeds klein genoeg
+  static const int maxDimension = 2048;
   
   /// JPEG quality for resized images (0-100)
-  static const int quality = 40;
+  /// 85 = goede balans tussen kwaliteit en bestandsgrootte
+  static const int quality = 85;
 
   /// Resize an image file if it's an image, returning a MatrixImageFile
   /// Returns null if the file is not an image
