@@ -3,12 +3,14 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/push_provider.dart';
 import '../../../config/app_config.dart';
 import '../../../utils/platform_infos.dart';
+import '../../../utils/push_helper.dart';
 
 /// Firebase Cloud Messaging fallback provider.
 ///
@@ -19,8 +21,26 @@ import '../../../utils/platform_infos.dart';
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
   Logs().v('[FirebasePush] Background message: ${message.messageId}');
-  // Background messages worden afgehandeld door het systeem
-  // We kunnen hier geen stream gebruiken omdat dit in een isolate draait
+  try {
+    final notification = PushNotification.fromJson(
+      Map<String, dynamic>.from(Map.from(message.data)),
+    );
+
+    final plugin = FlutterLocalNotificationsPlugin();
+    await plugin.initialize(
+      settings: const InitializationSettings(
+        android: AndroidInitializationSettings('notifications_icon'),
+        iOS: DarwinInitializationSettings(),
+      ),
+    );
+
+    await PushHelper.pushHelper(
+      notification,
+      flutterLocalNotificationsPlugin: plugin,
+    );
+  } catch (e, s) {
+    Logs().e('[FirebasePush] Background handler failed', e, s);
+  }
 }
 
 class FirebasePushProvider implements PushProvider {
