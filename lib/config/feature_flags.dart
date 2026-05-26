@@ -37,9 +37,9 @@ abstract class FeatureFlags {
 
   static const String _kUseNewPush = 'ff_use_new_push_v2';
 
-  /// Nieuwe push architectuur (default: false = legacy systeem actief!)
+  /// Nieuwe push architectuur staat aan (default: true)
   static bool get useNewPushSystem {
-    return _requirePrefs.getBool(_kUseNewPush) ?? false;  // ← TERUG NAAR FALSE!
+    return _requirePrefs.getBool(_kUseNewPush) ?? true;  // ← NIEUW systeem actief!
   }
 
   static set useNewPushSystem(bool value) {
