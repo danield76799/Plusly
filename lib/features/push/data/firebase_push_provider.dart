@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
@@ -22,6 +23,8 @@ import '../../../utils/push_helper.dart';
 Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
   Logs().v('[FirebasePush] Background message: ${message.messageId}');
   try {
+    await Firebase.initializeApp();
+    
     final notification = PushNotification.fromJson(
       Map<String, dynamic>.from(Map.from(message.data)),
     );
