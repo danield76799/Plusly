@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/feature_flags.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/settings_notifications/push_rule_extensions.dart';
 import 'package:Pulsly/utils/localized_exception_extension.dart';
@@ -128,6 +129,32 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(L10n.of(context).pushRegistrationFailed(e.toLocalizedString(context))),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  void toggleNewPushSystem(bool value) async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      FeatureFlags.useNewPushSystem = value;
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            value 
+              ? 'Nieuw push systeem geactiveerd. Herstart app om volledig effectief te zijn.'
+              : 'Legacy push systeem geactiveerd. Herstart app om volledig effectief te zijn.',
+          ),
         ),
       );
     } finally {
