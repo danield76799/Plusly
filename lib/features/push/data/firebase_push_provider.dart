@@ -13,6 +13,16 @@ import '../../../utils/platform_infos.dart';
 /// Firebase Cloud Messaging fallback provider.
 ///
 /// Werkt op alle platforms, vereist Google Play Services.
+
+/// Top-level background message handler voor Firebase.
+/// Moet top-level zijn met @pragma('vm:entry-point') voor firebase_messaging >=15.x.
+@pragma('vm:entry-point')
+Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
+  Logs().v('[FirebasePush] Background message: ${message.messageId}');
+  // Background messages worden afgehandeld door het systeem
+  // We kunnen hier geen stream gebruiken omdat dit in een isolate draait
+}
+
 class FirebasePushProvider implements PushProvider {
   final SharedPreferences _store;
   final List<Client> _clients;
@@ -51,7 +61,7 @@ class FirebasePushProvider implements PushProvider {
 
       // Luister naar FCM messages
       FirebaseMessaging.onMessage.listen(_onForegroundMessage);
-      FirebaseMessaging.onBackgroundMessage(_onBackgroundMessage);
+      FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
 
       // Luister naar token refreshes
       _fcm.onTokenRefresh.listen(_onTokenRefresh);
@@ -122,12 +132,6 @@ class FirebasePushProvider implements PushProvider {
   void _onForegroundMessage(RemoteMessage message) {
     Logs().v('[FirebasePush] Foreground message: ${message.messageId}');
     _handleRemoteMessage(message);
-  }
-
-  static Future<void> _onBackgroundMessage(RemoteMessage message) async {
-    Logs().v('[FirebasePush] Background message: ${message.messageId}');
-    // Background messages worden afgehandeld door het systeem
-    // We kunnen hier geen stream gebruiken omdat dit in een isolate draait
   }
 
   void _onTokenRefresh(String token) {
