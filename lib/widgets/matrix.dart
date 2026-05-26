@@ -409,14 +409,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   Future<void> _initPush() async {
     if (!PlatformInfos.isMobile) return;
 
-    // 🆕 Feature flag check: nieuw vs legacy push systeem
     await FeatureFlags.init();
 
-    if (FeatureFlags.useNewPushSystem) {
-      await initNewPushSystem();
-    } else {
-      await initLegacyPushSystem();
-    }
+    // 🆕 UP-only push systeem (geen legacy/FCM meer)
+    await initLegacyPushSystem();
   }
 
   void createVoipPlugin() async {
