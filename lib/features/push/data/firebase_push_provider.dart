@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/push_provider.dart';
 import '../../../config/app_config.dart';
+import '../../../config/setting_keys.dart';
 import '../../../utils/platform_infos.dart';
 import '../../../utils/push_helper.dart';
 
@@ -187,7 +188,8 @@ class FirebasePushProvider implements PushProvider {
 
   Future<void> _setupPusher(Client client, String token) async {
     try {
-      final gatewayUrl = 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify';
+      final gatewayUrl = AppSettings.pushNotificationsGatewayUrl.value;
+      final pusherFormat = AppSettings.pushNotificationsPusherFormat.value;
       final appId = '${AppConfig.appId}.data_message';
 
       await client.postPusher(
@@ -199,7 +201,11 @@ class FirebasePushProvider implements PushProvider {
           lang: 'en',
           data: PusherData(
             url: Uri.parse(gatewayUrl),
-            format: 'event_id_only',
+            format: pusherFormat,
+            additionalProperties: {
+              if (Platform.isAndroid) 'data_message': 'android',
+              if (Platform.isIOS) 'data_message': 'ios',
+            },
           ),
           kind: 'http',
         ),
