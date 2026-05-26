@@ -23,6 +23,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -41,8 +42,6 @@ import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import '../widgets/matrix.dart';
 import 'platform_infos.dart';
-
-import 'package:fcm_shared_isolate/fcm_shared_isolate.dart';
 
 class NoTokenException implements Exception {
   String get cause => 'Cannot get firebase token';
@@ -68,7 +67,7 @@ class BackgroundPush {
   final pendingTests = <String, Completer<void>>{};
   bool firebaseEnabled = false;
 
-  final firebase = FcmSharedIsolate();
+  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
 
   DateTime? lastReceivedPush;
 
@@ -127,21 +126,18 @@ class BackgroundPush {
       }
       await initialiseLocalNotifications();
       Logs().v('Flutter Local Notifications initialized');
-      firebase.setListeners(
-        onMessage: (message) {
-          final msg = Map<String, dynamic>.from(message);
-          PushHelper.pushHelper(
-            PushNotification.fromJson(
-              msg['data'] is Map ? Map<String, dynamic>.from(msg['data']) : msg,
-            ),
-            clients: clients,
-            l10n: l10n,
-            activeRoomId: matrix?.activeRoomId,
-            activeClient: clients.isNotEmpty ? clients.first : null,
-            flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-          );
-        },
-      );
+      FirebaseMessaging.onMessage.listen((message) {
+        PushHelper.pushHelper(
+          PushNotification.fromJson(
+            message.data is Map ? Map<String, dynamic>.from(Map.from(message.data)) : <String, dynamic>{},
+          ),
+          clients: clients,
+          l10n: l10n,
+          activeRoomId: matrix?.activeRoomId,
+          activeClient: clients.isNotEmpty ? clients.first : null,
+          flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+        );
+      });
       if (Platform.isAndroid) {
         await UnifiedPush.initialize(
           onNewEndpoint: _newUpEndpoint,
@@ -200,7 +196,7 @@ class BackgroundPush {
     required Client client,
   }) async {
     if (PlatformInfos.isIOS) {
-      await firebase.requestPermission();
+      await _fcm.requestPermission();
     }
     if (PlatformInfos.isAndroid) {
       _flutterLocalNotificationsPlugin
@@ -421,7 +417,7 @@ class BackgroundPush {
     Logs().v('Setup firebase');
     if (_fcmToken?.isEmpty ?? true) {
       try {
-        _fcmToken = await firebase.getToken();
+        _fcmToken = await _fcm.getToken();
         if (_fcmToken == null) throw ('PushToken is null');
       } catch (e, s) {
         Logs().w('[Push] cannot get token', e, e is String ? null : s);
@@ -600,7 +596,7 @@ class BackgroundPush {
     Logs().i('[Push] UnifiedPush using endpoint $endpoint');
     final oldTokens = <String?>{};
     try {
-      final fcmToken = await firebase.getToken();
+      final fcmToken = await _fcm.getToken();
       oldTokens.add(fcmToken);
     } catch (_) {}
     final client = clientFromInstance(i, clients) ?? clients.first;
