@@ -38,9 +38,11 @@ jobs:
           cache: 'gradle'
 
       - name: Setup Flutter
-        run: |
-          git clone --depth 1 https://github.com/flutter/flutter.git -b stable
-          echo "$PWD/flutter/bin" >> $GITHUB_PATH
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
@@ -53,23 +55,16 @@ jobs:
             flutter-deps-${{ runner.os }}-
 
       - name: Verify Flutter
-        run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter --version
+        run: flutter --version
 
       - name: Clean Flutter build
-        run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter clean
+        run: flutter clean
 
       - name: Generate localization
-        run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter gen-l10n
+        run: flutter gen-l10n
 
       - name: Generate assets
         run: |
-          export PATH="$PWD/flutter/bin:$PATH"
           flutter pub run flutter_launcher_icons:main
           flutter pub run flutter_native_splash:create
 
@@ -81,8 +76,7 @@ jobs:
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }} 2>&1 | tee build.log
+          flutter build apk --release --target-platform android-arm64 --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }} 2>&1 | tee build.log
           BUILD_EXIT_CODE=$?
           if [ $BUILD_EXIT_CODE -ne 0 ]; then
             echo "=== BUILD FAILED ==="
