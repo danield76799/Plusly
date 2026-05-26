@@ -1,0 +1,181 @@
+name: Main Deploy Workflow
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: main_deploy
+  cancel-in-progress: false
+
+jobs:
+  build_android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - run: cat .github/workflows/versions.env >> $GITHUB_ENV
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'zulu'
+          cache: 'gradle'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            ~/.gradle/caches
+          key: flutter-deps-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            flutter-deps-${{ runner.os }}-
+
+      - name: Verify Flutter
+        run: flutter --version
+
+      - name: Clean Flutter build
+        run: flutter clean
+
+      - name: Generate localization
+        run: flutter gen-l10n
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Generate assets
+        run: |
+          dart run flutter_launcher_icons:main
+          dart run flutter_native_splash:create
+
+      - name: Bump version
+        id: bump
+        run: |
+          VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
+          VERSION_NAME=$(echo "$VERSION" | sed 's/+.*//')
+          BUILD_NUMBER=$(echo "$VERSION" | sed 's/.*+//')
+          
+          # Parse version parts
+          MAJOR=$(echo "$VERSION_NAME" | cut -d. -f1)
+          MINOR=$(echo "$VERSION_NAME" | cut -d. -f2)
+          PATCH=$(echo "$VERSION_NAME" | cut -d. -f3)
+          
+          # Auto-bump patch
+          NEW_PATCH=$((PATCH + 1))
+          NEW_VERSION_NAME="${MAJOR}.${MINOR}.${NEW_PATCH}"
+          NEW_BUILD=$((BUILD_NUMBER + 1))
+          
+          sed -i "s/^version: .*/version: ${NEW_VERSION_NAME}+${NEW_BUILD}/" pubspec.yaml
+          echo "version_name=$NEW_VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "build_number=$NEW_BUILD" >> $GITHUB_OUTPUT
+          echo "full_version=${NEW_VERSION_NAME}+${NEW_BUILD}" >> $GITHUB_OUTPUT
+          echo "Bumped to ${NEW_VERSION_NAME}+${NEW_BUILD}"
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          git diff --cached --quiet || git commit -m "chore: bump version to ${{ steps.bump.outputs.full_version }} [skip ci]"
+          git push origin main || echo "Nothing to push"
+
+      # === SIGNING SETUP ===
+      - name: Setup signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+          cat > android/key.properties << EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=upload-keystore.jks
+          EOF
+
+      # === APK BUILD ===
+      - name: Build Android APK
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: |
+          flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
+          mkdir -p output
+          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
+
+      # === AAB BUILD ===
+      - name: Build Android App Bundle
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: |
+          flutter build appbundle --release --target-platform android-arm,android-arm64,android-x64 --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
+          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
+
+      # === UPLOAD ARTIFACTS ===
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: output/plusly-release.apk
+          retention-days: 7
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: output/plusly-release.aab
+          retention-days: 7
+
+      # === PLAY STORE DEPLOY (optional) ===
+      - name: Setup Play Store key
+        id: playstore
+        env:
+          PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
+        run: |
+          if [ -n "$PLAYSTORE_DEPLOY_KEY" ]; then
+            echo "$PLAYSTORE_DEPLOY_KEY" > android/keys.json
+            echo "has_key=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_key=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Ruby & Fastlane
+        if: steps.playstore.outputs.has_key == 'true'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Deploy to Play Store
+        if: steps.playstore.outputs.has_key == 'true'
+        working-directory: android
+        run: bundle exec fastlane deploy_internal_test
+
+      # === GITHUB RELEASE ===
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
+          name: Plusly v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
+          files: |
+            output/plusly-release.apk
+            output/plusly-release.aab
+          generate_release_notes: true
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
