@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plusly — Push Settings</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f0f0f; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+.phone {
+  width: 390px; height: 844px;
+  background: #121212;
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  display: flex; flex-direction: column;
+}
+.status-bar {
+  height: 54px; background: #121212;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 28px 0;
+  color: #fff; font-size: 14px; font-weight: 600; flex-shrink: 0;
+}
+.nav-header {
+  height: 56px; display: flex; align-items: center; padding: 0 16px;
+  gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0;
+}
+.back-btn { color: #a78bfa; font-size: 20px; cursor: pointer; }
+.nav-title { color: #fff; font-size: 18px; font-weight: 600; }
+
+.content { flex: 1; overflow-y: auto; padding: 0 0 20px; }
+.section-header {
+  color: #a78bfa; font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.8px; padding: 24px 16px 8px;
+}
+
+.setting-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; cursor: pointer; transition: background 0.15s;
+}
+.setting-item:hover { background: rgba(255,255,255,0.03); }
+.setting-left { display: flex; align-items: center; gap: 12px; }
+.setting-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.icon-purple { background: rgba(124,58,237,0.2); color: #a78bfa; }
+.icon-green { background: rgba(34,197,94,0.2); color: #4ade80; }
+.icon-blue { background: rgba(59,130,246,0.2); color: #60a5fa; }
+.icon-orange { background: rgba(249,115,22,0.2); color: #fb923c; }
+.icon-rose { background: rgba(244,63,94,0.2); color: #fb7185; }
+
+.setting-label { color: #fff; font-size: 15px; font-weight: 500; }
+.setting-sub { color: #888; font-size: 12px; margin-top: 1px; }
+
+/* Toggle switch */
+.toggle {
+  width: 50px; height: 30px; background: #333; border-radius: 15px;
+  position: relative; cursor: pointer; transition: background 0.25s;
+  flex-shrink: 0;
+}
+.toggle.on { background: #7c3aed; }
+.toggle::after {
+  content: ''; width: 26px; height: 26px; background: #fff;
+  border-radius: 50%; position: absolute; top: 2px; left: 2px;
+  transition: transform 0.25s;
+}
+.toggle.on::after { transform: translateX(20px); }
+
+.setting-chevron { color: #555; font-size: 16px; }
+
+/* Push status card */
+.status-card {
+  margin: 8px 16px; padding: 16px; border-radius: 14px;
+  background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.15);
+}
+.status-card .status-title { color: #a78bfa; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.status-card .status-desc { color: #999; font-size: 13px; line-height: 1.5; }
+.status-connected {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(34,197,94,0.15); color: #4ade80;
+  padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;
+}
+.status-dot { width: 6px; height: 6px; background: #4ade80; border-radius: 50%; }
+
+.info-banner {
+  margin: 8px 16px; padding: 12px 16px; border-radius: 12px;
+  background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.12);
+  color: #93c5fd; font-size: 13px; line-height: 1.5;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+
+.version-info {
+  text-align: center; color: #444; font-size: 12px; padding: 20px;
+}
+.version-info strong { color: #666; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <span class="status-icons">●●●●○ &nbsp;WiFi &nbsp;🔋 85%</span>
+  </div>
+  <div class="nav-header">
+    <span class="back-btn">‹</span>
+    <span class="nav-title">Settings</span>
+  </div>
+
+  <div class="content">
+    <div class="section-header">Push & Notifications</div>
+
+    <div class="setting-item">
+      <div class="setting-left">
+        <div class="setting-icon icon-purple">📡</div>
+        <div>
+          <div class="setting-label">Unified Push</div>
+          <div class="setting-sub">Decentralized push notifications</div>
+        </div>
+      </div>
+      <div class="toggle on"></div>
+    </div>
+
+    <div class="status-card">
+      <div class="status-title"><span class="status-connected"><span class="status-dot"></span> Connected</span></div>
+      <div class="status-desc">Push gateway: ntfy.sh • No Google services needed</div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-left">
+        <div class="setting-icon icon-green">🔔</div>
+        <div>
+          <div class="setting-label">Notification sounds</div>
+          <div class="setting-sub">Play sound on new messages</div>
+        </div>
+      </div>
+      <div class="toggle on"></div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-left">
+        <div class="setting-icon icon-blue">🔋</div>
+        <div>
+          <div class="setting-label">Battery-optimized push</div>
+          <div class="setting-sub">Use FCM fallback on battery saver</div>
+        </div>
+      </div>
+      <div class="toggle on"></div>
+    </div>
+
+    <div class="section-header">Privacy</div>
+
+    <div class="setting-item">
+      <div class="setting-left">
+        <div class="setting-icon icon-green">🔒</div>
+        <div>
+          <div class="setting-label">End-to-end encryption</div>
+          <div class="setting-sub">All messages encrypted by default</div>
+        </div>
+      </div>
+      <span class="setting-chevron">›</span>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-left">
+        <div class="setting-icon icon-purple">👁️</div>
+        <div>
+          <div class="setting-label">Read receipts</div>
+          <div class="setting-sub">Show "Read by" in conversations</div>
+        </div>
+      </div>
+      <div class="toggle on"></div>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-left">
+        <div class="setting-icon icon-orange">🕵️</div>
+        <div>
+          <div class="setting-label">Seen by filter</div>
+          <div class="setting-sub">Hide your own avatar in seen-by list</div>
+        </div>
+      </div>
+      <div class="toggle on"></div>
+    </div>
+
+    <div class="section-header">Appearance</div>
+
+    <div class="setting-item">
+      <div class="setting-left">
+        <div class="setting-icon icon-purple">🌙</div>
+        <div>
+          <div class="setting-label">Theme</div>
+          <div class="setting-sub">Dark</div>
+        </div>
+      </div>
+      <span class="setting-chevron">›</span>
+    </div>
+
+    <div class="setting-item">
+      <div class="setting-left">
+        <div class="setting-icon icon-rose">🎨</div>
+        <div>
+          <div class="setting-label">Accent color</div>
+          <div class="setting-sub">Purple (Matrix)</div>
+        </div>
+      </div>
+      <span class="setting-chevron">›</span>
+    </div>
+
+    <div class="info-banner">
+      <span>💡</span>
+      <span>Plusly uses <strong>Unified Push</strong> — no proprietary push services needed. Your notifications are private, fast, and battery-friendly. Works with any UP-compatible distributor like ntfy.sh.</span>
+    </div>
+
+    <div class="version-info">
+      <strong>Plusly</strong> v1.4.7 • Matrix client<br>
+      Built with Flutter 💙
+    </div>
+  </div>
+</div>
+</body>
+</html>
