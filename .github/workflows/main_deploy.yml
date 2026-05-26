@@ -59,6 +59,11 @@ jobs:
           export PATH="$PWD/flutter/bin:$PATH"
           flutter gen-l10n
 
+      - name: Install Flutter dependencies
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter pub get
+
       - name: Generate assets
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
