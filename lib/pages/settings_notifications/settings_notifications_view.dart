@@ -151,7 +151,7 @@ class SettingsNotificationsView extends StatelessWidget {
                         // 🆕 Feature flag switch voor nieuw push systeem
                         ListTile(
                           title: const Text('Nieuw Push Systeem'),
-                          subtitle: const Text('Experimentele push architectuur (herstart vereist)'),
+                          subtitle: const Text('Experimentele push architectuur'),
                           trailing: Switch.adaptive(
                             value: FeatureFlags.useNewPushSystem,
                             onChanged: controller.isLoading

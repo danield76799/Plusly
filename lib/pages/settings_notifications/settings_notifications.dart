@@ -147,14 +147,32 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
     try {
       FeatureFlags.useNewPushSystem = value;
       
+      // 🆕 Directe switch zonder herstart!
+      final matrix = Matrix.of(context);
+      if (value) {
+        // Activeer nieuwe push
+        await matrix.initNewPushSystem();
+      } else {
+        // Activeer legacy push
+        await matrix.initLegacyPushSystem();
+      }
+      
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             value 
-              ? 'Nieuw push systeem geactiveerd. Herstart app om volledig effectief te zijn.'
-              : 'Legacy push systeem geactiveerd. Herstart app om volledig effectief te zijn.',
+              ? 'Nieuw push systeem geactiveerd'
+              : 'Legacy push systeem geactiveerd',
           ),
+        ),
+      );
+    } catch (e, s) {
+      Logs().e('[Push] Failed to toggle push system', e, s);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Fout bij wisselen push systeem: $e'),
         ),
       );
     } finally {

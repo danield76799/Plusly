@@ -368,6 +368,68 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     createVoipPlugin();
   }
 
+  /// 🆕 Initialiseer nieuw push systeem (voor runtime switch)
+  Future<void> initNewPushSystem() async {
+    if (!PlatformInfos.isMobile) return;
+    
+    // Cleanup legacy
+    backgroundPush = null;
+    
+    // Initialiseer nieuwe
+    Logs().i('[Matrix] Runtime switch to NEW push system');
+    NotificationRouter.initialize(
+      router: PluslyApp.router,
+      clients: widget.clients,
+    );
+    
+    _pushController?.dispose();
+    _pushController = PushController(widget.store, widget.clients);
+    await _pushController!.initializeLocalNotifications();
+    await _pushController!.initialize();
+  }
+  
+  /// 🆕 Initialiseer legacy push systeem (voor runtime switch)
+  Future<void> initLegacyPushSystem() async {
+    if (!PlatformInfos.isMobile) return;
+    
+    // Cleanup nieuwe
+    _pushController?.dispose();
+    _pushController = null;
+    
+    // Initialiseer legacy
+    Logs().i('[Matrix] Runtime switch to LEGACY push system');
+    backgroundPush = BackgroundPush(
+      this,
+      onFcmError: (errorMsg, {Uri? link}) async {
+        final result = await showOkCancelAlertDialog(
+          context:
+              PluslyApp
+                  .router
+                  .routerDelegate
+                  .navigatorKey
+                  .currentContext ??
+              context,
+          title: L10n.of(context).pushNotificationsNotAvailable,
+          message: errorMsg,
+          okLabel: link == null
+              ? L10n.of(context).ok
+              : L10n.of(context).learnMore,
+          cancelLabel: L10n.of(context).doNotShowAgain,
+        );
+        if (result == OkCancelResult.ok && link != null) {
+          launchUrlString(
+            link.toString(),
+            mode: LaunchMode.externalApplication,
+          );
+        }
+        if (result == OkCancelResult.cancel) {
+          AppSettings.showNoGoogle.setItem(true);
+        }
+      },
+    );
+    backgroundPush?.setupPush(widget.clients);
+  }
+
   Future<void> _initPush() async {
     if (!PlatformInfos.isMobile) return;
 
@@ -375,54 +437,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     await FeatureFlags.init();
 
     if (FeatureFlags.useNewPushSystem) {
-      // NIEUWE push architectuur
-      Logs().i('[Matrix] Using NEW push system (feature flag ON)');
-      
-      // Initialiseer notification router met router en clients
-      NotificationRouter.initialize(
-        router: PluslyApp.router,
-        clients: widget.clients,
-      );
-      
-      _pushController = PushController(widget.store, widget.clients);
-      await _pushController!.initializeLocalNotifications();
-      await _pushController!.initialize();
-
-      // Legacy push is UITGESCHAKELD — nieuwe controller handelt alles af
-      // backgroundPush = BackgroundPush(this);  // ← UITGESCHAKELD
+      await initNewPushSystem();
     } else {
-      // LEGACY push — onaangeraakt!
-      Logs().i('[Matrix] Using LEGACY push system (default)');
-      backgroundPush = BackgroundPush(
-        this,
-        onFcmError: (errorMsg, {Uri? link}) async {
-          final result = await showOkCancelAlertDialog(
-            context:
-                PluslyApp
-                    .router
-                    .routerDelegate
-                    .navigatorKey
-                    .currentContext ??
-                context,
-            title: L10n.of(context).pushNotificationsNotAvailable,
-            message: errorMsg,
-            okLabel: link == null
-                ? L10n.of(context).ok
-                : L10n.of(context).learnMore,
-            cancelLabel: L10n.of(context).doNotShowAgain,
-          );
-          if (result == OkCancelResult.ok && link != null) {
-            launchUrlString(
-              link.toString(),
-              mode: LaunchMode.externalApplication,
-            );
-          }
-          if (result == OkCancelResult.cancel) {
-            AppSettings.showNoGoogle.setItem(true);
-          }
-        },
-      );
-      backgroundPush?.setupPush(widget.clients);
+      await initLegacyPushSystem();
     }
   }
 
