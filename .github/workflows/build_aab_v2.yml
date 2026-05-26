@@ -59,8 +59,8 @@ jobs:
       - name: Generate assets
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
-          flutter pub run flutter_launcher_icons:main
-          flutter pub run flutter_native_splash:create
+          dart run flutter_launcher_icons:main
+          dart run flutter_native_splash:create
 
       - name: Build Android App Bundle
         env:
