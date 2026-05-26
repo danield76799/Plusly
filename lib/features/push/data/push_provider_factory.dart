@@ -43,7 +43,7 @@ class PushProviderFactory {
     return PushProviderResult.failure(
       Platform.isAndroid
           ? 'Geen UnifiedPush distributor gevonden.\n'
-              'Installeer ntfy via F-Droid of zet SunUP aan.'
+              'Gebruik SunUP of ntfy.'
           : 'Push notificaties alleen beschikbaar op Android.',
     );
   }
