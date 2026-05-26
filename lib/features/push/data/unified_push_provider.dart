@@ -97,7 +97,7 @@ class UnifiedPushProvider implements PushProvider {
   Future<void> unregister() async {
     try {
       for (final client in _clients.where((c) => c.isLogged())) {
-        await up.UnifiedPush.unregister(instance: client.clientName);
+        await up.UnifiedPush.unregister(client.clientName);
       }
     } catch (e, s) {
       Logs().w('[UnifiedPush] Unregister failed', e, s);
