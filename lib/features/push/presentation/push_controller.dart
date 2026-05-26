@@ -175,6 +175,24 @@ class PushController extends ChangeNotifier {
     );
   }
 
+  /// Her-registreer bij alle ingelogde clients (bv. na login).
+  /// Werkt alleen als er al een actieve provider is.
+  Future<void> reRegister() async {
+    if (_activeProvider == null) {
+      Logs().w('[PushController] reRegister called but no active provider');
+      // Probeer opnieuw te initialiseren
+      await initialize();
+      return;
+    }
+    Logs().i('[PushController] Re-registering push for logged-in clients');
+    final token = await _activeProvider!.register();
+    if (token != null || _activeProvider!.isActive) {
+      Logs().i('[PushController] Re-registration successful');
+    } else {
+      Logs().w('[PushController] Re-registration failed');
+    }
+  }
+
   /// Cleanup
   @override
   void dispose() {
