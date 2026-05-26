@@ -31,9 +31,9 @@ import '../config/app_config.dart';
 import '../config/feature_flags.dart';
 import '../config/setting_keys.dart';
 import '../features/push/push_module.dart';
-import '../pages/key_verification/key_verification_dialog.dart';
-import 'package:Pulsly/widgets/plusly_app.dart';
 import '../features/push/presentation/notification_router.dart';
+import '../pages/key_verification/key_verification_dialog.dart';
+import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
 import 'local_notifications_extension.dart';
 
@@ -214,8 +214,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   void _updatePushActiveRoom() {
     if (_pushController != null) {
       final roomId = activeRoomId;
-      final client = roomId != null ? client : null;
-      _pushController!.setActiveRoom(roomId, client);
+      final activeClient = roomId != null ? client : null;
+      _pushController!.setActiveRoom(roomId, activeClient);
     }
   }
 
@@ -440,6 +440,16 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     final foreground =
         state != AppLifecycleState.inactive &&
         state != AppLifecycleState.paused;
+    
+    // 🆕 Update push controller met foreground status
+    if (_pushController != null) {
+      if (!foreground) {
+        _pushController!.setActiveRoom(null, null);
+      } else {
+        _updatePushActiveRoom();
+      }
+    }
+    
     final resumedLifecyclePresence = PresenceType.values.firstWhere(
       (x) => x.name == AppSettings.presenceStatus.value,
     );
