@@ -187,6 +187,7 @@ jobs:
 
       # === PLAY STORE DEPLOY ===
       - name: Deploy to Play Store
+        if: ${{ steps.build_number.outputs.last_version != '' }}
         run: bundle exec fastlane deploy_internal_test
         working-directory: android
 
