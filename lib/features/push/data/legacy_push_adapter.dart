@@ -12,7 +12,7 @@ import '../domain/push_provider.dart';
 /// dat we BackgroundPush hoeven aan te passen.
 ///
 /// ⚠️ Dit is een overgangsoplossing — uiteindelijk vervangen
-/// door [UnifiedPushProvider] en [FirebasePushProvider].
+/// door [UnifiedPushProvider].
 class LegacyPushAdapter implements PushProvider {
   final dynamic _backgroundPush; // BackgroundPush instance
 

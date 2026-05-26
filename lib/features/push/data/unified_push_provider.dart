@@ -95,7 +95,13 @@ class UnifiedPushProvider implements PushProvider {
 
   @override
   Future<void> unregister() async {
-    // TODO: Check UnifiedPush API voor correcte unregister signature
+    try {
+      for (final client in _clients.where((c) => c.isLogged())) {
+        await up.UnifiedPush.unregister(instance: client.clientName);
+      }
+    } catch (e, s) {
+      Logs().w('[UnifiedPush] Unregister failed', e, s);
+    }
     _isActive = false;
     _currentEndpoint = null;
   }
