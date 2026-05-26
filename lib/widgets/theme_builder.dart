@@ -26,11 +26,11 @@ class ThemeBuilder extends StatefulWidget {
 
   const ThemeBuilder({
     required this.builder,
-    this.themeModeSettingsKey = 'xyz.extera.next.themeMode',
+    this.themeModeSettingsKey = 'com.danield.plusly.themeMode',
     this.primaryColorSettingsKey = 'xyz.plusly.next.colorSchemeSeed',
-    this.pureBlackSettingsKey = 'xyz.extera.next.pureBlack',
-    this.twemojiSettingsKey = 'xyz.extera.next.twemojiFont',
-    this.schemeVariantSettingsKey = 'xyz.extera.next.schemeVariant',
+    this.pureBlackSettingsKey = 'com.danield.plusly.pureBlack',
+    this.twemojiSettingsKey = 'com.danield.plusly.twemojiFont',
+    this.schemeVariantSettingsKey = 'com.danield.plusly.schemeVariant',
     super.key,
   });
 

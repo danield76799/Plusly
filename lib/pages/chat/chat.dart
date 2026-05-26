@@ -1083,7 +1083,7 @@ class ChatController extends State<ChatPageWithRoom>
     await mx.client.reportEvent(
       roomId,
       event.eventId,
-      reason: "Extera (Next) Redacted Event Recover",
+      reason: "Plusly Redacted Event Recover",
     );
 
     final reports = await mx.client.getEventReports();

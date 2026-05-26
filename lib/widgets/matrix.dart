@@ -25,7 +25,7 @@ import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/uia_request_manager.dart';
 import 'package:Pulsly/utils/voip_plugin.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:Pulsly/widgets/fluffy_chat_app.dart';
+import 'package:Pulsly/widgets/plusly_app.dart';
 import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import '../config/app_config.dart';
 import '../config/feature_flags.dart';
@@ -171,7 +171,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
                 );
                 _registerSubs(_loginClientCandidate!.clientName);
                 _loginClientCandidate = null;
-                FluffyChatApp.router.go('/rooms');
+                PluslyApp.router.go('/rooms');
               });
     if (widget.clients.isEmpty) widget.clients.add(candidate);
     return candidate;
@@ -204,7 +204,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   bool webHasFocus = true;
 
   String? get activeRoomId {
-    final route = FluffyChatApp.router.routeInformationProvider.value.uri.path;
+    final route = PluslyApp.router.routeInformationProvider.value.uri.path;
     if (!route.startsWith('/rooms/')) return null;
     return route.split('/')[2];
   }
@@ -271,14 +271,14 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
                   KeyVerificationState.done,
                   KeyVerificationState.error,
                 }.contains(request.state)) {
-              FluffyChatApp.router.pop('dialog');
+              PluslyApp.router.pop('dialog');
             }
             hidPopup = true;
           };
           request.onUpdate = null;
           hidPopup = true;
           await KeyVerificationDialog(request: request).show(
-            FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
+            PluslyApp.router.routerDelegate.navigatorKey.currentContext ??
                 context,
           );
         });
@@ -301,17 +301,17 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       }
       if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
         ScaffoldMessenger.of(
-          FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
+          PluslyApp.router.routerDelegate.navigatorKey.currentContext ??
               context,
         ).showSnackBar(
           SnackBar(content: Text(L10n.of(context).oneClientLoggedOut)),
         );
 
         if (state != LoginState.loggedIn) {
-          FluffyChatApp.router.go('/rooms');
+          PluslyApp.router.go('/rooms');
         }
       } else {
-        FluffyChatApp.router.go(
+        PluslyApp.router.go(
           state == LoginState.loggedIn ? '/rooms' : '/home',
         );
       }
@@ -380,7 +380,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         onFcmError: (errorMsg, {Uri? link}) async {
           final result = await showOkCancelAlertDialog(
             context:
-                FluffyChatApp
+                PluslyApp
                     .router
                     .routerDelegate
                     .navigatorKey
@@ -488,7 +488,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     final exportBytes = Uint8List.fromList(const Utf8Codec().encode(export));
 
     final exportFileName =
-        'fluffychat-export-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.fluffybackup';
+        'plusly-export-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.pluslybackup';
 
     final file = MatrixFile(bytes: exportBytes, name: exportFileName);
     file.save(context);

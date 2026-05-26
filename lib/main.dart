@@ -19,7 +19,7 @@ import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/error_widget.dart';
 import 'config/setting_keys.dart';
 import 'utils/background_push.dart';
-import 'widgets/fluffy_chat_app.dart';
+import 'widgets/plusly_app.dart';
 
 ReceivePort? mainIsolateReceivePort;
 
@@ -170,9 +170,9 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 
-  ErrorWidget.builder = (details) => FluffyChatErrorWidget(details);
+  ErrorWidget.builder = (details) => PluslyErrorWidget(details);
   Logs().w("${clients.length} clients");
-  runApp(FluffyChatApp(clients: clients, pincode: pin, store: store));
+  runApp(PluslyApp(clients: clients, pincode: pin, store: store));
 }
 
 /// Watches the lifecycle changes to start the application when it

@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 
 import 'package:Pulsly/utils/error_reporter.dart';
 
-class FluffyChatErrorWidget extends StatefulWidget {
+class PluslyErrorWidget extends StatefulWidget {
   final FlutterErrorDetails details;
-  const FluffyChatErrorWidget(this.details, {super.key});
+  const PluslyErrorWidget(this.details, {super.key});
 
   @override
-  State<FluffyChatErrorWidget> createState() => _FluffyChatErrorWidgetState();
+  State<PluslyErrorWidget> createState() => _PluslyErrorWidgetState();
 }
 
-class _FluffyChatErrorWidgetState extends State<FluffyChatErrorWidget> {
+class _PluslyErrorWidgetState extends State<PluslyErrorWidget> {
   static final Set<String> knownExceptions = {};
   @override
   void initState() {
