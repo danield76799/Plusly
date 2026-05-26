@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/feature_flags.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/settings_notifications/push_rule_extensions.dart';
@@ -144,6 +145,18 @@ class SettingsNotificationsView extends StatelessWidget {
                                 : () => controller.registerPush(),
                             icon: const Icon(Icons.notifications_active),
                             label: Text(L10n.of(context).enable),
+                          ),
+                        ),
+                        const ListDivider(),
+                        // 🆕 Feature flag switch voor nieuw push systeem
+                        ListTile(
+                          title: const Text('Nieuw Push Systeem'),
+                          subtitle: const Text('Experimentele push architectuur (herstart vereist)'),
+                          trailing: Switch.adaptive(
+                            value: FeatureFlags.useNewPushSystem,
+                            onChanged: controller.isLoading
+                                ? null
+                                : (value) => controller.toggleNewPushSystem(value),
                           ),
                         ),
                         const ListDivider(),
