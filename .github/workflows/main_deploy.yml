@@ -166,8 +166,9 @@ jobs:
         working-directory: android
         run: bundle exec fastlane deploy_internal_test
 
-      # === GITHUB RELEASE ===
+      # === GITHUB RELEASE (failsafe — codeload sometimes flaky) ===
       - name: Create Release
+        continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
