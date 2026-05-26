@@ -1,12 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/push_provider.dart';
 import '../domain/push_state.dart';
 import '../data/push_provider_factory.dart';
+import '../../../utils/push_helper.dart';
+import '../../../utils/notification_background_handler.dart';
 
 /// Centrale controller voor push notifications.
 ///
@@ -27,17 +30,30 @@ import '../data/push_provider_factory.dart';
 class PushController extends ChangeNotifier {
   final SharedPreferences _store;
   final List<Client> _clients;
+  final FlutterLocalNotificationsPlugin _notificationsPlugin;
 
   PushState _state = const PushState.initial();
   PushProvider? _activeProvider;
+  String? _activeRoomId;
+  Client? _activeClient;
 
-  PushController(this._store, this._clients);
+  PushController(
+    this._store,
+    this._clients, {
+    FlutterLocalNotificationsPlugin? notificationsPlugin,
+  }) : _notificationsPlugin = notificationsPlugin ?? FlutterLocalNotificationsPlugin();
 
   // ─── Public API ───
 
   PushState get state => _state;
   PushProvider? get activeProvider => _activeProvider;
   bool get isActive => _state.isActive;
+
+  /// Set active room/client for foreground detection
+  void setActiveRoom(String? roomId, Client? client) {
+    _activeRoomId = roomId;
+    _activeClient = client;
+  }
 
   /// Initialiseer push met automatische fallback:
   /// 1. UnifiedPush (als beschikbaar)
@@ -118,12 +134,48 @@ class PushController extends ChangeNotifier {
   void _handleMessage(PushMessage message) {
     Logs().v('[PushController] Message received: $message');
 
-    // TODO: Deduplicatie
-    // TODO: Check foreground room
-    // TODO: Toon lokale notificatie
+    // Deduplicatie: check of we deze al hebben gehad
+    // TODO: Implementeer deduplicatie cache
 
-    // Voor nu: alleen loggen (shadow mode)
-    // De legacy BackgroundPush handelt het echte werk af
+    // Converteer naar Matrix PushNotification format
+    final notification = PushNotification.fromJson({
+      'room_id': message.roomId,
+      'event_id': message.eventId,
+      'sender': message.sender,
+      'content': {'body': message.body},
+      'counts': {'unread': message.unreadCount},
+      'devices': [],
+    });
+
+    // Gebruik bestaande PushHelper voor notificatie weergave
+    PushHelper.pushHelper(
+      notification,
+      clients: _clients,
+      activeRoomId: _activeRoomId,
+      activeClient: _activeClient,
+      flutterLocalNotificationsPlugin: _notificationsPlugin,
+      instance: message.clientName,
+    );
+  }
+
+  /// Initialiseer lokale notificaties (voor Android/iOS)
+  Future<void> initializeLocalNotifications() async {
+    await _notificationsPlugin.initialize(
+      settings: const InitializationSettings(
+        android: AndroidInitializationSettings('notifications_icon'),
+        iOS: DarwinInitializationSettings(),
+      ),
+      onDidReceiveNotificationResponse: _onNotificationTap,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+    );
+  }
+
+  void _onNotificationTap(NotificationResponse response) {
+    notificationTap(
+      response,
+      clients: _clients,
+      router: null, // Router wordt gezet door caller
+    );
   }
 
   /// Cleanup

@@ -209,6 +209,15 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     return route.split('/')[2];
   }
 
+  /// 🆕 Update push controller met huidige room (voor foreground detection)
+  void _updatePushActiveRoom() {
+    if (_pushController != null) {
+      final roomId = activeRoomId;
+      final client = roomId != null ? client : null;
+      _pushController!.setActiveRoom(roomId, client);
+    }
+  }
+
   final linuxNotifications = PlatformInfos.isLinux
       ? NotificationsClient()
       : null;
@@ -368,6 +377,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       // NIEUWE push architectuur
       Logs().i('[Matrix] Using NEW push system (feature flag ON)');
       _pushController = PushController(widget.store, widget.clients);
+      await _pushController!.initializeLocalNotifications();
       await _pushController!.initialize();
 
       // Legacy push is UITGESCHAKELD — nieuwe controller handelt alles af
@@ -459,6 +469,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     client.httpClient.close();
 
     linuxNotifications?.close();
+
+    // 🆕 Cleanup nieuwe push controller
+    _pushController?.dispose();
 
     super.dispose();
   }
