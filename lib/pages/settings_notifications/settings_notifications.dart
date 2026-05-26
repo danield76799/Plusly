@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/app_config.dart';
-import 'package:Pulsly/config/feature_flags.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/settings_notifications/push_rule_extensions.dart';
 import 'package:Pulsly/utils/localized_exception_extension.dart';
@@ -129,50 +128,6 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(L10n.of(context).pushRegistrationFailed(e.toLocalizedString(context))),
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-  }
-
-  void toggleNewPushSystem(bool value) async {
-    setState(() {
-      isLoading = true;
-    });
-    try {
-      FeatureFlags.useNewPushSystem = value;
-      
-      // 🆕 Directe switch zonder herstart!
-      final matrix = Matrix.of(context);
-      if (value) {
-        // Activeer nieuwe push
-        await matrix.initNewPushSystem();
-      } else {
-        // Activeer legacy push
-        await matrix.initLegacyPushSystem();
-      }
-      
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            value 
-              ? 'Nieuw push systeem geactiveerd'
-              : 'Legacy push systeem geactiveerd',
-          ),
-        ),
-      );
-    } catch (e, s) {
-      Logs().e('[Push] Failed to toggle push system', e, s);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Fout bij wisselen push systeem: $e'),
         ),
       );
     } finally {
