@@ -188,7 +188,14 @@ class FirebasePushProvider implements PushProvider {
 
   Future<void> _setupPusher(Client client, String token) async {
     try {
-      final gatewayUrl = AppSettings.pushNotificationsGatewayUrl.value;
+      // Gebruik de geconfigureerde gateway URL, of default naar de UP-gateway
+      // (die ondersteunt ook FCM tokens)
+      const defaultGateway =
+          'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify';
+      final configured = AppSettings.pushNotificationsGatewayUrl.value;
+      final gatewayUrl = configured.isNotEmpty && configured != defaultGateway
+          ? configured
+          : defaultGateway;
       final pusherFormat = AppSettings.pushNotificationsPusherFormat.value;
       final appId = '${AppConfig.appId}.data_message';
 
