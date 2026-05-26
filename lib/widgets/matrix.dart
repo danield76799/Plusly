@@ -32,7 +32,8 @@ import '../config/feature_flags.dart';
 import '../config/setting_keys.dart';
 import '../features/push/push_module.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
-import '../utils/account_bundles.dart';
+import 'package:Pulsly/widgets/plusly_app.dart';
+import '../features/push/presentation/notification_router.dart';
 import '../utils/background_push.dart';
 import 'local_notifications_extension.dart';
 
@@ -376,6 +377,13 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     if (FeatureFlags.useNewPushSystem) {
       // NIEUWE push architectuur
       Logs().i('[Matrix] Using NEW push system (feature flag ON)');
+      
+      // Initialiseer notification router met router en clients
+      NotificationRouter.initialize(
+        router: PluslyApp.router,
+        clients: widget.clients,
+      );
+      
       _pushController = PushController(widget.store, widget.clients);
       await _pushController!.initializeLocalNotifications();
       await _pushController!.initialize();

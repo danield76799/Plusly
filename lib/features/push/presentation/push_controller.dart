@@ -9,7 +9,7 @@ import '../domain/push_provider.dart';
 import '../domain/push_state.dart';
 import '../data/push_provider_factory.dart';
 import '../../../utils/push_helper.dart';
-import '../../../utils/notification_background_handler.dart';
+import 'notification_router.dart';
 
 /// Centrale controller voor push notifications.
 ///
@@ -165,16 +165,8 @@ class PushController extends ChangeNotifier {
         android: AndroidInitializationSettings('notifications_icon'),
         iOS: DarwinInitializationSettings(),
       ),
-      onDidReceiveNotificationResponse: _onNotificationTap,
-      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
-    );
-  }
-
-  void _onNotificationTap(NotificationResponse response) {
-    notificationTap(
-      response,
-      clients: _clients,
-      router: null, // Router wordt gezet door caller
+      onDidReceiveNotificationResponse: NotificationRouter.onTap,
+      onDidReceiveBackgroundNotificationResponse: NotificationRouter.onBackgroundTap,
     );
   }
 
@@ -184,6 +176,7 @@ class PushController extends ChangeNotifier {
     _activeProvider?.unregister();
     _activeProvider?.dispose();
     _activeProvider = null;
+    NotificationRouter.dispose();
     super.dispose();
   }
 
