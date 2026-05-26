@@ -65,8 +65,8 @@ jobs:
 
       - name: Generate assets
         run: |
-          flutter pub run flutter_launcher_icons:main
-          flutter pub run flutter_native_splash:create
+          dart run flutter_launcher_icons:main
+          dart run flutter_native_splash:create
 
       # NOTE: key.properties and keystore are already in the repo
       # No need for secrets - signing is configured in android/key.properties
