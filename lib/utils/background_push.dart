@@ -1,7 +1,7 @@
 /*
  *   Famedly
  *   Copyright (C) 2020, 2021 Famedly GmbH
- *   Copyright (C) 2021 Fluffychat
+ *   Copyright (C) 2021-2026 Plusly
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU Affero General Public License as
@@ -36,7 +36,7 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/main.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/push_helper.dart';
-import 'package:Pulsly/widgets/fluffy_chat_app.dart';
+import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import '../widgets/matrix.dart';
@@ -83,7 +83,7 @@ class BackgroundPush {
       onDidReceiveNotificationResponse: (response) => notificationTap(
         response,
         clients: clients,
-        router: FluffyChatApp.router,
+        router: PluslyApp.router,
         l10n: l10n,
       ),
       onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
@@ -98,7 +98,7 @@ class BackgroundPush {
           await notificationTap(
             NotificationResponseJson.fromJsonString(message),
             clients: clients,
-            router: FluffyChatApp.router,
+            router: PluslyApp.router,
             l10n: l10n,
           );
         } catch (e, s) {
@@ -117,7 +117,7 @@ class BackgroundPush {
             await notificationTap(
               NotificationResponseJson.fromJsonString(message),
               clients: clients,
-              router: FluffyChatApp.router,
+              router: PluslyApp.router,
               l10n: l10n,
             );
           } catch (e, s) {
@@ -390,7 +390,7 @@ class BackgroundPush {
         notificationTap(
           response,
           clients: clients,
-          router: FluffyChatApp.router,
+          router: PluslyApp.router,
           l10n: l10n,
         );
       }
@@ -492,7 +492,7 @@ class BackgroundPush {
     } else {
       // Multiple distributors: show a picker dialog
       final dialogContext =
-          FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
+          PluslyApp.router.routerDelegate.navigatorKey.currentContext ??
           matrix!.context;
 
       if (!dialogContext.mounted) {

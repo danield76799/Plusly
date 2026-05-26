@@ -21,13 +21,13 @@ import '../utils/custom_scroll_behaviour.dart';
 import '../utils/scheduler_service.dart';
 import 'matrix.dart';
 
-class FluffyChatApp extends StatefulWidget {
+class PluslyApp extends StatefulWidget {
   final Widget? testWidget;
   final List<Client> clients;
   final String? pincode;
   final SharedPreferences store;
 
-  const FluffyChatApp({
+  const PluslyApp({
     super.key,
     this.testWidget,
     required this.clients,
@@ -55,10 +55,10 @@ class FluffyChatApp extends StatefulWidget {
   );
 
   @override
-  State<FluffyChatApp> createState() => _FluffyChatAppState();
+  State<PluslyApp> createState() => _PluslyAppState();
 }
 
-class _FluffyChatAppState extends State<FluffyChatApp> {
+class _PluslyAppState extends State<PluslyApp> {
   // final _androidSystemFontPlugin = AndroidSystemFont(); // DISABLED
 
   @override
@@ -125,7 +125,7 @@ class _FluffyChatAppState extends State<FluffyChatApp> {
             scrollBehavior: CustomScrollBehavior(),
             localizationsDelegates: L10n.localizationsDelegates,
             supportedLocales: L10n.supportedLocales,
-            routerConfig: FluffyChatApp.router,
+            routerConfig: PluslyApp.router,
             builder: (context, child) => AppLockWidget(
               pincode: widget.pincode,
               clients: widget.clients,

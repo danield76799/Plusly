@@ -370,7 +370,7 @@ class PushHelper {
           ? null
           : <AndroidNotificationAction>[
               AndroidNotificationAction(
-                FluffyChatNotificationActions.reply.name,
+                PluslyNotificationActions.reply.name,
                 l10n!.reply,
                 inputs: [
                   AndroidNotificationActionInput(label: l10n!.writeAMessage),
@@ -380,7 +380,7 @@ class PushHelper {
                 semanticAction: SemanticAction.reply,
               ),
               AndroidNotificationAction(
-                FluffyChatNotificationActions.markAsRead.name,
+                PluslyNotificationActions.markAsRead.name,
                 l10n!.markAsRead,
                 semanticAction: SemanticAction.markAsRead,
               ),
