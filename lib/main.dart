@@ -17,7 +17,6 @@ import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/error_widget.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'config/setting_keys.dart';
 import 'utils/background_push.dart';
 import 'widgets/plusly_app.dart';
@@ -84,14 +83,6 @@ void main() async {
 }
 
 Future<void> _initializeApp() async {
-  // 🆕 Initialiseer Firebase (vereist voor firebase_core 4.x+)
-  try {
-    await Firebase.initializeApp();
-    Logs().i('[Firebase] Initialized successfully');
-  } catch (e, s) {
-    Logs().w('[Firebase] Init failed (non-fatal): $e', e, s);
-  }
-
   // 🆕 Initialiseer feature flags vroeg in de startup
   await FeatureFlags.init();
   Logs().i('[FeatureFlags] Initialized. useNewPushSystem=${FeatureFlags.useNewPushSystem}');
