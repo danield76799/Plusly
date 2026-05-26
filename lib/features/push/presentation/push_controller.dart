@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -173,6 +174,15 @@ class PushController extends ChangeNotifier {
       onDidReceiveNotificationResponse: NotificationRouter.onTap,
       onDidReceiveBackgroundNotificationResponse: NotificationRouter.onBackgroundTap,
     );
+
+    // Vraag notificatie permission op Android 13+ (API 33)
+    if (Platform.isAndroid) {
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.requestNotificationsPermission();
+    }
   }
 
   /// Her-registreer bij alle ingelogde clients (bv. na login).
