@@ -54,6 +54,7 @@ docs/tailwind.css
 android/key.jks
 android/keys.json
 android/Gemfile.lock
+android/app/google-services.json
 lib/l10n_old
 ios/Flutter/.last_build_id
 ios/Podfile.lock

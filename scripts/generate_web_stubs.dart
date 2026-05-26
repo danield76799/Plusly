@@ -15,7 +15,6 @@ final packagesToStub = [
   'video_compress',
   'firebase_core',
   'firebase_messaging',
-  'fcm_shared_isolate',
   'unifiedpush',
   'unifiedpush_ui',
   'local_auth',

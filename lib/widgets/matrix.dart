@@ -298,8 +298,12 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         // Wait for full initialization before setting up push
         Future.delayed(const Duration(seconds: 3), () {
           Logs().i('[Matrix] Login complete, setting up push notifications...');
-          backgroundPush?.upAction = false; // Reset UP action flag
+          backgroundPush?.upAction = false;
           backgroundPush?.setupPush(widget.clients);
+          // Ook nieuw systeem triggeren (pusher registreren nu client ingelogd is)
+          if (FeatureFlags.useNewPushSystem) {
+            _pushController?.reRegister();
+          }
         });
       }
       final loggedInWithMultipleClients = widget.clients.length > 1;
@@ -398,49 +402,17 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     
     // Initialiseer legacy
     Logs().i('[Matrix] Runtime switch to LEGACY push system');
-    backgroundPush = BackgroundPush(
-      this,
-      onFcmError: (errorMsg, {Uri? link}) async {
-        final result = await showOkCancelAlertDialog(
-          context:
-              PluslyApp
-                  .router
-                  .routerDelegate
-                  .navigatorKey
-                  .currentContext ??
-              context,
-          title: L10n.of(context).pushNotificationsNotAvailable,
-          message: errorMsg,
-          okLabel: link == null
-              ? L10n.of(context).ok
-              : L10n.of(context).learnMore,
-          cancelLabel: L10n.of(context).doNotShowAgain,
-        );
-        if (result == OkCancelResult.ok && link != null) {
-          launchUrlString(
-            link.toString(),
-            mode: LaunchMode.externalApplication,
-          );
-        }
-        if (result == OkCancelResult.cancel) {
-          AppSettings.showNoGoogle.setItem(true);
-        }
-      },
-    );
+    backgroundPush = BackgroundPush(this);
     backgroundPush?.setupPush(widget.clients);
   }
 
   Future<void> _initPush() async {
     if (!PlatformInfos.isMobile) return;
 
-    // 🆕 Feature flag check: nieuw vs legacy push systeem
     await FeatureFlags.init();
 
-    if (FeatureFlags.useNewPushSystem) {
-      await initNewPushSystem();
-    } else {
-      await initLegacyPushSystem();
-    }
+    // 🆕 UP-only push systeem (geen legacy/FCM meer)
+    await initLegacyPushSystem();
   }
 
   void createVoipPlugin() async {
