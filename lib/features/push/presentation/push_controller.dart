@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../domain/push_provider.dart';
 import '../domain/push_state.dart';
 import '../data/push_provider_factory.dart';
+import '../domain/deduplicator.dart';
 import '../../../utils/push_helper.dart';
 import 'notification_router.dart';
 
@@ -36,6 +37,7 @@ class PushController extends ChangeNotifier {
   PushProvider? _activeProvider;
   String? _activeRoomId;
   Client? _activeClient;
+  final _deduplicator = PushDeduplicator();
 
   PushController(
     this._store,
@@ -135,7 +137,10 @@ class PushController extends ChangeNotifier {
     Logs().v('[PushController] Message received: $message');
 
     // Deduplicatie: check of we deze al hebben gehad
-    // TODO: Implementeer deduplicatie cache
+    if (_deduplicator.isDuplicate(message.eventId)) {
+      Logs().v('[PushController] Duplicate message ignored: ${message.eventId}');
+      return;
+    }
 
     // Converteer naar Matrix PushNotification format
     final notification = PushNotification.fromJson({
