@@ -118,7 +118,7 @@ class PushHelper {
 
       final event = await client.getEventByPushNotification(
         notification,
-        storeInDatabase: helper.isBackgroundMessage,
+        storeInDatabase: helper.isBackgroundMessage ?? false,
       );
 
       if (event == null) {
