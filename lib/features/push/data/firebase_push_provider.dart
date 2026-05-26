@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,6 +19,8 @@ import '../../../utils/platform_infos.dart';
 /// Moet top-level zijn met @pragma('vm:entry-point') voor firebase_messaging >=15.x.
 @pragma('vm:entry-point')
 Future<void> firebaseBackgroundMessageHandler(RemoteMessage message) async {
+  // Firebase moet expliciet geinitialiseerd worden in background isolate
+  await Firebase.initializeApp();
   Logs().v('[FirebasePush] Background message: ${message.messageId}');
   // Background messages worden afgehandeld door het systeem
   // We kunnen hier geen stream gebruiken omdat dit in een isolate draait
