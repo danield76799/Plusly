@@ -402,35 +402,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     
     // Initialiseer legacy
     Logs().i('[Matrix] Runtime switch to LEGACY push system');
-    backgroundPush = BackgroundPush(
-      this,
-      onFcmError: (errorMsg, {Uri? link}) async {
-        final result = await showOkCancelAlertDialog(
-          context:
-              PluslyApp
-                  .router
-                  .routerDelegate
-                  .navigatorKey
-                  .currentContext ??
-              context,
-          title: L10n.of(context).pushNotificationsNotAvailable,
-          message: errorMsg,
-          okLabel: link == null
-              ? L10n.of(context).ok
-              : L10n.of(context).learnMore,
-          cancelLabel: L10n.of(context).doNotShowAgain,
-        );
-        if (result == OkCancelResult.ok && link != null) {
-          launchUrlString(
-            link.toString(),
-            mode: LaunchMode.externalApplication,
-          );
-        }
-        if (result == OkCancelResult.cancel) {
-          AppSettings.showNoGoogle.setItem(true);
-        }
-      },
-    );
+    backgroundPush = BackgroundPush(this);
     backgroundPush?.setupPush(widget.clients);
   }
 

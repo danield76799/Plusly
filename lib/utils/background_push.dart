@@ -23,7 +23,6 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -43,18 +42,12 @@ import '../config/setting_keys.dart';
 import '../widgets/matrix.dart';
 import 'platform_infos.dart';
 
-class NoTokenException implements Exception {
-  String get cause => 'Cannot get firebase token';
-}
-
 class BackgroundPush {
   static BackgroundPush? _instance;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   List<Client> clients;
   MatrixState? matrix;
-  String? _fcmToken;
-  void Function(String errorMsg, {Uri? link})? onFcmError;
   L10n? l10n;
 
   Future<void> loadLocale() async {
@@ -65,9 +58,6 @@ class BackgroundPush {
   }
 
   final pendingTests = <String, Completer<void>>{};
-  bool firebaseEnabled = false;
-
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
 
   DateTime? lastReceivedPush;
 
@@ -90,7 +80,6 @@ class BackgroundPush {
   }
 
   void _init() async {
-    firebaseEnabled = true;
     try {
       mainIsolateReceivePort?.listen((message) async {
         try {
@@ -126,18 +115,6 @@ class BackgroundPush {
       }
       await initialiseLocalNotifications();
       Logs().v('Flutter Local Notifications initialized');
-      FirebaseMessaging.onMessage.listen((message) {
-        PushHelper.pushHelper(
-          PushNotification.fromJson(
-            message.data is Map ? Map<String, dynamic>.from(Map.from(message.data)) : <String, dynamic>{},
-          ),
-          clients: clients,
-          l10n: l10n,
-          activeRoomId: matrix?.activeRoomId,
-          activeClient: clients.isNotEmpty ? clients.first : null,
-          flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-        );
-      });
       if (Platform.isAndroid) {
         await UnifiedPush.initialize(
           onNewEndpoint: _newUpEndpoint,
@@ -159,14 +136,9 @@ class BackgroundPush {
     return _instance ??= BackgroundPush._([client]);
   }
 
-  factory BackgroundPush(
-    MatrixState matrix, {
-    final void Function(String errorMsg, {Uri? link})? onFcmError,
-  }) {
+  factory BackgroundPush(MatrixState matrix) {
     final instance = BackgroundPush.clientOnly(matrix.client);
     instance.matrix = matrix;
-    // ignore: prefer_initializing_formals
-    instance.onFcmError = onFcmError;
     return instance;
   }
 
@@ -195,9 +167,6 @@ class BackgroundPush {
     bool useDeviceSpecificAppId = false,
     required Client client,
   }) async {
-    if (PlatformInfos.isIOS) {
-      await _fcm.requestPermission();
-    }
     if (PlatformInfos.isAndroid) {
       _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
@@ -332,14 +301,6 @@ class BackgroundPush {
       Logs().w("SetupPush early return - not logged in or not mobile");
       return;
     }
-    // Do not setup unifiedpush if this has been initialized by
-    // an unifiedpush action - DISABLED to allow manual re-registration
-    /*
-    if (upAction) {
-      Logs().w("SetupPush early return - upAction is true");
-      return;
-    }
-    */
     Logs().i("Setting up push notifications...");
     if (!PlatformInfos.isIOS &&
         (await UnifiedPush.getDistributors()).isNotEmpty) {
@@ -368,7 +329,7 @@ class BackgroundPush {
       }
       await setupUp();
     } else {
-      await setupFirebase();
+      Logs().i('[Push] No UnifiedPush distributors available on this device');
     }
 
     // ignore: unawaited_futures
@@ -391,49 +352,6 @@ class BackgroundPush {
         );
       }
     });
-  }
-
-  Future<void> _noFcmWarning() async {
-    if (matrix == null) {
-      return;
-    }
-    if (AppSettings.showNoGoogle.value) {
-      return;
-    }
-    await loadLocale();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (PlatformInfos.isAndroid) {
-        onFcmError?.call(
-          l10n!.noGoogleServicesWarning,
-          link: Uri.parse(AppConfig.enablePushTutorial),
-        );
-        return;
-      }
-      onFcmError?.call(l10n!.oopsPushError);
-    });
-  }
-
-  Future<void> setupFirebase() async {
-    Logs().v('Setup firebase');
-    if (_fcmToken?.isEmpty ?? true) {
-      try {
-        _fcmToken = await _fcm.getToken();
-        if (_fcmToken == null) throw ('PushToken is null');
-      } catch (e, s) {
-        Logs().w('[Push] cannot get token', e, e is String ? null : s);
-        await _noFcmWarning();
-        return;
-      }
-    }
-    for (final client in clients) {
-      if (client.isLogged()) {
-        await setupPusher(
-          gatewayUrl: AppSettings.pushNotificationsGatewayUrl.value,
-          token: _fcmToken,
-          client: client,
-        );
-      }
-    }
   }
 
   Future<void> setupUp() async {
@@ -594,16 +512,10 @@ class BackgroundPush {
       );
     }
     Logs().i('[Push] UnifiedPush using endpoint $endpoint');
-    final oldTokens = <String?>{};
-    try {
-      final fcmToken = await _fcm.getToken();
-      oldTokens.add(fcmToken);
-    } catch (_) {}
     final client = clientFromInstance(i, clients) ?? clients.first;
     await setupPusher(
       gatewayUrl: endpoint,
       token: newEndpoint,
-      oldTokens: oldTokens,
       useDeviceSpecificAppId: true,
       client: client,
     );
