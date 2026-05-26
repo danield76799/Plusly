@@ -7,6 +7,7 @@ import '../domain/push_provider.dart';
 import '../domain/push_state.dart';
 import 'unified_push_provider.dart';
 import 'firebase_push_provider.dart';
+import '../../../config/feature_flags.dart';
 
 /// Factory die het juiste push provider kiest met fallback logica:
 ///
@@ -42,17 +43,19 @@ class PushProviderFactory {
       }
     }
 
-    // ─── Stap 2: Fallback naar Firebase ───
-    final fcm = FirebasePushProvider(_store, _clients);
-    final fcmInitialized = await fcm.initialize();
+    // ─── Stap 2: Fallback naar Firebase (alleen als feature flag aan staat) ───
+    if (FeatureFlags.useFirebase) {
+      final fcm = FirebasePushProvider(_store, _clients);
+      final fcmInitialized = await fcm.initialize();
 
-    if (fcmInitialized) {
-      final token = await fcm.register();
-      if (token != null && fcm.isActive) {
-        return PushProviderResult.success(fcm, PushProviderType.firebase);
+      if (fcmInitialized) {
+        final token = await fcm.register();
+        if (token != null && fcm.isActive) {
+          return PushProviderResult.success(fcm, PushProviderType.firebase);
+        }
       }
+      fcm.dispose();
     }
-    fcm.dispose();
 
     // ─── Stap 3: Niets werkte ───
     return PushProviderResult.failure('Geen push provider beschikbaar');
