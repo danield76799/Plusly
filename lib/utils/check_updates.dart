@@ -165,8 +165,11 @@ bool isNewerVersion(String latest, String current) {
   latest = latest.startsWith('v') ? latest.substring(1) : latest;
   current = current.startsWith('v') ? current.substring(1) : current;
 
-  // Strip build metadata (+929) from current version for comparison
-  // e.g., "1.4.1+929" -> "1.4.1"
+  // Strip build metadata (+NNN) from both versions for comparison
+  final latestPlusIndex = latest.indexOf('+');
+  if (latestPlusIndex != -1) {
+    latest = latest.substring(0, latestPlusIndex);
+  }
   final currentPlusIndex = current.indexOf('+');
   if (currentPlusIndex != -1) {
     current = current.substring(0, currentPlusIndex);
