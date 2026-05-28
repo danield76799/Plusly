@@ -93,6 +93,5 @@ class PushMessage {
 
 enum PushProviderType {
   unifiedPush,
-  firebase,
   none,
 }

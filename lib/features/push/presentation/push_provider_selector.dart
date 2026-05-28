@@ -8,8 +8,8 @@ import 'push_controller.dart';
 
 /// Widget voor het selecteren van de push provider in settings.
 ///
-/// Toont de huidige status en laat de gebruiker switchen tussen
-/// UnifiedPush (Android) en Firebase Cloud Messaging.
+/// Toont de huidige status en laat de gebruiker UnifiedPush configureren.
+/// Alleen UnifiedPush — geen Firebase.
 class PushProviderSelector extends StatelessWidget {
   final PushController controller;
 
@@ -35,15 +35,6 @@ class PushProviderSelector extends StatelessWidget {
                 isSelected: state.activeProvider == PushProviderType.unifiedPush,
                 onTap: () => controller.switchProvider(PushProviderType.unifiedPush),
                 isAvailable: Platform.isAndroid,
-              ),
-              _buildProviderTile(
-                context,
-                title: 'Firebase Cloud Messaging',
-                subtitle: 'Google push dienst',
-                icon: Icons.cloud,
-                isSelected: state.activeProvider == PushProviderType.firebase,
-                onTap: () => controller.switchProvider(PushProviderType.firebase),
-                isAvailable: true,
               ),
             ],
             if (state.isFailed)

@@ -53,7 +53,6 @@ class PushProviderFactory {
     switch (type) {
       case PushProviderType.unifiedPush:
         return UnifiedPushProvider(_store, _clients);
-      case PushProviderType.firebase:
       case PushProviderType.none:
         throw ArgumentError('Cannot create provider for type "$type"');
     }

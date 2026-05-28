@@ -54,22 +54,6 @@ abstract class FeatureFlags {
   }
 
   // ─────────────────────────────────────────────
-  // Firebase Feature Flag
-  // ─────────────────────────────────────────────
-
-  static const String _kUseFirebase = 'ff_use_firebase';
-
-  /// Firebase Cloud Messaging (default: false = alleen UP!)
-  /// Overslaan van Firebase initialisatie in nieuwe push systeem.
-  static bool get useFirebase {
-    return _requirePrefs.getBool(_kUseFirebase) ?? false;
-  }
-
-  static set useFirebase(bool value) {
-    _requirePrefs.setBool(_kUseFirebase, value);
-  }
-
-  // ─────────────────────────────────────────────
   // Debug / Test helpers
   // ─────────────────────────────────────────────
 
@@ -88,7 +72,6 @@ abstract class FeatureFlags {
   /// Reset alle feature flags (voor testing)
   static Future<void> resetAll() async {
     await _requirePrefs.remove(_kUseNewPush);
-    await _requirePrefs.remove(_kUseFirebase);
     await _requirePrefs.remove(_kShadowMode);
   }
 }
