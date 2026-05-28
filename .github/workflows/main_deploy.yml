@@ -74,93 +74,83 @@ jobs:
           echo "full_version=${VERSION_NAME}+${BUILD_NUMBER}" >> $GITHUB_OUTPUT
           echo "Using version ${VERSION_NAME}+${BUILD_NUMBER}"
 
-      # === SIGNING SETUP ===
+      # === SIGNING SETUP (optional — uses debug signing if secrets missing) ===
       - name: Setup signing
+        id: signing
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
-          cat > android/key.properties << EOF
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+            cat > android/key.properties << EOF
           storePassword=$KEYSTORE_PASSWORD
           keyPassword=$KEY_PASSWORD
           keyAlias=$KEY_ALIAS
           storeFile=upload-keystore.jks
           EOF
+            echo "has_signing=true" >> $GITHUB_OUTPUT
+            echo "Signing configured"
+          else
+            echo "has_signing=false" >> $GITHUB_OUTPUT
+            echo "WARNING: No signing secrets found — using debug signing"
+          fi
 
-      # === APK BUILD (split per architecture) ===
-      - name: Build Android APK (32-bit)
-        if: always()
+      # === APK BUILD (universal APK — works on all devices) ===
+      - name: Build Android APK (universal)
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
-          flutter build apk --release --target-platform android-arm --split-per-abi --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
+          flutter build apk --release --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
           mkdir -p output
+          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-universal-release.apk || true
+
+      # === APK BUILD (split per architecture — smaller files) ===
+      - name: Build Android APK (split ABIs)
+        if: always()
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+        run: |
+          flutter build apk --release --split-per-abi --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
-
-      - name: Build Android APK (64-bit)
-        if: always()
-        env:
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
-        run: |
-          flutter build apk --release --target-platform android-arm64 --split-per-abi --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
-
-      - name: Build Android APK (x86_64)
-        if: always()
-        env:
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
-        run: |
-          flutter build apk --release --target-platform android-x64 --split-per-abi --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
           cp build/app/outputs/flutter-apk/app-x86_64-release.apk output/plusly-x86_64-release.apk || true
 
-      # === AAB BUILD ===
+      # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
-          flutter build appbundle --release --target-platform android-arm,android-arm64,android-x64 --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
-          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
+          flutter build appbundle --release --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
+          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab || true
 
-      # === UPLOAD ARTIFACTS ===
-      - name: Upload APK (32-bit)
+      # === VERIFY OUTPUTS ===
+      - name: List build outputs
+        run: |
+          echo "=== Build outputs ==="
+          ls -la output/ || echo "No output directory"
+          echo "=== APK files ==="
+          find build/app/outputs -name "*.apk" -type f || echo "No APK files found"
+
+      # === UPLOAD ARTIFACTS (always — even if release fails) ===
+      - name: Upload all artifacts
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: plusly-armeabi-v7a
-          path: output/plusly-armeabi-v7a-release.apk
-          retention-days: 7
+          name: plusly-build-${{ steps.bump.outputs.full_version }}
+          path: output/*
+          retention-days: 30
 
-      - name: Upload APK (64-bit)
-        uses: actions/upload-artifact@v4
-        with:
-          name: plusly-arm64-v8a
-          path: output/plusly-arm64-v8a-release.apk
-          retention-days: 7
-
-      - name: Upload APK (x86_64)
-        uses: actions/upload-artifact@v4
-        with:
-          name: plusly-x86_64
-          path: output/plusly-x86_64-release.apk
-          retention-days: 7
-
-      - name: Upload AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-aab
-          path: output/plusly-release.aab
-          retention-days: 7
-
-      # === PLAY STORE DEPLOY (optional) ===
+      # === PLAY STORE DEPLOY (optional — only if key exists) ===
       - name: Setup Play Store key
         id: playstore
         env:
           PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
         run: |
           if [ -n "$PLAYSTORE_DEPLOY_KEY" ]; then
-            echo "***PLAYSTORE_DEPLOY_KEY***" > android/keys.json
+            echo "$PLAYSTORE_DEPLOY_KEY" > android/keys.json
             echo "has_key=true" >> $GITHUB_OUTPUT
           else
             echo "has_key=false" >> $GITHUB_OUTPUT
@@ -178,19 +168,25 @@ jobs:
         working-directory: android
         run: bundle exec fastlane deploy_internal_test
 
-      # === GITHUB RELEASE (failsafe — codeload sometimes flaky) ===
+      # === GITHUB RELEASE ===
       - name: Create Release
-        continue-on-error: true
+        id: release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
           name: Plusly v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
-          files: |
-            output/plusly-armeabi-v7a-release.apk
-            output/plusly-arm64-v8a-release.apk
-            output/plusly-x86_64-release.apk
-            output/plusly-release.aab
+          files: output/*
           generate_release_notes: true
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # === NOTIFY ON FAILURE ===
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Build failed! Check logs above for details."
+          echo "Common causes:"
+          echo "  - Missing signing secrets (KEYSTORE_BASE64, etc.)"
+          echo "  - Flutter build errors"
+          echo "  - Dependency conflicts"
