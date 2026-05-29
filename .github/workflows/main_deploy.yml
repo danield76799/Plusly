@@ -133,9 +133,10 @@ jobs:
           ls -la output/ || echo "No output directory"
           echo "=== APK files ==="
           find build/app/outputs -name "*.apk" -type f || echo "No APK files found"
-          echo "=== AAB signature info ==="
-          BUILD_TOOLS_DIR=$(find $ANDROID_SDK_ROOT/build-tools -maxdepth 1 -type d | sort -V | tail -1)
-          $BUILD_TOOLS_DIR/apksigner verify -v build/app/outputs/bundle/release/app-release.aab || echo "AAB verification skipped"
+          echo "=== AAB files ==="
+          find build/app/outputs -name "*.aab" -type f || echo "No AAB files found"
+          echo "=== AAB size ==="
+          ls -lh build/app/outputs/bundle/release/app-release.aab || echo "AAB not found"
 
       # === UPLOAD ARTIFACTS (always — even if release fails) ===
       - name: Upload all artifacts
