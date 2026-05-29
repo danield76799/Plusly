@@ -150,7 +150,7 @@ jobs:
           PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
         run: |
           if [ -n "$PLAYSTORE_DEPLOY_KEY" ]; then
-            echo "$PLAYSTORE_DEPLOY_KEY" > android/keys.json
+            echo "$PLAYSTORE_DEPLOY_KEY" | base64 -d > android/keys.json
             echo "has_key=true" >> $GITHUB_OUTPUT
           else
             echo "has_key=false" >> $GITHUB_OUTPUT
