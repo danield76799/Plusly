@@ -32,7 +32,7 @@ class ChatListBottomNavbar extends StatelessWidget {
     final filterLambdas = {
       ActiveFilter.allChats: (Room room) => true,
       ActiveFilter.messages: (Room room) => room.isDirectChat,
-      ActiveFilter.groups: (Room room) => !room.isDirectChat,
+      ActiveFilter.groups: (Room room) => room.isSpace,
       ActiveFilter.unread: (Room room) => room.isUnread,
       ActiveFilter.favorites: (Room room) => false,
     };
