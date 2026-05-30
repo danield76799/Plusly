@@ -6,8 +6,6 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';
-import 'package:Pulsly/pages/chat_list/chat_list_bottom_navbar.dart';
-import 'package:Pulsly/pages/chat_list/chat_list_legacy_bottom_navbar.dart';
 import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/navigation_rail.dart';
@@ -56,99 +54,27 @@ class ChatListView extends StatelessWidget {
                 body: Stack(
                   children: [
                     ChatListViewBody(controller),
-                    if (client.rooms.isNotEmpty &&
-                        !controller.isSearchMode &&
-                        !AppSettings.useLegacyNavBar.value)
+                    if (!controller.isSearchMode &&
+                        controller.activeSpaceId == null)
                       Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: IgnorePointer(
-                          child: Container(
-                            height: 100,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  theme.colorScheme.surface.withValues(
-                                    alpha: 0,
-                                  ),
-                                  theme.colorScheme.surface,
-                                ],
-                              ),
-                            ),
+                        right: 16,
+                        bottom: 16,
+                        child: FloatingActionButton.extended(
+                          onPressed: () =>
+                              context.go('/rooms/newprivatechat'),
+                          icon: const Icon(
+                            Icons.chat_outlined,
+                            color: Colors.white,
                           ),
+                          label: Text(
+                            L10n.of(context).newChat,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          backgroundColor: const Color(0xFF49AFC2),
                         ),
                       ),
-                    SafeArea(
-                      child: Stack(
-                        children: [
-                          if (!controller.isSearchMode &&
-                              controller.activeSpaceId == null &&
-                              !AppSettings.useLegacyNavBar.value)
-                            Positioned(
-                              right: 16,
-                              bottom:
-                                  88, // 16dp above navbar (56dp height + 16dp margin + 16dp padding)
-                              child: Material(
-                                elevation: 6,
-                                borderRadius: BorderRadius.circular(16),
-                                child: FloatingActionButton.extended(
-                                  onPressed: () =>
-                                      context.go('/rooms/newprivatechat'),
-                                  icon: const Icon(
-                                    Icons.chat_outlined,
-                                    color: Colors.white,
-                                  ),
-                                  label: Text(
-                                    L10n.of(context).newChat,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                  backgroundColor: const Color(0xFF49AFC2),
-                                ),
-                              ),
-                            ),
-
-                          if (client.rooms.isNotEmpty &&
-                              !controller.isSearchMode &&
-                              !AppSettings.useLegacyNavBar.value)
-                            Positioned(
-                              left: 16,
-                              right: 16,
-                              bottom: 16,
-                              child: ChatListBottomNavbar(controller),
-                            ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
-                floatingActionButton:
-                    !controller.isSearchMode &&
-                        controller.activeSpaceId == null &&
-                        AppSettings.useLegacyNavBar.value
-                    ? FloatingActionButton.extended(
-                        onPressed: () => context.go('/rooms/newprivatechat'),
-                        icon: const Icon(
-                          Icons.chat_outlined,
-                          color: Colors.white,
-                        ),
-                        label: Text(
-                          L10n.of(context).newChat,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        backgroundColor: const Color(0xFF49AFC2),
-                      )
-                    : const SizedBox.shrink(),
-                floatingActionButtonLocation:
-                    FloatingActionButtonLocation.endFloat,
-                bottomNavigationBar:
-                    client.rooms.isNotEmpty &&
-                        !controller.isSearchMode &&
-                        AppSettings.useLegacyNavBar.value
-                    ? ChatListLegacyBottomNavbar(controller)
-                    : null,
               ),
             ),
           ),

@@ -19,17 +19,6 @@ class ChatListBottomNavbar extends StatelessWidget {
     final client = Matrix.of(context).client;
     final theme = Theme.of(context);
 
-    final spaces = client.rooms.where((r) => r.isSpace);
-    final spaceDelegateCandidates = <String, Room>{};
-
-    for (final space in spaces) {
-      for (final spaceChild in space.spaceChildren) {
-        final roomId = spaceChild.roomId;
-        if (roomId == null) continue;
-        spaceDelegateCandidates[roomId] = space;
-      }
-    }
-
     final filters = [
       if (AppSettings.separateChatTypes.value)
         ActiveFilter.messages
@@ -37,11 +26,7 @@ class ChatListBottomNavbar extends StatelessWidget {
         ActiveFilter.allChats,
       if (AppSettings.separateChatTypes.value) ActiveFilter.groups,
       ActiveFilter.unread,
-      if (spaceDelegateCandidates.isNotEmpty &&
-          !controller.widget.displayNavigationRail)
-        ActiveFilter.spaces,
-      if (AppSettings.enablePeopleTab.value) ActiveFilter.people,
-      ActiveFilter.favorites, // ⭐ Favorieten tab
+      ActiveFilter.favorites,
     ];
 
     final filterLambdas = {
@@ -49,9 +34,7 @@ class ChatListBottomNavbar extends StatelessWidget {
       ActiveFilter.messages: (Room room) => room.isDirectChat,
       ActiveFilter.groups: (Room room) => !room.isDirectChat,
       ActiveFilter.unread: (Room room) => room.isUnread,
-      ActiveFilter.spaces: (Room room) => false,
-      ActiveFilter.people: (Room room) => false,
-      ActiveFilter.favorites: (Room room) => false, // ⭐ Favorieten filter
+      ActiveFilter.favorites: (Room room) => false,
     };
 
     return Material(
