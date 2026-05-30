@@ -242,10 +242,7 @@ class ChatListController extends State<ChatList>
             _isBridgeTypeVisible(room);
       case .groups:
         return (room) =>
-            !room.isSpace &&
-            !room.isDirectChat &&
-            (AppSettings.showSpaceRoomsInGlobalList.value ||
-                room.spaceParents.isEmpty);
+            room.isSpace;
       case .unread:
         return (room) => room.isUnreadOrInvited && _isBridgeTypeVisible(room);
       case .favorites:
@@ -294,10 +291,7 @@ class ChatListController extends State<ChatList>
             (AppSettings.showSpaceRoomsInGlobalList.value ||
                 room.spaceParents.isEmpty);
       case .groups:
-        return !room.isSpace &&
-            !room.isDirectChat &&
-            (AppSettings.showSpaceRoomsInGlobalList.value ||
-                room.spaceParents.isEmpty);
+        return room.isSpace;
       case .unread:
         return room.isUnreadOrInvited;
       case .favorites:
