@@ -36,7 +36,7 @@ import '../../widgets/matrix.dart';
 
 enum PopupMenuAction { settings, invite, newGroup, newSpace, archive, syncDebug }
 
-enum ActiveFilter { allChats, messages, groups, unread, favorites }
+enum ActiveFilter { allChats, messages, groups, unread, favorites, people }
 
 enum SearchScope { local, public }
 
@@ -53,6 +53,8 @@ extension LocalizedActiveFilter on ActiveFilter {
         return L10n.of(context).groups;
       case ActiveFilter.favorites:
         return "Favorites";
+      case ActiveFilter.people:
+        return L10n.of(context).people;
     }
   }
 
@@ -69,6 +71,8 @@ extension LocalizedActiveFilter on ActiveFilter {
         return outline ? Icons.people_outline : Icons.people;
       case ActiveFilter.favorites:
         return Icons.star_outline;
+      case ActiveFilter.people:
+        return Icons.person_outline;
     }
   }
 }
@@ -246,6 +250,12 @@ class ChatListController extends State<ChatList>
         return (room) => room.isUnreadOrInvited && _isBridgeTypeVisible(room);
       case .favorites:
         return (room) => true; // Show all rooms for favorites tab
+      case .people:
+        return (room) =>
+            !room.isSpace &&
+            room.isDirectChat &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
     }
   }
 
@@ -292,6 +302,11 @@ class ChatListController extends State<ChatList>
         return room.isUnreadOrInvited;
       case .favorites:
         return true;
+      case .people:
+        return !room.isSpace &&
+            room.isDirectChat &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
     }
   }).toList();
 
