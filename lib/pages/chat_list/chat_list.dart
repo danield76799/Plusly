@@ -36,7 +36,7 @@ import '../../widgets/matrix.dart';
 
 enum PopupMenuAction { settings, invite, newGroup, newSpace, archive, syncDebug }
 
-enum ActiveFilter { allChats, messages, groups, unread, spaces, people, favorites }
+enum ActiveFilter { allChats, messages, groups, unread, favorites }
 
 enum SearchScope { local, public }
 
@@ -51,12 +51,8 @@ extension LocalizedActiveFilter on ActiveFilter {
         return L10n.of(context).unread;
       case ActiveFilter.groups:
         return L10n.of(context).groups;
-      case ActiveFilter.spaces:
-        return L10n.of(context).spaces;
-      case ActiveFilter.people:
-        return L10n.of(context).people;
       case ActiveFilter.favorites:
-        return "Favorieten"; // ⭐ Favorieten
+        return "Favorites";
     }
   }
 
@@ -71,12 +67,8 @@ extension LocalizedActiveFilter on ActiveFilter {
             : Icons.mark_unread_chat_alt;
       case ActiveFilter.groups:
         return outline ? Icons.people_outline : Icons.people;
-      case ActiveFilter.spaces:
-        return outline ? Icons.grid_view_outlined : Icons.grid_view_rounded;
-      case ActiveFilter.people:
-        return Icons.people_outline;
       case ActiveFilter.favorites:
-        return Icons.star_outline; // ⭐ Favorieten icoon
+        return Icons.star_outline;
     }
   }
 }
@@ -252,13 +244,8 @@ class ChatListController extends State<ChatList>
                 room.spaceParents.isEmpty);
       case .unread:
         return (room) => room.isUnreadOrInvited && _isBridgeTypeVisible(room);
-      case .spaces:
-        return (room) => room.isSpace;
-      case .people:
-        return (room) => false;
       case .favorites:
-        return (room) => true; // ⭐ Favorieten: toon alle rooms zodat je erop kunt klikken
-        return (room) => false; // ⭐ Favorieten: geen rooms tonen, aparte pagina
+        return (room) => true; // Show all rooms for favorites tab
     }
   }
 
@@ -303,12 +290,8 @@ class ChatListController extends State<ChatList>
                 room.spaceParents.isEmpty);
       case .unread:
         return room.isUnreadOrInvited;
-      case .spaces:
-        return room.isSpace;
-      case .people:
-        return false;
       case .favorites:
-        return true; // ⭐ Favorieten: toon placeholder
+        return true;
     }
   }).toList();
 
@@ -1019,9 +1002,6 @@ class ChatListController extends State<ChatList>
   void setActiveFilter(ActiveFilter filter) {
     setState(() {
       activeFilter = filter;
-      if (filter != .spaces && activeSpaceId != null) {
-        _activeSpaceId = null;
-      }
     });
   }
 
