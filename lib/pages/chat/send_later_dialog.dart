@@ -220,8 +220,8 @@ class SendLaterDialogState extends State<SendLaterDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Scheduled locally for ${_formatSelected()} (server does not support delayed sending — keep app open)'),
-            duration: const Duration(seconds: 5),
+            content: Text('Scheduled locally for ${_formatSelected()} ($e)'),
+            duration: const Duration(seconds: 8),
           ),
         );
         Navigator.of(context).pop();
