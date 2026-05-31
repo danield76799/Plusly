@@ -15,6 +15,7 @@ class ScheduledMessage {
   final String? replyEventId;
   final String? threadRootEventId;
   final String? threadLastEventId;
+  final String? delayId; // MSC4140 server-side delay ID
   bool isSent;
   bool isMissed;
   DateTime? missedAt;
@@ -28,6 +29,7 @@ class ScheduledMessage {
     this.replyEventId,
     this.threadRootEventId,
     this.threadLastEventId,
+    this.delayId,
     this.isSent = false,
     this.isMissed = false,
     this.missedAt,
@@ -43,6 +45,7 @@ class ScheduledMessage {
       replyEventId: json['reply_event_id'] as String?,
       threadRootEventId: json['thread_root_event_id'] as String?,
       threadLastEventId: json['thread_last_event_id'] as String?,
+      delayId: json['delay_id'] as String?,
       isSent: json['is_sent'] as bool? ?? false,
       isMissed: json['is_missed'] as bool? ?? false,
       missedAt: json['missed_at'] != null ? DateTime.parse(json['missed_at'] as String) : null,
@@ -59,6 +62,7 @@ class ScheduledMessage {
       'reply_event_id': replyEventId,
       'thread_root_event_id': threadRootEventId,
       'thread_last_event_id': threadLastEventId,
+      'delay_id': delayId,
       'is_sent': isSent,
       'is_missed': isMissed,
       'missed_at': missedAt?.toIso8601String(),
@@ -237,5 +241,36 @@ class ScheduledMessagesService {
     );
     
     return await _sendScheduledMessage(client, message);
+  }
+
+  /// Cancel a server-side scheduled message via MSC4140
+  static Future<bool> cancelScheduledMessage(Client client, String messageId) async {
+    final messages = await loadScheduledMessages();
+    final message = messages.firstWhere(
+      (m) => m.id == messageId,
+      orElse: () => throw Exception('Scheduled message not found: $messageId'),
+    );
+
+    if (message.delayId == null) {
+      Logs().w('No delayId for message $messageId — cannot cancel server-side');
+      await removeScheduledMessage(messageId);
+      return true;
+    }
+
+    try {
+      final room = client.getRoomById(message.roomId);
+      if (room == null) {
+        Logs().e('Room not found: ${message.roomId}');
+        await removeScheduledMessage(messageId);
+        return false;
+      }
+      await room.cancelDelayedEvent(message.delayId!);
+      await removeScheduledMessage(messageId);
+      Logs().d('Cancelled scheduled message $messageId (delayId: ${message.delayId})');
+      return true;
+    } catch (e) {
+      Logs().e('Failed to cancel scheduled message $messageId', e);
+      return false;
+    }
   }
 }
