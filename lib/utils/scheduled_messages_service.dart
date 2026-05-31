@@ -5,6 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:matrix/matrix.dart';
 
+import 'package:Pulsly/utils/matrix_sdk_extensions/msc4140_extension.dart';
+
 /// Model for a scheduled message
 class ScheduledMessage {
   final String id;
