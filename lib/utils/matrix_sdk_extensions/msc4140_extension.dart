@@ -13,11 +13,27 @@ extension Msc4140Extension on matrix.Room {
     String? threadRootEventId,
     String? threadLastEventId,
   }) async {
+    // Build enriched content with reply/thread info
+    final enrichedContent = Map<String, dynamic>.from(content);
+
+    if (inReplyTo != null) {
+      enrichedContent['m.relates_to'] = {
+        'm.in_reply_to': {'event_id': inReplyTo.eventId},
+      };
+    } else if (threadRootEventId != null) {
+      enrichedContent['m.relates_to'] = {
+        'rel_type': 'm.thread',
+        'event_id': threadRootEventId,
+        if (threadLastEventId != null) 'm.relatesto': threadLastEventId,
+        'is_falling_back': inReplyTo == null,
+      };
+    }
+
     // PUT /_matrix/client/v3/rooms/{roomId}/delayed_event/{eventType}/{txnId}
     final requestUri = Uri(
       path: '/_matrix/client/v3/rooms/$id/delayed_event/$type/$txid',
     );
-    final body = jsonEncode({'content': content, 'delay': delay});
+    final body = jsonEncode({'content': enrichedContent, 'delay': delay});
     final response = await client.httpClient.put(
       client.baseUri!.resolveUri(requestUri),
       body: body,
