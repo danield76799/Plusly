@@ -166,7 +166,7 @@ class SendLaterDialogState extends State<SendLaterDialog> {
         'sched_${DateTime.now().millisecondsSinceEpoch}_${_generateRandomId()}';
 
     try {
-      // Use MSC4140 server-side scheduling
+      // Try MSC4140 server-side scheduling first
       final delayId = await widget.room.scheduleDelayedEvent(
         messageContent,
         delay: delayMs,
@@ -201,13 +201,30 @@ class SendLaterDialogState extends State<SendLaterDialog> {
         Navigator.of(context).pop();
       }
     } catch (e) {
+      // MSC4140 not supported — fall back to client-side scheduling
+      Logs().w('MSC4140 failed, falling back to client-side: $e');
+
+      final scheduledMessage = ScheduledMessage(
+        id: txid,
+        roomId: widget.room.id,
+        senderId: widget.room.client.userID!,
+        content: messageContent,
+        scheduledAt: _selected!,
+        replyEventId: widget.replyEvent?.eventId,
+        threadRootEventId: widget.thread?.rootEvent.eventId,
+        threadLastEventId: widget.thread?.lastEvent?.eventId,
+      );
+
+      await ScheduledMessagesService.addScheduledMessage(scheduledMessage);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to schedule: $e'),
+            content: Text('Scheduled locally for ${_formatSelected()} (server does not support delayed sending — keep app open)'),
             duration: const Duration(seconds: 5),
           ),
         );
+        Navigator.of(context).pop();
       }
     }
   }
