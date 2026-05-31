@@ -37,7 +37,10 @@ extension Msc4140Extension on matrix.Room {
     final response = await client.httpClient.put(
       client.baseUri!.resolveUri(requestUri),
       body: body,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${client.accessToken}',
+      },
     );
     if (response.statusCode == 200) {
       final responseBody = jsonDecode(response.body);
@@ -60,6 +63,10 @@ extension Msc4140Extension on matrix.Room {
     final response = await client.httpClient.post(
       requestUri,
       body: jsonEncode({}),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${client.accessToken}',
+      },
     );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return;
@@ -117,6 +124,9 @@ extension Msc4140Extension on matrix.Room {
 
     final response = await client.httpClient.get(
       client.baseUri!.resolveUri(requestUri),
+      headers: {
+        'Authorization': 'Bearer ${client.accessToken}',
+      },
     );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       try {
