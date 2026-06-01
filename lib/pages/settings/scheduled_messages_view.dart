@@ -359,13 +359,18 @@ class _ScheduledMessageTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isServerScheduled = message.delayId != null;
 
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: theme.colorScheme.primaryContainer,
+        backgroundColor: isServerScheduled
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.surfaceContainerHighest,
         child: Icon(
-          Icons.schedule,
-          color: theme.colorScheme.onPrimaryContainer,
+          isServerScheduled ? Icons.cloud_outlined : Icons.phone_android,
+          color: isServerScheduled
+              ? theme.colorScheme.onPrimaryContainer
+              : theme.colorScheme.onSurfaceVariant,
         ),
       ),
       title: Text(
@@ -397,6 +402,26 @@ class _ScheduledMessageTile extends StatelessWidget {
                   fontSize: 12,
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(
+                  color: isServerScheduled
+                      ? theme.colorScheme.primary.withOpacity(0.1)
+                      : theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  isServerScheduled ? 'Server' : 'Local',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: isServerScheduled
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],
