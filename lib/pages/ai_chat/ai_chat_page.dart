@@ -17,6 +17,7 @@ class _AiChatPageState extends State<AiChatPage> {
 
   // Ollama config — change to your server
   static const String _ollamaUrl = 'http://38.124.152.103:11434/api/chat';
+  static const String _apiKey = 'BK-GXIOU5NlUZhnFqCWicAqw_jarZQ1YyUFY0hMVH1U';
   static const String _model = 'qwen2.5:7b';
 
   @override
@@ -71,7 +72,10 @@ class _AiChatPageState extends State<AiChatPage> {
 
       final response = await http.post(
         Uri.parse(_ollamaUrl),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_apiKey',
+        },
         body: jsonEncode({
           'model': _model,
           'messages': messages,
