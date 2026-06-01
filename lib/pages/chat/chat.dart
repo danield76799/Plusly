@@ -706,9 +706,8 @@ class ChatController extends State<ChatPageWithRoom>
     FocusScope.of(context).requestFocus(inputFocus);
     _isSending = true;
     _storeInputTimeoutTimer?.cancel();
-    SharedPreferences.getInstance().then(
-      (prefs) => prefs.remove('draft_$roomId'),
-    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('draft_$roomId');
     var parseCommands = true;
 
     final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
