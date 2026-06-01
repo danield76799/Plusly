@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 import 'dart:math';
@@ -164,10 +165,16 @@ class _MxcImageState extends State<MxcImage> {
           thumbnailMethod: widget.thumbnailMethod,
           isThumbnail: widget.isThumbnail,
           animated: widget.animated,
+        ).timeout(
+          const Duration(seconds: 15),
+          onTimeout: () => throw TimeoutException('Image download timed out'),
         );
       } else if (event != null) {
         final data = await event.downloadAndDecryptAttachment(
           getThumbnail: widget.isThumbnail,
+        ).timeout(
+          const Duration(seconds: 15),
+          onTimeout: () => throw TimeoutException('Image download timed out'),
         );
         if (data.detectFileType is MatrixImageFile) {
           loadedBytes = data.bytes;

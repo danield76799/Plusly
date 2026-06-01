@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart' hide Image;
@@ -212,6 +213,11 @@ class SendFileDialogState extends State<SendFileDialog> {
                 widget.thread?.lastEvent?.eventId ??
                 widget.thread?.rootEvent.eventId,
             threadRootEventId: widget.thread?.rootEvent.eventId,
+          ).timeout(
+            const Duration(seconds: 60),
+            onTimeout: () {
+              throw TimeoutException('Upload timed out after 60 seconds');
+            },
           );
         } on MatrixException catch (e) {
           final retryAfterMs = e.retryAfterMs;
@@ -242,6 +248,11 @@ class SendFileDialogState extends State<SendFileDialog> {
                 widget.thread?.lastEvent?.eventId ??
                 widget.thread?.rootEvent.eventId,
             threadRootEventId: widget.thread?.rootEvent.eventId,
+          ).timeout(
+            const Duration(seconds: 60),
+            onTimeout: () {
+              throw TimeoutException('Upload timed out after 60 seconds');
+            },
           );
         }
       }
