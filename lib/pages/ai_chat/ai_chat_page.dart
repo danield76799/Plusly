@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class AiChatPage extends StatefulWidget {
-  const AiChatPage({super.key});
+  const AiChatPage({super.key, this.onBack});
+
+  final VoidCallback? onBack;
 
   @override
   State<AiChatPage> createState() => _AiChatPageState();
@@ -124,7 +126,13 @@ class _AiChatPageState extends State<AiChatPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (widget.onBack != null) {
+              widget.onBack!();
+            } else {
+              Navigator.pop(context);
+            }
+          },
         ),
         title: Row(
           children: [
