@@ -31,6 +31,10 @@ class CustomHttpClient {
 
     final client = HttpClient(context: context);
 
+    // Verbeterde stabiliteit: langere timeouts voor langzamere verbindingen
+    client.connectionTimeout = const Duration(seconds: 30);
+    client.idleTimeout = const Duration(minutes: 5);
+
     if (AppSettings.httpProxy.value.isNotEmpty) {
       client.findProxy = (uri) {
         return "PROXY ${AppSettings.httpProxy.value};";

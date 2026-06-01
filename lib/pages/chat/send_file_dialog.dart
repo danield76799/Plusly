@@ -212,7 +212,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                 widget.thread?.lastEvent?.eventId ??
                 widget.thread?.rootEvent.eventId,
             threadRootEventId: widget.thread?.rootEvent.eventId,
-          ).timeout(const Duration(seconds: 60));
+          ).timeout(const Duration(minutes: 3));
         } on MatrixException catch (e) {
           final retryAfterMs = e.retryAfterMs;
           if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {
@@ -242,7 +242,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                 widget.thread?.lastEvent?.eventId ??
                 widget.thread?.rootEvent.eventId,
             threadRootEventId: widget.thread?.rootEvent.eventId,
-          ).timeout(const Duration(seconds: 60));
+          ).timeout(const Duration(minutes: 3));
         }
       }
       scaffoldMessenger.clearSnackBars();

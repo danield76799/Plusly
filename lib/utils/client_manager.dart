@@ -142,6 +142,8 @@ abstract class ClientManager {
       nativeImplementations: nativeImplementations,
       customImageResizer: PlatformInfos.isMobile ? customImageResizer : null,
       defaultNetworkRequestTimeout: const Duration(minutes: 5),
+      // Timeline event timeout verhoogd voor grote bestanden
+      sendTimelineEventTimeout: const Duration(minutes: 3),
       enableDehydratedDevices: true,
       shareKeysWith:
           ShareKeysWith.values.singleWhereOrNull(
