@@ -166,6 +166,9 @@ class ScheduledMessagesService {
     final now = DateTime.now();
 
     for (final message in pending) {
+      // Skip server-scheduled messages — the server will send them
+      if (message.delayId != null) continue;
+
       // Only send messages scheduled within the last 60 seconds
       // This prevents all "missed" messages from being sent at once
       final diff = now.difference(message.scheduledAt);
