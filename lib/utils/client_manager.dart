@@ -141,7 +141,7 @@ abstract class ClientManager {
       },
       nativeImplementations: nativeImplementations,
       customImageResizer: PlatformInfos.isMobile ? customImageResizer : null,
-      defaultNetworkRequestTimeout: const Duration(minutes: 5),
+      defaultNetworkRequestTimeout: const Duration(seconds: 30),
       enableDehydratedDevices: true,
       shareKeysWith:
           ShareKeysWith.values.singleWhereOrNull(
