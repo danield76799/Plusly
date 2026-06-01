@@ -13,6 +13,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/ai_chat/ai_chat_page.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_view.dart';
 import 'package:Pulsly/pages/chat_list/invite_dialog.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
@@ -278,55 +279,39 @@ class ChatListController extends State<ChatList>
 
     _cachedFilteredRooms = Matrix.of(
       context,
-    ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).toList();
+    ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).where(_isBridgeTypeVisible).toList();
     _lastFilterCalc = now;
     _lastActiveFilter = activeFilter;
     _lastVisibleBridgeTypes = Set<String>.from(visibleBridgeTypes);
     return _cachedFilteredRooms;
   }
 
-  // Cached searchRooms - 500ms cache
-  List<Room> _cachedSearchRooms = [];
-  DateTime _lastSearchRoomsCalc = DateTime(2000);
-  ActiveFilter _lastSearchRoomsFilter = ActiveFilter.allChats;
-
-  List<Room> get searchRooms {
-    final now = DateTime.now();
-    if (now.difference(_lastSearchRoomsCalc) < Duration(milliseconds: 500) &&
-        _lastSearchRoomsFilter == activeFilter) {
-      return _cachedSearchRooms;
+  List<Room> get searchRooms => Matrix.of(context).client.rooms.where((room) {
+    switch (activeFilter) {
+      case .allChats:
+        return !room.isSpace &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
+      case .messages:
+        return !room.isSpace &&
+            room.isDirectChat &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
+      case .groups:
+        return room.isSpace;
+      case .unread:
+        return room.isUnreadOrInvited;
+      case .favorites:
+        return true;
+      case .people:
+        return !room.isSpace &&
+            room.isDirectChat &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
+      case .ai:
+        return false; // No rooms for AI tab
     }
-
-    _cachedSearchRooms = Matrix.of(context).client.rooms.where((room) {
-      switch (activeFilter) {
-        case .allChats:
-          return !room.isSpace &&
-              (AppSettings.showSpaceRoomsInGlobalList.value ||
-                  room.spaceParents.isEmpty);
-        case .messages:
-          return !room.isSpace &&
-              room.isDirectChat &&
-              (AppSettings.showSpaceRoomsInGlobalList.value ||
-                  room.spaceParents.isEmpty);
-        case .groups:
-          return room.isSpace;
-        case .unread:
-          return room.isUnreadOrInvited;
-        case .favorites:
-          return true;
-        case .people:
-          return !room.isSpace &&
-              room.isDirectChat &&
-              (AppSettings.showSpaceRoomsInGlobalList.value ||
-                  room.spaceParents.isEmpty);
-        case .ai:
-          return false; // No rooms for AI tab
-      }
-    }).toList();
-    _lastSearchRoomsCalc = now;
-    _lastSearchRoomsFilter = activeFilter;
-    return _cachedSearchRooms;
-  }
+  }).toList();
 
   bool isSearchMode = false;
   Future<QueryPublicRoomsResponse>? publicRoomsResponse;
@@ -437,21 +422,17 @@ class ChatListController extends State<ChatList>
     final client = Matrix.of(context).client;
     final lowerQuery = query.toLowerCase();
     final results = <sdk.Event>[];
-    // Only search the most recent 20 non-space rooms to avoid heavy I/O
-    final rooms = client.rooms
-        .where((room) => !room.isSpace)
-        .take(20)
-        .toList();
-
+    final rooms = client.rooms.where((room) => !room.isSpace).toList();
+    
     for (final room in rooms) {
       try {
         final timeline = await room.getTimeline();
         final events = timeline.events
             .where((e) => e.body.toLowerCase().contains(lowerQuery))
-            .take(5)
+            .take(10)
             .toList();
         results.addAll(events);
-        if (results.length >= 50) break; // Limit results
+        if (results.length >= 100) break; // Limit results
       } catch (_) {
         // Skip rooms that fail
       }
@@ -1038,7 +1019,9 @@ class ChatListController extends State<ChatList>
 
   void setActiveFilter(ActiveFilter filter) {
     if (filter == ActiveFilter.ai) {
-      context.go('/rooms/ai');
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const AiChatPage()),
+      );
       return;
     }
     setState(() {
