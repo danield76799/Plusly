@@ -165,67 +165,77 @@ class SendLaterDialogState extends State<SendLaterDialog> {
     final txid =
         'sched_${DateTime.now().millisecondsSinceEpoch}_${_generateRandomId()}';
 
-    try {
-      // Try MSC4140 server-side scheduling first
-      final delayId = await widget.room.scheduleDelayedEvent(
-        messageContent,
-        delay: delayMs,
-        txid: txid,
-        inReplyTo: widget.replyEvent,
-        threadRootEventId: widget.thread?.rootEvent.eventId,
-        threadLastEventId: widget.thread?.lastEvent?.eventId,
-      );
+    // Check if server supports both delayed send AND cancel
+    final serverSupportsCancel = await widget.room.supportsDelayedEventCancel();
 
-      // Track locally for UI display and cancellation
-      final scheduledMessage = ScheduledMessage(
-        id: txid,
-        roomId: widget.room.id,
-        senderId: widget.room.client.userID!,
-        content: messageContent,
-        scheduledAt: _selected!,
-        replyEventId: widget.replyEvent?.eventId,
-        threadRootEventId: widget.thread?.rootEvent.eventId,
-        threadLastEventId: widget.thread?.lastEvent?.eventId,
-        delayId: delayId,
-      );
-
-      await ScheduledMessagesService.addScheduledMessage(scheduledMessage);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Message scheduled for ${_formatSelected()}'),
-            duration: const Duration(seconds: 3),
-          ),
+    if (serverSupportsCancel) {
+      // Use MSC4140 server-side scheduling (cancellable)
+      try {
+        final delayId = await widget.room.scheduleDelayedEvent(
+          messageContent,
+          delay: delayMs,
+          txid: txid,
+          inReplyTo: widget.replyEvent,
+          threadRootEventId: widget.thread?.rootEvent.eventId,
+          threadLastEventId: widget.thread?.lastEvent?.eventId,
         );
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      // MSC4140 not supported — fall back to client-side scheduling
-      Logs().w('MSC4140 failed, falling back to client-side: $e');
 
-      final scheduledMessage = ScheduledMessage(
-        id: txid,
-        roomId: widget.room.id,
-        senderId: widget.room.client.userID!,
-        content: messageContent,
-        scheduledAt: _selected!,
-        replyEventId: widget.replyEvent?.eventId,
-        threadRootEventId: widget.thread?.rootEvent.eventId,
-        threadLastEventId: widget.thread?.lastEvent?.eventId,
-      );
-
-      await ScheduledMessagesService.addScheduledMessage(scheduledMessage);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Scheduled locally for ${_formatSelected()} ($e)'),
-            duration: const Duration(seconds: 8),
-          ),
+        final scheduledMessage = ScheduledMessage(
+          id: txid,
+          roomId: widget.room.id,
+          senderId: widget.room.client.userID!,
+          content: messageContent,
+          scheduledAt: _selected!,
+          replyEventId: widget.replyEvent?.eventId,
+          threadRootEventId: widget.thread?.rootEvent.eventId,
+          threadLastEventId: widget.thread?.lastEvent?.eventId,
+          delayId: delayId,
         );
-        Navigator.of(context).pop();
+
+        await ScheduledMessagesService.addScheduledMessage(scheduledMessage);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Message scheduled for ${_formatSelected()}'),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        // Server-side scheduling failed — fall back to local
+        Logs().w('MSC4140 scheduling failed, falling back to local: $e');
+        await _scheduleLocally(txid, messageContent);
       }
+    } else {
+      // Server doesn't support cancel — use local scheduling
+      await _scheduleLocally(txid, messageContent);
+    }
+  }
+
+  Future<void> _scheduleLocally(String txid, Map<String, dynamic> messageContent) async {
+    final scheduledMessage = ScheduledMessage(
+      id: txid,
+      roomId: widget.room.id,
+      senderId: widget.room.client.userID!,
+      content: messageContent,
+      scheduledAt: _selected!,
+      replyEventId: widget.replyEvent?.eventId,
+      threadRootEventId: widget.thread?.rootEvent.eventId,
+      threadLastEventId: widget.thread?.lastEvent?.eventId,
+    );
+
+    await ScheduledMessagesService.addScheduledMessage(scheduledMessage);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Scheduled locally for ${_formatSelected()} (keep app open)'),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+      Navigator.of(context).pop();
     }
   }
 

@@ -1,8 +1,44 @@
 import 'dart:convert';
 
 import 'package:matrix/matrix.dart' as matrix;
+import 'package:matrix/matrix_api_lite/utils/logs.dart';
 
 extension Msc4140Extension on matrix.Room {
+  static final Map<String, bool> _cancelSupportCache = {};
+
+  /// Check if the server supports delayed event cancellation.
+  /// Probes the cancel endpoint once per server and caches the result.
+  Future<bool> supportsDelayedEventCancel() async {
+    final server = client.baseUri?.host ?? '';
+    if (_cancelSupportCache.containsKey(server)) {
+      return _cancelSupportCache[server]!;
+    }
+
+    try {
+      // Probe the cancel endpoint with a dummy ID
+      final requestUri = Uri(
+        path: '/_matrix/client/unstable/org.matrix.msc4140/delayed_events/_probe/cancel',
+      );
+      final response = await client.httpClient.post(
+        requestUri,
+        body: jsonEncode({}),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${client.accessToken}',
+        },
+      );
+      // 404 = endpoint doesn't exist, anything else = it does
+      final supported = response.statusCode != 404;
+      _cancelSupportCache[server] = supported;
+      Logs().i('MSC4140 cancel support for $server: $supported');
+      return supported;
+    } catch (e) {
+      _cancelSupportCache[server] = false;
+      Logs().w('MSC4140 cancel probe failed for $server: $e');
+      return false;
+    }
+  }
+
   Future<String> scheduleDelayedEvent(
     Map<String, dynamic> content, {
     required int delay,
