@@ -58,9 +58,9 @@ extension Msc4140Extension on matrix.Room {
   }
 
   Future<void> _manageDelayedEvent(String delayId, String action) async {
-    // POST /_matrix/client/v1/delayed_events/{delay_id}/{action}
+    // POST /_matrix/client/unstable/org.matrix.msc4140/delayed_events/{delay_id}/{action}
     final requestUri = Uri(
-      path: '/_matrix/client/v1/delayed_events/$delayId/$action',
+      path: '/_matrix/client/unstable/org.matrix.msc4140/delayed_events/$delayId/$action',
     );
     final response = await client.httpClient.post(
       requestUri,
@@ -107,8 +107,8 @@ extension Msc4140Extension on matrix.Room {
     List<String>? delayIds,
     String? from,
   }) async {
-    // GET /_matrix/client/v3/delayed_events
-    const basePath = '/_matrix/client/v3/delayed_events';
+    // GET /_matrix/client/unstable/org.matrix.msc4140/delayed_events
+    const basePath = '/_matrix/client/unstable/org.matrix.msc4140/delayed_events';
     final queryParts = <String>[];
     if (status != null) {
       queryParts.add('status=${Uri.encodeQueryComponent(status)}');
