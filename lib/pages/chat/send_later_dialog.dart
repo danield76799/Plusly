@@ -165,51 +165,43 @@ class SendLaterDialogState extends State<SendLaterDialog> {
     final txid =
         'sched_${DateTime.now().millisecondsSinceEpoch}_${_generateRandomId()}';
 
-    // Check if server supports both delayed send AND cancel
-    final serverSupportsCancel = await widget.room.supportsDelayedEventCancel();
+    // Try MSC4140 server-side scheduling (always attempt — cancel is optional)
+    try {
+      final delayId = await widget.room.scheduleDelayedEvent(
+        messageContent,
+        delay: delayMs,
+        txid: txid,
+        inReplyTo: widget.replyEvent,
+        threadRootEventId: widget.thread?.rootEvent.eventId,
+        threadLastEventId: widget.thread?.lastEvent?.eventId,
+      );
 
-    if (serverSupportsCancel) {
-      // Use MSC4140 server-side scheduling (cancellable)
-      try {
-        final delayId = await widget.room.scheduleDelayedEvent(
-          messageContent,
-          delay: delayMs,
-          txid: txid,
-          inReplyTo: widget.replyEvent,
-          threadRootEventId: widget.thread?.rootEvent.eventId,
-          threadLastEventId: widget.thread?.lastEvent?.eventId,
+      final scheduledMessage = ScheduledMessage(
+        id: txid,
+        roomId: widget.room.id,
+        senderId: widget.room.client.userID!,
+        content: messageContent,
+        scheduledAt: _selected!,
+        replyEventId: widget.replyEvent?.eventId,
+        threadRootEventId: widget.thread?.rootEvent.eventId,
+        threadLastEventId: widget.thread?.lastEvent?.eventId,
+        delayId: delayId,
+      );
+
+      await ScheduledMessagesService.addScheduledMessage(scheduledMessage);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Message scheduled for ${_formatSelected()}'),
+            duration: const Duration(seconds: 3),
+          ),
         );
-
-        final scheduledMessage = ScheduledMessage(
-          id: txid,
-          roomId: widget.room.id,
-          senderId: widget.room.client.userID!,
-          content: messageContent,
-          scheduledAt: _selected!,
-          replyEventId: widget.replyEvent?.eventId,
-          threadRootEventId: widget.thread?.rootEvent.eventId,
-          threadLastEventId: widget.thread?.lastEvent?.eventId,
-          delayId: delayId,
-        );
-
-        await ScheduledMessagesService.addScheduledMessage(scheduledMessage);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Message scheduled for ${_formatSelected()}'),
-              duration: const Duration(seconds: 3),
-            ),
-          );
-          Navigator.of(context).pop();
-        }
-      } catch (e) {
-        // Server-side scheduling failed — fall back to local
-        Logs().w('MSC4140 scheduling failed, falling back to local: $e');
-        await _scheduleLocally(txid, messageContent);
+        Navigator.of(context).pop();
       }
-    } else {
-      // Server doesn't support cancel — use local scheduling
+    } catch (e) {
+      // Server-side scheduling failed — fall back to local
+      Logs().w('MSC4140 scheduling failed, falling back to local: $e');
       await _scheduleLocally(txid, messageContent);
     }
   }

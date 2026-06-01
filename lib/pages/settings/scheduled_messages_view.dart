@@ -439,7 +439,7 @@ class _ScheduledMessageTile extends StatelessWidget {
               title: const Text('Cancel scheduled message?'),
               content: Text(
                 isServerScheduled
-                    ? 'This will cancel the message on the server so it will not be sent.'
+                    ? 'This will try to cancel the message on the server. If the server does not support cancellation, the message will still be sent.'
                     : 'This message is scheduled locally. It will only be removed from this device.',
               ),
               actions: [
@@ -461,17 +461,17 @@ class _ScheduledMessageTile extends StatelessWidget {
           if (confirm == true) {
             final client = Matrix.of(context).client;
             if (isServerScheduled) {
-              // Try server-side cancel first
+              // Try server-side cancel
               final success = await ScheduledMessagesService.cancelScheduledMessage(client, message.id);
               if (!success && context.mounted) {
-                // Server doesn't support cancel — message will still be sent
+                // Server doesn't support cancel — remove from local list anyway
+                await ScheduledMessagesService.removeScheduledMessage(message.id);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Server does not support cancellation. Message will still be sent.'),
                     duration: Duration(seconds: 5),
                   ),
                 );
-                return;
               }
             } else {
               await ScheduledMessagesService.removeScheduledMessage(message.id);
