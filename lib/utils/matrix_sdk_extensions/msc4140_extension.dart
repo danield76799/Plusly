@@ -29,11 +29,12 @@ extension Msc4140Extension on matrix.Room {
       };
     }
 
-    // PUT /_matrix/client/v3/rooms/{roomId}/delayed_event/{eventType}/{txnId}
+    // PUT /_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}?delay={ms}
     final requestUri = Uri(
-      path: '/_matrix/client/v3/rooms/$id/delayed_event/$type/$txid',
+      path: '/_matrix/client/v3/rooms/$id/send/$type/$txid',
+      queryParameters: {'delay': delay.toString()},
     );
-    final body = jsonEncode({'content': enrichedContent, 'delay': delay});
+    final body = jsonEncode(enrichedContent);
     final response = await client.httpClient.put(
       client.baseUri!.resolveUri(requestUri),
       body: body,
@@ -44,7 +45,8 @@ extension Msc4140Extension on matrix.Room {
     );
     if (response.statusCode == 200) {
       final responseBody = jsonDecode(response.body);
-      return responseBody['delay_id'] as String;
+      // Server may return delay_id (some implementations) or just event_id
+      return (responseBody['delay_id'] as String?) ?? txid ?? 'unknown';
     } else {
       final errorBody = jsonDecode(response.body);
       var text = "${errorBody['errcode']}: ${errorBody['error']}";
@@ -88,6 +90,7 @@ extension Msc4140Extension on matrix.Room {
   }
 
   /// Cancel the delayed event so that it will never be sent.
+  /// Note: Not all servers support this endpoint.
   Future<void> cancelDelayedEvent(String delayId) async {
     return _manageDelayedEvent(delayId, 'cancel');
   }
