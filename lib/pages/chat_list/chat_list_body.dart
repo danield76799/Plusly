@@ -43,7 +43,9 @@ class ChatListViewBody extends StatelessWidget {
       );
     }
     if (controller.activeFilter == .ai) {
-      return const AiChatPage();
+      return AiChatPage(
+        onBack: () => controller.setActiveFilter(ActiveFilter.allChats),
+      );
     }
     if (activeSpace != null) {
       return SpaceView(
