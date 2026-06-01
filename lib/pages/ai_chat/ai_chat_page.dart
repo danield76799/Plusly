@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
 class AiChatPage extends StatefulWidget {
@@ -253,7 +254,17 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
+    return GestureDetector(
+      onLongPress: () {
+        Clipboard.setData(ClipboardData(text: message.text));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Gekopieerd naar klembord'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      },
+      child: Align(
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
@@ -273,7 +284,7 @@ class _MessageBubble extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SelectableText(
+            Text(
               message.text,
               style: TextStyle(
                 color: message.isUser ? Colors.white : Colors.black87,
@@ -290,6 +301,7 @@ class _MessageBubble extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
