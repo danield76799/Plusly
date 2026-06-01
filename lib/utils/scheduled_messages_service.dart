@@ -271,10 +271,9 @@ class ScheduledMessagesService {
       Logs().d('Cancelled scheduled message $messageId (delayId: ${message.delayId})');
       return true;
     } catch (e) {
-      // Server may not support cancel endpoint — remove local tracking anyway
-      Logs().w('Server cancel failed for $messageId, removing local tracking: $e');
-      await removeScheduledMessage(messageId);
-      return true;
+      // Server doesn't support cancel — message will still be sent
+      Logs().w('Server cancel not supported for $messageId: $e');
+      return false;
     }
   }
 }
