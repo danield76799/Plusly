@@ -16,8 +16,7 @@ class _AiChatPageState extends State<AiChatPage> {
   bool _isLoading = false;
 
   // Ollama config — change to your server
-  static const String _ollamaUrl = 'http://10.0.2.2:11434/api/chat'; // Android emulator
-  // For real device use your server IP: 'http://YOUR_SERVER_IP:11434/api/chat'
+  static const String _ollamaUrl = 'http://38.124.152.103:11434/api/chat';
   static const String _model = 'qwen2.5:7b';
 
   @override
