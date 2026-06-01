@@ -100,25 +100,15 @@ jobs:
             echo "WARNING: No signing secrets found — using debug signing"
           fi
 
-      # === APK BUILD (universal APK — works on all devices) ===
-      - name: Build Android APK (universal)
-        env:
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
-        run: |
-          flutter build apk --release --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
-          mkdir -p output
-          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-universal-release.apk || true
-
-      # === APK BUILD (split per architecture — smaller files) ===
+      # === APK BUILD (split per architecture — 32-bit + 64-bit) ===
       - name: Build Android APK (split ABIs)
-        if: always()
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
           flutter build apk --release --split-per-abi --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
+          mkdir -p output
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
-          cp build/app/outputs/flutter-apk/app-x86_64-release.apk output/plusly-x86_64-release.apk || true
 
       # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
@@ -140,13 +130,29 @@ jobs:
           echo "=== AAB size ==="
           ls -lh build/app/outputs/bundle/release/app-release.aab || echo "AAB not found"
 
-      # === UPLOAD ARTIFACTS (always — even if release fails) ===
-      - name: Upload all artifacts
+      # === UPLOAD ARTIFACTS (split — download only what you need) ===
+      - name: Upload armeabi-v7a APK
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: plusly-build-${{ steps.bump.outputs.full_version }}
-          path: output/*
+          name: plusly-armeabi-v7a-apk
+          path: output/plusly-armeabi-v7a-release.apk
+          retention-days: 30
+
+      - name: Upload arm64-v8a APK
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plusly-arm64-v8a-apk
+          path: output/plusly-arm64-v8a-release.apk
+          retention-days: 30
+
+      - name: Upload AAB (Play Store)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plusly-aab-playstore
+          path: output/plusly-release.aab
           retention-days: 30
 
       # === PLAY STORE DEPLOY (optional — only if key exists) ===
