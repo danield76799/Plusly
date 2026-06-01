@@ -18,7 +18,7 @@ class _AiChatPageState extends State<AiChatPage> {
   // Ollama config — change to your server
   static const String _ollamaUrl = 'http://38.124.152.103:11434/api/chat';
   static const String _apiKey = 'BK-GXIOU5NlUZhnFqCWicAqw_jarZQ1YyUFY0hMVH1U';
-  static const String _model = 'qwen2.5:7b';
+  static const String _model = 'qwen2.5:3b';
 
   @override
   void initState() {
@@ -142,7 +142,7 @@ class _AiChatPageState extends State<AiChatPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('AI Assistent', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                Text('Qwen 2.5', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                Text('Qwen 2.5 3B', style: TextStyle(color: Colors.white70, fontSize: 12)),
               ],
             ),
           ],
