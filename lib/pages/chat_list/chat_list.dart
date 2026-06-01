@@ -13,6 +13,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/ai_chat/ai_chat_page.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_view.dart';
 import 'package:Pulsly/pages/chat_list/invite_dialog.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
@@ -1017,6 +1018,12 @@ class ChatListController extends State<ChatList>
   }
 
   void setActiveFilter(ActiveFilter filter) {
+    if (filter == ActiveFilter.ai) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const AiChatPage()),
+      );
+      return;
+    }
     setState(() {
       activeFilter = filter;
     });

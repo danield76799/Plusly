@@ -58,7 +58,6 @@ class ChatListView extends StatelessWidget {
                   ActiveFilter.unread,
                   ActiveFilter.groups,
                   ActiveFilter.favorites,
-                  ActiveFilter.ai,
                   if (controller.activeFilter == ActiveFilter.people)
                     ActiveFilter.people,
                 ];
@@ -77,8 +76,7 @@ class ChatListView extends StatelessWidget {
                   children: [
                     ChatListViewBody(controller),
                     if (!controller.isSearchMode &&
-                        controller.activeSpaceId == null &&
-                        controller.activeFilter != .ai)
+                        controller.activeSpaceId == null)
                       Positioned(
                         right: 16,
                         bottom: 46,
