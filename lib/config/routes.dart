@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/pages/ai_chat/ai_chat_page.dart';
 import 'package:Pulsly/pages/archive/archive.dart';
 import 'package:Pulsly/pages/bootstrap/bootstrap_dialog.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
@@ -237,6 +238,12 @@ abstract class AppRoutes {
               path: '/notifications',
               pageBuilder: (context, state) =>
                   defaultPageBuilder(context, state, const Notifications()),
+              redirect: loggedOutRedirect,
+            ),
+            GoRoute(
+              path: '/ai',
+              pageBuilder: (context, state) =>
+                  defaultPageBuilder(context, state, const AiChatPage()),
               redirect: loggedOutRedirect,
             ),
             GoRoute(
