@@ -406,11 +406,17 @@ class _ScheduledMessageTile extends StatelessWidget {
       trailing: IconButton(
         icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
         onPressed: () async {
+          final isServerScheduled = message.delayId != null;
+          
           final confirm = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
               title: const Text('Cancel scheduled message?'),
-              content: const Text('This message will not be sent.'),
+              content: Text(
+                isServerScheduled
+                    ? 'This will cancel the message on the server so it will not be sent.'
+                    : 'This message is scheduled locally. It will only be removed from this device.',
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
@@ -428,8 +434,23 @@ class _ScheduledMessageTile extends StatelessWidget {
           );
 
           if (confirm == true) {
-            await ScheduledMessagesService.removeScheduledMessage(message.id);
-            // Roep de callback aan om de lijst te verversen
+            final client = Matrix.of(context).client;
+            if (isServerScheduled) {
+              // Try server-side cancel first
+              final success = await ScheduledMessagesService.cancelScheduledMessage(client, message.id);
+              if (!success && context.mounted) {
+                // Server doesn't support cancel — message will still be sent
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Server does not support cancellation. Message will still be sent.'),
+                    duration: Duration(seconds: 5),
+                  ),
+                );
+                return;
+              }
+            } else {
+              await ScheduledMessagesService.removeScheduledMessage(message.id);
+            }
             onCancel?.call();
           }
         },
