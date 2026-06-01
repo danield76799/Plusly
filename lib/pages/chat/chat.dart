@@ -570,19 +570,8 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> _getTimeline({String? eventContextId}) async {
-    // Don't block forever if sync is slow — 5s max wait
-    try {
-      await Future.any([
-        Matrix.of(context).client.roomsLoading,
-        Future.delayed(const Duration(seconds: 5)),
-      ]);
-      await Future.any([
-        Matrix.of(context).client.accountDataLoading,
-        Future.delayed(const Duration(seconds: 5)),
-      ]);
-    } catch (_) {
-      // Continue even if loading futures fail
-    }
+    await Matrix.of(context).client.roomsLoading;
+    await Matrix.of(context).client.accountDataLoading;
     if (eventContextId != null &&
         (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
       eventContextId = null;
@@ -714,12 +703,11 @@ class ChatController extends State<ChatPageWithRoom>
     if (inputFocus.hasFocus) {
       inputFocus.unfocus();
     }
+    FocusScope.of(context).requestFocus(inputFocus);
     _isSending = true;
     _storeInputTimeoutTimer?.cancel();
-    // Clear draft in background — don't await before sending
-    SharedPreferences.getInstance().then(
-      (prefs) => prefs.remove('draft_$roomId'),
-    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('draft_$roomId');
     var parseCommands = true;
 
     final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
@@ -737,34 +725,30 @@ class ChatController extends State<ChatPageWithRoom>
       parseCommands = false;
     }
 
-    final text = sendController.text;
-    final savedReplyEvent = replyEvent;
-    final savedReplyMention = replyMention;
-    final savedEditEvent = editEvent;
-    sendController.value = TextEditingValue(
-      text: pendingText,
-      selection: const TextSelection.collapsed(offset: 0),
-    );
-    setState(() {
-      _isSending = false;
-      _inputTextIsEmpty = pendingText.isEmpty;
-      replyEvent = null;
-      editEvent = null;
-      pendingText = '';
-    });
-
-    // Send after UI update — no blocking
     // ignore: unawaited_futures
     room.sendTextEvent(
-      text,
-      inReplyTo: savedReplyEvent,
-      replyMention: savedReplyMention,
-      editEventId: savedEditEvent?.eventId,
+      sendController.text,
+      inReplyTo: replyEvent,
+      replyMention: replyMention,
+      editEventId: editEvent?.eventId,
       parseCommands: parseCommands,
       threadRootEventId: thread?.rootEvent.eventId,
       threadLastEventId:
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
     );
+    sendController.value = TextEditingValue(
+      text: pendingText,
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+
+    setState(() {
+      _isSending = false;
+      sendController.text = pendingText;
+      _inputTextIsEmpty = pendingText.isEmpty;
+      replyEvent = null;
+      editEvent = null;
+      pendingText = '';
+    });
   }
 
   void sendPollAction() async {
