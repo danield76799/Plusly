@@ -59,10 +59,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _titleHeight + _searchBarHeight + _tabBarHeight + topPadding;
 
   @override
-  bool shouldRebuild(covariant _ChatListHeaderDelegate oldDelegate) =>
-      controller != oldDelegate.controller ||
-      globalSearch != oldDelegate.globalSearch ||
-      topPadding != oldDelegate.topPadding;
+  bool shouldRebuild(covariant _ChatListHeaderDelegate oldDelegate) => true;
 
   @override
   Widget build(
@@ -95,9 +92,10 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                     // Plusly logo SVG
                     SvgPicture.asset('assets/plusly_header.svg', height: 40),
                     const Spacer(),
-                    // Tijd weergave — update alleen bij wissel van minuut
-                    Builder(
-                      builder: (context) {
+                    // Tijd weergave
+                    StreamBuilder(
+                      stream: Stream.periodic(const Duration(seconds: 1)),
+                      builder: (context, snapshot) {
                         final now = DateTime.now();
                         final timeString =
                             '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
