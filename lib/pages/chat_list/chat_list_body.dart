@@ -37,7 +37,9 @@ class ChatListViewBody extends StatelessWidget {
     final client = Matrix.of(context).client;
     final activeSpace = controller.activeSpaceId;
     if (controller.activeFilter == .favorites) {
-      return const FavoritesPage();
+      return FavoritesPage(
+        onBack: () => controller.setActiveFilter(ActiveFilter.allChats),
+      );
     }
     if (activeSpace != null) {
       return SpaceView(
