@@ -164,11 +164,11 @@ class _MxcImageState extends State<MxcImage> {
           thumbnailMethod: widget.thumbnailMethod,
           isThumbnail: widget.isThumbnail,
           animated: widget.animated,
-        );
+        ).timeout(const Duration(seconds: 15));
       } else if (event != null) {
         final data = await event.downloadAndDecryptAttachment(
           getThumbnail: widget.isThumbnail,
-        );
+        ).timeout(const Duration(seconds: 15));
         if (data.detectFileType is MatrixImageFile) {
           loadedBytes = data.bytes;
         }
