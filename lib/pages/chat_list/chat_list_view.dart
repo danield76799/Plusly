@@ -58,6 +58,7 @@ class ChatListView extends StatelessWidget {
                   ActiveFilter.unread,
                   ActiveFilter.groups,
                   ActiveFilter.favorites,
+                  ActiveFilter.ai,
                   if (controller.activeFilter == ActiveFilter.people)
                     ActiveFilter.people,
                 ];

@@ -36,7 +36,7 @@ import '../../widgets/matrix.dart';
 
 enum PopupMenuAction { settings, invite, newGroup, newSpace, archive, syncDebug }
 
-enum ActiveFilter { allChats, messages, groups, unread, favorites, people }
+enum ActiveFilter { allChats, messages, groups, unread, favorites, people, ai }
 
 enum SearchScope { local, public }
 
@@ -55,6 +55,8 @@ extension LocalizedActiveFilter on ActiveFilter {
         return "Favorites";
       case ActiveFilter.people:
         return L10n.of(context).people;
+      case ActiveFilter.ai:
+        return "AI";
     }
   }
 
@@ -73,6 +75,8 @@ extension LocalizedActiveFilter on ActiveFilter {
         return Icons.star_outline;
       case ActiveFilter.people:
         return Icons.person_outline;
+      case ActiveFilter.ai:
+        return Icons.smart_toy_outlined;
     }
   }
 }
@@ -253,6 +257,8 @@ class ChatListController extends State<ChatList>
             room.isDirectChat &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
                 room.spaceParents.isEmpty);
+      case .ai:
+        return (room) => false; // No rooms for AI tab
     }
   }
 
@@ -301,6 +307,8 @@ class ChatListController extends State<ChatList>
             room.isDirectChat &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
                 room.spaceParents.isEmpty);
+      case .ai:
+        return false; // No rooms for AI tab
     }
   }).toList();
 

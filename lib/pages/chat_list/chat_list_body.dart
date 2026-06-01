@@ -1,5 +1,6 @@
 import 'package:Pulsly/pages/chat_list/people_view.dart';
 import 'package:Pulsly/pages/favorites/favorites_page.dart';
+import 'package:Pulsly/pages/ai_chat/ai_chat_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -40,6 +41,9 @@ class ChatListViewBody extends StatelessWidget {
       return FavoritesPage(
         onBack: () => controller.setActiveFilter(ActiveFilter.allChats),
       );
+    }
+    if (controller.activeFilter == .ai) {
+      return const AiChatPage();
     }
     if (activeSpace != null) {
       return SpaceView(
