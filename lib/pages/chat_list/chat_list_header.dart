@@ -302,7 +302,6 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
       ActiveFilter.unread,
       ActiveFilter.groups,
       ActiveFilter.favorites,
-      ActiveFilter.ai,
       // People tab is only visible when selected
       if (controller.activeFilter == ActiveFilter.people)
         ActiveFilter.people,
