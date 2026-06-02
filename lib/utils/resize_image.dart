@@ -11,8 +11,8 @@ class ImageResizer {
   static const int maxDimension = 2048;
   
   /// JPEG quality for resized images (0-100)
-  /// 85 = goede balans tussen kwaliteit en bestandsgrootte
-  static const int quality = 85;
+  /// 70 = snellere encoding, nog steeds goede kwaliteit voor chat
+  static const int quality = 70;
 
   /// Resize an image file if it's an image, returning a MatrixImageFile
   /// Returns null if the file is not an image

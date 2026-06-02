@@ -857,7 +857,12 @@ class ChatController extends State<ChatPageWithRoom>
   void openCameraAction() async {
     // Make sure the textfield is unfocused before opening the camera
     FocusScope.of(context).requestFocus(FocusNode());
-    final file = await ImagePicker().pickImage(source: ImageSource.camera);
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      maxWidth: 2048,
+      maxHeight: 2048,
+      imageQuality: 85,
+    );
     if (file == null) return;
 
     await showAdaptiveDialog(
