@@ -49,10 +49,13 @@ class MxcImage extends StatefulWidget {
 
 class _MxcImageState extends State<MxcImage> {
   // LRU cache with max 500 entries for better performance
-  // Was 200, verhoogd naar 500 voor minder herladen van plaatjes
   static const int _maxCacheSize = 500;
   static final LinkedHashMap<String, Uint8List> _imageDataCache =
       LinkedHashMap<String, Uint8List>();
+
+  // Track cache hits for warm restart optimization
+  static final Set<String> _persistentCacheKeys = <String>{};
+  static const String _cacheKeysPref = 'mxc_image_cache_keys';
 
   Uint8List? _currentData;
   bool _isLoading = false;
@@ -117,9 +120,14 @@ class _MxcImageState extends State<MxcImage> {
       // Move to end (most recently used) if already exists
       _imageDataCache.remove(widget.cacheKey!);
       _imageDataCache[widget.cacheKey!] = data;
+      // Track this key as recently cached for warm restart
+      _persistentCacheKeys.add(widget.cacheKey!);
       // Evict oldest entries if over capacity
       while (_imageDataCache.length > _maxCacheSize) {
-        _imageDataCache.remove(_imageDataCache.keys.first);
+        final removed = _imageDataCache.remove(_imageDataCache.keys.first);
+        if (removed != null) {
+          _persistentCacheKeys.remove(_imageDataCache.keys.first);
+        }
       }
     }
   }
@@ -149,29 +157,44 @@ class _MxcImageState extends State<MxcImage> {
 
       Uint8List? loadedBytes;
 
-      if (uri != null) {
-        final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-        final realWidth = widget.width != null
-            ? widget.width! * devicePixelRatio
-            : null;
-        final realHeight = widget.height != null
-            ? widget.height! * devicePixelRatio
-            : null;
+      // Check database cache first for warm restart optimization
+      if (widget.cacheKey != null && 
+          _persistentCacheKeys.contains(widget.cacheKey)) {
+        try {
+          final dbData = await client.database.getFile(widget.cacheKey!);
+          if (dbData != null && dbData.isNotEmpty) {
+            loadedBytes = dbData;
+          }
+        } catch (e) {
+          Logs().d('Database cache miss for ${widget.cacheKey}', e);
+        }
+      }
 
-        loadedBytes = await client.downloadMxcCached(
-          uri,
-          width: realWidth ?? 800,
-          height: realHeight ?? 600,
-          thumbnailMethod: widget.thumbnailMethod,
-          isThumbnail: widget.isThumbnail,
-          animated: widget.animated,
-        ).timeout(const Duration(seconds: 30));
-      } else if (event != null) {
-        final data = await event.downloadAndDecryptAttachment(
-          getThumbnail: widget.isThumbnail,
-        ).timeout(const Duration(seconds: 30));
-        if (data.detectFileType is MatrixImageFile) {
-          loadedBytes = data.bytes;
+      if (loadedBytes == null) {
+        if (uri != null) {
+          final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+          final realWidth = widget.width != null
+              ? widget.width! * devicePixelRatio
+              : null;
+          final realHeight = widget.height != null
+              ? widget.height! * devicePixelRatio
+              : null;
+
+          loadedBytes = await client.downloadMxcCached(
+            uri,
+            width: realWidth ?? 800,
+            height: realHeight ?? 600,
+            thumbnailMethod: widget.thumbnailMethod,
+            isThumbnail: widget.isThumbnail,
+            animated: widget.animated,
+          ).timeout(const Duration(seconds: 30));
+        } else if (event != null) {
+          final data = await event.downloadAndDecryptAttachment(
+            getThumbnail: widget.isThumbnail,
+          ).timeout(const Duration(seconds: 30));
+          if (data.detectFileType is MatrixImageFile) {
+            loadedBytes = data.bytes;
+          }
         }
       }
 
