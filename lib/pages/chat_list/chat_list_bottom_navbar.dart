@@ -27,7 +27,6 @@ class ChatListBottomNavbar extends StatelessWidget {
       if (AppSettings.separateChatTypes.value) ActiveFilter.groups,
       ActiveFilter.unread,
       ActiveFilter.favorites,
-      ActiveFilter.ai,
     ];
 
     final filterLambdas = {
@@ -36,7 +35,6 @@ class ChatListBottomNavbar extends StatelessWidget {
       ActiveFilter.groups: (Room room) => room.isSpace,
       ActiveFilter.unread: (Room room) => room.isUnread,
       ActiveFilter.favorites: (Room room) => false,
-      ActiveFilter.ai: (Room room) => false,
     };
 
     return Material(

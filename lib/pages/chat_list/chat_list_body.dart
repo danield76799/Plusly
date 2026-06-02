@@ -7,7 +7,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
-import 'package:Pulsly/pages/ai_chat/ai_chat_page.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_legacy_header.dart';
@@ -39,11 +38,6 @@ class ChatListViewBody extends StatelessWidget {
     final activeSpace = controller.activeSpaceId;
     if (controller.activeFilter == .favorites) {
       return FavoritesPage(
-        onBack: () => controller.setActiveFilter(ActiveFilter.allChats),
-      );
-    }
-    if (controller.activeFilter == .ai) {
-      return AiChatPage(
         onBack: () => controller.setActiveFilter(ActiveFilter.allChats),
       );
     }
