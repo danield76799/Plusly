@@ -859,9 +859,9 @@ class ChatController extends State<ChatPageWithRoom>
     FocusScope.of(context).requestFocus(FocusNode());
     final file = await ImagePicker().pickImage(
       source: ImageSource.camera,
-      maxWidth: 2048,
-      maxHeight: 2048,
-      imageQuality: 85,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 70,
     );
     if (file == null) return;
 
