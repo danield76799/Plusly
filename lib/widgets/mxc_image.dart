@@ -48,8 +48,9 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage> {
-  // LRU cache with max 200 entries to prevent unbounded memory growth
-  static const int _maxCacheSize = 200;
+  // LRU cache with max 500 entries for better performance
+  // Was 200, verhoogd naar 500 voor minder herladen van plaatjes
+  static const int _maxCacheSize = 500;
   static final LinkedHashMap<String, Uint8List> _imageDataCache =
       LinkedHashMap<String, Uint8List>();
 
