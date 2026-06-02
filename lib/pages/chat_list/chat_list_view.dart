@@ -54,12 +54,14 @@ class ChatListView extends StatelessWidget {
                 final velocity = details.primaryVelocity ?? 0;
                 if (velocity.abs() < 300) return; // ignore slow drags
                 final filters = [
-                  ActiveFilter.allChats,
+                  if (AppSettings.separateChatTypes.value)
+                    ActiveFilter.messages
+                  else
+                    ActiveFilter.allChats,
+                  if (AppSettings.separateChatTypes.value) ActiveFilter.groups,
                   ActiveFilter.unread,
-                  ActiveFilter.groups,
                   ActiveFilter.favorites,
-                  if (controller.activeFilter == ActiveFilter.people)
-                    ActiveFilter.people,
+                  ActiveFilter.ai,
                 ];
                 final currentIndex = filters.indexOf(controller.activeFilter);
                 if (currentIndex == -1) return;
