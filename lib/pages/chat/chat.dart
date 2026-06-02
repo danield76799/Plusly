@@ -877,6 +877,33 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
+  void sendImageFromGallery() async {
+    // Use ImagePicker for native compression (instant, not slow Dart resize)
+    final picker = ImagePicker();
+    final files = await picker.pickMultiImage(
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 70,
+    );
+    if (files.isEmpty) return;
+
+    if (!mounted) return;
+    await showAdaptiveDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => SendFileDialog(
+        files: files,
+        room: room,
+        thread: thread,
+        outerContext: context,
+        replyEvent: replyEvent,
+        onClearReply: () {
+          replyEvent = null;
+        },
+      ),
+    );
+  }
+
   void openVideoCameraAction() async {
     // Make sure the textfield is unfocused before opening the camera
     FocusScope.of(context).requestFocus(FocusNode());
@@ -1778,7 +1805,7 @@ class ChatController extends State<ChatPageWithRoom>
       sendFileAction();
     }
     if (choice == 'image') {
-      sendFileAction(type: FileType.image);
+      sendImageFromGallery();
     }
     if (choice == 'video') {
       sendFileAction(type: FileType.video);
