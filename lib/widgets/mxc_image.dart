@@ -161,7 +161,7 @@ class _MxcImageState extends State<MxcImage> {
       if (widget.cacheKey != null && 
           _persistentCacheKeys.contains(widget.cacheKey)) {
         try {
-          final dbData = await client.database.getFile(widget.cacheKey!);
+          final dbData = await client.database.getFile(Uri.parse(widget.cacheKey!));
           if (dbData != null && dbData.isNotEmpty) {
             loadedBytes = dbData;
           }
