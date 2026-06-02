@@ -1019,9 +1019,9 @@ class ChatListController extends State<ChatList>
 
   void setActiveFilter(ActiveFilter filter) {
     if (filter == ActiveFilter.ai) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const AiChatPage()),
-      );
+      setState(() {
+        activeFilter = filter;
+      });
       return;
     }
     setState(() {
