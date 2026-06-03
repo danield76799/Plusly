@@ -1,13 +1,13 @@
 import 'dart:typed_data';
 
-import 'package:image/image.dart';
+import 'package:image/image.dart' as img;
 import 'package:matrix/matrix.dart';
 
 extension ClientDownloadContentExtension on Client {
   Future<Uint8List> downloadMxcCached(
     Uri mxc, {
-    num? width = 800,
-    num? height = 600,
+    num? width,
+    num? height,
     bool isThumbnail = false,
     bool? animated,
     ThumbnailMethod? thumbnailMethod,
@@ -21,7 +21,7 @@ extension ClientDownloadContentExtension on Client {
             width: width,
             height: height,
             animated: animated,
-            method: thumbnailMethod!,
+            method: thumbnailMethod,
           )
         : mxc;
 
@@ -45,16 +45,14 @@ extension ClientDownloadContentExtension on Client {
           : {'authorization': 'Bearer $accessToken'},
     );
     if (response.statusCode != 200) {
-      throw Exception(
-        "Failed to download: ${response.statusCode} ${response.body} $httpUri",
-      );
+      throw Exception();
     }
     var imageData = response.bodyBytes;
 
     if (rounded) {
-      final image = decodeImage(imageData);
+      final image = img.decodeImage(imageData);
       if (image != null) {
-        imageData = encodePng(copyCropCircle(image));
+        imageData = img.encodePng(img.copyCropCircle(image));
       }
     }
 
