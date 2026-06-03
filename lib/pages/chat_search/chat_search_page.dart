@@ -91,10 +91,14 @@ class ChatSearchController extends State<ChatSearchPage>
         final result = await room.searchEvents(
           searchTerm: searchQuery,
           nextBatch: messagesNextBatch,
+          limit: 1500,
         );
         var events = result.events;
         events = _applyTextFilter(events, searchQuery);
         events = _applyFilters(events);
+        // Deduplicate by eventId
+        final existingIds = messages.map((e) => e.eventId).toSet();
+        events = events.where((e) => !existingIds.contains(e.eventId)).toList();
         setState(() {
           isLoading = false;
           messages.addAll(events);
@@ -113,12 +117,16 @@ class ChatSearchController extends State<ChatSearchPage>
             MessageTypes.Video,
           }.contains(event.messageType),
           nextBatch: imagesNextBatch,
+          limit: 1500,
         );
         var events = result.events;
         if (searchController.text.isNotEmpty) {
           events = _applyTextFilter(events, searchController.text);
         }
         events = _applyFilters(events);
+        // Deduplicate by eventId
+        final existingIds = images.map((e) => e.eventId).toSet();
+        events = events.where((e) => !existingIds.contains(e.eventId)).toList();
         setState(() {
           isLoading = false;
           images.addAll(events);
@@ -137,12 +145,16 @@ class ChatSearchController extends State<ChatSearchPage>
               (event.messageType == MessageTypes.Audio &&
                   !event.content.containsKey('org.matrix.msc3245.voice')),
           nextBatch: filesNextBatch,
+          limit: 1500,
         );
         var events = result.events;
         if (searchController.text.isNotEmpty) {
           events = _applyTextFilter(events, searchController.text);
         }
         events = _applyFilters(events);
+        // Deduplicate by eventId
+        final existingIds = files.map((e) => e.eventId).toSet();
+        events = events.where((e) => !existingIds.contains(e.eventId)).toList();
         setState(() {
           isLoading = false;
           files.addAll(events);
