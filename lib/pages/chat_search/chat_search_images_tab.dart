@@ -166,6 +166,7 @@ class ChatSearchImagesTab extends StatelessWidget {
                           fit: BoxFit.cover,
                           animated: true,
                           isThumbnail: true,
+                          cacheKey: '${event.eventId}_gallery_thumb',
                         ),
                       ),
                     );
