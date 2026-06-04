@@ -95,6 +95,9 @@ enum AppSettings<T> {
   audioRecordingSamplingRate<int>('audioRecordingSamplingRate', 44100),
   enableVideoNotes<bool>('xyz.plusly.next.enableVideoNotes', false),
   enableChatFrostedGlass<bool>('xyz.plusly.next.enableChatFrostedGlass', false),
+  galleryColumns<int>('xyz.plusly.galleryColumns', 3),
+  galleryThumbnailSize<int>('xyz.plusly.galleryThumbnailSize', 128),
+  galleryLazyLoading<bool>('xyz.plusly.galleryLazyLoading', true),
   enableAppBarCenterTitle<bool>(
     'xyz.plusly.next.enableAppBarCenterTitle',
     false,
