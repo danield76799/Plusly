@@ -46,6 +46,7 @@ class AppLock extends State<AppLockWidget> with WidgetsBindingObserver {
     if (widget.clients.any((client) => client.isLogged())) return;
 
     await changePincode(null);
+    if (!mounted) return;
     setState(() {
       _isLocked = false;
     });
