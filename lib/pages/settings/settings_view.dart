@@ -71,6 +71,7 @@ class SettingsView extends StatelessWidget {
                   children: <Widget>[
                     FutureBuilder<Profile>(
                       future: controller.profileFuture,
+                      initialData: controller.cachedProfile, // Voorkomt flickering
                       builder: (context, snapshot) {
                         final profile = snapshot.data;
                         final avatar = profile?.avatarUrl;
