@@ -62,116 +62,122 @@ class ChatSearchImagesTab extends StatelessWidget {
     final thumbnailSize = AppSettings.galleryThumbnailSize.value.toDouble();
     final useLazyLoading = AppSettings.galleryLazyLoading.value;
 
-    return ListView.builder(
-      itemCount: eventsByMonth.length + 1,
-      itemBuilder: (context, i) {
-        if (i == eventsByMonth.length) {
-          if (isLoading) {
-            return const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Center(
-                child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        _LazyMxcImageState.onScroll();
+        return false;
+      },
+      child: ListView.builder(
+        itemCount: eventsByMonth.length + 1,
+        itemBuilder: (context, i) {
+          if (i == eventsByMonth.length) {
+            if (isLoading) {
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                ),
+              );
+            }
+            if (endReached) {
+              return const SizedBox.shrink();
+            }
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    backgroundColor: theme.colorScheme.secondaryContainer,
+                    foregroundColor: theme.colorScheme.onSecondaryContainer,
+                  ),
+                  onPressed: onStartSearch,
+                  icon: const Icon(Icons.arrow_downward_outlined),
+                  label: Text(l10n.searchMore),
+                ),
               ),
             );
           }
-          if (endReached) {
-            return const SizedBox.shrink();
-          }
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: TextButton.icon(
-                style: TextButton.styleFrom(
-                  backgroundColor: theme.colorScheme.secondaryContainer,
-                  foregroundColor: theme.colorScheme.onSecondaryContainer,
-                ),
-                onPressed: onStartSearch,
-                icon: const Icon(Icons.arrow_downward_outlined),
-                label: Text(l10n.searchMore),
-              ),
-            ),
-          );
-        }
 
-        final monthEvents = eventsByMonthList[i].value;
-        final isLazyLoaded = useLazyLoading && i > 0;
+          final monthEvents = eventsByMonthList[i].value;
+          final isLazyLoaded = useLazyLoading && i > 0;
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(height: 1, color: theme.dividerColor),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    DateFormat.yMMMM(
-                      Localizations.localeOf(context).languageCode,
-                    ).format(eventsByMonthList[i].key),
-                    style: theme.textTheme.labelSmall,
-                    textAlign: TextAlign.center,
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(height: 1, color: theme.dividerColor),
                   ),
-                ),
-                Expanded(
-                  child: Container(height: 1, color: theme.dividerColor),
-                ),
-              ],
-            ),
-            GridView.count(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              mainAxisSpacing: padding,
-              crossAxisSpacing: padding,
-              clipBehavior: Clip.hardEdge,
-              padding: const EdgeInsets.all(padding),
-              crossAxisCount: crossAxisCount,
-              children: monthEvents.map((event) {
-                if (event.messageType == MessageTypes.Video) {
-                  return Material(
-                    clipBehavior: Clip.hardEdge,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      DateFormat.yMMMM(
+                        Localizations.localeOf(context).languageCode,
+                      ).format(eventsByMonthList[i].key),
+                      style: theme.textTheme.labelSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(height: 1, color: theme.dividerColor),
+                  ),
+                ],
+              ),
+              GridView.count(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                mainAxisSpacing: padding,
+                crossAxisSpacing: padding,
+                clipBehavior: Clip.hardEdge,
+                padding: const EdgeInsets.all(padding),
+                crossAxisCount: crossAxisCount,
+                children: monthEvents.map((event) {
+                  if (event.messageType == MessageTypes.Video) {
+                    return Material(
+                      clipBehavior: Clip.hardEdge,
+                      borderRadius: borderRadius,
+                      child: EventVideoPlayer(
+                        event,
+                        theme.colorScheme.onSurface,
+                        theme.colorScheme.primary,
+                      ),
+                    );
+                  }
+                  return InkWell(
+                    onTap: () => showDialog(
+                      context: context,
+                      useRootNavigator: false,
+                      builder: (_) =>
+                          ImageViewer(event, outerContext: context),
+                    ),
                     borderRadius: borderRadius,
-                    child: EventVideoPlayer(
-                      event,
-                      theme.colorScheme.onSurface,
-                      theme.colorScheme.primary,
+                    child: Material(
+                      clipBehavior: Clip.hardEdge,
+                      borderRadius: borderRadius,
+                      child: isLazyLoaded
+                          ? _LazyMxcImage(
+                              event: event,
+                              width: thumbnailSize,
+                              height: thumbnailSize,
+                            )
+                          : MxcImage(
+                              event: event,
+                              width: thumbnailSize,
+                              height: thumbnailSize,
+                              fit: BoxFit.cover,
+                              animated: true,
+                              isThumbnail: true,
+                            ),
                     ),
                   );
-                }
-                return InkWell(
-                  onTap: () => showDialog(
-                    context: context,
-                    useRootNavigator: false,
-                    builder: (_) =>
-                        ImageViewer(event, outerContext: context),
-                  ),
-                  borderRadius: borderRadius,
-                  child: Material(
-                    clipBehavior: Clip.hardEdge,
-                    borderRadius: borderRadius,
-                    child: isLazyLoaded
-                        ? _LazyMxcImage(
-                            event: event,
-                            width: thumbnailSize,
-                            height: thumbnailSize,
-                          )
-                        : MxcImage(
-                            event: event,
-                            width: thumbnailSize,
-                            height: thumbnailSize,
-                            fit: BoxFit.cover,
-                            animated: true,
-                            isThumbnail: true,
-                          ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
-        );
-      },
+                }).toList(),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -194,10 +200,27 @@ class _LazyMxcImage extends StatefulWidget {
 class _LazyMxcImageState extends State<_LazyMxcImage> {
   bool _isVisible = false;
 
+  static final List<_LazyMxcImageState> _instances = [];
+
+  static void onScroll() {
+    for (final instance in List<_LazyMxcImageState>.from(_instances)) {
+      if (instance.mounted && !instance._isVisible) {
+        instance._checkVisibility();
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _instances.add(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
+  }
+
+  @override
+  void dispose() {
+    _instances.remove(this);
+    super.dispose();
   }
 
   void _checkVisibility() {
@@ -215,16 +238,6 @@ class _LazyMxcImageState extends State<_LazyMxcImage> {
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        if (!_isVisible) _checkVisibility();
-        return false;
-      },
-      child: _buildImage(),
-    );
-  }
-
-  Widget _buildImage() {
     if (!_isVisible) {
       return Container(
         width: widget.width,
