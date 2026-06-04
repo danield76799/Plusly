@@ -125,15 +125,19 @@ class ChatSearchImagesTab extends StatelessWidget {
                   ),
                 ],
               ),
-              GridView.count(
+              GridView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                mainAxisSpacing: padding,
-                crossAxisSpacing: padding,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  mainAxisSpacing: padding,
+                  crossAxisSpacing: padding,
+                ),
+                itemCount: monthEvents.length,
                 clipBehavior: Clip.hardEdge,
                 padding: const EdgeInsets.all(padding),
-                crossAxisCount: crossAxisCount,
-                children: monthEvents.map((event) {
+                itemBuilder: (context, index) {
+                  final event = monthEvents[index];
                   if (event.messageType == MessageTypes.Video) {
                     return Material(
                       clipBehavior: Clip.hardEdge,
@@ -172,7 +176,7 @@ class ChatSearchImagesTab extends StatelessWidget {
                             ),
                     ),
                   );
-                }).toList(),
+                },
               ),
             ],
           );
