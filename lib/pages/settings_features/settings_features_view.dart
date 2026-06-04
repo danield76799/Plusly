@@ -208,8 +208,8 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                       ),
                       const ListDivider(),
                       SettingsSwitchListTile.adaptive(
-                        title: const Text('Lazy loading'),
-                        subtitle: const Text('Load images when scrolling'),
+                        title: 'Lazy loading',
+                        subtitle: 'Load images when scrolling',
                         setting: AppSettings.galleryLazyLoading,
                       ),
                     ],
