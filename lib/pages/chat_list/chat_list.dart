@@ -290,15 +290,15 @@ class ChatListController extends State<ChatList>
   
   bool get hasMoreRooms => filteredRooms.length > _visibleCount;
   
-  void loadMoreRooms() {
-    _visibleCount += _pageSize;
-    notifyListeners();
-  }
-  
   void resetPagination() {
     _visibleCount = _pageSize;
+    setState(() {}); // State gebruikt setState, geen notifyListeners
   }
-
+  
+  void loadMoreRooms() {
+    _visibleCount += _pageSize;
+    setState(() {}); // State gebruikt setState, geen notifyListeners
+  }
   List<Room> get searchRooms => Matrix.of(context).client.rooms.where((room) {
     switch (activeFilter) {
       case .allChats:
