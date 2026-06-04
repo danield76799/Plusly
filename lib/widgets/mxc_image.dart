@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -51,20 +52,21 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage> {
-  static final Map<String, Uint8List> _imageDataCache = {};
+  /// LRU cache with max 100 entries (~50-100MB depending on image sizes)
+  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 100);
 
   Uint8List? _imageDataNoCache;
 
   Uint8List? get _imageData => widget.cacheKey == null
       ? _imageDataNoCache
-      : _imageDataCache[widget.cacheKey];
+      : _imageDataCache.get(widget.cacheKey!);
 
   set _imageData(Uint8List? data) {
     if (data == null) return;
     final cacheKey = widget.cacheKey;
     cacheKey == null
         ? _imageDataNoCache = data
-        : _imageDataCache[cacheKey] = data;
+        : _imageDataCache.put(cacheKey, data);
   }
 
   Future<void> _load() async {
@@ -91,8 +93,7 @@ class _MxcImageState extends State<MxcImage> {
       setState(() {
         _imageData = remoteData;
       });
-    }
-    if (event != null) {
+    } else if (event != null) {
       final data = await event.downloadAndDecryptAttachment(
         getThumbnail: widget.isThumbnail,
       );
@@ -189,4 +190,30 @@ class _MxcImagePlaceholder extends StatelessWidget {
           child: const CircularProgressIndicator.adaptive(strokeWidth: 2),
         );
   }
+}
+
+/// Simple LRU cache for image data
+class _LruCache<K, V> {
+  final int maxSize;
+  final _map = LinkedHashMap<K, V>();
+
+  _LruCache({required this.maxSize});
+
+  V? get(K key) {
+    final value = _map.remove(key);
+    if (value != null) {
+      _map[key] = value;
+    }
+    return value;
+  }
+
+  void put(K key, V value) {
+    _map.remove(key);
+    _map[key] = value;
+    while (_map.length > maxSize) {
+      _map.remove(_map.keys.first);
+    }
+  }
+
+  void clear() => _map.clear();
 }
