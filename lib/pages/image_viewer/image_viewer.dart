@@ -119,5 +119,12 @@ class ImageViewerController extends State<ImageViewer> {
   }
 
   @override
+  void dispose() {
+    pageController.dispose();
+    focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => ImageViewerView(this);
 }
