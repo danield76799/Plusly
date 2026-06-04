@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/msc4140_extension.dart';
 import 'package:Pulsly/utils/scheduled_messages_service.dart';
 
 class SendLaterDialog extends StatefulWidget {
@@ -157,13 +158,57 @@ class SendLaterDialogState extends State<SendLaterDialog> {
     final messageContent =
         widget.content ?? {'msgtype': 'm.text', 'body': text};
 
-    // Generate a unique ID for this scheduled message
-    final id =
+    // Calculate delay in milliseconds
+    final delayMs = _selected!.difference(now).inMilliseconds;
+
+    // Generate txid
+    final txid =
         'sched_${DateTime.now().millisecondsSinceEpoch}_${_generateRandomId()}';
 
-    // Create the scheduled message
+    // Try MSC4140 server-side scheduling (always attempt — cancel is optional)
+    try {
+      final delayId = await widget.room.scheduleDelayedEvent(
+        messageContent,
+        delay: delayMs,
+        txid: txid,
+        inReplyTo: widget.replyEvent,
+        threadRootEventId: widget.thread?.rootEvent.eventId,
+        threadLastEventId: widget.thread?.lastEvent?.eventId,
+      );
+
+      final scheduledMessage = ScheduledMessage(
+        id: txid,
+        roomId: widget.room.id,
+        senderId: widget.room.client.userID!,
+        content: messageContent,
+        scheduledAt: _selected!,
+        replyEventId: widget.replyEvent?.eventId,
+        threadRootEventId: widget.thread?.rootEvent.eventId,
+        threadLastEventId: widget.thread?.lastEvent?.eventId,
+        delayId: delayId,
+      );
+
+      await ScheduledMessagesService.addScheduledMessage(scheduledMessage);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Message scheduled for ${_formatSelected()}'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      // Server-side scheduling failed — fall back to local
+      Logs().w('MSC4140 scheduling failed, falling back to local: $e');
+      await _scheduleLocally(txid, messageContent);
+    }
+  }
+
+  Future<void> _scheduleLocally(String txid, Map<String, dynamic> messageContent) async {
     final scheduledMessage = ScheduledMessage(
-      id: id,
+      id: txid,
       roomId: widget.room.id,
       senderId: widget.room.client.userID!,
       content: messageContent,
@@ -173,15 +218,13 @@ class SendLaterDialogState extends State<SendLaterDialog> {
       threadLastEventId: widget.thread?.lastEvent?.eventId,
     );
 
-    // Save to local storage
     await ScheduledMessagesService.addScheduledMessage(scheduledMessage);
 
-    // Show success and close
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Message scheduled for ${_formatSelected()}'),
-          duration: const Duration(seconds: 3),
+          content: Text('Scheduled locally for ${_formatSelected()} (keep app open)'),
+          duration: const Duration(seconds: 5),
         ),
       );
       Navigator.of(context).pop();

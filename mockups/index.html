@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plusly — App Mockups</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0a0a0a;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 40px 20px;
+}
+.header {
+  text-align: center; margin-bottom: 40px;
+}
+.header h1 {
+  font-size: 28px; font-weight: 800; letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #a78bfa, #7c3aed);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.header p { color: #666; margin-top: 8px; font-size: 15px; }
+
+.phones {
+  display: flex; gap: 24px; flex-wrap: wrap; justify-content: center;
+}
+.phone-wrapper {
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.phone-label {
+  color: #888; font-size: 13px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.phone {
+  width: 350px; height: 758px;
+  background: #121212;
+  border-radius: 36px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  display: flex; flex-direction: column; position: relative;
+}
+.phone iframe { width: 100%; height: 100%; border: none; border-radius: 36px; }
+
+.cta {
+  margin-top: 40px; text-align: center;
+}
+.cta a {
+  display: inline-block; padding: 14px 32px; background: #7c3aed;
+  color: #fff; text-decoration: none; border-radius: 12px;
+  font-weight: 600; font-size: 15px; transition: background 0.2s;
+}
+.cta a:hover { background: #6d28d9; }
+.cta .sub { color: #555; font-size: 13px; margin-top: 8px; }
+
+.footer { color: #444; font-size: 12px; margin-top: 24px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>Plusly</h1>
+  <p>A modern, private Matrix client — built with Flutter</p>
+</div>
+
+<div class="phones">
+  <div class="phone-wrapper">
+    <span class="phone-label">Chats</span>
+    <div class="phone">
+      <iframe src="screen1-chat-list.html"></iframe>
+    </div>
+  </div>
+  <div class="phone-wrapper">
+    <span class="phone-label">Conversation</span>
+    <div class="phone">
+      <iframe src="screen2-conversation.html"></iframe>
+    </div>
+  </div>
+  <div class="phone-wrapper">
+    <span class="phone-label">Settings</span>
+    <div class="phone">
+      <iframe src="screen3-settings.html"></iframe>
+    </div>
+  </div>
+</div>
+
+<div class="cta">
+  <a href="https://github.com/danield76799/Plusly" target="_blank">⭐ View on GitHub</a>
+   <div class="sub">Open source • End-to-end encrypted</div>
+</div>
+
+<div class="footer">Plusly — A Flutter Matrix Client</div>
+</body>
+</html>

@@ -11,7 +11,7 @@ on:
 
 concurrency:
   group: main_deploy
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build_android:
@@ -29,10 +29,11 @@ jobs:
           distribution: 'zulu'
           cache: 'gradle'
 
-      - name: Setup Flutter
-        run: |
-          git clone --depth 1 https://github.com/flutter/flutter.git -b stable
-          echo "$PWD/flutter/bin" >> $GITHUB_PATH
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
@@ -45,189 +46,159 @@ jobs:
             flutter-deps-${{ runner.os }}-
 
       - name: Verify Flutter
-        run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter --version
+        run: flutter --version
 
       - name: Clean Flutter build
-        run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter clean
+        run: flutter clean
 
       - name: Generate localization
-        run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter gen-l10n
+        run: flutter gen-l10n
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
 
       - name: Generate assets
         run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter pub run flutter_launcher_icons:main
-          flutter pub run flutter_native_splash:create
+          dart run flutter_launcher_icons:main
+          dart run flutter_native_splash:create
 
-      # === SETUP RUBY & FASTLANE (needed for Play Store operations) ===
-      - name: Setup Ruby & Fastlane
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.3'
-          bundler-cache: true
+      - name: Read version
+        id: bump
+        run: |
+          VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
+          VERSION_NAME=$(echo "$VERSION" | sed 's/+.*//')
+          BUILD_NUMBER=$(echo "$VERSION" | sed 's/.*+//')
+          
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "full_version=${VERSION_NAME}+${BUILD_NUMBER}" >> $GITHUB_OUTPUT
+          echo "Using version ${VERSION_NAME}+${BUILD_NUMBER}"
 
-      - name: Install gems
-        working-directory: android
-        run: bundle install
-
-      # === AAB BUILD + SIGNING ===
-      - name: Setup Play Store signing
+      # === SIGNING SETUP (optional — uses debug signing if secrets missing) ===
+      - name: Setup signing
+        id: signing
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-          PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
         run: |
-          cd android/app
-          echo "$KEYSTORE_BASE64" | base64 -d > upload-keystore.jks
-          cd ..
-          cat > key.properties << EOF
-          storePassword=$KEYSTORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=$KEY_ALIAS
-          storeFile=upload-keystore.jks
-          EOF
-          # Only create keys.json if PLAYSTORE_DEPLOY_KEY is set
-          if [ -n "$PLAYSTORE_DEPLOY_KEY" ]; then
-            echo "$PLAYSTORE_DEPLOY_KEY" > keys.json
-            echo "has_playstore_key=true" >> $GITHUB_OUTPUT
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+            echo "storePassword=$KEYSTORE_PASSWORD" > android/key.properties
+            echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+            echo "keyAlias=$KEY_ALIAS" >> android/key.properties
+            echo "storeFile=upload-keystore.jks" >> android/key.properties
+            echo "=== key.properties ==="
+            cat android/key.properties
+            echo "=== Keystore SHA1 ==="
+            keytool -list -v -keystore android/app/upload-keystore.jks -storepass "$KEYSTORE_PASSWORD" 2>&1 | grep -E "SHA1|Alias|Owner"
+            echo "has_signing=true" >> $GITHUB_OUTPUT
+            echo "Signing configured"
           else
-            echo "has_playstore_key=false" >> $GITHUB_OUTPUT
+            echo "has_signing=false" >> $GITHUB_OUTPUT
+            echo "WARNING: No signing secrets found — using debug signing"
           fi
-          cd ..
 
-      # === APK BUILD (after signing setup) ===
-      - name: Build Signed Android APK
+      # === APK BUILD (split per architecture — 32-bit + 64-bit) ===
+      - name: Build Android APK (split ABIs)
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          # Debug: Check if keystore exists
-          ls -la android/app/upload-keystore.jks || echo "Keystore not found!"
-          cat android/key.properties || echo "key.properties not found!"
-          # Build APK
-          flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
+          flutter build apk --release --split-per-abi --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
           mkdir -p output
-          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
-          ls -la output/
-        continue-on-error: true
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
 
-      - name: Get next build number from Play Store
-        id: build_number
-        working-directory: android
-        run: |
-          # Check if we have a Play Store key
-          if [ -f keys.json ] && [ -s keys.json ]; then
-            bundle exec fastlane run google_play_track_version_codes track:internal json_key:keys.json > /tmp/version_codes.txt
-            LAST_VERSION=$(grep -o '[0-9]\+' /tmp/version_codes.txt | head -1)
-            NEXT_VERSION=$((LAST_VERSION + 1))
-            echo "last_version=$LAST_VERSION" >> $GITHUB_OUTPUT
-            echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
-            echo "Last Play Store version: $LAST_VERSION"
-            echo "Next version: $NEXT_VERSION"
-          else
-            # Fallback: use current pubspec build number + 1
-            CURRENT_BUILD=$(grep "^version:" ../pubspec.yaml | grep -o '+[0-9]\+' | tr -d '+')
-            if [ -z "$CURRENT_BUILD" ]; then
-              CURRENT_BUILD=0
-            fi
-            NEXT_VERSION=$((CURRENT_BUILD + 1))
-            echo "last_version=$CURRENT_BUILD" >> $GITHUB_OUTPUT
-            echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
-            echo "No Play Store key found, using local build: $NEXT_VERSION"
-          fi
-
-      - name: Update pubspec version
-        run: |
-          NEXT_VERSION=${{ steps.build_number.outputs.next_version }}
-          sed -i "s/^version: .*/version: 1.1.0+$NEXT_VERSION/" pubspec.yaml
-          cat pubspec.yaml | grep "^version:"
-
+      # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter build appbundle \
-            --release \
-            --target-platform android-arm,android-arm64,android-x64 \
-            --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
-          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
-        continue-on-error: true
+          flutter build appbundle --release --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
+          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab || true
 
-      # === UPLOAD ARTIFACTS ===
-      - name: Upload Build Log
+      # === VERIFY OUTPUTS ===
+      - name: List build outputs
+        run: |
+          echo "=== Build outputs ==="
+          ls -la output/ || echo "No output directory"
+          echo "=== APK files ==="
+          find build/app/outputs -name "*.apk" -type f || echo "No APK files found"
+          echo "=== AAB files ==="
+          find build/app/outputs -name "*.aab" -type f || echo "No AAB files found"
+          echo "=== AAB size ==="
+          ls -lh build/app/outputs/bundle/release/app-release.aab || echo "AAB not found"
+
+      # === UPLOAD ARTIFACTS (split — download only what you need) ===
+      - name: Upload armeabi-v7a APK
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: android-build-log
-          path: build.log
-          retention-days: 3
+          name: plusly-armeabi-v7a-apk
+          path: output/plusly-armeabi-v7a-release.apk
+          retention-days: 30
 
-      - name: Upload APK Artifacts
+      - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: android-apk
-          path: output/plusly-release.apk
-          retention-days: 7
+          name: plusly-arm64-v8a-apk
+          path: output/plusly-arm64-v8a-release.apk
+          retention-days: 30
 
-      - name: Upload AAB Artifacts
+      - name: Upload AAB (Play Store)
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: android-aab
+          name: plusly-aab-playstore
           path: output/plusly-release.aab
-          retention-days: 7
+          retention-days: 30
 
-      # === PLAY STORE DEPLOY ===
+      # === PLAY STORE DEPLOY (optional — only if key exists) ===
+      - name: Setup Play Store key
+        id: playstore
+        env:
+          PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
+        run: |
+          if [ -n "$PLAYSTORE_DEPLOY_KEY" ]; then
+            echo "$PLAYSTORE_DEPLOY_KEY" | base64 -d > android/keys.json
+            echo "has_key=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_key=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Ruby & Fastlane
+        if: steps.playstore.outputs.has_key == 'true'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
       - name: Deploy to Play Store
-        run: bundle exec fastlane deploy_internal_test
+        if: steps.playstore.outputs.has_key == 'true'
         working-directory: android
+        run: bundle exec fastlane deploy_internal_test
 
       # === GITHUB RELEASE ===
-      - name: Get version from pubspec
-        id: version
-        run: |
-          VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
-          echo "Full version: $VERSION"
-          # Extract just the version without build suffix (e.g., "1.3.0" from "1.3.0+927")
-          VERSION_NAME=$(echo "$VERSION" | sed 's/+.*//')
-          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
-          echo "full_version=$VERSION" >> $GITHUB_OUTPUT
-
       - name: Create Release
+        id: release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.version_name }}
-          name: Plusly v${{ steps.version.outputs.version_name }}
-          files: |
-            output/plusly-release.apk
-            output/plusly-release.aab
-          body: |
-            ## Plusly v${{ steps.version.outputs.version_name }}
-            
-            **Build info:**
-            - Version: ${{ steps.version.outputs.full_version }}
-            - Build number: ${{ github.run_number }}
-            - Commit: ${{ github.sha }}
-            
-            **Wijzigingen in deze build:**
-            - APK build verbeterd voor directe installatie
-            - Play Store AAB beschikbaar voor store upload
-            - Signing configuratie geoptimaliseerd
-            
-            **Installatie opties:**
-            - Download APK voor directe installatie (Android)
-            - Download AAB voor Play Store upload
-            
-            **Let op:** Dit is een automatische build.
-          generate_release_notes: false
+          tag_name: v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
+          name: Plusly v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
+          files: output/*
+          generate_release_notes: true
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # === NOTIFY ON FAILURE ===
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Build failed! Check logs above for details."
+          echo "Common causes:"
+          echo "  - Missing signing secrets (KEYSTORE_BASE64, etc.)"
+          echo "  - Flutter build errors"
+          echo "  - Dependency conflicts"

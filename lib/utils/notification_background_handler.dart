@@ -159,7 +159,7 @@ Future<void> notificationTap(
             : '/rooms/$roomId',
       );
     case NotificationResponseType.selectedNotificationAction:
-      final actionType = FluffyChatNotificationActions.values.singleWhereOrNull(
+      final actionType = PluslyNotificationActions.values.singleWhereOrNull(
         (action) => action.name == notificationResponse.actionId,
       );
       if (actionType == null) {
@@ -179,13 +179,13 @@ Future<void> notificationTap(
         );
       }
       switch (actionType) {
-        case FluffyChatNotificationActions.markAsRead:
+        case PluslyNotificationActions.markAsRead:
           await room.setReadMarker(
             payload.eventId ?? room.lastEvent!.eventId,
             mRead: payload.eventId ?? room.lastEvent!.eventId,
             public: shouldSendPublicReadReceipts(client, roomId),
           );
-        case FluffyChatNotificationActions.reply:
+        case PluslyNotificationActions.reply:
           final input = notificationResponse.input;
           if (input == null || input.isEmpty) {
             throw Exception(
@@ -250,7 +250,7 @@ Future<void> notificationTap(
                   enableVibration: false,
                   actions: <AndroidNotificationAction>[
                     AndroidNotificationAction(
-                      FluffyChatNotificationActions.reply.name,
+                      PluslyNotificationActions.reply.name,
                       l10n.reply,
                       inputs: [
                         AndroidNotificationActionInput(
@@ -262,7 +262,7 @@ Future<void> notificationTap(
                       semanticAction: SemanticAction.reply,
                     ),
                     AndroidNotificationAction(
-                      FluffyChatNotificationActions.markAsRead.name,
+                      PluslyNotificationActions.markAsRead.name,
                       l10n.markAsRead,
                       semanticAction: SemanticAction.markAsRead,
                     ),
@@ -280,4 +280,4 @@ Future<void> notificationTap(
   }
 }
 
-enum FluffyChatNotificationActions { markAsRead, reply }
+enum PluslyNotificationActions { markAsRead, reply }

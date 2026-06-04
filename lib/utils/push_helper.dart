@@ -25,9 +25,9 @@ class PushHelper {
   final PushNotification notification;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   final bool useNotificationActions;
-  late Client client;
-  late Event event;
-  late bool isBackgroundMessage;
+  Client? client;
+  Event? event;
+  bool? isBackgroundMessage;
   L10n? l10n;
 
   PushHelper._(
@@ -118,7 +118,7 @@ class PushHelper {
 
       final event = await client.getEventByPushNotification(
         notification,
-        storeInDatabase: helper.isBackgroundMessage,
+        storeInDatabase: helper.isBackgroundMessage ?? false,
       );
 
       if (event == null) {
@@ -194,25 +194,30 @@ class PushHelper {
 
   Future<void> _showNotification() async {
     try {
-      if (event.type.startsWith('m.call')) {
+      if (client == null || event == null) {
+        Logs().e('PushHelper: client or event is null, cannot show notification');
+        return;
+      }
+
+      if (event!.type.startsWith('m.call')) {
         // make sure bg sync is on (needed to update hold, unhold events)
         // prevent over write from app life cycle change
-        client.backgroundSync = true;
+        client!.backgroundSync = true;
       }
 
-      if (event.type == EventTypes.CallHangup) {
-        client.backgroundSync = false;
+      if (event!.type == EventTypes.CallHangup) {
+        client!.backgroundSync = false;
       }
 
-      if (event.type.startsWith('m.call') &&
-          event.type != EventTypes.CallInvite) {
+      if (event!.type.startsWith('m.call') &&
+          event!.type != EventTypes.CallInvite) {
         Logs().v('Push message is a m.call but not invite. Do not display.');
         return;
       }
 
-      if ((event.type.startsWith('m.call') &&
-              event.type != EventTypes.CallInvite) ||
-          event.type == 'org.matrix.call.sdp_stream_metadata_changed') {
+      if ((event!.type.startsWith('m.call') &&
+              event!.type != EventTypes.CallInvite) ||
+          event!.type == 'org.matrix.call.sdp_stream_metadata_changed') {
         Logs().v('Push message was for a call, but not call invite.');
         return;
       }
@@ -221,9 +226,9 @@ class PushHelper {
       final matrixLocals = MatrixLocals(l10n!);
 
       // Calculate the body
-      final body = event.type == EventTypes.Encrypted
+      final body = event!.type == EventTypes.Encrypted
           ? '💬 New message in ${AppConfig.applicationName}'
-          : await event.calcLocalizedBody(
+          : await event!.calcLocalizedBody(
               matrixLocals,
               plaintextBody: true,
               withSenderNamePrefix: false,
@@ -232,13 +237,13 @@ class PushHelper {
               removeMarkdown: true,
             );
 
-      final title = event.room.getLocalizedDisplayname(matrixLocals);
-      final roomName = event.room.getLocalizedDisplayname(matrixLocals);
+      final title = event!.room.getLocalizedDisplayname(matrixLocals);
+      final roomName = event!.room.getLocalizedDisplayname(matrixLocals);
 
-      final notificationGroupId = event.room.isDirectChat
+      final notificationGroupId = event!.room.isDirectChat
           ? 'directChats'
           : 'groupChats';
-      final groupName = event.room.isDirectChat
+      final groupName = event!.room.isDirectChat
           ? l10n!.directChats
           : l10n!.groups;
 
@@ -247,7 +252,7 @@ class PushHelper {
         groupName,
       );
       final roomsChannel = AndroidNotificationChannel(
-        event.room.id,
+        event!.room.id,
         roomName,
         groupId: notificationGroupId,
       );
@@ -276,9 +281,9 @@ class PushHelper {
         body: body,
         notificationDetails: platformChannelSpecifics,
         payload: NotificationPushPayload(
-          client.clientName,
-          event.room.id,
-          event.eventId,
+          client!.clientName,
+          event!.room.id,
+          event!.eventId,
         ).toString(),
       );
       Logs().v('Push helper has been completed!');
@@ -294,26 +299,30 @@ class PushHelper {
     String notificationTitle,
     String roomName,
   ) async {
+    if (client == null || event == null) {
+      throw StateError('PushHelper: client or event is null in _getPlatformChannelSpecifics');
+    }
+
     // The person object for the android message style notification
-    final avatar = event.room.avatar;
-    final senderAvatar = event.room.isDirectChat
+    final avatar = event!.room.avatar;
+    final senderAvatar = event!.room.isDirectChat
         ? avatar
-        : event.senderFromMemoryOrFallback.avatarUrl;
+        : event!.senderFromMemoryOrFallback.avatarUrl;
 
-    final roomAvatarFile = await _getAvatarFile(client, avatar);
-    final senderAvatarFile = event.room.isDirectChat
+    final roomAvatarFile = await _getAvatarFile(client!, avatar);
+    final senderAvatarFile = event!.room.isDirectChat
         ? roomAvatarFile
-        : await _getAvatarFile(client, senderAvatar);
+        : await _getAvatarFile(client!, senderAvatar);
 
-    final senderName = event.senderFromMemoryOrFallback.calcDisplayname();
+    final senderName = event!.senderFromMemoryOrFallback.calcDisplayname();
 
     // Show notification
     final newMessage = Message(
       notificationBody,
-      event.originServerTs,
+      event!.originServerTs,
       Person(
-        bot: event.messageType == MessageTypes.Notice,
-        key: event.senderId,
+        bot: event!.messageType == MessageTypes.Notice,
+        key: event!.senderId,
         name: senderName,
         icon: senderAvatarFile == null
             ? null
@@ -337,9 +346,9 @@ class PushHelper {
       AppConfig.pushNotificationsChannelId,
       l10n!.incomingMessages,
       number: notification.counts?.unread,
-      subText: client.clientName,
+      subText: client!.clientName,
       category: AndroidNotificationCategory.message,
-      shortcutId: event.room.id,
+      shortcutId: event!.room.id,
       styleInformation:
           messagingStyleInformation ??
           MessagingStyleInformation(
@@ -348,29 +357,29 @@ class PushHelper {
               icon: roomAvatarFile == null
                   ? null
                   : ByteArrayAndroidIcon(roomAvatarFile),
-              key: event.roomId,
-              important: event.room.isFavourite,
+              key: event!.roomId,
+              important: event!.room.isFavourite,
             ),
-            conversationTitle: event.room.isDirectChat ? null : roomName,
-            groupConversation: !event.room.isDirectChat,
+            conversationTitle: event!.room.isDirectChat ? null : roomName,
+            groupConversation: !event!.room.isDirectChat,
             messages: [newMessage],
           ),
-      ticker: event.calcLocalizedBodyFallback(
+      ticker: event!.calcLocalizedBodyFallback(
         matrixLocals,
         plaintextBody: true,
-        withSenderNamePrefix: !event.room.isDirectChat,
+        withSenderNamePrefix: !event!.room.isDirectChat,
         hideReply: true,
         hideEdit: true,
         removeMarkdown: true,
       ),
       importance: Importance.high,
       priority: Priority.max,
-      groupKey: event.room.spaceParents.firstOrNull?.roomId ?? 'rooms',
-      actions: event.type == EventTypes.RoomMember || !useNotificationActions
+      groupKey: event!.room.spaceParents.firstOrNull?.roomId ?? 'rooms',
+      actions: event!.type == EventTypes.RoomMember || !useNotificationActions
           ? null
           : <AndroidNotificationAction>[
               AndroidNotificationAction(
-                FluffyChatNotificationActions.reply.name,
+                PluslyNotificationActions.reply.name,
                 l10n!.reply,
                 inputs: [
                   AndroidNotificationActionInput(label: l10n!.writeAMessage),
@@ -380,7 +389,7 @@ class PushHelper {
                 semanticAction: SemanticAction.reply,
               ),
               AndroidNotificationAction(
-                FluffyChatNotificationActions.markAsRead.name,
+                PluslyNotificationActions.markAsRead.name,
                 l10n!.markAsRead,
                 semanticAction: SemanticAction.markAsRead,
               ),
@@ -397,19 +406,21 @@ class PushHelper {
   /// notification. This is optional but provides a nicer view of the
   /// notification popup.
   Future<void> _setShortcut(String title, Uint8List? avatarFile) async {
+    if (event == null) return;
+
     final flutterShortcuts = FlutterShortcuts();
     await flutterShortcuts.initialize(debug: !kReleaseMode);
     await flutterShortcuts.pushShortcutItem(
       shortcut: ShortcutItem(
-        id: event.room.id,
-        action: AppConfig.inviteLinkPrefix + event.room.id,
+        id: event!.room.id,
+        action: AppConfig.inviteLinkPrefix + event!.room.id,
         shortLabel: title,
         conversationShortcut: true,
         icon: avatarFile == null ? null : base64Encode(avatarFile),
         shortcutIconAsset: avatarFile == null
             ? ShortcutIconAsset.androidAsset
             : ShortcutIconAsset.memoryAsset,
-        isImportant: event.room.isFavourite,
+        isImportant: event!.room.isFavourite,
       ),
     );
   }
