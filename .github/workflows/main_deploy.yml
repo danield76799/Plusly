@@ -62,17 +62,30 @@ jobs:
           dart run flutter_launcher_icons:main
           dart run flutter_native_splash:create
 
-      - name: Read version
+      - name: Bump build number
         id: bump
         run: |
           VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
           VERSION_NAME=$(echo "$VERSION" | sed 's/+.*//')
           BUILD_NUMBER=$(echo "$VERSION" | sed 's/.*+//')
-          
+          NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
+
+          # Update pubspec.yaml
+          sed -i "s/^version: .*/version: ${VERSION_NAME}+${NEW_BUILD_NUMBER}/" pubspec.yaml
+
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
-          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
-          echo "full_version=${VERSION_NAME}+${BUILD_NUMBER}" >> $GITHUB_OUTPUT
-          echo "Using version ${VERSION_NAME}+${BUILD_NUMBER}"
+          echo "build_number=$NEW_BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "full_version=${VERSION_NAME}+${NEW_BUILD_NUMBER}" >> $GITHUB_OUTPUT
+          echo "Bumped ${VERSION_NAME}+${BUILD_NUMBER} → ${VERSION_NAME}+${NEW_BUILD_NUMBER}"
+
+      # === COMMIT VERSION BUMP ===
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          git diff --cached --quiet || git commit -m "Bump version to ${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}"
+          git push
 
       # === SIGNING SETUP (optional — uses debug signing if secrets missing) ===
       - name: Setup signing
