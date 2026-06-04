@@ -11,14 +11,15 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
-import 'package:Pulsly/utils/sync_debugger.dart';
+import 'package:Pulsly/config/feature_flags.dart';
 import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/error_widget.dart';
 import 'config/setting_keys.dart';
 import 'utils/background_push.dart';
-import 'widgets/fluffy_chat_app.dart';
+import 'widgets/plusly_app.dart';
 
 ReceivePort? mainIsolateReceivePort;
 
@@ -82,6 +83,10 @@ void main() async {
 }
 
 Future<void> _initializeApp() async {
+  // 🆕 Initialiseer feature flags vroeg in de startup
+  await FeatureFlags.init();
+  Logs().i('[FeatureFlags] Initialized. useNewPushSystem=${FeatureFlags.useNewPushSystem}');
+
   Logs().i('Welcome to ${AppConfig.applicationName}! Wonderhoy!!');
 
   if (PlatformInfos.isAndroid) {
@@ -165,9 +170,9 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 
-  ErrorWidget.builder = (details) => FluffyChatErrorWidget(details);
+  ErrorWidget.builder = (details) => PluslyErrorWidget(details);
   Logs().w("${clients.length} clients");
-  runApp(FluffyChatApp(clients: clients, pincode: pin, store: store));
+  runApp(PluslyApp(clients: clients, pincode: pin, store: store));
 }
 
 /// Watches the lifecycle changes to start the application when it

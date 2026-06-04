@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plusly — Chat List</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0f0f0f; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+.phone {
+  width: 390px; height: 844px;
+  background: #121212;
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.status-bar {
+  height: 54px; background: #121212;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 28px 0;
+  color: #fff; font-size: 14px; font-weight: 600;
+}
+.status-bar .time { font-size: 15px; }
+.status-icons { display: flex; gap: 6px; font-size: 13px; }
+.app-bar {
+  height: 56px; display: flex; align-items: center; padding: 0 16px;
+  justify-content: space-between;
+}
+.app-bar h1 { color: #fff; font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+.app-bar .avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 15px;
+}
+.search-bar {
+  margin: 0 16px 8px; height: 40px; background: #1e1e1e;
+  border-radius: 12px; display: flex; align-items: center;
+  padding: 0 14px; gap: 8px;
+}
+.search-bar span { color: #666; font-size: 15px; }
+.chat-list { overflow-y: auto; height: calc(844px - 54px - 56px - 48px - 80px); }
+.chat-item {
+  display: flex; align-items: center; padding: 12px 16px; gap: 12px;
+  cursor: pointer; transition: background 0.15s;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.chat-item:hover { background: rgba(255,255,255,0.04); }
+.chat-avatar {
+  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px; color: #fff; position: relative;
+}
+.online-dot {
+  width: 12px; height: 12px; border-radius: 50%; background: #22c55e;
+  position: absolute; bottom: 1px; right: 1px;
+  border: 2.5px solid #121212;
+}
+.chat-content { flex: 1; min-width: 0; }
+.chat-header { display: flex; justify-content: space-between; align-items: baseline; }
+.chat-name { color: #fff; font-size: 16px; font-weight: 600; }
+.chat-time { color: #666; font-size: 12px; }
+.chat-preview { color: #888; font-size: 14px; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-preview .encrypted { color: #22c55e; margin-right: 4px; }
+.unread-badge {
+  background: #7c3aed; color: #fff; font-size: 12px; font-weight: 700;
+  min-width: 20px; height: 20px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; padding: 0 6px;
+}
+.nav-bar {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
+  background: #121212; border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; justify-content: space-around; align-items: center;
+  padding-bottom: 20px;
+}
+.nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.nav-icon { font-size: 22px; }
+.nav-label { font-size: 10px; color: #888; font-weight: 500; }
+.nav-item.active .nav-label { color: #a78bfa; }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 8px rgba(167,139,250,0.4)); }
+
+.avatar-purple { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+.avatar-pink { background: linear-gradient(135deg, #ec4899, #be185d); }
+.avatar-blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.avatar-green { background: linear-gradient(135deg, #22c55e, #15803d); }
+.avatar-orange { background: linear-gradient(135deg, #f97316, #c2410c); }
+.avatar-teal { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+.avatar-rose { background: linear-gradient(135deg, #f43f5e, #9f1239); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <span class="status-icons">●●●●○ &nbsp;WiFi &nbsp;🔋 85%</span>
+  </div>
+  <div class="app-bar">
+    <h1>Plusly</h1>
+    <div class="avatar">D</div>
+  </div>
+  <div class="search-bar">
+    <span>🔍</span><span style="color:#666">Search conversations...</span>
+  </div>
+  <div class="chat-list">
+    <div class="chat-item">
+      <div class="chat-avatar avatar-purple"><span>NL</span><div class="online-dot"></div></div>
+      <div class="chat-content">
+        <div class="chat-header"><span class="chat-name">Nederlandse Matrix Community</span><span class="chat-time">09:32</span></div>
+        <div class="chat-preview"><span class="encrypted">🔒</span> Marie: Heeft iemand de nieuwe Plusly update al?</div>
+      </div>
+      <div class="unread-badge">3</div>
+    </div>
+    <div class="chat-item">
+      <div class="chat-avatar avatar-pink"><span>SB</span><div class="online-dot"></div></div>
+      <div class="chat-content">
+        <div class="chat-header"><span class="chat-name">Sophie B.</span><span class="chat-time">09:15</span></div>
+        <div class="chat-preview"><span class="encrypted">🔒</span> Yes! I'll bring the design files to the…</div>
+      </div>
+    </div>
+    <div class="chat-item">
+      <div class="chat-avatar avatar-blue"><span>TK</span></div>
+      <div class="chat-content">
+        <div class="chat-header"><span class="chat-name">Tom & Kim</span><span class="chat-time">Yesterday</span></div>
+        <div class="chat-preview"><span class="encrypted">🔒</span> Tom: Dinner at 8? 🍕</div>
+      </div>
+      <div class="unread-badge">1</div>
+    </div>
+    <div class="chat-item">
+      <div class="chat-avatar avatar-green"><span>OS</span><div class="online-dot"></div></div>
+      <div class="chat-content">
+        <div class="chat-header"><span class="chat-name">Open Source Chat</span><span class="chat-time">Yesterday</span></div>
+        <div class="chat-preview"><span class="encrypted">🔒</span> Alex: Just pushed a new PR for the Flutter…</div>
+      </div>
+    </div>
+    <div class="chat-item">
+      <div class="chat-avatar avatar-orange"><span>FL</span></div>
+      <div class="chat-content">
+        <div class="chat-header"><span class="chat-name">Flutter Devs NL</span><span class="chat-time">Monday</span></div>
+        <div class="chat-preview"><span class="encrypted">🔒</span> You: Ik gebruik Plusly nu als dagelijkse…</div>
+      </div>
+    </div>
+    <div class="chat-item">
+      <div class="chat-avatar avatar-teal"><span>MT</span></div>
+      <div class="chat-content">
+        <div class="chat-header"><span class="chat-name">Matrix Tips & Tricks</span><span class="chat-time">Monday</span></div>
+        <div class="chat-preview"><span class="encrypted">🔒</span> New bot: auto-translate bridges now in beta</div>
+      </div>
+    </div>
+    <div class="chat-item">
+      <div class="chat-avatar avatar-rose"><span>EM</span></div>
+      <div class="chat-content">
+        <div class="chat-header"><span class="chat-name">Eline M.</span><span class="chat-time">Sunday</span></div>
+        <div class="chat-preview"><span class="encrypted">🔒</span> Stuur je de foto's van gister nog door?</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-bar">
+    <div class="nav-item active"><span class="nav-icon">💬</span><span class="nav-label">Chats</span></div>
+    <div class="nav-item"><span class="nav-icon">👥</span><span class="nav-label">Spaces</span></div>
+    <div class="nav-item"><span class="nav-icon">🔔</span><span class="nav-label">Notifications</span></div>
+    <div class="nav-item"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></div>
+  </div>
+</div>
+</body>
+</html>

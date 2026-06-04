@@ -176,7 +176,7 @@ class MessageContent extends StatelessWidget {
             if (PlatformInfos.isMobile ||
                 PlatformInfos.isMacOS ||
                 PlatformInfos.isWeb ||
-                // Extera Next is not being built for snap, so enable this.
+                // Plusly is not being built for snap, so enable this.
                 PlatformInfos.isLinux) {
               return AudioPlayerWidget(
                 event,

@@ -7,10 +7,12 @@ import 'package:mime/mime.dart';
 /// Helper class to resize images before upload
 class ImageResizer {
   /// Max dimension (width or height) for resized images
+  /// 1200px = goed genoeg voor chat, veel kleiner bestand
   static const int maxDimension = 1200;
   
   /// JPEG quality for resized images (0-100)
-  static const int quality = 40;
+  /// 70 = snellere encoding, nog steeds goede kwaliteit voor chat
+  static const int quality = 70;
 
   /// Resize an image file if it's an image, returning a MatrixImageFile
   /// Returns null if the file is not an image
@@ -30,12 +32,8 @@ class ImageResizer {
 
       // Check if resize is needed
       if (image.width <= maxDimension && image.height <= maxDimension) {
-        // No resize needed, return original
-        return MatrixImageFile.create(
-          bytes: bytes,
-          name: xfile.name,
-          mimeType: mimeType,
-        );
+        // No resize needed, return original directly (skip MatrixImageFile.create)
+        return null; // Let caller use original file directly
       }
 
       // Calculate new dimensions maintaining aspect ratio

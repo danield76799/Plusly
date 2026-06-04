@@ -50,13 +50,22 @@ class _ScheduledMessagesViewState extends State<ScheduledMessagesView> with Sing
   }
 }
 
-class _PendingMessagesTab extends StatelessWidget {
+class _PendingMessagesTab extends StatefulWidget {
   const _PendingMessagesTab();
+
+  @override
+  State<_PendingMessagesTab> createState() => _PendingMessagesTabState();
+}
+
+class _PendingMessagesTabState extends State<_PendingMessagesTab> {
+  Future<List<ScheduledMessage>> _loadMessages() async {
+    return await ScheduledMessagesService.loadScheduledMessages();
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<ScheduledMessage>>(
-      future: ScheduledMessagesService.loadScheduledMessages(),
+      future: _loadMessages(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator.adaptive());
@@ -96,7 +105,10 @@ class _PendingMessagesTab extends StatelessWidget {
           itemCount: pendingMessages.length,
           itemBuilder: (context, index) {
             final message = pendingMessages[index];
-            return _ScheduledMessageTile(message: message);
+            return _ScheduledMessageTile(
+              message: message,
+              onCancel: () => setState(() {}),  // ← Ververs de lijst!
+            );
           },
         );
       },
@@ -301,8 +313,9 @@ class _MissedMessageTile extends StatelessWidget {
 
 class _ScheduledMessageTile extends StatelessWidget {
   final ScheduledMessage message;
+  final VoidCallback? onCancel;
 
-  const _ScheduledMessageTile({required this.message});
+  const _ScheduledMessageTile({required this.message, this.onCancel});
 
   String _formatScheduledTime(BuildContext context) {
     final scheduled = message.scheduledAt;
@@ -346,13 +359,18 @@ class _ScheduledMessageTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isServerScheduled = message.delayId != null;
 
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: theme.colorScheme.primaryContainer,
+        backgroundColor: isServerScheduled
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.surfaceContainerHighest,
         child: Icon(
-          Icons.schedule,
-          color: theme.colorScheme.onPrimaryContainer,
+          isServerScheduled ? Icons.cloud_outlined : Icons.phone_android,
+          color: isServerScheduled
+              ? theme.colorScheme.onPrimaryContainer
+              : theme.colorScheme.onSurfaceVariant,
         ),
       ),
       title: Text(
@@ -386,6 +404,26 @@ class _ScheduledMessageTile extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(
+                  color: isServerScheduled
+                      ? theme.colorScheme.primary.withOpacity(0.1)
+                      : theme.colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  isServerScheduled ? 'Server' : 'Local',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                    color: isServerScheduled
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
             ],
           ),
         ],
@@ -393,11 +431,17 @@ class _ScheduledMessageTile extends StatelessWidget {
       trailing: IconButton(
         icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
         onPressed: () async {
+          final isServerScheduled = message.delayId != null;
+          
           final confirm = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
               title: const Text('Cancel scheduled message?'),
-              content: const Text('This message will not be sent.'),
+              content: Text(
+                isServerScheduled
+                    ? 'This will try to cancel the message on the server. If the server does not support cancellation, the message will still be sent.'
+                    : 'This message is scheduled locally. It will only be removed from this device.',
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
@@ -415,11 +459,24 @@ class _ScheduledMessageTile extends StatelessWidget {
           );
 
           if (confirm == true) {
-            await ScheduledMessagesService.removeScheduledMessage(message.id);
-            // Force rebuild
-            if (context.mounted) {
-              (context as Element).markNeedsBuild();
+            final client = Matrix.of(context).client;
+            if (isServerScheduled) {
+              // Try server-side cancel
+              final success = await ScheduledMessagesService.cancelScheduledMessage(client, message.id);
+              if (!success && context.mounted) {
+                // Server doesn't support cancel — remove from local list anyway
+                await ScheduledMessagesService.removeScheduledMessage(message.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Server does not support cancellation. Message will still be sent.'),
+                    duration: Duration(seconds: 5),
+                  ),
+                );
+              }
+            } else {
+              await ScheduledMessagesService.removeScheduledMessage(message.id);
             }
+            onCancel?.call();
           }
         },
       ),

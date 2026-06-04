@@ -25,10 +25,13 @@ import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/uia_request_manager.dart';
 import 'package:Pulsly/utils/voip_plugin.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
-import 'package:Pulsly/widgets/fluffy_chat_app.dart';
+import 'package:Pulsly/widgets/plusly_app.dart';
 import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import '../config/app_config.dart';
+import '../config/feature_flags.dart';
 import '../config/setting_keys.dart';
+import '../features/push/push_module.dart';
+import '../features/push/presentation/notification_router.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
@@ -72,6 +75,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   bool? loginRegistrationSupported;
 
   BackgroundPush? backgroundPush;
+
+  /// 🆕 Nieuwe push controller (achter feature flag)
+  PushController? _pushController;
 
   Client get client {
     if (_activeClient < 0 || _activeClient >= widget.clients.length) {
@@ -166,7 +172,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
                 );
                 _registerSubs(_loginClientCandidate!.clientName);
                 _loginClientCandidate = null;
-                FluffyChatApp.router.go('/rooms');
+                PluslyApp.router.go('/rooms');
               });
     if (widget.clients.isEmpty) widget.clients.add(candidate);
     return candidate;
@@ -199,9 +205,18 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   bool webHasFocus = true;
 
   String? get activeRoomId {
-    final route = FluffyChatApp.router.routeInformationProvider.value.uri.path;
+    final route = PluslyApp.router.routeInformationProvider.value.uri.path;
     if (!route.startsWith('/rooms/')) return null;
     return route.split('/')[2];
+  }
+
+  /// 🆕 Update push controller met huidige room (voor foreground detection)
+  void _updatePushActiveRoom() {
+    if (_pushController != null) {
+      final roomId = activeRoomId;
+      final activeClient = roomId != null ? client : null;
+      _pushController!.setActiveRoom(roomId, activeClient);
+    }
   }
 
   final linuxNotifications = PlatformInfos.isLinux
@@ -266,14 +281,14 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
                   KeyVerificationState.done,
                   KeyVerificationState.error,
                 }.contains(request.state)) {
-              FluffyChatApp.router.pop('dialog');
+              PluslyApp.router.pop('dialog');
             }
             hidPopup = true;
           };
           request.onUpdate = null;
           hidPopup = true;
           await KeyVerificationDialog(request: request).show(
-            FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
+            PluslyApp.router.routerDelegate.navigatorKey.currentContext ??
                 context,
           );
         });
@@ -283,8 +298,12 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         // Wait for full initialization before setting up push
         Future.delayed(const Duration(seconds: 3), () {
           Logs().i('[Matrix] Login complete, setting up push notifications...');
-          backgroundPush?.upAction = false; // Reset UP action flag
+          backgroundPush?.upAction = false;
           backgroundPush?.setupPush(widget.clients);
+          // Ook nieuw systeem triggeren (pusher registreren nu client ingelogd is)
+          if (FeatureFlags.useNewPushSystem) {
+            _pushController?.reRegister();
+          }
         });
       }
       final loggedInWithMultipleClients = widget.clients.length > 1;
@@ -296,17 +315,17 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       }
       if (loggedInWithMultipleClients && state != LoginState.loggedIn) {
         ScaffoldMessenger.of(
-          FluffyChatApp.router.routerDelegate.navigatorKey.currentContext ??
+          PluslyApp.router.routerDelegate.navigatorKey.currentContext ??
               context,
         ).showSnackBar(
           SnackBar(content: Text(L10n.of(context).oneClientLoggedOut)),
         );
 
         if (state != LoginState.loggedIn) {
-          FluffyChatApp.router.go('/rooms');
+          PluslyApp.router.go('/rooms');
         }
       } else {
-        FluffyChatApp.router.go(
+        PluslyApp.router.go(
           state == LoginState.loggedIn ? '/rooms' : '/home',
         );
       }
@@ -349,39 +368,51 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       }
     }
 
-    if (PlatformInfos.isMobile) {
-      backgroundPush = BackgroundPush(
-        this,
-        onFcmError: (errorMsg, {Uri? link}) async {
-          final result = await showOkCancelAlertDialog(
-            context:
-                FluffyChatApp
-                    .router
-                    .routerDelegate
-                    .navigatorKey
-                    .currentContext ??
-                context,
-            title: L10n.of(context).pushNotificationsNotAvailable,
-            message: errorMsg,
-            okLabel: link == null
-                ? L10n.of(context).ok
-                : L10n.of(context).learnMore,
-            cancelLabel: L10n.of(context).doNotShowAgain,
-          );
-          if (result == OkCancelResult.ok && link != null) {
-            launchUrlString(
-              link.toString(),
-              mode: LaunchMode.externalApplication,
-            );
-          }
-          if (result == OkCancelResult.cancel) {
-            AppSettings.showNoGoogle.setItem(true);
-          }
-        },
-      );
-    }
-
+    _initPush();
     createVoipPlugin();
+  }
+
+  /// 🆕 Initialiseer nieuw push systeem (voor runtime switch)
+  Future<void> initNewPushSystem() async {
+    if (!PlatformInfos.isMobile) return;
+    
+    // Cleanup legacy
+    backgroundPush = null;
+    
+    // Initialiseer nieuwe
+    Logs().i('[Matrix] Runtime switch to NEW push system');
+    NotificationRouter.initialize(
+      router: PluslyApp.router,
+      clients: widget.clients,
+    );
+    
+    _pushController?.dispose();
+    _pushController = PushController(widget.store, widget.clients);
+    await _pushController!.initializeLocalNotifications();
+    await _pushController!.initialize();
+  }
+  
+  /// 🆕 Initialiseer legacy push systeem (voor runtime switch)
+  Future<void> initLegacyPushSystem() async {
+    if (!PlatformInfos.isMobile) return;
+    
+    // Cleanup nieuwe
+    _pushController?.dispose();
+    _pushController = null;
+    
+    // Initialiseer legacy
+    Logs().i('[Matrix] Runtime switch to LEGACY push system');
+    backgroundPush = BackgroundPush(this);
+    backgroundPush?.setupPush(widget.clients);
+  }
+
+  Future<void> _initPush() async {
+    if (!PlatformInfos.isMobile) return;
+
+    await FeatureFlags.init();
+
+    // 🆕 UP-only push systeem (geen legacy/FCM meer)
+    await initLegacyPushSystem();
   }
 
   void createVoipPlugin() async {
@@ -398,6 +429,16 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     final foreground =
         state != AppLifecycleState.inactive &&
         state != AppLifecycleState.paused;
+    
+    // 🆕 Update push controller met foreground status
+    if (_pushController != null) {
+      if (!foreground) {
+        _pushController!.setActiveRoom(null, null);
+      } else {
+        _updatePushActiveRoom();
+      }
+    }
+    
     final resumedLifecyclePresence = PresenceType.values.firstWhere(
       (x) => x.name == AppSettings.presenceStatus.value,
     );
@@ -436,6 +477,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
     linuxNotifications?.close();
 
+    // 🆕 Cleanup nieuwe push controller
+    _pushController?.dispose();
+
     super.dispose();
   }
 
@@ -464,7 +508,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     final exportBytes = Uint8List.fromList(const Utf8Codec().encode(export));
 
     final exportFileName =
-        'fluffychat-export-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.fluffybackup';
+        'plusly-export-${DateFormat(DateFormat.YEAR_MONTH_DAY).format(DateTime.now())}.pluslybackup';
 
     final file = MatrixFile(bytes: exportBytes, name: exportFileName);
     file.save(context);

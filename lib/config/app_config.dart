@@ -38,14 +38,14 @@ abstract class AppConfig {
   static String get privacyUrl => _privacyUrl;
   static const String website = 'https://plusly.im';
   static const String enablePushTutorial =
-      'https://github.com/krille-chan/fluffychat/wiki/Push-Notifications-without-Google-Services';
+      'https://github.com/danield76799/Plusly/wiki/Push-Notifications-without-Google-Services';
   static const String encryptionTutorial =
-      'https://github.com/krille-chan/fluffychat/wiki/How-to-use-end-to-end-encryption-in-FluffyChat';
+      'https://github.com/danield76799/Plusly/wiki/End-to-End-Encryption';
   static const String startChatTutorial =
-      'https://github.com/krille-chan/fluffychat/wiki/How-to-Find-Users-in-FluffyChat';
+      'https://github.com/danield76799/Plusly/wiki/Find-Users';
   static const String appId = 'com.danield.plusly';
   static const String appOpenUrlScheme = 'com.danield.plusly';
-  static final String _webBaseUrl = 'https://fluffychat.im/web';
+  static final String _webBaseUrl = 'https://plusly.chat/web';
 
   static String get webBaseUrl => _webBaseUrl;
   static const String sourceCodeUrl = 'https://github.com/danield76799/Plusly';

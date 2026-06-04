@@ -12,7 +12,6 @@ import 'package:url_launcher/url_launcher_string.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/app_config.dart';
-import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
@@ -144,6 +143,17 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
         Logs().v('No semver release with APK found');
         return null;
       }
+
+      // Cache the result
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(cacheKey, jsonEncode(latestSemverRelease.toJson()));
+        await prefs.setInt(cacheTimeKey, DateTime.now().millisecondsSinceEpoch);
+      } catch (e) {
+        Logs().v('Cache write failed: $e');
+      }
+
+      return latestSemverRelease;
     } else {
       Logs().w('GitHub API returned status ${response.statusCode}');
     }
@@ -165,8 +175,11 @@ bool isNewerVersion(String latest, String current) {
   latest = latest.startsWith('v') ? latest.substring(1) : latest;
   current = current.startsWith('v') ? current.substring(1) : current;
 
-  // Strip build metadata (+929) from current version for comparison
-  // e.g., "1.4.1+929" -> "1.4.1"
+  // Strip build metadata (+NNN) from both versions for comparison
+  final latestPlusIndex = latest.indexOf('+');
+  if (latestPlusIndex != -1) {
+    latest = latest.substring(0, latestPlusIndex);
+  }
   final currentPlusIndex = current.indexOf('+');
   if (currentPlusIndex != -1) {
     current = current.substring(0, currentPlusIndex);

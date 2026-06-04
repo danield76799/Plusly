@@ -857,7 +857,12 @@ class ChatController extends State<ChatPageWithRoom>
   void openCameraAction() async {
     // Make sure the textfield is unfocused before opening the camera
     FocusScope.of(context).requestFocus(FocusNode());
-    final file = await ImagePicker().pickImage(source: ImageSource.camera);
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 70,
+    );
     if (file == null) return;
 
     await showAdaptiveDialog(
@@ -868,6 +873,33 @@ class ChatController extends State<ChatPageWithRoom>
         room: room,
         thread: thread,
         outerContext: context,
+      ),
+    );
+  }
+
+  void sendImageFromGallery() async {
+    // Use ImagePicker for native compression (instant, not slow Dart resize)
+    final picker = ImagePicker();
+    final files = await picker.pickMultiImage(
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 70,
+    );
+    if (files.isEmpty) return;
+
+    if (!mounted) return;
+    await showAdaptiveDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => SendFileDialog(
+        files: files,
+        room: room,
+        thread: thread,
+        outerContext: context,
+        replyEvent: replyEvent,
+        onClearReply: () {
+          replyEvent = null;
+        },
       ),
     );
   }
@@ -1083,7 +1115,7 @@ class ChatController extends State<ChatPageWithRoom>
     await mx.client.reportEvent(
       roomId,
       event.eventId,
-      reason: "Extera (Next) Redacted Event Recover",
+      reason: "Plusly Redacted Event Recover",
     );
 
     final reports = await mx.client.getEventReports();
@@ -1763,11 +1795,17 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void onAddPopupMenuButtonSelected(String choice) {
+    if (choice == 'emoji') {
+      emojiPickerAction();
+    }
+    if (choice == 'sticker') {
+      emojiPickerAction();
+    }
     if (choice == 'file') {
       sendFileAction();
     }
     if (choice == 'image') {
-      sendFileAction(type: FileType.image);
+      sendImageFromGallery();
     }
     if (choice == 'video') {
       sendFileAction(type: FileType.video);

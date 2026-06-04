@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plusly — Chat List</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #1a1a2e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #0A0A0F;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 2px #333;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-bar {
+    height: 54px;
+    background: #0A0A0F;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 30px 8px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .status-bar .time { font-size: 16px; font-weight: 700; }
+  .status-bar .icons { display: flex; gap: 5px; align-items: center; }
+  .status-bar .icons svg { width: 18px; height: 18px; fill: #fff; }
+
+  .app-bar {
+    height: 64px;
+    background: #0A0A0F;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .app-bar .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #49AFC2, #3A8FA0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .app-bar .title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    flex: 1;
+  }
+  .app-bar .actions { display: flex; gap: 16px; }
+  .app-bar .actions svg { width: 24px; height: 24px; fill: #888; cursor: pointer; }
+  .app-bar .actions svg:hover { fill: #49AFC2; }
+
+  .search-bar {
+    margin: 0 16px 12px;
+    height: 44px;
+    background: #1E1E2E;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .search-bar svg { width: 20px; height: 20px; fill: #666; flex-shrink: 0; }
+  .search-bar input {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 15px;
+    flex: 1;
+    outline: none;
+  }
+  .search-bar input::placeholder { color: #555; }
+
+  .tab-bar {
+    display: flex;
+    padding: 0 16px;
+    gap: 4px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #1E1E2E;
+    flex-shrink: 0;
+  }
+  .tab {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab.active {
+    color: #49AFC2;
+    border-bottom-color: #49AFC2;
+  }
+  .tab:hover { color: #aaa; }
+
+  .chat-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 0;
+  }
+  .chat-list::-webkit-scrollbar { width: 0; }
+
+  .chat-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+  .chat-item:hover { background: rgba(73, 175, 194, 0.06); }
+  .chat-item.active { background: rgba(73, 175, 194, 0.1); }
+  .chat-item.hidden { display: none; }
+
+  .chat-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    color: #fff;
+  }
+  .chat-avatar .online-dot {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 12px;
+    height: 12px;
+    background: #4CAF50;
+    border-radius: 50%;
+    border: 2px solid #0A0A0F;
+  }
+
+  .chat-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .chat-info .top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 3px;
+  }
+  .chat-info .name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chat-info .time {
+    font-size: 12px;
+    color: #666;
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .chat-info .preview {
+    font-size: 13px;
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .chat-info .preview .sender {
+    color: #49AFC2;
+    font-weight: 500;
+  }
+
+  .unread-badge {
+    background: #49AFC2;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+
+  .chat-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .encrypted-icon {
+    width: 14px;
+    height: 14px;
+    fill: #4CAF50;
+  }
+
+  .fab {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: #49AFC2;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(73, 175, 194, 0.4);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .fab:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 30px rgba(73, 175, 194, 0.5);
+  }
+  .fab svg { width: 28px; height: 28px; fill: #fff; }
+
+  .group-avatar {
+    background: linear-gradient(135deg, #49AFC2 0%, #6FC5D8 50%, #3A8FA0 100%);
+  }
+  .space-avatar {
+    background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+  }
+  .person-avatar-1 { background: linear-gradient(135deg, #E91E63, #C2185B); }
+  .person-avatar-2 { background: linear-gradient(135deg, #FF9800, #F57C00); }
+  .person-avatar-3 { background: linear-gradient(135deg, #4CAF50, #388E3C); }
+  .person-avatar-4 { background: linear-gradient(135deg, #2196F3, #1976D2); }
+  .person-avatar-5 { background: linear-gradient(135deg, #49AFC2, #3A8FA0); }
+  .person-avatar-6 { background: linear-gradient(135deg, #FF5722, #E64A19); }
+  .person-avatar-7 { background: linear-gradient(135deg, #607D8B, #455A64); }
+
+  .divider {
+    height: 1px;
+    background: #1E1E2E;
+    margin: 0 16px 0 80px;
+  }
+  .divider.hidden { display: none; }
+
+  .pinned-icon {
+    width: 14px;
+    height: 14px;
+    fill: #666;
+    transform: rotate(45deg);
+  }
+
+  .star-icon {
+    width: 16px;
+    height: 16px;
+    fill: #FFD700;
+  }
+
+  .empty-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 16px;
+  }
+  .empty-state.visible { display: flex; }
+  .empty-state svg { width: 48px; height: 48px; fill: #333; }
+  .empty-state .empty-title { font-size: 16px; font-weight: 600; color: #555; }
+  .empty-state .empty-desc { font-size: 13px; color: #444; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div class="icons">
+      <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+    </div>
+  </div>
+
+  <!-- App Bar -->
+  <div class="app-bar">
+    <div class="avatar">D</div>
+    <div class="title">Plusly</div>
+    <div class="actions">
+      <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#888"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" fill="#888"/></svg>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    <input type="text" placeholder="Search chats..." />
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab active" data-tab="all">All chats</div>
+    <div class="tab" data-tab="unread">Unread</div>
+    <div class="tab" data-tab="groups">Groups</div>
+    <div class="tab" data-tab="favorites">Favorites</div>
+    <div class="tab" data-tab="people">People</div>
+  </div>
+
+  <!-- Chat List -->
+  <div class="chat-list" id="chatList">
+    <!-- Pinned: Work Team (GROUP, UNREAD) -->
+    <div class="chat-item active" data-type="group" data-unread="true" data-favorite="false">
+      <div class="chat-avatar group-avatar">W</div>
+      <div class="chat-info">
+        <div class="top-row">
+          <span class="name">🏗️ Work Team</span>
+          <span class="time">Now</span>
+        </div>
+        <div class="preview">
+          <span class="sender">Mark:</span> Has anyone checked the deploy pipeline?
+        </div>
+      </div>
+      <div class="chat-meta">
+        <svg class="pinned-icon" viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>
+        <div class="unread-badge">3</div>
+      </div>
+    </div>
+
+    <!-- Sarah (PERSON, UNREAD, FAVORITE) -->
+    <div class="chat-item" data-type="person" data-unread="true" data-favorite="true">
+      <div class="chat-avatar person-avatar-1">S</div>
+      <div class="chat-info">
+        <div class="top-row">
+          <span class="name">Sarah van Dijk ⭐</span>
+          <span class="time">10:23</span>
+        </div>
+        <div class="preview">Have you seen the new design? 🎨</div>
+      </div>
+      <div class="chat-meta">
+        <svg class="encrypted-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+        <div class="unread-badge">1</div>
+      </div>
+    </div>
+
+    <div class="divider" data-type="divider"></div>
+
+    <!-- Jan (PERSON) -->
+    <div class="chat-item" data-type="person" data-unread="false" data-favorite="false">
+      <div class="chat-avatar person-avatar-2">J</div>
+      <div class="chat-info">
+        <div class="top-row">
+          <span class="name">Jan de Vries</span>
+          <span class="time">09:45</span>
+        </div>
+        <div class="preview">Ok, see you this afternoon then!</div>
+      </div>
+      <div class="chat-meta">
+        <svg class="encrypted-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      </div>
+    </div>
+
+    <!-- Gaming Squad (GROUP, UNREAD) -->
+    <div class="chat-item" data-type="group" data-unread="true" data-favorite="false">
+      <div class="chat-avatar group-avatar">🎮</div>
+      <div class="chat-info">
+        <div class="top-row">
+          <span class="name">🎮 Gaming Squad</span>
+          <span class="time">Yesterday</span>
+        </div>
+        <div class="preview">
+          <span class="sender">Tom:</span> Who is joining tonight?
+        </div>
+      </div>
+      <div class="chat-meta">
+        <div class="unread-badge">12</div>
+      </div>
+    </div>
+
+    <div class="divider" data-type="divider"></div>
+
+    <!-- Lisa (PERSON, FAVORITE) -->
+    <div class="chat-item" data-type="person" data-unread="false" data-favorite="true">
+      <div class="chat-avatar person-avatar-3">L</div>
+      <div class="chat-info">
+        <div class="top-row">
+          <span class="name">Lisa Bakker ⭐</span>
+          <span class="time">Yesterday</span>
+        </div>
+        <div class="preview">📷 Photo sent</div>
+      </div>
+      <div class="chat-meta">
+        <svg class="encrypted-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      </div>
+    </div>
+
+    <!-- Mike (PERSON) -->
+    <div class="chat-item" data-type="person" data-unread="false" data-favorite="false">
+      <div class="chat-avatar person-avatar-4">M</div>
+      <div class="chat-info">
+        <div class="top-row">
+          <span class="name">Mike Hendriks</span>
+          <span class="time">Mon</span>
+        </div>
+        <div class="preview">🎙️ Voice message (0:23)</div>
+      </div>
+      <div class="chat-meta">
+        <svg class="encrypted-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      </div>
+    </div>
+
+    <!-- NL Developers (GROUP/SPACE, UNREAD) -->
+    <div class="chat-item" data-type="group" data-unread="true" data-favorite="false">
+      <div class="chat-avatar space-avatar">N</div>
+      <div class="chat-info">
+        <div class="top-row">
+          <span class="name">🇳🇱 NL Developers</span>
+          <span class="time">Sun</span>
+        </div>
+        <div class="preview">
+          <span class="sender">Daan:</span> Flutter 3.24 is out!
+        </div>
+      </div>
+      <div class="chat-meta">
+        <div class="unread-badge">5</div>
+      </div>
+    </div>
+
+    <!-- Anna (PERSON, FAVORITE) -->
+    <div class="chat-item" data-type="person" data-unread="false" data-favorite="true">
+      <div class="chat-avatar person-avatar-5">A</div>
+      <div class="chat-info">
+        <div class="top-row">
+          <span class="name">Anna de Groot ⭐</span>
+          <span class="time">Fri</span>
+        </div>
+        <div class="preview">Thanks for your help! 🙏</div>
+      </div>
+      <div class="chat-meta">
+        <svg class="encrypted-icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
+      </div>
+    </div>
+
+    <!-- Ruben (PERSON) -->
+    <div class="chat-item" data-type="person" data-unread="false" data-favorite="false">
+      <div class="chat-avatar person-avatar-6">R</div>
+      <div class="chat-info">
+        <div class="top-row">
+          <span class="name">Ruben Smit</span>
+          <span class="time">Thu</span>
+        </div>
+        <div class="preview">🗳️ Poll: Which restaurant? (4 votes)</div>
+      </div>
+      <div class="chat-meta">
+      </div>
+    </div>
+
+    <!-- Kevin (PERSON) -->
+    <div class="chat-item" data-type="person" data-unread="false" data-favorite="false">
+      <div class="chat-avatar person-avatar-7">K</div>
+      <div class="chat-info">
+        <div class="top-row">
+          <span class="name">Kevin Visser</span>
+          <span class="time">Wed</span>
+        </div>
+        <div class="preview">Location shared 📍</div>
+      </div>
+      <div class="chat-meta">
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty States -->
+  <div class="empty-state" id="emptyUnread">
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+    <div class="empty-title">All caught up!</div>
+    <div class="empty-desc">No unread messages</div>
+  </div>
+
+  <div class="empty-state" id="emptyGroups">
+    <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+    <div class="empty-title">No groups</div>
+    <div class="empty-desc">Join or create a group chat</div>
+  </div>
+
+  <div class="empty-state" id="emptyFavorites">
+    <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    <div class="empty-title">No favorites</div>
+    <div class="empty-desc">Star chats to add them here</div>
+  </div>
+
+  <div class="empty-state" id="emptyPeople">
+    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    <div class="empty-title">No people</div>
+    <div class="empty-desc">Start a conversation</div>
+  </div>
+
+  <!-- FAB -->
+  <div class="fab">
+    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+  </div>
+
+</div>
+
+<script>
+const tabs = document.querySelectorAll('.tab');
+const chatItems = document.querySelectorAll('.chat-item');
+const dividers = document.querySelectorAll('.divider');
+const chatList = document.getElementById('chatList');
+const emptyStates = {
+  unread: document.getElementById('emptyUnread'),
+  groups: document.getElementById('emptyGroups'),
+  favorites: document.getElementById('emptyFavorites'),
+  people: document.getElementById('emptyPeople')
+};
+
+function switchTab(tabName) {
+  // Update active tab
+  tabs.forEach(t => t.classList.remove('active'));
+  document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+  // Hide all empty states
+  Object.values(emptyStates).forEach(es => es.classList.remove('visible'));
+
+  // Filter items
+  let visibleCount = 0;
+  chatItems.forEach(item => {
+    let show = false;
+    switch(tabName) {
+      case 'all':
+        show = true;
+        break;
+      case 'unread':
+        show = item.dataset.unread === 'true';
+        break;
+      case 'groups':
+        show = item.dataset.type === 'group';
+        break;
+      case 'favorites':
+        show = item.dataset.favorite === 'true';
+        break;
+      case 'people':
+        show = item.dataset.type === 'person';
+        break;
+    }
+    item.classList.toggle('hidden', !show);
+    if (show) visibleCount++;
+  });
+
+  // Show dividers only in "all" tab
+  dividers.forEach(d => {
+    d.classList.toggle('hidden', tabName !== 'all');
+  });
+
+  // Show empty state if no items
+  if (visibleCount === 0 && emptyStates[tabName]) {
+    emptyStates[tabName].classList.add('visible');
+  }
+}
+
+// Add click handlers
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    switchTab(tab.dataset.tab);
+  });
+});
+</script>
+
+</body>
+</html>

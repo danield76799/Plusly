@@ -96,20 +96,13 @@ class SendFileDialogState extends State<SendFileDialog> {
             length > minSizeToCompress &&
             compress) {
           // Resize image before upload (much faster sending)
-          scaffoldMessenger.showLoadingSnackBar(l10n.compressVideo);
+          // EXIF wordt automatisch verwijderd tijdens resize + JPEG encode
+          scaffoldMessenger.showLoadingSnackBar(l10n.compress);
           final resizedImage = await ImageResizer.resizeImage(xfile);
           if (resizedImage != null) {
             file = resizedImage;
-          } else if (AppSettings.cleanExif.value) {
-            // Fallback: just remove EXIF if cleanExif is enabled
-            file = MatrixFile(
-              bytes: Uint8List.fromList(
-                ExifCleaner.removeExifData(await xfile.readAsBytes()),
-              ),
-              name: name,
-              mimeType: mimeType,
-            ).detectFileType;
           } else {
+            // Resize faalde, gebruik origineel
             file = MatrixFile(
               bytes: await xfile.readAsBytes(),
               name: name,
@@ -119,11 +112,12 @@ class SendFileDialogState extends State<SendFileDialog> {
         } else if (mimeType != null &&
             mimeType.startsWith('image') &&
             AppSettings.cleanExif.value) {
+          // Alleen EXIF verwijderen als we NIET al gecomprimeerd hebben
           if (length > maxUploadSize) {
             throw FileTooBigMatrixException(length, maxUploadSize);
           }
 
-          // Else we just create a MatrixFile
+          scaffoldMessenger.showLoadingSnackBar(l10n.prepareSendingAttachment);
           file = MatrixFile(
             bytes: Uint8List.fromList(
               ExifCleaner.removeExifData(await xfile.readAsBytes()),
@@ -148,9 +142,11 @@ class SendFileDialogState extends State<SendFileDialog> {
           throw FileTooBigMatrixException(length, maxUploadSize);
         }
 
+        // Video thumbnail alleen genereren als expliciet gewenst (bespaart tijd)
         if (PlatformInfos.isMobile &&
             mimeType != null &&
-            mimeType.startsWith('video')) {
+            mimeType.startsWith('video') &&
+            compress) {
           try {
             scaffoldMessenger.showLoadingSnackBar(
               l10n.generatingVideoThumbnail,
@@ -210,7 +206,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           await widget.room.sendFileEvent(
             file,
             thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 1600 : null,
+            shrinkImageMaxDimension: compress ? 2048 : null,
             extraContent: extraContent,
             threadLastEventId:
                 widget.thread?.lastEvent?.eventId ??
@@ -240,7 +236,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           await widget.room.sendFileEvent(
             file,
             thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 1600 : null,
+            shrinkImageMaxDimension: compress ? 2048 : null,
             extraContent: extraContent,
             threadLastEventId:
                 widget.thread?.lastEvent?.eventId ??
