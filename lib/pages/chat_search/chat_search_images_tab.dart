@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/events/video_player.dart';
 import 'package:Pulsly/pages/image_viewer/image_viewer.dart';
@@ -68,6 +69,10 @@ class ChatSearchImagesTab extends StatelessWidget {
 
         const padding = 8.0;
 
+        final crossAxisCount = AppSettings.galleryColumns.value;
+        final thumbnailSize = AppSettings.galleryThumbnailSize.value.toDouble();
+        final useLazyLoading = AppSettings.galleryLazyLoading.value;
+
         return ListView.builder(
           itemCount: eventsByMonth.length + 1,
           itemBuilder: (context, i) {
@@ -104,6 +109,8 @@ class ChatSearchImagesTab extends StatelessWidget {
             }
 
             final monthEvents = eventsByMonthList[i].value;
+            final isLazyLoaded = useLazyLoading && i > 0;
+
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -135,7 +142,7 @@ class ChatSearchImagesTab extends StatelessWidget {
                   crossAxisSpacing: padding,
                   clipBehavior: Clip.hardEdge,
                   padding: const EdgeInsets.all(padding),
-                  crossAxisCount: 3,
+                  crossAxisCount: crossAxisCount,
                   children: monthEvents.map((event) {
                     if (event.messageType == MessageTypes.Video) {
                       return Material(
@@ -159,14 +166,20 @@ class ChatSearchImagesTab extends StatelessWidget {
                       child: Material(
                         clipBehavior: Clip.hardEdge,
                         borderRadius: borderRadius,
-                        child: MxcImage(
-                          event: event,
-                          width: 128,
-                          height: 128,
-                          fit: BoxFit.cover,
-                          animated: true,
-                          isThumbnail: true,
-                        ),
+                        child: isLazyLoaded
+                            ? _LazyMxcImage(
+                                event: event,
+                                width: thumbnailSize,
+                                height: thumbnailSize,
+                              )
+                            : MxcImage(
+                                event: event,
+                                width: thumbnailSize,
+                                height: thumbnailSize,
+                                fit: BoxFit.cover,
+                                animated: true,
+                                isThumbnail: true,
+                              ),
                       ),
                     );
                   }).toList(),
@@ -176,6 +189,82 @@ class ChatSearchImagesTab extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _LazyMxcImage extends StatefulWidget {
+  final Event event;
+  final double width;
+  final double height;
+
+  const _LazyMxcImage({
+    required this.event,
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  State<_LazyMxcImage> createState() => _LazyMxcImageState();
+}
+
+class _LazyMxcImageState extends State<_LazyMxcImage> {
+  bool _isVisible = false;
+  final _controller = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    _checkVisibility();
+  }
+
+  void _checkVisibility() {
+    if (!mounted || _isVisible) return;
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final size = renderBox.size;
+    final offset = renderBox.localToGlobal(Offset.zero);
+    final screenHeight = WidgetsBinding.instance.window.physicalSize.height /
+        WidgetsBinding.instance.window.devicePixelRatio;
+    if (offset.dy < screenHeight * 2) {
+      setState(() => _isVisible = true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isVisible) {
+      return Container(
+        width: widget.width,
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+        ),
+        child: const Center(
+          child: Icon(Icons.image_outlined, color: Colors.grey),
+        ),
+      );
+    }
+    return MxcImage(
+      event: widget.event,
+      width: widget.width,
+      height: widget.height,
+      fit: BoxFit.cover,
+      animated: true,
+      isThumbnail: true,
     );
   }
 }
