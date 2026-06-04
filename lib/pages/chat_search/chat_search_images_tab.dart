@@ -8,7 +8,6 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/events/video_player.dart';
 import 'package:Pulsly/pages/image_viewer/image_viewer.dart';
-import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 
 class ChatSearchImagesTab extends StatelessWidget {
@@ -205,17 +204,27 @@ class _LazyMxcImageState extends State<_LazyMxcImage> {
     if (!mounted || _isVisible) return;
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
-    final size = renderBox.size;
     final offset = renderBox.localToGlobal(Offset.zero);
-    final screenHeight = WidgetsBinding.instance.window.physicalSize.height /
-        WidgetsBinding.instance.window.devicePixelRatio;
-    if (offset.dy < screenHeight * 2) {
+    final view = View.of(context);
+    final screenHeight = view.physicalSize.height / view.devicePixelRatio;
+    // Load if within 1 screen height above or below viewport
+    if (offset.dy > -screenHeight && offset.dy < screenHeight * 2) {
       setState(() => _isVisible = true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (!_isVisible) _checkVisibility();
+        return false;
+      },
+      child: _buildImage(),
+    );
+  }
+
+  Widget _buildImage() {
     if (!_isVisible) {
       return Container(
         width: widget.width,
