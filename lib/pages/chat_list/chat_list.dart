@@ -279,6 +279,26 @@ class ChatListController extends State<ChatList>
     return _cachedFilteredRooms;
   }
 
+  // Lazy loading pagination
+  static const int _pageSize = 40;
+  int _visibleCount = _pageSize;
+  
+  List<Room> get visibleRooms {
+    final all = filteredRooms;
+    return all.take(_visibleCount).toList();
+  }
+  
+  bool get hasMoreRooms => filteredRooms.length > _visibleCount;
+  
+  void loadMoreRooms() {
+    _visibleCount += _pageSize;
+    notifyListeners();
+  }
+  
+  void resetPagination() {
+    _visibleCount = _pageSize;
+  }
+
   List<Room> get searchRooms => Matrix.of(context).client.rooms.where((room) {
     switch (activeFilter) {
       case .allChats:
@@ -452,6 +472,7 @@ class ChatListController extends State<ChatList>
   void startSearch() {
     setState(() {
       isSearchMode = true;
+      resetPagination(); // Reset pagination bij search start
     });
     searchFocusNode.requestFocus();
     _coolDown?.cancel();
@@ -465,6 +486,7 @@ class ChatListController extends State<ChatList>
       roomSearchResult = userSearchResult = null;
       allMessagesSearchResult = null;
       isSearching = false;
+      resetPagination(); // Reset pagination bij search cancel
     });
     if (unfocus) searchFocusNode.unfocus();
   }
@@ -1011,6 +1033,7 @@ class ChatListController extends State<ChatList>
   void setActiveFilter(ActiveFilter filter) {
     setState(() {
       activeFilter = filter;
+      resetPagination(); // Reset pagination bij filter wijziging
     });
   }
 
