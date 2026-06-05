@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
@@ -118,30 +117,13 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
               if (downloadSuccess) {
                 if (filePath != null) {
                   final fileName = filePath!.split('/').last;
-                  final isPdf = fileName.toLowerCase().endsWith('.pdf');
-
                   try {
-                    if (isPdf) {
-                      // For PDFs, use share_plus to let user choose viewer
-                      await Share.shareXFiles(
-                        [XFile(filePath!)],
-                        text: 'Open with...',
-                      );
-                    } else {
-                      // For other files, use url_launcher
-                      final uri = Uri.file(filePath!);
-                      final launched = await launchUrl(
-                        uri,
-                        mode: LaunchMode.externalApplication,
-                      );
-                      if (!launched && context.mounted) {
-                        // Fallback to share if launch fails
-                        await Share.shareXFiles(
-                          [XFile(filePath!)],
-                          text: 'Open with...',
-                        );
-                      }
-                    }
+                    // Use share_plus for all files - it uses FileProvider
+                    // which generates proper content:// URIs on Android
+                    await Share.shareXFiles(
+                      [XFile(filePath!)],
+                      text: 'Open $fileName with...',
+                    );
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
