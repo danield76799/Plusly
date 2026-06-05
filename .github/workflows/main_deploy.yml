@@ -41,7 +41,7 @@ jobs:
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
       - name: Install Android NDK
-        uses: android-actions/setup-ndk@v1
+        uses: nttld/setup-ndk@v1
         with:
           ndk-version: r26d
 
