@@ -83,10 +83,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # First, pull latest changes to handle commits pushed during build
+          # Use --autostash to automatically stash/unstash local changes
+          git pull --rebase --autostash origin main || git pull --rebase origin main
+
+          # Now apply the version bump
           git add pubspec.yaml
+          # Commit the version bump (ignore if nothing to commit)
           git diff --cached --quiet || git commit -m "Bump version to ${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}"
-          git pull --rebase origin main
-          git push
+
+          # Push the changes
+          git push origin main
 
       # === SIGNING SETUP (optional — uses debug signing if secrets missing) ===
       - name: Setup signing
