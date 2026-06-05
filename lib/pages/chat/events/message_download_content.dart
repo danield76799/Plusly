@@ -10,7 +10,6 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/events/html_message.dart';
 import 'package:Pulsly/pages/download_manager/download_manager.dart';
-import 'package:Pulsly/pages/pdf_viewer/pdf_viewer_page.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:Pulsly/utils/url_launcher.dart';
 
@@ -116,19 +115,7 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
             onTap: () {
               if (isDownloading) return;
               if (downloadSuccess) {
-                if (filePath != null) {
-                  // Check if file is PDF
-                  if (filePath!.toLowerCase().endsWith('.pdf')) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => PdfViewerPage(filePath: filePath!),
-                      ),
-                    );
-                  } else {
-                    // Open with external app for non-PDF files
-                    OpenFile.open(filePath);
-                  }
-                }
+                if (filePath != null) OpenFile.open(filePath);
                 return;
               }
               if (event.canDownloadInBackground) {
