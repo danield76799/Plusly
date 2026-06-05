@@ -161,27 +161,28 @@ class ChatView extends StatelessWidget {
         else if (AppSettings.experimentalJitsi.value)
           JitsiPopupButton(controller.room),
         EncryptionButton(controller.room),
-        StreamBuilder(
-          stream: Stream.periodic(const Duration(minutes: 1)),
-          builder: (context, _) {
-            final now = DateTime.now();
-            final timeString =
-                '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Center(
-                child: Text(
-                  timeString,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+        // TODO: Time display causing build failures - disabled temporarily
+        // StreamBuilder(
+        //   stream: Stream.periodic(const Duration(minutes: 1)),
+        //   builder: (context, _) {
+        //     final now = DateTime.now();
+        //     final timeString =
+        //         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+        //     return Padding(
+        //       padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        //       child: Center(
+        //         child: Text(
+        //           timeString,
+        //           style: TextStyle(
+        //             fontSize: 14,
+        //             fontWeight: FontWeight.w500,
+        //             color: Theme.of(context).colorScheme.onSurface,
+        //           ),
+        //         ),
+        //       ),
+        //     );
+        //   },
+        // ),
         ChatSettingsPopupMenu(controller.room, true),
       ];
     }
