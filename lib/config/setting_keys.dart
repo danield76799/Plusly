@@ -34,7 +34,7 @@ enum AppSettings<T> {
   translationTargetLanguage<String>('xyz.plusly.translationTargetLanguage', ''),
   pluslyServiceUrl<String>(
     'xyz.plusly.serviceUrl',
-    'http://38.124.152.103:5000', // Jouw LibreTranslate server
+    'http://13.140.136.172:5000', // Jouw LibreTranslate server
   ),
   latexMath<bool>('xyz.plusly.latexMath', false),
   messageTranslation<bool>('xyz.plusly.messageTranslation', true),
