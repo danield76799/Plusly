@@ -41,9 +41,12 @@ jobs:
           targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
       - name: Install Android NDK
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: 26.3.11579264
+        run: |
+          echo "Installing NDK via sdkmanager..."
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;26.3.11579264"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.3.11579264" >> $GITHUB_ENV
+          echo "NDK installed at: $ANDROID_HOME/ndk/26.3.11579264"
 
       - name: Set up Rust Android environment
         run: |
