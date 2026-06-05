@@ -90,3 +90,4 @@ This project is licensed under the [AGPL-3.0 License](LICENSE). See the LICENSE 
 - [FluffyChat](https://github.com/krille-chan/fluffychat) - The original FluffyChat project
 - [Extera Next](https://github.com/ExteraApp/Extera) - The upstream fork this project is based on
 - [matrix-dart-sdk](https://github.com/ExteraApp/matrix-dart-sdk) - Dart SDK for Matrix 
+ 
