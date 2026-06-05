@@ -42,11 +42,34 @@ jobs:
 
       - name: Install Android NDK
         run: |
-          echo "Installing NDK via sdkmanager..."
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;26.3.11579264"
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/26.3.11579264" >> $GITHUB_ENV
-          echo "NDK installed at: $ANDROID_HOME/ndk/26.3.11579264"
+          echo "Installing NDK manually..."
+          NDK_VERSION="26.3.11579264"
+          NDK_DIR="$ANDROID_HOME/ndk/$NDK_VERSION"
+          
+          # Create NDK directory
+          mkdir -p "$NDK_DIR"
+          
+          # Download NDK from Google
+          echo "Downloading NDK $NDK_VERSION..."
+          cd /tmp
+          wget -q "https://dl.google.com/android/repository/android-ndk-r26d-linux.zip" -O ndk.zip || \
+          curl -L -o ndk.zip "https://dl.google.com/android/repository/android-ndk-r26d-linux.zip"
+          
+          # Check if download succeeded
+          if [ ! -f ndk.zip ] || [ ! -s ndk.zip ]; then
+            echo "ERROR: NDK download failed"
+            exit 1
+          fi
+          
+          # Extract NDK
+          echo "Extracting NDK..."
+          unzip -q ndk.zip
+          mv android-ndk-r26d/* "$NDK_DIR/" 2>/dev/null || mv android-ndk-r26d/*/* "$NDK_DIR/" 2>/dev/null
+          
+          # Set environment variable
+          echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
+          echo "NDK installed at: $NDK_DIR"
+          ls -la "$NDK_DIR" | head -10
 
       - name: Set up Rust Android environment
         run: |
