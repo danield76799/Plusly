@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:Pulsly/config/app_config.dart';
@@ -116,21 +117,30 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
               if (isDownloading) return;
               if (downloadSuccess) {
                 if (filePath != null) {
-                  // Use url_launcher with file:// URI for better compatibility
-                  final uri = Uri.file(filePath!);
+                  final fileName = filePath!.split('/').last;
+                  final isPdf = fileName.toLowerCase().endsWith('.pdf');
+
                   try {
-                    final launched = await launchUrl(
-                      uri,
-                      mode: LaunchMode.externalApplication,
-                    );
-                    if (!launched && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Could not open file: ${filePath!.split('/').last}',
-                          ),
-                        ),
+                    if (isPdf) {
+                      // For PDFs, use share_plus to let user choose viewer
+                      await Share.shareXFiles(
+                        [XFile(filePath!)],
+                        text: 'Open with...',
                       );
+                    } else {
+                      // For other files, use url_launcher
+                      final uri = Uri.file(filePath!);
+                      final launched = await launchUrl(
+                        uri,
+                        mode: LaunchMode.externalApplication,
+                      );
+                      if (!launched && context.mounted) {
+                        // Fallback to share if launch fails
+                        await Share.shareXFiles(
+                          [XFile(filePath!)],
+                          text: 'Open with...',
+                        );
+                      }
                     }
                   } catch (e) {
                     if (context.mounted) {
