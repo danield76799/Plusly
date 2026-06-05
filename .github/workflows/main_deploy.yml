@@ -43,7 +43,14 @@ jobs:
       - name: Install Android NDK
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: r26d
+          ndk-version: 26.3.11579264
+
+      - name: Set up Rust Android environment
+        run: |
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "Rust targets installed:"
+          rustup target list --installed
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
