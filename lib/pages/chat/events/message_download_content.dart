@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
-import 'package:open_file/open_file.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
@@ -112,10 +112,36 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
           color: Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-            onTap: () {
+            onTap: () async {
               if (isDownloading) return;
               if (downloadSuccess) {
-                if (filePath != null) OpenFile.open(filePath);
+                if (filePath != null) {
+                  // Use url_launcher with file:// URI for better compatibility
+                  final uri = Uri.file(filePath!);
+                  try {
+                    final launched = await launchUrl(
+                      uri,
+                      mode: LaunchMode.externalApplication,
+                    );
+                    if (!launched && context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Could not open file: ${filePath!.split('/').last}',
+                          ),
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error opening file: $e'),
+                        ),
+                      );
+                    }
+                  }
+                }
                 return;
               }
               if (event.canDownloadInBackground) {
