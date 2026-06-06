@@ -3377,5 +3377,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "smartReply": "Intelligente Antwort",
+  "generatingReply": "Antwort wird generiert...",
+  "errorGeneratingReply": "Antwort generieren fehlgeschlagen"
 }

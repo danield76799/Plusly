@@ -3785,5 +3785,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "smartReply": "Smart Reply",
+  "generatingReply": "Generating reply...",
+  "errorGeneratingReply": "Failed to generate reply"
 }

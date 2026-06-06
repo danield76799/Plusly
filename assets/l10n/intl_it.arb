@@ -3420,5 +3420,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "smartReply": "Risposta Intelligente",
+  "generatingReply": "Generazione risposta...",
+  "errorGeneratingReply": "Errore nella generazione della risposta"
 }

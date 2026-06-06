@@ -689,6 +689,18 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             ),
                             const ListDivider(),
                           ],
+                          if (event.text.trim().isNotEmpty) ...[
+                            _buildMenuItem(
+                              event: event,
+                              icon: Icons.auto_awesome,
+                              label: L10n.of(context).smartReply,
+                              onPressed: () {
+                                controller.closeMessageMenu();
+                                controller.smartReplyAction(event: event);
+                              },
+                            ),
+                            const ListDivider(),
+                          ],
                           if (event.redacted) ...[
                             _buildMenuItem(
                               event: event,

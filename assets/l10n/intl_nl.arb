@@ -3441,5 +3441,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "smartReply": "Slim Antwoord",
+  "generatingReply": "Antwoord genereren...",
+  "errorGeneratingReply": "Antwoord genereren mislukt"
 }

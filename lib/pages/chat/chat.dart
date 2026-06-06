@@ -28,6 +28,7 @@ import 'package:Pulsly/pages/chat/seen_by_row.dart';
 import 'package:Pulsly/pages/chat/send_poll_dialog.dart';
 import 'package:Pulsly/pages/chat/send_later_dialog.dart';
 import 'package:Pulsly/pages/chat/translated_event_dialog.dart';
+import 'package:Pulsly/services/llm_service.dart';
 import 'package:Pulsly/pages/chat/vote_results_dialog.dart';
 import 'package:Pulsly/pages/chat_details/chat_details.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
@@ -1142,6 +1143,35 @@ class ChatController extends State<ChatPageWithRoom>
         fullscreenDialog: true,
       ),
     );
+  }
+
+  void smartReplyAction({Event? event}) async {
+    event ??= selectedEvents.single;
+    final text = event.isRichMessage ? event.formattedText : event.text;
+    if (text.trim().isEmpty) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(L10n.of(context).generatingReply)),
+    );
+
+    try {
+      final messages = [
+        LlmMessage(
+          role: 'system',
+          content: 'You are a helpful assistant. Generate a short, natural '
+              'reply to the user\'s message. Keep it brief and conversational. '
+              'Output ONLY the reply text, nothing else.',
+        ),
+        LlmMessage(role: 'user', content: text),
+      ];
+      final reply = await LlmService.sendMessage(messages);
+      sendController.text = reply;
+      inputFocus.requestFocus();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(L10n.of(context).errorGeneratingReply)),
+      );
+    }
   }
 
   void translateEventAction({Event? event}) async {

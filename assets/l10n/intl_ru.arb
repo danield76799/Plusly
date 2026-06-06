@@ -3866,5 +3866,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "smartReply": "Умный Ответ",
+  "generatingReply": "Генерация ответа...",
+  "errorGeneratingReply": "Ошибка генерации ответа"
 }

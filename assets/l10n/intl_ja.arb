@@ -2497,5 +2497,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "smartReply": "スマート返信",
+  "generatingReply": "返信を生成中...",
+  "errorGeneratingReply": "返信の生成に失敗しました"
 }
