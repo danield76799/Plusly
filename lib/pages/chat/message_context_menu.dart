@@ -511,6 +511,18 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                             ),
                             const ListDivider(),
                           ],
+                          if (event.text.trim().isNotEmpty) ...[
+                            _buildMenuItem(
+                              event: event,
+                              icon: Icons.auto_awesome,
+                              label: L10n.of(context).smartReply,
+                              onPressed: () {
+                                controller.closeMessageMenu();
+                                controller.smartReplyAction(event: event);
+                              },
+                            ),
+                            const ListDivider(),
+                          ],
                           if (event.type ==
                               'org.matrix.msc3381.poll.start') ...[
                             _buildMenuItem(
@@ -685,18 +697,6 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                               onPressed: () {
                                 controller.closeMessageMenu();
                                 controller.translateEventAction(event: event);
-                              },
-                            ),
-                            const ListDivider(),
-                          ],
-                          if (event.text.trim().isNotEmpty) ...[
-                            _buildMenuItem(
-                              event: event,
-                              icon: Icons.auto_awesome,
-                              label: L10n.of(context).smartReply,
-                              onPressed: () {
-                                controller.closeMessageMenu();
-                                controller.smartReplyAction(event: event);
                               },
                             ),
                             const ListDivider(),
