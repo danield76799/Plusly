@@ -151,13 +151,15 @@ jobs:
           storeFile=upload-keystore.jks
           EOF
 
-      # === APK BUILD ===
-      - name: Build Android APK
+      # === APK BUILD (Split ABIs) ===
+      - name: Build Android APK (split ABIs)
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
-          flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
+          flutter build apk --release --split-per-abi --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
           mkdir -p output
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk
           cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
 
       # === PATCH ELF ALIGNMENT FOR 16KB PAGE SIZE (Android 15+/17) ===
