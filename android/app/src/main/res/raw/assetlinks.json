@@ -5,7 +5,7 @@
  ],
  "target": {
  "namespace": "android_app",
- "package_name": "com.danield.plusly.app",
+ "package_name": "com.danield.plusly.app.debug",
  "sha256_cert_fingerprints": [
  "44:48:D2:82:01:EC:6A:99:94:09:6D:63:7C:BE:35:62:A5:E9:5D:BD:8B:CD:0D:43:29:DA:B6:34:52:26:34:AB"
  ]

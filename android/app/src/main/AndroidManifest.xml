@@ -35,7 +35,7 @@
     <uses-sdk
         tools:overrideLibrary="io.wazo.callkeep, net.touchcapture.qr.flutterqr, com.cloudwebrtc.webrtc, org.webrtc, com.it_nomads.fluttersecurestorage, com.pichillilorenzo.flutter_inappwebview, com.example.video_compress, com.otaliastudios.transcoder, com.otaliastudios.opengl, com.kineapps.flutter_file_dialog, com.llfbandit.record, com.pravera.flutter_foreground_task" />
     <application
-        android:label="Plusly"
+        android:label="Plusly Debug"
         android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
         android:allowBackup="false"
@@ -88,7 +88,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="com.danield.plusly" android:host="chat" />
+                <data android:scheme="com.danield.plusly.debug" android:host="chat" />
             </intent-filter>
 
             <!-- App can receive shared text -->
@@ -119,7 +119,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="com.danield.plusly.auth" />
+                <data android:scheme="com.danield.plusly.debug.auth" />
             </intent-filter>
         </activity>
 
@@ -159,7 +159,7 @@
 
         <!-- Chat Widget Provider (Legacy) -->
         <receiver
-            android:name="com.danield.plusly.app.ChatWidgetProvider"
+            android:name="com.danield.plusly.app.debug.ChatWidgetProvider"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
