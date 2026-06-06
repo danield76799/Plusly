@@ -48,7 +48,7 @@ Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
   LlmProviderType.ollama: const LlmProviderConfig(
     name: 'Plusly local LLM (private but slower)',
     baseUrl: '', // overridden by settings llmGatewayUrl
-    model: 'llama3.1:8b',
+    model: 'qwen2.5:4b',
   ),
   LlmProviderType.groq: LlmProviderConfig(
     name: 'Groq (Cloud)',
