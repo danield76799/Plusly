@@ -160,7 +160,6 @@ jobs:
           mkdir -p output
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
-          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
 
       # === PATCH ELF ALIGNMENT FOR 16KB PAGE SIZE (Android 15+/17) ===
       - name: Patch ELF alignment to 16KB
