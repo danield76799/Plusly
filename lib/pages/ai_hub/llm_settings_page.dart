@@ -11,7 +11,6 @@ class LlmSettingsPage extends StatefulWidget {
 
 class _LlmSettingsPageState extends State<LlmSettingsPage> {
   late LlmProviderType _selectedProvider;
-  final _ollamaUrlController = TextEditingController();
   bool _testing = false;
   bool? _connectionOk;
 
@@ -19,18 +18,15 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
   void initState() {
     super.initState();
     _selectedProvider = LlmService.currentProvider;
-    _ollamaUrlController.text = AppSettings.llmGatewayUrl.value;
   }
 
   @override
   void dispose() {
-    _ollamaUrlController.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
     await AppSettings.llmProvider.setItem(_selectedProvider.name);
-    await AppSettings.llmGatewayUrl.setItem(_ollamaUrlController.text.trim());
   }
 
   Future<void> _testConnection() async {
@@ -100,32 +96,25 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
           const Divider(),
           const SizedBox(height: 16),
 
-          // ── Ollama URL (only when Ollama selected) ────────────
+          // ── Ollama info (only when Ollama selected) ────────────
           if (_selectedProvider == LlmProviderType.ollama) ...[
-            Text(
-              'Plusly LLM Server URL',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
               ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _ollamaUrlController,
-              decoration: const InputDecoration(
-                hintText: 'http://13.140.136.172:11434',
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              ),
-              keyboardType: TextInputType.url,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Make sure the Plusly LLM server is running and accessible from the internet.',
-              style: TextStyle(
-                fontSize: 12,
-                color: theme.colorScheme.outline,
+              child: Row(
+                children: [
+                  const Icon(Icons.dns, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Connects to the Plusly LLM server automatically.',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
