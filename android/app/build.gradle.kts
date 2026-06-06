@@ -47,19 +47,8 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
-    // Support for 16KB page size on Android 15+
-    // See: https://developer.android.com/guide/practices/page-sizes
-    defaultConfig {
-        // 16KB flexible page sizes for NDK r27
-        externalNativeBuild {
-            cmake {
-                arguments += "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-            }
-        }
-    }
-
     signingConfigs {
-       create("release") {
+        create("release") {
             keyAlias = "dummyAlias"
             keyPassword = "dummyStorePassword"
             storeFile = file("dummy.keystore")
@@ -80,12 +69,21 @@ android {
         }
     }
 
+    // Support for 16KB page size on Android 15+ / Android 17
+    // See: https://developer.android.com/guide/practices/page-sizes
     defaultConfig {
         applicationId = "com.danield.plusly.app"
         minSdk = 24  // Required for modern features
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // 16KB flexible page sizes for NDK r27
+        externalNativeBuild {
+            cmake {
+                arguments += "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+            }
+        }
     }
 
     buildTypes {
@@ -114,3 +112,8 @@ android {
 flutter {
     source = "../.."
 }
+
+
+// Patch ELF alignment to 16KB for Android 15+/17 compatibility
+// Run scripts/patch_elf_alignment.py after build to fix third-party .so files
+// that were compiled with 4KB page size alignment
