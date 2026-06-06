@@ -190,7 +190,8 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        'Groq & Cerebras: cloud-powered, free tier included.',
+                        'Groq & Cerebras: cloud-powered, free tier. '
+                        'Daily limits may apply.',
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.colorScheme.outline,

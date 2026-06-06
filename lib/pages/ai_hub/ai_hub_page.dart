@@ -65,7 +65,8 @@ class _AiHubPageState extends State<AiHubPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Plusly AI uses cloud providers (Groq, Cerebras) for smart replies and translations.',
+                    'Plusly AI uses cloud providers (Groq, Cerebras) for smart replies and translations. '
+                    'These use free tier APIs which may have daily usage limits.',
                     style: TextStyle(fontSize: 15),
                   ),
                   SizedBox(height: 12),
