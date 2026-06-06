@@ -103,7 +103,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
           // ── Ollama URL (only when Ollama selected) ────────────
           if (_selectedProvider == LlmProviderType.ollama) ...[
             Text(
-              'Ollama Server URL',
+              'Plusly LLM Server URL',
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.primary,
                 fontWeight: FontWeight.bold,
@@ -122,7 +122,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Make sure Ollama is running and accessible from the internet.',
+              'Make sure the Plusly LLM server is running and accessible from the internet.',
               style: TextStyle(
                 fontSize: 12,
                 color: theme.colorScheme.outline,
@@ -224,7 +224,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        'Ollama: data stays on your own server. '
+                        'Plusly local LLM: data stays on your own server. '
                         'Groq & Cerebras: cloud-powered, free tier included.',
                         style: TextStyle(
                           fontSize: 12,

@@ -46,7 +46,7 @@ const _cerebrasKey = String.fromEnvironment('CEREBRAS_API_KEY');
 /// `/v1/chat/completions` endpoint, so the request format is identical.
 Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
   LlmProviderType.ollama: const LlmProviderConfig(
-    name: 'Ollama (Local)',
+    name: 'Plusly local LLM (private but slower)',
     baseUrl: '', // overridden by settings llmGatewayUrl
     model: 'llama3.1:8b',
   ),
