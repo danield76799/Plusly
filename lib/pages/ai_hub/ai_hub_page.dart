@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/services/llm_service.dart';
+import 'package:Pulsly/pages/ai_hub/llm_settings_page.dart';
 
 class AiHubPage extends StatefulWidget {
   const AiHubPage({super.key});
@@ -64,13 +65,14 @@ class _AiHubPageState extends State<AiHubPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Plusly AI uses a cloud-based language model to provide smart replies and translations.',
+                    'Plusly AI can use a local server (Ollama) or cloud providers (Groq, Cerebras) for smart replies and translations.',
                     style: TextStyle(fontSize: 15),
                   ),
                   SizedBox(height: 12),
                   Text(
-                    '⚠️ Your messages are sent to a cloud server for processing. '
-                    'Do not share sensitive information in AI conversations.',
+                    '⚠️ With cloud providers, your messages are sent to a remote server. '
+                    'Ollama (local) keeps everything on your own server. '
+                    'You can change provider at any time in AI settings.',
                     style: TextStyle(fontSize: 13, color: Colors.orange),
                   ),
                   SizedBox(height: 12),
@@ -173,6 +175,20 @@ class _AiHubPageState extends State<AiHubPage> {
               onPressed: _clearChat,
             ),
           IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'AI Settings',
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const LlmSettingsPage(),
+                ),
+              );
+              // Refresh connection after returning from settings
+              _isConnected = await LlmService.ping();
+              if (mounted) setState(() {});
+            },
+          ),
+          IconButton(
             icon: Icon(
               _isConnected ? Icons.cloud_done : Icons.cloud_off,
               color: _isConnected ? Colors.green : Colors.red,
@@ -199,7 +215,7 @@ class _AiHubPageState extends State<AiHubPage> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'AI gateway not reachable. Check your connection.',
+                      '${LlmService.providerName} not reachable. Check settings.',
                       style: TextStyle(
                         fontSize: 12,
                         color: theme.colorScheme.onErrorContainer,
@@ -232,7 +248,7 @@ class _AiHubPageState extends State<AiHubPage> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Powered by AI',
+                          'Powered by ${LlmService.providerName}',
                           style: TextStyle(
                             fontSize: 13,
                             color: theme.colorScheme.outline,

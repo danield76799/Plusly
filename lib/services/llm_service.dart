@@ -16,43 +16,140 @@ class LlmMessage {
   Map<String, String> toApi() => {'role': role, 'content': content};
 }
 
+/// Supported LLM providers.
+enum LlmProviderType {
+  ollama,
+  groq,
+  cerebras,
+}
+
+/// Configuration for a single LLM provider.
+class LlmProviderConfig {
+  final String name;
+  final String baseUrl;
+  final String model;
+  final bool requiresApiKey;
+
+  const LlmProviderConfig({
+    required this.name,
+    required this.baseUrl,
+    required this.model,
+    this.requiresApiKey = false,
+  });
+}
+
+/// Provider definitions. All three expose an OpenAI-compatible
+/// `/v1/chat/completions` endpoint, so the request format is identical.
+const Map<LlmProviderType, LlmProviderConfig> providerConfigs = {
+  LlmProviderType.ollama: LlmProviderConfig(
+    name: 'Ollama (Local)',
+    baseUrl: '', // overridden by settings llmGatewayUrl
+    model: 'llama3.1:8b',
+  ),
+  LlmProviderType.groq: LlmProviderConfig(
+    name: 'Groq (Cloud)',
+    baseUrl: 'https://api.groq.com/openai',
+    model: 'llama-3.1-8b-instant',
+    requiresApiKey: true,
+  ),
+  LlmProviderType.cerebras: LlmProviderConfig(
+    name: 'Cerebras (Cloud)',
+    baseUrl: 'https://api.cerebras.ai',
+    model: 'llama-3.3-70b',
+    requiresApiKey: true,
+  ),
+}
+
 class LlmService {
-  static String get _baseUrl => AppSettings.llmGatewayUrl.value;
+  // ── Provider resolution ──────────────────────────────────────────────
+
+  static LlmProviderType get currentProvider {
+    final raw = AppSettings.llmProvider.value;
+    return LlmProviderType.values.firstWhere(
+      (p) => p.name == raw,
+      orElse: () => LlmProviderType.ollama,
+    );
+  }
+
+  static LlmProviderConfig get _config =>
+      providerConfigs[currentProvider]!;
+
+  /// Effective base URL: Ollama uses the user-configured gateway URL,
+  /// cloud providers use their hardcoded endpoint.
+  static String get _baseUrl {
+    if (currentProvider == LlmProviderType.ollama) {
+      return AppSettings.llmGatewayUrl.value;
+    }
+    return _config.baseUrl;
+  }
+
   static bool get isEnabled => AppSettings.llmEnabled.value;
+
+  static String get providerName => _config.name;
+
+  /// API key for the active cloud provider (empty string for Ollama).
+  static String get _apiKey {
+    switch (currentProvider) {
+      case LlmProviderType.groq:
+        return AppSettings.llmGroqApiKey.value;
+      case LlmProviderType.cerebras:
+        return AppSettings.llmCerebrasApiKey.value;
+      case LlmProviderType.ollama:
+        return '';
+    }
+  }
+
+  static bool get hasApiKey =>
+      !_config.requiresApiKey || _apiKey.isNotEmpty;
+
+  // ── Chat ─────────────────────────────────────────────────────────────
 
   /// Send a chat completion request and return the assistant's reply.
   static Future<String> sendMessage(List<LlmMessage> history) async {
     final url = Uri.parse('$_baseUrl/v1/chat/completions');
+
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+    };
+    if (_apiKey.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $_apiKey';
+    }
+
     final body = jsonEncode({
-      'model': 'default',
+      'model': _config.model,
       'messages': history.map((m) => m.toApi()).toList(),
       'stream': false,
     });
 
     final response = await http
-        .post(
-          url,
-          headers: {'Content-Type': 'application/json'},
-          body: body,
-        )
-        .timeout(const Duration(seconds: 30));
+        .post(url, headers: headers, body: body)
+        .timeout(const Duration(seconds: 60));
 
     if (response.statusCode != 200) {
-      throw Exception('Gateway error ${response.statusCode}: ${response.body}');
+      throw Exception('LLM error ${response.statusCode}: ${response.body}');
     }
 
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     final choices = data['choices'] as List<dynamic>;
-    if (choices.isEmpty) throw Exception('Empty response from gateway');
+    if (choices.isEmpty) throw Exception('Empty response from LLM');
     return choices[0]['message']['content'] as String;
   }
 
-  /// Check if the gateway is reachable.
+  // ── Connectivity ─────────────────────────────────────────────────────
+
+  /// Check if the current provider is reachable.
   static Future<bool> ping() async {
     try {
       final url = Uri.parse('$_baseUrl/v1/models');
-      final response =
-          await http.get(url).timeout(const Duration(seconds: 5));
+
+      final headers = <String, String>{};
+      if (_apiKey.isNotEmpty) {
+        headers['Authorization'] = 'Bearer $_apiKey';
+      }
+
+      final response = await http
+          .get(url, headers: headers)
+          .timeout(const Duration(seconds: 8));
       return response.statusCode == 200;
     } catch (_) {
       return false;
