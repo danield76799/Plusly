@@ -1,63 +1,81 @@
-import 'dart:convert';
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:Pulsly/services/llm_service.dart';
 
 class Translator {
-  static const Duration _timeout = Duration(seconds: 30);
-  
-  
+  /// Translate text using the configured LLM provider (Groq/Cerebras).
   static Future<String> translate(
-    String str,
+    String text,
     String targetLanguage,
-    String baseUrl,
+    String _unusedBaseUrl, // kept for backward compat
   ) async {
-    // Always use LibreTranslate, remove DeepL dependency
-    return _translateLibreTranslate(str, targetLanguage, baseUrl);
-  }
-  
-  static Future<String> _translateLibreTranslate(
-    String str,
-    String targetLanguage,
-    String baseUrl,
-  ) async {
-    // Log server URL for debugging
-    debugPrint('LibreTranslate URL: $baseUrl');
-    debugPrint('Target language: $targetLanguage');
-    
-    final uri = Uri.parse('$baseUrl/translate');
-    
-    final body = {
-      'q': str.length > 5000 ? str.substring(0, 5000) : str,
-      'source': 'auto',
-      'target': targetLanguage,
-      'format': 'text',
-    };
-    
-    try {
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      ).timeout(_timeout);
-      
-      debugPrint('LibreTranslate response status: ${response.statusCode}');
-      debugPrint('LibreTranslate response body: ${response.body}');
-      
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        return responseData['translatedText'] ?? '';
-      } else {
-        throw Exception('LibreTranslate error: ${response.statusCode} - ${response.body}');
-      }
-    } on http.ClientException catch (e) {
-      throw Exception('Network error during translation: $e');
-    } catch (e) {
-      if (e.toString().contains('TimeoutException')) {
-        throw Exception('Translation timeout - try again.');
-      }
-      rethrow;
-    }
-  }
-  
+    if (text.trim().isEmpty) return '';
 
+    final truncated = text.length > 5000 ? text.substring(0, 5000) : text;
+    final langName = _languageName(targetLanguage);
+
+    final messages = [
+      LlmMessage(
+        role: 'system',
+        content:
+            'You are a translator. Translate the user\'s message to $langName. '
+            'Output ONLY the translation, nothing else. No quotes, no explanation.',
+      ),
+      LlmMessage(role: 'user', content: truncated),
+    ];
+
+    return LlmService.sendMessage(messages);
+  }
+
+  static String _languageName(String code) {
+    const names = {
+      'en': 'English',
+      'nl': 'Dutch',
+      'de': 'German',
+      'fr': 'French',
+      'es': 'Spanish',
+      'it': 'Italian',
+      'pt': 'Portuguese',
+      'ru': 'Russian',
+      'zh': 'Chinese',
+      'ja': 'Japanese',
+      'ko': 'Korean',
+      'ar': 'Arabic',
+      'hi': 'Hindi',
+      'tr': 'Turkish',
+      'pl': 'Polish',
+      'sv': 'Swedish',
+      'da': 'Danish',
+      'fi': 'Finnish',
+      'nb': 'Norwegian',
+      'ro': 'Romanian',
+      'hu': 'Hungarian',
+      'cs': 'Czech',
+      'el': 'Greek',
+      'he': 'Hebrew',
+      'th': 'Thai',
+      'vi': 'Vietnamese',
+      'id': 'Indonesian',
+      'uk': 'Ukrainian',
+      'sr': 'Serbian',
+      'hr': 'Croatian',
+      'sk': 'Slovak',
+      'sl': 'Slovenian',
+      'lt': 'Lithuanian',
+      'lv': 'Latvian',
+      'et': 'Estonian',
+      'bn': 'Bengali',
+      'ta': 'Tamil',
+      'te': 'Telugu',
+      'ka': 'Georgian',
+      'ga': 'Irish',
+      'eu': 'Basque',
+      'gl': 'Galician',
+      'ca': 'Catalan',
+      'fil': 'Filipino',
+      'fa': 'Persian',
+      'eo': 'Esperanto',
+      'ia': 'Interlingua',
+      'ie': 'Interlingue',
+    };
+    return names[code] ?? code;
+  }
 }
