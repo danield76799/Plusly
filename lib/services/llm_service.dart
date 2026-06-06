@@ -28,20 +28,24 @@ class LlmProviderConfig {
   final String name;
   final String baseUrl;
   final String model;
-  final bool requiresApiKey;
+  final String apiKey; // empty = no auth needed
 
   const LlmProviderConfig({
     required this.name,
     required this.baseUrl,
     required this.model,
-    this.requiresApiKey = false,
+    this.apiKey = '',
   });
 }
 
+// ── API keys injected at build time via --dart-define ──────────────
+const _groqKey = String.fromEnvironment('GROQ_API_KEY');
+const _cerebrasKey = String.fromEnvironment('CEREBRAS_API_KEY');
+
 /// Provider definitions. All three expose an OpenAI-compatible
 /// `/v1/chat/completions` endpoint, so the request format is identical.
-const Map<LlmProviderType, LlmProviderConfig> providerConfigs = {
-  LlmProviderType.ollama: LlmProviderConfig(
+Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
+  LlmProviderType.ollama: const LlmProviderConfig(
     name: 'Ollama (Local)',
     baseUrl: '', // overridden by settings llmGatewayUrl
     model: 'llama3.1:8b',
@@ -50,15 +54,15 @@ const Map<LlmProviderType, LlmProviderConfig> providerConfigs = {
     name: 'Groq (Cloud)',
     baseUrl: 'https://api.groq.com/openai',
     model: 'llama-3.1-8b-instant',
-    requiresApiKey: true,
+    apiKey: _groqKey,
   ),
   LlmProviderType.cerebras: LlmProviderConfig(
     name: 'Cerebras (Cloud)',
     baseUrl: 'https://api.cerebras.ai',
     model: 'llama-3.3-70b',
-    requiresApiKey: true,
+    apiKey: _cerebrasKey,
   ),
-}
+};
 
 class LlmService {
   // ── Provider resolution ──────────────────────────────────────────────
@@ -87,20 +91,7 @@ class LlmService {
 
   static String get providerName => _config.name;
 
-  /// API key for the active cloud provider (empty string for Ollama).
-  static String get _apiKey {
-    switch (currentProvider) {
-      case LlmProviderType.groq:
-        return AppSettings.llmGroqApiKey.value;
-      case LlmProviderType.cerebras:
-        return AppSettings.llmCerebrasApiKey.value;
-      case LlmProviderType.ollama:
-        return '';
-    }
-  }
-
-  static bool get hasApiKey =>
-      !_config.requiresApiKey || _apiKey.isNotEmpty;
+  static String get _apiKey => _config.apiKey;
 
   // ── Chat ─────────────────────────────────────────────────────────────
 

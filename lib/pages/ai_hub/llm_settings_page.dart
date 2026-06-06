@@ -11,8 +11,6 @@ class LlmSettingsPage extends StatefulWidget {
 
 class _LlmSettingsPageState extends State<LlmSettingsPage> {
   late LlmProviderType _selectedProvider;
-  final _groqKeyController = TextEditingController();
-  final _cerebrasKeyController = TextEditingController();
   final _ollamaUrlController = TextEditingController();
   bool _testing = false;
   bool? _connectionOk;
@@ -21,24 +19,17 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
   void initState() {
     super.initState();
     _selectedProvider = LlmService.currentProvider;
-    _groqKeyController.text = AppSettings.llmGroqApiKey.value;
-    _cerebrasKeyController.text = AppSettings.llmCerebrasApiKey.value;
     _ollamaUrlController.text = AppSettings.llmGatewayUrl.value;
   }
 
   @override
   void dispose() {
-    _groqKeyController.dispose();
-    _cerebrasKeyController.dispose();
     _ollamaUrlController.dispose();
     super.dispose();
   }
 
   Future<void> _save() async {
     await AppSettings.llmProvider.setItem(_selectedProvider.name);
-    await AppSettings.llmGroqApiKey.setItem(_groqKeyController.text.trim());
-    await AppSettings.llmCerebrasApiKey
-        .setItem(_cerebrasKeyController.text.trim());
     await AppSettings.llmGatewayUrl.setItem(_ollamaUrlController.text.trim());
   }
 
@@ -96,9 +87,9 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                 cfg.model,
                 style: const TextStyle(fontSize: 12),
               ),
-              secondary: cfg.requiresApiKey
-                  ? const Icon(Icons.vpn_key, size: 18)
-                  : const Icon(Icons.home, size: 18),
+              secondary: p == LlmProviderType.ollama
+                  ? const Icon(Icons.dns, size: 18)
+                  : const Icon(Icons.cloud, size: 18),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -109,7 +100,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
           const Divider(),
           const SizedBox(height: 16),
 
-          // ── Provider-specific settings ────────────────────────
+          // ── Ollama URL (only when Ollama selected) ────────────
           if (_selectedProvider == LlmProviderType.ollama) ...[
             Text(
               'Ollama Server URL',
@@ -139,62 +130,26 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
             ),
           ],
 
-          if (_selectedProvider == LlmProviderType.groq) ...[
-            Text(
-              'Groq API Key',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
+          // ── Cloud provider info ───────────────────────────────
+          if (_selectedProvider != LlmProviderType.ollama) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
               ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _groqKeyController,
-              decoration: const InputDecoration(
-                hintText: 'gsk_...',
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              ),
-              obscureText: true,
-              keyboardType: TextInputType.visiblePassword,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Free tier available at console.groq.com',
-              style: TextStyle(
-                fontSize: 12,
-                color: theme.colorScheme.outline,
-              ),
-            ),
-          ],
-
-          if (_selectedProvider == LlmProviderType.cerebras) ...[
-            Text(
-              'Cerebras API Key',
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _cerebrasKeyController,
-              decoration: const InputDecoration(
-                hintText: 'csk-...',
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              ),
-              obscureText: true,
-              keyboardType: TextInputType.visiblePassword,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Free tier available at cloud.cerebras.ai',
-              style: TextStyle(
-                fontSize: 12,
-                color: theme.colorScheme.outline,
+              child: Row(
+                children: [
+                  const Icon(Icons.cloud_done, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '${providerConfigs[_selectedProvider]!.name} is ready to use. '
+                      'No configuration needed.',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -252,7 +207,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
 
           const SizedBox(height: 24),
 
-          // ── Info card ─────────────────────────────────────────
+          // ── Info ──────────────────────────────────────────────
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
@@ -267,23 +222,17 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                     Icon(Icons.info_outline,
                         size: 16, color: theme.colorScheme.outline),
                     const SizedBox(width: 6),
-                    Text(
-                      'All providers use the OpenAI-compatible API format.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: theme.colorScheme.outline,
+                    Expanded(
+                      child: Text(
+                        'Ollama: data stays on your own server. '
+                        'Groq & Cerebras: cloud-powered, free tier included.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.outline,
+                        ),
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Ollama runs on your own server — no data leaves your network. '
-                  'Groq and Cerebras are cloud services with free tiers.',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: theme.colorScheme.outline,
-                  ),
                 ),
               ],
             ),

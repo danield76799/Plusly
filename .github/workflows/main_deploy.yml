@@ -118,8 +118,10 @@ jobs:
       - name: Build Android APK (split ABIs)
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
         run: |
-          flutter build apk --release --split-per-abi --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
+          flutter build apk --release --split-per-abi --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }} --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           mkdir -p output
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
@@ -128,8 +130,10 @@ jobs:
       - name: Build Android App Bundle
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
         run: |
-          flutter build appbundle --release --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
+          flutter build appbundle --release --dart-define=DEEPL_API_KEY=*** secrets.DEEPL_API_KEY || '' }} --dart-define=GROQ_API_KEY=*** secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=*** secrets.CEREBRAS_API_KEY || '' }}
           cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab || true
 
       # === VERIFY OUTPUTS ===

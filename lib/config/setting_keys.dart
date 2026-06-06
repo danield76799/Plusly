@@ -40,8 +40,6 @@ enum AppSettings<T> {
   llmEnabled<bool>('xyz.plusly.llmEnabled', false),
   llmProvider<String>('xyz.plusly.llmProvider', 'ollama'),
   llmGatewayUrl<String>('xyz.plusly.llmGatewayUrl', 'http://13.140.136.172:11434'),
-  llmGroqApiKey<String>('xyz.plusly.llmGroqApiKey', ''),
-  llmCerebrasApiKey<String>('xyz.plusly.llmCerebrasApiKey', ''),
   llmPrivacyAccepted<bool>('xyz.plusly.llmPrivacyAccepted', false),
   llmShowSmartReplies<bool>('xyz.plusly.llmShowSmartReplies', true),
   llmEnableTranslation<bool>('xyz.plusly.llmEnableTranslation', true),
