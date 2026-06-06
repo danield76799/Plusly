@@ -59,7 +59,7 @@ Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
   LlmProviderType.cerebras: LlmProviderConfig(
     name: 'Cerebras (Cloud)',
     baseUrl: 'https://api.cerebras.ai',
-    model: 'llama-3.3-70b',
+    model: 'gpt-oss-120b',
     apiKey: _cerebrasKey,
   ),
 };
