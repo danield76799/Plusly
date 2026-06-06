@@ -157,10 +157,10 @@ def patch_apk(apk_path: Path) -> bool:
         print(f"  Writing patched APK to: {output_path}")
 
         with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as z_out:
-            # First add all the patched .so files
+            # First add all the patched .so files (STORED for Android 15+ 16KB support)
             for so_path in extract_dir.rglob('*.so'):
                 relative = so_path.relative_to(extract_dir)
-                z_out.write(so_path, str(relative).replace(os.sep, '/'))
+                z_out.write(so_path, str(relative).replace(os.sep, '/'), compress_type=zipfile.ZIP_STORED)
 
             # Then add everything else from the original APK
             with zipfile.ZipFile(apk_path, 'r') as z_in:
