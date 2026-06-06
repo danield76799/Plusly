@@ -47,6 +47,17 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
+    // Support for 16KB page size on Android 15+
+    // See: https://developer.android.com/guide/practices/page-sizes
+    defaultConfig {
+        // 16KB flexible page sizes for NDK r27
+        externalNativeBuild {
+            cmake {
+                arguments += "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+            }
+        }
+    }
+
     signingConfigs {
        create("release") {
             keyAlias = "dummyAlias"

@@ -35,6 +35,48 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+      - name: Install Android NDK
+        run: |
+          echo "Installing NDK manually..."
+          NDK_VERSION="27.0.12077973"
+          NDK_DIR="$ANDROID_HOME/ndk/$NDK_VERSION"
+
+          # Create NDK directory
+          mkdir -p "$NDK_DIR"
+
+          # Download NDK from Google
+          echo "Downloading NDK $NDK_VERSION..."
+          cd /tmp
+          wget -q "https://dl.google.com/android/repository/android-ndk-r27-linux.zip" -O ndk.zip || \
+          curl -L -o ndk.zip "https://dl.google.com/android/repository/android-ndk-r27-linux.zip"
+
+          # Check if download succeeded
+          if [ ! -f ndk.zip ] || [ ! -s ndk.zip ]; then
+            echo "ERROR: NDK download failed"
+            exit 1
+          fi
+
+          # Extract NDK
+          echo "Extracting NDK..."
+          unzip -q ndk.zip
+          mv android-ndk-r27/* "$NDK_DIR/" 2>/dev/null || mv android-ndk-r27/*/* "$NDK_DIR/" 2>/dev/null
+
+          # Set environment variable
+          echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
+          echo "NDK installed at: $NDK_DIR"
+          ls -la "$NDK_DIR" | head -10
+
+      - name: Set up Rust Android environment
+        run: |
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+          echo "Rust targets installed:"
+          rustup target list --installed
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
         with:
