@@ -96,18 +96,48 @@ class LlmService {
   // ── Chat ─────────────────────────────────────────────────────────────
 
   /// Send a chat completion request and return the assistant's reply.
+  /// Automatically falls back from Groq → Cerebras on failure.
   static Future<String> sendMessage(List<LlmMessage> history) async {
-    final url = Uri.parse('$_baseUrl/v1/chat/completions');
+    final primary = currentProvider;
+    // Build fallback chain: primary first, then the other cloud provider
+    final chain = <LlmProviderType>[primary];
+    if (primary == LlmProviderType.groq) {
+      chain.add(LlmProviderType.cerebras);
+    } else if (primary == LlmProviderType.cerebras) {
+      chain.add(LlmProviderType.groq);
+    }
+
+    Exception? lastError;
+    for (final provider in chain) {
+      final config = providerConfigs[provider]!;
+      try {
+        return await _sendToProvider(config, history);
+      } catch (e) {
+        lastError = e is Exception ? e : Exception(e.toString());
+        // If this was the last provider in chain, rethrow
+        if (provider == chain.last) break;
+        // Otherwise try next provider
+        continue;
+      }
+    }
+    throw lastError ?? Exception('All providers failed');
+  }
+
+  static Future<String> _sendToProvider(
+    LlmProviderConfig config,
+    List<LlmMessage> history,
+  ) async {
+    final url = Uri.parse('${config.baseUrl}/v1/chat/completions');
 
     final headers = <String, String>{
       'Content-Type': 'application/json',
     };
-    if (_apiKey.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $_apiKey';
+    if (config.apiKey.isNotEmpty) {
+      headers['Authorization'] = 'Bearer ${config.apiKey}';
     }
 
     final body = jsonEncode({
-      'model': _config.model,
+      'model': config.model,
       'messages': history.map((m) => m.toApi()).toList(),
       'stream': false,
     });
@@ -131,11 +161,11 @@ class LlmService {
   /// Check if the current provider is reachable.
   static Future<bool> ping() async {
     try {
-      final url = Uri.parse('$_baseUrl/v1/models');
+      final url = Uri.parse('${_config.baseUrl}/v1/models');
 
       final headers = <String, String>{};
-      if (_apiKey.isNotEmpty) {
-        headers['Authorization'] = 'Bearer $_apiKey';
+      if (_config.apiKey.isNotEmpty) {
+        headers['Authorization'] = 'Bearer ${_config.apiKey}';
       }
 
       final response = await http
