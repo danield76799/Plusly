@@ -133,7 +133,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
         run: |
-          flutter build appbundle --release --dart-define=DEEPL_API_KEY=*** secrets.DEEPL_API_KEY || '' }} --dart-define=GROQ_API_KEY=*** secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=*** secrets.CEREBRAS_API_KEY || '' }}
+          flutter build appbundle --release --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }} --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab || true
 
       # === VERIFY OUTPUTS ===
