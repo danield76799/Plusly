@@ -103,10 +103,6 @@ jobs:
             echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
             echo "keyAlias=$KEY_ALIAS" >> android/key.properties
             echo "storeFile=upload-keystore.jks" >> android/key.properties
-            echo "=== key.properties ==="
-            cat android/key.properties
-            echo "=== Keystore SHA1 ==="
-            keytool -list -v -keystore android/app/upload-keystore.jks -storepass "$KEYSTORE_PASSWORD" 2>&1 | grep -E "SHA1|Alias|Owner"
             echo "has_signing=true" >> $GITHUB_OUTPUT
             echo "Signing configured"
           else
@@ -116,10 +112,6 @@ jobs:
 
       # === APK BUILD (split per architecture — 32-bit + 64-bit) ===
       - name: Build Android APK (split ABIs)
-        env:
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
         run: |
           flutter build apk --release --split-per-abi --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }} --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           mkdir -p output
@@ -128,10 +120,6 @@ jobs:
 
       # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
-        env:
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
-          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
         run: |
           flutter build appbundle --release --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }} --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab || true

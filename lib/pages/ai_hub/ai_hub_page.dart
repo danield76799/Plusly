@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/services/llm_service.dart';
 import 'package:Pulsly/pages/ai_hub/llm_settings_page.dart';
@@ -13,10 +14,13 @@ class AiHubPage extends StatefulWidget {
 }
 
 class _AiHubPageState extends State<AiHubPage> {
+  static const int _maxHistoryLength = 20;
+
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   final _messages = <LlmMessage>[];
   bool _isLoading = false;
+  bool _isSending = false;
   bool _isConnected = false;
 
   @override
@@ -71,7 +75,7 @@ class _AiHubPageState extends State<AiHubPage> {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    '⚠️ ${L10n.of(context).aiPrivacyWarning}',
+                    '⚠️ ${L10n.of(context).aiPrivacyWarning.replaceAll('a cloud server', 'Groq and Cerebras').replaceAll('cloud server', 'Groq and Cerebras')}',
                     style: TextStyle(fontSize: 13, color: Colors.orange),
                   ),
                   SizedBox(height: 12),
@@ -99,12 +103,18 @@ class _AiHubPageState extends State<AiHubPage> {
 
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
-    if (text.isEmpty || _isLoading) return;
+    if (text.isEmpty || _isSending) return;
 
     _controller.clear();
     setState(() {
       _messages.add(LlmMessage(role: 'user', content: text));
       _isLoading = true;
+      _isSending = true;
+
+      // Trim message history to keep only the last _maxHistoryLength messages
+      if (_messages.length > _maxHistoryLength) {
+        _messages.removeRange(0, _messages.length - _maxHistoryLength);
+      }
     });
     _scrollToBottom();
 
@@ -114,19 +124,22 @@ class _AiHubPageState extends State<AiHubPage> {
         setState(() {
           _messages.add(LlmMessage(role: 'assistant', content: reply));
           _isLoading = false;
+          _isSending = false;
         });
         _scrollToBottom();
       }
     } catch (e) {
+      debugPrint('LLM error: $e');
       if (mounted) {
         setState(() {
           _messages.add(
             LlmMessage(
               role: 'assistant',
-              content: '⚠️ Error: ${e.toString().replaceFirst('Exception: ', '')}',
+              content: '⚠️ Failed to get AI response. Please try again.',
             ),
           );
           _isLoading = false;
+          _isSending = false;
         });
         _scrollToBottom();
       }
@@ -135,12 +148,16 @@ class _AiHubPageState extends State<AiHubPage> {
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-        );
+      try {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+          );
+        }
+      } catch (_) {
+        // Scroll position may be disposed between check and access
       }
     });
   }
@@ -161,7 +178,7 @@ class _AiHubPageState extends State<AiHubPage> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Assistant'),
+        title: Text(L10n.of(context).aiAssistant),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -170,7 +187,7 @@ class _AiHubPageState extends State<AiHubPage> {
           if (_messages.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_outline),
-              tooltip: 'Clear chat',
+              tooltip: L10n.of(context).clearChat,
               onPressed: _clearChat,
             ),
           IconButton(
@@ -239,7 +256,7 @@ class _AiHubPageState extends State<AiHubPage> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Ask me anything',
+                          L10n.of(context).askMeAnything,
                           style: TextStyle(
                             fontSize: 18,
                             color: theme.colorScheme.outline,
@@ -281,8 +298,8 @@ class _AiHubPageState extends State<AiHubPage> {
                             ClipboardData(text: _messages[index].content),
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Copied to clipboard'),
+                            SnackBar(
+                              content: Text(L10n.of(context).copiedToClipboard),
                               duration: Duration(seconds: 1),
                             ),
                           );
@@ -338,7 +355,7 @@ class _AiHubPageState extends State<AiHubPage> {
                   shape: const CircleBorder(),
                   child: InkWell(
                     customBorder: const CircleBorder(),
-                    onTap: _isLoading ? null : _sendMessage,
+                    onTap: _isSending ? null : _sendMessage,
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: Icon(

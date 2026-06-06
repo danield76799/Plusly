@@ -71,9 +71,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
             ),
           ),
           const SizedBox(height: 8),
-          ...LlmProviderType.values
-              .where((p) => p != LlmProviderType.ollama)
-              .map((p) {
+          ...LlmProviderType.values.map((p) {
             final cfg = providerConfigs[p]!;
             return RadioListTile<LlmProviderType>(
               value: p,
@@ -86,9 +84,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                 cfg.model,
                 style: const TextStyle(fontSize: 12),
               ),
-              secondary: p == LlmProviderType.ollama
-                  ? const Icon(Icons.dns, size: 18)
-                  : const Icon(Icons.cloud, size: 18),
+              secondary: const Icon(Icons.cloud, size: 18),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -170,6 +166,49 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
               ),
             ),
           ],
+
+          const SizedBox(height: 24),
+          const Divider(),
+          const SizedBox(height: 16),
+
+          // ── Revoke privacy consent ───────────────────────────
+          if (AppSettings.llmPrivacyAccepted.value)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: Text(L10n.of(context).revokeConsent),
+                      content: Text(L10n.of(context).revokeConsentDescription),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(false),
+                          child: Text(L10n.of(context).cancel),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(true),
+                          child: Text(L10n.of(context).ok),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm == true && context.mounted) {
+                    await AppSettings.llmPrivacyAccepted.setItem(false);
+                    await AppSettings.llmEnabled.setItem(false);
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
+                  }
+                },
+                icon: const Icon(Icons.privacy_tip_outlined, size: 18),
+                label: Text(L10n.of(context).revokeConsent),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: theme.colorScheme.error,
+                ),
+              ),
+            ),
 
           const SizedBox(height: 24),
 

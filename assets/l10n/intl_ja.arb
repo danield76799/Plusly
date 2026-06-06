@@ -429,7 +429,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "copiedToClipboard": "クリップボードにコピーされました",
+  "copiedToClipboard": "クリップボードにコピーしました",
   "@copiedToClipboard": {
     "type": "String",
     "placeholders": {}
@@ -2500,5 +2500,13 @@
   },
   "smartReply": "スマート返信",
   "generatingReply": "返信を生成中...",
-  "errorGeneratingReply": "返信の生成に失敗しました"
+  "errorGeneratingReply": "返信の生成に失敗しました",
+  "encryptedRoomWarning": "暗号化されたルーム",
+  "encryptedRoomAIDescription": "このメッセージは暗号化されたルームにあります。AIを使用すると、メッセージの内容がクラウドサービス（Groq/Cerebras）に送信されます。続行しますか？",
+  "aiNotEnabled": "まず設定でAI機能を有効にしてください",
+  "aiAssistant": "AIアシスタント",
+  "clearChat": "チャットをクリア",
+  "askMeAnything": "何でも聞いてください",
+  "revokeConsent": "AI同意を取り消す",
+  "revokeConsentDescription": "これによりすべてのAI機能が無効になり、プライバシー同意が取り消されます。AIを再有効化するには、プライバシー通知に再度同意する必要があります。"
 }

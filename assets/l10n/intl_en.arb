@@ -3788,5 +3788,13 @@
   },
   "smartReply": "Smart Reply",
   "generatingReply": "Generating reply...",
-  "errorGeneratingReply": "Failed to generate reply"
+  "errorGeneratingReply": "Failed to generate reply",
+  "encryptedRoomWarning": "Encrypted Room",
+  "encryptedRoomAIDescription": "This message is in an encrypted room. Using AI will send the message content to cloud services (Groq/Cerebras). Continue?",
+  "aiNotEnabled": "Enable AI features in Settings first",
+  "aiAssistant": "AI Assistant",
+  "clearChat": "Clear chat",
+  "askMeAnything": "Ask me anything",
+  "revokeConsent": "Revoke AI Consent",
+  "revokeConsentDescription": "This will disable all AI features and revoke your privacy consent. You will need to accept the privacy notice again to re-enable AI."
 }

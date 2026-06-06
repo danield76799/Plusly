@@ -5,7 +5,6 @@ class Translator {
   static Future<String> translate(
     String text,
     String targetLanguage,
-    String _unusedBaseUrl, // kept for backward compat
   ) async {
     if (text.trim().isEmpty) return '';
 

@@ -541,7 +541,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "copiedToClipboard": "Copié dans le presse-papier",
+  "copiedToClipboard": "Copié dans le pres-papiers",
   "@copiedToClipboard": {
     "type": "String",
     "placeholders": {}
@@ -3184,5 +3184,13 @@
   },
   "smartReply": "Réponse Intelligente",
   "generatingReply": "Génération de la réponse...",
-  "errorGeneratingReply": "Échec de la génération de la réponse"
+  "errorGeneratingReply": "Échec de la génération de la réponse",
+  "encryptedRoomWarning": "Salon chiffré",
+  "encryptedRoomAIDescription": "Ce message est dans un salon chiffré. L'utilisation de l'IA enverra le contenu aux services cloud (Groq/Cerebras). Continuer ?",
+  "aiNotEnabled": "Activez d'abord les fonctions IA dans les Paramètres",
+  "aiAssistant": "Assistant IA",
+  "clearChat": "Effacer le chat",
+  "askMeAnything": "Demandez-moi n'importe quoi",
+  "revokeConsent": "Révoquer le consentement IA",
+  "revokeConsentDescription": "Cela désactivera toutes les fonctions IA et révoquera votre consentement à la confidentialité. Vous devrez accepter à nouveau l'avis de confidentialité pour réactiver l'IA."
 }

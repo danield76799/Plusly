@@ -1,6 +1,6 @@
 {
   "@@last_modified": "2021-08-14 12:41:09.940318",
-  "copiedToClipboard": "Copiada para a área de transferência",
+  "copiedToClipboard": "Copiado para a área de transferência",
   "@copiedToClipboard": {
     "type": "String",
     "placeholders": {}
@@ -2216,5 +2216,13 @@
   },
   "smartReply": "Resposta Inteligente",
   "generatingReply": "Gerando resposta...",
-  "errorGeneratingReply": "Falha ao gerar resposta"
+  "errorGeneratingReply": "Falha ao gerar resposta",
+  "encryptedRoomWarning": "Sala encriptada",
+  "encryptedRoomAIDescription": "Esta mensagem está numa sala encriptada. Usar IA enviará o conteúdo para serviços cloud (Groq/Cerebras). Continuar?",
+  "aiNotEnabled": "Ative primeiro as funções de IA nas Definições",
+  "aiAssistant": "Assistente IA",
+  "clearChat": "Limpar chat",
+  "askMeAnything": "Pergunte-me qualquer coisa",
+  "revokeConsent": "Revogar consentimento IA",
+  "revokeConsentDescription": "Isto desativará todas as funções de IA e revogará o seu consentimento de privacidade. Terá de aceitar o aviso de privacidade novamente para reativar a IA."
 }

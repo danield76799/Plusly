@@ -3444,5 +3444,13 @@
   },
   "smartReply": "Slim Antwoord",
   "generatingReply": "Antwoord genereren...",
-  "errorGeneratingReply": "Antwoord genereren mislukt"
+  "errorGeneratingReply": "Antwoord genereren mislukt",
+  "encryptedRoomWarning": "Versleutelde Kamer",
+  "encryptedRoomAIDescription": "Dit bericht is in een versleutelde kamer. AI gebruiken stuurt de inhoud naar cloud services (Groq/Cerebras). Doorgaan?",
+  "aiNotEnabled": "Schakel eerst AI-functies in bij Instellingen",
+  "aiAssistant": "AI Assistent",
+  "clearChat": "Chat wissen",
+  "askMeAnything": "Vraag mij iets",
+  "revokeConsent": "AI Toestemming Intrekken",
+  "revokeConsentDescription": "Dit schakelt alle AI-functies uit en trekt je privacytoestemming in. Je moet de privacyverklaring opnieuw accepteren om AI weer in te schakelen."
 }

@@ -426,7 +426,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "copiedToClipboard": "Copiato negli Appunti",
+  "copiedToClipboard": "Copiato negli appunti",
   "@copiedToClipboard": {
     "type": "String",
     "placeholders": {}
@@ -3423,5 +3423,13 @@
   },
   "smartReply": "Risposta Intelligente",
   "generatingReply": "Generazione risposta...",
-  "errorGeneratingReply": "Errore nella generazione della risposta"
+  "errorGeneratingReply": "Errore nella generazione della risposta",
+  "encryptedRoomWarning": "Stanza crittografata",
+  "encryptedRoomAIDescription": "Questo messaggio è in una stanza crittografata. Usare l'IA invierà il contenuto ai servizi cloud (Groq/Cerebras). Continuare?",
+  "aiNotEnabled": "Attiva prima le funzioni IA nelle Impostazioni",
+  "aiAssistant": "Assistente IA",
+  "clearChat": "Cancella chat",
+  "askMeAnything": "Chiedimi qualsiasi cosa",
+  "revokeConsent": "Revoca consenso IA",
+  "revokeConsentDescription": "Questo disattiverà tutte le funzioni IA e revocherà il tuo consenso alla privacy. Dovrai accettare nuovamente l'informativa sulla privacy per riattivare l'IA."
 }

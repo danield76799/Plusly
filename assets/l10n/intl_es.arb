@@ -3437,5 +3437,13 @@
   },
   "smartReply": "Respuesta Inteligente",
   "generatingReply": "Generando respuesta...",
-  "errorGeneratingReply": "Error al generar la respuesta"
+  "errorGeneratingReply": "Error al generar la respuesta",
+  "encryptedRoomWarning": "Sala cifrada",
+  "encryptedRoomAIDescription": "Este mensaje está en una sala cifrada. Usar IA enviará el contenido a servicios en la nube (Groq/Cerebras). ¿Continuar?",
+  "aiNotEnabled": "Activa primero las funciones de IA en Ajustes",
+  "aiAssistant": "Asistente IA",
+  "clearChat": "Borrar chat",
+  "askMeAnything": "Pregúntame lo que sea",
+  "revokeConsent": "Revocar consentimiento IA",
+  "revokeConsentDescription": "Esto desactivará todas las funciones de IA y revocará tu consentimiento de privacidad. Deberás aceptar el aviso de privacidad nuevamente para reactivar la IA."
 }

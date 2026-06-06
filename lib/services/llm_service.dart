@@ -18,7 +18,6 @@ class LlmMessage {
 
 /// Supported LLM providers.
 enum LlmProviderType {
-  ollama,
   groq,
   cerebras,
 }
@@ -38,18 +37,16 @@ class LlmProviderConfig {
   });
 }
 
+// WARNING: These keys are embedded in the compiled APK binary.
+// Anyone decompiling the APK can extract them. For production,
+// consider a server-side proxy or per-user keys.
 // ── API keys injected at build time via --dart-define ──────────────
 const _groqKey = String.fromEnvironment('GROQ_API_KEY');
 const _cerebrasKey = String.fromEnvironment('CEREBRAS_API_KEY');
 
-/// Provider definitions. All three expose an OpenAI-compatible
+/// Provider definitions. Both expose an OpenAI-compatible
 /// `/v1/chat/completions` endpoint, so the request format is identical.
 Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
-  LlmProviderType.ollama: const LlmProviderConfig(
-    name: 'Plusly local LLM (private but slower)',
-    baseUrl: '', // overridden by settings llmGatewayUrl
-    model: 'qwen3.5:4b',
-  ),
   LlmProviderType.groq: LlmProviderConfig(
     name: 'Groq (Cloud)',
     baseUrl: 'https://api.groq.com/openai',
@@ -71,21 +68,14 @@ class LlmService {
     final raw = AppSettings.llmProvider.value;
     return LlmProviderType.values.firstWhere(
       (p) => p.name == raw,
-      orElse: () => LlmProviderType.ollama,
+      orElse: () => LlmProviderType.groq,
     );
   }
 
   static LlmProviderConfig get _config =>
       providerConfigs[currentProvider]!;
 
-  /// Effective base URL: Ollama uses the user-configured gateway URL,
-  /// cloud providers use their hardcoded endpoint.
-  static String get _baseUrl {
-    if (currentProvider == LlmProviderType.ollama) {
-      return AppSettings.llmGatewayUrl.value;
-    }
-    return _config.baseUrl;
-  }
+  static String get _baseUrl => _config.baseUrl;
 
   static bool get isEnabled => AppSettings.llmEnabled.value;
 

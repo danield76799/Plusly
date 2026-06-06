@@ -536,7 +536,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "copiedToClipboard": "Wurde in die Zwischenablage kopiert",
+  "copiedToClipboard": "In Zwischenablage kopiert",
   "@copiedToClipboard": {
     "type": "String",
     "placeholders": {}
@@ -3380,5 +3380,13 @@
   },
   "smartReply": "Intelligente Antwort",
   "generatingReply": "Antwort wird generiert...",
-  "errorGeneratingReply": "Antwort generieren fehlgeschlagen"
+  "errorGeneratingReply": "Antwort generieren fehlgeschlagen",
+  "encryptedRoomWarning": "Verschlüsselter Raum",
+  "encryptedRoomAIDescription": "Diese Nachricht befindet sich in einem verschlüsselten Raum. Die Nutzung von KI sendet den Inhalt an Cloud-Dienste (Groq/Cerebras). Fortfahren?",
+  "aiNotEnabled": "KI-Funktionen zuerst in den Einstellungen aktivieren",
+  "aiAssistant": "KI-Assistent",
+  "clearChat": "Chat löschen",
+  "askMeAnything": "Frag mich anything",
+  "revokeConsent": "KI-Einwilligung widerrufen",
+  "revokeConsentDescription": "Dies deaktiviert alle KI-Funktionen und widerruft Ihre Datenschutzeinwilligung. Sie müssen den Datenschutzhinweis erneut akzeptieren, um KI zu reaktivieren."
 }

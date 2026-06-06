@@ -1145,10 +1145,48 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
+  /// Check LLM privacy consent and E2EE warning before using AI features.
+  /// Returns true if the user may proceed, false if blocked/declined.
+  Future<bool> _checkLlmPrivacy({Event? event}) async {
+    if (!AppSettings.llmEnabled.value) return false;
+    if (!AppSettings.llmPrivacyAccepted.value) {
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(L10n.of(context).aiNotEnabled)),
+      );
+      return false;
+    }
+    // Warn if sending encrypted room content to cloud LLM
+    if (event != null && room.encrypted) {
+      if (!mounted) return false;
+      final proceed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(L10n.of(context).encryptedRoomWarning),
+          content: Text(L10n.of(context).encryptedRoomAIDescription),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(L10n.of(context).cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(L10n.of(context).ok),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true) return false;
+    }
+    return true;
+  }
+
   void smartReplyAction({Event? event}) async {
     event ??= selectedEvents.single;
     final text = event.isRichMessage ? event.formattedText : event.text;
     if (text.trim().isEmpty) return;
+
+    if (!await _checkLlmPrivacy(event: event)) return;
 
     // Set up as a proper Matrix reply (shows original message quoted)
     replyAction(replyTo: event);
@@ -1182,6 +1220,9 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
     event ??= selectedEvents.single;
+
+    if (!await _checkLlmPrivacy(event: event)) return;
+
     ScaffoldMessenger.of(
       context,
     ).showLoadingSnackBar(L10n.of(context).translating);
@@ -1193,7 +1234,6 @@ class ChatController extends State<ChatPageWithRoom>
         AppSettings.translationTargetLanguage.value.isEmpty
             ? PlatformDispatcher.instance.locale.languageCode
             : AppSettings.translationTargetLanguage.value,
-        AppSettings.pluslyServiceUrl.value,
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
