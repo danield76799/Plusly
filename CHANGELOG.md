@@ -1,3 +1,11 @@
+# Plusly v1.4.13
+
+## Fixes
+- Fixed LibreTranslate connection to new server
+- Upgraded Android NDK to r27 for Android 15 compatibility
+- Added 16KB page size support for upcoming Android 16
+- Improved APK update checks
+
 # Plusly v1.4.1
 
 ## New Features
