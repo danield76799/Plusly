@@ -114,26 +114,22 @@ jobs:
             echo "WARNING: No signing secrets found — using debug signing"
           fi
 
-      # === APK BUILD (split per architecture) ===
+      # === APK BUILD (split per architecture — 32-bit + 64-bit) ===
       - name: Build Android APK (split ABIs)
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
-          flutter build apk --release --split-per-abi --dart-define=DEEPL_API_KEY=*** secrets.DEEPL_API_KEY }}"
+          flutter build apk --release --split-per-abi --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
           mkdir -p output
-          echo "=== APK outputs ==="
-          find build/app/outputs -name "*.apk" -type f
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
-          echo "=== Output files ==="
-          ls -la output/
 
       # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
-          flutter build appbundle --release --dart-define=DEEPL_API_KEY="${{ secrets.DEEPL_API_KEY }}"
+          flutter build appbundle --release --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
           cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab || true
 
       # === VERIFY OUTPUTS ===
