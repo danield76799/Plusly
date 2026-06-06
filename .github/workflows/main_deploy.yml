@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - llm-base
   workflow_dispatch:
 
 concurrency:
