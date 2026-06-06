@@ -142,6 +142,12 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                           setting: AppSettings.enableVideoNotes,
                         ),
                       ],
+                      const ListDivider(),
+                      SettingsSwitchListTile.adaptive(
+                        title: 'AI Features',
+                        subtitle: 'Smart replies & translations',
+                        setting: AppSettings.llmEnabled,
+                      ),
                     ],
                   ),
                 ),

@@ -38,7 +38,7 @@ enum AppSettings<T> {
   ),
   // LLM / AI Features
   llmEnabled<bool>('xyz.plusly.llmEnabled', false),
-  llmProvider<String>('xyz.plusly.llmProvider', 'ollama'),
+  llmProvider<String>('xyz.plusly.llmProvider', 'groq'),
   llmGatewayUrl<String>('xyz.plusly.llmGatewayUrl', 'http://13.140.136.172:11434'),
   llmPrivacyAccepted<bool>('xyz.plusly.llmPrivacyAccepted', false),
   llmShowSmartReplies<bool>('xyz.plusly.llmShowSmartReplies', true),

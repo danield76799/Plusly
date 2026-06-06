@@ -65,13 +65,12 @@ class _AiHubPageState extends State<AiHubPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Plusly AI can use a local LLM server (private) or cloud providers (Groq, Cerebras) for smart replies and translations.',
+                    'Plusly AI uses cloud providers (Groq, Cerebras) for smart replies and translations.',
                     style: TextStyle(fontSize: 15),
                   ),
                   SizedBox(height: 12),
                   Text(
-                    '⚠️ With cloud providers, your messages are sent to a remote server. '
-                    'Plusly local LLM keeps everything on your own server. '
+                    '⚠️ Your messages are sent to a cloud server for processing. '
                     'You can change provider at any time in AI settings.',
                     style: TextStyle(fontSize: 13, color: Colors.orange),
                   ),

@@ -70,7 +70,9 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
             ),
           ),
           const SizedBox(height: 8),
-          ...LlmProviderType.values.map((p) {
+          ...LlmProviderType.values
+              .where((p) => p != LlmProviderType.ollama)
+              .map((p) {
             final cfg = providerConfigs[p]!;
             return RadioListTile<LlmProviderType>(
               value: p,
@@ -96,32 +98,8 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
           const Divider(),
           const SizedBox(height: 16),
 
-          // ── Ollama info (only when Ollama selected) ────────────
-          if (_selectedProvider == LlmProviderType.ollama) ...[
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.dns, size: 20),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Connects to the Plusly LLM server automatically.',
-                      style: const TextStyle(fontSize: 13),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
           // ── Cloud provider info ───────────────────────────────
-          if (_selectedProvider != LlmProviderType.ollama) ...[
-            Container(
+          Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: theme.colorScheme.surfaceContainerHighest,
@@ -141,7 +119,6 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                 ],
               ),
             ),
-          ],
 
           const SizedBox(height: 24),
           const Divider(),
@@ -213,7 +190,6 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        'Plusly local LLM: data stays on your own server. '
                         'Groq & Cerebras: cloud-powered, free tier included.',
                         style: TextStyle(
                           fontSize: 12,
