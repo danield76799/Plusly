@@ -1150,6 +1150,9 @@ class ChatController extends State<ChatPageWithRoom>
     final text = event.isRichMessage ? event.formattedText : event.text;
     if (text.trim().isEmpty) return;
 
+    // Set up as a proper Matrix reply (shows original message quoted)
+    replyAction(replyTo: event);
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(L10n.of(context).generatingReply)),
     );
