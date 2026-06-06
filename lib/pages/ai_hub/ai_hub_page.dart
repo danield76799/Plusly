@@ -60,7 +60,7 @@ class _AiHubPageState extends State<AiHubPage> {
                 Text(L10n.of(context).aiFeatures),
               ],
             ),
-            content: const SingleChildScrollView(
+            content: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -71,7 +71,7 @@ class _AiHubPageState extends State<AiHubPage> {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    '⚠️ \${L10n.of(context).aiPrivacyWarning}',
+                    '⚠️ ${L10n.of(context).aiPrivacyWarning}',
                     style: TextStyle(fontSize: 13, color: Colors.orange),
                   ),
                   SizedBox(height: 12),
