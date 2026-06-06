@@ -36,6 +36,13 @@ enum AppSettings<T> {
     'xyz.plusly.serviceUrl',
     'http://38.124.152.103:5000', // Jouw LibreTranslate server
   ),
+  // LLM / AI Features
+  llmEnabled<bool>('xyz.plusly.llmEnabled', false),
+  llmGatewayUrl<String>('xyz.plusly.llmGatewayUrl', 'http://13.140.136.172:8765'),
+  llmPreferCloud<bool>('xyz.plusly.llmPreferCloud', true),
+  llmPrivacyAccepted<bool>('xyz.plusly.llmPrivacyAccepted', false),
+  llmShowSmartReplies<bool>('xyz.plusly.llmShowSmartReplies', true),
+  llmEnableTranslation<bool>('xyz.plusly.llmEnableTranslation', true),
   latexMath<bool>('xyz.plusly.latexMath', false),
   messageTranslation<bool>('xyz.plusly.messageTranslation', true),
   useLegacyChatListAppBar<bool>('xyz.plusly.legacyAppBar', false),
