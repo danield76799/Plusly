@@ -144,8 +144,8 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                       ],
                       const ListDivider(),
                       SettingsSwitchListTile.adaptive(
-                        title: 'AI Features',
-                        subtitle: 'Smart replies & translations',
+                        title: L10n.of(context).aiFeatures,
+                        subtitle: L10n.of(context).aiFeaturesSubtitle,
                         setting: AppSettings.llmEnabled,
                       ),
                     ],

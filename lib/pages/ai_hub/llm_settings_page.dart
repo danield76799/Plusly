@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/services/llm_service.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
 
 class LlmSettingsPage extends StatefulWidget {
   const LlmSettingsPage({super.key});
@@ -52,7 +53,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Provider'),
+        title: Text(L10n.of(context).aiSettings),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
@@ -63,7 +64,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
         children: [
           // ── Provider selector ─────────────────────────────────
           Text(
-            'Provider',
+            L10n.of(context).aiProvider,
             style: theme.textTheme.titleSmall?.copyWith(
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
@@ -111,8 +112,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      '${providerConfigs[_selectedProvider]!.name} is ready to use. '
-                      'No configuration needed.',
+                      L10n.of(context).aiProviderReady(providerConfigs[_selectedProvider]!.name),
                       style: const TextStyle(fontSize: 13),
                     ),
                   ),
@@ -136,7 +136,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.wifi_find),
-              label: Text(_testing ? 'Testing...' : 'Test Connection'),
+              label: Text(_testing ? '...' : L10n.of(context).testConnection),
             ),
           ),
 
@@ -160,8 +160,8 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                   const SizedBox(width: 8),
                   Text(
                     _connectionOk!
-                        ? 'Connected successfully'
-                        : 'Connection failed — check your settings',
+                        ? L10n.of(context).connectedSuccessfully
+                        : L10n.of(context).connectionFailed,
                     style: TextStyle(
                       color: _connectionOk! ? Colors.green : Colors.red,
                     ),
@@ -190,8 +190,7 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        'Groq & Cerebras: cloud-powered, free tier. '
-                        'Daily limits may apply.',
+                        L10n.of(context).aiFreeTierInfo,
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.colorScheme.outline,

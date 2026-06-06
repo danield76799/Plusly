@@ -3807,5 +3807,64 @@
   "@enable": {
     "type": "String",
     "placeholders": {}
+  },
+  "aiFeatures": "Функции ИИ",
+  "@aiFeatures": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeaturesSubtitle": "Умные ответы и переводы",
+  "@aiFeaturesSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyNotice": "Plusly ИИ использует облачные провайдеры (Groq, Cerebras) для умных ответов и переводов. Используются бесплатные API с дневными лимитами.",
+  "@aiPrivacyNotice": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyWarning": "Ваши сообщения отправляются на облачный сервер для обработки. Вы можете сменить провайдера в настройках ИИ.",
+  "@aiPrivacyWarning": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProviderReady": "{provider} готов к использованию. Настройка не требуется.",
+  "@aiProviderReady": {
+    "type": "String",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiFreeTierInfo": "Groq & Cerebras: облако, бесплатный тариф. Возможны дневные лимиты.",
+  "@aiFreeTierInfo": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiSettings": "Настройки ИИ",
+  "@aiSettings": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProvider": "Провайдер",
+  "@aiProvider": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "testConnection": "Проверить соединение",
+  "@testConnection": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectedSuccessfully": "Соединение установлено",
+  "@connectedSuccessfully": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectionFailed": "Ошибка соединения — проверьте настройки",
+  "@connectionFailed": {
+    "type": "String",
+    "placeholders": {}
   }
 }

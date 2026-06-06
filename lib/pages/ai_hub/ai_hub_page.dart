@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/services/llm_service.dart';
 import 'package:Pulsly/pages/ai_hub/llm_settings_page.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
 
 class AiHubPage extends StatefulWidget {
   const AiHubPage({super.key});
@@ -52,11 +53,11 @@ class _AiHubPageState extends State<AiHubPage> {
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            title: const Row(
+            title: Row(
               children: [
                 Icon(Icons.auto_awesome, color: Colors.amber),
                 SizedBox(width: 8),
-                Text('AI Features'),
+                Text(L10n.of(context).aiFeatures),
               ],
             ),
             content: const SingleChildScrollView(
@@ -65,19 +66,17 @@ class _AiHubPageState extends State<AiHubPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Plusly AI uses cloud providers (Groq, Cerebras) for smart replies and translations. '
-                    'These use free tier APIs which may have daily usage limits.',
+                    L10n.of(context).aiPrivacyNotice,
                     style: TextStyle(fontSize: 15),
                   ),
                   SizedBox(height: 12),
                   Text(
-                    '⚠️ Your messages are sent to a cloud server for processing. '
-                    'You can change provider at any time in AI settings.',
+                    '⚠️ \${L10n.of(context).aiPrivacyWarning}',
                     style: TextStyle(fontSize: 13, color: Colors.orange),
                   ),
                   SizedBox(height: 12),
                   Text(
-                    'You can disable AI features at any time in Settings.',
+                    L10n.of(context).aiSettings,
                     style: TextStyle(fontSize: 13, color: Colors.grey),
                   ),
                 ],
@@ -86,11 +85,11 @@ class _AiHubPageState extends State<AiHubPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Decline'),
+                child: Text(L10n.of(context).decline),
               ),
               FilledButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Accept & Continue'),
+                child: Text(L10n.of(context).accept),
               ),
             ],
           ),

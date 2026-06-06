@@ -3318,5 +3318,64 @@
   "@enable": {
     "type": "String",
     "placeholders": {}
+  },
+  "aiFeatures": "KI-Funktionen",
+  "@aiFeatures": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeaturesSubtitle": "Intelligente Antworten & Übersetzungen",
+  "@aiFeaturesSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyNotice": "Plusly KI nutzt Cloud-Anbieter (Groq, Cerebras) für intelligente Antworten und Übersetzungen. Diese verwenden kostenlose APIs mit täglichen Limits.",
+  "@aiPrivacyNotice": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyWarning": "Ihre Nachrichten werden zur Verarbeitung an einen Cloud-Server gesendet. Sie können den Anbieter jederzeit in den KI-Einstellungen ändern.",
+  "@aiPrivacyWarning": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProviderReady": "{provider} ist einsatzbereit. Keine Konfiguration erforderlich.",
+  "@aiProviderReady": {
+    "type": "String",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiFreeTierInfo": "Groq & Cerebras: Cloud-basiert, kostenlose Stufe. Tägliche Limits möglich.",
+  "@aiFreeTierInfo": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiSettings": "KI-Einstellungen",
+  "@aiSettings": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProvider": "Anbieter",
+  "@aiProvider": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "testConnection": "Verbindung testen",
+  "@testConnection": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectedSuccessfully": "Verbindung erfolgreich",
+  "@connectedSuccessfully": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectionFailed": "Verbindung fehlgeschlagen — Einstellungen prüfen",
+  "@connectionFailed": {
+    "type": "String",
+    "placeholders": {}
   }
 }

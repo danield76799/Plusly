@@ -3122,5 +3122,64 @@
   "@enable": {
     "type": "String",
     "placeholders": {}
+  },
+  "aiFeatures": "Fonctionnalités IA",
+  "@aiFeatures": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeaturesSubtitle": "Réponses intelligentes & traductions",
+  "@aiFeaturesSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyNotice": "Plusly IA utilise des fournisseurs cloud (Groq, Cerebras) pour les réponses intelligentes et les traductions. Ces services utilisent des API gratuites avec des limites quotidiennes.",
+  "@aiPrivacyNotice": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyWarning": "Vos messages sont envoyés à un serveur cloud pour traitement. Vous pouvez changer de fournisseur à tout moment dans les paramètres IA.",
+  "@aiPrivacyWarning": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProviderReady": "{provider} est prêt à l'emploi. Aucune configuration nécessaire.",
+  "@aiProviderReady": {
+    "type": "String",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiFreeTierInfo": "Groq & Cerebras : cloud, niveau gratuit. Des limites quotidiennes peuvent s'appliquer.",
+  "@aiFreeTierInfo": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiSettings": "Paramètres IA",
+  "@aiSettings": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProvider": "Fournisseur",
+  "@aiProvider": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "testConnection": "Tester la connexion",
+  "@testConnection": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectedSuccessfully": "Connexion réussie",
+  "@connectedSuccessfully": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectionFailed": "Connexion échouée — vérifiez vos paramètres",
+  "@connectionFailed": {
+    "type": "String",
+    "placeholders": {}
   }
 }

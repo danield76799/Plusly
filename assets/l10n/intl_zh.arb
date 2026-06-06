@@ -3370,8 +3370,67 @@
       }
     }
   },
-  "enable": "Enable",
+  "enable": "启用",
   "@enable": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeatures": "AI功能",
+  "@aiFeatures": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeaturesSubtitle": "智能回复和翻译",
+  "@aiFeaturesSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyNotice": "Plusly AI使用云提供商（Groq、Cerebras）提供智能回复和翻译。使用免费API，可能有每日限制。",
+  "@aiPrivacyNotice": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyWarning": "您的消息将发送到云服务器进行处理。您可以随时在AI设置中更改提供商。",
+  "@aiPrivacyWarning": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProviderReady": "{provider}已准备就绪。无需配置。",
+  "@aiProviderReady": {
+    "type": "String",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiFreeTierInfo": "Groq和Cerebras：云端，免费套餐。可能有每日限制。",
+  "@aiFreeTierInfo": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiSettings": "AI设置",
+  "@aiSettings": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProvider": "提供商",
+  "@aiProvider": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "testConnection": "测试连接",
+  "@testConnection": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectedSuccessfully": "连接成功",
+  "@connectedSuccessfully": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectionFailed": "连接失败 — 请检查设置",
+  "@connectionFailed": {
     "type": "String",
     "placeholders": {}
   }

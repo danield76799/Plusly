@@ -2434,8 +2434,67 @@
       }
     }
   },
-  "enable": "Enable",
+  "enable": "有効にする",
   "@enable": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeatures": "AI機能",
+  "@aiFeatures": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeaturesSubtitle": "スマート返信＆翻訳",
+  "@aiFeaturesSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyNotice": "Plusly AIはクラウドプロバイダー（Groq、Cerebras）を使用してスマート返信と翻訳を提供します。無料APIを使用しており、日次制限があります。",
+  "@aiPrivacyNotice": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyWarning": "メッセージは処理のためにクラウドサーバーに送信されます。AI設定でプロバイダーをいつでも変更できます。",
+  "@aiPrivacyWarning": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProviderReady": "{provider}は使用準備完了です。設定は不要です。",
+  "@aiProviderReady": {
+    "type": "String",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiFreeTierInfo": "Groq & Cerebras：クラウド、無料プラン。日次制限が適用される場合があります。",
+  "@aiFreeTierInfo": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiSettings": "AI設定",
+  "@aiSettings": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProvider": "プロバイダー",
+  "@aiProvider": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "testConnection": "接続テスト",
+  "@testConnection": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectedSuccessfully": "接続成功",
+  "@connectedSuccessfully": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectionFailed": "接続失敗 — 設定を確認してください",
+  "@connectionFailed": {
     "type": "String",
     "placeholders": {}
   }
