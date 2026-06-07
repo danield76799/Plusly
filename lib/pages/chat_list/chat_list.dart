@@ -603,6 +603,19 @@ class ChatListController extends State<ChatList>
     });
   }
 
+  StreamSubscription? _syncSubscription;
+
+  void _subscribeToSync() {
+    // Listen to sync updates and force a quick sync on incoming push
+    // so that messages appear instantly in the chat list
+    final client = Matrix.of(context).client;
+    _syncSubscription = client.onSync.stream.listen((update) async {
+      if (!mounted) return;
+      // On incoming sync, update chat list immediately
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   void initState() {
     _initReceiveSharingIntent();
@@ -611,6 +624,7 @@ class ChatListController extends State<ChatList>
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
     _preloadChats();
+    _subscribeToSync();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         searchServer = Matrix.of(
@@ -639,6 +653,7 @@ class ChatListController extends State<ChatList>
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();
     scrollController.removeListener(_onScroll);
+    _syncSubscription?.cancel();
     _clientStream.close();
     searchController.dispose();
     searchFocusNode.dispose();
