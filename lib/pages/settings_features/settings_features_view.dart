@@ -137,6 +137,7 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                           setting: AppSettings.enableVideoNotes,
                         ),
                       ],
+                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
