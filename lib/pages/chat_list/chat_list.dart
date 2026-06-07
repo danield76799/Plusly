@@ -17,6 +17,7 @@ import 'package:Pulsly/pages/chat_list/chat_list_view.dart';
 import 'package:Pulsly/pages/chat_list/invite_dialog.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
 import 'package:Pulsly/utils/localized_exception_extension.dart';
+import 'package:Pulsly/services/timeline_cache.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/show_scaffold_dialog.dart';
@@ -590,12 +591,26 @@ class ChatListController extends State<ChatList>
   }
 
   @override
+  void _preloadChats() {
+    // Preload first 40 chat timelines in background — instant opens
+    Future.microtask(() async {
+      final client = Matrix.of(context).client;
+      final rooms = client.rooms
+          .where((r) => r.isDirectChat || !r.isSpace)
+          .take(40)
+          .toList();
+      TimelineCache.preloadRooms(rooms);
+    });
+  }
+
+  @override
   void initState() {
     _initReceiveSharingIntent();
 
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
+    _preloadChats();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         searchServer = Matrix.of(

@@ -45,6 +45,7 @@ import 'package:Pulsly/utils/privacy_options.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
 import 'package:Pulsly/utils/show_scaffold_dialog.dart';
 import 'package:Pulsly/utils/translator.dart';
+import 'package:Pulsly/services/timeline_cache.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -576,6 +577,27 @@ class ChatController extends State<ChatPageWithRoom>
         (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
       eventContextId = null;
     }
+
+    // Cache hit: use preloaded timeline for instant open (no network wait).
+    // Only apply when no specific event context was requested (i.e. just opening
+    // a chat, not jumping to a specific message).
+    if (eventContextId == null && thread == null) {
+      final cached = TimelineCache.getTimeline(roomId);
+      if (cached != null) {
+        // cancel any existing timeline and adopt the cached one
+        timeline?.cancelSubscriptions();
+        timeline = cached;
+        // refresh in the background so we still pick up new messages
+        // (does not block the UI)
+        unawaited(room.getTimeline(onUpdate: updateView).then((t) {
+          if (mounted) timeline = t;
+        }).catchError((_) {}));
+        timeline!.requestKeys(onlineKeyBackupOnly: false);
+        if (room.markedUnread) room.markUnread(false);
+        return;
+      }
+    }
+
     if (thread == null) {
       await _loadRoomTimeline(eventContextId: eventContextId);
     } else {
