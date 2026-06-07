@@ -428,6 +428,7 @@ class ChatController extends State<ChatPageWithRoom>
     WidgetsBinding.instance.addObserver(this);
     
     // Non-blocking initialization
+    loadTimelineFuture = Future.value(); // show chat instantly, messages load async
     _asyncInit();
   }
 
@@ -587,8 +588,10 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> _getTimeline({String? eventContextId}) async {
-    await Matrix.of(context).client.roomsLoading;
-    await Matrix.of(context).client.accountDataLoading;
+    // Don't await these — Matrix SDK syncs in background.
+    // Awaiting them adds ~0.5s to EVERY chat open.
+    Matrix.of(context).client.roomsLoading;
+    Matrix.of(context).client.accountDataLoading;
     if (eventContextId != null &&
         (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
       eventContextId = null;
