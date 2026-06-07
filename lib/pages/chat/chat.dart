@@ -29,7 +29,6 @@ import 'package:Pulsly/pages/chat/seen_by_row.dart';
 import 'package:Pulsly/pages/chat/send_poll_dialog.dart';
 import 'package:Pulsly/pages/chat/send_later_dialog.dart';
 import 'package:Pulsly/pages/chat/translated_event_dialog.dart';
-import 'package:Pulsly/services/llm_service.dart';
 import 'package:Pulsly/services/timeline_cache.dart';
 import 'package:Pulsly/pages/chat/vote_results_dialog.dart';
 import 'package:Pulsly/pages/chat_details/chat_details.dart';
@@ -1163,44 +1162,11 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
-  /// Check LLM privacy consent and E2EE warning before using AI features.
-  /// Returns true if the user may proceed, false if blocked/declined.
-  Future<bool> _checkLlmPrivacy({Event? event}) async {
-    // Warn if sending encrypted room content to cloud LLM
-    if (event != null && room.encrypted && !AppSettings.llmEncryptedRoomConsent.value) {
-      if (!mounted) return false;
-      final proceed = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(L10n.of(context).encryptedRoomWarning),
-          content: Text(L10n.of(context).encryptedRoomAIDescription),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: Text(L10n.of(context).cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                AppSettings.llmEncryptedRoomConsent.setItem(true);
-                Navigator.of(ctx).pop(true);
-              },
-              child: Text(L10n.of(context).ok),
-            ),
-          ],
-        ),
-      );
-      if (proceed != true) return false;
-    }
-    return true;
-  }
-
   void translateEventAction({Event? event}) async {
     if (!AppSettings.messageTranslation.value) {
       return;
     }
     event ??= selectedEvents.single;
-
-    if (!await _checkLlmPrivacy(event: event)) return;
 
     ScaffoldMessenger.of(
       context,

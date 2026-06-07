@@ -3434,9 +3434,7 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },
-  "smartReply": "Respuesta Inteligente",
-  "generatingReply": "Generando respuesta...",
+  },  "generatingReply": "Generando respuesta...",
   "errorGeneratingReply": "Error al generar la respuesta",
   "encryptedRoomWarning": "Sala cifrada",
   "encryptedRoomAIDescription": "Este mensaje está en una sala cifrada. Usar IA enviará el contenido a servicios en la nube (Groq/Cerebras). ¿Continuar?",

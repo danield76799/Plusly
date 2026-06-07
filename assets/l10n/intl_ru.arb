@@ -3866,9 +3866,7 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },
-  "smartReply": "Умный Ответ",
-  "generatingReply": "Генерация ответа...",
+  },  "generatingReply": "Генерация ответа...",
   "errorGeneratingReply": "Ошибка генерации ответа",
   "encryptedRoomWarning": "Зашифрованная комната",
   "encryptedRoomAIDescription": "Это сообщение в зашифрованной комнате. Использование ИИ отправит содержимое в облачные сервисы (Groq/Cerebras). Продолжить?",

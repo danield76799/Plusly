@@ -3377,9 +3377,7 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },
-  "smartReply": "Intelligente Antwort",
-  "generatingReply": "Antwort wird generiert...",
+  },  "generatingReply": "Antwort wird generiert...",
   "errorGeneratingReply": "Antwort generieren fehlgeschlagen",
   "encryptedRoomWarning": "Verschlüsselter Raum",
   "encryptedRoomAIDescription": "Diese Nachricht befindet sich in einem verschlüsselten Raum. Die Nutzung von KI sendet den Inhalt an Cloud-Dienste (Groq/Cerebras). Fortfahren?",

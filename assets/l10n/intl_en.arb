@@ -3785,9 +3785,7 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },
-  "smartReply": "Smart Reply",
-  "generatingReply": "Generating reply...",
+  },  "generatingReply": "Generating reply...",
   "errorGeneratingReply": "Failed to generate reply",
   "encryptedRoomWarning": "Encrypted Room",
   "encryptedRoomAIDescription": "This message is in an encrypted room. Using AI will send the message content to cloud services (Groq/Cerebras). Continue?",

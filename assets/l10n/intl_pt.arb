@@ -2213,9 +2213,7 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },
-  "smartReply": "Resposta Inteligente",
-  "generatingReply": "Gerando resposta...",
+  },  "generatingReply": "Gerando resposta...",
   "errorGeneratingReply": "Falha ao gerar resposta",
   "encryptedRoomWarning": "Sala encriptada",
   "encryptedRoomAIDescription": "Esta mensagem está numa sala encriptada. Usar IA enviará o conteúdo para serviços cloud (Groq/Cerebras). Continuar?",

@@ -3181,9 +3181,7 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },
-  "smartReply": "Réponse Intelligente",
-  "generatingReply": "Génération de la réponse...",
+  },  "generatingReply": "Génération de la réponse...",
   "errorGeneratingReply": "Échec de la génération de la réponse",
   "encryptedRoomWarning": "Salon chiffré",
   "encryptedRoomAIDescription": "Ce message est dans un salon chiffré. L'utilisation de l'IA enverra le contenu aux services cloud (Groq/Cerebras). Continuer ?",

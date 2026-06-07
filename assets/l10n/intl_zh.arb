@@ -3433,9 +3433,7 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },
-  "smartReply": "智能回复",
-  "generatingReply": "正在生成回复...",
+  },  "generatingReply": "正在生成回复...",
   "errorGeneratingReply": "生成回复失败",
   "encryptedRoomWarning": "加密房间",
   "encryptedRoomAIDescription": "此消息位于加密房间中。使用AI会将消息内容发送到云服务（Groq/Cerebras）。继续吗？",

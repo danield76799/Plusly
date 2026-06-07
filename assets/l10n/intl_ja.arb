@@ -2497,9 +2497,7 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },
-  "smartReply": "スマート返信",
-  "generatingReply": "返信を生成中...",
+  },  "generatingReply": "返信を生成中...",
   "errorGeneratingReply": "返信の生成に失敗しました",
   "encryptedRoomWarning": "暗号化されたルーム",
   "encryptedRoomAIDescription": "このメッセージは暗号化されたルームにあります。AIを使用すると、メッセージの内容がクラウドサービス（Groq/Cerebras）に送信されます。続行しますか？",
