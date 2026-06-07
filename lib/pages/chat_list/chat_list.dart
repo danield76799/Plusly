@@ -613,7 +613,6 @@ class ChatListController extends State<ChatList>
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
-    _preloadChats();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         searchServer = Matrix.of(
@@ -623,6 +622,10 @@ class ChatListController extends State<ChatList>
           context,
         ).backgroundPush?.setupPush(Matrix.of(context).widget.clients);
         UpdateNotifier.showUpdateSnackBar(context);
+
+        // Preload first 40 chat timelines after push setup,
+        // so notification registration isn't competing with 40 timeline streams.
+        _preloadChats();
       }
 
       // Workaround for system UI overlay style not applied on app start
