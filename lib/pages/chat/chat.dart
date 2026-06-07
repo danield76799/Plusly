@@ -1167,7 +1167,8 @@ class ChatController extends State<ChatPageWithRoom>
       }
     }
     // Warn if sending encrypted room content to cloud LLM
-    if (event != null && room.encrypted) {
+    
+    if (event != null && room.encrypted && !AppSettings.llmEncryptedRoomConsent.value) {
       if (!mounted) return false;
       final proceed = await showDialog<bool>(
         context: context,
@@ -1180,13 +1181,17 @@ class ChatController extends State<ChatPageWithRoom>
               child: Text(L10n.of(context).cancel),
             ),
             TextButton(
-              onPressed: () => Navigator.of(ctx).pop(true),
+              onPressed: () {
+                AppSettings.llmEncryptedRoomConsent.set(true);
+                Navigator.of(ctx).pop(true);
+              },
               child: Text(L10n.of(context).ok),
             ),
           ],
         ),
       );
       if (proceed != true) return false;
+    }
     }
     return true;
   }
