@@ -1182,7 +1182,7 @@ class ChatController extends State<ChatPageWithRoom>
             ),
             TextButton(
               onPressed: () {
-                AppSettings.llmEncryptedRoomConsent.set(true);
+                AppSettings.llmEncryptedRoomConsent.setItem(true);
                 Navigator.of(ctx).pop(true);
               },
               child: Text(L10n.of(context).ok),
