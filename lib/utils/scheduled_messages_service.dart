@@ -166,8 +166,14 @@ class ScheduledMessagesService {
     final now = DateTime.now();
 
     for (final message in pending) {
-      // Skip server-scheduled messages — the server will send them
-      if (message.delayId != null) continue;
+      // Server-scheduled: check if past scheduled time → assume sent
+      if (message.delayId != null) {
+        if (message.scheduledAt.isBefore(now.subtract(const Duration(minutes: 2)))) {
+          Logs().d('Server-scheduled message ${message.id} past due, marking sent');
+          await removeScheduledMessage(message.id);
+        }
+        continue;
+      }
 
       // Only send messages scheduled within the last 60 seconds
       // This prevents all "missed" messages from being sent at once
