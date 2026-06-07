@@ -428,9 +428,17 @@ class ChatController extends State<ChatPageWithRoom>
     sendingClient = Matrix.of(context).client;
     readMarkerEventId = room.hasNewMessages ? room.fullyRead : '';
     WidgetsBinding.instance.addObserver(this);
-    _tryLoadTimeline();
+    
+    // Non-blocking initialization
+    _asyncInit();
+  }
 
-    _getThreads();
+  Future<void> _asyncInit() async {
+    // Run timeline and threads loading in parallel to avoid sequential blocking
+    await Future.wait([
+      _tryLoadTimeline(),
+      _getThreads(),
+    ]);
   }
 
   void _tryLoadTimeline() async {
