@@ -7,7 +7,8 @@ import 'package:Pulsly/pages/ai_hub/llm_settings_page.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 
 class AiHubPage extends StatefulWidget {
-  const AiHubPage({super.key});
+  final bool autoPopAfterConsent;
+  const AiHubPage({super.key, this.autoPopAfterConsent = false});
 
   @override
   State<AiHubPage> createState() => _AiHubPageState();
@@ -36,7 +37,7 @@ class _AiHubPageState extends State<AiHubPage> {
       if (!mounted) return;
       final accepted = await _showPrivacyDialog();
       if (!accepted) {
-        if (mounted) Navigator.of(context).pop();
+        if (mounted) Navigator.of(context).pop(false);
         return;
       }
       await AppSettings.llmPrivacyAccepted.setItem(true);
@@ -50,6 +51,11 @@ class _AiHubPageState extends State<AiHubPage> {
     // Check gateway connection
     _isConnected = await LlmService.ping();
     if (mounted) setState(() {});
+
+    // Pop with true if opened as consent flow (caller needs to know AI is ready)
+    if (widget.autoPopAfterConsent && mounted) {
+      Navigator.of(context).pop(true);
+    }
   }
 
   Future<bool> _showPrivacyDialog() async {

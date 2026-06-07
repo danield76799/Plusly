@@ -20,6 +20,7 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat_view.dart';
+import 'package:Pulsly/pages/ai_hub/ai_hub_page.dart';
 import 'package:Pulsly/pages/chat/event_info_dialog.dart';
 import 'package:Pulsly/pages/chat/message_context_menu.dart';
 import 'package:Pulsly/pages/chat/message_edits_dialog.dart';
@@ -1148,13 +1149,22 @@ class ChatController extends State<ChatPageWithRoom>
   /// Check LLM privacy consent and E2EE warning before using AI features.
   /// Returns true if the user may proceed, false if blocked/declined.
   Future<bool> _checkLlmPrivacy({Event? event}) async {
-    if (!AppSettings.llmEnabled.value) return false;
-    if (!AppSettings.llmPrivacyAccepted.value) {
+    // If consent not accepted or AI not enabled, redirect to AI Hub
+    // which shows the privacy dialog and enables AI
+    if (!AppSettings.llmPrivacyAccepted.value || !AppSettings.llmEnabled.value) {
       if (!mounted) return false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context).aiNotEnabled)),
+      final result = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => const AiHubPage(autoPopAfterConsent: true),
+          fullscreenDialog: true,
+        ),
       );
-      return false;
+      // If user accepted privacy and AI is now enabled, continue
+      if (result == true && AppSettings.llmPrivacyAccepted.value && AppSettings.llmEnabled.value) {
+        // Fall through to E2EE check below
+      } else {
+        return false;
+      }
     }
     // Warn if sending encrypted room content to cloud LLM
     if (event != null && room.encrypted) {
