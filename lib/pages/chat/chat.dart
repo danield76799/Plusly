@@ -434,7 +434,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   Future<void> _asyncInit() async {
     // INSTANT: check cache and show immediately (WhatsApp-style)
-    final cached = TimelineCache.getTimeline(widget.roomId);
+    final cached = TimelineCache.getTimeline(roomId);
     if (cached != null) {
       timeline = cached;
       loadTimelineFuture = Future.value(); // mark as done so FutureBuilder shows instantly
@@ -603,7 +603,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
     timeline!.requestKeys(onlineKeyBackupOnly: false);
     if (room.markedUnread) room.markUnread(false);
-    TimelineCache.setTimeline(widget.roomId, timeline!);
+    TimelineCache.setTimeline(roomId, timeline!);
 
     return;
   }
