@@ -66,7 +66,7 @@ Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
   LlmProviderType.ollama: LlmProviderConfig(
     name: 'Ollama Cloud',
     baseUrl: 'https://ollama.com',
-    model: 'deepseek-v4-pro:cloud',
+    'model': 'gpt-oss:20b'
     apiKey: _ollamaKey,
   ),
 };
