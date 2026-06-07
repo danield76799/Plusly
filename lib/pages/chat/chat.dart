@@ -441,7 +441,7 @@ class ChatController extends State<ChatPageWithRoom>
     ]);
   }
 
-  void _tryLoadTimeline() async {
+  Future<void> _tryLoadTimeline() async {
     final initialEventId = widget.eventId;
     loadTimelineFuture = _getTimeline();
     Logs().v("Trying to load timeline...");
