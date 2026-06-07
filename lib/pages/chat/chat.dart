@@ -216,13 +216,11 @@ class ChatController extends State<ChatPageWithRoom>
   set localRecentEmojis(List<String> value) => _localRecentEmojis = value;
 
   Future<void> _loadLocalRecentEmojis() async {
-    final prefs = await SharedPreferences.getInstance();
-    _localRecentEmojis = prefs.getStringList(_recentEmojisKey) ?? [];
+    _localRecentEmojis = AppSettings.store.getStringList(_recentEmojisKey) ?? [];
   }
 
   Future<void> _saveLocalRecentEmojis() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_recentEmojisKey, _localRecentEmojis);
+    await AppSettings.store.setStringList(_recentEmojisKey, _localRecentEmojis);
   }
 
   // Public wrapper for saving emojis from other classes
@@ -343,8 +341,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void _loadDraft() async {
-    final prefs = await SharedPreferences.getInstance();
-    final draft = prefs.getString('draft_$roomId');
+    final draft = AppSettings.store.getString('draft_$roomId');
     if (draft != null && draft.isNotEmpty) {
       sendController.text = draft;
     }
@@ -716,8 +713,7 @@ class ChatController extends State<ChatPageWithRoom>
     FocusScope.of(context).requestFocus(inputFocus);
     _isSending = true;
     _storeInputTimeoutTimer?.cancel();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('draft_$roomId');
+    await AppSettings.store.remove('draft_$roomId');
     var parseCommands = true;
 
     final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
@@ -772,7 +768,6 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void sendScheduleAction() async {
-    final prefs = await SharedPreferences.getInstance();
     _storeInputTimeoutTimer?.cancel();
     await showAdaptiveDialog(
       context: context,
@@ -791,7 +786,7 @@ class ChatController extends State<ChatPageWithRoom>
     // Force rebuild of InputBar by resetting the controller
     sendController.value = TextEditingValue.empty;
     // Clear the draft so it doesn't reappear when chat is reopened
-    await prefs.remove('draft_$roomId');
+    await AppSettings.store.remove('draft_$roomId');
     setState(() {
       replyEvent = null;
       editEvent = null;
