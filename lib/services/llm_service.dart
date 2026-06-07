@@ -20,7 +20,7 @@ class LlmMessage {
 enum LlmProviderType {
   groq,
   cerebras,
-  kimi,
+  ollama,
 }
 
 /// Configuration for a single LLM provider.
@@ -46,7 +46,7 @@ class LlmProviderConfig {
 // ── API keys injected at build time via --dart-define ──────────────
 const _groqKey = String.fromEnvironment('GROQ_API_KEY');
 const _cerebrasKey = String.fromEnvironment('CEREBRAS_API_KEY');
-const _kimiKey = String.fromEnvironment('KIMI_API_KEY');
+const _ollamaKey = String.fromEnvironment('OLLAMA_API_KEY');
 
 /// Provider definitions. All expose an OpenAI-compatible
 /// `/v1/chat/completions` endpoint, so the request format is identical.
@@ -63,12 +63,11 @@ Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
     model: 'gpt-oss-120b',
     apiKey: _cerebrasKey,
   ),
-  LlmProviderType.kimi: LlmProviderConfig(
-    name: 'Kimi (Moonshot)',
-    baseUrl: 'https://api.moonshot.ai',
-    model: 'kimi-k2.6',
-    apiKey: _kimiKey,
-    extraBody: const {'thinking': {'type': 'disabled'}},
+  LlmProviderType.ollama: LlmProviderConfig(
+    name: 'Ollama Cloud',
+    baseUrl: 'https://ollama.com',
+    model: 'gemma3:4b',
+    apiKey: _ollamaKey,
   ),
 };
 

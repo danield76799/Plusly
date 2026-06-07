@@ -71,9 +71,9 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
             ),
           ),
           const SizedBox(height: 8),
-          // Only show selectable cloud providers (Kimi is auto-fallback only)
+          // Only show selectable cloud providers (Ollama is auto-fallback only)
           ...LlmProviderType.values
-              .where((p) => p != LlmProviderType.kimi)
+              .where((p) => p != LlmProviderType.ollama)
               .map((p) {
             final cfg = providerConfigs[p]!;
             return RadioListTile<LlmProviderType>(

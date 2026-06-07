@@ -3856,5 +3856,5 @@
   "deleteMissedMessageDescription": "This message will not be sent.",
   "undo": "Undo",
   "deleteScheduled": "Delete",
-  "aiAutoFallbackInfo": "Auto-fallback: Groq → Cerebras → Kimi. If your chosen provider fails, the next one is used automatically."
+  "aiAutoFallbackInfo": "Auto-fallback: Groq → Cerebras → Ollama. If your chosen provider fails, the next one is used automatically."
 }
