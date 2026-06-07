@@ -590,11 +590,14 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  @override
   void _preloadChats() {
-    // Preload first 40 chat timelines in background — instant opens
+    // Preload first 40 chat timelines in background — instant opens.
+    // Wait for the client to finish loading rooms first, otherwise the
+    // list is empty and the preload is a no-op.
     Future.microtask(() async {
       final client = Matrix.of(context).client;
+      await client.roomsLoading;
+      if (!mounted) return;
       final rooms = client.rooms
           .where((r) => r.isDirectChat || !r.isSpace)
           .take(40)
