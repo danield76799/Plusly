@@ -1166,25 +1166,7 @@ class ChatController extends State<ChatPageWithRoom>
   /// Check LLM privacy consent and E2EE warning before using AI features.
   /// Returns true if the user may proceed, false if blocked/declined.
   Future<bool> _checkLlmPrivacy({Event? event}) async {
-    // If consent not accepted or AI not enabled, redirect to AI Hub
-    // which shows the privacy dialog and enables AI
-    if (!AppSettings.llmPrivacyAccepted.value || !AppSettings.llmEnabled.value) {
-      if (!mounted) return false;
-      final result = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (_) => const AiHubPage(autoPopAfterConsent: true),
-          fullscreenDialog: true,
-        ),
-      );
-      // If user accepted privacy and AI is now enabled, continue
-      if (result == true && AppSettings.llmPrivacyAccepted.value && AppSettings.llmEnabled.value) {
-        // Fall through to E2EE check below
-      } else {
-        return false;
-      }
-    }
     // Warn if sending encrypted room content to cloud LLM
-    
     if (event != null && room.encrypted && !AppSettings.llmEncryptedRoomConsent.value) {
       if (!mounted) return false;
       final proceed = await showDialog<bool>(

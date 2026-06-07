@@ -126,18 +126,6 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                         icon: const Icon(Icons.search),
                       ),
                     ClientChooserButton(controller),
-                    if (AppSettings.llmEnabled.value)
-                      IconButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const AiHubPage(),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.auto_awesome_outlined),
-                        tooltip: L10n.of(context).aiAssistant,
-                      ),
                   ],
                 ),
               ),

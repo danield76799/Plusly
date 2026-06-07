@@ -130,11 +130,6 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                         title: L10n.of(context).enableAppBarCenterTitle,
                         setting: AppSettings.enableAppBarCenterTitle,
                       ),
-                      const ListDivider(),
-                      SettingsSwitchListTile.adaptive(
-                        title: L10n.of(context).enablePeopleTab,
-                        setting: AppSettings.enablePeopleTab,
-                      ),
                       if (PlatformInfos.isMobile) ...[
                         const ListDivider(),
                         SettingsSwitchListTile.adaptive(
