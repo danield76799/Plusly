@@ -116,21 +116,9 @@ class PushHelper {
         return null;
       }
 
-      // Force a quick sync so the incoming message lands in the local
-      // database / timeline immediately after the push notification fires.
-      // Without this, the user gets a notification but the chat list shows
-      // nothing for several seconds until the next sync cycle.
-      try {
-        await client.roomsLoading;
-        // oneShotSync returns when the sync has finished
-        unawaited(client.oneShotSync());
-      } catch (e) {
-        Logs().w('Foreground sync after push failed: $e');
-      }
-
       final event = await client.getEventByPushNotification(
         notification,
-        storeInDatabase: true, // Always store so it shows in chat list
+        storeInDatabase: helper.isBackgroundMessage ?? false,
       );
 
       if (event == null) {

@@ -479,15 +479,6 @@ class ChatController extends State<ChatPageWithRoom>
       }
 
       setReadMarker();
-      // Also mark as read after a short delay when user opens chat
-      // This ensures messages are marked read even if scroll position
-      // prevents immediate read marker
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) setReadMarker();
-      });
-      Future.delayed(const Duration(seconds: 5), () {
-        if (mounted) setReadMarker();
-      });
 
       if (!mounted) return;
     } catch (e, s) {
