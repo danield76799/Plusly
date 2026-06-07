@@ -1192,7 +1192,6 @@ class ChatController extends State<ChatPageWithRoom>
       );
       if (proceed != true) return false;
     }
-    }
     return true;
   }
 
