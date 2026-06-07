@@ -11,13 +11,16 @@ class ScheduledMessagesView extends StatefulWidget {
   State<ScheduledMessagesView> createState() => _ScheduledMessagesViewState();
 }
 
-class _ScheduledMessagesViewState extends State<ScheduledMessagesView> with SingleTickerProviderStateMixin {
+class _ScheduledMessagesViewState extends State<ScheduledMessagesView>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late Future<List<ScheduledMessage>> _messagesFuture;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _messagesFuture = ScheduledMessagesService.loadScheduledMessages();
   }
 
   @override
@@ -26,461 +29,584 @@ class _ScheduledMessagesViewState extends State<ScheduledMessagesView> with Sing
     super.dispose();
   }
 
+  void _refresh() {
+    setState(() {
+      _messagesFuture = ScheduledMessagesService.loadScheduledMessages();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = L10n.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(L10n.of(context).chatBackup),
+        title: Text(l10n.scheduledMessages),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Gepland', icon: Icon(Icons.schedule)),
-            Tab(text: 'Gemist', icon: Icon(Icons.error_outline)),
+          tabs: [
+            Tab(text: l10n.scheduledTab),
+            Tab(text: l10n.missedTab),
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          _PendingMessagesTab(),
-          _MissedMessagesTab(),
-        ],
+      body: FutureBuilder<List<ScheduledMessage>>(
+        future: _messagesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator.adaptive(),
+            );
+          }
+
+          final messages = snapshot.data ?? [];
+          final pending =
+              messages.where((m) => !m.isSent && !m.isMissed).toList();
+          final missed =
+              messages.where((m) => m.isMissed && !m.isSent).toList();
+
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _PendingTab(
+                messages: pending,
+                onRefresh: _refresh,
+              ),
+              _MissedTab(
+                messages: missed,
+                onRefresh: _refresh,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class _PendingMessagesTab extends StatefulWidget {
-  const _PendingMessagesTab();
+// ─── Pending Tab ────────────────────────────────────────────────────
 
-  @override
-  State<_PendingMessagesTab> createState() => _PendingMessagesTabState();
-}
+class _PendingTab extends StatelessWidget {
+  final List<ScheduledMessage> messages;
+  final VoidCallback onRefresh;
 
-class _PendingMessagesTabState extends State<_PendingMessagesTab> {
-  Future<List<ScheduledMessage>> _loadMessages() async {
-    return await ScheduledMessagesService.loadScheduledMessages();
-  }
+  const _PendingTab({required this.messages, required this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<ScheduledMessage>>(
-      future: _loadMessages(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator.adaptive());
-        }
+    final theme = Theme.of(context);
+    final l10n = L10n.of(context);
 
-        final messages = snapshot.data ?? [];
-        final pendingMessages = messages.where((m) => !m.isSent && !m.isMissed).toList();
+    if (messages.isEmpty) {
+      return _EmptyState(
+        icon: Icons.schedule_rounded,
+        title: l10n.noScheduledMessages,
+        subtitle: l10n.noScheduledMessagesDescription,
+      );
+    }
 
-        if (pendingMessages.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.schedule_outlined,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No scheduled messages',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Messages you schedule will appear here',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
+    return RefreshIndicator.adaptive(
+      onRefresh: () async => onRefresh(),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        itemCount: messages.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 4),
+        itemBuilder: (context, index) {
+          return _PendingCard(
+            message: messages[index],
+            onChanged: onRefresh,
           );
-        }
-
-        return ListView.builder(
-          itemCount: pendingMessages.length,
-          itemBuilder: (context, index) {
-            final message = pendingMessages[index];
-            return _ScheduledMessageTile(
-              message: message,
-              onCancel: () => setState(() {}),  // ← Ververs de lijst!
-            );
-          },
-        );
-      },
+        },
+      ),
     );
   }
 }
 
-class _MissedMessagesTab extends StatelessWidget {
-  const _MissedMessagesTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<List<ScheduledMessage>>(
-      future: ScheduledMessagesService.loadScheduledMessages(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator.adaptive());
-        }
-
-        final messages = snapshot.data ?? [];
-        final missedMessages = messages.where((m) => m.isMissed && !m.isSent).toList();
-
-        if (missedMessages.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.check_circle_outline,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Geen gemiste berichten',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Alle geplande berichten zijn verstuurd',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ListView.builder(
-          itemCount: missedMessages.length,
-          itemBuilder: (context, index) {
-            final message = missedMessages[index];
-            return _MissedMessageTile(message: message);
-          },
-        );
-      },
-    );
-  }
-}
-
-class _MissedMessageTile extends StatelessWidget {
+class _PendingCard extends StatelessWidget {
   final ScheduledMessage message;
+  final VoidCallback onChanged;
 
-  const _MissedMessageTile({required this.message});
+  const _PendingCard({required this.message, required this.onChanged});
 
-  String _formatMissedTime(BuildContext context) {
-    final missed = message.missedAt ?? message.scheduledAt;
-    return '${missed.day}/${missed.month}/${missed.year} at ${missed.hour}:${missed.minute.toString().padLeft(2, '0')}';
+  String _relativeTime(BuildContext context) {
+    final l10n = L10n.of(context);
+    final diff = message.scheduledAt.difference(DateTime.now());
+
+    if (diff.isNegative) return l10n.scheduledDueNow;
+    if (diff.inMinutes < 60) return l10n.scheduledInMinutes(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.scheduledInHours(diff.inHours);
+    if (diff.inDays < 7) return l10n.scheduledInDays(diff.inDays);
+
+    final d = message.scheduledAt;
+    return '${d.day}/${d.month}/${d.year} ${d.hour}:${d.minute.toString().padLeft(2, '0')}';
   }
 
-  String _getRoomName(BuildContext context) {
+  String _roomName(BuildContext context) {
     final client = Matrix.of(context).client;
     final room = client.getRoomById(message.roomId);
-    return room?.displayname ?? 'Unknown room';
+    return room?.displayname ?? message.roomId;
   }
 
-  String _getMessagePreview() {
+  String _preview() {
     final body = message.content['body'] as String? ?? '';
-    if (body.length > 50) {
-      return '${body.substring(0, 50)}...';
-    }
-    return body;
+    return body.length > 80 ? '${body.substring(0, 80)}…' : body;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = L10n.of(context);
+    final isServer = message.delayId != null;
 
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: theme.colorScheme.errorContainer,
+    return Dismissible(
+      key: ValueKey(message.id),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        margin: const EdgeInsets.symmetric(vertical: 2),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Icon(
-          Icons.error_outline,
+          Icons.cancel_rounded,
           color: theme.colorScheme.onErrorContainer,
         ),
       ),
-      title: Text(
-        _getRoomName(context),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _getMessagePreview(),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+      confirmDismiss: (_) => _confirmCancel(context),
+      onDismissed: (_) => _doCancel(context),
+      child: Card(
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
           ),
-          const SizedBox(height: 4),
-          Row(
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.access_time,
-                size: 14,
-                color: theme.colorScheme.error,
+              // Header row: room name + source chip
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _roomName(context),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _SourceChip(isServer: isServer),
+                ],
               ),
-              const SizedBox(width: 4),
+              const SizedBox(height: 6),
+
+              // Message preview
               Text(
-                'Gemist: ${_formatMissedTime(context)}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.error,
-                  fontWeight: FontWeight.w500,
+                _preview(),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 10),
+
+              // Footer: time + cancel button
+              Row(
+                children: [
+                  Icon(
+                    Icons.access_time_rounded,
+                    size: 14,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _relativeTime(context),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: () => _confirmCancel(context).then((yes) {
+                      if (yes == true) _doCancel(context);
+                    }),
+                    icon: const Icon(Icons.cancel_outlined, size: 16),
+                    label: Text(l10n.cancelMessage),
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                      visualDensity: VisualDensity.compact,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
+        ),
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ElevatedButton.icon(
-            onPressed: () async {
-              try {
-                final client = Matrix.of(context).client;
-                final success = await ScheduledMessagesService.sendMissedMessage(client, message.id);
-                if (success && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Bericht handmatig verstuurd!')),
-                  );
-                  // Force rebuild
-                  (context as Element).markNeedsBuild();
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Fout bij versturen: $e')),
-                  );
-                }
-              }
-            },
-            icon: const Icon(Icons.send, size: 16),
-            label: const Text('Verstuur'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Gemist bericht verwijderen?'),
-                  content: const Text('Dit bericht wordt niet verstuurd.'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: const Text('Annuleren'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: Text(
-                        'Verwijderen',
-                        style: TextStyle(color: theme.colorScheme.error),
-                      ),
-                    ),
-                  ],
-                ),
-              );
+    );
+  }
 
-              if (confirm == true) {
-                await ScheduledMessagesService.removeScheduledMessage(message.id);
-                if (context.mounted) {
-                  (context as Element).markNeedsBuild();
-                }
-              }
-            },
+  Future<bool?> _confirmCancel(BuildContext context) {
+    final l10n = L10n.of(context);
+    final isServer = message.delayId != null;
+
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.cancelScheduledMessage),
+        content: Text(
+          isServer
+              ? l10n.cancelServerScheduledDescription
+              : l10n.cancelLocalScheduledDescription,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.keep),
+          ),
+          FilledButton.tonal(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.cancelMessage),
           ),
         ],
       ),
-      isThreeLine: true,
+    );
+  }
+
+  Future<void> _doCancel(BuildContext context) async {
+    final l10n = L10n.of(context);
+    final isServer = message.delayId != null;
+
+    if (isServer) {
+      final client = Matrix.of(context).client;
+      final success =
+          await ScheduledMessagesService.cancelScheduledMessage(client, message.id);
+      if (!success && context.mounted) {
+        await ScheduledMessagesService.removeScheduledMessage(message.id);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.serverCancelNotSupported),
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+      }
+    } else {
+      await ScheduledMessagesService.removeScheduledMessage(message.id);
+    }
+    onChanged();
+  }
+}
+
+// ─── Missed Tab ─────────────────────────────────────────────────────
+
+class _MissedTab extends StatelessWidget {
+  final List<ScheduledMessage> messages;
+  final VoidCallback onRefresh;
+
+  const _MissedTab({required this.messages, required this.onRefresh});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
+
+    if (messages.isEmpty) {
+      return _EmptyState(
+        icon: Icons.check_circle_rounded,
+        title: l10n.noMissedMessages,
+        subtitle: l10n.noMissedMessagesDescription,
+      );
+    }
+
+    return RefreshIndicator.adaptive(
+      onRefresh: () async => onRefresh(),
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        itemCount: messages.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 4),
+        itemBuilder: (context, index) {
+          return _MissedCard(
+            message: messages[index],
+            onChanged: onRefresh,
+          );
+        },
+      ),
     );
   }
 }
 
-class _ScheduledMessageTile extends StatelessWidget {
+class _MissedCard extends StatelessWidget {
   final ScheduledMessage message;
-  final VoidCallback? onCancel;
+  final VoidCallback onChanged;
 
-  const _ScheduledMessageTile({required this.message, this.onCancel});
+  const _MissedCard({required this.message, required this.onChanged});
 
-  String _formatScheduledTime(BuildContext context) {
-    final scheduled = message.scheduledAt;
-    final now = DateTime.now();
-    final diff = scheduled.difference(now);
-
-    if (diff.isNegative) {
-      return 'Due now';
-    }
-
-    if (diff.inMinutes < 60) {
-      return 'In ${diff.inMinutes} minutes';
-    }
-
-    if (diff.inHours < 24) {
-      return 'In ${diff.inHours} hours';
-    }
-
-    if (diff.inDays < 7) {
-      return 'In ${diff.inDays} days';
-    }
-
-    // Format as date
-    return '${scheduled.day}/${scheduled.month}/${scheduled.year} at ${scheduled.hour}:${scheduled.minute.toString().padLeft(2, '0')}';
+  String _missedTime() {
+    final d = message.missedAt ?? message.scheduledAt;
+    return '${d.day}/${d.month}/${d.year} ${d.hour}:${d.minute.toString().padLeft(2, '0')}';
   }
 
-  String _getRoomName(BuildContext context) {
+  String _roomName(BuildContext context) {
     final client = Matrix.of(context).client;
     final room = client.getRoomById(message.roomId);
-    return room?.displayname ?? 'Unknown room';
+    return room?.displayname ?? message.roomId;
   }
 
-  String _getMessagePreview() {
+  String _preview() {
     final body = message.content['body'] as String? ?? '';
-    if (body.length > 50) {
-      return '${body.substring(0, 50)}...';
-    }
-    return body;
+    return body.length > 80 ? '${body.substring(0, 80)}…' : body;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isServerScheduled = message.delayId != null;
+    final l10n = L10n.of(context);
 
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: isServerScheduled
-            ? theme.colorScheme.primaryContainer
-            : theme.colorScheme.surfaceContainerHighest,
-        child: Icon(
-          isServerScheduled ? Icons.cloud_outlined : Icons.phone_android,
-          color: isServerScheduled
-              ? theme.colorScheme.onPrimaryContainer
-              : theme.colorScheme.onSurfaceVariant,
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: theme.colorScheme.errorContainer.withValues(alpha: 0.5),
         ),
       ),
-      title: Text(
-        _getRoomName(context),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _getMessagePreview(),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Icon(
-                Icons.access_time,
-                size: 14,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                _formatScheduledTime(context),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w500,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header row
+            Row(
+              children: [
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 18,
+                  color: theme.colorScheme.error,
                 ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                decoration: BoxDecoration(
-                  color: isServerScheduled
-                      ? theme.colorScheme.primary.withOpacity(0.1)
-                      : theme.colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  isServerScheduled ? 'Server' : 'Local',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    color: isServerScheduled
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      trailing: IconButton(
-        icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-        onPressed: () async {
-          final isServerScheduled = message.delayId != null;
-          
-          final confirm = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Cancel scheduled message?'),
-              content: Text(
-                isServerScheduled
-                    ? 'This will try to cancel the message on the server. If the server does not support cancellation, the message will still be sent.'
-                    : 'This message is scheduled locally. It will only be removed from this device.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Keep'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
+                const SizedBox(width: 6),
+                Expanded(
                   child: Text(
-                    'Cancel',
-                    style: TextStyle(color: theme.colorScheme.error),
+                    _roomName(context),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
-          );
+            const SizedBox(height: 6),
 
-          if (confirm == true) {
-            final client = Matrix.of(context).client;
-            if (isServerScheduled) {
-              // Try server-side cancel
-              final success = await ScheduledMessagesService.cancelScheduledMessage(client, message.id);
-              if (!success && context.mounted) {
-                // Server doesn't support cancel — remove from local list anyway
-                await ScheduledMessagesService.removeScheduledMessage(message.id);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Server does not support cancellation. Message will still be sent.'),
-                    duration: Duration(seconds: 5),
+            // Message preview
+            Text(
+              _preview(),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 10),
+
+            // Footer: missed time + action buttons
+            Row(
+              children: [
+                Icon(
+                  Icons.access_time_rounded,
+                  size: 14,
+                  color: theme.colorScheme.error,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  l10n.scheduledMissedAt(_missedTime()),
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: FontWeight.w500,
                   ),
-                );
-              }
-            } else {
-              await ScheduledMessagesService.removeScheduledMessage(message.id);
-            }
-            onCancel?.call();
-          }
-        },
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () => _sendNow(context),
+                  icon: const Icon(Icons.send_rounded, size: 16),
+                  label: Text(l10n.sendNow),
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.primary,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () => _confirmDelete(context),
+                  icon: const Icon(Icons.delete_outline_rounded, size: 16),
+                  label: Text(l10n.deleteScheduled),
+                  style: TextButton.styleFrom(
+                    foregroundColor: theme.colorScheme.error,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-      isThreeLine: true,
+    );
+  }
+
+  Future<void> _sendNow(BuildContext context) async {
+    final l10n = L10n.of(context);
+    try {
+      final client = Matrix.of(context).client;
+      final success =
+          await ScheduledMessagesService.sendMissedMessage(client, message.id);
+      if (success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.messageSentManually)),
+        );
+        onChanged();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.errorSendingMessage)),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final l10n = L10n.of(context);
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.deleteMissedMessage),
+        content: Text(l10n.deleteMissedMessageDescription),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton.tonal(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.deleteScheduled),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await ScheduledMessagesService.removeScheduledMessage(message.id);
+      onChanged();
+    }
+  }
+}
+
+// ─── Shared Widgets ─────────────────────────────────────────────────
+
+class _EmptyState extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  const _EmptyState({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 56,
+              color: theme.colorScheme.primary.withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SourceChip extends StatelessWidget {
+  final bool isServer;
+
+  const _SourceChip({required this.isServer});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = L10n.of(context);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: isServer
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isServer ? Icons.cloud_outlined : Icons.phone_android_rounded,
+            size: 12,
+            color: isServer
+                ? theme.colorScheme.onPrimaryContainer
+                : theme.colorScheme.onSurfaceVariant,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            isServer ? l10n.serverScheduled : l10n.localScheduled,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w500,
+              color: isServer
+                  ? theme.colorScheme.onPrimaryContainer
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
