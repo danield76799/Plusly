@@ -14,7 +14,6 @@ abstract class SettingKeys {
 }
 
 enum AppSettings<T> {
-  enablePeopleTab<bool>('xyz.plusly.enablePeopleTab', true),
   autoLoadMedia<bool>('xyz.plusly.autoLoadMedia', true),
   showCameraButton<bool>('xyz.plusly.cameraButton', true),
   stickerScale<double>('xyz.plusly.stickerScale', 2),
@@ -60,7 +59,7 @@ enum AppSettings<T> {
   checkForUpdates<bool>('xyz.plusly.next.checkForUpdates', true),
   colorSchemeSeed<int>('xyz.plusly.next.colorSchemeSeed', 0x49AFC2),
   hideAvatarsInInvites<bool>('xyz.plusly.next.hideAvatarsInInvites', true),
-  displayNavigationRail<bool>('chat.fluffy.displayNavigationRail', true),
+  displayNavigationRail<bool>('chat.fluffy.displayNavigationRail', false),
   httpProxy<String>('xyz.plusly.next.httpProxy', ''),
   cleanExif<bool>('xyz.plusly.next.cleanExif', true),
   doNotSendIfCantClean<bool>('xyz.plusly.next.doNotSendIfCantClean', true),

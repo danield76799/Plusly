@@ -78,16 +78,6 @@ class ClientChooserButton extends StatelessWidget {
         ),
       ),
       PopupMenuItem(
-        value: SettingsAction.syncDebug,
-        child: Row(
-          children: [
-            const Icon(Icons.bug_report_outlined, color: Color(0xFF49AFC2)),
-            const SizedBox(width: 22),
-            const Text('Sync Debug'),
-          ],
-        ),
-      ),
-      PopupMenuItem(
         value: SettingsAction.settings,
         child: Row(
           children: [

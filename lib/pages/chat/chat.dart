@@ -20,7 +20,7 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat_view.dart';
-import 'package:Pulsly/pages/ai_hub/ai_hub_page.dart';
+
 import 'package:Pulsly/pages/chat/event_info_dialog.dart';
 import 'package:Pulsly/pages/chat/message_context_menu.dart';
 import 'package:Pulsly/pages/chat/message_edits_dialog.dart';
@@ -1197,50 +1197,6 @@ class ChatController extends State<ChatPageWithRoom>
       if (proceed != true) return false;
     }
     return true;
-  }
-
-  void smartReplyAction({Event? event}) async {
-    event ??= selectedEvents.single;
-    final text = event.isRichMessage ? event.formattedText : event.text;
-    if (text.trim().isEmpty) return;
-
-    if (!await _checkLlmPrivacy(event: event)) return;
-
-    // Set up as a proper Matrix reply (shows original message quoted)
-    replyAction(replyTo: event);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(L10n.of(context).generatingReply)),
-    );
-
-    try {
-      final messages = [
-        LlmMessage(
-          role: 'system',
-          content: 'You are a helpful assistant. Generate a short, natural '
-              'reply to the user\'s message. Keep it brief and conversational. '
-              'Output ONLY the reply text, nothing else.',
-        ),
-        LlmMessage(role: 'user', content: text),
-      ];
-      final reply = await LlmService.sendMessage(messages);
-      sendController.text = reply;
-      inputFocus.requestFocus();
-      // Show fallback notification
-      if (LlmService.lastFallbackMessage != null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(LlmService.lastFallbackMessage!),
-            duration: const Duration(seconds: 3),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context).errorGeneratingReply)),
-      );
-    }
   }
 
   void translateEventAction({Event? event}) async {

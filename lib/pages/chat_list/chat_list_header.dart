@@ -9,7 +9,7 @@ import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';
 import 'package:Pulsly/pages/chat_list/client_chooser_button.dart';
-import 'package:Pulsly/pages/ai_hub/ai_hub_page.dart';
+
 import 'package:Pulsly/utils/sync_status_localization.dart';
 import '../../widgets/matrix.dart';
 
@@ -316,9 +316,6 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
       ActiveFilter.unread,
       ActiveFilter.groups,
       ActiveFilter.favorites,
-      // People tab is only visible when selected
-      if (controller.activeFilter == ActiveFilter.people)
-        ActiveFilter.people,
     ];
 
     return Container(
