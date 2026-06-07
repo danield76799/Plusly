@@ -3431,5 +3431,64 @@
   "clearChat": "Cancella chat",
   "askMeAnything": "Chiedimi qualsiasi cosa",
   "revokeConsent": "Revoca consenso IA",
-  "revokeConsentDescription": "Questo disattiverà tutte le funzioni IA e revocherà il tuo consenso alla privacy. Dovrai accettare nuovamente l'informativa sulla privacy per riattivare l'IA."
+  "revokeConsentDescription": "Questo disattiverà tutte le funzioni IA e revocherà il tuo consenso alla privacy. Dovrai accettare nuovamente l'informativa sulla privacy per riattivare l'IA.",
+  "scheduledMessages": "Messaggi Pianificati",
+  "scheduledTab": "Pianificati",
+  "missedTab": "Mancati",
+  "noScheduledMessages": "Nessun messaggio pianificato",
+  "noScheduledMessagesDescription": "I messaggi che pianifichi appariranno qui",
+  "noMissedMessages": "Nessun messaggio mancato",
+  "noMissedMessagesDescription": "Tutti i messaggi pianificati sono stati inviati con successo",
+  "scheduledInMinutes": "Tra {minutes} min",
+  "@scheduledInMinutes": {
+    "type": "String",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInHours": "Tra {hours}h",
+  "@scheduledInHours": {
+    "type": "String",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInDays": "Tra {days}g",
+  "@scheduledInDays": {
+    "type": "String",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledDueNow": "Invia ora",
+  "scheduledMissedAt": "Mancato {time}",
+  "@scheduledMissedAt": {
+    "type": "String",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serverScheduled": "Server",
+  "localScheduled": "Locale",
+  "cancelScheduledMessage": "Annullare il messaggio pianificato?",
+  "cancelServerScheduledDescription": "Questo tenterà di annullare il messaggio sul server. Se il server non supporta l'annullamento, il messaggio verrà comunque inviato.",
+  "cancelLocalScheduledDescription": "Questo messaggio è pianificato localmente. Verrà rimosso solo da questo dispositivo.",
+  "keep": "Mantieni",
+  "cancelMessage": "Annulla",
+  "serverCancelNotSupported": "Il server non supporta l'annullamento. Il messaggio verrà comunque inviato.",
+  "sendNow": "Invia ora",
+  "messageSentManually": "Messaggio inviato!",
+  "errorSendingMessage": "Errore nell'invio",
+  "deleteMissedMessage": "Eliminare il messaggio mancato?",
+  "deleteMissedMessageDescription": "Questo messaggio non verrà inviato.",
+  "undo": "Annulla",
+  "deleteScheduled": "Elimina"
 }

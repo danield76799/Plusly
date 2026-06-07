@@ -3877,5 +3877,64 @@
   "clearChat": "Очистить чат",
   "askMeAnything": "Спросите меня о чём угодно",
   "revokeConsent": "Отозвать согласие на ИИ",
-  "revokeConsentDescription": "Это отключит все функции ИИ и отозвывает ваше согласие на обработку данных. Вам нужно будет повторно принять уведомление о конфиденциальности, чтобы повторно включить ИИ."
+  "revokeConsentDescription": "Это отключит все функции ИИ и отозвывает ваше согласие на обработку данных. Вам нужно будет повторно принять уведомление о конфиденциальности, чтобы повторно включить ИИ.",
+  "scheduledMessages": "Запланированные сообщения",
+  "scheduledTab": "Запланированные",
+  "missedTab": "Пропущенные",
+  "noScheduledMessages": "Нет запланированных сообщений",
+  "noScheduledMessagesDescription": "Запланированные сообщения появятся здесь",
+  "noMissedMessages": "Нет пропущенных сообщений",
+  "noMissedMessagesDescription": "Все запланированные сообщения были успешно отправлены",
+  "scheduledInMinutes": "Через {minutes} мин",
+  "@scheduledInMinutes": {
+    "type": "String",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInHours": "Через {hours} ч",
+  "@scheduledInHours": {
+    "type": "String",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInDays": "Через {days} дн",
+  "@scheduledInDays": {
+    "type": "String",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledDueNow": "Отправить сейчас",
+  "scheduledMissedAt": "Пропущено {time}",
+  "@scheduledMissedAt": {
+    "type": "String",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serverScheduled": "Сервер",
+  "localScheduled": "Локально",
+  "cancelScheduledMessage": "Отменить запланированное сообщение?",
+  "cancelServerScheduledDescription": "Попытка отменить сообщение на сервере. Если сервер не поддерживает отмену, сообщение всё равно будет отправлено.",
+  "cancelLocalScheduledDescription": "Это сообщение запланировано локально. Оно будет удалено только с этого устройства.",
+  "keep": "Оставить",
+  "cancelMessage": "Отмена",
+  "serverCancelNotSupported": "Сервер не поддерживает отмену. Сообщение будет отправлено.",
+  "sendNow": "Отправить",
+  "messageSentManually": "Сообщение отправлено!",
+  "errorSendingMessage": "Ошибка отправки",
+  "deleteMissedMessage": "Удалить пропущенное сообщение?",
+  "deleteMissedMessageDescription": "Это сообщение не будет отправлено.",
+  "undo": "Отменить",
+  "deleteScheduled": "Удалить"
 }

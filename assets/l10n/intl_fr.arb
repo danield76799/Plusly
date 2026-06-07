@@ -3192,5 +3192,64 @@
   "clearChat": "Effacer le chat",
   "askMeAnything": "Demandez-moi n'importe quoi",
   "revokeConsent": "Révoquer le consentement IA",
-  "revokeConsentDescription": "Cela désactivera toutes les fonctions IA et révoquera votre consentement à la confidentialité. Vous devrez accepter à nouveau l'avis de confidentialité pour réactiver l'IA."
+  "revokeConsentDescription": "Cela désactivera toutes les fonctions IA et révoquera votre consentement à la confidentialité. Vous devrez accepter à nouveau l'avis de confidentialité pour réactiver l'IA.",
+  "scheduledMessages": "Messages Planifiés",
+  "scheduledTab": "Planifiés",
+  "missedTab": "Manqués",
+  "noScheduledMessages": "Aucun message planifié",
+  "noScheduledMessagesDescription": "Les messages que vous planifiez apparaîtront ici",
+  "noMissedMessages": "Aucun message manqué",
+  "noMissedMessagesDescription": "Tous les messages planifiés ont été envoyés avec succès",
+  "scheduledInMinutes": "Dans {minutes} min",
+  "@scheduledInMinutes": {
+    "type": "String",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInHours": "Dans {hours}h",
+  "@scheduledInHours": {
+    "type": "String",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInDays": "Dans {days}j",
+  "@scheduledInDays": {
+    "type": "String",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledDueNow": "Envoyer maintenant",
+  "scheduledMissedAt": "Manqué {time}",
+  "@scheduledMissedAt": {
+    "type": "String",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serverScheduled": "Serveur",
+  "localScheduled": "Local",
+  "cancelScheduledMessage": "Annuler le message planifié ?",
+  "cancelServerScheduledDescription": "Cela tentera d'annuler le message sur le serveur. Si le serveur ne supporte pas l'annulation, le message sera tout de même envoyé.",
+  "cancelLocalScheduledDescription": "Ce message est planifié localement. Il sera uniquement supprimé de cet appareil.",
+  "keep": "Garder",
+  "cancelMessage": "Annuler",
+  "serverCancelNotSupported": "Le serveur ne supporte pas l'annulation. Le message sera tout de même envoyé.",
+  "sendNow": "Envoyer",
+  "messageSentManually": "Message envoyé !",
+  "errorSendingMessage": "Erreur d'envoi",
+  "deleteMissedMessage": "Supprimer le message manqué ?",
+  "deleteMissedMessageDescription": "Ce message ne sera pas envoyé.",
+  "undo": "Annuler",
+  "deleteScheduled": "Supprimer"
 }

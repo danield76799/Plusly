@@ -3388,5 +3388,64 @@
   "clearChat": "Chat löschen",
   "askMeAnything": "Frag mich anything",
   "revokeConsent": "KI-Einwilligung widerrufen",
-  "revokeConsentDescription": "Dies deaktiviert alle KI-Funktionen und widerruft Ihre Datenschutzeinwilligung. Sie müssen den Datenschutzhinweis erneut akzeptieren, um KI zu reaktivieren."
+  "revokeConsentDescription": "Dies deaktiviert alle KI-Funktionen und widerruft Ihre Datenschutzeinwilligung. Sie müssen den Datenschutzhinweis erneut akzeptieren, um KI zu reaktivieren.",
+  "scheduledMessages": "Geplante Nachrichten",
+  "scheduledTab": "Geplant",
+  "missedTab": "Verpasst",
+  "noScheduledMessages": "Keine geplanten Nachrichten",
+  "noScheduledMessagesDescription": "Geplante Nachrichten werden hier angezeigt",
+  "noMissedMessages": "Keine verpassten Nachrichten",
+  "noMissedMessagesDescription": "Alle geplanten Nachrichten wurden erfolgreich gesendet",
+  "scheduledInMinutes": "In {minutes} Min",
+  "@scheduledInMinutes": {
+    "type": "String",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInHours": "In {hours} Std",
+  "@scheduledInHours": {
+    "type": "String",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInDays": "In {days} T",
+  "@scheduledInDays": {
+    "type": "String",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledDueNow": "Jetzt senden",
+  "scheduledMissedAt": "Verpasst {time}",
+  "@scheduledMissedAt": {
+    "type": "String",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serverScheduled": "Server",
+  "localScheduled": "Lokal",
+  "cancelScheduledMessage": "Geplante Nachricht abbrechen?",
+  "cancelServerScheduledDescription": "Dies versucht, die Nachricht auf dem Server abzubrechen. Wenn der Server dies nicht unterstützt, wird die Nachricht trotzdem gesendet.",
+  "cancelLocalScheduledDescription": "Diese Nachricht ist lokal geplant. Sie wird nur von diesem Gerät entfernt.",
+  "keep": "Behalten",
+  "cancelMessage": "Abbrechen",
+  "serverCancelNotSupported": "Server unterstützt keine Stornierung. Nachricht wird trotzdem gesendet.",
+  "sendNow": "Jetzt senden",
+  "messageSentManually": "Nachricht gesendet!",
+  "errorSendingMessage": "Fehler beim Senden",
+  "deleteMissedMessage": "Verpasste Nachricht löschen?",
+  "deleteMissedMessageDescription": "Diese Nachricht wird nicht gesendet.",
+  "undo": "Rückgängig",
+  "deleteScheduled": "Löschen"
 }

@@ -2508,5 +2508,64 @@
   "clearChat": "チャットをクリア",
   "askMeAnything": "何でも聞いてください",
   "revokeConsent": "AI同意を取り消す",
-  "revokeConsentDescription": "これによりすべてのAI機能が無効になり、プライバシー同意が取り消されます。AIを再有効化するには、プライバシー通知に再度同意する必要があります。"
+  "revokeConsentDescription": "これによりすべてのAI機能が無効になり、プライバシー同意が取り消されます。AIを再有効化するには、プライバシー通知に再度同意する必要があります。",
+  "scheduledMessages": "予約メッセージ",
+  "scheduledTab": "予約済み",
+  "missedTab": "未送信",
+  "noScheduledMessages": "予約メッセージはありません",
+  "noScheduledMessagesDescription": "予約したメッセージがここに表示されます",
+  "noMissedMessages": "未送信メッセージはありません",
+  "noMissedMessagesDescription": "すべての予約メッセージが正常に送信されました",
+  "scheduledInMinutes": "{minutes}分後",
+  "@scheduledInMinutes": {
+    "type": "String",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInHours": "{hours}時間後",
+  "@scheduledInHours": {
+    "type": "String",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInDays": "{days}日後",
+  "@scheduledInDays": {
+    "type": "String",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledDueNow": "今すぐ送信",
+  "scheduledMissedAt": "未送信 {time}",
+  "@scheduledMissedAt": {
+    "type": "String",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serverScheduled": "サーバー",
+  "localScheduled": "ローカル",
+  "cancelScheduledMessage": "予約メッセージをキャンセルしますか？",
+  "cancelServerScheduledDescription": "サーバーでのキャンセルを試みます。サーバーがキャンセルをサポートしていない場合、メッセージは送信されます。",
+  "cancelLocalScheduledDescription": "このメッセージはローカルで予約されています。このデバイスからのみ削除されます。",
+  "keep": "保持",
+  "cancelMessage": "キャンセル",
+  "serverCancelNotSupported": "サーバーはキャンセルをサポートしていません。メッセージは送信されます。",
+  "sendNow": "今すぐ送信",
+  "messageSentManually": "メッセージを送信しました！",
+  "errorSendingMessage": "送信エラー",
+  "deleteMissedMessage": "未送信メッセージを削除しますか？",
+  "deleteMissedMessageDescription": "このメッセージは送信されません。",
+  "undo": "元に戻す",
+  "deleteScheduled": "削除"
 }
