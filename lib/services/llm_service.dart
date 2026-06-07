@@ -66,7 +66,7 @@ Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
   LlmProviderType.ollama: LlmProviderConfig(
     name: 'Ollama Cloud',
     baseUrl: 'https://ollama.com',
-    'model': 'gemma4:31b-cloud'
+    model: 'gemma4:31b-cloud',
     apiKey: _ollamaKey,
   ),
 };
