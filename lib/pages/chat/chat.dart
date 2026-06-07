@@ -436,6 +436,7 @@ class ChatController extends State<ChatPageWithRoom>
     final cached = TimelineCache.getTimeline(widget.roomId);
     if (cached != null) {
       timeline = cached;
+      loadTimelineFuture = Future.value(); // mark as done so FutureBuilder shows instantly
       _getTimeline(); // background sync — don't await
       _getThreads();  // background sync
       return;
