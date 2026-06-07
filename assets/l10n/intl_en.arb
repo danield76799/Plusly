@@ -3805,14 +3805,42 @@
   "noMissedMessages": "No missed messages",
   "noMissedMessagesDescription": "All scheduled messages were sent successfully",
   "scheduledInMinutes": "In {minutes} min",
-  "@scheduledInMinutes": {"type": "String", "placeholders": {"minutes": {"type": "int"}}},
+  "@scheduledInMinutes": {
+    "type": "String",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "scheduledInHours": "In {hours}h",
-  "@scheduledInHours": {"type": "String", "placeholders": {"hours": {"type": "int"}}},
+  "@scheduledInHours": {
+    "type": "String",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "scheduledInDays": "In {days}d",
-  "@scheduledInDays": {"type": "String", "placeholders": {"days": {"type": "int"}}},
+  "@scheduledInDays": {
+    "type": "String",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "scheduledDueNow": "Due now",
   "scheduledMissedAt": "Missed {time}",
-  "@scheduledMissedAt": {"type": "String", "placeholders": {"time": {"type": "String"}}},
+  "@scheduledMissedAt": {
+    "type": "String",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "serverScheduled": "Server",
   "localScheduled": "Local",
   "cancelScheduledMessage": "Cancel scheduled message?",
@@ -3827,5 +3855,6 @@
   "deleteMissedMessage": "Delete missed message?",
   "deleteMissedMessageDescription": "This message will not be sent.",
   "undo": "Undo",
-  "deleteScheduled": "Delete"
+  "deleteScheduled": "Delete",
+  "aiAutoFallbackInfo": "Auto-fallback: Groq → Cerebras → Kimi. If your chosen provider fails, the next one is used automatically."
 }

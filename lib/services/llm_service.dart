@@ -20,6 +20,7 @@ class LlmMessage {
 enum LlmProviderType {
   groq,
   cerebras,
+  kimi,
 }
 
 /// Configuration for a single LLM provider.
@@ -28,12 +29,14 @@ class LlmProviderConfig {
   final String baseUrl;
   final String model;
   final String apiKey; // empty = no auth needed
+  final Map<String, dynamic> extraBody; // provider-specific body params
 
   const LlmProviderConfig({
     required this.name,
     required this.baseUrl,
     required this.model,
     this.apiKey = '',
+    this.extraBody = const {},
   });
 }
 
@@ -43,8 +46,9 @@ class LlmProviderConfig {
 // ── API keys injected at build time via --dart-define ──────────────
 const _groqKey = String.fromEnvironment('GROQ_API_KEY');
 const _cerebrasKey = String.fromEnvironment('CEREBRAS_API_KEY');
+const _kimiKey = String.fromEnvironment('KIMI_API_KEY');
 
-/// Provider definitions. Both expose an OpenAI-compatible
+/// Provider definitions. All expose an OpenAI-compatible
 /// `/v1/chat/completions` endpoint, so the request format is identical.
 Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
   LlmProviderType.groq: LlmProviderConfig(
@@ -58,6 +62,13 @@ Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
     baseUrl: 'https://api.cerebras.ai',
     model: 'gpt-oss-120b',
     apiKey: _cerebrasKey,
+  ),
+  LlmProviderType.kimi: LlmProviderConfig(
+    name: 'Kimi (Moonshot)',
+    baseUrl: 'https://api.moonshot.ai',
+    model: 'kimi-k2.6',
+    apiKey: _kimiKey,
+    extraBody: const {'thinking': {'type': 'disabled'}},
   ),
 };
 
@@ -90,21 +101,22 @@ class LlmService {
   // ── Chat ─────────────────────────────────────────────────────────────
 
   /// Send a chat completion request and return the assistant's reply.
-  /// Automatically falls back from Groq → Cerebras on failure.
+  /// Automatically falls back: Groq → Cerebras → Kimi.
   static Future<String> sendMessage(List<LlmMessage> history) async {
     lastFallbackMessage = null;
     final primary = currentProvider;
-    // Build fallback chain: primary first, then the other cloud provider
+
+    // Build fallback chain: primary first, then others in order
+    final allProviders = LlmProviderType.values;
     final chain = <LlmProviderType>[primary];
-    if (primary == LlmProviderType.groq) {
-      chain.add(LlmProviderType.cerebras);
-    } else if (primary == LlmProviderType.cerebras) {
-      chain.add(LlmProviderType.groq);
+    for (final p in allProviders) {
+      if (p != primary) chain.add(p);
     }
 
     Exception? lastError;
     for (final provider in chain) {
       final config = providerConfigs[provider]!;
+      if (config.apiKey.isEmpty) continue; // skip unconfigured
       try {
         final result = await _sendToProvider(config, history);
         // Notify if we fell back to a different provider
@@ -115,11 +127,10 @@ class LlmService {
         return result;
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
-        if (provider == chain.last) break;
         continue;
       }
     }
-    // Both providers failed — give a clear error
+    // All providers failed — give a clear error
     final errorMsg = lastError?.toString() ?? 'Unknown error';
     if (errorMsg.contains('429') || errorMsg.toLowerCase().contains('rate')) {
       throw Exception('Daily limit reached. Try again tomorrow.');
@@ -147,6 +158,7 @@ class LlmService {
       'model': config.model,
       'messages': history.map((m) => m.toApi()).toList(),
       'stream': false,
+      ...config.extraBody,
     });
 
     final response = await http

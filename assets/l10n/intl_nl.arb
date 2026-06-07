@@ -3479,5 +3479,6 @@
   "deleteMissedMessage": "Gemist bericht verwijderen?",
   "deleteMissedMessageDescription": "Dit bericht wordt niet verstuurd.",
   "undo": "Ongedaan maken",
-  "deleteScheduled": "Verwijderen"
+  "deleteScheduled": "Verwijderen",
+  "aiAutoFallbackInfo": "Automatische fallback: Groq → Cerebras → Kimi. Als je gekozen provider faalt, wordt de volgende automatisch gebruikt."
 }

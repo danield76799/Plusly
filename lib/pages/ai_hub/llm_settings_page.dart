@@ -71,7 +71,10 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
             ),
           ),
           const SizedBox(height: 8),
-          ...LlmProviderType.values.map((p) {
+          // Only show selectable cloud providers (Kimi is auto-fallback only)
+          ...LlmProviderType.values
+              .where((p) => p != LlmProviderType.kimi)
+              .map((p) {
             final cfg = providerConfigs[p]!;
             return RadioListTile<LlmProviderType>(
               value: p,
@@ -230,6 +233,23 @@ class _LlmSettingsPageState extends State<LlmSettingsPage> {
                     Expanded(
                       child: Text(
                         L10n.of(context).aiFreeTierInfo,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: theme.colorScheme.outline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.swap_horiz,
+                        size: 16, color: theme.colorScheme.outline),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        L10n.of(context).aiAutoFallbackInfo,
                         style: TextStyle(
                           fontSize: 12,
                           color: theme.colorScheme.outline,
