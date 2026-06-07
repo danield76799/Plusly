@@ -137,13 +137,6 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                           setting: AppSettings.enableVideoNotes,
                         ),
                       ],
-                      const ListDivider(),
-                      SettingsSwitchListTile.adaptive(
-                        title: L10n.of(context).aiFeatures,
-                        subtitle: L10n.of(context).aiFeaturesSubtitle,
-                        setting: AppSettings.llmEnabled,
-                      ),
-                    ],
                   ),
                 ),
                 const SizedBox(height: 12),
