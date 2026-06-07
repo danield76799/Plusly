@@ -432,7 +432,15 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> _asyncInit() async {
-    // Run timeline and threads loading in parallel to avoid sequential blocking
+    // INSTANT: check cache and show immediately (WhatsApp-style)
+    final cached = TimelineCache.getTimeline(widget.roomId);
+    if (cached != null) {
+      timeline = cached;
+      _getTimeline(); // background sync — don't await
+      _getThreads();  // background sync
+      return;
+    }
+    // No cache — load in parallel but show ASAP
     await Future.wait([
       _tryLoadTimeline(),
       _getThreads(),
@@ -591,6 +599,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
     timeline!.requestKeys(onlineKeyBackupOnly: false);
     if (room.markedUnread) room.markUnread(false);
+    TimelineCache.setTimeline(widget.roomId, timeline!);
 
     return;
   }
