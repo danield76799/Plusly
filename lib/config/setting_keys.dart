@@ -41,6 +41,7 @@ enum AppSettings<T> {
   llmProvider<String>('xyz.plusly.llmProvider', 'groq'),
   llmGatewayUrl<String>('xyz.plusly.llmGatewayUrl', 'http://13.140.136.172:11434'),
   llmPrivacyAccepted<bool>('xyz.plusly.llmPrivacyAccepted', false),
+  llmEncryptedRoomConsent<bool>('xyz.plusly.llmEncryptedRoomConsent', false),
   llmShowSmartReplies<bool>('xyz.plusly.llmShowSmartReplies', true),
   llmEnableTranslation<bool>('xyz.plusly.llmEnableTranslation', true),
   latexMath<bool>('xyz.plusly.latexMath', false),
