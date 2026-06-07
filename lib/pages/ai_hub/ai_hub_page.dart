@@ -127,6 +127,16 @@ class _AiHubPageState extends State<AiHubPage> {
     try {
       final reply = await LlmService.sendMessage(_messages);
       if (mounted) {
+        // Show fallback notification if provider was switched
+        if (LlmService.lastFallbackMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(LlmService.lastFallbackMessage!),
+              duration: const Duration(seconds: 3),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
         setState(() {
           _messages.add(LlmMessage(role: 'assistant', content: reply));
           _isLoading = false;

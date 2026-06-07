@@ -62,6 +62,10 @@ Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
 };
 
 class LlmService {
+  // ── Fallback notification ────────────────────────────────────────
+  /// Set to a message when fallback was used, cleared on next request.
+  static String? lastFallbackMessage;
+
   // ── Provider resolution ──────────────────────────────────────────────
 
   static LlmProviderType get currentProvider {
@@ -88,6 +92,7 @@ class LlmService {
   /// Send a chat completion request and return the assistant's reply.
   /// Automatically falls back from Groq → Cerebras on failure.
   static Future<String> sendMessage(List<LlmMessage> history) async {
+    lastFallbackMessage = null;
     final primary = currentProvider;
     // Build fallback chain: primary first, then the other cloud provider
     final chain = <LlmProviderType>[primary];
@@ -101,14 +106,26 @@ class LlmService {
     for (final provider in chain) {
       final config = providerConfigs[provider]!;
       try {
-        return await _sendToProvider(config, history);
+        final result = await _sendToProvider(config, history);
+        // Notify if we fell back to a different provider
+        if (provider != primary) {
+          lastFallbackMessage =
+              'Switched to ${config.name} (${primary.name} unavailable)';
+        }
+        return result;
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
-        // If this was the last provider in chain, rethrow
         if (provider == chain.last) break;
-        // Otherwise try next provider
         continue;
       }
+    }
+    // Both providers failed — give a clear error
+    final errorMsg = lastError?.toString() ?? 'Unknown error';
+    if (errorMsg.contains('429') || errorMsg.toLowerCase().contains('rate')) {
+      throw Exception('Daily limit reached. Try again tomorrow.');
+    }
+    if (errorMsg.contains('401') || errorMsg.contains('403')) {
+      throw Exception('API key invalid or expired.');
     }
     throw lastError ?? Exception('All providers failed');
   }

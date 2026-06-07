@@ -1218,6 +1218,16 @@ class ChatController extends State<ChatPageWithRoom>
       final reply = await LlmService.sendMessage(messages);
       sendController.text = reply;
       inputFocus.requestFocus();
+      // Show fallback notification
+      if (LlmService.lastFallbackMessage != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(LlmService.lastFallbackMessage!),
+            duration: const Duration(seconds: 3),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(L10n.of(context).errorGeneratingReply)),
