@@ -290,8 +290,10 @@ class CallingView extends State<Calling> {
 
   @override
   void dispose() {
-    super.dispose();
+    onCallStateChangedSubscription.cancel();
+    onCallEventChangedSubscription.cancel();
     call.cleanUp.call();
+    super.dispose();
   }
 
   void _resizeLocalVideo(Orientation orientation) {
