@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:Pulsly/utils/client_download_content_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class TimelineCache {
