@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SavedMessage {
@@ -48,7 +49,7 @@ class FavoritesService {
         _cache = jsonList.map((e) => SavedMessage.fromJson(e)).toList();
       }
     } catch (e) {
-      print('Favorites init error: $e');
+      Logs().e('Favorites init error: $e');
       _cache = [];
     }
     _initialized = true;
@@ -77,7 +78,7 @@ class FavoritesService {
       final String data = jsonEncode(_cache.map((e) => e.toJson()).toList());
       await prefs.setString(_key, data);
     } catch (e) {
-      print('Favorites persist error: $e');
+      Logs().e('Favorites persist error: $e');
     }
   }
 

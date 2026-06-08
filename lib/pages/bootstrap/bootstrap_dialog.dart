@@ -214,6 +214,12 @@ class BootstrapDialogState extends State<BootstrapDialog> {
   }
 
   @override
+  void dispose() {
+    _recoveryKeyTextEditingController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final bootstrap = this.bootstrap;

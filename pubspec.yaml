@@ -54,7 +54,7 @@ dependencies:
   flutter_typeahead: ## Custom fork from flutter_typeahead since the package is not maintain well.
     git:
       url: https://github.com/famedly/flutter_typeahead.git
-      ref: main
+      ref: 3e209e67aa6e780cba61ced06cf49d2babbbcaa4
   flutter_vodozemac: ^0.5.0
   flutter_web_auth_2: ^5.0.1
   flutter_webrtc: ^1.4.1
@@ -80,7 +80,7 @@ dependencies:
     # path: ../matrix-dart-sdk
     git:
       url: https://github.com/ExteraApp/matrix-dart-sdk.git
-      ref: main
+      ref: e8e4c74b8ca680c37c264e29b8424c102bdd5798
   mime: ^2.0.0
   native_imaging: ^0.4.0
   open_file: ^3.5.11 # Keep for backward compatibility

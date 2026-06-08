@@ -386,6 +386,12 @@ class _SpaceViewState extends State<SpaceView> {
   }
 
   @override
+  void dispose() {
+    _filterController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 

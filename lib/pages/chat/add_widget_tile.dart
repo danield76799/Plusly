@@ -89,5 +89,12 @@ class AddWidgetTileState extends State<AddWidgetTile> {
   }
 
   @override
+  void dispose() {
+    urlController.dispose();
+    nameController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => AddWidgetTileView(controller: this);
 }

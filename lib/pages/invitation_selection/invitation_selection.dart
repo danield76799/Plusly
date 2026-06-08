@@ -107,5 +107,12 @@ class InvitationSelectionController extends State<InvitationSelection> {
   }
 
   @override
+  void dispose() {
+    coolDown?.cancel();
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => InvitationSelectionView(this);
 }

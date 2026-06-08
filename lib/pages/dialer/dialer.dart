@@ -172,8 +172,8 @@ class CallingView extends State<Calling> {
     initialize();
   }
 
-  late StreamSubscription<CallState> onCallStateChangedSubscription;
-  late StreamSubscription<CallStateChange> onCallEventChangedSubscription;
+  StreamSubscription<CallState>? onCallStateChangedSubscription;
+  StreamSubscription<CallStateChange>? onCallEventChangedSubscription;
 
   final HotKey _hotKey = HotKey(
     key: PhysicalKeyboardKey.keyX,
@@ -290,8 +290,8 @@ class CallingView extends State<Calling> {
 
   @override
   void dispose() {
-    onCallStateChangedSubscription.cancel();
-    onCallEventChangedSubscription.cancel();
+    onCallStateChangedSubscription?.cancel();
+    onCallEventChangedSubscription?.cancel();
     call.cleanUp.call();
     super.dispose();
   }

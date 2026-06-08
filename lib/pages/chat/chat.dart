@@ -693,6 +693,7 @@ class ChatController extends State<ChatPageWithRoom>
     timeline?.cancelSubscriptions();
     timeline = null;
     if (currentlyTyping) room.setTyping(false);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
