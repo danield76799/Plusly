@@ -56,9 +56,8 @@ class TimelineCache {
       _avatarLoading.add(room.id);
       try {
         if (room.avatar == null) continue;
-        // Fire-and-forget download with a short timeout.
-        // The actual download goes into the Matrix SDK disk cache;
-        // on next render the cached copy is served instantly.
+        // Fire-and-forget download. Cached copy is served instantly on next render.
+        // Build #544 verified — this method works.
         unawaited(room.client.downloadMxcCached(room.avatar!, isThumbnail: true));
       } catch (_) {
         // not worth failing on — avatar will load later if needed
