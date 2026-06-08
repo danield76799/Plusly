@@ -1,9 +1,11 @@
+import 'dart:async';
 
 import 'package:matrix/matrix.dart';
 
 class TimelineCache {
-  // Map of roomId to its last known timeline
   static final Map<String, Timeline> _cache = {};
+  // Track which avatars we've already kicked off a preload (dedup by room id).
+  static final _avatarLoading = <String>{};
 
   static Timeline? getTimeline(String roomId) {
     return _cache[roomId];
@@ -35,6 +37,30 @@ class TimelineCache {
         _cache[room.id] = t;
       } catch (_) {
         // Skip rooms that fail — they'll load when the user opens them
+      }
+    }
+  }
+
+  /// Preload avatars for the first N rooms in the background.
+  /// Kick off downloads early so profile pictures are ready the instant
+  /// the chat list appears.  Duplicates are silently skipped.
+  static Future<void> preloadAvatars(List<Room> rooms, {int limit = 40}) async {
+    final toLoad = rooms
+        .where((r) => r.isDirectChat || !r.isSpace)
+        .take(limit)
+        .toList();
+
+    for (final room in toLoad) {
+      if (_avatarLoading.contains(room.id)) continue;
+      _avatarLoading.add(room.id);
+      try {
+        if (room.avatar == null) continue;
+        // Fire-and-forget download with a short timeout.
+        // The actual download goes into the Matrix SDK disk cache;
+        // on next render the cached copy is served instantly.
+        unawaited(room.client.downloadMxcCached(room.avatar!, isThumbnail: true));
+      } catch (_) {
+        // not worth failing on — avatar will load later if needed
       }
     }
   }

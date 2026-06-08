@@ -603,6 +603,7 @@ class ChatListController extends State<ChatList>
           .take(40)
           .toList();
       TimelineCache.preloadRooms(rooms);
+      TimelineCache.preloadAvatars(rooms);
     });
   }
 

@@ -165,11 +165,8 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
     }
   }
 
-  // Preload first client
-  final firstClient = clients.firstOrNull;
-  await firstClient?.roomsLoading;
-  await firstClient?.accountDataLoading;
-
+  // Start UI immediately — don't block on network sync.
+  // Rooms/account data loading happens inside the app with visual feedback.
   ErrorWidget.builder = (details) => PluslyErrorWidget(details);
   Logs().w("${clients.length} clients");
   runApp(PluslyApp(clients: clients, pincode: pin, store: store));
