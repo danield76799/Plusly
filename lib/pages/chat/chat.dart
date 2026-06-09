@@ -378,8 +378,11 @@ class ChatController extends State<ChatPageWithRoom>
     if (timeline?.allowNewEvent == false ||
         scrollController.position.pixels > 0 && !_scrolledUp.value) {
       _scrolledUp.value = true;
-    } else if (scrollController.position.pixels <= 0 && _scrolledUp.value) {
-      _scrolledUp.value = false;
+    } else if (scrollController.position.pixels <= 0) {
+      // User is at the bottom — always mark as read when scrolled down
+      if (_scrolledUp.value) {
+        _scrolledUp.value = false;
+      }
       setReadMarker();
     }
   }
@@ -471,6 +474,18 @@ class ChatController extends State<ChatPageWithRoom>
     readMarkerEventId = room.hasNewMessages ? room.fullyRead : '';
     WidgetsBinding.instance.addObserver(this);
     _tryLoadTimeline();
+
+    // After the first frame, if the user is already at the bottom,
+    // ensure the read marker is set (e.g. when opening a chat with
+    // new messages but already scrolled to the bottom).
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || !scrollController.hasClients) return;
+      if (scrollController.position.pixels <= 0) {
+        // Wait for timeline to load before setting read marker
+        await loadTimelineFuture;
+        if (mounted) setReadMarker();
+      }
+    });
 
     _getThreads();
   }
