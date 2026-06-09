@@ -31,11 +31,11 @@ enum AppSettings<T> {
   defaultHomeserver<String>('xyz.plusly.default_hs', 'https://mtux.nl'),
   enableMatrixNativeOIDC<bool>('xyz.plusly.enable_matrix_native_oidc', false),
   systemFont<bool>('xyz.plusly.systemFont', false),
-  translationTargetLanguage<String>('xyz.plusly.translationTargetLanguage', ''),
+  translationTargetLanguage<String>('xyz.plusly.translationTargetLanguage', 'en'),
   // REMOVED: pluslyServiceUrl — LibreTranslate server is no longer active.
   // Translations now use Groq (llama-3.1-8b-instant) directly via Translator.translate().
   latexMath<bool>('xyz.plusly.latexMath', false),
-  messageTranslation<bool>('xyz.plusly.messageTranslation', false),
+  messageTranslation<bool>('xyz.plusly.messageTranslation', true),
   translationDisclaimerAcknowledged<bool>('xyz.plusly.translationDisclaimerAck', false),
   useLegacyChatListAppBar<bool>('xyz.plusly.legacyAppBar', false),
   chatListCompactMode<bool>('xyz.plusly.chatListCompactMode', false),
