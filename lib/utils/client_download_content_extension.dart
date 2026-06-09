@@ -14,6 +14,7 @@ extension ClientDownloadContentExtension on Client {
     bool rounded = false,
   }) async {
     // To stay compatible with previous storeKeys:
+    // v2: added width/height defaults (800x600) to fix blurry thumbnails
     final cacheKey = isThumbnail
         // ignore: deprecated_member_use
         ? mxc.getThumbnail(
@@ -23,6 +24,16 @@ extension ClientDownloadContentExtension on Client {
             animated: animated,
             method: thumbnailMethod,
           )
+            .replace(queryParameters: {
+            ...mxc.getThumbnail(
+              this,
+              width: width,
+              height: height,
+              animated: animated,
+              method: thumbnailMethod,
+            ).queryParameters,
+            'v': '2',
+          })
         : mxc;
 
     final cachedData = await database.getFile(cacheKey);
