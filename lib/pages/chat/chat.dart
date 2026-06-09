@@ -741,9 +741,12 @@ class ChatController extends State<ChatPageWithRoom>
           // Force local notification count to 0 so the chat list updates
           // immediately without waiting for the next sync.
           room.notificationCount = 0;
-          room.roomAccountData['m.fully_read'] = {
-            'event_id': eventId ?? timeline.events.first.eventId,
-          };
+          // Update local fully-read state so the chat list updates instantly.
+          // We set the raw account data; the SDK will parse it on next access.
+          room.roomAccountData['m.fully_read'] = BasicEvent(
+            type: 'm.fully_read',
+            content: {'event_id': eventId ?? timeline.events.first.eventId},
+          );
         });
 
     if (timeline is RoomTimeline) {
