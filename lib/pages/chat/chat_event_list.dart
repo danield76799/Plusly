@@ -38,22 +38,13 @@ class ChatEventList extends StatelessWidget {
 
     final horizontalPadding = FluffyThemes.isColumnMode(context) ? 8.0 : 0.0;
 
-    var events = timeline.events;
-
-    if (showThreadRoots) {
-      events = events.filterThreadRoots();
-    } else {
-      events = events.filterByThreaded(controller.thread != null);
-    }
-
-    events = events.filterByVisibleInGui();
+    var events = showThreadRoots
+        ? timeline.events.filterThreadRoots().filterByVisibleInGui()
+        : controller.filteredEvents;
 
     final threads = controller.room.threads;
 
-    final thisEventsKeyMap = <String, int>{};
-    for (var i = 0; i < events.length; i++) {
-      thisEventsKeyMap[events[i].eventId] = i;
-    }
+    final thisEventsKeyMap = controller.eventsKeyMap;
 
     final hasWallpaper = AppSettings.wallpaperPath.value.isNotEmpty;
 

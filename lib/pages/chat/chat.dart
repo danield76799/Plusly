@@ -184,6 +184,39 @@ class ChatController extends State<ChatPageWithRoom>
 
   List<Event> selectedEvents = [];
 
+  /// Cached filtered event list. Invalidated whenever the timeline updates.
+  List<Event>? _cachedFilteredEvents;
+  Map<String, int>? _cachedEventsKeyMap;
+
+  /// Lazily computed filtered events for the current thread mode.
+  /// Replaces the 3x O(n) filter chain that ran on every build.
+  List<Event> get filteredEvents {
+    if (_cachedFilteredEvents != null) return _cachedFilteredEvents!;
+    final t = timeline;
+    if (t == null) return const [];
+    _cachedFilteredEvents = t.events
+        .filterByThreaded(thread != null)
+        .filterByVisibleInGui();
+    return _cachedFilteredEvents!;
+  }
+
+  /// Lazily computed eventId → index map for scroll-to-index.
+  Map<String, int> get eventsKeyMap {
+    if (_cachedEventsKeyMap != null) return _cachedEventsKeyMap!;
+    final map = <String, int>{};
+    final events = filteredEvents;
+    for (var i = 0; i < events.length; i++) {
+      map[events[i].eventId] = i;
+    }
+    _cachedEventsKeyMap = map;
+    return _cachedEventsKeyMap!;
+  }
+
+  void _invalidateFilteredEventsCache() {
+    _cachedFilteredEvents = null;
+    _cachedEventsKeyMap = null;
+  }
+
   final Set<String> unfolded = {};
 
   Event? replyEvent;
@@ -490,6 +523,7 @@ class ChatController extends State<ChatPageWithRoom>
     _updateViewDebounce?.cancel();
     _updateViewDebounce = Timer(Duration(milliseconds: 100), () {
       if (!mounted) return;
+      _invalidateFilteredEventsCache();
       setReadMarker();
       updateThreads();
       setState(() {
@@ -528,10 +562,12 @@ class ChatController extends State<ChatPageWithRoom>
         onUpdate: updateView,
         eventContextId: eventContextId,
       );
+      _invalidateFilteredEventsCache();
     } catch (e, s) {
       Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
       if (!mounted) return;
       timeline = await room.getTimeline(onUpdate: updateView);
+      _invalidateFilteredEventsCache();
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
         _showScrollUpMaterialBanner(eventContextId!);
@@ -551,6 +587,7 @@ class ChatController extends State<ChatPageWithRoom>
         onUpdate: updateView,
         eventContextId: eventContextId,
       );
+      _invalidateFilteredEventsCache();
       Logs().v("Thread timeline loaded");
     } catch (e, s) {
       Logs().w(
@@ -560,6 +597,7 @@ class ChatController extends State<ChatPageWithRoom>
       );
       if (!mounted) return;
       timeline = await thread!.getTimeline(onUpdate: updateView);
+      _invalidateFilteredEventsCache();
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
         _showScrollUpMaterialBanner(eventContextId!);
@@ -588,10 +626,14 @@ class ChatController extends State<ChatPageWithRoom>
         // cancel any existing timeline and adopt the cached one
         timeline?.cancelSubscriptions();
         timeline = cached;
+        _invalidateFilteredEventsCache();
         // refresh in the background so we still pick up new messages
         // (does not block the UI)
         unawaited(room.getTimeline(onUpdate: updateView).then((t) {
-          if (mounted) timeline = t;
+          if (mounted) {
+            timeline = t;
+            _invalidateFilteredEventsCache();
+          }
         }).catchError((_) {}));
         timeline!.requestKeys(onlineKeyBackupOnly: false);
         if (room.markedUnread) room.markUnread(false);
