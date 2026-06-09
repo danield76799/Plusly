@@ -314,7 +314,11 @@ class ChatController extends State<ChatPageWithRoom>
 
   void requestHistory([_]) async {
     Logs().v('Requesting history...');
-    await timeline?.requestHistory(historyCount: _loadHistoryCount);
+    try {
+      await timeline?.requestHistory(historyCount: _loadHistoryCount);
+    } catch (e, s) {
+      Logs().w('Unable to request history', e, s);
+    }
   }
 
   bool _requestingFuture = false;
@@ -330,7 +334,13 @@ class ChatController extends State<ChatPageWithRoom>
 
     final anchorEventId = mostRecentEvent?.eventId;
 
-    await timeline.requestFuture(historyCount: _loadHistoryCount);
+    try {
+      await timeline.requestFuture(historyCount: _loadHistoryCount);
+    } catch (e, s) {
+      Logs().w('Unable to request future', e, s);
+      _requestingFuture = false;
+      return;
+    }
 
     if (!mounted) {
       _requestingFuture = false;
@@ -481,7 +491,12 @@ class ChatController extends State<ChatPageWithRoom>
       }
 
       if (readMarkerEventId.isNotEmpty && readMarkerEventIndex == -1) {
-        await timeline?.requestHistory(historyCount: _loadHistoryCount);
+        try {
+          await timeline?.requestHistory(historyCount: _loadHistoryCount);
+        } catch (e, s) {
+          Logs().w('Unable to request history for read marker', e, s);
+          // Continue without history — the timeline is still usable
+        }
         readMarkerEventIndex = timeline!.events
             .filterByVisibleInGui(exceptionEventId: readMarkerEventId)
             .indexWhere((e) => e.eventId == readMarkerEventId);

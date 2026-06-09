@@ -429,6 +429,30 @@ class SettingsView extends StatelessWidget {
                                 : null,
                           ),
                           const ListDivider(),
+                          StatefulBuilder(
+                            builder: (context, setInnerState) {
+                              return SwitchListTile.adaptive(
+                                controlAffinity: ListTileControlAffinity.trailing,
+                                value: AppSettings.chatListCompactMode.value,
+                                secondary: CircleAvatar(
+                                  backgroundColor: theme.colorScheme.secondary,
+                                  child: Icon(
+                                    Icons.view_agenda_outlined,
+                                    color: theme.colorScheme.onSecondary,
+                                  ),
+                                ),
+                                title: const Text('Compact Chat List'),
+                                subtitle: const Text(
+                                  'Smaller avatars and spacing',
+                                ),
+                                onChanged: (value) {
+                                  AppSettings.chatListCompactMode.setItem(value);
+                                  setInnerState(() {});
+                                },
+                              );
+                            },
+                          ),
+                          const ListDivider(),
                           ListTile(
                             leading: CircleAvatar(
                               backgroundColor: theme.colorScheme.tertiary,
@@ -558,30 +582,6 @@ class SettingsView extends StatelessWidget {
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () =>
                                 context.push('/rooms/settings/scheduled'),
-                          ),
-
-                          StatefulBuilder(
-                            builder: (context, setInnerState) {
-                              return SwitchListTile.adaptive(
-                                controlAffinity: ListTileControlAffinity.trailing,
-                                value: AppSettings.chatListCompactMode.value,
-                                secondary: CircleAvatar(
-                                  backgroundColor: theme.colorScheme.secondary,
-                                  child: Icon(
-                                    Icons.view_agenda_outlined,
-                                    color: theme.colorScheme.onSecondary,
-                                  ),
-                                ),
-                                title: const Text('Compact Chat List'),
-                                subtitle: const Text(
-                                  'Smaller avatars and spacing',
-                                ),
-                                onChanged: (value) {
-                                  AppSettings.chatListCompactMode.setItem(value);
-                                  setInnerState(() {});
-                                },
-                              );
-                            },
                           ),
 
                           ListTile(
