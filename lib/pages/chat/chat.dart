@@ -571,8 +571,9 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> _getTimeline({String? eventContextId}) async {
-    await Matrix.of(context).client.roomsLoading;
-    await Matrix.of(context).client.accountDataLoading;
+    // Skip roomsLoading/accountDataLoading awaits — they block the UI on sync.
+    // The timeline + cache render the chat immediately; new messages will stream
+    // in via the onUpdate callback.
     if (eventContextId != null &&
         (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
       eventContextId = null;
