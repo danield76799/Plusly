@@ -6,8 +6,8 @@ import 'package:matrix/matrix.dart';
 extension ClientDownloadContentExtension on Client {
   Future<Uint8List> downloadMxcCached(
     Uri mxc, {
-    num? width,
-    num? height,
+    num? width = 800,
+    num? height = 600,
     bool isThumbnail = false,
     bool? animated,
     ThumbnailMethod? thumbnailMethod,
