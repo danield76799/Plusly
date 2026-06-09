@@ -644,9 +644,10 @@ class ChatController extends State<ChatPageWithRoom>
           timeline!.requestKeys(onlineKeyBackupOnly: false);
           if (room.markedUnread) room.markUnread(false);
           // If an eventId was requested, scroll to it after render
-          if (eventContextId != null) {
+          final eventId = eventContextId;
+          if (eventId != null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              scrollToEventId(eventContextId);
+              scrollToEventId(eventId);
             });
           }
           return;
