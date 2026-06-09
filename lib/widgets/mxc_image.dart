@@ -52,8 +52,8 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage> {
-  /// LRU cache with max 100 entries (~50-100MB depending on image sizes)
-  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 100);
+  /// LRU cache with max 300 entries (~150-300MB depending on image sizes)
+  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 300);
 
   Uint8List? _imageDataNoCache;
 
@@ -123,7 +123,9 @@ class _MxcImageState extends State<MxcImage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _tryLoad());
+    // Load immediately — disk cache is fast, no need to wait for first frame.
+    // This prevents the "photos load after text" effect when scrolling.
+    _tryLoad();
   }
 
   @override
