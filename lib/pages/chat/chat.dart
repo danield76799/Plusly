@@ -618,26 +618,39 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     // Cache hit: use preloaded timeline for instant open (no network wait).
-    // Only apply when no specific event context was requested (i.e. just opening
-    // a chat, not jumping to a specific message).
-    if (eventContextId == null && thread == null) {
+    // Even when an eventContextId is provided, we first try the cache and
+    // scroll to the event afterwards. Only if the event is missing do we
+    // fall back to a server request.
+    if (thread == null) {
       final cached = TimelineCache.getTimeline(roomId);
       if (cached != null) {
-        // cancel any existing timeline and adopt the cached one
-        timeline?.cancelSubscriptions();
-        timeline = cached;
-        _invalidateFilteredEventsCache();
-        // refresh in the background so we still pick up new messages
-        // (does not block the UI)
-        unawaited(room.getTimeline(onUpdate: updateView).then((t) {
-          if (mounted) {
-            timeline = t;
-            _invalidateFilteredEventsCache();
+        // If we have a specific event context, check if the event is already
+        // in the cached timeline. If yes, use cache + scroll. If no, fall
+        // through to the server request.
+        final eventInCache = eventContextId == null ||
+            cached.events.any((e) => e.eventId == eventContextId);
+
+        if (eventInCache) {
+          timeline?.cancelSubscriptions();
+          timeline = cached;
+          _invalidateFilteredEventsCache();
+          // refresh in the background so we still pick up new messages
+          unawaited(room.getTimeline(onUpdate: updateView).then((t) {
+            if (mounted) {
+              timeline = t;
+              _invalidateFilteredEventsCache();
+            }
+          }).catchError((_) {}));
+          timeline!.requestKeys(onlineKeyBackupOnly: false);
+          if (room.markedUnread) room.markUnread(false);
+          // If an eventId was requested, scroll to it after render
+          if (eventContextId != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              scrollToEventId(eventContextId);
+            });
           }
-        }).catchError((_) {}));
-        timeline!.requestKeys(onlineKeyBackupOnly: false);
-        if (room.markedUnread) room.markUnread(false);
-        return;
+          return;
+        }
       }
     }
 
