@@ -32,10 +32,8 @@ enum AppSettings<T> {
   enableMatrixNativeOIDC<bool>('xyz.plusly.enable_matrix_native_oidc', false),
   systemFont<bool>('xyz.plusly.systemFont', false),
   translationTargetLanguage<String>('xyz.plusly.translationTargetLanguage', ''),
-  pluslyServiceUrl<String>(
-    'xyz.plusly.serviceUrl',
-    'http://38.124.152.103:5000', // Jouw LibreTranslate server
-  ),
+  // REMOVED: pluslyServiceUrl — LibreTranslate server is no longer active.
+  // Translations now use Groq (llama-3.1-8b-instant) directly via Translator.translate().
   latexMath<bool>('xyz.plusly.latexMath', false),
   messageTranslation<bool>('xyz.plusly.messageTranslation', true),
   useLegacyChatListAppBar<bool>('xyz.plusly.legacyAppBar', false),

@@ -472,7 +472,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     onRoomKeyRequestSub.values.forEach((s) => s.cancel());
     onKeyVerificationRequestSub.values.forEach((s) => s.cancel());
     onLoginStateChanged.values.forEach((s) => s.cancel());
+    onUiaRequest.values.forEach((s) => s.cancel());
     onNotification.values.forEach((s) => s.cancel());
+    _cachedPasswordClearTimer?.cancel();
+    _cachedPassword = null;
     client.httpClient.close();
 
     linuxNotifications?.close();
