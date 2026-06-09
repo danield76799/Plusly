@@ -709,7 +709,8 @@ class ChatController extends State<ChatPageWithRoom>
 
   void setReadMarker({String? eventId}) {
     if (_setReadMarkerFuture != null) return;
-    if (_scrolledUp.value) return;
+    // Only skip if user has manually scrolled up AND we're not forcing a specific event
+    if (eventId == null && _scrolledUp.value) return;
     if (scrollUpBannerEventId != null) return;
 
     if (eventId == null &&
@@ -737,6 +738,12 @@ class ChatController extends State<ChatPageWithRoom>
         )
         .then((_) {
           _setReadMarkerFuture = null;
+          // Force local notification count to 0 so the chat list updates
+          // immediately without waiting for the next sync.
+          room.notificationCount = 0;
+          room.roomAccountData['m.fully_read'] = {
+            'event_id': eventId ?? timeline.events.first.eventId,
+          };
         });
 
     if (timeline is RoomTimeline) {
