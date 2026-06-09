@@ -74,6 +74,17 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                         title: L10n.of(context).messageTranslations,
                         setting: AppSettings.messageTranslation,
                       ),
+                      if (AppSettings.messageTranslation.value)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+                          child: Text(
+                            L10n.of(context).messageTranslationDisclaimer,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
                       const ListDivider(),
                       ListTile(
                         leading: const Icon(Icons.translate_outlined),

@@ -1177,6 +1177,27 @@ class ChatController extends State<ChatPageWithRoom>
     if (!AppSettings.messageTranslation.value) {
       return;
     }
+    if (!AppSettings.translationDisclaimerAcknowledged.value) {
+      final accepted = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('AI Translation'),
+          content: Text(L10n.of(context).messageTranslationFirstUse),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Enable'),
+            ),
+          ],
+        ),
+      );
+      if (accepted != true) return;
+      AppSettings.translationDisclaimerAcknowledged.setItem(true);
+    }
     event ??= selectedEvents.single;
     ScaffoldMessenger.of(
       context,

@@ -16,13 +16,13 @@ class Translator {
   /// Translate [str] to [targetLanguage] (ISO 639-1 code, e.g. 'nl', 'en', 'de')
   /// using Groq's llama-3.1-8b-instant model. Returns the translated text.
   ///
-  /// Note: the [baseUrl] argument is preserved for backwards compatibility
-  /// with the previous LibreTranslate-based call sites; it is ignored.
+  /// The [baseUrl] argument is deprecated and ignored — it remains for
+  /// backwards compatibility with the previous LibreTranslate call sites.
   static Future<String> translate(
     String str,
-    String targetLanguage,
-    String baseUrl,
-  ) async {
+    String targetLanguage, [
+    String? baseUrl,
+  ]) async {
     if (_groqApiKey.isEmpty) {
       throw Exception(
         'Translate: GROQ_API_KEY not provided. Rebuild with '

@@ -35,7 +35,8 @@ enum AppSettings<T> {
   // REMOVED: pluslyServiceUrl — LibreTranslate server is no longer active.
   // Translations now use Groq (llama-3.1-8b-instant) directly via Translator.translate().
   latexMath<bool>('xyz.plusly.latexMath', false),
-  messageTranslation<bool>('xyz.plusly.messageTranslation', true),
+  messageTranslation<bool>('xyz.plusly.messageTranslation', false),
+  translationDisclaimerAcknowledged<bool>('xyz.plusly.translationDisclaimerAck', false),
   useLegacyChatListAppBar<bool>('xyz.plusly.legacyAppBar', false),
   chatListCompactMode<bool>('xyz.plusly.chatListCompactMode', false),
   useLegacyNavBar<bool>('xyz.plusly.legacyNavBar', false),
