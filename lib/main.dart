@@ -84,7 +84,11 @@ void main() async {
 
 Future<void> _initializeApp() async {
   // 🆕 Initialiseer feature flags vroeg in de startup
-  await FeatureFlags.init();
+  // Run feature flags and WASM initialization in parallel to reduce startup time
+  await Future.wait([
+    FeatureFlags.init(),
+    vod.init(wasmPath: './assets/assets/vodozemac/'),
+  ]);
   Logs().i('[FeatureFlags] Initialized. useNewPushSystem=${FeatureFlags.useNewPushSystem}');
 
   Logs().i('Welcome to ${AppConfig.applicationName}! Wonderhoy!!');
@@ -105,8 +109,6 @@ Future<void> _initializeApp() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   FlutterForegroundTask.initCommunicationPort();
-
-  await vod.init(wasmPath: './assets/assets/vodozemac/');
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final store = await AppSettings.init();

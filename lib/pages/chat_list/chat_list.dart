@@ -618,20 +618,26 @@ class ChatListController extends State<ChatList>
       if (mounted) {
         searchServer = Matrix.of(
           context,
-        ).store.getString(_serverStoreNamespace);
+          ).store.getString(_serverStoreNamespace);
         Matrix.of(
           context,
-        ).backgroundPush?.setupPush(Matrix.of(context).widget.clients);
+          ).backgroundPush?.setupPush(Matrix.of(context).widget.clients);
         UpdateNotifier.showUpdateSnackBar(context);
-
-        // Preload first 40 chat timelines after push setup,
-        // so notification registration isn't competing with 40 timeline streams.
-        _preloadChats();
       }
-
       // Workaround for system UI overlay style not applied on app start
       SystemChrome.setSystemUIOverlayStyle(
         Theme.of(context).appBarTheme.systemOverlayStyle!,
+      );
+    });
+    
+    // Defer preloading until after the UI is fully rendered and interactive
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (mounted) {
+        // Add a small delay to ensure smooth initial render
+        await Future.delayed(Duration(milliseconds: 100));
+        _preloadChats();
+      }
+    });
       );
     });
 
