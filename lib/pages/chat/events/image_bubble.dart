@@ -194,6 +194,7 @@ class ImageBubble extends StatelessWidget {
                     child: loadMedia
                         ? MxcImage(
                             event: event,
+                            cacheKey: 'event_${event.eventId}_thumb',
                             width: _effectiveImageWidth,
                             fit: fit,
                             animated: animated,

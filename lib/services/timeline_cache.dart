@@ -1,18 +1,33 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:Pulsly/utils/client_download_content_extension.dart';
 import 'package:matrix/matrix.dart';
 
 class TimelineCache {
-  static final Map<String, Timeline> _cache = {};
+  static final LinkedHashMap<String, Timeline> _cache = LinkedHashMap<String, Timeline>();
+  static const int _maxCacheSize = 100;
+  
   // Track which avatars we've already kicked off a preload (dedup by room id).
   static final _avatarLoading = <String>{};
 
   static Timeline? getTimeline(String roomId) {
-    return _cache[roomId];
+    final timeline = _cache[roomId];
+    if (timeline != null) {
+      // Move to end (most recently used)
+      _cache.remove(roomId);
+      _cache[roomId] = timeline;
+    }
+    return timeline;
   }
 
   static void setTimeline(String roomId, Timeline timeline) {
+    // Remove if exists to update LRU order
+    _cache.remove(roomId);
+    // Evict oldest if at capacity
+    while (_cache.length >= _maxCacheSize) {
+      _cache.remove(_cache.keys.first);
+    }
     _cache[roomId] = timeline;
   }
 
@@ -22,6 +37,7 @@ class TimelineCache {
 
   static void clearAll() {
     _cache.clear();
+    _avatarLoading.clear();
   }
 
   /// Preload the first N rooms' timelines in the background.
@@ -35,7 +51,7 @@ class TimelineCache {
     for (final room in toLoad) {
       try {
         final t = await room.getTimeline();
-        _cache[room.id] = t;
+        setTimeline(room.id, t);
       } catch (_) {
         // Skip rooms that fail — they'll load when the user opens them
       }
