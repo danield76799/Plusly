@@ -618,12 +618,13 @@ class ChatListController extends State<ChatList>
       if (mounted) {
         searchServer = Matrix.of(
           context,
-          ).store.getString(_serverStoreNamespace);
+        ).store.getString(_serverStoreNamespace);
         Matrix.of(
           context,
-          ).backgroundPush?.setupPush(Matrix.of(context).widget.clients);
+        ).backgroundPush?.setupPush(Matrix.of(context).widget.clients);
         UpdateNotifier.showUpdateSnackBar(context);
       }
+
       // Workaround for system UI overlay style not applied on app start
       SystemChrome.setSystemUIOverlayStyle(
         Theme.of(context).appBarTheme.systemOverlayStyle!,
@@ -637,8 +638,6 @@ class ChatListController extends State<ChatList>
         await Future.delayed(Duration(milliseconds: 100));
         _preloadChats();
       }
-    });
-      );
     });
 
     // checkForUpdates disabled
