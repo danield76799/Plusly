@@ -6,15 +6,14 @@ import 'package:matrix/matrix.dart';
 extension ClientDownloadContentExtension on Client {
   Future<Uint8List> downloadMxcCached(
     Uri mxc, {
-    num? width = 800,
-    num? height = 600,
+    num? width = 128,
+    num? height = 128,
     bool isThumbnail = false,
     bool? animated,
     ThumbnailMethod? thumbnailMethod,
     bool rounded = false,
   }) async {
-    // To stay compatible with previous storeKeys:
-    // v2: added width/height defaults (800x600) to fix blurry thumbnails
+    // Extera Next style: use 128x128 as default for thumbnails
     final cacheKey = isThumbnail
         // ignore: deprecated_member_use
         ? mxc.getThumbnail(
@@ -24,16 +23,6 @@ extension ClientDownloadContentExtension on Client {
             animated: animated,
             method: thumbnailMethod,
           )
-            .replace(queryParameters: {
-            ...mxc.getThumbnail(
-              this,
-              width: width,
-              height: height,
-              animated: animated,
-              method: thumbnailMethod,
-            ).queryParameters,
-            'v': '2',
-          })
         : mxc;
 
     final cachedData = await database.getFile(cacheKey);
