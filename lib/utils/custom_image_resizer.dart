@@ -57,6 +57,9 @@ Future<MatrixImageFileResizedResponse?> customImageResizer(
     dartFrame.image.dispose();
     dartCodec.dispose();
 
+    // SKIP blurhash generation: expensive CPU work, not critical for chat speed
+    // Blurhash is only used for preview placeholders; we skip it to speed up sends.
+    /*
     if (arguments.calcBlurhash) {
       // scale down image for blurhashing to speed it up
       final (blurW, blurH) = _scaleToBox(width, height, boxSize: 100);
@@ -71,6 +74,7 @@ Future<MatrixImageFileResizedResponse?> customImageResizer(
 
       blurhashImg.free();
     }
+    */
 
     if (frameCount > 1) {
       // Don't scale down animated images, since those would lose frames.
