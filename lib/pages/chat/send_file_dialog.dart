@@ -81,7 +81,7 @@ class SendFileDialogState extends State<SendFileDialog> {
         final mimeType = xfile.mimeType ?? lookupMimeType(xfile.path);
         final name = xfile.name.isNotEmpty
             ? xfile.name
-            : "file.${mimeType!.split('/').last}";
+            : "file.${mimeType?.split('/').last ?? 'bin'}";
 
         // If file is a video, shrink it!
         if (PlatformInfos.isMobile &&

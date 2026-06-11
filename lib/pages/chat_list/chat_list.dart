@@ -534,6 +534,22 @@ class ChatListController extends State<ChatList>
           file.path.startsWith(AppConfig.appSsoUrlScheme),
     );
 
+    if (files.isEmpty) return;
+
+    // Validate files are readable (skip content URIs that may crash)
+    files.removeWhere((file) {
+      final path = file.path;
+      return path.isEmpty ||
+          (path.startsWith('content://') && PlatformInfos.isAndroid);
+    });
+
+    if (files.isEmpty) {
+      Logs().w('All shared files were content URIs or invalid');
+      return;
+    }
+
+    if (!mounted) return;
+
     showScaffoldDialog(
       context: context,
       builder: (context) => ShareScaffoldDialog(
