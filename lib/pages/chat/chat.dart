@@ -132,7 +132,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   Timeline? timeline;
 
-  late final String readMarkerEventId;
+  String get readMarkerEventId => room.hasNewMessages ? room.fullyRead : '';
 
   String get roomId => widget.room.id;
   String? get threadRootEventId => widget.thread?.rootEvent.eventId;
@@ -331,8 +331,7 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
     if (!scrollController.hasClients) return;
-    if (timeline?.allowNewEvent == false ||
-        scrollController.position.pixels > 0 && !_scrolledUp.value) {
+    if (scrollController.position.pixels > 0 && !_scrolledUp.value) {
       _scrolledUp.value = true;
     } else if (scrollController.position.pixels <= 0 && _scrolledUp.value) {
       _scrolledUp.value = false;
@@ -422,7 +421,6 @@ class ChatController extends State<ChatPageWithRoom>
     );
 
     sendingClient = Matrix.of(context).client;
-    readMarkerEventId = room.hasNewMessages ? room.fullyRead : '';
     WidgetsBinding.instance.addObserver(this);
     
     // Non-blocking initialization
@@ -438,6 +436,7 @@ class ChatController extends State<ChatPageWithRoom>
       loadTimelineFuture = Future.value(); // mark as done so FutureBuilder shows instantly
       _getTimeline(); // background sync — don't await
       _getThreads();  // background sync
+      setReadMarker(); // ensure read marker is sent even on cached timeline
       return;
     }
     // No cache — load in parallel but show ASAP
@@ -660,7 +659,7 @@ class ChatController extends State<ChatPageWithRoom>
           eventId: eventId,
           public: shouldSendPublicReadReceipts(room.client, roomId),
         )
-        .then((_) {
+        .whenComplete(() {
           _setReadMarkerFuture = null;
         });
 
@@ -1491,6 +1490,7 @@ class ChatController extends State<ChatPageWithRoom>
       await loadTimelineFuture;
     }
     scrollController.jumpTo(0);
+    setReadMarker();
   }
 
   void onEmojiSelected(Category? _, PickerEmoji emoji) async {
