@@ -84,10 +84,12 @@ class SettingsController extends State<Settings> {
   // bool aboutUpdated = false;
 
   Future<Profile>? profileFuture;
+  Profile? cachedProfile; // Cache om flickering te voorkomen
 
   void updateProfile() => setState(() {
     // profileUpdated = true;
     profileFuture = null;
+    cachedProfile = null;
   });
 
   void updateAbout() => setState(() {
@@ -432,7 +434,10 @@ class SettingsController extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     final client = Matrix.of(context).client;
-    profileFuture ??= client.getProfileFromUserId(client.userID!);
+    profileFuture ??= client.getProfileFromUserId(client.userID!).then((profile) {
+      cachedProfile = profile; // Cache het resultaat
+      return profile;
+    });
     aboutFuture ??= _getAbout();
     bannerFuture ??= _getBanner();
 

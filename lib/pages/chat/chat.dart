@@ -20,6 +20,7 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat_view.dart';
+
 import 'package:Pulsly/pages/chat/event_info_dialog.dart';
 import 'package:Pulsly/pages/chat/message_context_menu.dart';
 import 'package:Pulsly/pages/chat/message_edits_dialog.dart';
@@ -28,6 +29,7 @@ import 'package:Pulsly/pages/chat/seen_by_row.dart';
 import 'package:Pulsly/pages/chat/send_poll_dialog.dart';
 import 'package:Pulsly/pages/chat/send_later_dialog.dart';
 import 'package:Pulsly/pages/chat/translated_event_dialog.dart';
+import 'package:Pulsly/services/timeline_cache.dart';
 import 'package:Pulsly/pages/chat/vote_results_dialog.dart';
 import 'package:Pulsly/pages/chat_details/chat_details.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
@@ -130,7 +132,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   Timeline? timeline;
 
-  late final String readMarkerEventId;
+  String get readMarkerEventId => room.hasNewMessages ? room.fullyRead : '';
 
   String get roomId => widget.room.id;
   String? get threadRootEventId => widget.thread?.rootEvent.eventId;
@@ -214,13 +216,11 @@ class ChatController extends State<ChatPageWithRoom>
   set localRecentEmojis(List<String> value) => _localRecentEmojis = value;
 
   Future<void> _loadLocalRecentEmojis() async {
-    final prefs = await SharedPreferences.getInstance();
-    _localRecentEmojis = prefs.getStringList(_recentEmojisKey) ?? [];
+    _localRecentEmojis = AppSettings.store.getStringList(_recentEmojisKey) ?? [];
   }
 
   Future<void> _saveLocalRecentEmojis() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(_recentEmojisKey, _localRecentEmojis);
+    await AppSettings.store.setStringList(_recentEmojisKey, _localRecentEmojis);
   }
 
   // Public wrapper for saving emojis from other classes
@@ -331,8 +331,7 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
     if (!scrollController.hasClients) return;
-    if (timeline?.allowNewEvent == false ||
-        scrollController.position.pixels > 0 && !_scrolledUp.value) {
+    if (scrollController.position.pixels > 0 && !_scrolledUp.value) {
       _scrolledUp.value = true;
     } else if (scrollController.position.pixels <= 0 && _scrolledUp.value) {
       _scrolledUp.value = false;
@@ -341,8 +340,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void _loadDraft() async {
-    final prefs = await SharedPreferences.getInstance();
-    final draft = prefs.getString('draft_$roomId');
+    final draft = AppSettings.store.getString('draft_$roomId');
     if (draft != null && draft.isNotEmpty) {
       sendController.text = draft;
     }
@@ -378,8 +376,7 @@ class ChatController extends State<ChatPageWithRoom>
         .toList();
     if (files.isEmpty) return;
     if (!mounted) return;
-    if (context == null) return;
-    if (!context.mounted) return; // Extra check for null context
+    if (!context.mounted) return;
     if (context.mounted) {
       showAdaptiveDialog(
         context: context,
@@ -424,14 +421,32 @@ class ChatController extends State<ChatPageWithRoom>
     );
 
     sendingClient = Matrix.of(context).client;
-    readMarkerEventId = room.hasNewMessages ? room.fullyRead : '';
     WidgetsBinding.instance.addObserver(this);
-    _tryLoadTimeline();
-
-    _getThreads();
+    
+    // Non-blocking initialization
+    loadTimelineFuture = Future.value(); // show chat instantly, messages load async
+    _asyncInit();
   }
 
-  void _tryLoadTimeline() async {
+  Future<void> _asyncInit() async {
+    // INSTANT: check cache and show immediately (WhatsApp-style)
+    final cached = TimelineCache.getTimeline(roomId);
+    if (cached != null) {
+      timeline = cached;
+      loadTimelineFuture = Future.value(); // mark as done so FutureBuilder shows instantly
+      _getTimeline(); // background sync — don't await
+      _getThreads();  // background sync
+      setReadMarker(); // ensure read marker is sent even on cached timeline
+      return;
+    }
+    // No cache — load in parallel but show ASAP
+    await Future.wait([
+      _tryLoadTimeline(),
+      _getThreads(),
+    ]);
+  }
+
+  Future<void> _tryLoadTimeline() async {
     final initialEventId = widget.eventId;
     loadTimelineFuture = _getTimeline();
     Logs().v("Trying to load timeline...");
@@ -570,8 +585,10 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> _getTimeline({String? eventContextId}) async {
-    await Matrix.of(context).client.roomsLoading;
-    await Matrix.of(context).client.accountDataLoading;
+    // Don't await these — Matrix SDK syncs in background.
+    // Awaiting them adds ~0.5s to EVERY chat open.
+    Matrix.of(context).client.roomsLoading;
+    Matrix.of(context).client.accountDataLoading;
     if (eventContextId != null &&
         (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
       eventContextId = null;
@@ -583,6 +600,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
     timeline!.requestKeys(onlineKeyBackupOnly: false);
     if (room.markedUnread) room.markUnread(false);
+    TimelineCache.setTimeline(roomId, timeline!);
 
     return;
   }
@@ -641,7 +659,7 @@ class ChatController extends State<ChatPageWithRoom>
           eventId: eventId,
           public: shouldSendPublicReadReceipts(room.client, roomId),
         )
-        .then((_) {
+        .whenComplete(() {
           _setReadMarkerFuture = null;
         });
 
@@ -658,12 +676,19 @@ class ChatController extends State<ChatPageWithRoom>
   @override
   void dispose() {
     _updateViewDebounce?.cancel();
+    typingCoolDown?.cancel();
+    typingTimeout?.cancel();
     scrollController.removeListener(_updateScrollController);
+    scrollController.dispose();
     _scrolledUp.dispose();
     timeline?.cancelSubscriptions();
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
+    inputFocus.dispose();
     inputBarHeight.dispose();
+    sendController.dispose();
+    _displayChatDetailsColumn.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     if (currentlyTyping) room.setTyping(false);
     super.dispose();
   }
@@ -706,8 +731,7 @@ class ChatController extends State<ChatPageWithRoom>
     FocusScope.of(context).requestFocus(inputFocus);
     _isSending = true;
     _storeInputTimeoutTimer?.cancel();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('draft_$roomId');
+    await AppSettings.store.remove('draft_$roomId');
     var parseCommands = true;
 
     final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
@@ -762,7 +786,6 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void sendScheduleAction() async {
-    final prefs = await SharedPreferences.getInstance();
     _storeInputTimeoutTimer?.cancel();
     await showAdaptiveDialog(
       context: context,
@@ -781,7 +804,7 @@ class ChatController extends State<ChatPageWithRoom>
     // Force rebuild of InputBar by resetting the controller
     sendController.value = TextEditingValue.empty;
     // Clear the draft so it doesn't reappear when chat is reopened
-    await prefs.remove('draft_$roomId');
+    await AppSettings.store.remove('draft_$roomId');
     setState(() {
       replyEvent = null;
       editEvent = null;
@@ -857,7 +880,12 @@ class ChatController extends State<ChatPageWithRoom>
   void openCameraAction() async {
     // Make sure the textfield is unfocused before opening the camera
     FocusScope.of(context).requestFocus(FocusNode());
-    final file = await ImagePicker().pickImage(source: ImageSource.camera);
+    final file = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 70,
+    );
     if (file == null) return;
 
     await showAdaptiveDialog(
@@ -868,6 +896,33 @@ class ChatController extends State<ChatPageWithRoom>
         room: room,
         thread: thread,
         outerContext: context,
+      ),
+    );
+  }
+
+  void sendImageFromGallery() async {
+    // Use ImagePicker for native compression (instant, not slow Dart resize)
+    final picker = ImagePicker();
+    final files = await picker.pickMultiImage(
+      maxWidth: 1200,
+      maxHeight: 1200,
+      imageQuality: 70,
+    );
+    if (files.isEmpty) return;
+
+    if (!mounted) return;
+    await showAdaptiveDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => SendFileDialog(
+        files: files,
+        room: room,
+        thread: thread,
+        outerContext: context,
+        replyEvent: replyEvent,
+        onClearReply: () {
+          replyEvent = null;
+        },
       ),
     );
   }
@@ -1117,6 +1172,7 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
     event ??= selectedEvents.single;
+
     ScaffoldMessenger.of(
       context,
     ).showLoadingSnackBar(L10n.of(context).translating);
@@ -1128,7 +1184,6 @@ class ChatController extends State<ChatPageWithRoom>
         AppSettings.translationTargetLanguage.value.isEmpty
             ? PlatformDispatcher.instance.locale.languageCode
             : AppSettings.translationTargetLanguage.value,
-        AppSettings.pluslyServiceUrl.value,
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1442,6 +1497,7 @@ class ChatController extends State<ChatPageWithRoom>
       await loadTimelineFuture;
     }
     scrollController.jumpTo(0);
+    setReadMarker();
   }
 
   void onEmojiSelected(Category? _, PickerEmoji emoji) async {
@@ -1773,7 +1829,7 @@ class ChatController extends State<ChatPageWithRoom>
       sendFileAction();
     }
     if (choice == 'image') {
-      sendFileAction(type: FileType.image);
+      sendImageFromGallery();
     }
     if (choice == 'video') {
       sendFileAction(type: FileType.video);

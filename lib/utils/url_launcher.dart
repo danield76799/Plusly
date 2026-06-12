@@ -28,19 +28,22 @@ class UrlLauncher {
   const UrlLauncher(this.context, this.url, [this.name]);
 
   void launchUrl() async {
-    if (url!.toLowerCase().startsWith(AppConfig.schemePrefix)) {
+    final url = this.url;
+    if (url == null) return;
+
+    if (url.toLowerCase().startsWith(AppConfig.schemePrefix)) {
       return openMatrixUrl();
     }
-    if (url!.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
-        url!.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
-        {'#', '@', '!', '+', '\$'}.contains(url![0])) {
+    if (url.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
+        url.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
+        url[0] == '#' || url[0] == '@' || url[0] == '!' || url[0] == '+' || url[0] == '\$') {
       return openMatrixToUrl();
     }
-    final uri = Uri.tryParse(url!);
+    final uri = Uri.tryParse(url);
     if (uri == null) {
       // we can't open this thing
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context).cantOpenUri(url!))),
+        SnackBar(content: Text(L10n.of(context).cantOpenUri(url))),
       );
       return;
     }
@@ -89,12 +92,12 @@ class UrlLauncher {
           return;
         }
       }
-      launchUrlString(url!);
+      launchUrlString(url);
       return;
     }
     if (uri.host.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(L10n.of(context).cantOpenUri(url!))),
+        SnackBar(content: Text(L10n.of(context).cantOpenUri(url))),
       );
       return;
     }
@@ -114,7 +117,7 @@ class UrlLauncher {
     // Force LaunchMode.externalApplication, otherwise url_launcher will default
     // to opening links in a webview on mobile platforms.
     launchUrlString(
-      url!.replaceFirst(uri.host, newHost),
+      url.replaceFirst(uri.host, newHost),
       mode: LaunchMode.externalApplication,
     );
   }

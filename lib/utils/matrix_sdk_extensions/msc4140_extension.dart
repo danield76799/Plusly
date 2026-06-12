@@ -1,8 +1,44 @@
 import 'dart:convert';
 
 import 'package:matrix/matrix.dart' as matrix;
+import 'package:matrix/matrix_api_lite/utils/logs.dart';
 
 extension Msc4140Extension on matrix.Room {
+  static final Map<String, bool> _cancelSupportCache = {};
+
+  /// Check if the server supports delayed event cancellation.
+  /// Probes the cancel endpoint once per server and caches the result.
+  Future<bool> supportsDelayedEventCancel() async {
+    final server = client.baseUri?.host ?? '';
+    if (_cancelSupportCache.containsKey(server)) {
+      return _cancelSupportCache[server]!;
+    }
+
+    try {
+      // Probe the cancel endpoint with a dummy ID
+      final requestUri = Uri(
+        path: '/_matrix/client/unstable/org.matrix.msc4140/delayed_events/_probe/cancel',
+      );
+      final response = await client.httpClient.post(
+        requestUri,
+        body: jsonEncode({}),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${client.accessToken}',
+        },
+      );
+      // 404 = endpoint doesn't exist, anything else = it does
+      final supported = response.statusCode != 404;
+      _cancelSupportCache[server] = supported;
+      Logs().i('MSC4140 cancel support for $server: $supported');
+      return supported;
+    } catch (e) {
+      _cancelSupportCache[server] = false;
+      Logs().w('MSC4140 cancel probe failed for $server: $e');
+      return false;
+    }
+  }
+
   Future<String> scheduleDelayedEvent(
     Map<String, dynamic> content, {
     required int delay,
@@ -13,19 +49,40 @@ extension Msc4140Extension on matrix.Room {
     String? threadRootEventId,
     String? threadLastEventId,
   }) async {
-    // PUT /_matrix/client/v3/rooms/{roomId}/delayed_event/{eventType}/{txnId}
+    // Build enriched content with reply/thread info
+    final enrichedContent = Map<String, dynamic>.from(content);
+
+    if (inReplyTo != null) {
+      enrichedContent['m.relates_to'] = {
+        'm.in_reply_to': {'event_id': inReplyTo.eventId},
+      };
+    } else if (threadRootEventId != null) {
+      enrichedContent['m.relates_to'] = {
+        'rel_type': 'm.thread',
+        'event_id': threadRootEventId,
+        if (threadLastEventId != null) 'm.relatesto': threadLastEventId,
+        'is_falling_back': inReplyTo == null,
+      };
+    }
+
+    // PUT /_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}?delay={ms}
     final requestUri = Uri(
-      path: '/_matrix/client/v3/rooms/$id/delayed_event/$type/$txid',
+      path: '/_matrix/client/v3/rooms/$id/send/$type/$txid',
+      queryParameters: {'delay': delay.toString()},
     );
-    final body = jsonEncode({'content': content, 'delay': delay});
+    final body = jsonEncode(enrichedContent);
     final response = await client.httpClient.put(
       client.baseUri!.resolveUri(requestUri),
       body: body,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${client.accessToken}',
+      },
     );
     if (response.statusCode == 200) {
       final responseBody = jsonDecode(response.body);
-      return responseBody['delay_id'] as String;
+      // Server may return delay_id (some implementations) or just event_id
+      return (responseBody['delay_id'] as String?) ?? txid ?? 'unknown';
     } else {
       final errorBody = jsonDecode(response.body);
       var text = "${errorBody['errcode']}: ${errorBody['error']}";
@@ -37,13 +94,17 @@ extension Msc4140Extension on matrix.Room {
   }
 
   Future<void> _manageDelayedEvent(String delayId, String action) async {
-    // POST /_matrix/client/v1/delayed_events/{delay_id}/{action}
+    // POST /_matrix/client/unstable/org.matrix.msc4140/delayed_events/{delay_id}/{action}
     final requestUri = Uri(
-      path: '/_matrix/client/v1/delayed_events/$delayId/$action',
+      path: '/_matrix/client/unstable/org.matrix.msc4140/delayed_events/$delayId/$action',
     );
     final response = await client.httpClient.post(
       requestUri,
       body: jsonEncode({}),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${client.accessToken}',
+      },
     );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return;
@@ -65,6 +126,7 @@ extension Msc4140Extension on matrix.Room {
   }
 
   /// Cancel the delayed event so that it will never be sent.
+  /// Note: Not all servers support this endpoint.
   Future<void> cancelDelayedEvent(String delayId) async {
     return _manageDelayedEvent(delayId, 'cancel');
   }
@@ -81,8 +143,8 @@ extension Msc4140Extension on matrix.Room {
     List<String>? delayIds,
     String? from,
   }) async {
-    // GET /_matrix/client/v3/delayed_events
-    const basePath = '/_matrix/client/v3/delayed_events';
+    // GET /_matrix/client/unstable/org.matrix.msc4140/delayed_events
+    const basePath = '/_matrix/client/unstable/org.matrix.msc4140/delayed_events';
     final queryParts = <String>[];
     if (status != null) {
       queryParts.add('status=${Uri.encodeQueryComponent(status)}');
@@ -101,6 +163,9 @@ extension Msc4140Extension on matrix.Room {
 
     final response = await client.httpClient.get(
       client.baseUri!.resolveUri(requestUri),
+      headers: {
+        'Authorization': 'Bearer ${client.accessToken}',
+      },
     );
     if (response.statusCode >= 200 && response.statusCode < 300) {
       try {

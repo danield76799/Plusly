@@ -48,7 +48,6 @@ import 'package:Pulsly/pages/sign_in/sign_in_page.dart';
 import 'package:Pulsly/widgets/config_viewer.dart';
 import 'package:Pulsly/widgets/layouts/empty_page.dart';
 import 'package:Pulsly/widgets/layouts/two_column_layout.dart';
-import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/log_view.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/share_scaffold_dialog.dart';
@@ -116,14 +115,6 @@ abstract class AppRoutes {
       path: '/logs',
       pageBuilder: (context, state) =>
           defaultPageBuilder(context, state, const LogViewer()),
-    ),
-    GoRoute(
-      path: '/sync-debug',
-      pageBuilder: (context, state) => defaultPageBuilder(
-        context,
-        state,
-        SyncDebugScreen(client: Matrix.of(context).client),
-      ),
     ),
     GoRoute(
       path: '/configs',

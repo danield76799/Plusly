@@ -536,7 +536,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "copiedToClipboard": "Wurde in die Zwischenablage kopiert",
+  "copiedToClipboard": "In Zwischenablage kopiert",
   "@copiedToClipboard": {
     "type": "String",
     "placeholders": {}
@@ -3318,5 +3318,132 @@
   "@enable": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "aiFeatures": "KI-Funktionen",
+  "@aiFeatures": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeaturesSubtitle": "Intelligente Antworten & Übersetzungen",
+  "@aiFeaturesSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyNotice": "Plusly KI nutzt Cloud-Anbieter (Groq, Cerebras) für intelligente Antworten und Übersetzungen. Diese verwenden kostenlose APIs mit täglichen Limits.",
+  "@aiPrivacyNotice": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyWarning": "Ihre Nachrichten werden zur Verarbeitung an einen Cloud-Server gesendet. Sie können den Anbieter jederzeit in den KI-Einstellungen ändern.",
+  "@aiPrivacyWarning": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProviderReady": "{provider} ist einsatzbereit. Keine Konfiguration erforderlich.",
+  "@aiProviderReady": {
+    "type": "String",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiFreeTierInfo": "Groq & Cerebras: Cloud-basiert, kostenlose Stufe. Tägliche Limits möglich.",
+  "@aiFreeTierInfo": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiSettings": "KI-Einstellungen",
+  "@aiSettings": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProvider": "Anbieter",
+  "@aiProvider": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "testConnection": "Verbindung testen",
+  "@testConnection": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectedSuccessfully": "Verbindung erfolgreich",
+  "@connectedSuccessfully": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectionFailed": "Verbindung fehlgeschlagen — Einstellungen prüfen",
+  "@connectionFailed": {
+    "type": "String",
+    "placeholders": {}
+  },  "generatingReply": "Antwort wird generiert...",
+  "errorGeneratingReply": "Antwort generieren fehlgeschlagen",
+  "encryptedRoomWarning": "Verschlüsselter Raum",
+  "encryptedRoomAIDescription": "Diese Nachricht befindet sich in einem verschlüsselten Raum. Die Nutzung von KI sendet den Inhalt an Cloud-Dienste (Groq/Cerebras). Fortfahren?",
+  "aiNotEnabled": "KI-Funktionen zuerst in den Einstellungen aktivieren",
+  "aiAssistant": "KI-Assistent",
+  "clearChat": "Chat löschen",
+  "askMeAnything": "Frag mich anything",
+  "revokeConsent": "KI-Einwilligung widerrufen",
+  "revokeConsentDescription": "Dies deaktiviert alle KI-Funktionen und widerruft Ihre Datenschutzeinwilligung. Sie müssen den Datenschutzhinweis erneut akzeptieren, um KI zu reaktivieren.",
+  "scheduledMessages": "Geplante Nachrichten",
+  "scheduledTab": "Geplant",
+  "missedTab": "Verpasst",
+  "noScheduledMessages": "Keine geplanten Nachrichten",
+  "noScheduledMessagesDescription": "Geplante Nachrichten werden hier angezeigt",
+  "noMissedMessages": "Keine verpassten Nachrichten",
+  "noMissedMessagesDescription": "Alle geplanten Nachrichten wurden erfolgreich gesendet",
+  "scheduledInMinutes": "In {minutes} Min",
+  "@scheduledInMinutes": {
+    "type": "String",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInHours": "In {hours} Std",
+  "@scheduledInHours": {
+    "type": "String",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInDays": "In {days} T",
+  "@scheduledInDays": {
+    "type": "String",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledDueNow": "Jetzt senden",
+  "scheduledMissedAt": "Verpasst {time}",
+  "@scheduledMissedAt": {
+    "type": "String",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serverScheduled": "Server",
+  "localScheduled": "Lokal",
+  "cancelScheduledMessage": "Geplante Nachricht abbrechen?",
+  "cancelServerScheduledDescription": "Dies versucht, die Nachricht auf dem Server abzubrechen. Wenn der Server dies nicht unterstützt, wird die Nachricht trotzdem gesendet.",
+  "cancelLocalScheduledDescription": "Diese Nachricht ist lokal geplant. Sie wird nur von diesem Gerät entfernt.",
+  "keep": "Behalten",
+  "cancelMessage": "Abbrechen",
+  "serverCancelNotSupported": "Server unterstützt keine Stornierung. Nachricht wird trotzdem gesendet.",
+  "sendNow": "Jetzt senden",
+  "messageSentManually": "Nachricht gesendet!",
+  "errorSendingMessage": "Fehler beim Senden",
+  "deleteMissedMessage": "Verpasste Nachricht löschen?",
+  "deleteMissedMessageDescription": "Diese Nachricht wird nicht gesendet.",
+  "undo": "Rückgängig",
+  "deleteScheduled": "Löschen"
 }

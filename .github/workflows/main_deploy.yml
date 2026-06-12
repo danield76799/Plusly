@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - llm-base
   workflow_dispatch:
 
 concurrency:
@@ -35,48 +36,6 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
-
-      - name: Install Android NDK
-        run: |
-          echo "Installing NDK manually..."
-          NDK_VERSION="27.0.12077973"
-          NDK_DIR="$ANDROID_HOME/ndk/$NDK_VERSION"
-
-          # Create NDK directory
-          mkdir -p "$NDK_DIR"
-
-          # Download NDK from Google
-          echo "Downloading NDK $NDK_VERSION..."
-          cd /tmp
-          wget -q "https://dl.google.com/android/repository/android-ndk-r27-linux.zip" -O ndk.zip || \
-          curl -L -o ndk.zip "https://dl.google.com/android/repository/android-ndk-r27-linux.zip"
-
-          # Check if download succeeded
-          if [ ! -f ndk.zip ] || [ ! -s ndk.zip ]; then
-            echo "ERROR: NDK download failed"
-            exit 1
-          fi
-
-          # Extract NDK
-          echo "Extracting NDK..."
-          unzip -q ndk.zip
-          mv android-ndk-r27/* "$NDK_DIR/" 2>/dev/null || mv android-ndk-r27/*/* "$NDK_DIR/" 2>/dev/null
-
-          # Set environment variable
-          echo "ANDROID_NDK_HOME=$NDK_DIR" >> $GITHUB_ENV
-          echo "NDK installed at: $NDK_DIR"
-          ls -la "$NDK_DIR" | head -10
-
-      - name: Set up Rust Android environment
-        run: |
-          echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "Rust targets installed:"
-          rustup target list --installed
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
         with:
@@ -104,115 +63,112 @@ jobs:
           dart run flutter_launcher_icons:main
           dart run flutter_native_splash:create
 
-      - name: Bump version
+      - name: Bump build number
         id: bump
         run: |
           VERSION=$(grep "^version:" pubspec.yaml | sed 's/version: //' | tr -d ' ')
           VERSION_NAME=$(echo "$VERSION" | sed 's/+.*//')
           BUILD_NUMBER=$(echo "$VERSION" | sed 's/.*+//')
-          
-          # Parse version parts
-          MAJOR=$(echo "$VERSION_NAME" | cut -d. -f1)
-          MINOR=$(echo "$VERSION_NAME" | cut -d. -f2)
-          PATCH=$(echo "$VERSION_NAME" | cut -d. -f3)
-          
-          # Auto-bump patch
-          NEW_PATCH=$((PATCH + 1))
-          NEW_VERSION_NAME="${MAJOR}.${MINOR}.${NEW_PATCH}"
-          NEW_BUILD=$((BUILD_NUMBER + 1))
-          
-          sed -i "s/^version: .*/version: ${NEW_VERSION_NAME}+${NEW_BUILD}/" pubspec.yaml
-          echo "version_name=$NEW_VERSION_NAME" >> $GITHUB_OUTPUT
-          echo "build_number=$NEW_BUILD" >> $GITHUB_OUTPUT
-          echo "full_version=${NEW_VERSION_NAME}+${NEW_BUILD}" >> $GITHUB_OUTPUT
-          echo "Bumped to ${NEW_VERSION_NAME}+${NEW_BUILD}"
+          NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
 
+          # Update pubspec.yaml
+          sed -i "s/^version: .*/version: ${VERSION_NAME}+${NEW_BUILD_NUMBER}/" pubspec.yaml
+
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "build_number=$NEW_BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "full_version=${VERSION_NAME}+${NEW_BUILD_NUMBER}" >> $GITHUB_OUTPUT
+          echo "Bumped ${VERSION_NAME}+${BUILD_NUMBER} → ${VERSION_NAME}+${NEW_BUILD_NUMBER}"
+
+      # === COMMIT VERSION BUMP ===
       - name: Commit version bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pubspec.yaml
-          git diff --cached --quiet || git commit -m "chore: bump version to ${{ steps.bump.outputs.full_version }} [skip ci]"
-          git push origin main || echo "Nothing to push"
+          git diff --cached --quiet || git commit -m "Bump version to ${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}"
+          git push
 
-      # === SIGNING SETUP ===
+      # === SIGNING SETUP (optional — uses debug signing if secrets missing) ===
       - name: Setup signing
+        id: signing
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
-          cat > android/key.properties << EOF
-          storePassword=$KEYSTORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=$KEY_ALIAS
-          storeFile=upload-keystore.jks
-          EOF
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+            echo "storePassword=$KEYSTORE_PASSWORD" > android/key.properties
+            echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+            echo "keyAlias=$KEY_ALIAS" >> android/key.properties
+            echo "storeFile=upload-keystore.jks" >> android/key.properties
+            echo "has_signing=true" >> $GITHUB_OUTPUT
+            echo "Signing configured"
+          else
+            echo "has_signing=false" >> $GITHUB_OUTPUT
+            echo "WARNING: No signing secrets found — using debug signing"
+          fi
 
-      # === APK BUILD ===
-      - name: Build Android APK
-        env:
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+      # === APK BUILD (split per architecture — 32-bit + 64-bit) ===
+      - name: Build Android APK (split ABIs)
         run: |
-          flutter build apk --release --target-platform android-arm64,android-arm --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY }}
+          flutter build apk --release --split-per-abi --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }} --dart-define=OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY || '' }}
           mkdir -p output
-          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-release.apk
-
-      # === PATCH ELF ALIGNMENT FOR 16KB PAGE SIZE (Android 15+/17) ===
-      - name: Patch ELF alignment to 16KB
-        run: |
-          echo "Patching ELF alignment for Android 15+/17 16KB page size compatibility..."
-          python3 scripts/patch_elf_alignment.py output/plusly-arm64-v8a-release.apk || true
-          python3 scripts/patch_elf_alignment.py output/plusly-armeabi-v7a-release.apk || true
-          # Replace originals with patched versions
-          if [ -f output/plusly-arm64-v8a-release.patched.apk ]; then
-            mv output/plusly-arm64-v8a-release.patched.apk output/plusly-arm64-v8a-release.apk
-            echo "✅ Replaced arm64-v8a APK with patched version"
-          fi
-          if [ -f output/plusly-armeabi-v7a-release.patched.apk ]; then
-            mv output/plusly-armeabi-v7a-release.patched.apk output/plusly-armeabi-v7a-release.apk
-            echo "✅ Replaced armeabi-v7a APK with patched version"
-          fi
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
 
       # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
-        env:
-          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
         run: |
-          flutter build appbundle --release --target-platform android-arm,android-arm64,android-x64 --dart-define=DEEPL_API_KEY=${{ secrets.DEEPL_API_KEY || '' }}
-          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
-          # Patch the AAB too
-          python3 scripts/patch_elf_alignment.py output/plusly-release.aab || true
-          if [ -f output/plusly-release.patched.aab ]; then
-            mv output/plusly-release.patched.aab output/plusly-release.aab
-            echo "✅ Replaced AAB with patched version"
-          fi
+          flutter build appbundle --release --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }} --dart-define=OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY || '' }}
+          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab || true
 
-      # === UPLOAD ARTIFACTS ===
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-apk
-          path: output/plusly-release.apk
-          retention-days: 7
+      # === VERIFY OUTPUTS ===
+      - name: List build outputs
+        run: |
+          echo "=== Build outputs ==="
+          ls -la output/ || echo "No output directory"
+          echo "=== APK files ==="
+          find build/app/outputs -name "*.apk" -type f || echo "No APK files found"
+          echo "=== AAB files ==="
+          find build/app/outputs -name "*.aab" -type f || echo "No AAB files found"
+          echo "=== AAB size ==="
+          ls -lh build/app/outputs/bundle/release/app-release.aab || echo "AAB not found"
 
-      - name: Upload AAB
+      # === UPLOAD ARTIFACTS (split — download only what you need) ===
+      - name: Upload armeabi-v7a APK
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: android-aab
+          name: plusly-armeabi-v7a-apk
+          path: output/plusly-armeabi-v7a-release.apk
+          retention-days: 30
+
+      - name: Upload arm64-v8a APK
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plusly-arm64-v8a-apk
+          path: output/plusly-arm64-v8a-release.apk
+          retention-days: 30
+
+      - name: Upload AAB (Play Store)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plusly-aab-playstore
           path: output/plusly-release.aab
-          retention-days: 7
+          retention-days: 30
 
-      # === PLAY STORE DEPLOY (optional) ===
+      # === PLAY STORE DEPLOY (optional — only if key exists) ===
       - name: Setup Play Store key
         id: playstore
         env:
           PLAYSTORE_DEPLOY_KEY: ${{ secrets.PLAYSTORE_DEPLOY_KEY }}
         run: |
           if [ -n "$PLAYSTORE_DEPLOY_KEY" ]; then
-            echo "$PLAYSTORE_DEPLOY_KEY" > android/keys.json
+            echo "$PLAYSTORE_DEPLOY_KEY" | base64 -d > android/keys.json
             echo "has_key=true" >> $GITHUB_OUTPUT
           else
             echo "has_key=false" >> $GITHUB_OUTPUT
@@ -230,17 +186,25 @@ jobs:
         working-directory: android
         run: bundle exec fastlane deploy_internal_test
 
-      # === GITHUB RELEASE (failsafe — codeload sometimes flaky) ===
+      # === GITHUB RELEASE ===
       - name: Create Release
-        continue-on-error: true
+        id: release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
           name: Plusly v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
-          files: |
-            output/plusly-release.apk
-            output/plusly-release.aab
+          files: output/*
           generate_release_notes: true
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # === NOTIFY ON FAILURE ===
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Build failed! Check logs above for details."
+          echo "Common causes:"
+          echo "  - Missing signing secrets (KEYSTORE_BASE64, etc.)"
+          echo "  - Flutter build errors"
+          echo "  - Dependency conflicts"

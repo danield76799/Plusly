@@ -3382,5 +3382,101 @@
   "@enable": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "aiFeatures": "AI-functies",
+  "@aiFeatures": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeaturesSubtitle": "Slimme antwoorden & vertalingen",
+  "@aiFeaturesSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyNotice": "Plusly AI gebruikt cloudproviders (Groq, Cerebras) voor slimme antwoorden en vertalingen. Deze gebruiken gratis API's met dagelijkse limieten.",
+  "@aiPrivacyNotice": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyWarning": "Je berichten worden naar een cloudserver gestuurd voor verwerking. Je kunt de provider altijd wijzigen in AI-instellingen.",
+  "@aiPrivacyWarning": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProviderReady": "{provider} is klaar voor gebruik. Geen configuratie nodig.",
+  "@aiProviderReady": {
+    "type": "String",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiFreeTierInfo": "Groq & Cerebras: cloud, gratis tier. Dagelijkse limieten kunnen gelden.",
+  "@aiFreeTierInfo": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiSettings": "AI-instellingen",
+  "@aiSettings": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProvider": "Provider",
+  "@aiProvider": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "testConnection": "Verbinding testen",
+  "@testConnection": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectedSuccessfully": "Verbinding geslaagd",
+  "@connectedSuccessfully": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectionFailed": "Verbinding mislukt — controleer je instellingen",
+  "@connectionFailed": {
+    "type": "String",
+    "placeholders": {}
+  },  "generatingReply": "Antwoord genereren...",
+  "errorGeneratingReply": "Antwoord genereren mislukt",
+  "encryptedRoomWarning": "Versleutelde Kamer",
+  "encryptedRoomAIDescription": "Dit bericht is in een versleutelde kamer. AI gebruiken stuurt de inhoud naar cloud services (Groq/Cerebras). Doorgaan?",
+  "aiNotEnabled": "Schakel eerst AI-functies in bij Instellingen",
+  "aiAssistant": "AI Assistent",
+  "clearChat": "Chat wissen",
+  "askMeAnything": "Vraag mij iets",
+  "revokeConsent": "AI Toestemming Intrekken",
+  "revokeConsentDescription": "Dit schakelt alle AI-functies uit en trekt je privacytoestemming in. Je moet de privacyverklaring opnieuw accepteren om AI weer in te schakelen.",
+  "scheduledMessages": "Geplande Berichten",
+  "scheduledTab": "Gepland",
+  "missedTab": "Gemist",
+  "noScheduledMessages": "Geen geplande berichten",
+  "noScheduledMessagesDescription": "Berichten die je inplant verschijnen hier",
+  "noMissedMessages": "Geen gemiste berichten",
+  "noMissedMessagesDescription": "Alle geplande berichten zijn verstuurd",
+  "scheduledInMinutes": "Over {minutes} min",
+  "scheduledInHours": "Over {hours}u",
+  "scheduledInDays": "Over {days}d",
+  "scheduledDueNow": "Nu verzenden",
+  "scheduledMissedAt": "Gemist {time}",
+  "serverScheduled": "Server",
+  "localScheduled": "Lokaal",
+  "cancelScheduledMessage": "Gepland bericht annuleren?",
+  "cancelServerScheduledDescription": "Dit probeert het bericht op de server te annuleren. Als de server dit niet ondersteunt, wordt het bericht alsnog verstuurd.",
+  "cancelLocalScheduledDescription": "Dit bericht is lokaal ingepland. Het wordt alleen van dit apparaat verwijderd.",
+  "keep": "Behouden",
+  "cancelMessage": "Annuleren",
+  "serverCancelNotSupported": "Server ondersteunt annulering niet. Bericht wordt alsnog verstuurd.",
+  "sendNow": "Nu versturen",
+  "messageSentManually": "Bericht verstuurd!",
+  "errorSendingMessage": "Fout bij versturen",
+  "deleteMissedMessage": "Gemist bericht verwijderen?",
+  "deleteMissedMessageDescription": "Dit bericht wordt niet verstuurd.",
+  "undo": "Ongedaan maken",
+  "deleteScheduled": "Verwijderen",
+  "aiAutoFallbackInfo": "Automatische fallback: Groq → Cerebras → Ollama. Als je gekozen provider faalt, wordt de volgende automatisch gebruikt."
 }

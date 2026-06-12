@@ -130,11 +130,6 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                         title: L10n.of(context).enableAppBarCenterTitle,
                         setting: AppSettings.enableAppBarCenterTitle,
                       ),
-                      const ListDivider(),
-                      SettingsSwitchListTile.adaptive(
-                        title: L10n.of(context).enablePeopleTab,
-                        setting: AppSettings.enablePeopleTab,
-                      ),
                       if (PlatformInfos.isMobile) ...[
                         const ListDivider(),
                         SettingsSwitchListTile.adaptive(
@@ -142,6 +137,76 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                           setting: AppSettings.enableVideoNotes,
                         ),
                       ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Material(
+                  clipBehavior: Clip.hardEdge,
+                  color: theme.colorScheme.surfaceContainerHigh,
+                  borderRadius: borderRadius,
+                  child: Column(
+                    children: [
+                      ListTile(
+                        title: Text(
+                          'Gallery',
+                          style: TextStyle(
+                            color: theme.colorScheme.secondary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.grid_view_outlined),
+                        title: const Text('Columns'),
+                        subtitle: Text('${AppSettings.galleryColumns.value} columns'),
+                        trailing: DropdownButton<int>(
+                          value: AppSettings.galleryColumns.value,
+                          underline: const SizedBox(),
+                          onChanged: (int? newValue) async {
+                            if (newValue != null) {
+                              await AppSettings.galleryColumns.setItem(newValue);
+                              if (mounted) setState(() {});
+                            }
+                          },
+                          items: const [
+                            DropdownMenuItem(value: 2, child: Text('2')),
+                            DropdownMenuItem(value: 3, child: Text('3')),
+                            DropdownMenuItem(value: 4, child: Text('4')),
+                            DropdownMenuItem(value: 5, child: Text('5')),
+                            DropdownMenuItem(value: 6, child: Text('6')),
+                          ],
+                        ),
+                      ),
+                      const ListDivider(),
+                      ListTile(
+                        leading: const Icon(Icons.photo_size_select_large_outlined),
+                        title: const Text('Thumbnail size'),
+                        subtitle: Text('${AppSettings.galleryThumbnailSize.value}px'),
+                        trailing: DropdownButton<int>(
+                          value: AppSettings.galleryThumbnailSize.value,
+                          underline: const SizedBox(),
+                          onChanged: (int? newValue) async {
+                            if (newValue != null) {
+                              await AppSettings.galleryThumbnailSize.setItem(newValue);
+                              if (mounted) setState(() {});
+                            }
+                          },
+                          items: const [
+                            DropdownMenuItem(value: 64, child: Text('64px')),
+                            DropdownMenuItem(value: 96, child: Text('96px')),
+                            DropdownMenuItem(value: 128, child: Text('128px')),
+                            DropdownMenuItem(value: 192, child: Text('192px')),
+                            DropdownMenuItem(value: 256, child: Text('256px')),
+                          ],
+                        ),
+                      ),
+                      const ListDivider(),
+                      SettingsSwitchListTile.adaptive(
+                        title: 'Lazy loading',
+                        subtitle: 'Load images when scrolling',
+                        setting: AppSettings.galleryLazyLoading,
+                      ),
                     ],
                   ),
                 ),

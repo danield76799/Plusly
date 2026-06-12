@@ -3,7 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:Pulsly/services/favorites_service.dart';
 
 class FavoritesPage extends StatefulWidget {
-  const FavoritesPage({super.key});
+  final VoidCallback? onBack;
+  const FavoritesPage({this.onBack, super.key});
 
   @override
   State<FavoritesPage> createState() => _FavoritesPageState();
@@ -68,6 +69,14 @@ class _FavoritesPageState extends State<FavoritesPage> {
             alignment: Alignment.bottomLeft,
             child: Row(
               children: [
+                if (widget.onBack != null)
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                    onPressed: widget.onBack,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                if (widget.onBack != null) const SizedBox(width: 8),
                 const Icon(Icons.star, color: Colors.amber, size: 28),
                 const SizedBox(width: 12),
                 const Text(

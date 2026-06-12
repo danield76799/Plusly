@@ -429,7 +429,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "copiedToClipboard": "クリップボードにコピーされました",
+  "copiedToClipboard": "クリップボードにコピーしました",
   "@copiedToClipboard": {
     "type": "String",
     "placeholders": {}
@@ -2434,9 +2434,136 @@
       }
     }
   },
-  "enable": "Enable",
+  "enable": "有効にする",
   "@enable": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "aiFeatures": "AI機能",
+  "@aiFeatures": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeaturesSubtitle": "スマート返信＆翻訳",
+  "@aiFeaturesSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyNotice": "Plusly AIはクラウドプロバイダー（Groq、Cerebras）を使用してスマート返信と翻訳を提供します。無料APIを使用しており、日次制限があります。",
+  "@aiPrivacyNotice": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyWarning": "メッセージは処理のためにクラウドサーバーに送信されます。AI設定でプロバイダーをいつでも変更できます。",
+  "@aiPrivacyWarning": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProviderReady": "{provider}は使用準備完了です。設定は不要です。",
+  "@aiProviderReady": {
+    "type": "String",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiFreeTierInfo": "Groq & Cerebras：クラウド、無料プラン。日次制限が適用される場合があります。",
+  "@aiFreeTierInfo": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiSettings": "AI設定",
+  "@aiSettings": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProvider": "プロバイダー",
+  "@aiProvider": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "testConnection": "接続テスト",
+  "@testConnection": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectedSuccessfully": "接続成功",
+  "@connectedSuccessfully": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectionFailed": "接続失敗 — 設定を確認してください",
+  "@connectionFailed": {
+    "type": "String",
+    "placeholders": {}
+  },  "generatingReply": "返信を生成中...",
+  "errorGeneratingReply": "返信の生成に失敗しました",
+  "encryptedRoomWarning": "暗号化されたルーム",
+  "encryptedRoomAIDescription": "このメッセージは暗号化されたルームにあります。AIを使用すると、メッセージの内容がクラウドサービス（Groq/Cerebras）に送信されます。続行しますか？",
+  "aiNotEnabled": "まず設定でAI機能を有効にしてください",
+  "aiAssistant": "AIアシスタント",
+  "clearChat": "チャットをクリア",
+  "askMeAnything": "何でも聞いてください",
+  "revokeConsent": "AI同意を取り消す",
+  "revokeConsentDescription": "これによりすべてのAI機能が無効になり、プライバシー同意が取り消されます。AIを再有効化するには、プライバシー通知に再度同意する必要があります。",
+  "scheduledMessages": "予約メッセージ",
+  "scheduledTab": "予約済み",
+  "missedTab": "未送信",
+  "noScheduledMessages": "予約メッセージはありません",
+  "noScheduledMessagesDescription": "予約したメッセージがここに表示されます",
+  "noMissedMessages": "未送信メッセージはありません",
+  "noMissedMessagesDescription": "すべての予約メッセージが正常に送信されました",
+  "scheduledInMinutes": "{minutes}分後",
+  "@scheduledInMinutes": {
+    "type": "String",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInHours": "{hours}時間後",
+  "@scheduledInHours": {
+    "type": "String",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInDays": "{days}日後",
+  "@scheduledInDays": {
+    "type": "String",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledDueNow": "今すぐ送信",
+  "scheduledMissedAt": "未送信 {time}",
+  "@scheduledMissedAt": {
+    "type": "String",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serverScheduled": "サーバー",
+  "localScheduled": "ローカル",
+  "cancelScheduledMessage": "予約メッセージをキャンセルしますか？",
+  "cancelServerScheduledDescription": "サーバーでのキャンセルを試みます。サーバーがキャンセルをサポートしていない場合、メッセージは送信されます。",
+  "cancelLocalScheduledDescription": "このメッセージはローカルで予約されています。このデバイスからのみ削除されます。",
+  "keep": "保持",
+  "cancelMessage": "キャンセル",
+  "serverCancelNotSupported": "サーバーはキャンセルをサポートしていません。メッセージは送信されます。",
+  "sendNow": "今すぐ送信",
+  "messageSentManually": "メッセージを送信しました！",
+  "errorSendingMessage": "送信エラー",
+  "deleteMissedMessage": "未送信メッセージを削除しますか？",
+  "deleteMissedMessageDescription": "このメッセージは送信されません。",
+  "undo": "元に戻す",
+  "deleteScheduled": "削除"
 }

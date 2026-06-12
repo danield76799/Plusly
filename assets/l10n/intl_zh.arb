@@ -3370,9 +3370,136 @@
       }
     }
   },
-  "enable": "Enable",
+  "enable": "启用",
   "@enable": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "aiFeatures": "AI功能",
+  "@aiFeatures": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeaturesSubtitle": "智能回复和翻译",
+  "@aiFeaturesSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyNotice": "Plusly AI使用云提供商（Groq、Cerebras）提供智能回复和翻译。使用免费API，可能有每日限制。",
+  "@aiPrivacyNotice": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyWarning": "您的消息将发送到云服务器进行处理。您可以随时在AI设置中更改提供商。",
+  "@aiPrivacyWarning": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProviderReady": "{provider}已准备就绪。无需配置。",
+  "@aiProviderReady": {
+    "type": "String",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiFreeTierInfo": "Groq和Cerebras：云端，免费套餐。可能有每日限制。",
+  "@aiFreeTierInfo": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiSettings": "AI设置",
+  "@aiSettings": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProvider": "提供商",
+  "@aiProvider": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "testConnection": "测试连接",
+  "@testConnection": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectedSuccessfully": "连接成功",
+  "@connectedSuccessfully": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectionFailed": "连接失败 — 请检查设置",
+  "@connectionFailed": {
+    "type": "String",
+    "placeholders": {}
+  },  "generatingReply": "正在生成回复...",
+  "errorGeneratingReply": "生成回复失败",
+  "encryptedRoomWarning": "加密房间",
+  "encryptedRoomAIDescription": "此消息位于加密房间中。使用AI会将消息内容发送到云服务（Groq/Cerebras）。继续吗？",
+  "aiNotEnabled": "请先在设置中启用AI功能",
+  "aiAssistant": "AI助手",
+  "clearChat": "清除聊天",
+  "askMeAnything": "随便问我",
+  "revokeConsent": "撤销AI同意",
+  "revokeConsentDescription": "这将禁用所有AI功能并撤销您的隐私同意。您需要重新接受隐私声明才能重新启用AI。",
+  "scheduledMessages": "定时消息",
+  "scheduledTab": "已定时",
+  "missedTab": "未发送",
+  "noScheduledMessages": "没有定时消息",
+  "noScheduledMessagesDescription": "你定时的消息会显示在这里",
+  "noMissedMessages": "没有未发送的消息",
+  "noMissedMessagesDescription": "所有定时消息已成功发送",
+  "scheduledInMinutes": "{minutes}分钟后",
+  "@scheduledInMinutes": {
+    "type": "String",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInHours": "{hours}小时后",
+  "@scheduledInHours": {
+    "type": "String",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInDays": "{days}天后",
+  "@scheduledInDays": {
+    "type": "String",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledDueNow": "立即发送",
+  "scheduledMissedAt": "未发送 {time}",
+  "@scheduledMissedAt": {
+    "type": "String",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serverScheduled": "服务器",
+  "localScheduled": "本地",
+  "cancelScheduledMessage": "取消定时消息？",
+  "cancelServerScheduledDescription": "将尝试在服务器上取消该消息。如果服务器不支持取消，消息仍将被发送。",
+  "cancelLocalScheduledDescription": "此消息为本地定时。仅会从此设备上移除。",
+  "keep": "保留",
+  "cancelMessage": "取消",
+  "serverCancelNotSupported": "服务器不支持取消。消息仍将被发送。",
+  "sendNow": "立即发送",
+  "messageSentManually": "消息已发送！",
+  "errorSendingMessage": "发送错误",
+  "deleteMissedMessage": "删除未发送的消息？",
+  "deleteMissedMessageDescription": "此消息将不会被发送。",
+  "undo": "撤销",
+  "deleteScheduled": "删除"
 }

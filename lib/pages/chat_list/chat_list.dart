@@ -17,6 +17,7 @@ import 'package:Pulsly/pages/chat_list/chat_list_view.dart';
 import 'package:Pulsly/pages/chat_list/invite_dialog.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
 import 'package:Pulsly/utils/localized_exception_extension.dart';
+import 'package:Pulsly/services/timeline_cache.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/show_scaffold_dialog.dart';
@@ -36,7 +37,7 @@ import '../../widgets/matrix.dart';
 
 enum PopupMenuAction { settings, invite, newGroup, newSpace, archive, syncDebug }
 
-enum ActiveFilter { allChats, messages, groups, unread, spaces, people, favorites }
+enum ActiveFilter { allChats, messages, groups, unread, favorites, people }
 
 enum SearchScope { local, public }
 
@@ -51,12 +52,10 @@ extension LocalizedActiveFilter on ActiveFilter {
         return L10n.of(context).unread;
       case ActiveFilter.groups:
         return L10n.of(context).groups;
-      case ActiveFilter.spaces:
-        return L10n.of(context).spaces;
+      case ActiveFilter.favorites:
+        return "Favorites";
       case ActiveFilter.people:
         return L10n.of(context).people;
-      case ActiveFilter.favorites:
-        return "Favorieten"; // ⭐ Favorieten
     }
   }
 
@@ -71,12 +70,10 @@ extension LocalizedActiveFilter on ActiveFilter {
             : Icons.mark_unread_chat_alt;
       case ActiveFilter.groups:
         return outline ? Icons.people_outline : Icons.people;
-      case ActiveFilter.spaces:
-        return outline ? Icons.grid_view_outlined : Icons.grid_view_rounded;
-      case ActiveFilter.people:
-        return Icons.people_outline;
       case ActiveFilter.favorites:
-        return Icons.star_outline; // ⭐ Favorieten icoon
+        return Icons.star_outline;
+      case ActiveFilter.people:
+        return Icons.person_outline;
     }
   }
 }
@@ -246,19 +243,17 @@ class ChatListController extends State<ChatList>
             _isBridgeTypeVisible(room);
       case .groups:
         return (room) =>
-            !room.isSpace &&
-            !room.isDirectChat &&
-            (AppSettings.showSpaceRoomsInGlobalList.value ||
-                room.spaceParents.isEmpty);
+            room.isSpace;
       case .unread:
         return (room) => room.isUnreadOrInvited && _isBridgeTypeVisible(room);
-      case .spaces:
-        return (room) => room.isSpace;
-      case .people:
-        return (room) => false;
       case .favorites:
-        return (room) => true; // ⭐ Favorieten: toon alle rooms zodat je erop kunt klikken
-        return (room) => false; // ⭐ Favorieten: geen rooms tonen, aparte pagina
+        return (room) => true; // Show all rooms for favorites tab
+      case .people:
+        return (room) =>
+            !room.isSpace &&
+            room.isDirectChat &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
     }
   }
 
@@ -285,6 +280,26 @@ class ChatListController extends State<ChatList>
     return _cachedFilteredRooms;
   }
 
+  // Lazy loading pagination
+  static const int _pageSize = 40;
+  int _visibleCount = _pageSize;
+  
+  List<Room> get visibleRooms {
+    final all = filteredRooms;
+    return all.take(_visibleCount).toList();
+  }
+  
+  bool get hasMoreRooms => filteredRooms.length > _visibleCount;
+  
+  void resetPagination() {
+    _visibleCount = _pageSize;
+    setState(() {}); // State gebruikt setState, geen notifyListeners
+  }
+  
+  void loadMoreRooms() {
+    _visibleCount += _pageSize;
+    setState(() {}); // State gebruikt setState, geen notifyListeners
+  }
   List<Room> get searchRooms => Matrix.of(context).client.rooms.where((room) {
     switch (activeFilter) {
       case .allChats:
@@ -297,18 +312,16 @@ class ChatListController extends State<ChatList>
             (AppSettings.showSpaceRoomsInGlobalList.value ||
                 room.spaceParents.isEmpty);
       case .groups:
-        return !room.isSpace &&
-            !room.isDirectChat &&
-            (AppSettings.showSpaceRoomsInGlobalList.value ||
-                room.spaceParents.isEmpty);
+        return room.isSpace;
       case .unread:
         return room.isUnreadOrInvited;
-      case .spaces:
-        return room.isSpace;
-      case .people:
-        return false;
       case .favorites:
-        return true; // ⭐ Favorieten: toon placeholder
+        return true;
+      case .people:
+        return !room.isSpace &&
+            room.isDirectChat &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
     }
   }).toList();
 
@@ -460,6 +473,7 @@ class ChatListController extends State<ChatList>
   void startSearch() {
     setState(() {
       isSearchMode = true;
+      resetPagination(); // Reset pagination bij search start
     });
     searchFocusNode.requestFocus();
     _coolDown?.cancel();
@@ -473,6 +487,7 @@ class ChatListController extends State<ChatList>
       roomSearchResult = userSearchResult = null;
       allMessagesSearchResult = null;
       isSearching = false;
+      resetPagination(); // Reset pagination bij search cancel
     });
     if (unfocus) searchFocusNode.unfocus();
   }
@@ -519,6 +534,22 @@ class ChatListController extends State<ChatList>
           file.path.startsWith(AppConfig.appSsoUrlScheme),
     );
 
+    if (files.isEmpty) return;
+
+    // Validate files are readable (skip content URIs that may crash)
+    files.removeWhere((file) {
+      final path = file.path;
+      return path.isEmpty ||
+          (path.startsWith('content://') && PlatformInfos.isAndroid);
+    });
+
+    if (files.isEmpty) {
+      Logs().w('All shared files were content URIs or invalid');
+      return;
+    }
+
+    if (!mounted) return;
+
     showScaffoldDialog(
       context: context,
       builder: (context) => ShareScaffoldDialog(
@@ -541,8 +572,9 @@ class ChatListController extends State<ChatList>
     if (uri == null) return;
     Logs().w("Processing incoming url: ${uri.toString()}");
     context.go('/rooms');
+    final localContext = context;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      UrlLauncher(context, uri.toString()).openMatrixToUrl();
+      UrlLauncher(localContext, uri.toString()).openMatrixToUrl();
     });
   }
 
@@ -576,12 +608,26 @@ class ChatListController extends State<ChatList>
   }
 
   @override
+  void _preloadChats() {
+    // Preload first 40 chat timelines in background — instant opens
+    Future.microtask(() async {
+      final client = Matrix.of(context).client;
+      final rooms = client.rooms
+          .where((r) => r.isDirectChat || !r.isSpace)
+          .take(40)
+          .toList();
+      TimelineCache.preloadRooms(rooms);
+    });
+  }
+
+  @override
   void initState() {
     _initReceiveSharingIntent();
 
     scrollController.addListener(_onScroll);
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
+    _preloadChats();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         searchServer = Matrix.of(
@@ -1019,9 +1065,7 @@ class ChatListController extends State<ChatList>
   void setActiveFilter(ActiveFilter filter) {
     setState(() {
       activeFilter = filter;
-      if (filter != .spaces && activeSpaceId != null) {
-        _activeSpaceId = null;
-      }
+      resetPagination(); // Reset pagination bij filter wijziging
     });
   }
 

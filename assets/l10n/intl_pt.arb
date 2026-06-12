@@ -1,6 +1,6 @@
 {
   "@@last_modified": "2021-08-14 12:41:09.940318",
-  "copiedToClipboard": "Copiada para a área de transferência",
+  "copiedToClipboard": "Copiado para a área de transferência",
   "@copiedToClipboard": {
     "type": "String",
     "placeholders": {}
@@ -2154,5 +2154,132 @@
   "@enable": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "aiFeatures": "Funcionalidades de IA",
+  "@aiFeatures": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiFeaturesSubtitle": "Respostas inteligentes e traduções",
+  "@aiFeaturesSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyNotice": "O Plusly IA usa fornecedores cloud (Groq, Cerebras) para respostas inteligentes e traduções. Usam APIs gratuitas com limites diários.",
+  "@aiPrivacyNotice": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiPrivacyWarning": "As suas mensagens são enviadas para um servidor cloud para processamento. Pode mudar de fornecedor a qualquer momento nas definições de IA.",
+  "@aiPrivacyWarning": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProviderReady": "{provider} está pronto a usar. Não é necessária configuração.",
+  "@aiProviderReady": {
+    "type": "String",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "aiFreeTierInfo": "Groq & Cerebras: cloud, nível gratuito. Limites diários podem aplicar-se.",
+  "@aiFreeTierInfo": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiSettings": "Definições de IA",
+  "@aiSettings": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "aiProvider": "Fornecedor",
+  "@aiProvider": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "testConnection": "Testar ligação",
+  "@testConnection": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectedSuccessfully": "Ligação bem-sucedida",
+  "@connectedSuccessfully": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "connectionFailed": "Ligação falhada — verifique as definições",
+  "@connectionFailed": {
+    "type": "String",
+    "placeholders": {}
+  },  "generatingReply": "Gerando resposta...",
+  "errorGeneratingReply": "Falha ao gerar resposta",
+  "encryptedRoomWarning": "Sala encriptada",
+  "encryptedRoomAIDescription": "Esta mensagem está numa sala encriptada. Usar IA enviará o conteúdo para serviços cloud (Groq/Cerebras). Continuar?",
+  "aiNotEnabled": "Ative primeiro as funções de IA nas Definições",
+  "aiAssistant": "Assistente IA",
+  "clearChat": "Limpar chat",
+  "askMeAnything": "Pergunte-me qualquer coisa",
+  "revokeConsent": "Revogar consentimento IA",
+  "revokeConsentDescription": "Isto desativará todas as funções de IA e revogará o seu consentimento de privacidade. Terá de aceitar o aviso de privacidade novamente para reativar a IA.",
+  "scheduledMessages": "Mensagens Agendadas",
+  "scheduledTab": "Agendadas",
+  "missedTab": "Perdidas",
+  "noScheduledMessages": "Nenhuma mensagem agendada",
+  "noScheduledMessagesDescription": "As mensagens que agendar aparecerão aqui",
+  "noMissedMessages": "Nenhuma mensagem perdida",
+  "noMissedMessagesDescription": "Todas as mensagens agendadas foram enviadas com sucesso",
+  "scheduledInMinutes": "Em {minutes} min",
+  "@scheduledInMinutes": {
+    "type": "String",
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInHours": "Em {hours}h",
+  "@scheduledInHours": {
+    "type": "String",
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledInDays": "Em {days}d",
+  "@scheduledInDays": {
+    "type": "String",
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduledDueNow": "Enviar agora",
+  "scheduledMissedAt": "Perdida {time}",
+  "@scheduledMissedAt": {
+    "type": "String",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serverScheduled": "Servidor",
+  "localScheduled": "Local",
+  "cancelScheduledMessage": "Cancelar mensagem agendada?",
+  "cancelServerScheduledDescription": "Isto tentará cancelar a mensagem no servidor. Se o servidor não suportar cancelamento, a mensagem será enviada na mesma.",
+  "cancelLocalScheduledDescription": "Esta mensagem está agendada localmente. Será removida apenas deste dispositivo.",
+  "keep": "Manter",
+  "cancelMessage": "Cancelar",
+  "serverCancelNotSupported": "O servidor não suporta cancelamento. A mensagem será enviada na mesma.",
+  "sendNow": "Enviar agora",
+  "messageSentManually": "Mensagem enviada!",
+  "errorSendingMessage": "Erro ao enviar",
+  "deleteMissedMessage": "Eliminar mensagem perdida?",
+  "deleteMissedMessageDescription": "Esta mensagem não será enviada.",
+  "undo": "Desfazer",
+  "deleteScheduled": "Eliminar"
 }

@@ -6,23 +6,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../domain/push_provider.dart';
 import '../domain/push_state.dart';
 import 'unified_push_provider.dart';
-import 'firebase_push_provider.dart';
 
-/// Factory die het juiste push provider kiest met fallback logica:
+/// Factory die de UnifiedPush provider kiest.
 ///
-/// 1. UnifiedPush (als beschikbaar)
-/// 2. Firebase Cloud Messaging (fallback)
-/// 3. null (geen push mogelijk)
+/// Alleen UnifiedPush — geen Firebase fallback.
 class PushProviderFactory {
   final SharedPreferences _store;
   final List<Client> _clients;
 
   PushProviderFactory(this._store, this._clients);
 
-  /// Maak provider met automatische fallback.
+  /// Maak provider met UnifiedPush.
   /// Returnt [PushProviderResult] met gekozen provider of error.
   Future<PushProviderResult> createWithFallback() async {
-    // ─── Stap 1: Probeer UnifiedPush ───
+    // ─── UnifiedPush (Android only) ───
     if (Platform.isAndroid) {
       final up = UnifiedPushProvider(_store, _clients);
 
@@ -42,20 +39,13 @@ class PushProviderFactory {
       }
     }
 
-    // ─── Stap 2: Fallback naar Firebase ───
-    final fcm = FirebasePushProvider(_store, _clients);
-    final fcmInitialized = await fcm.initialize();
-
-    if (fcmInitialized) {
-      final token = await fcm.register();
-      if (token != null && fcm.isActive) {
-        return PushProviderResult.success(fcm, PushProviderType.firebase);
-      }
-    }
-    fcm.dispose();
-
-    // ─── Stap 3: Niets werkte ───
-    return PushProviderResult.failure('Geen push provider beschikbaar');
+    // ─── Geen push mogelijk ───
+    return PushProviderResult.failure(
+      Platform.isAndroid
+          ? 'Geen UnifiedPush distributor gevonden.\n'
+              'Gebruik SunUP of ntfy.'
+          : 'Push notificaties alleen beschikbaar op Android.',
+    );
   }
 
   /// Maak specifieke provider (voor manual override in settings)
@@ -63,10 +53,8 @@ class PushProviderFactory {
     switch (type) {
       case PushProviderType.unifiedPush:
         return UnifiedPushProvider(_store, _clients);
-      case PushProviderType.firebase:
-        return FirebasePushProvider(_store, _clients);
       case PushProviderType.none:
-        throw ArgumentError('Cannot create provider for type "none"');
+        throw ArgumentError('Cannot create provider for type "$type"');
     }
   }
 }

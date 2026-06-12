@@ -4,178 +4,264 @@ import 'package:intl/intl.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/events/video_player.dart';
 import 'package:Pulsly/pages/image_viewer/image_viewer.dart';
-import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 
 class ChatSearchImagesTab extends StatelessWidget {
   final Room room;
-  final Stream<(List<Event>, String?)>? searchStream;
-  final void Function({String? prevBatch, List<Event>? previousSearchResult})
-  startSearch;
+  final List<Event> events;
+  final void Function() onStartSearch;
+  final bool endReached;
+  final bool isLoading;
+  final DateTime? searchedUntil;
 
   const ChatSearchImagesTab({
     required this.room,
-    required this.startSearch,
-    required this.searchStream,
+    required this.events,
+    required this.onStartSearch,
+    required this.endReached,
+    required this.isLoading,
+    required this.searchedUntil,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.circular(AppConfig.borderRadius / 2);
-    return StreamBuilder(
-      stream: searchStream,
-      builder: (context, snapshot) {
-        final theme = Theme.of(context);
-        final events = snapshot.data?.$1;
-        if (searchStream == null || events == null) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator.adaptive(strokeWidth: 2),
-              const SizedBox(height: 8),
-              Text(
-                L10n.of(context).searchIn(
-                  room.getLocalizedDisplayname(MatrixLocals(L10n.of(context))),
-                ),
-              ),
-            ],
-          );
-        }
-        if (events.isEmpty) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.photo_outlined, size: 64),
-              const SizedBox(height: 8),
-              Text(L10n.of(context).nothingFound),
-            ],
-          );
-        }
-        final eventsByMonth = <DateTime, List<Event>>{};
-        for (final event in events) {
-          final month = DateTime(
-            event.originServerTs.year,
-            event.originServerTs.month,
-          );
-          eventsByMonth[month] ??= [];
-          eventsByMonth[month]!.add(event);
-        }
-        final eventsByMonthList = eventsByMonth.entries.toList();
+    final theme = Theme.of(context);
+    final l10n = L10n.of(context);
 
-        const padding = 8.0;
+    if (events.isEmpty && !isLoading) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.photo_outlined, size: 64),
+          const SizedBox(height: 8),
+          Text(l10n.nothingFound),
+        ],
+      );
+    }
 
-        return ListView.builder(
-          itemCount: eventsByMonth.length + 1,
-          itemBuilder: (context, i) {
-            if (i == eventsByMonth.length) {
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(
-                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                  ),
-                );
-              }
-              final nextBatch = snapshot.data?.$2;
-              if (nextBatch == null) {
-                return const SizedBox.shrink();
-              }
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: TextButton.icon(
-                    style: TextButton.styleFrom(
-                      backgroundColor: theme.colorScheme.secondaryContainer,
-                      foregroundColor: theme.colorScheme.onSecondaryContainer,
-                    ),
-                    onPressed: () => startSearch(
-                      prevBatch: nextBatch,
-                      previousSearchResult: events,
-                    ),
-                    icon: const Icon(Icons.arrow_downward_outlined),
-                    label: Text(L10n.of(context).searchMore),
-                  ),
+    final eventsByMonth = <DateTime, List<Event>>{};
+    for (final event in events) {
+      final month = DateTime(
+        event.originServerTs.year,
+        event.originServerTs.month,
+      );
+      eventsByMonth[month] ??= [];
+      eventsByMonth[month]!.add(event);
+    }
+    final eventsByMonthList = eventsByMonth.entries.toList();
+
+    const padding = 8.0;
+
+    final crossAxisCount = AppSettings.galleryColumns.value;
+    final thumbnailSize = AppSettings.galleryThumbnailSize.value.toDouble();
+    final useLazyLoading = AppSettings.galleryLazyLoading.value;
+
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        _LazyMxcImageState.onScroll();
+        return false;
+      },
+      child: ListView.builder(
+        itemCount: eventsByMonth.length + 1,
+        itemBuilder: (context, i) {
+          if (i == eventsByMonth.length) {
+            if (isLoading) {
+              return const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(
+                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                 ),
               );
             }
-
-            final monthEvents = eventsByMonthList[i].value;
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(height: 1, color: theme.dividerColor),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        DateFormat.yMMMM(
-                          Localizations.localeOf(context).languageCode,
-                        ).format(eventsByMonthList[i].key),
-                        style: theme.textTheme.labelSmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(height: 1, color: theme.dividerColor),
-                    ),
-                  ],
+            if (endReached) {
+              return const SizedBox.shrink();
+            }
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    backgroundColor: theme.colorScheme.secondaryContainer,
+                    foregroundColor: theme.colorScheme.onSecondaryContainer,
+                  ),
+                  onPressed: onStartSearch,
+                  icon: const Icon(Icons.arrow_downward_outlined),
+                  label: Text(l10n.searchMore),
                 ),
-                GridView.count(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
+              ),
+            );
+          }
+
+          final monthEvents = eventsByMonthList[i].value;
+          final isLazyLoaded = useLazyLoading && i > 0;
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(height: 1, color: theme.dividerColor),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      DateFormat.yMMMM(
+                        Localizations.localeOf(context).languageCode,
+                      ).format(eventsByMonthList[i].key),
+                      style: theme.textTheme.labelSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(height: 1, color: theme.dividerColor),
+                  ),
+                ],
+              ),
+              GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
                   mainAxisSpacing: padding,
                   crossAxisSpacing: padding,
-                  clipBehavior: Clip.hardEdge,
-                  padding: const EdgeInsets.all(padding),
-                  crossAxisCount: 3,
-                  children: monthEvents.map((event) {
-                    if (event.messageType == MessageTypes.Video) {
-                      return Material(
-                        clipBehavior: Clip.hardEdge,
-                        borderRadius: borderRadius,
-                        child: EventVideoPlayer(
-                          event,
-                          theme.colorScheme.onSurface,
-                          theme.colorScheme.primary,
-                        ),
-                      );
-                    }
-                    return InkWell(
-                      onTap: () => showDialog(
-                        context: context,
-                        useRootNavigator: false,
-                        builder: (_) =>
-                            ImageViewer(event, outerContext: context),
-                      ),
+                ),
+                itemCount: monthEvents.length,
+                clipBehavior: Clip.hardEdge,
+                padding: const EdgeInsets.all(padding),
+                itemBuilder: (context, index) {
+                  final event = monthEvents[index];
+                  if (event.messageType == MessageTypes.Video) {
+                    return Material(
+                      clipBehavior: Clip.hardEdge,
                       borderRadius: borderRadius,
-                      child: Material(
-                        clipBehavior: Clip.hardEdge,
-                        borderRadius: borderRadius,
-                        child: MxcImage(
-                          event: event,
-                          width: 128,
-                          height: 128,
-                          fit: BoxFit.cover,
-                          animated: true,
-                          isThumbnail: true,
-                        ),
+                      child: EventVideoPlayer(
+                        event,
+                        theme.colorScheme.onSurface,
+                        theme.colorScheme.primary,
                       ),
                     );
-                  }).toList(),
-                ),
-              ],
-            );
-          },
-        );
-      },
+                  }
+                  return InkWell(
+                    onTap: () => showDialog(
+                      context: context,
+                      useRootNavigator: false,
+                      builder: (_) =>
+                          ImageViewer(event, outerContext: context),
+                    ),
+                    borderRadius: borderRadius,
+                    child: Material(
+                      clipBehavior: Clip.hardEdge,
+                      borderRadius: borderRadius,
+                      child: isLazyLoaded
+                          ? _LazyMxcImage(
+                              event: event,
+                              width: thumbnailSize,
+                              height: thumbnailSize,
+                            )
+                          : MxcImage(
+                              event: event,
+                              width: thumbnailSize,
+                              height: thumbnailSize,
+                              fit: BoxFit.cover,
+                              animated: true,
+                              isThumbnail: true,
+                            ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _LazyMxcImage extends StatefulWidget {
+  final Event event;
+  final double width;
+  final double height;
+
+  const _LazyMxcImage({
+    required this.event,
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  State<_LazyMxcImage> createState() => _LazyMxcImageState();
+}
+
+class _LazyMxcImageState extends State<_LazyMxcImage> {
+  bool _isVisible = false;
+
+  static final List<_LazyMxcImageState> _instances = [];
+
+  static void onScroll() {
+    for (final instance in List<_LazyMxcImageState>.from(_instances)) {
+      if (instance.mounted && !instance._isVisible) {
+        instance._checkVisibility();
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _instances.add(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
+  }
+
+  @override
+  void dispose() {
+    _instances.remove(this);
+    super.dispose();
+  }
+
+  void _checkVisibility() {
+    if (!mounted || _isVisible) return;
+    final renderBox = context.findRenderObject() as RenderBox?;
+    if (renderBox == null) return;
+    final offset = renderBox.localToGlobal(Offset.zero);
+    final view = View.of(context);
+    final screenHeight = view.physicalSize.height / view.devicePixelRatio;
+    // Load if within 1 screen height above or below viewport
+    if (offset.dy > -screenHeight && offset.dy < screenHeight * 2) {
+      setState(() => _isVisible = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isVisible) {
+      return Container(
+        width: widget.width,
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
+        ),
+        child: const Center(
+          child: Icon(Icons.image_outlined, color: Colors.grey),
+        ),
+      );
+    }
+    return MxcImage(
+      event: widget.event,
+      width: widget.width,
+      height: widget.height,
+      fit: BoxFit.cover,
+      animated: true,
+      isThumbnail: true,
     );
   }
 }

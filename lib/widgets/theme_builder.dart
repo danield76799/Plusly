@@ -72,6 +72,7 @@ class ThemeController extends State<ThemeBuilder> {
         preferences.getInt(widget.schemeVariantSettingsKey) ??
         DynamicSchemeVariant.values.indexOf(.tonalSpot);
 
+    if (!mounted) return;
     setState(() {
       _themeMode = ThemeMode.values.singleWhereOrNull(
         (value) => value.name == rawThemeMode,
@@ -87,6 +88,7 @@ class ThemeController extends State<ThemeBuilder> {
     final preferences = _sharedPreferences ??=
         await SharedPreferences.getInstance();
     await preferences.setString(widget.themeModeSettingsKey, newThemeMode.name);
+    if (!mounted) return;
     setState(() {
       _themeMode = newThemeMode;
     });
@@ -103,6 +105,7 @@ class ThemeController extends State<ThemeBuilder> {
         newPrimaryColor.hexValue,
       );
     }
+    if (!mounted) return;
     setState(() {
       _primaryColor = newPrimaryColor;
     });
@@ -119,6 +122,7 @@ class ThemeController extends State<ThemeBuilder> {
         DynamicSchemeVariant.values.indexOf(newVariant),
       );
     }
+    if (!mounted) return;
     setState(() {
       _variant = newVariant;
     });
@@ -128,6 +132,7 @@ class ThemeController extends State<ThemeBuilder> {
     final preferences = _sharedPreferences ??=
         await SharedPreferences.getInstance();
     await preferences.setBool(widget.pureBlackSettingsKey, newPureBlack);
+    if (!mounted) return;
     setState(() {
       _pureBlack = newPureBlack;
     });
@@ -137,6 +142,7 @@ class ThemeController extends State<ThemeBuilder> {
     final preferences = _sharedPreferences ??=
         await SharedPreferences.getInstance();
     await preferences.setBool(widget.twemojiSettingsKey, newTwemoji);
+    if (!mounted) return;
     setState(() {
       _twemoji = newTwemoji;
     });

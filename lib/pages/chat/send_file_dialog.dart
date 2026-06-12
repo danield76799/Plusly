@@ -81,7 +81,7 @@ class SendFileDialogState extends State<SendFileDialog> {
         final mimeType = xfile.mimeType ?? lookupMimeType(xfile.path);
         final name = xfile.name.isNotEmpty
             ? xfile.name
-            : "file.${mimeType!.split('/').last}";
+            : "file.${mimeType?.split('/').last ?? 'bin'}";
 
         // If file is a video, shrink it!
         if (PlatformInfos.isMobile &&
@@ -206,7 +206,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           await widget.room.sendFileEvent(
             file,
             thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 2048 : null,
+            shrinkImageMaxDimension: compress ? 1600 : null,
             extraContent: extraContent,
             threadLastEventId:
                 widget.thread?.lastEvent?.eventId ??
@@ -236,7 +236,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           await widget.room.sendFileEvent(
             file,
             thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 2048 : null,
+            shrinkImageMaxDimension: compress ? 1600 : null,
             extraContent: extraContent,
             threadLastEventId:
                 widget.thread?.lastEvent?.eventId ??

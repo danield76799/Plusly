@@ -12,7 +12,6 @@ export 'domain/push_state.dart';
 // Data
 export 'data/push_provider_factory.dart';
 export 'data/unified_push_provider.dart';
-export 'data/firebase_push_provider.dart';
 
 // Presentation
 export 'presentation/push_controller.dart';

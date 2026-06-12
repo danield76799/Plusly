@@ -1,0 +1,41 @@
+🤖 AI Features (NEW)
+
+• AI Chat — Ask anything to Groq (Llama 3.1 8B) or Cerebras (GPT-OSS 120B)
+• Smart Reply — Long-press any message → generate an AI reply as a proper quoted response
+• Translate — Long-press any message → translate to your language using AI
+• Auto fallback — If Groq is down, automatically switches to Cerebras (and vice versa)
+• Fallback notifications — Orange banner when provider switches
+• Clear error messages — "Daily limit reached" instead of cryptic API errors
+
+🔒 Privacy & Security
+
+• Privacy consent required before any AI feature can be used
+• Encrypted room warning — Explicit confirmation before sending E2EE messages to cloud AI
+• Revoke AI consent — Settings → AI → Revoke Consent (disables all AI features)
+• Removed credential leaks from build logs
+• API keys are build-time injected, not hardcoded in source
+
+🌐 Localization (10 languages)
+
+• All AI strings translated: EN, NL, DE, FR, ES, PT, IT, JA, ZH, RU
+• AI Chat, Smart Reply, Translate, Privacy dialog, Settings — all localized
+
+⚙️ Settings
+
+• AI toggle in Features — Enable/disable AI globally
+• Provider selector — Choose Groq or Cerebras
+• Connection test — Verify provider connectivity
+• Free tier disclaimer — Daily usage limits explained
+
+🛡️ Code Quality (14 review issues resolved)
+
+• Security: Removed credential leaks, added API key warnings
+• Privacy: Consent checks on all AI actions, E2EE warnings
+• Reliability: 20-message history limit, debounce on AI actions, scroll safety
+• Cleanup: Removed dead Ollama code, fixed unused parameters
+• Error handling: Sanitized error messages, generic user-facing errors
+
+📦 Providers
+
+• Groq (default): llama-3.1-8b-instant — fast, no daily request limit
+• Cerebras (fallback): gpt-oss-120b — 1000 requests/day, Apache 2.0 license

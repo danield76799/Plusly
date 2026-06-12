@@ -11,7 +11,8 @@ import 'package:unifiedpush/unifiedpush.dart' as up;
 
 import '../domain/push_provider.dart' hide PushMessage;
 import '../domain/push_provider.dart' show PushProvider, PushProviderType, PushMessage;
-
+import '../../../config/app_config.dart';
+import '../../../utils/platform_infos.dart';
 /// UnifiedPush implementatie — privacy-friendly push zonder Google.
 ///
 /// Vereist een UnifiedPush distributor app (bijv. ntfy, UP-FCM distributor).
@@ -94,7 +95,13 @@ class UnifiedPushProvider implements PushProvider {
 
   @override
   Future<void> unregister() async {
-    // TODO: Check UnifiedPush API voor correcte unregister signature
+    try {
+      for (final client in _clients.where((c) => c.isLogged())) {
+        await up.UnifiedPush.unregister(client.clientName);
+      }
+    } catch (e, s) {
+      Logs().w('[UnifiedPush] Unregister failed', e, s);
+    }
     _isActive = false;
     _currentEndpoint = null;
   }
@@ -238,13 +245,79 @@ class UnifiedPushProvider implements PushProvider {
     required String token,
     required bool useDeviceSpecificAppId,
   }) async {
-    // TODO: Implementeer pusher setup (uit legacy BackgroundPush)
-    Logs().v('[UnifiedPush] Setting up pusher for ${client.clientName}');
+    try {
+      final clientName = PlatformInfos.clientName;
+      final pushers = await client.getPushers().catchError((e) {
+        Logs().w('[UnifiedPush] Unable to get pushers', e);
+        return <Pusher>[];
+      }) ?? [];
+
+      var appId = AppConfig.pushNotificationsAppId;
+      if (useDeviceSpecificAppId) {
+        appId = '$appId.${client.deviceID}';
+        if (appId.length > 64) appId = appId.substring(0, 64);
+      } else {
+        appId += '.data_message';
+      }
+
+      // Check if pusher already set correctly
+      final existing = pushers.firstWhereOrNull(
+        (p) => p.pushkey == token && p.appId == appId,
+      );
+      if (existing != null &&
+          existing.kind == 'http' &&
+          existing.data.url.toString() == gatewayUrl &&
+          existing.appDisplayName == clientName &&
+          existing.deviceDisplayName == client.deviceName) {
+        Logs().i('[UnifiedPush] Pusher already set for ${client.clientName}');
+        return;
+      }
+
+      // Remove old pushers for this device
+      for (final pusher in pushers) {
+        if (pusher.appId == appId && pusher.pushkey != token) {
+          await client.deletePusher(pusher);
+        }
+      }
+
+      // Set new pusher
+      await client.postPusher(
+        Pusher(
+          pushkey: token,
+          appId: appId,
+          appDisplayName: clientName,
+          deviceDisplayName: client.deviceName ?? 'Plusly',
+          lang: 'en',
+          data: PusherData(
+            url: Uri.parse(gatewayUrl),
+            format: 'event_id_only',
+          ),
+          kind: 'http',
+        ),
+        append: false,
+      );
+
+      Logs().i('[UnifiedPush] Pusher set for ${client.clientName}');
+    } catch (e, s) {
+      Logs().e('[UnifiedPush] Failed to set pusher', e, s);
+    }
   }
 
   Future<void> _removePusher(Client client, String endpoint) async {
-    // TODO: Implementeer pusher removal
-    Logs().v('[UnifiedPush] Removing pusher for ${client.clientName}');
+    try {
+      final pushers = await client.getPushers().catchError((e) {
+        Logs().w('[UnifiedPush] Unable to get pushers', e);
+        return <Pusher>[];
+      }) ?? [];
+
+      final pusher = pushers.firstWhereOrNull((p) => p.pushkey == endpoint);
+      if (pusher != null) {
+        await client.deletePusher(pusher);
+        Logs().i('[UnifiedPush] Pusher removed for ${client.clientName}');
+      }
+    } catch (e, s) {
+      Logs().e('[UnifiedPush] Failed to remove pusher', e, s);
+    }
   }
 
   @override

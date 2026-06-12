@@ -1,4 +1,3 @@
-import 'package:Pulsly/pages/chat_list/people_view.dart';
 import 'package:Pulsly/pages/favorites/favorites_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -36,19 +35,10 @@ class ChatListViewBody extends StatelessWidget {
 
     final client = Matrix.of(context).client;
     final activeSpace = controller.activeSpaceId;
-    if (controller.activeFilter == .people) {
-      return PeopleView(
-        onBack: () => controller.activeFilter =
-            AppSettings.separateChatTypes.value ? .messages : .allChats,
-        onChatTap: (room) => controller.onChatTap(room),
-        chatListController: controller,
+    if (controller.activeFilter == .favorites) {
+      return FavoritesPage(
+        onBack: () => controller.setActiveFilter(ActiveFilter.allChats),
       );
-    }
-    if (controller.activeFilter == .favorites) {
-      return const FavoritesPage(); // ⭐ Favorieten pagina
-    }
-    if (controller.activeFilter == .favorites) {
-      return const FavoritesPage(); // ⭐ Favorieten pagina
     }
     if (activeSpace != null) {
       return SpaceView(
@@ -91,7 +81,7 @@ class ChatListViewBody extends StatelessWidget {
         controller.syncBridgeTypes();
         final rooms = controller.isSearchMode
             ? controller.searchRooms
-            : controller.filteredRooms;
+            : controller.visibleRooms; // Gebruik visibleRooms i.p.v. filteredRooms
 
         return ChatListShortcuts(
           onPreviousChat: () {
@@ -291,8 +281,20 @@ class ChatListViewBody extends StatelessWidget {
                   ),
                 if (client.prevBatch != null)
                   SliverList.builder(
-                    itemCount: rooms.length,
+                    itemCount: rooms.length + (controller.hasMoreRooms ? 1 : 0),
                     itemBuilder: (BuildContext context, int i) {
+                      if (i == rooms.length) {
+                        return Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Center(
+                            child: ElevatedButton.icon(
+                              onPressed: controller.loadMoreRooms,
+                              icon: const Icon(Icons.expand_more),
+                              label: Text(L10n.of(context).loadMore),
+                            ),
+                          ),
+                        );
+                      }
                       final room = rooms[i];
                       final space = spaceDelegateCandidates[room.id];
                       return ChatListItem(

@@ -31,6 +31,7 @@ class SettingsSwitchListTileState extends State<SettingsSwitchListTile> {
       onChanged: (bool newValue) async {
         widget.onChanged?.call(newValue);
         await widget.setting.setItem(newValue);
+        if (!mounted) return;
         setState(() {});
       },
     );

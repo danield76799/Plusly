@@ -14,7 +14,6 @@ abstract class SettingKeys {
 }
 
 enum AppSettings<T> {
-  enablePeopleTab<bool>('xyz.plusly.enablePeopleTab', true),
   autoLoadMedia<bool>('xyz.plusly.autoLoadMedia', true),
   showCameraButton<bool>('xyz.plusly.cameraButton', true),
   stickerScale<double>('xyz.plusly.stickerScale', 2),
@@ -36,6 +35,14 @@ enum AppSettings<T> {
     'xyz.plusly.serviceUrl',
     'http://13.140.136.172:5000', // Jouw LibreTranslate server
   ),
+  // LLM / AI Features
+  llmEnabled<bool>('xyz.plusly.llmEnabled', false),
+  llmProvider<String>('xyz.plusly.llmProvider', 'groq'),
+  llmGatewayUrl<String>('xyz.plusly.llmGatewayUrl', 'http://13.140.136.172:11434'),
+  llmPrivacyAccepted<bool>('xyz.plusly.llmPrivacyAccepted', false),
+  llmEncryptedRoomConsent<bool>('xyz.plusly.llmEncryptedRoomConsent', false),
+  llmShowSmartReplies<bool>('xyz.plusly.llmShowSmartReplies', true),
+  llmEnableTranslation<bool>('xyz.plusly.llmEnableTranslation', true),
   latexMath<bool>('xyz.plusly.latexMath', false),
   messageTranslation<bool>('xyz.plusly.messageTranslation', true),
   useLegacyChatListAppBar<bool>('xyz.plusly.legacyAppBar', false),
@@ -52,7 +59,7 @@ enum AppSettings<T> {
   checkForUpdates<bool>('xyz.plusly.next.checkForUpdates', true),
   colorSchemeSeed<int>('xyz.plusly.next.colorSchemeSeed', 0x49AFC2),
   hideAvatarsInInvites<bool>('xyz.plusly.next.hideAvatarsInInvites', true),
-  displayNavigationRail<bool>('chat.fluffy.displayNavigationRail', true),
+  displayNavigationRail<bool>('chat.fluffy.displayNavigationRail', false),
   httpProxy<String>('xyz.plusly.next.httpProxy', ''),
   cleanExif<bool>('xyz.plusly.next.cleanExif', true),
   doNotSendIfCantClean<bool>('xyz.plusly.next.doNotSendIfCantClean', true),
@@ -95,6 +102,9 @@ enum AppSettings<T> {
   audioRecordingSamplingRate<int>('audioRecordingSamplingRate', 44100),
   enableVideoNotes<bool>('xyz.plusly.next.enableVideoNotes', false),
   enableChatFrostedGlass<bool>('xyz.plusly.next.enableChatFrostedGlass', false),
+  galleryColumns<int>('xyz.plusly.galleryColumns', 3),
+  galleryThumbnailSize<int>('xyz.plusly.galleryThumbnailSize', 128),
+  galleryLazyLoading<bool>('xyz.plusly.galleryLazyLoading', true),
   enableAppBarCenterTitle<bool>(
     'xyz.plusly.next.enableAppBarCenterTitle',
     false,

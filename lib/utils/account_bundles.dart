@@ -49,9 +49,10 @@ extension AccountBundlesExtension on Client {
   List<AccountBundle> get accountBundles {
     List<AccountBundle>? ret;
     if (accountData.containsKey(accountBundlesType)) {
-      ret = AccountBundles.fromJson(
-        accountData[accountBundlesType]!.content,
-      ).bundles;
+      final content = accountData[accountBundlesType]?.content;
+      if (content != null) {
+        ret = AccountBundles.fromJson(content).bundles;
+      }
     }
     ret ??= [];
     if (ret.isEmpty) {
@@ -76,25 +77,29 @@ extension AccountBundlesExtension on Client {
     if (!foundBundle) {
       bundles.add(AccountBundle(name: name, priority: priority));
     }
-    await setAccountData(userID!, accountBundlesType, data.toJson());
+    final uid = userID;
+    if (uid == null) return;
+    await setAccountData(uid, accountBundlesType, data.toJson());
   }
 
   Future<void> removeFromAccountBundle(String name) async {
     if (!accountData.containsKey(accountBundlesType)) {
       return; // nothing to do
     }
-    final data = AccountBundles.fromJson(
-      accountData[accountBundlesType]!.content,
-    );
+    final content = accountData[accountBundlesType]?.content;
+    if (content == null) return;
+    final data = AccountBundles.fromJson(content);
     if (data.bundles == null) return;
     data.bundles!.removeWhere((b) => b.name == name);
-    await setAccountData(userID!, accountBundlesType, data.toJson());
+    final uid = userID;
+    if (uid == null) return;
+    await setAccountData(uid, accountBundlesType, data.toJson());
   }
 
   String get sendPrefix {
     final data = AccountBundles.fromJson(
       accountData[accountBundlesType]?.content ?? {},
     );
-    return data.prefix!;
+    return data.prefix ?? '';
   }
 }

@@ -1,77 +1,17 @@
-# Fastlane config voor Plusly (com.danield.plusly.app)
-# Gebaseerd op FluffyChat config maar aangepast voor Plusly
-
-ENV['SUPPLY_UPLOAD_MAX_RETRIES']='5'
-
-update_fastlane
-
 default_platform(:android)
 
 platform :android do
-  # Haal huidige versie op uit pubspec.yaml
-  def get_version
-    pubspec = File.read("../../pubspec.yaml")
-    version_match = pubspec.match(/version:\s*([0-9]+\.[0-9]+\.[0-9]+)\+?([0-9]*)/)
-    {
-      name: version_match[1],
-      code: version_match[2].to_i > 0 ? version_match[2].to_i : 1
-    }
-  end
-
-  lane :set_build_code_internal do
-    versions = google_play_track_version_codes(
-      track: "internal",
-      json_key: "./keys.json"
-    )
-    last_version = versions[0].to_i
-    next_version = last_version + 1
-    
-    Dir.chdir("../..") do
-      current = get_version
-      new_code = [next_version, current[:code]].max
-      
-      re = /version:\s*([0-9]+\.[0-9]+\.[0-9]+)\+?([0-9]*)/
-      subst = "version: #{current[:name]}+#{new_code}"
-      
-      result = File.read("pubspec.yaml").gsub(re, subst)
-      File.open("pubspec.yaml", 'w') { |f| f.write(result) }
-      
-      UI.success("Updated version to #{current[:name]}+#{new_code} (Play Store was at #{last_version})")
-    end
-  end
-
+  desc "Deploy to Play Store Internal Testing"
   lane :deploy_internal_test do
-    # Haal build nummer uit pubspec.yaml
-    pubspec = File.read("../../pubspec.yaml")
-    version_match = pubspec.match(/version:\s*([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+)/)
-    build_number = version_match[2].to_i
-    version_name = version_match[1]
-    
-    UI.success("Uploading Plusly #{version_name} (#{build_number}) to Play Store")
-    
     upload_to_play_store(
-      track: 'internal',
-      aab: '../build/app/outputs/bundle/release/app-release.aab',
-      version_code: "#{build_number}",
-      release_status: 'draft'
-    )
-  end
-
-  lane :deploy_beta do
-    upload_to_play_store(
-      track: 'internal',
-      track_promote_to: "beta",
-      deactivate_on_promote: false,
-      skip_upload_changelogs: true
-    )
-  end
-
-  lane :deploy_production do
-    upload_to_play_store(
-      track: 'internal',
-      track_promote_to: "production",
-      deactivate_on_promote: false,
-      skip_upload_changelogs: true
+      track: "internal",
+      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      json_key: "keys.json",
+      package_name: "com.danield.plusly.app",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false,
     )
   end
 end

@@ -3,8 +3,7 @@ import 'dart:async';
 /// Abstract interface voor alle push providers.
 /// 
 /// Implementaties:
-/// - [UnifiedPushProvider] — privacy-friendly, de-facto standaard voor Matrix
-/// - [FirebasePushProvider] — Google FCM fallback
+/// - [UnifiedPushProvider] — privacy-first, geen Google
 abstract class PushProvider {
   /// Unieke identifier voor deze provider
   String get id;
@@ -94,6 +93,5 @@ class PushMessage {
 
 enum PushProviderType {
   unifiedPush,
-  firebase,
   none,
 }

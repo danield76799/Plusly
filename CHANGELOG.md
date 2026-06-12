@@ -1,10 +1,33 @@
-# Plusly v1.4.13
+# Plusly v1.4.9 — UnifiedPush Edition
 
-## Fixes
-- Fixed LibreTranslate connection to new server
-- Upgraded Android NDK to r27 for Android 15 compatibility
-- Added 16KB page size support for upcoming Android 16
-- Improved APK update checks
+## Breaking Changes
+- **Firebase Cloud Messaging verwijderd** — Plusly gebruikt nu alleen UnifiedPush (SunUP)
+- Alle FCM code is opgeruimd: `firebase_push_provider.dart`, `FcmPushService.kt`, `fcm_shared_isolate` weg
+- `google-services.json` niet langer nodig (Firebase account niet meer vereist)
+
+## New Features
+- **UnifiedPush (UP) only** — stabiele push notificaties via SunUP
+- **Gesplitste APKs** — aparte downloads voor 32-bit (armeabi-v7a), 64-bit (arm64-v8a), x86_64
+- **AAB** voor Play Store blijft beschikbaar
+
+## Bugfixes
+- `UnifiedPush.unregister()` — positional parameter gefixt (was named param, crashed op runtime)
+- Background handler `Firebase.initializeApp()` toegevoegd voor background isolates
+- "Nieuw Push Systeem" toggle verwijderd uit settings (overbodig — alles is UP)
+- `useFirebase` feature flag toegevoegd (default false) op main branch
+- CI: `cancel-in-progress: false` — builds worden niet meer halverwege afgebroken
+- CI: `flutter pub get` vóór asset generation — dependency resolving gefixt
+- CI: Flutter 3.27.0 → 3.41.9 — verouderde Flutter versie opgelost
+- CI: auto bump patch + build nummer met `[skip ci]`
+- CI: Play Store deploy optioneel (alleen als secret bestaat)
+
+## Build System
+- **Split-per-abi**: 3 aparte APK builds i.p.v. 1 fat APK (~130MB → ~45MB elk)
+- **Signing**: Nieuwe keystore gegenereerd, consistent in GitHub secrets
+- **CI volledig herschreven**: stabielere workflows, minder failures
+- `versions.env` opgeschoond (geen comment-regels die GITHUB_ENV breken)
+
+---
 
 # Plusly v1.4.1
 

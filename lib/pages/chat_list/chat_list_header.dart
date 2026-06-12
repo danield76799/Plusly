@@ -4,10 +4,12 @@ import 'package:matrix/matrix.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';
 import 'package:Pulsly/pages/chat_list/client_chooser_button.dart';
+
 import 'package:Pulsly/utils/sync_status_localization.dart';
 import '../../widgets/matrix.dart';
 
@@ -44,6 +46,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   static const double _titleHeight = 56.0;
   static const double _searchBarHeight = 48.0; // 40 + 8 padding
+  static const double _tabBarHeight = 48.0;
 
   _ChatListHeaderDelegate({
     required this.controller,
@@ -52,10 +55,10 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
   });
 
   @override
-  double get minExtent => _titleHeight + topPadding;
+  double get minExtent => _titleHeight + _tabBarHeight + topPadding;
 
   @override
-  double get maxExtent => _titleHeight + _searchBarHeight + topPadding;
+  double get maxExtent => _titleHeight + _searchBarHeight + _tabBarHeight + topPadding;
 
   @override
   bool shouldRebuild(covariant _ChatListHeaderDelegate oldDelegate) => true;
@@ -283,8 +286,68 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                 ),
               ),
             ),
+
+            // Tab Bar with 4 tabs
+            SizedBox(
+              height: _tabBarHeight,
+              child: _buildTabBar(context, theme),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTabBar(BuildContext context, ThemeData theme) {
+    final filters = [
+      ActiveFilter.allChats,
+      ActiveFilter.unread,
+      ActiveFilter.groups,
+      ActiveFilter.favorites,
+    ];
+
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: theme.dividerColor,
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: filters.map((filter) {
+          final isActive = controller.activeFilter == filter;
+          return Expanded(
+            child: InkWell(
+              onTap: () => controller.setActiveFilter(filter),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: isActive
+                          ? const Color(0xFF49AFC2)
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    filter.toLocalizedString(context),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isActive
+                          ? const Color(0xFF49AFC2)
+                          : theme.colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
