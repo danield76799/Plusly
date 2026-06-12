@@ -413,44 +413,42 @@ class InputBar extends StatelessWidget {
       hideOnSelect: false,
       debounceDuration: const Duration(milliseconds: 50),
       // show suggestions after 50ms idle time (default is 300)
-      builder: (context, controller, focusNode) => TextField(
-        controller: controller,
-        focusNode: focusNode,
-        contextMenuBuilder: (c, e) => markdownContextBuilder(c, e, controller),
-        contentInsertionConfiguration: ContentInsertionConfiguration(
-          onContentInserted: (KeyboardInsertedContent content) {
-            final data = content.data;
-            if (data == null) return;
+      builder: (context, controller, focusNode) {
+        return TextField(
+          controller: controller,
+          focusNode: focusNode,
+          contextMenuBuilder: (c, e) => markdownContextBuilder(c, e, controller),
+          contentInsertionConfiguration: ContentInsertionConfiguration(
+            onContentInserted: (KeyboardInsertedContent content) {
+              final data = content.data;
+              if (data == null) return;
 
-            final file = MatrixFile(
-              mimeType: content.mimeType,
-              bytes: data,
-              name: content.uri.split('/').last,
-            );
-            room.sendFileEvent(file, shrinkImageMaxDimension: 1600);
+              final file = MatrixFile(
+                mimeType: content.mimeType,
+                bytes: data,
+                name: content.uri.split('/').last,
+              );
+              room.sendFileEvent(file, shrinkImageMaxDimension: 1600);
+            },
+          ),
+          minLines: minLines,
+          maxLines: maxLines,
+          keyboardType: keyboardType!,
+          textInputAction: textInputAction,
+          autofocus: autofocus!,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter((maxPDUSize / 3).floor()),
+          ],
+          onSubmitted: (text) {
+            onSubmitted!(text);
           },
-        ),
-        minLines: minLines,
-        maxLines: maxLines,
-        keyboardType: keyboardType!,
-        textInputAction: textInputAction,
-        autofocus: autofocus!,
-        inputFormatters: [
-          LengthLimitingTextInputFormatter((maxPDUSize / 3).floor()),
-        ],
-        onSubmitted: (text) {
-          // fix for library for now
-          // it sets the types for the callback incorrectly
-          onSubmitted!(text);
-        },
-        decoration: decoration!,
-        onChanged: (text) {
-          // fix for the library for now
-          // it sets the types for the callback incorrectly
-          onChanged!(text);
-        },
-        textCapitalization: TextCapitalization.sentences,
-      ),
+          decoration: decoration!,
+          onChanged: (text) {
+            onChanged!(text);
+          },
+          textCapitalization: TextCapitalization.sentences,
+        );
+      },
       suggestionsCallback: getSuggestions,
       itemBuilder: (c, s) => buildSuggestion(c, s, Matrix.of(context).client),
       onSelected: (Map<String, String?> suggestion) =>
