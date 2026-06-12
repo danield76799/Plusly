@@ -36,7 +36,7 @@ class UrlLauncher {
     }
     if (url.toLowerCase().startsWith(AppConfig.deepLinkPrefix) ||
         url.toLowerCase().startsWith(AppConfig.inviteLinkPrefix) ||
-        {'#', '@', '!', '+', '\\$'}.contains(url[0])) {
+        url[0] == '#' || url[0] == '@' || url[0] == '!' || url[0] == '+' || url[0] == '\$') {
       return openMatrixToUrl();
     }
     final uri = Uri.tryParse(url);
