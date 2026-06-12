@@ -572,8 +572,9 @@ class ChatListController extends State<ChatList>
     if (uri == null) return;
     Logs().w("Processing incoming url: ${uri.toString()}");
     context.go('/rooms');
+    final localContext = context;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      UrlLauncher(context, uri.toString()).openMatrixToUrl();
+      UrlLauncher(localContext, uri.toString()).openMatrixToUrl();
     });
   }
 

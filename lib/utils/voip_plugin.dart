@@ -48,7 +48,11 @@ class VoipPlugin with WidgetsBindingObserver implements WebRTCDelegate {
   }
 
   void addCallingOverlay(String callId, CallSession call) {
-    final context = ChatList.contextForVoip!; // web is weird
+    final context = ChatList.contextForVoip;
+    if (context == null) {
+      Logs().e('[VOIP] addCallingOverlay: No context available — ChatList.contextForVoip not set');
+      return;
+    }
 
     if (overlayEntry != null) {
       Logs().e('[VOIP] addCallingOverlay: The call session already exists?');

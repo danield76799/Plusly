@@ -30,7 +30,9 @@ class EmotesSettings extends StatefulWidget {
 }
 
 class EmotesSettingsController extends State<EmotesSettings> {
-  late final Room? room;
+  Room? get room => widget.roomId != null
+      ? Matrix.of(context).client.getRoomById(widget.roomId!)
+      : null;
 
   String? stateKey;
 
@@ -45,9 +47,6 @@ class EmotesSettingsController extends State<EmotesSettings> {
   @override
   void initState() {
     super.initState();
-    room = widget.roomId != null
-        ? Matrix.of(context).client.getRoomById(widget.roomId!)
-        : null;
     setStateKey(packKeys?.firstOrNull, reset: false);
   }
 

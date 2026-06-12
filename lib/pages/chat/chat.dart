@@ -676,12 +676,19 @@ class ChatController extends State<ChatPageWithRoom>
   @override
   void dispose() {
     _updateViewDebounce?.cancel();
+    typingCoolDown?.cancel();
+    typingTimeout?.cancel();
     scrollController.removeListener(_updateScrollController);
+    scrollController.dispose();
     _scrolledUp.dispose();
     timeline?.cancelSubscriptions();
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);
+    inputFocus.dispose();
     inputBarHeight.dispose();
+    sendController.dispose();
+    _displayChatDetailsColumn.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     if (currentlyTyping) room.setTyping(false);
     super.dispose();
   }
