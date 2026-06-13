@@ -262,23 +262,30 @@ class ChatListController extends State<ChatList>
     return true;
   }
 
-  // Cached filteredRooms - 500ms cache
+  // Cached filteredRooms - 2s cache + room count hash for stability
   List<Room> get filteredRooms {
     final now = DateTime.now();
-    if (now.difference(_lastFilterCalc) < Duration(milliseconds: 500) &&
+    final client = Matrix.of(context).client;
+    final currentRoomCount = client.rooms.length;
+    if (now.difference(_lastFilterCalc) < Duration(seconds: 2) &&
         _lastActiveFilter == activeFilter &&
-        _lastVisibleBridgeTypes == visibleBridgeTypes) {
+        _lastVisibleBridgeTypes == visibleBridgeTypes &&
+        _lastRoomCount == currentRoomCount) {
       return _cachedFilteredRooms;
     }
 
-    _cachedFilteredRooms = Matrix.of(
-      context,
-    ).client.rooms.where(getRoomFilterByActiveFilter(activeFilter)).where(_isBridgeTypeVisible).toList();
+    _cachedFilteredRooms = client.rooms
+        .where(getRoomFilterByActiveFilter(activeFilter))
+        .where(_isBridgeTypeVisible)
+        .toList();
     _lastFilterCalc = now;
     _lastActiveFilter = activeFilter;
     _lastVisibleBridgeTypes = Set<String>.from(visibleBridgeTypes);
+    _lastRoomCount = currentRoomCount;
     return _cachedFilteredRooms;
   }
+
+  int _lastRoomCount = 0;
 
   // Lazy loading pagination
   static const int _pageSize = 40;

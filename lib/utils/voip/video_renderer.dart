@@ -68,6 +68,7 @@ class _VideoRendererState extends State<VideoRenderer> {
   @override
   void dispose() {
     _streamChangeSubscription?.cancel();
+    _streamChangeSubscription = null;
     disposeRenderer();
     super.dispose();
   }

@@ -76,12 +76,12 @@ class ChatListViewBody extends StatelessWidget {
       key: ValueKey(client.userID.toString()),
       stream: client.onSync.stream
           .where((s) => s.hasRoomUpdate)
-          .rateLimit(const Duration(seconds: 1)),
+          .rateLimit(const Duration(seconds: 3)),
       builder: (context, _) {
         controller.syncBridgeTypes();
         final rooms = controller.isSearchMode
             ? controller.searchRooms
-            : controller.visibleRooms; // Gebruik visibleRooms i.p.v. filteredRooms
+            : controller.visibleRooms;
 
         return ChatListShortcuts(
           onPreviousChat: () {
