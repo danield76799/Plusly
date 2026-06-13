@@ -436,18 +436,32 @@ class ChatListController extends State<ChatList>
     final results = <sdk.Event>[];
     final rooms = client.rooms.where((room) => !room.isSpace).toList();
     
-    for (final room in rooms) {
-      try {
-        final timeline = await room.getTimeline();
-        final events = timeline.events
-            .where((e) => e.body.toLowerCase().contains(lowerQuery))
-            .take(10)
-            .toList();
+    // Use cached timelines when available, load in parallel batches
+    const batchSize = 5;
+    for (var i = 0; i < rooms.length; i += batchSize) {
+      final batch = rooms.skip(i).take(batchSize);
+      final batchResults = await Future.wait(
+        batch.map((room) async {
+          try {
+            // Prefer cached timeline for speed
+            final cached = TimelineCache.getTimeline(room.id);
+            final timeline = cached ?? await room.getTimeline();
+            final events = timeline.events
+                .where((e) => e.body.toLowerCase().contains(lowerQuery))
+                .take(10)
+                .toList();
+            return events;
+          } catch (_) {
+            return <sdk.Event>[];
+          }
+        }),
+        eagerError: false,
+      );
+      for (final events in batchResults) {
         results.addAll(events);
         if (results.length >= 100) break; // Limit results
-      } catch (_) {
-        // Skip rooms that fail
       }
+      if (results.length >= 100) break;
     }
     return results;
   }
