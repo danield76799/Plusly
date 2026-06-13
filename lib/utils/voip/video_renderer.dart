@@ -35,12 +35,16 @@ class _VideoRendererState extends State<VideoRenderer> {
   }
 
   void disposeRenderer() {
+    _streamChangeSubscription?.cancel();
+    _streamChangeSubscription = null;
     try {
       _renderer?.srcObject = null;
       _renderer?.dispose();
       _renderer = null;
-      // ignore: empty_catches
-    } catch (e) {}
+    } catch (e, stack) {
+      debugPrint('VideoRenderer dispose error: $e');
+      debugPrintStack(stackTrace: stack);
+    }
   }
 
   @override

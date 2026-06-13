@@ -56,6 +56,8 @@ class _MxcImageState extends State<MxcImage> {
   static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 100);
 
   Uint8List? _imageDataNoCache;
+  int _retryCount = 0;
+  static const int _maxRetries = 3;
 
   Uint8List? get _imageData => widget.cacheKey == null
       ? _imageDataNoCache
@@ -113,8 +115,14 @@ class _MxcImageState extends State<MxcImage> {
     }
     try {
       await _load();
+      _retryCount = 0; // reset on success
     } on IOException catch (_) {
       if (!mounted) return;
+      _retryCount++;
+      if (_retryCount >= _maxRetries) {
+        Logs().d('MxcImage: max retries ($_maxRetries) reached for ${widget.uri}');
+        return;
+      }
       await Future.delayed(widget.retryDuration);
       _tryLoad();
     }

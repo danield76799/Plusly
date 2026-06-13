@@ -23,18 +23,27 @@ class TimelineCache {
 
   /// Preload the first N rooms' timelines in the background.
   /// Call this once at app startup (non-blocking).
+  /// Loads in parallel batches of 10 to avoid overwhelming the server.
   static Future<void> preloadRooms(List<Room> rooms, {int limit = 40}) async {
     final toLoad = rooms
         .where((r) => r.isDirectChat || !r.isSpace)
         .take(limit)
         .toList();
 
-    for (final room in toLoad) {
-      try {
-        final t = await room.getTimeline();
-        _cache[room.id] = t;
-      } catch (_) {
-        // Skip rooms that fail — they'll load when the user opens them
+    const batchSize = 10;
+    for (var i = 0; i < toLoad.length; i += batchSize) {
+      final batch = toLoad.skip(i).take(batchSize);
+      final results = await Future.wait(
+        batch.map((room) => room.getTimeline().then(
+              (t) => MapEntry(room.id, t),
+              onError: (_) => null,
+            )),
+        eagerError: false,
+      );
+      for (final entry in results) {
+        if (entry != null) {
+          _cache[entry.key] = entry.value;
+        }
       }
     }
   }
