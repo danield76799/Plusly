@@ -13,7 +13,7 @@ import '../../widgets/avatar.dart';
 import '../../widgets/matrix.dart';
 import 'command_hints.dart';
 
-class InputBar extends StatelessWidget {
+class InputBar extends StatefulWidget {
   final Room room;
   final int? minLines;
   final int? maxLines;
@@ -45,6 +45,22 @@ class InputBar extends StatelessWidget {
     super.key,
   });
 
+  @override
+  State<InputBar> createState() => _InputBarState();
+}
+
+class _InputBarState extends State<InputBar> {
+  // Cache for expensive emoji/user/room lookups
+  List<Map<String, String?>>? _cachedEmojiSuggestions;
+  String? _cachedEmojiSearch;
+  List<Map<String, String?>>? _cachedUserSuggestions;
+  String? _cachedUserSearch;
+  List<Map<String, String?>>? _cachedRoomSuggestions;
+  String? _cachedRoomSearch;
+
+  Room get room => widget.room;
+  TextEditingController? get controller => widget.controller;
+
   List<Map<String, String?>> getSuggestions(String text) {
     if (controller!.selection.baseOffset !=
             controller!.selection.extentOffset ||
@@ -75,6 +91,22 @@ class InputBar extends StatelessWidget {
     if (emojiMatch != null) {
       final packSearch = emojiMatch[1];
       final emoteSearch = emojiMatch[2]!.toLowerCase();
+      
+      // Cache hit: if search starts with cached prefix, filter from cache
+      if (_cachedEmojiSearch != null &&
+          emoteSearch.startsWith(_cachedEmojiSearch!) &&
+          _cachedEmojiSuggestions != null) {
+        final filtered = _cachedEmojiSuggestions!
+            .where((s) => (s['name'] ?? s['label'] ?? '')
+                .toLowerCase()
+                .contains(emoteSearch))
+            .take(maxResults)
+            .toList();
+        if (filtered.length >= maxResults ~/ 2) {
+          return filtered;
+        }
+      }
+      
       final emotePacks = room.getImagePacks(ImagePackUsage.emoticon);
       if (packSearch == null || packSearch.isEmpty) {
         for (final pack in emotePacks.entries) {
@@ -153,6 +185,9 @@ class InputBar extends StatelessWidget {
           break;
         }
       }
+      // Cache emoji results for incremental search
+      _cachedEmojiSearch = emoteSearch;
+      _cachedEmojiSuggestions = List.from(ret);
     }
     final userMatch = RegExp(
       r'(?:\s|^)@([^ \[\]]+)$',
@@ -160,6 +195,23 @@ class InputBar extends StatelessWidget {
     ).firstMatch(searchText);
     if (userMatch != null) {
       final userSearch = userMatch[1]!.toLowerCase();
+      
+      // Cache hit for user search
+      if (_cachedUserSearch != null &&
+          userSearch.startsWith(_cachedUserSearch!) &&
+          _cachedUserSuggestions != null) {
+        final filtered = _cachedUserSuggestions!
+            .where((s) =>
+                (s['displayname'] ?? s['mxid'] ?? '')
+                    .toLowerCase()
+                    .contains(userSearch))
+            .take(maxResults)
+            .toList();
+        if (filtered.length >= maxResults ~/ 2) {
+          return filtered;
+        }
+      }
+      
       for (final user in room.getParticipants()) {
         if ((user.displayName != null &&
                 (user.displayName!.toLowerCase().contains(userSearch) ||
@@ -179,10 +231,30 @@ class InputBar extends StatelessWidget {
           break;
         }
       }
+      // Cache user results for incremental search
+      _cachedUserSearch = userSearch;
+      _cachedUserSuggestions = List.from(ret);
     }
     final roomMatch = RegExp(r'(?:\s|^)#([^ \[\]]+)$').firstMatch(searchText);
     if (roomMatch != null) {
       final roomSearch = roomMatch[1]!.toLowerCase();
+      
+      // Cache hit for room search
+      if (_cachedRoomSearch != null &&
+          roomSearch.startsWith(_cachedRoomSearch!) &&
+          _cachedRoomSuggestions != null) {
+        final filtered = _cachedRoomSuggestions!
+            .where((s) =>
+                (s['displayname'] ?? s['mxid'] ?? '')
+                    .toLowerCase()
+                    .contains(roomSearch))
+            .take(maxResults)
+            .toList();
+        if (filtered.length >= maxResults ~/ 2) {
+          return filtered;
+        }
+      }
+      
       for (final r in room.client.rooms) {
         if (r.getState(EventTypes.RoomTombstone) != null) {
           continue; // we don't care about tombstoned rooms
@@ -216,6 +288,9 @@ class InputBar extends StatelessWidget {
           break;
         }
       }
+      // Cache room results for incremental search
+      _cachedRoomSearch = roomSearch;
+      _cachedRoomSuggestions = List.from(ret);
     }
     return ret;
   }
@@ -409,7 +484,7 @@ class InputBar extends StatelessWidget {
       hideOnEmpty: true,
       hideOnLoading: true,
       controller: controller,
-      focusNode: focusNode,
+      focusNode: widget.focusNode,
       hideOnSelect: false,
       debounceDuration: const Duration(milliseconds: 50),
       // show suggestions after 50ms idle time (default is 300)
@@ -431,20 +506,20 @@ class InputBar extends StatelessWidget {
               room.sendFileEvent(file, shrinkImageMaxDimension: 1600);
             },
           ),
-          minLines: minLines,
-          maxLines: maxLines,
-          keyboardType: keyboardType!,
-          textInputAction: textInputAction,
-          autofocus: autofocus!,
+          minLines: widget.minLines,
+          maxLines: widget.maxLines,
+          keyboardType: widget.keyboardType!,
+          textInputAction: widget.textInputAction,
+          autofocus: widget.autofocus!,
           inputFormatters: [
             LengthLimitingTextInputFormatter((maxPDUSize / 3).floor()),
           ],
           onSubmitted: (text) {
-            onSubmitted!(text);
+            widget.onSubmitted!(text);
           },
-          decoration: decoration!,
+          decoration: widget.decoration!,
           onChanged: (text) {
-            onChanged!(text);
+            widget.onChanged!(text);
           },
           textCapitalization: TextCapitalization.sentences,
         );
