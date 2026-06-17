@@ -17,6 +17,7 @@ import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/privacy_options.dart';
 import 'package:Pulsly/utils/push_helper.dart';
 import '../config/app_config.dart';
+import '../services/timeline_cache.dart';
 
 bool _vodInitialized = false;
 
@@ -152,6 +153,19 @@ Future<void> notificationTap(
         await client
             .waitForRoomInSync(roomId)
             .timeout(const Duration(seconds: 30));
+      }
+      // Preload timeline for instant chat opening
+      final room = client.getRoomById(roomId);
+      if (room != null) {
+        try {
+          final timeline = await room.getTimeline().timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => room.getTimeline(), // Fallback without timeout
+          );
+          TimelineCache.setTimeline(roomId, timeline);
+        } catch (e) {
+          Logs().w('Failed to preload timeline for $roomId', e);
+        }
       }
       router.go(
         client.getRoomById(roomId)?.membership == Membership.invite
