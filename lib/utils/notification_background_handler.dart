@@ -147,20 +147,21 @@ Future<void> notificationTap(
         return;
       }
       Logs().v('Open room from notification tap', roomId);
-      await client.roomsLoading;
-      await client.accountDataLoading;
-      if (client.getRoomById(roomId) == null) {
+      // Verwijder roomsLoading/accountDataLoading await voor snellere navigatie
+      // (timeline cache zorgt voor snel laden)
+      final room = client.getRoomById(roomId);
+      if (room == null) {
         await client
             .waitForRoomInSync(roomId)
             .timeout(const Duration(seconds: 30));
       }
-      // Preload timeline for instant chat opening
-      final room = client.getRoomById(roomId);
-      if (room != null) {
+      // Preload timeline voor instant chat opening
+      final loadedRoom = client.getRoomById(roomId);
+      if (loadedRoom != null) {
         try {
-          final timeline = await room.getTimeline().timeout(
+          final timeline = await loadedRoom.getTimeline().timeout(
             const Duration(seconds: 5),
-            onTimeout: () => room.getTimeline(), // Fallback without timeout
+            onTimeout: () => loadedRoom.getTimeline(),
           );
           TimelineCache.setTimeline(roomId, timeline);
         } catch (e) {
@@ -183,8 +184,6 @@ Future<void> notificationTap(
       if (roomId == null) {
         throw Exception('Selected notification with action but no payload');
       }
-      await client.roomsLoading;
-      await client.accountDataLoading;
       await client.userDeviceKeysLoading;
       final room = client.getRoomById(roomId);
       if (room == null) {
