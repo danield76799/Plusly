@@ -113,10 +113,9 @@ jobs:
       # === APK BUILD (split per architecture — 32-bit + 64-bit) ===
       - name: Build Android APK (split ABIs)
         run: |
-          flutter build apk --release --split-per-abi --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }} --dart-define=OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY || '' }}
+          flutter build apk --release --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }} --dart-define=OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY || '' }}
           mkdir -p output
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
+          cp build/app/outputs/flutter-apk/app-release.apk output/plusly-universal-release.apk || true
 
       # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
@@ -142,16 +141,9 @@ jobs:
         if: always()
         with:
           name: plusly-armeabi-v7a-apk
-          path: output/plusly-armeabi-v7a-release.apk
+          path: output/plusly-universal-release.apk
           retention-days: 30
 
-      - name: Upload arm64-v8a APK
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: plusly-arm64-v8a-apk
-          path: output/plusly-arm64-v8a-release.apk
-          retention-days: 30
 
       - name: Upload AAB (Play Store)
         uses: actions/upload-artifact@v4
