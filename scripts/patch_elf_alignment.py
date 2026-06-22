@@ -152,8 +152,8 @@ def process_apk(apk_path):
             print("If the Play Store still warns, try updating the Flutter NDK version.")
             return 0  # Don't fail the build
 
-        # Repack
-        print("\nRepacking APK/AAB...")
+        # Repack — remove old signature (it's invalid after .so changes)
+        print("\nRepacking APK/AAB (removing old signature)...")
         # Keep original
         backup = apk_path + '.bak'
         shutil.copy2(apk_path, backup)
@@ -161,12 +161,22 @@ def process_apk(apk_path):
         with zipfile.ZipFile(backup, 'r') as zin:
             with zipfile.ZipFile(apk_path, 'w', zipfile.ZIP_DEFLATED) as zout:
                 for item in zin.namelist():
+                    # Skip signature files — they're invalid after .so changes
+                    if item.startswith('META-INF/') and (
+                        item.endswith('.SF') or
+                        item.endswith('.RSA') or
+                        item.endswith('.DSA') or
+                        item.endswith('.EC')
+                    ):
+                        print(f"  Removed signature: {item}")
+                        continue
                     if item in needs_fix:
                         zout.write(os.path.join(tmpdir, item), item)
                     else:
                         zout.writestr(item, zin.read(item))
 
-        print(f"Done! {fixed}/{len(needs_fix)} files fixed. ✅")
+        print(f"Done! {fixed}/{len(needs_fix)} files fixed. ⚠️ AAB needs re-signing!")
+        print("Run: jarsigner -keystore <keystore> <aab> <alias>")
         return 0
 
     finally:
