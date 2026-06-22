@@ -571,6 +571,18 @@ class BackgroundPush {
       useNotificationActions:
           false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
     );
+
+    // Trigger immediate sync so the new message appears in the chat instantly
+    // (without this, the timeline can take 15+ seconds to update)
+    final client = clientFromInstance(i, clients);
+    if (client != null) {
+      try {
+        await client.oneShotSync();
+        Logs().v('Immediate sync triggered after push notification');
+      } catch (e) {
+        Logs().w('Failed to trigger immediate sync after push', e);
+      }
+    }
   }
 }
 
