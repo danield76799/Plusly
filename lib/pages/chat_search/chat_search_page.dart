@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/pages/chat_search/chat_search_view.dart';
+import 'package:Pulsly/services/smart_search_service.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
 class ChatSearchPage extends StatefulWidget {
@@ -34,6 +35,10 @@ class ChatSearchController extends State<ChatSearchPage>
 
   bool isLoading = false;
   DateTime? searchedUntil;
+
+  // Smart search (natural language)
+  bool smartSearchEnabled = false;
+  List<String> smartSearchKeywords = [];
 
   // Search filters
   String? filterSenderId;
@@ -88,6 +93,37 @@ class ChatSearchController extends State<ChatSearchPage>
         setState(() {
           isLoading = true;
         });
+
+        if (smartSearchEnabled) {
+          // Smart search: natural language → keywords → Matrix search → LLM rank
+          try {
+            final result = await SmartSearchService.search(
+              room: room,
+              query: searchQuery,
+              nextBatch: messagesNextBatch,
+              limit: 50,
+            );
+            var events = result.events;
+            events = _applyFilters(events);
+            // Deduplicate by eventId
+            final existingIds = messages.map((e) => e.eventId).toSet();
+            events = events.where((e) => !existingIds.contains(e.eventId)).toList();
+            setState(() {
+              isLoading = false;
+              messages.addAll(events);
+              messagesNextBatch = result.nextBatch;
+              messagesEndReached = result.nextBatch == null;
+              searchedUntil = null;
+              smartSearchKeywords = result.keywords;
+            });
+          } catch (e) {
+            setState(() {
+              isLoading = false;
+            });
+          }
+          return;
+        }
+
         final result = await room.searchEvents(
           searchTerm: searchQuery,
           nextBatch: messagesNextBatch,

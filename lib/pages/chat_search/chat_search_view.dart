@@ -58,8 +58,30 @@ class ChatSearchView extends StatelessWidget {
                     autofocus: true,
                     enabled: controller.tabController.index == 0,
                     decoration: InputDecoration(
-                      hintText: L10n.of(context).search,
+                      hintText: controller.smartSearchEnabled
+                          ? 'Ask in natural language...'
+                          : L10n.of(context).search,
                       prefixIcon: const Icon(Icons.search_outlined),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.smartSearchEnabled
+                              ? Icons.auto_awesome
+                              : Icons.auto_awesome_outlined,
+                          color: controller.smartSearchEnabled
+                              ? theme.colorScheme.primary
+                              : null,
+                        ),
+                        tooltip: 'AI Search',
+                        onPressed: () {
+                          controller.smartSearchEnabled =
+                              !controller.smartSearchEnabled;
+                          controller.smartSearchKeywords = [];
+                          (context as Element).markNeedsBuild();
+                          if (controller.searchController.text.isNotEmpty) {
+                            controller.restartSearch();
+                          }
+                        },
+                      ),
                       filled: true,
                       fillColor: theme.colorScheme.secondaryContainer,
                       border: OutlineInputBorder(
@@ -72,6 +94,26 @@ class ChatSearchView extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (controller.smartSearchEnabled &&
+                      controller.smartSearchKeywords.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Wrap(
+                          spacing: 4,
+                          children: controller.smartSearchKeywords
+                              .map((k) => Chip(
+                                    label: Text(k,
+                                        style: const TextStyle(fontSize: 11)),
+                                    visualDensity: VisualDensity.compact,
+                                    materialTapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                    ),
                   const SizedBox(height: 8),
                   // Filter chips row
                   SingleChildScrollView(
