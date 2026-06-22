@@ -6,9 +6,11 @@ import 'package:Pulsly/services/llm_service.dart';
 ///
 /// Flow:
 /// 1. User types a natural language query (e.g. "what did Daan say about the deadline?")
-/// 2. LLM extracts search keywords from the query
-/// 3. Matrix server-side search with those keywords
-/// 4. LLM ranks results by relevance to the original question
+/// 2. Direct search with the raw query (same as normal search — always works)
+/// 3. LLM extracts additional keywords from the query
+/// 4. Matrix server-side search with those keywords
+/// 5. Merge all results, client-side filter on original query
+/// 6. LLM ranks results by relevance
 class SmartSearchService {
   /// Extract search keywords from a natural language query.
   /// Returns a list of search terms to use with Matrix searchEvents.
@@ -25,8 +27,9 @@ class SmartSearchService {
             'Rules:\n'
             '- Extract the most important content words\n'
             '- Skip filler words (what, did, say, about, the, a)\n'
-            '- Skip time references (last week, yesterday) — those are handled separately\n'
+            '- Skip time references (last week, yesterday)\n'
             '- Keep names of people if mentioned\n'
+            '- Keep emotional/descriptive words (emotie, sad, happy, etc.)\n'
             '- Lowercase everything\n'
             '- Maximum 5 keywords',
       ),
@@ -45,7 +48,8 @@ class SmartSearchService {
         'wat', 'zei', 'over', 'de', 'het', 'een', 'is', 'was', 'waren',
         'heeft', 'hebben', 'kan', 'kun', 'zijn', 'weer', 'vorige', 'deze',
         'laatste', 'on', 'in', 'to', 'for', 'and', 'or', 'of', 'from',
-        'last', 'this', 'week', 'yesterday', 'today', 'tomorrow'};
+        'last', 'this', 'week', 'yesterday', 'today', 'tomorrow',
+        'welke', 'op', 'zoek', 'naar', 'bijvoorbeeld'};
       return query
           .toLowerCase()
           .split(RegExp(r'[\s,.!?;:]+'))
@@ -63,23 +67,41 @@ class SmartSearchService {
     String? nextBatch,
     int limit = 50,
   }) async {
-    // Step 1: Extract keywords from the natural language query
-    final keywords = await extractKeywords(query);
-
-    if (keywords.isEmpty) {
-      return SmartSearchResult(events: [], nextBatch: null, keywords: []);
-    }
-
-    // Step 2: Search with each keyword and merge results
     final allEvents = <Event>[];
     final seenEventIds = <String>{};
     String? latestBatch;
 
-    for (final keyword in keywords) {
+    // Step 1: ALWAYS search with the raw query first (direct match)
+    // This ensures single-word searches like "Mattijn" or "emotie" always work
+    try {
+      final result = await room.searchEvents(
+        searchTerm: query,
+        nextBatch: nextBatch,
+        limit: limit,
+      );
+      latestBatch ??= result.nextBatch;
+      for (final event in result.events) {
+        if (!seenEventIds.contains(event.eventId)) {
+          seenEventIds.add(event.eventId);
+          allEvents.add(event);
+        }
+      }
+    } catch (_) {}
+
+    // Step 2: Also search with individual words from the query
+    // (helps when server search doesn't match multi-word queries)
+    final queryWords = query
+        .toLowerCase()
+        .split(RegExp(r'[\s,.!?;:]+'))
+        .where((w) => w.length > 2)
+        .toSet()
+        .toList();
+
+    for (final word in queryWords) {
+      if (word == query.toLowerCase()) continue; // already searched
       try {
         final result = await room.searchEvents(
-          searchTerm: keyword,
-          nextBatch: nextBatch,
+          searchTerm: word,
           limit: limit,
         );
         latestBatch ??= result.nextBatch;
@@ -89,13 +111,56 @@ class SmartSearchService {
             allEvents.add(event);
           }
         }
-      } catch (_) {
-        // Continue with other keywords even if one fails
-      }
+      } catch (_) {}
     }
 
-    // Step 3: Rank results by relevance using LLM
-    final ranked = await _rankResults(query, allEvents);
+    // Step 3: Extract keywords via LLM and search with those too
+    // (this catches synonyms/related terms the user didn't type)
+    List<String> keywords = [];
+    try {
+      keywords = await extractKeywords(query);
+    } catch (_) {
+      keywords = [];
+    }
+
+    for (final keyword in keywords) {
+      if (queryWords.contains(keyword) || keyword == query.toLowerCase()) continue;
+      try {
+        final result = await room.searchEvents(
+          searchTerm: keyword,
+          limit: limit,
+        );
+        latestBatch ??= result.nextBatch;
+        for (final event in result.events) {
+          if (!seenEventIds.contains(event.eventId)) {
+            seenEventIds.add(event.eventId);
+            allEvents.add(event);
+          }
+        }
+      } catch (_) {}
+    }
+
+    // Step 4: Client-side filter — keep events that match the query text
+    // This catches case-insensitive matches the server missed
+    final lowerQuery = query.toLowerCase();
+    final queryTerms = queryWords.toSet();
+
+    final filtered = allEvents.where((event) {
+      final body = event.body.toLowerCase();
+      final filename = (event.content.tryGet<String>('filename') ?? '').toLowerCase();
+      // Match if any query word appears in body or filename
+      for (final term in queryTerms) {
+        if (body.contains(term) || filename.contains(term)) return true;
+      }
+      // Also check LLM keywords
+      for (final kw in keywords) {
+        if (body.contains(kw) || filename.contains(kw)) return true;
+      }
+      return false;
+    }).toList();
+
+    // Step 5: Rank results by relevance using LLM
+    final ranked = await _rankResults(query, filtered);
 
     return SmartSearchResult(
       events: ranked,
@@ -109,6 +174,7 @@ class SmartSearchService {
     String query,
     List<Event> events,
   ) async {
+    if (events.isEmpty) return events;
     if (events.length <= 5) return events; // No need to rank small lists
 
     try {
