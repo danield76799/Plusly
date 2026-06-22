@@ -35,7 +35,7 @@ dependencies {
 android {
     namespace = "com.danield.plusly.app"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion = "27.0.12077973"  // NDK r27 — 16KB page size aligned
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -80,6 +80,13 @@ android {
             isMinifyEnabled = false
             isShrinkResources = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+        }
+    }
+
+    // 16KB page size support — extract native libs uncompressed
+    packaging {
+        jniLibs {
+            useLegacyPackaging = false
         }
     }
 
