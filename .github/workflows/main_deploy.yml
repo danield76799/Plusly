@@ -118,10 +118,18 @@ jobs:
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
 
+      # === 16KB PAGE SIZE ALIGNMENT CHECK ===
+      - name: Check & patch 16KB ELF alignment
+        run: |
+          echo "=== Checking ELF alignment for 16KB page size support ==="
+          python3 scripts/patch_elf_alignment.py build/app/outputs/flutter-apk/app-arm64-v8a-release.apk || true
+          python3 scripts/patch_elf_alignment.py build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk || true
+
       # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
         run: |
           flutter build appbundle --release --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }} --dart-define=OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY || '' }}
+          python3 scripts/patch_elf_alignment.py build/app/outputs/bundle/release/app-release.aab || true
           cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab || true
 
       # === VERIFY OUTPUTS ===
