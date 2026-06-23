@@ -132,7 +132,27 @@ jobs:
       - name: Build Android App Bundle
         run: |
           flutter build appbundle --release --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }} --dart-define=OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY || '' }}
-          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab || true
+          
+      # === 16KB PAGE SIZE PATCH & RE-SIGN ===
+      - name: Patch 16KB alignment and Re-sign AAB
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          echo "=== Patching ELF alignment to 16KB ==="
+          # De-compress and patch .so files
+          python3 scripts/patch_elf_alignment.py build/app/outputs/bundle/release/app-release.aab
+          
+          echo "=== Re-signing AAB ==="
+          # Re-sign the patched AAB using jarsigner (AABs require jarsigner, not apksigner)
+          jarsigner -keystore android/app/upload-keystore.jks \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            build/app/outputs/bundle/release/app-release.aab \
+            "$KEY_ALIAS"
+            
+          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
 
       # === VERIFY OUTPUTS ===
       - name: List build outputs
