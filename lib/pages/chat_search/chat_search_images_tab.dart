@@ -99,7 +99,7 @@ class ChatSearchImagesTab extends StatelessWidget {
           }
 
           final monthEvents = eventsByMonthList[i].value;
-          final isLazyLoaded = useLazyLoading && i > 0;
+          final isLazyLoaded = useLazyLoading && i > 1;
 
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -234,8 +234,8 @@ class _LazyMxcImageState extends State<_LazyMxcImage> {
     final offset = renderBox.localToGlobal(Offset.zero);
     final view = View.of(context);
     final screenHeight = view.physicalSize.height / view.devicePixelRatio;
-    // Load if within 1 screen height above or below viewport
-    if (offset.dy > -screenHeight && offset.dy < screenHeight * 2) {
+    // Load if within 2 screen heights above or below viewport (wider range for faster loading)
+    if (offset.dy > -screenHeight * 2 && offset.dy < screenHeight * 3) {
       setState(() => _isVisible = true);
     }
   }
