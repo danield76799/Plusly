@@ -453,6 +453,15 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         client.backgroundSync = foreground;
         client.requestHistoryOnLimitedTimeline = !foreground;
         Logs().v('Set background sync to', foreground);
+        // Trigger immediate sync when app returns to foreground
+        // so new messages appear instantly instead of waiting for next sync cycle
+        if (foreground) {
+          client.oneShotSync().then((_) {
+            Logs().v('Immediate sync triggered on app resume');
+          }).catchError((e) {
+            Logs().w('Failed to sync on resume', e);
+          });
+        }
       }
       // Update Android home screen widget when app resumes
       if (foreground && PlatformInfos.isAndroid) {
