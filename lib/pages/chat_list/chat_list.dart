@@ -17,6 +17,7 @@ import 'package:Pulsly/pages/chat_list/chat_list_view.dart';
 import 'package:Pulsly/pages/chat_list/invite_dialog.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
 import 'package:Pulsly/utils/localized_exception_extension.dart';
+import 'package:Pulsly/services/chat_list_cache_service.dart';
 import 'package:Pulsly/services/timeline_cache.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
@@ -628,6 +629,8 @@ class ChatListController extends State<ChatList>
     }
   }
 
+  Timer? _cacheSaveTimer;
+
   @override
   void _preloadChats() {
     // Preload first 40 chat timelines in background — instant opens
@@ -638,7 +641,20 @@ class ChatListController extends State<ChatList>
           .take(40)
           .toList();
       TimelineCache.preloadRooms(rooms);
+      ChatListCacheService.saveRooms(client.rooms);
     });
+
+    // Save a lightweight cache of the chat list every 30s for instant startup.
+    _cacheSaveTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) {
+        if (!mounted) return;
+        final client = Matrix.of(context).client;
+        if (client.prevBatch != null && client.rooms.isNotEmpty) {
+          ChatListCacheService.saveRooms(client.rooms);
+        }
+      },
+    );
   }
 
   @override
@@ -673,6 +689,7 @@ class ChatListController extends State<ChatList>
 
   @override
   void dispose() {
+    _cacheSaveTimer?.cancel();
     _intentDataStreamSubscription?.cancel();
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();

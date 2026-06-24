@@ -7,6 +7,7 @@ import 'package:matrix/matrix.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';
+import 'package:Pulsly/pages/chat_list/cached_chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_legacy_header.dart';
 import 'package:Pulsly/pages/chat_list/dummy_chat_list_item.dart';
@@ -15,6 +16,7 @@ import 'package:Pulsly/pages/chat_list/space_view.dart';
 import 'package:Pulsly/pages/chat_list/status_msg_list.dart';
 import 'package:Pulsly/pages/dialer/back_to_call_button.dart';
 import 'package:Pulsly/shortcuts/chat_list/chat_list_shortcuts.dart';
+import 'package:Pulsly/services/chat_list_cache_service.dart';
 import 'package:Pulsly/utils/show_profile.dart';
 import 'package:Pulsly/utils/stream_extension.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/public_room_dialog.dart';
@@ -270,14 +272,29 @@ class ChatListViewBody extends StatelessWidget {
                   ]),
                 ),
                 if (client.prevBatch == null)
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, i) => DummyChatListItem(
-                        opacity: (dummyChatCount - i) / dummyChatCount,
-                        animate: true,
-                      ),
-                      childCount: dummyChatCount,
-                    ),
+                  FutureBuilder<List<Map<String, dynamic>>?>(
+                    future: ChatListCacheService.loadRooms(),
+                    builder: (context, cacheSnapshot) {
+                      final cachedRooms = cacheSnapshot.data;
+                      if (cachedRooms != null && cachedRooms.isNotEmpty) {
+                        return SliverList.builder(
+                          itemCount: cachedRooms.length,
+                          itemBuilder: (context, i) => CachedChatListItem(
+                            room: cachedRooms[i],
+                            onTap: null, // Disabled while syncing; real list replaces soon.
+                          ),
+                        );
+                      }
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, i) => DummyChatListItem(
+                            opacity: (dummyChatCount - i) / dummyChatCount,
+                            animate: true,
+                          ),
+                          childCount: dummyChatCount,
+                        ),
+                      );
+                    },
                   ),
                 if (client.prevBatch != null)
                   SliverList.builder(
