@@ -218,7 +218,15 @@ class _LazyMxcImageState extends State<_LazyMxcImage> {
   void initState() {
     super.initState();
     _instances.add(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
+    // Check visibility immediately and after a short delay
+    // This catches cases where scroll events haven't fired yet
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkVisibility();
+      // Re-check after 500ms in case layout wasn't ready yet
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted && !_isVisible) _checkVisibility();
+      });
+    });
   }
 
   @override
@@ -230,12 +238,12 @@ class _LazyMxcImageState extends State<_LazyMxcImage> {
   void _checkVisibility() {
     if (!mounted || _isVisible) return;
     final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
+    if (renderBox == null || !renderBox.hasSize) return;
     final offset = renderBox.localToGlobal(Offset.zero);
     final view = View.of(context);
     final screenHeight = view.physicalSize.height / view.devicePixelRatio;
-    // Load if within 2 screen heights above or below viewport (wider range for faster loading)
-    if (offset.dy > -screenHeight * 2 && offset.dy < screenHeight * 3) {
+    // Load if within 3 screen heights above or below viewport
+    if (offset.dy > -screenHeight * 3 && offset.dy < screenHeight * 4) {
       setState(() => _isVisible = true);
     }
   }
@@ -260,7 +268,7 @@ class _LazyMxcImageState extends State<_LazyMxcImage> {
       width: widget.width,
       height: widget.height,
       fit: BoxFit.cover,
-      animated: true,
+      animated: false, // Disable animation for faster thumbnail loading
       isThumbnail: true,
     );
   }
