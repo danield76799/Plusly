@@ -65,14 +65,6 @@ class ChatSearchImagesTab extends StatelessWidget {
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         _LazyMxcImageState.onScroll();
-        // Auto-load more when scrolling near the bottom
-        if (notification is ScrollEndNotification &&
-            notification.metrics.pixels >=
-                notification.metrics.maxScrollExtent - 200 &&
-            !endReached &&
-            !isLoading) {
-          onStartSearch();
-        }
         return false;
       },
       child: ListView.builder(
@@ -93,18 +85,21 @@ class ChatSearchImagesTab extends StatelessWidget {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: FilledButton.tonalIcon(
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(
+                    backgroundColor: theme.colorScheme.secondaryContainer,
+                    foregroundColor: theme.colorScheme.onSecondaryContainer,
+                  ),
                   onPressed: onStartSearch,
                   icon: const Icon(Icons.arrow_downward_outlined),
-                  label: Text('Meer laden'),
+                  label: Text(l10n.searchMore),
                 ),
               ),
             );
           }
 
           final monthEvents = eventsByMonthList[i].value;
-          // First 2 months load directly, rest uses lazy loading
-          final isLazyLoaded = useLazyLoading && i > 1;
+          final isLazyLoaded = useLazyLoading && i > 0;
 
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -223,15 +218,7 @@ class _LazyMxcImageState extends State<_LazyMxcImage> {
   void initState() {
     super.initState();
     _instances.add(this);
-    // Check visibility immediately and after a short delay
-    // This catches cases where scroll events haven't fired yet
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkVisibility();
-      // Re-check after 500ms in case layout wasn't ready yet
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (mounted && !_isVisible) _checkVisibility();
-      });
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
   }
 
   @override
@@ -243,12 +230,12 @@ class _LazyMxcImageState extends State<_LazyMxcImage> {
   void _checkVisibility() {
     if (!mounted || _isVisible) return;
     final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null || !renderBox.hasSize) return;
+    if (renderBox == null) return;
     final offset = renderBox.localToGlobal(Offset.zero);
     final view = View.of(context);
     final screenHeight = view.physicalSize.height / view.devicePixelRatio;
-    // Load if within 3 screen heights above or below viewport
-    if (offset.dy > -screenHeight * 3 && offset.dy < screenHeight * 4) {
+    // Load if within 1 screen height above or below viewport
+    if (offset.dy > -screenHeight && offset.dy < screenHeight * 2) {
       setState(() => _isVisible = true);
     }
   }
@@ -273,7 +260,7 @@ class _LazyMxcImageState extends State<_LazyMxcImage> {
       width: widget.width,
       height: widget.height,
       fit: BoxFit.cover,
-      animated: false, // Disable animation for faster thumbnail loading
+      animated: true,
       isThumbnail: true,
     );
   }

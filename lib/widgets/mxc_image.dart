@@ -38,7 +38,7 @@ class MxcImage extends StatefulWidget {
     this.isThumbnail = true,
     this.animated = false,
     this.animationDuration = const Duration(milliseconds: 200),
-    this.retryDuration = const Duration(milliseconds: 500),
+    this.retryDuration = const Duration(seconds: 2),
     this.animationCurve = Curves.easeInOut,
     this.thumbnailMethod = ThumbnailMethod.scale,
     this.cacheKey,
@@ -52,8 +52,8 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage> {
-  /// LRU cache with max 300 entries (~150-300MB depending on image sizes)
-  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 300);
+  /// LRU cache with max 100 entries (~50-100MB depending on image sizes)
+  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 100);
 
   Uint8List? _imageDataNoCache;
   int _retryCount = 0;
@@ -106,11 +106,6 @@ class _MxcImageState extends State<MxcImage> {
         });
         return;
       }
-      // If not an image and not thumbnail, still try to show data
-      if (!mounted) return;
-      setState(() {
-        _imageData = data.bytes;
-      });
     }
   }
 
