@@ -45,6 +45,7 @@ class PushHelper {
     required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
     String? instance,
     bool useNotificationActions = true,
+    void Function(Event event)? onEventLoaded,
   }) async {
     final handler = await _newPushHandler(
       notification,
@@ -55,6 +56,7 @@ class PushHelper {
       flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
       instance: instance,
       useNotificationActions: useNotificationActions,
+      onEventLoaded: onEventLoaded,
     );
     await handler?._showNotification();
   }
@@ -68,6 +70,7 @@ class PushHelper {
     required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
     String? instance,
     bool useNotificationActions = true,
+    void Function(Event event)? onEventLoaded,
   }) async {
     final helper = PushHelper._(
       notification,
@@ -146,6 +149,7 @@ class PushHelper {
         return null;
       }
       helper.event = event;
+      onEventLoaded?.call(event);
 
       Logs().v('Push helper got notification event of type ${event.type}.');
       return helper;

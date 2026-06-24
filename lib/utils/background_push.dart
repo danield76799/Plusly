@@ -570,6 +570,32 @@ class BackgroundPush {
       instance: i,
       useNotificationActions:
           false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
+      onEventLoaded: (event) async {
+        // Preload the room timeline so the chat opens instantly when tapped
+        final room = event.room;
+        try {
+          final timeline = await room.getTimeline();
+          TimelineCache.setTimeline(room.id, timeline);
+          Logs().v('Timeline preloaded for room ${room.id} after push');
+        } catch (e) {
+          Logs().w('Failed to preload timeline after push', e);
+        }
+
+        // Preload image/video thumbnail so it appears instantly in chat/gallery
+        if ({
+          MessageTypes.Image,
+          MessageTypes.Video,
+        }.contains(event.messageType)) {
+          try {
+            await event.downloadAndDecryptAttachment(
+              getThumbnail: true,
+            );
+            Logs().v('Thumbnail preloaded after push for ${event.eventId}');
+          } catch (e) {
+            Logs().w('Failed to preload thumbnail after push', e);
+          }
+        }
+      },
     );
 
     // Trigger immediate sync so the new message appears in the chat instantly
