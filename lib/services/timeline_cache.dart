@@ -28,10 +28,12 @@ class TimelineCache {
     final toLoad = rooms
         .where((r) => r.isDirectChat || !r.isSpace)
         .toList()
-      ..sort((a, b) => b.lastEvent?.originServerTs?.compareTo(
-                a.lastEvent?.originServerTs ?? 0,
-              ) ??
-              0);
+      ..sort((a, b) {
+        final aTs = a.lastEvent?.originServerTs;
+        final bTs = b.lastEvent?.originServerTs;
+        if (aTs == null || bTs == null) return 0;
+        return bTs.compareTo(aTs);
+      });
 
     final limited = toLoad.take(limit).toList();
 

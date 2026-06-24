@@ -39,6 +39,7 @@ import 'package:Pulsly/utils/push_helper.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
+import '../services/timeline_cache.dart';
 import '../widgets/matrix.dart';
 import 'platform_infos.dart';
 
