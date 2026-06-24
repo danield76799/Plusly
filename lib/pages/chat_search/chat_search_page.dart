@@ -117,7 +117,7 @@ class ChatSearchController extends State<ChatSearchPage>
             MessageTypes.Video,
           }.contains(event.messageType),
           nextBatch: imagesNextBatch,
-          limit: 1500,
+          limit: 30,
         );
         var events = result.events;
         if (searchController.text.isNotEmpty) {

@@ -65,6 +65,14 @@ class ChatSearchImagesTab extends StatelessWidget {
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
         _LazyMxcImageState.onScroll();
+        // Auto-load more when scrolling near the bottom
+        if (notification is ScrollEndNotification &&
+            notification.metrics.pixels >=
+                notification.metrics.maxScrollExtent - 200 &&
+            !endReached &&
+            !isLoading) {
+          onStartSearch();
+        }
         return false;
       },
       child: ListView.builder(
@@ -85,20 +93,17 @@ class ChatSearchImagesTab extends StatelessWidget {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: TextButton.icon(
-                  style: TextButton.styleFrom(
-                    backgroundColor: theme.colorScheme.secondaryContainer,
-                    foregroundColor: theme.colorScheme.onSecondaryContainer,
-                  ),
+                child: FilledButton.tonalIcon(
                   onPressed: onStartSearch,
                   icon: const Icon(Icons.arrow_downward_outlined),
-                  label: Text(l10n.searchMore),
+                  label: Text('Meer laden'),
                 ),
               ),
             );
           }
 
           final monthEvents = eventsByMonthList[i].value;
+          // First 2 months load directly, rest uses lazy loading
           final isLazyLoaded = useLazyLoading && i > 1;
 
           return Column(
