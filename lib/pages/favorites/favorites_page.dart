@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:matrix/matrix.dart';
+
+import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/services/favorites_service.dart';
+import 'package:Pulsly/widgets/avatar.dart';
 
 class FavoritesPage extends StatefulWidget {
   final VoidCallback? onBack;
@@ -14,21 +18,6 @@ class _FavoritesPageState extends State<FavoritesPage> {
   List<SavedMessage> _favorites = [];
   bool _isLoading = true;
   String _error = '';
-
-  // Plusly brand colors from branding guidelines
-  static const Color pluslyBlue = Color(0xFF49AFC2);
-  static const Color darkBackground = Color(0xFF333333);
-  static const Color cardBackground = Color(0xFF3D3D3D);
-  static const Color textGray = Color(0xFF999999);
-  static const Color warmRed = Color(0xFFE74C3C);
-
-  // Spacing constants
-  static const double screenPadding = 12.0;
-  static const double cardBorderRadius = 12.0;
-  static const double cardPadding = 12.0; // Was 16.0, nu compacter
-  static const double avatarSize = 48.0;
-  static const double cardSpacing = 4.0; // Was 8.0, nu compacter
-  static const double headerHeight = 110.0;
 
   @override
   void initState() {
@@ -49,7 +38,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
       });
     } catch (e) {
       setState(() {
-        _error = 'Fout bij laden: $e';
+        _error = '${L10n.of(context).oopsSomethingWentWrong}: $e';
         _isLoading = false;
       });
     }
@@ -57,55 +46,36 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = L10n.of(context);
+
     return Scaffold(
-      backgroundColor: darkBackground,
-      body: Column(
-        children: [
-          // Header with Plusly blue background
-          Container(
-            height: headerHeight,
-            color: pluslyBlue,
-            padding: const EdgeInsets.only(left: 16, bottom: 16),
-            alignment: Alignment.bottomLeft,
-            child: Row(
-              children: [
-                if (widget.onBack != null)
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
-                    onPressed: widget.onBack,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                if (widget.onBack != null) const SizedBox(width: 8),
-                const Icon(Icons.star, color: Colors.amber, size: 28),
-                const SizedBox(width: 12),
-                const Text(
-                  'Favorieten',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // List content
-          Expanded(
-            child: _buildBody(),
-          ),
-        ],
+      appBar: AppBar(
+        leading: widget.onBack != null
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: widget.onBack,
+              )
+            : null,
+        title: Row(
+          children: [
+            const Icon(Icons.star, color: Colors.amber),
+            const SizedBox(width: 8),
+            const Text('Favorieten'),
+          ],
+        ),
       ),
-      floatingActionButton: null, // Geen FAB op Favorieten pagina
+      body: _buildBody(context),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = L10n.of(context);
+
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(pluslyBlue),
-        ),
+        child: CircularProgressIndicator.adaptive(),
       );
     }
 
@@ -114,14 +84,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_error, style: const TextStyle(color: warmRed)),
+            Text(_error),
             const SizedBox(height: 16),
-            ElevatedButton(
+            FilledButton.tonalIcon(
               onPressed: _loadFavorites,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: pluslyBlue,
-              ),
-              child: const Text('Opnieuw proberen'),
+              icon: const Icon(Icons.refresh),
+              label: Text(l10n.tryAgain),
             ),
           ],
         ),
@@ -136,22 +104,18 @@ class _FavoritesPageState extends State<FavoritesPage> {
             Icon(
               Icons.star_outline,
               size: 64,
-              color: textGray.withOpacity(0.5),
+              color: theme.colorScheme.onSurface.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Geen favorieten yet',
-              style: TextStyle(
-                color: textGray,
-                fontSize: 16,
-              ),
+            Text(
+              l10n.nothingFound,
+              style: theme.textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
-            const Text(
-              '⭐ Lang druk op een bericht om op te slaan',
-              style: TextStyle(
-                color: textGray,
-                fontSize: 14,
+            Text(
+              'Lang druk op een bericht om op te slaan',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.7),
               ),
             ),
           ],
@@ -160,75 +124,51 @@ class _FavoritesPageState extends State<FavoritesPage> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(screenPadding),
+      padding: const EdgeInsets.all(8),
       itemCount: _favorites.length,
       itemBuilder: (context, index) {
         final msg = _favorites[index];
-        return _buildFavoriteCard(msg);
+        return _buildFavoriteCard(context, msg);
       },
     );
   }
 
-  Widget _buildFavoriteCard(SavedMessage msg) {
+  Widget _buildFavoriteCard(BuildContext context, SavedMessage msg) {
+    final theme = Theme.of(context);
+    final l10n = L10n.of(context);
+
     return Card(
-      margin: const EdgeInsets.only(bottom: cardSpacing),
-      color: cardBackground,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(cardBorderRadius),
-      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () {
-          context.go('/rooms/${msg.roomId}?event=${msg.id}');
-        },
-        borderRadius: BorderRadius.circular(cardBorderRadius),
+        onTap: () => context.go('/rooms/${msg.roomId}?event=${msg.id}'),
         child: Padding(
-          padding: const EdgeInsets.all(cardPadding),
+          padding: const EdgeInsets.all(12),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar circle with Plusly blue
-              Container(
-                width: avatarSize,
-                height: avatarSize,
-                decoration: const BoxDecoration(
-                  color: pluslyBlue,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    msg.sender.isNotEmpty ? msg.sender[0].toUpperCase() : '?',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+              Avatar(
+                name: msg.sender,
+                size: 48,
               ),
               const SizedBox(width: 12),
-              // Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Name row with delete icon
                     Row(
                       children: [
                         Expanded(
                           child: Text(
                             msg.sender,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete_outline),
-                          color: warmRed,
-                          iconSize: 24,
+                          color: theme.colorScheme.error,
+                          iconSize: 20,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                           onPressed: () async {
@@ -239,14 +179,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    // Message preview
                     Text(
                       msg.content,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: textGray,
-                        fontSize: 14,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.8),
                       ),
                     ),
                   ],
