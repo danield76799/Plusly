@@ -24,6 +24,24 @@ jobs:
 
       - run: cat .github/workflows/versions.env >> $GITHUB_ENV
 
+      - name: Free disk space
+        run: |
+          echo "=== Before cleanup ==="
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android/sdk/ndk
+          sudo rm -rf /usr/local/lib/android/sdk/emulator
+          sudo rm -rf /usr/local/lib/android/sdk/platforms/android-2*
+          sudo rm -rf /usr/local/lib/android/sdk/platforms/android-3[0-3]
+          sudo rm -rf /usr/local/lib/android/sdk/build-tools/2*
+          sudo rm -rf /usr/local/lib/android/sdk/build-tools/3[0-3]*
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo apt-get clean
+          echo "=== After cleanup ==="
+          df -h
+
       - uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
