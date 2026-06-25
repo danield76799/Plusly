@@ -655,24 +655,9 @@ abstract class AppRoutes {
     Widget child,
   ) => FluffyThemes.isColumnMode(context)
       ? noTransitionPageBuilder(context, state, child)
-      : CustomTransitionPage(
+      : MaterialPage(
           key: state.pageKey,
           restorationId: state.pageKey.value,
           child: child,
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(0.04, 0);
-            const end = Offset.zero;
-            final tween = Tween(begin: begin, end: end).chain(
-              CurveTween(curve: Curves.easeInOutCubic),
-            );
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: animation.drive(tween),
-                child: child,
-              ),
-            );
-          },
-          transitionDuration: FluffyThemes.animationDuration,
         );
 }
