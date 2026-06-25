@@ -150,7 +150,7 @@ jobs:
       # === APK BUILD (split per architecture — 32-bit + 64-bit) ===
       - name: Build Android APK (split ABIs)
         run: |
-          flutter build apk --release --split-per-abi --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }} --dart-define=OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY || '' }}
+          flutter build apk --release --split-per-abi --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           mkdir -p output
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
           cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
@@ -158,7 +158,7 @@ jobs:
       # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
         run: |
-          flutter build appbundle --release --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }} --dart-define=OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY || '' }}
+          flutter build appbundle --release --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           
       # === 16KB PAGE SIZE PATCH & RE-SIGN ===
       - name: Patch 16KB alignment and Re-sign AAB
