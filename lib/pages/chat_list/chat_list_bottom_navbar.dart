@@ -37,10 +37,12 @@ class ChatListBottomNavbar extends StatelessWidget {
       ActiveFilter.favorites: (Room room) => false,
     };
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Material(
       borderRadius: BorderRadius.circular(AppConfig.borderRadius),
       clipBehavior: Clip.hardEdge,
-      color: const Color(0xFF49AFC2).withOpacity(0.30),
+      color: colorScheme.primaryContainer.withOpacity(0.30),
       child: Padding(
         padding: const EdgeInsets.all(4),
         child: Row(
@@ -49,12 +51,12 @@ class ChatListBottomNavbar extends StatelessWidget {
 
             // Pre-calculate styles
             final backgroundColor = isActive
-                ? const Color(0xFF49AFC2).withOpacity(0.2)
+                ? colorScheme.primaryContainer
                 : Colors.transparent;
 
             final foregroundColor = isActive
-                ? const Color(0xFF49AFC2) // Plusly blue for active
-                : const Color(0xFF757575); // Gray for inactive
+                ? colorScheme.primary
+                : colorScheme.outline;
 
             final currentBorderRadius = BorderRadius.circular(
               isActive ? AppConfig.borderRadius - 4 : AppConfig.borderRadius,

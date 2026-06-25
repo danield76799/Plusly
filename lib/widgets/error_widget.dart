@@ -30,12 +30,14 @@ class _PluslyErrorWidgetState extends State<PluslyErrorWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Material(
-      color: Colors.orange,
+      color: theme.colorScheme.error,
       child: Placeholder(
+        color: theme.colorScheme.error,
         child: Center(
           child: Material(
-            color: Colors.white.withAlpha(230),
+            color: theme.colorScheme.surfaceContainerHighest.withAlpha(230),
             borderRadius: BorderRadius.circular(8),
           ),
         ),

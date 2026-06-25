@@ -29,8 +29,8 @@ class DownloadManagerView extends StatelessWidget {
               title: Text(download.name),
               subtitle: LinearProgressIndicator(
                 value: download.progress / 100,
-                backgroundColor: Colors.grey[200],
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
               ),
               trailing: ElevatedButton(
                 onPressed: () {

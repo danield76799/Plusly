@@ -87,8 +87,8 @@ class ChatSearchImagesTab extends StatelessWidget {
                 padding: const EdgeInsets.all(16.0),
                 child: TextButton.icon(
                   style: TextButton.styleFrom(
-                    backgroundColor: theme.colorScheme.secondaryContainer,
-                    foregroundColor: theme.colorScheme.onSecondaryContainer,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    foregroundColor: theme.colorScheme.onSurface,
                   ),
                   onPressed: onStartSearch,
                   icon: const Icon(Icons.arrow_downward_outlined),

@@ -73,7 +73,7 @@ class BridgeFilterBar extends StatelessWidget {
                 Icon(
                   getBridgeTypeIcon(type),
                   size: 16,
-                  color: isSelected ? color : Colors.black87,
+                  color: isSelected ? color : theme.colorScheme.onSurface,
                 ),
                 // Badge voor ongelezen
                 if (unreadCount > 0)
@@ -120,7 +120,7 @@ class BridgeFilterBar extends StatelessWidget {
             labelStyle: TextStyle(
               color: isSelected
                   ? color
-                  : Colors.black87, // Donkerder voor beter contrast (WCAG AA)
+                  : theme.colorScheme.onSurface,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
             side: BorderSide.none,

@@ -36,40 +36,50 @@ void main() async {
     debugPrint('FATAL ERROR: $e');
     debugPrint('Stack trace: $s');
     
-    // Show error UI instead of crashing
+    // Show error UI instead of crashing (dark mode compatible)
     runApp(
       MaterialApp(
         debugShowCheckedModeBanner: false,
+        theme: ThemeData.dark(),
         home: Scaffold(
-          backgroundColor: Colors.red[50],
+          backgroundColor: const Color(0xFF1A0F0F),
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, color: Colors.red, size: 64),
-                  SizedBox(height: 16),
-                  Text(
+                  const Icon(Icons.error_outline, color: Color(0xFFFF6B6B), size: 64),
+                  const SizedBox(height: 16),
+                  const Text(
                     'Oeps! Er is iets misgegaan',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     '${AppConfig.applicationName} kon niet starten. Probeer de app opnieuw te starten.',
                     textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.white70),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Container(
-                    padding: EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey[200],
+                      color: const Color(0xFF2D1F1F),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       'Error: $e',
-                      style: TextStyle(fontSize: 12, fontFamily: 'monospace'),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'monospace',
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ],

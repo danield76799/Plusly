@@ -85,13 +85,13 @@ class ChatListView extends StatelessWidget {
                               context.go('/rooms/newprivatechat'),
                           icon: const Icon(
                             Icons.chat_outlined,
-                            color: Colors.white,
+                            color: Colors.black87,
                           ),
                           label: Text(
                             L10n.of(context).newChat,
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.black87),
                           ),
-                          backgroundColor: const Color(0xFF49AFC2),
+                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                         ),
                       ),
                   ],

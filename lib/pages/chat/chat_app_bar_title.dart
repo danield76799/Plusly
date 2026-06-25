@@ -69,7 +69,7 @@ class ChatAppBarTitle extends StatelessWidget {
                             )
                           : Icon(
                               Icons.chat_bubble_outline,
-                              color: Colors.grey[200],
+                              color: Theme.of(context).colorScheme.onSurface.withAlpha(200),
                               size: 18,
                             ),
                     ),
@@ -188,7 +188,7 @@ class ChatAppBarTitle extends StatelessWidget {
                         )
                       : Icon(
                           Icons.chat_bubble_outline,
-                          color: Colors.grey[200],
+                          color: Theme.of(context).colorScheme.onSurface.withAlpha(200),
                           size: 20,
                         ),
                 ),

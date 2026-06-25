@@ -297,9 +297,10 @@ class SettingsView extends StatelessWidget {
                                 children: [
                                   ListTile(
                                     leading: const CircleAvatar(
-                                      backgroundColor: Colors.cyanAccent,
+                                      backgroundColor: Colors.cyan,
                                       child: Icon(
                                         Icons.account_circle_outlined,
+                                        color: Colors.black,
                                       ),
                                     ),
                                     title: Text(L10n.of(context).manageAccount),
