@@ -277,11 +277,13 @@ class ChatListViewBody extends StatelessWidget {
                     builder: (context, cacheSnapshot) {
                       final cachedRooms = cacheSnapshot.data;
                       if (cachedRooms != null && cachedRooms.isNotEmpty) {
-                        return SliverList.builder(
-                          itemCount: cachedRooms.length,
-                          itemBuilder: (context, i) => CachedChatListItem(
-                            room: cachedRooms[i],
-                            onTap: null, // Disabled while syncing; real list replaces soon.
+                        return _FadeIn(
+                          child: SliverList.builder(
+                            itemCount: cachedRooms.length,
+                            itemBuilder: (context, i) => CachedChatListItem(
+                              room: cachedRooms[i],
+                              onTap: null,
+                            ),
                           ),
                         );
                       }
@@ -417,5 +419,42 @@ class _SearchItem extends StatelessWidget {
         ],
       ),
     ),
+  );
+}
+
+class _FadeIn extends StatefulWidget {
+  final Widget child;
+  const _FadeIn({required this.child});
+
+  @override
+  State<_FadeIn> createState() => _FadeInState();
+}
+
+class _FadeInState extends State<_FadeIn> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: FluffyThemes.animationDuration,
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: CurvedAnimation(
+      parent: _controller,
+      curve: FluffyThemes.animationCurve,
+    ),
+    child: widget.child,
   );
 }

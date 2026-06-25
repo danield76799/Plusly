@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class DummyChatListItem extends StatelessWidget {
+class DummyChatListItem extends StatefulWidget {
   final double opacity;
   final bool animate;
 
@@ -11,19 +11,72 @@ class DummyChatListItem extends StatelessWidget {
   });
 
   @override
+  State<DummyChatListItem> createState() => _DummyChatListItemState();
+}
+
+class _DummyChatListItemState extends State<DummyChatListItem>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 1400),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 0.35, end: 0.65).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+    if (widget.animate) {
+      _controller.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final titleColor = theme.textTheme.bodyLarge!.color!.withAlpha(100);
-    final subtitleColor = theme.textTheme.bodyLarge!.color!.withAlpha(50);
+    final baseColor = theme.colorScheme.onSurface;
+
+    if (!widget.animate) {
+      return _buildItem(baseColor.withAlpha((widget.opacity * 80).toInt()));
+    }
+
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        final alpha = (_animation.value * widget.opacity * 160).toInt();
+        return _buildItem(baseColor.withAlpha(alpha));
+      },
+    );
+  }
+
+  Widget _buildItem(Color shimmerColor) {
+    final theme = Theme.of(context);
+    final subtitleColor = shimmerColor.withAlpha((shimmerColor.alpha * 0.6).toInt());
     return Opacity(
-      opacity: opacity,
+      opacity: widget.opacity,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: titleColor,
-          child: animate
-              ? CircularProgressIndicator(
-                  strokeWidth: 1,
-                  color: theme.textTheme.bodyLarge!.color,
+          backgroundColor: shimmerColor,
+          child: widget.animate
+              ? SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.5,
+                    color: theme.colorScheme.onSurface.withAlpha(150),
+                  ),
                 )
               : const SizedBox.shrink(),
         ),
@@ -33,7 +86,7 @@ class DummyChatListItem extends StatelessWidget {
               child: Container(
                 height: 14,
                 decoration: BoxDecoration(
-                  color: titleColor,
+                  color: shimmerColor,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
