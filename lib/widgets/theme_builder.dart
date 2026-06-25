@@ -70,7 +70,7 @@ class ThemeController extends State<ThemeBuilder> {
     final rawTwemoji = preferences.getBool(widget.twemojiSettingsKey);
     final rawVariant =
         preferences.getInt(widget.schemeVariantSettingsKey) ??
-        DynamicSchemeVariant.values.indexOf(.tonalSpot);
+        DynamicSchemeVariant.values.indexOf(DynamicSchemeVariant.tonalSpot);
 
     if (!mounted) return;
     setState(() {
@@ -80,7 +80,7 @@ class ThemeController extends State<ThemeBuilder> {
       _primaryColor = rawColor == null ? null : Color(rawColor);
       _pureBlack = rawPureBlack;
       _twemoji = rawTwemoji;
-      _variant = .values[rawVariant];
+      _variant = DynamicSchemeVariant.values[rawVariant];
     });
   }
 
