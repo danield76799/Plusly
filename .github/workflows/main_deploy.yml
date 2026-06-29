@@ -198,7 +198,7 @@ jobs:
         with:
           name: plusly-armeabi-v7a-apk
           path: output/plusly-armeabi-v7a-release.apk
-          retention-days: 30
+          retention-days: 7
 
       - name: Upload arm64-v8a APK
         uses: actions/upload-artifact@v4
@@ -206,7 +206,7 @@ jobs:
         with:
           name: plusly-arm64-v8a-apk
           path: output/plusly-arm64-v8a-release.apk
-          retention-days: 30
+          retention-days: 7
 
       - name: Upload AAB (Play Store)
         uses: actions/upload-artifact@v4
@@ -214,7 +214,7 @@ jobs:
         with:
           name: plusly-aab-playstore
           path: output/plusly-release.aab
-          retention-days: 30
+          retention-days: 7
 
       # === PLAY STORE DEPLOY (optional — only if key exists) ===
       - name: Setup Play Store key
