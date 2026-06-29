@@ -48,7 +48,7 @@ class FavoritesService {
         _cache = jsonList.map((e) => SavedMessage.fromJson(e)).toList();
       }
     } catch (e) {
-      print('Favorites init error: $e');
+      debugPrint('Favorites init error: $e');
       _cache = [];
     }
     _initialized = true;
@@ -77,7 +77,7 @@ class FavoritesService {
       final String data = jsonEncode(_cache.map((e) => e.toJson()).toList());
       await prefs.setString(_key, data);
     } catch (e) {
-      print('Favorites persist error: $e');
+      debugPrint('Favorites persist error: $e');
     }
   }
 

@@ -300,7 +300,7 @@ class SettingsView extends StatelessWidget {
                                       backgroundColor: Colors.cyan,
                                       child: Icon(
                                         Icons.account_circle_outlined,
-                                        color: Colors.black,
+                                        color: Colors.black87,
                                       ),
                                     ),
                                     title: Text(L10n.of(context).manageAccount),

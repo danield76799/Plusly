@@ -51,12 +51,9 @@ extension SynapseAdmin on matrix.Client {
   }
 
   Future<bool> isSynapseAdministrator() async {
-    print('Checking if I am admin...');
-    print('User ID: $userID');
     if (userID == null) return false;
     final requestUri = Uri(path: '/_synapse/admin/v1/users/$userID/admin');
 
-    print('Base URL: ${baseUri.toString()}');
     if (baseUri == null) return false;
     final request = Request('GET', baseUri!.resolveUri(requestUri));
     request.headers['authorization'] = 'Bearer $accessToken';
@@ -65,7 +62,6 @@ extension SynapseAdmin on matrix.Client {
     if (response.statusCode != 200) unexpectedResponse(response, responseBody);
     final responseString = utf8.decode(responseBody);
     final json = jsonDecode(responseString);
-    print('Response from endpoint: $responseString');
     return json['admin'];
   }
 }

@@ -792,14 +792,6 @@ class _MessageState extends State<Message> {
                 ),
               ],
             ),
-          // Read receipts avatars disabled — checkmarks (Icons.done_all) already show read status
-          // MessageReadReceipts caused duplicate read indicators next to checkmarks
-          // if (widget.readReceipts != null && widget.readReceipts!.isNotEmpty && ownMessage)
-          //   MessageReadReceipts(
-          //     receipts: widget.readReceipts!,
-          //     isOwnMessage: ownMessage,
-          //     ownUserId: event.room.client.userID,
-          //   ),
         ],
       );
     } else {
