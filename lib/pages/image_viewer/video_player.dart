@@ -83,7 +83,11 @@ class EventVideoPlayerState extends State<EventVideoPlayer> {
           videoPlayerController = VideoPlayerController.file(file);
         }
       } else {
-        final videoUrl = await widget.event.attachmentMxcUrl!.getDownloadUri(
+        final mxcUrl = widget.event.attachmentMxcUrl ?? widget.event.thumbnailMxcUrl;
+        if (mxcUrl == null) {
+          throw Exception('Video has no attachment or thumbnail URL');
+        }
+        final videoUrl = await mxcUrl.getDownloadUri(
           widget.event.room.client,
         );
         Logs().d("Video url: $videoUrl");
