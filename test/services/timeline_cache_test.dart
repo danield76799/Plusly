@@ -1,10 +1,14 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:matrix/matrix.dart';
 import 'package:Pulsly/services/timeline_cache.dart';
 
-// Fake Timeline implementatie voor directe cache tests
-class FakeTimeline {
+// Fake Timeline die de Timeline interface implementeert
+class FakeTimeline implements Timeline {
   final String roomId;
   FakeTimeline(this.roomId);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
