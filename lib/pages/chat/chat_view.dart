@@ -162,7 +162,7 @@ class ChatView extends StatelessWidget {
           JitsiPopupButton(controller.room),
         EncryptionButton(controller.room),
         SizedBox(
-          width: 50,
+          width: 65,
           child: StreamBuilder(
             stream: Stream.periodic(const Duration(minutes: 1)),
             builder: (context, _) {
