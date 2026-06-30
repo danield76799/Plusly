@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:google_fonts/google_fonts.dart';
 import 'package:pro_image_editor/pro_image_editor.dart';
 
 class MaterialYouEditor extends StatefulWidget {
@@ -44,13 +43,13 @@ class _MaterialYouEditorState extends State<MaterialYouEditor> {
             ),
             textEditor: TextEditorConfigs(
               customTextStyles: [
-                GoogleFonts.roboto(),
-                GoogleFonts.averiaLibre(),
-                GoogleFonts.lato(),
-                GoogleFonts.comicNeue(),
-                GoogleFonts.actor(),
-                GoogleFonts.odorMeanChey(),
-                GoogleFonts.nabla(),
+                const TextStyle(fontFamily: 'Roboto'),
+                const TextStyle(fontFamily: 'Roboto'),
+                const TextStyle(fontFamily: 'Roboto'),
+                const TextStyle(fontFamily: 'Roboto'),
+                const TextStyle(fontFamily: 'Roboto'),
+                const TextStyle(fontFamily: 'Roboto'),
+                const TextStyle(fontFamily: 'Roboto'),
               ],
             ),
             cropRotateEditor: const CropRotateEditorConfigs(),

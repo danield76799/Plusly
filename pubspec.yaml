@@ -60,7 +60,6 @@ dependencies:
   flutter_webrtc: ^1.4.1
   geolocator: ^14.0.2
   go_router: ^17.1.0
-  google_fonts: ^8.0.2
   handy_window: ^0.4.0
   highlight_selectable: ^0.2.1
   hotkey_manager: ^0.2.3
@@ -169,6 +168,18 @@ flutter:
     - assets/sounds/ringtones/
     - assets/font/
   fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 500
+    - family: RobotoMono
+      fonts:
+        - asset: assets/fonts/RobotoMono-Regular.ttf
+        - asset: assets/fonts/RobotoMono-Bold.ttf
+          weight: 700
     - family: Twemoji Mozilla
       fonts:
         - asset: assets/font/Twemoji.v0.7.0.ttf
