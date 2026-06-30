@@ -250,8 +250,8 @@ class _LazyMxcImageState extends State<_LazyMxcImage> {
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
         ),
-        child: const Center(
-          child: Icon(Icons.image_outlined, color: Colors.grey),
+        child: Center(
+          child: Icon(Icons.image_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       );
     }

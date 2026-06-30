@@ -205,8 +205,8 @@ class PresenceAvatar extends StatelessWidget {
                                         statusMsg,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: Colors.black,
+                                        style: TextStyle(
+                                          color: Theme.of(context).colorScheme.onSurface,
                                           fontSize: 10.5,
                                         ),
                                       ),
