@@ -633,12 +633,12 @@ class ChatListController extends State<ChatList>
 
   @override
   void _preloadChats() {
-    // Preload first 40 chat timelines in background — instant opens
+    // Preload chat timelines in background — instant opens.
+    // preloadRooms sorts by most recent and limits to 40.
     Future.microtask(() async {
       final client = Matrix.of(context).client;
       final rooms = client.rooms
           .where((r) => r.isDirectChat || !r.isSpace)
-          .take(40)
           .toList();
       TimelineCache.preloadRooms(rooms);
       ChatListCacheService.saveRooms(client.rooms);
