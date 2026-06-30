@@ -19,7 +19,7 @@ class FakeRoom implements Room {
   FakeRoom(this.id, {this.lastEvent, this.isDirectChat = true, this.isSpace = false});
 
   @override
-  Future<Timeline> getTimeline({TimelineFilter? filter}) async {
+  Future<Timeline> getTimeline() async {
     // Simuleer een korte laadtijd
     await Future.delayed(const Duration(milliseconds: 10));
     return FakeTimeline(id);

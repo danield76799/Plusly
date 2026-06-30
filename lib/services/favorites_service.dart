@@ -82,6 +82,15 @@ class FavoritesService {
     }
   }
 
+  /// Reset de service — alleen voor tests
+  @visibleForTesting
+  static Future<void> reset() async {
+    _cache = [];
+    _initialized = false;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_key);
+  }
+
   static Future<List<SavedMessage>> searchFavorites(String query) async {
     final favorites = await getFavorites();
     if (query.isEmpty) return favorites;

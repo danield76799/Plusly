@@ -1,14 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Pulsly/services/favorites_service.dart';
 
 void main() {
   group('FavoritesService', () {
     setUp(() async {
-      // Mock SharedPreferences — geen echte storage nodig
-      SharedPreferences.setMockInitialValues({});
-      // Forceer her-initialisatie
-      await FavoritesService.getFavorites();
+      // Reset state tussen tests
+      await FavoritesService.reset();
     });
 
     test('getFavorites retourneert lege lijst bij start', () async {
