@@ -52,7 +52,7 @@ void main() async {
                   const Icon(Icons.error_outline, color: Color(0xFFFF6B6B), size: 64),
                   const SizedBox(height: 16),
                   const Text(
-                    'Oeps! Er is iets misgegaan',
+                    'Oops! Something went wrong',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -62,7 +62,7 @@ void main() async {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${AppConfig.applicationName} kon niet starten. Probeer de app opnieuw te starten.',
+                    '${AppConfig.applicationName} could not start. Please try restarting the app.',
                     textAlign: TextAlign.center,
                     style: const TextStyle(color: Colors.white70),
                   ),
