@@ -2,7 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:Pulsly/services/timeline_cache.dart';
 
-/// Fake Room voor testing — geen echte Matrix server nodig
+/// Fake Room voor testing — geen echte Matrix server nodig.
+/// Gebruikt noSuchMethod om niet ALLE Room methods te hoeven implementeren.
 class FakeRoom implements Room {
   @override
   final String id;
@@ -19,15 +20,13 @@ class FakeRoom implements Room {
   FakeRoom(this.id, {this.lastEvent, this.isDirectChat = true, this.isSpace = false});
 
   @override
-  Future<Timeline> getTimeline() async {
-    // Simuleer een korte laadtijd
-    await Future.delayed(const Duration(milliseconds: 10));
-    return FakeTimeline(id);
+  dynamic noSuchMethod(Invocation invocation) {
+    // Intercept getTimeline calls en return een FakeTimeline
+    if (invocation.memberName == #getTimeline) {
+      return Future.value(FakeTimeline(id));
+    }
+    return super.noSuchMethod(invocation);
   }
-
-  // Alle andere Room members — niet gebruikt in deze tests
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 class FakeTimeline implements Timeline {

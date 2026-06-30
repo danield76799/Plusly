@@ -1,10 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:Pulsly/services/favorites_service.dart';
 
 void main() {
   group('FavoritesService', () {
     setUp(() async {
-      // Reset state tussen tests
+      // Mock SharedPreferences — vereist voor tests
+      SharedPreferences.setMockInitialValues({});
+      // Reset interne state
       await FavoritesService.reset();
     });
 
