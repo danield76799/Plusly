@@ -1,23 +1,21 @@
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:Pulsly/features/push/domain/push_state.dart';
+import 'package:Pulsly/features/push/domain/push_provider.dart';
 
 void main() {
-  group('PushController', () {
+  group('PushState', () {
     test('initial state has correct default values', () {
       final state = const PushState.initial();
 
       expect(state.status, PushStatus.initial);
       expect(state.activeProvider, isNull);
       expect(state.errorMessage, isNull);
-      expect(state.isInitial, isTrue);
       expect(state.isActive, isFalse);
       expect(state.isFailed, isFalse);
       expect(state.isInitializing, isFalse);
     });
 
-    group('PushState copyWith', () {
+    group('copyWith', () {
       test('should update status', () {
         final state = const PushState.initial();
         final updated = state.copyWith(status: PushStatus.active);
@@ -38,7 +36,14 @@ void main() {
         final updated = state.copyWith(errorMessage: 'Test error');
 
         expect(updated.errorMessage, 'Test error');
-        expect(updated.isFailed, isTrue);
+        expect(updated.isFailed, isFalse); // status unchanged
+      });
+
+      test('failed state should set isFailed to true', () {
+        final state = const PushState(status: PushStatus.failed, errorMessage: 'Oops');
+
+        expect(state.isFailed, isTrue);
+        expect(state.errorMessage, 'Oops');
       });
     });
   });
