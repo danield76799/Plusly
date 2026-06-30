@@ -3,104 +3,126 @@ import 'package:Pulsly/features/push/domain/push_provider.dart';
 
 void main() {
   group('PushMessage', () {
-    test('should create valid PushMessage from JSON', () {
-      // Arrange
+    test('fromJson parseert volledige payload correct', () {
       final json = {
-        'room_id': '!test:matrix.org',
-        'event_id': '\$123456',
-        'sender': '@alice:matrix.org',
-        'body': 'Hello world',
+        'room_id': '!abc:server',
+        'event_id': '\$event123',
+        'sender': '@alice:server',
+        'body': 'Hallo wereld',
         'source': 'unifiedPush',
-        'received_at': '2026-05-25T12:00:00.000Z',
+        'received_at': '2024-06-15T10:30:00.000Z',
         'unread_count': 5,
+        'client_name': 'Plusly',
       };
 
-      // Act
-      final message = PushMessage.fromJson(json);
+      final msg = PushMessage.fromJson(json);
 
-      // Assert
-      expect(message.roomId, '!test:matrix.org');
-      expect(message.eventId, '\$123456');
-      expect(message.sender, '@alice:matrix.org');
-      expect(message.body, 'Hello world');
-      expect(message.source, PushProviderType.unifiedPush);
-      expect(message.unreadCount, 5);
+      expect(msg.roomId, '!abc:server');
+      expect(msg.eventId, '\$event123');
+      expect(msg.sender, '@alice:server');
+      expect(msg.body, 'Hallo wereld');
+      expect(msg.source, PushProviderType.unifiedPush);
+      expect(msg.receivedAt, DateTime.parse('2024-06-15T10:30:00.000Z'));
+      expect(msg.unreadCount, 5);
+      expect(msg.clientName, 'Plusly');
     });
 
-    test('should serialize to payload string', () {
-      // Arrange
-      final message = PushMessage(
-        roomId: '!test:matrix.org',
-        eventId: '\$123456',
-        sender: '@alice:matrix.org',
-        body: 'Hello world',
+    test('fromJson handelt null velden met defaults', () {
+      final msg = PushMessage.fromJson({});
+
+      expect(msg.roomId, '');
+      expect(msg.eventId, '');
+      expect(msg.sender, '');
+      expect(msg.body, '');
+      expect(msg.source, PushProviderType.unifiedPush);
+      expect(msg.receivedAt, isA<DateTime>());
+      expect(msg.unreadCount, isNull);
+      expect(msg.clientName, isNull);
+    });
+
+    test('fromJson onbekende source valt terug naar unifiedPush', () {
+      final msg = PushMessage.fromJson({'source': 'onbekend_provider'});
+      expect(msg.source, PushProviderType.unifiedPush);
+    });
+
+    test('toJson serialiseert correct', () {
+      final msg = PushMessage(
+        roomId: '!abc:server',
+        eventId: '\$event123',
+        sender: '@alice:server',
+        body: 'Test',
         source: PushProviderType.unifiedPush,
-        receivedAt: DateTime(2026, 5, 25, 12, 0),
-        clientName: 'test_client',
-      );
-
-      // Act
-      final payload = message.toPayload();
-
-      // Assert
-      expect(payload, 'test_client|!test:matrix.org|\$123456');
-    });
-
-    test('should handle missing optional fields', () {
-      // Arrange
-      final json = {
-        'room_id': '!test:matrix.org',
-        'event_id': '\$123456',
-        'sender': '@alice:matrix.org',
-        'body': 'Hello',
-        'source': 'firebase',
-        'received_at': '2026-05-25T12:00:00.000Z',
-      };
-
-      // Act
-      final message = PushMessage.fromJson(json);
-
-      // Assert
-      expect(message.unreadCount, isNull);
-      expect(message.clientName, isNull);
-      expect(message.source, PushProviderType.firebase);
-    });
-
-    test('should use default values for missing source and received_at', () {
-      // Arrange
-      final json = {
-        'room_id': '!test:matrix.org',
-        'event_id': '\$123456',
-        'sender': '@alice:matrix.org',
-        'body': 'Hello',
-      };
-
-      // Act
-      final message = PushMessage.fromJson(json);
-
-      // Assert
-      expect(message.source, PushProviderType.unifiedPush);
-      expect(message.receivedAt, isA<DateTime>());
-    });
-
-    test('should round-trip through JSON', () {
-      // Arrange
-      final original = PushMessage(
-        roomId: '!test:matrix.org',
-        eventId: '\$123456',
-        sender: '@alice:matrix.org',
-        body: 'Hello world',
-        source: PushProviderType.unifiedPush,
-        receivedAt: DateTime(2026, 5, 25, 12, 0),
+        receivedAt: DateTime.parse('2024-06-15T10:30:00.000Z'),
         unreadCount: 3,
-        clientName: 'my_client',
+        clientName: 'Plusly',
       );
 
-      // Act
+      final json = msg.toJson();
+
+      expect(json['room_id'], '!abc:server');
+      expect(json['event_id'], '\$event123');
+      expect(json['source'], 'unifiedPush');
+      expect(json['unread_count'], 3);
+      expect(json['client_name'], 'Plusly');
+    });
+
+    test('toPayload genereert correct format', () {
+      final msg = PushMessage(
+        roomId: '!abc:server',
+        eventId: '\$event123',
+        sender: '@alice:server',
+        body: 'Test',
+        source: PushProviderType.unifiedPush,
+        receivedAt: DateTime.now(),
+        clientName: 'Plusly',
+      );
+
+      expect(msg.toPayload(), 'Plusly|!abc:server|\$event123');
+    });
+
+    test('toPayload zonder clientName is leeg prefix', () {
+      final msg = PushMessage(
+        roomId: '!abc:server',
+        eventId: '\$event123',
+        sender: '@alice:server',
+        body: 'Test',
+        source: PushProviderType.unifiedPush,
+        receivedAt: DateTime.now(),
+      );
+
+      expect(msg.toPayload(), '|!abc:server|\$event123');
+    });
+
+    test('toString bevat sender en body', () {
+      final msg = PushMessage(
+        roomId: '!abc:server',
+        eventId: '\$event123',
+        sender: '@alice:server',
+        body: 'Hallo',
+        source: PushProviderType.unifiedPush,
+        receivedAt: DateTime.now(),
+      );
+
+      expect(msg.toString(), contains('@alice:server'));
+      expect(msg.toString(), contains('Hallo'));
+      expect(msg.toString(), contains('!abc:server'));
+    });
+
+    test('roundtrip: toJson -> fromJson behoudt alle data', () {
+      final original = PushMessage(
+        roomId: '!test:server',
+        eventId: '\$evt456',
+        sender: '@bob:server',
+        body: 'Bericht',
+        source: PushProviderType.unifiedPush,
+        receivedAt: DateTime(2024, 6, 15, 12, 0, 0),
+        unreadCount: 7,
+        clientName: 'TestClient',
+      );
+
       final json = original.toJson();
       final restored = PushMessage.fromJson(json);
 
-      // Assert
       expect(restored.roomId, original.roomId);
       expect(restored.eventId, original.eventId);
       expect(restored.sender, original.sender);
@@ -108,6 +130,18 @@ void main() {
       expect(restored.source, original.source);
       expect(restored.unreadCount, original.unreadCount);
       expect(restored.clientName, original.clientName);
+    });
+  });
+
+  group('PushProviderType', () {
+    test('enum bevat expected values', () {
+      expect(PushProviderType.values, contains(PushProviderType.unifiedPush));
+      expect(PushProviderType.values, contains(PushProviderType.none));
+    });
+
+    test('enum name property werkt', () {
+      expect(PushProviderType.unifiedPush.name, 'unifiedPush');
+      expect(PushProviderType.none.name, 'none');
     });
   });
 }
