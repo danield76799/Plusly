@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - llm-base
   workflow_dispatch:
 
 concurrency:
@@ -94,6 +93,9 @@ jobs:
 
       - name: Install Flutter dependencies
         run: flutter pub get
+
+      - name: Run tests
+        run: flutter test
 
       - name: Generate assets
         run: |

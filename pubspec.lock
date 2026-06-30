@@ -114,7 +114,7 @@ packages:
     source: hosted
     version: "6.3.0"
   audioplayers_linux:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: audioplayers_linux
       sha256: f75bce1ce864170ef5e6a2c6a61cd3339e1a17ce11e99a25bae4474ea491d001
@@ -1350,14 +1350,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.19"
-  material:
-    dependency: "direct main"
-    description:
-      name: material
-      sha256: "544f2dd87d8b24ecdcf7850fe12b2f2e8ccc3ad6cf47396e9c9241e4e7efac44"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   material_color_utilities:
     dependency: transitive
     description:

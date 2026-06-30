@@ -17,14 +17,13 @@ dependencies:
   archive: ^4.0.9
   async: ^2.13.0
   audioplayers: ^6.5.1
-  audioplayers_linux: ^4.2.1
   badges: ^3.1.2
   blurhash_dart: ^1.2.1
   camera: ^0.12.0+1
   chewie: ^1.13.0
   collection: ^1.18.0
   cross_file: ^0.3.5+2
-  cupertino_icons: any
+  cupertino_icons: ^1.0.8
   desktop_drop: ^0.7.0
   desktop_notifications: ^0.6.3
   desktop_webview_window: ^0.2.3
@@ -73,8 +72,6 @@ dependencies:
   latlong2: ^0.9.1
   linkify: ^5.0.0
   marquee: ^2.3.0
-  material: ^1.0.1
-  # material_design_icons_flutter: ^7.0.7296  # DISABLED - incompatible with Flutter 3.41+
   matrix:
     # path: ../matrix-dart-sdk
     git:
