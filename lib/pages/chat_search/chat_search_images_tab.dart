@@ -60,7 +60,6 @@ class ChatSearchImagesTab extends StatelessWidget {
 
     final crossAxisCount = AppSettings.galleryColumns.value;
     final thumbnailSize = AppSettings.galleryThumbnailSize.value.toDouble();
-    final useLazyLoading = AppSettings.galleryLazyLoading.value;
 
     return ListView.builder(
       itemCount: eventsByMonth.length + 1,
@@ -94,7 +93,6 @@ class ChatSearchImagesTab extends StatelessWidget {
           }
 
           final monthEvents = eventsByMonthList[i].value;
-          final isLazyLoaded = useLazyLoading && i > 0;
 
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -171,8 +169,7 @@ class ChatSearchImagesTab extends StatelessWidget {
             ],
           );
         },
-      ),
-    );
+      );
   }
 }
 
