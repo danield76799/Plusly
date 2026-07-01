@@ -46,7 +46,11 @@ class ChatSearchImagesTab extends StatelessWidget {
     }
 
     final eventsByMonth = <DateTime, List<Event>>{};
+    
+    // Deduplicate by eventId (server may return duplicates across pages)
+    final seenIds = <String>{};
     for (final event in events) {
+      if (!seenIds.add(event.eventId)) continue; // Skip duplicate
       final month = DateTime(
         event.originServerTs.year,
         event.originServerTs.month,
