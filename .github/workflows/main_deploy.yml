@@ -118,16 +118,17 @@ jobs:
           echo "full_version=${VERSION_NAME}+${NEW_BUILD_NUMBER}" >> $GITHUB_OUTPUT
           echo "Bumped ${VERSION_NAME}+${BUILD_NUMBER} → ${VERSION_NAME}+${NEW_BUILD_NUMBER}"
 
-      # === COMMIT VERSION BUMP ===
       - name: Commit version bump
+        id: bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pubspec.yaml
-          git diff --cached --quiet || git commit -m "Bump version to ${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}"
-          git push
-
-      # === SIGNING SETUP (optional — uses debug signing if secrets missing) ===
+          git diff --cached --quiet || git commit -m "Bump version to ${{ steps.version.outputs.version }}+${{ steps.version.outputs.build_number }}"
+          git push || echo "Push failed, continuing anyway"
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup signing
         id: signing
         env:

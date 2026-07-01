@@ -62,14 +62,9 @@ class ChatSearchImagesTab extends StatelessWidget {
     final thumbnailSize = AppSettings.galleryThumbnailSize.value.toDouble();
     final useLazyLoading = AppSettings.galleryLazyLoading.value;
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (notification) {
-        _LazyMxcImageState.onScroll();
-        return false;
-      },
-      child: ListView.builder(
-        itemCount: eventsByMonth.length + 1,
-        itemBuilder: (context, i) {
+    return ListView.builder(
+      itemCount: eventsByMonth.length + 1,
+      itemBuilder: (context, i) {
           if (i == eventsByMonth.length) {
             if (isLoading) {
               return const Padding(
@@ -160,20 +155,15 @@ class ChatSearchImagesTab extends StatelessWidget {
                     child: Material(
                       clipBehavior: Clip.hardEdge,
                       borderRadius: borderRadius,
-                      child: isLazyLoaded
-                          ? _LazyMxcImage(
-                              event: event,
-                              width: thumbnailSize,
-                              height: thumbnailSize,
-                            )
-                          : MxcImage(
-                              event: event,
-                              width: thumbnailSize,
-                              height: thumbnailSize,
-                              fit: BoxFit.cover,
-                              animated: true,
-                              isThumbnail: true,
-                            ),
+                      child: MxcImage(
+                        event: event,
+                        width: thumbnailSize,
+                        height: thumbnailSize,
+                        fit: BoxFit.cover,
+                        animated: true,
+                        isThumbnail: true,
+                        cacheKey: '${event.eventId}_thumb_${thumbnailSize.toInt()}',
+                      ),
                     ),
                   );
                 },
@@ -186,82 +176,3 @@ class ChatSearchImagesTab extends StatelessWidget {
   }
 }
 
-class _LazyMxcImage extends StatefulWidget {
-  final Event event;
-  final double width;
-  final double height;
-
-  const _LazyMxcImage({
-    required this.event,
-    required this.width,
-    required this.height,
-  });
-
-  @override
-  State<_LazyMxcImage> createState() => _LazyMxcImageState();
-}
-
-class _LazyMxcImageState extends State<_LazyMxcImage> {
-  bool _isVisible = false;
-
-  static final List<_LazyMxcImageState> _instances = [];
-
-  static void onScroll() {
-    for (final instance in List<_LazyMxcImageState>.from(_instances)) {
-      if (instance.mounted && !instance._isVisible) {
-        instance._checkVisibility();
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _instances.add(this);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkVisibility());
-  }
-
-  @override
-  void dispose() {
-    _instances.remove(this);
-    super.dispose();
-  }
-
-  void _checkVisibility() {
-    if (!mounted || _isVisible) return;
-    final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null) return;
-    final offset = renderBox.localToGlobal(Offset.zero);
-    final view = View.of(context);
-    final screenHeight = view.physicalSize.height / view.devicePixelRatio;
-    // Load if within 1 screen height above or below viewport
-    if (offset.dy > -screenHeight && offset.dy < screenHeight * 2) {
-      setState(() => _isVisible = true);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_isVisible) {
-      return Container(
-        width: widget.width,
-        height: widget.height,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
-        ),
-        child: Center(
-          child: Icon(Icons.image_outlined, color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
-      );
-    }
-    return MxcImage(
-      event: widget.event,
-      width: widget.width,
-      height: widget.height,
-      fit: BoxFit.cover,
-      animated: true,
-      isThumbnail: true,
-    );
-  }
-}

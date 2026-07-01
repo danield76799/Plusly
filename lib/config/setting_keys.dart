@@ -104,7 +104,7 @@ enum AppSettings<T> {
   enableChatFrostedGlass<bool>('xyz.plusly.next.enableChatFrostedGlass', false),
   galleryColumns<int>('xyz.plusly.galleryColumns', 3),
   galleryThumbnailSize<int>('xyz.plusly.galleryThumbnailSize', 128),
-  galleryLazyLoading<bool>('xyz.plusly.galleryLazyLoading', true),
+  galleryLazyLoading<bool>('xyz.plusly.galleryLazyLoading', false),
   enableAppBarCenterTitle<bool>(
     'xyz.plusly.next.enableAppBarCenterTitle',
     false,
