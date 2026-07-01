@@ -1,90 +1,40 @@
 import 'package:flutter_test/flutter_test.dart';
 
-/// Test template voor Image/Video Media Handling
-/// 
-/// Run: flutter test test/utils/media_handling_test.dart
-/// 
-/// Deze test verifieert:
-/// - Image resizing en compressie
-/// - EXIF data verwijdering
-/// - Mime type detectie
-/// - Thumbnail generation
-/// 
-/// NOTE: File I/O tests gebruiken mock data, geen echte bestanden.
+import 'package:Pulsly/utils/clean_exif.dart' as clean_exif;
 
+/// Tests voor EXIF/image handling utilities.
+///
+/// NOTE: De echte removeExifData() vereist een geldige JPEG/PNG decode,
+/// wat het `image` package nodig heeft. We testen hier alleen de
+/// format-detectie logica die geen decoding vereist.
 void main() {
-  group('MediaHandler', () {
-    setUp(() {
-      // TODO: Setup mock file system
+  group('Image Format Detection', () {
+    test('detecteert JPEG uit magic bytes', () {
+      final bytes = [0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10];
+      expect(clean_exif.ExifCleaner.getImageFormat(bytes), 'JPEG');
     });
 
-    test('removeExifData verwijdert GPS en camera info', () {
-      // Arrange: Simuleer JPEG met EXIF
-      // final jpegWithExif = Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE1, ...]);
-      
-      // Act
-      // final cleaned = MediaHandler.removeExifData(jpegWithExif);
-      
-      // Assert
-      // expect(cleaned.length, lessThan(jpegWithExif.length));
-      // expect(hasExif(cleaned), isFalse);
+    test('detecteert PNG uit magic bytes', () {
+      final bytes = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+      expect(clean_exif.ExifCleaner.getImageFormat(bytes), 'PNG');
     });
 
-    test('resizeImage scalet correct naar max dimensies', () {
-      // Arrange: 4000x3000 image
-      // final original = MockImage(width: 4000, height: 3000);
-      
-      // Act
-      // final resized = MediaHandler.resizeImage(original, maxWidth: 1920, maxHeight: 1080);
-      
-      // Assert: Should scale to 1440x1080 (maintaining aspect ratio)
-      // expect(resized.width, 1440);
-      // expect(resized.height, 1080);
+    test('detecteert GIF uit magic bytes', () {
+      final bytes = [0x47, 0x49, 0x46, 0x38, 0x39, 0x61];
+      expect(clean_exif.ExifCleaner.getImageFormat(bytes), 'GIF');
     });
 
-    test('getMimeType detecteert correct uit bytes', () {
-      // Arrange
-      // final pngHeader = [0x89, 0x50, 0x4E, 0x47];
-      // final jpegHeader = [0xFF, 0xD8, 0xFF];
-      
-      // Act & Assert
-      // expect(MediaHandler.getMimeType(pngHeader), 'image/png');
-      // expect(MediaHandler.getMimeType(jpegHeader), 'image/jpeg');
+    test('detecteert BMP uit magic bytes', () {
+      final bytes = [0x42, 0x4D, 0x00, 0x00];
+      expect(clean_exif.ExifCleaner.getImageFormat(bytes), 'BMP');
     });
 
-    test('generateThumbnail maakt klein voorbeeld', () {
-      // Arrange
-      // final image = MockImage(width: 2000, height: 1500);
-      
-      // Act
-      // final thumb = MediaHandler.generateThumbnail(image, size: 120);
-      
-      // Assert
-      // expect(thumb.width, 120);
-      // expect(thumb.height, 90); // Maintains 4:3 ratio
+    test('retourneert Unknown voor ongeldige bytes', () {
+      expect(clean_exif.ExifCleaner.getImageFormat([0x00]), 'Unknown');
     });
 
-    test('videoThumbnail genereert eerste frame', () {
-      // Arrange
-      // final videoPath = 'test.mp4';
-      
-      // Act
-      // final thumb = await MediaHandler.videoThumbnail(videoPath);
-      
-      // Assert
-      // expect(thumb, isNotNull);
-      // expect(thumb.format, 'image/jpeg');
-    });
-
-    test('cancelDownload stopt active transfer', () {
-      // Arrange
-      // final transfer = MediaHandler.downloadFile('mxc://server/media123');
-      
-      // Act
-      // MediaHandler.cancelDownload('mxc://server/media123');
-      
-      // Assert
-      // expect(transfer.isCancelled, isTrue);
+    test('retourneert Unknown voor lege lijst', () {
+      expect(clean_exif.ExifCleaner.getImageFormat([]), 'Unknown');
     });
   });
 }

@@ -1,84 +1,67 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
-/// Test template voor Encryptie / E2EE Key Management
-/// 
-/// Run: flutter test test/utils/encryption_test.dart
-/// 
-/// Deze test verifieert:
-/// - Key generation en storage
-/// - Encrypt/decrypt roundtrip
-/// - Session key handling
-/// 
-/// NOTE: Dit test alleen de Flutter-layer wrappers, niet de
-/// onderliggende libolm/libmatrixcrypt (native code).
-
+/// Tests voor E2EE emoji verification.
+///
+/// We testen hier alleen de JSON parsing en emoji mapping logica,
+/// niet de onderliggende native crypto.
 void main() {
-  group('EncryptionService', () {
-    setUp(() {
-      // TODO: Reset key store
+  group('SAS Emoji Verification', () {
+    late List<dynamic> sasEmoji;
+
+    setUpAll(() async {
+      // Laad het SAS emoji bestand direct van disk (geen rootBundle nodig)
+      final file = File('assets/sas-emoji.json');
+      final raw = await file.readAsString();
+      sasEmoji = json.decode(raw);
     });
 
-    test('generateDeviceKeys maakt valide key pair', () {
-      // Arrange
-      // final service = EncryptionService();
-      
-      // Act
-      // final keys = await service.generateDeviceKeys();
-      
-      // Assert
-      // expect(keys.ed25519Key, isNotEmpty);
-      // expect(keys.curve25519Key, isNotEmpty);
-      // expect(keys.deviceId, isNotEmpty);
+    test('sas-emoji.json bevat 64 entries', () {
+      expect(sasEmoji.length, 64);
     });
 
-    test('encrypt/decrypt roundtrip met eigen key', () async {
-      // Arrange
-      // final service = EncryptionService();
-      // await service.initialize();
-      // final plaintext = 'Geheim bericht 🤐';
-      
-      // Act
-      // final encrypted = await service.encrypt(plaintext, toDeviceId: '@bob:server');
-      // final decrypted = await service.decrypt(encrypted);
-      
-      // Assert
-      // expect(decrypted, plaintext);
+    test('elke entry heeft nummer, emoji, en description', () {
+      for (final entry in sasEmoji) {
+        expect(entry['number'], isA<int>());
+        expect(entry['emoji'], isA<String>());
+        expect(entry['description'], isA<String>());
+      }
     });
 
-    test('exportKeys produceert importeerbare backup', () async {
-      // Arrange
-      // final service = EncryptionService();
-      // await service.addInboundGroupSession('!room:server', 'sessie123', keyData);
-      
-      // Act
-      // final export = await service.exportKeys(passphrase: 'wachtwoord123');
-      
-      // Assert
-      // expect(export, isNotEmpty);
-      // expect(export['version'], 1);
+    test('nummers zijn 0-63', () {
+      final numbers = sasEmoji.map((e) => e['number'] as int).toList();
+      expect(numbers, equals(List.generate(64, (i) => i)));
     });
 
-    test('importKeys herstelt keys correct', () async {
-      // Arrange
-      // final export = {...key data...};
-      
-      // Act
-      // await service.importKeys(export, passphrase: 'wachtwoord123');
-      // final canDecrypt = await service.canDecrypt('!room:server', 'event123');
-      
-      // Assert
-      // expect(canDecrypt, isTrue);
+    test('nederlandse vertaling bestaat voor entry 0 (hond)', () {
+      final entry = sasEmoji[0];
+      final translations =
+          Map<String, dynamic>.from(entry['translated_descriptions']);
+      expect(translations['nl'], 'Hond');
     });
 
-    test('verifieerFingerprint toont juiste emoji', () {
-      // Arrange
-      // final key = 'dSqGP9dN6m6xU7GpJzCXcdCGHfFsVMnfvW8cYuXbxvY';
-      
-      // Act
-      // final emoji = service.getVerificationEmoji(key);
-      
-      // Assert
-      // expect(emoji, equals(['🐶', '🌲', '⚡', '🎈', '🍕', '🚀', '🌈', '🔑']));
+    test('emoji voor nummer 0 is 🐶', () {
+      expect(sasEmoji[0]['emoji'], '🐶');
+    });
+
+    test('emoji voor nummer 1 is 🐱', () {
+      expect(sasEmoji[1]['emoji'], '🐱');
+    });
+
+    test('alle emojis zijn uniek', () {
+      final emojis = sasEmoji.map((e) => e['emoji']).toSet();
+      expect(emojis.length, 64); // Geen dubbele
+    });
+
+    test('translated_descriptions bevat NL voor alle entries', () {
+      for (final entry in sasEmoji) {
+        final translations =
+            Map<String, dynamic>.from(entry['translated_descriptions']);
+        expect(translations['nl'], isA<String>());
+        expect(translations['nl']!.isNotEmpty, isTrue);
+      }
     });
   });
 }
