@@ -100,7 +100,7 @@ class LlmService {
   // ── Chat ─────────────────────────────────────────────────────────────
 
   /// Send a chat completion request and return the assistant's reply.
-  /// Automatically falls back: Groq → Cerebras → Ollama.
+  /// Automatically falls back: Groq → Cerebras → Kimi.
   static Future<String> sendMessage(List<LlmMessage> history) async {
     lastFallbackMessage = null;
     final primary = currentProvider;
