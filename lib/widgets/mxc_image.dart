@@ -237,6 +237,8 @@ class _LruCache<K, V> {
     return value;
   }
 
+  bool containsKey(K key) => _map.containsKey(key);
+
   void put(K key, V value) {
     _map.remove(key);
     _map[key] = value;
