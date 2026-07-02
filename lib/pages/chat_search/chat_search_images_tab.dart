@@ -81,7 +81,7 @@ class _ChatSearchImagesTabState extends State<ChatSearchImagesTab> {
     final theme = Theme.of(context);
     final l10n = L10n.of(context);
 
-    if (events.isEmpty && !widget.isLoading) {
+    if (widget.events.isEmpty && !widget.isLoading) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -96,7 +96,7 @@ class _ChatSearchImagesTabState extends State<ChatSearchImagesTab> {
     
     // Deduplicate by eventId (server may return duplicates across pages)
     final seenIds = <String>{};
-    for (final event in events) {
+    for (final event in widget.events) {
       if (!seenIds.add(event.eventId)) continue; // Skip duplicate
       final month = DateTime(
         event.originServerTs.year,
