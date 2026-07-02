@@ -81,7 +81,7 @@ class _ChatSearchImagesTabState extends State<ChatSearchImagesTab> {
     final theme = Theme.of(context);
     final l10n = L10n.of(context);
 
-    if (events.isEmpty && !isLoading) {
+    if (events.isEmpty && !widget.isLoading) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -124,7 +124,7 @@ class _ChatSearchImagesTabState extends State<ChatSearchImagesTab> {
       itemCount: eventsByMonth.length + 1,
       itemBuilder: (context, i) {
           if (i == eventsByMonth.length) {
-            if (isLoading) {
+            if (widget.isLoading) {
               return const Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Center(
@@ -132,7 +132,7 @@ class _ChatSearchImagesTabState extends State<ChatSearchImagesTab> {
                 ),
               );
             }
-            if (endReached) {
+            if (widget.endReached) {
               return const SizedBox.shrink();
             }
             return Center(
