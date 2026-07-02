@@ -274,11 +274,9 @@ class UnifiedPushProvider implements PushProvider {
   String _getDistributorName(String distributor) {
     if (distributor.contains('ntfy')) return 'ntfy';
     if (distributor.contains('sunup')) return 'SunUP';
-    if (distributor.contains('gotify')) return 'Gotify';
     if (distributor.contains('unifiedpush') && distributor.contains('fcm')) {
       return 'FCM Distributor (via UnifiedPush)';
     }
-    if (distributor.contains('unifiedpush')) return 'UnifiedPush';
     return distributor;
   }
 
@@ -286,11 +284,9 @@ class UnifiedPushProvider implements PushProvider {
   IconData _getDistributorIcon(String distributor) {
     if (distributor.contains('ntfy')) return Icons.notifications_active;
     if (distributor.contains('sunup')) return Icons.wb_sunny; // SunUP = zonnetje
-    if (distributor.contains('gotify')) return Icons.chat_bubble;
     if (distributor.contains('unifiedpush') && distributor.contains('fcm')) {
       return Icons.cloud_sync; // FCM → UnifiedPush bridge
     }
-    if (distributor.contains('unifiedpush')) return Icons.share;
     return Icons.notifications;
   }
 
