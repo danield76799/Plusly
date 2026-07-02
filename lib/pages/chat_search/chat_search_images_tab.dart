@@ -10,7 +10,7 @@ import 'package:Pulsly/pages/chat/events/video_player.dart';
 import 'package:Pulsly/pages/image_viewer/image_viewer.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 
-class ChatSearchImagesTab extends StatelessWidget {
+class ChatSearchImagesTab extends StatefulWidget {
   final Room room;
   final List<Event> events;
   final void Function() onStartSearch;
@@ -27,6 +27,53 @@ class ChatSearchImagesTab extends StatelessWidget {
     required this.searchedUntil,
     super.key,
   });
+
+  @override
+  State<ChatSearchImagesTab> createState() => _ChatSearchImagesTabState();
+}
+
+class _ChatSearchImagesTabState extends State<ChatSearchImagesTab> {
+  DateTime? _lastPreloadedMonth;
+
+  @override
+  void didUpdateWidget(ChatSearchImagesTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Preload adjacent months when events change
+    if (widget.events != oldWidget.events) {
+      _preloadAdjacentMonths();
+    }
+  }
+
+  void _preloadAdjacentMonths() {
+    if (_lastPreloadedMonth == null) return;
+    
+    final thumbnailSize = AppSettings.galleryThumbnailSize.value.toDouble();
+    final eventsByMonth = <DateTime, List<Event>>{};
+    final seenIds = <String>{};
+    
+    for (final event in widget.events) {
+      if (!seenIds.add(event.eventId)) continue;
+      final month = DateTime(event.originServerTs.year, event.originServerTs.month);
+      eventsByMonth[month] ??= [];
+      eventsByMonth[month]!.add(event);
+    }
+
+    final months = eventsByMonth.keys.toList();
+    final currentIndex = months.indexOf(_lastPreloadedMonth!);
+    
+    // Preload previous and next month
+    final toPreload = <Event>[];
+    if (currentIndex > 0) {
+      toPreload.addAll(eventsByMonth[months[currentIndex - 1]] ?? []);
+    }
+    if (currentIndex < months.length - 1) {
+      toPreload.addAll(eventsByMonth[months[currentIndex + 1]] ?? []);
+    }
+
+    if (toPreload.isNotEmpty) {
+      MxcImage.preloadAll(toPreload, thumbnailSize: thumbnailSize);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +106,14 @@ class ChatSearchImagesTab extends StatelessWidget {
       eventsByMonth[month]!.add(event);
     }
     final eventsByMonthList = eventsByMonth.entries.toList();
+
+    // Track first visible month for preloading
+    if (_lastPreloadedMonth == null && eventsByMonth.isNotEmpty) {
+      _lastPreloadedMonth = eventsByMonthList.first.key;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _preloadAdjacentMonths();
+      });
+    }
 
     const padding = 8.0;
 

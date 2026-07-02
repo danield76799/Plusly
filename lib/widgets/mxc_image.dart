@@ -55,6 +55,30 @@ class _MxcImageState extends State<MxcImage> {
   /// LRU cache with max 300 entries (~150-300MB depending on image sizes)
   static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 300);
 
+  /// Preload image into cache (call before image is visible)
+  static Future<void> preload(Event event, {required double thumbnailSize}) async {
+    final cacheKey = '${event.eventId}_thumb_${thumbnailSize.toInt()}';
+    if (_imageDataCache.containsKey(cacheKey)) return; // Already cached
+
+    try {
+      final client = event.room.client;
+      final data = await client.downloadContent(
+        event.contentFileUrl(event.room),
+        isThumbnail: true,
+        thumbnailSize: thumbnailSize.toInt(),
+        thumbnailMethod: ThumbnailMethod.scale,
+      );
+      _imageDataCache.put(cacheKey, data);
+    } catch (_) {
+      // Ignore preload errors - image will load on-demand
+    }
+  }
+
+  /// Preload multiple images (for gallery preloading)
+  static Future<void> preloadAll(Iterable<Event> events, {required double thumbnailSize}) async {
+    await Future.wait(events.map((e) => preload(e, thumbnailSize: thumbnailSize)));
+  }
+
   Uint8List? _imageDataNoCache;
   int _retryCount = 0;
   static const int _maxRetries = 3;
