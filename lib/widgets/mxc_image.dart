@@ -61,14 +61,12 @@ class _MxcImageState extends State<MxcImage> {
     if (_imageDataCache.containsKey(cacheKey)) return; // Already cached
 
     try {
-      final client = event.room.client;
-      final data = await client.downloadContent(
-        event.contentFileUrl(event.room),
-        isThumbnail: true,
-        thumbnailSize: thumbnailSize.toInt(),
-        thumbnailMethod: ThumbnailMethod.scale,
+      final data = await event.downloadAndDecryptAttachment(
+        getThumbnail: true,
       );
-      _imageDataCache.put(cacheKey, data);
+      if (data.bytes.isNotEmpty) {
+        _imageDataCache.put(cacheKey, data.bytes);
+      }
     } catch (_) {
       // Ignore preload errors - image will load on-demand
     }
