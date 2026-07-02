@@ -143,7 +143,7 @@ class _ChatSearchImagesTabState extends State<ChatSearchImagesTab> {
                     backgroundColor: theme.colorScheme.surfaceContainerHighest,
                     foregroundColor: theme.colorScheme.onSurface,
                   ),
-                  onPressed: onStartSearch,
+                  onPressed: widget.onStartSearch,
                   icon: const Icon(Icons.arrow_downward_outlined),
                   label: Text(l10n.searchMore),
                 ),
