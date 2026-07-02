@@ -52,8 +52,8 @@ class MxcImage extends StatefulWidget {
 }
 
 class _MxcImageState extends State<MxcImage> {
-  /// LRU cache with max 100 entries (~50-100MB depending on image sizes)
-  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 100);
+  /// LRU cache with max 300 entries (~150-300MB depending on image sizes)
+  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 300);
 
   Uint8List? _imageDataNoCache;
   int _retryCount = 0;
@@ -149,7 +149,9 @@ class _MxcImageState extends State<MxcImage> {
                 height: widget.height,
                 fit: widget.fit,
                 filterQuality: widget.isThumbnail
-                    ? FilterQuality.low
+                    ? (widget.width ?? 0) < 100
+                        ? FilterQuality.none  // Scherpe pixels bij kleine thumbnails
+                        : FilterQuality.low
                     : FilterQuality.medium,
                 errorBuilder: (context, e, s) {
                   Logs().d('Unable to render mxc image', e, s);

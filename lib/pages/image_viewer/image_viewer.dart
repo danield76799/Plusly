@@ -50,6 +50,8 @@ class ImageViewerController extends State<ImageViewer> {
     );
     if (index < 0) index = 0;
     pageController = PageController(initialPage: index);
+    // Preload adjacent images for instant swiping
+    WidgetsBinding.instance.addPostFrameCallback((_) => _preloadAdjacent());
   }
 
   late final PageController pageController;
@@ -92,6 +94,23 @@ class ImageViewerController extends State<ImageViewer> {
   bool get canGoNext => _index < allEvents.length - 1;
 
   bool get canGoBack => _index > 0;
+
+  /// Preload adjacent images for instant swiping
+  void _preloadAdjacent() {
+    final currentIndex = _index;
+    // Preload next image
+    if (currentIndex < allEvents.length - 1) {
+      allEvents[currentIndex + 1].downloadAndDecryptAttachment(
+        getThumbnail: false,
+      ).catchError((_) => null);
+    }
+    // Preload previous image
+    if (currentIndex > 0) {
+      allEvents[currentIndex - 1].downloadAndDecryptAttachment(
+        getThumbnail: false,
+      ).catchError((_) => null);
+    }
+  }
 
   /// Forward this image to another room.
   void forwardAction() => showScaffoldDialog(
