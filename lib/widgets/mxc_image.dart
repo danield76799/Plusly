@@ -47,18 +47,13 @@ class MxcImage extends StatefulWidget {
     super.key,
   });
 
-  @override
-  State<MxcImage> createState() => _MxcImageState();
-}
-
-class _MxcImageState extends State<MxcImage> {
-  /// LRU cache with max 300 entries (~150-300MB depending on image sizes)
+  /// LRU cache shared across all MxcImage instances
   static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 300);
 
-  /// Preload image into cache (call before image is visible)
+  /// Preload a single image into cache
   static Future<void> preload(Event event, {required double thumbnailSize}) async {
     final cacheKey = '${event.eventId}_thumb_${thumbnailSize.toInt()}';
-    if (_imageDataCache.containsKey(cacheKey)) return; // Already cached
+    if (_imageDataCache.containsKey(cacheKey)) return;
 
     try {
       final data = await event.downloadAndDecryptAttachment(
@@ -67,30 +62,33 @@ class _MxcImageState extends State<MxcImage> {
       if (data.bytes.isNotEmpty) {
         _imageDataCache.put(cacheKey, data.bytes);
       }
-    } catch (_) {
-      // Ignore preload errors - image will load on-demand
-    }
+    } catch (_) {}
   }
 
-  /// Preload multiple images (for gallery preloading)
+  /// Preload multiple images into cache
   static Future<void> preloadAll(Iterable<Event> events, {required double thumbnailSize}) async {
     await Future.wait(events.map((e) => preload(e, thumbnailSize: thumbnailSize)));
   }
 
+  @override
+  State<MxcImage> createState() => _MxcImageState();
+}
+
+class _MxcImageState extends State<MxcImage> {
   Uint8List? _imageDataNoCache;
   int _retryCount = 0;
   static const int _maxRetries = 3;
 
   Uint8List? get _imageData => widget.cacheKey == null
       ? _imageDataNoCache
-      : _imageDataCache.get(widget.cacheKey!);
+      : MxcImage._imageDataCache.get(widget.cacheKey!);
 
   set _imageData(Uint8List? data) {
     if (data == null) return;
     final cacheKey = widget.cacheKey;
     cacheKey == null
         ? _imageDataNoCache = data
-        : _imageDataCache.put(cacheKey, data);
+        : MxcImage._imageDataCache.put(cacheKey, data);
   }
 
   Future<void> _load() async {
