@@ -229,10 +229,67 @@ class UnifiedPushProvider implements PushProvider {
   Future<String?> _selectDistributor(List<String> distributors) async {
     if (distributors.length == 1) return distributors.first;
 
-    // TODO: Toon picker dialog via navigatorKey
-    // Voor nu: gebruik eerste
-    Logs().i('[UnifiedPush] Multiple distributors, using first: ${distributors.first}');
-    return distributors.first;
+    // Toon picker dialog als er meerdere distributors zijn
+    try {
+      // Gebruik Matrix.navigatorKey als fallback voor navigator
+      final context = Matrix.navigatorKey?.currentContext;
+      if (context == null) {
+        Logs().w('[UnifiedPush] No navigator context, using first distributor');
+        return distributors.first;
+      }
+
+      return await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Kies push notificatie service'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: distributors.map((distributor) {
+              final name = _getDistributorName(distributor);
+              return ListTile(
+                leading: Icon(_getDistributorIcon(distributor)),
+                title: Text(name),
+                onTap: () => Navigator.pop(context, distributor),
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Annuleren'),
+            ),
+          ],
+        ),
+      );
+    } catch (e, s) {
+      Logs().e('[UnifiedPush] Failed to show distributor picker', e, s);
+      // Fallback: gebruik eerste
+      return distributors.first;
+    }
+  }
+
+  /// Vriendelijke naam voor distributor
+  String _getDistributorName(String distributor) {
+    if (distributor.contains('ntfy')) return 'ntfy';
+    if (distributor.contains('sunup')) return 'SunUP';
+    if (distributor.contains('gotify')) return 'Gotify';
+    if (distributor.contains('unifiedpush') && distributor.contains('fcm')) {
+      return 'FCM Distributor (via UnifiedPush)';
+    }
+    if (distributor.contains('unifiedpush')) return 'UnifiedPush';
+    return distributor;
+  }
+
+  /// Icoon voor distributor
+  IconData _getDistributorIcon(String distributor) {
+    if (distributor.contains('ntfy')) return Icons.notifications_active;
+    if (distributor.contains('sunup')) return Icons.wb_sunny; // SunUP = zonnetje
+    if (distributor.contains('gotify')) return Icons.chat_bubble;
+    if (distributor.contains('unifiedpush') && distributor.contains('fcm')) {
+      return Icons.cloud_sync; // FCM → UnifiedPush bridge
+    }
+    if (distributor.contains('unifiedpush')) return Icons.share;
+    return Icons.notifications;
   }
 
   Client? _clientFromInstance(String instance) {
