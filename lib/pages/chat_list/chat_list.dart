@@ -54,7 +54,7 @@ extension LocalizedActiveFilter on ActiveFilter {
       case ActiveFilter.groups:
         return L10n.of(context).groups;
       case ActiveFilter.favorites:
-        return "Favorites";
+        return "Favorieten";
       case ActiveFilter.people:
         return L10n.of(context).people;
     }

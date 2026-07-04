@@ -1,8 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
+/// Extension to clean bridge-related noise from message previews
+extension MessagePreviewCleaner on String {
+  /// Removes bridge prefixes like ". (WA): " or "Facebook (WA): " and leading punctuation
+  String sanitizePreview() {
+    if (this.isEmpty) return this;
+    
+    // 1. Remove known bridge prefixes (e.g., "WhatsApp (WA): ", "bridge bot: ")
+    final prefixRegex = RegExp(r'^(\.?\s*([a-zA-Z]+)?\s*\(WA\):?|bridge bot:?)\s*', caseSensitive: false);
+    String cleaned = this.replaceFirst(prefixRegex, '');
+
+    // 2. Remove leading punctuation/whitespace that might remain (e.g., ". Hello")
+    cleaned = cleaned.replaceFirst(RegExp(r'^[\.\s,\-]+'), '');
+
+    // 3. Remove double spaces
+    cleaned = cleaned.replaceAll(RegExp(r'\s{2,}'), ' ');
+
+    return cleaned.trim();
+  }
+}
+
 /// Gets a display name for a bridge type
 String getBridgeTypeLabel(String? type) {
+// ... rest of the file
   switch (type) {
     case 'whatsapp':
       return 'WhatsApp';

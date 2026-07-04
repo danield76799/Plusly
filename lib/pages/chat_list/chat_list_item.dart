@@ -95,13 +95,35 @@ class ChatListItem extends StatelessWidget {
                   duration: FluffyThemes.animationDuration,
                   curve: FluffyThemes.animationCurve,
                   scale: hovered ? 1.1 : 1.0,
-                  child: Avatar(
-                    mxContent: room.avatar,
-                    size: compactMode ? 28.0 : Avatar.defaultSize,
-                    name: cleanDisplayname,
-                    presenceUserId: directChatMatrixId,
-                    presenceBackgroundColor: backgroundColor,
-                    onTap: () => onLongPress?.call(context),
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      Avatar(
+                        mxContent: room.avatar,
+                        size: compactMode ? 28.0 : Avatar.defaultSize,
+                        name: cleanDisplayname,
+                        presenceUserId: directChatMatrixId,
+                        presenceBackgroundColor: backgroundColor,
+                        onTap: () => onLongPress?.call(context),
+                      ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                          child: Icon(
+                            getBridgeTypeIcon(getBridgeType(room)),
+                            size: 12,
+                            color: getBridgeTypeColor(getBridgeType(room)),
+                            // We use a small background circle for the icon to make it pop
+                            // since the bridge icon might be too small on its own
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -150,13 +172,17 @@ class ChatListItem extends StatelessWidget {
                   if (!room.isSpace && room.membership != Membership.invite)
                     Padding(
                       padding: const EdgeInsets.only(left: 4.0),
-                      child: Text(
-                        room.latestEventReceivedTime.localizedTimeShort(
-                          context,
-                        ),
-                        style: TextStyle(
-                          fontSize: compactMode ? 10 : 12,
-                          color: theme.colorScheme.outline,
+                      child: SizedBox(
+                        width: 50, // Fixed width to prevent jumping
+                        child: Text(
+                          room.latestEventReceivedTime.localizedTimeShort(
+                            context,
+                          ),
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: compactMode ? 10 : 12,
+                            color: theme.colorScheme.outline,
+                          ),
                         ),
                       ),
                     ),
@@ -268,23 +294,23 @@ class ChatListItem extends StatelessWidget {
                                                   : L10n.of(
                                                       context,
                                                     ).inviteGroupChat)
-                                        : snapshot.data ??
-                                              L10n.of(context).noMessagesYet,
-                                    softWrap: false,
-                                    maxLines: room.notificationCount >= 1
-                                        ? 2
-                                        : 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: unread || room.hasNewMessages
-                                          ? theme.colorScheme.onSurface
-                                          : theme.colorScheme.outline,
-                                      decoration:
-                                          room.lastEvent?.redacted == true
-                                          ? TextDecoration.lineThrough
-                                          : null,
-                                    ),
-                                  ),
+                                        : snapshot.data?.sanitizePreview() ??
+                                            L10n.of(context).noMessagesYet,
+                                        softWrap: false,
+                                        maxLines: room.notificationCount >= 1
+                                          ? 2
+                                          : 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                        color: unread || room.hasNewMessages
+                                            ? theme.colorScheme.onSurface
+                                            : theme.colorScheme.outline,
+                                        decoration:
+                                            room.lastEvent?.redacted == true
+                                            ? TextDecoration.lineThrough
+                                            : null,
+                                        ),
+                                        ),
                                 ),
                               ],
                             ),
