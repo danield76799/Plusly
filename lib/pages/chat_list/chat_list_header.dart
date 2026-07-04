@@ -92,7 +92,11 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                 child: Row(
                   children: [
                     // Plusly logo SVG
-                    SvgPicture.asset('assets/plusly_header.svg', height: 40),
+                    SvgPicture.asset(
+                      'assets/plusly_header.svg',
+                      height: 40,
+                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                    ),
                     const Spacer(),
                     // Tijd weergave
                     StreamBuilder(

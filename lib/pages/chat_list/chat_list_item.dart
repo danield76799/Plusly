@@ -173,16 +173,23 @@ class ChatListItem extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(left: 4.0),
                       child: SizedBox(
-                        width: 50, // Fixed width to prevent jumping
-                        child: Text(
-                          room.latestEventReceivedTime.localizedTimeShort(
-                            context,
-                          ),
-                          textAlign: TextAlign.right,
-                          style: TextStyle(
-                            fontSize: compactMode ? 10 : 12,
-                            color: theme.colorScheme.outline,
-                          ),
+                        width: 70, // Fixed width to ensure a straight right edge
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              room.latestEventReceivedTime.localizedTimeShort(
+                                context,
+                              ),
+                              style: TextStyle(
+                                fontSize: compactMode ? 10 : 12,
+                                color: theme.colorScheme.outline,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            UnreadBubble(room: room),
+                          ],
                         ),
                       ),
                     ),
