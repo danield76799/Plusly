@@ -268,12 +268,54 @@ class ChatListItem extends StatelessWidget {
                             initialData: lastEvent?.calcLocalizedBodyFallback(
                                 MatrixLocals(L10n.of(context)),
                                 hideReply: true,
-                               L10n.of(context).noMessagesYet,
-                                softWrap: false,
-                                maxLines: room.notificationCount >= 1
-                                  ? 2
-                                  : 1,
-                                overflow: TextOverflow.ellipsis,
+                                hideEdit: true,
+                                plaintextBody: true,
+                                removeMarkdown: true,
+                                withSenderNamePrefix: true,
+                            ),
+                            builder: (context, snapshot) => Row(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 2,
+                              children: [
+                                if (room.membership == Membership.join &&
+                                    ownMessage)
+                                  Icon(
+                                    lastEvent!.receipts
+                                            .where(
+                                              (receipt) =>
+                                                  receipt.user.id !=
+                                                  client.userID!,
+                                            )
+                                            .isNotEmpty
+                                        ? Icons.done_all
+                                        : Icons.done,
+                                    size: 16,
+                                    color: theme.colorScheme.outline,
+                                  ),
+                                Flexible(
+                                  child: Text(
+                                    room.membership == Membership.invite
+                                        ? room
+                                                  .getState(
+                                                    EventTypes.RoomMember,
+                                                    room.client.userID!,
+                                                  )
+                                                  ?.content
+                                                  .tryGet<String>('reason') ??
+                                              (isDirectChat
+                                                  ? L10n.of(
+                                                      context,
+                                                    ).newChatRequest
+                                                  : L10n.of(
+                                                      context,
+                                                    ).inviteGroupChat)
+                                        : snapshot.data?.sanitizePreview() ??
+                                            L10n.of(context).noMessagesYet,
+                                        softWrap: false,
+                                        maxLines: room.notificationCount >= 1
+                                          ? 2
+                                          : 1,
+                                        overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                         color: unread || room.hasNewMessages
                                             ? theme.colorScheme.onSurface
