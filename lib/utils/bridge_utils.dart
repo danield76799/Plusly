@@ -78,7 +78,7 @@ Color getBridgeTypeColor(String? type) {
     case 'matrix':
       return const Color(0xFF0DBD8B);
     default:
-      return Colors.grey;
+      return const Color(0xFF9E9E9E); // Medium grey — visible in both light and dark
   }
 }
 

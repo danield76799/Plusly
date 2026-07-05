@@ -83,7 +83,7 @@ class BridgeFilterBar extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(2),
                       decoration: BoxDecoration(
-                        color: Colors.red,
+                        color: theme.colorScheme.error,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       constraints: const BoxConstraints(
@@ -92,8 +92,8 @@ class BridgeFilterBar extends StatelessWidget {
                       ),
                       child: Text(
                         unreadCount > 99 ? '99+' : unreadCount.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: theme.colorScheme.onError,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),

@@ -56,7 +56,7 @@ void main() async {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Color(0xFFE0E0E0),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -64,7 +64,7 @@ void main() async {
                   Text(
                     '${AppConfig.applicationName} could not start. Please try restarting the app.',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.white70),
+                    style: const TextStyle(color: Color(0xFFBDBDBD)),
                   ),
                   const SizedBox(height: 16),
                   Container(
@@ -78,7 +78,7 @@ void main() async {
                       style: const TextStyle(
                         fontSize: 12,
                         fontFamily: 'monospace',
-                        color: Colors.white,
+                        color: Color(0xFFE0E0E0),
                       ),
                     ),
                   ),
