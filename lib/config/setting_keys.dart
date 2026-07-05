@@ -33,12 +33,12 @@ enum AppSettings<T> {
   translationTargetLanguage<String>('xyz.plusly.translationTargetLanguage', ''),
   pluslyServiceUrl<String>(
     'xyz.plusly.serviceUrl',
-    'http://13.140.136.172:5000', // Jouw LibreTranslate server
+    '',
   ),
   // LLM / AI Features
   llmEnabled<bool>('xyz.plusly.llmEnabled', false),
   llmProvider<String>('xyz.plusly.llmProvider', 'groq'),
-  llmGatewayUrl<String>('xyz.plusly.llmGatewayUrl', 'http://13.140.136.172:11434'),
+  llmGatewayUrl<String>('xyz.plusly.llmGatewayUrl', ''),
   llmPrivacyAccepted<bool>('xyz.plusly.llmPrivacyAccepted', false),
   llmEncryptedRoomConsent<bool>('xyz.plusly.llmEncryptedRoomConsent', false),
   llmShowSmartReplies<bool>('xyz.plusly.llmShowSmartReplies', true),
