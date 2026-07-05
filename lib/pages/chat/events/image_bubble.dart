@@ -74,25 +74,21 @@ class ImageBubble extends StatelessWidget {
   }
 
   Widget _buildPlaceholder(BuildContext context) {
-    final blurHashString = event.infoMap['xyz.amorgan.blurhash'] is String
-        ? event.infoMap['xyz.amorgan.blurhash'] as String
-        : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
     return LayoutBuilder(
       builder: (context, constraints) {
-        return BlurHash(
-          blurhash: blurHashString,
+        return Container(
           width: constraints.maxWidth,
           height: constraints.maxHeight,
-          fit: fit,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: const Center(
+            child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+          ),
         );
       },
     );
   }
 
   Widget _buildUnloaded(BuildContext context) {
-    final blurHashString = event.infoMap['xyz.amorgan.blurhash'] is String
-        ? event.infoMap['xyz.amorgan.blurhash'] as String
-        : 'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
     final size = event.infoMap['size'] is num
         ? event.infoMap['size'] as num
         : null;
@@ -100,11 +96,10 @@ class ImageBubble extends StatelessWidget {
       builder: (context, constraints) {
         return Stack(
           children: [
-            BlurHash(
-              blurhash: blurHashString,
+            Container(
               width: constraints.maxWidth,
               height: constraints.maxHeight,
-              fit: fit,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             Center(
               child: ElevatedButton(
