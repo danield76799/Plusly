@@ -151,7 +151,7 @@ Future<void> notificationTap(
       // 🚀 NAVIGATE IMMEDIATELY
       // We skip the 'await' on sync and preloading to avoid the delay.
       // The UI and TimelineCache will handle the loading state.
-      router.go(
+      router?.go(
         client.getRoomById(roomId)?.membership == Membership.invite
             ? '/rooms'
             : '/rooms/$roomId',
@@ -241,7 +241,7 @@ Future<void> notificationTap(
           Logs().w('Failed to preload timeline for $roomId', e);
         }
       }
-      router.go(
+      router?.go(
         client.getRoomById(roomId)?.membership == Membership.invite
             ? '/rooms'
             : '/rooms/$roomId',
