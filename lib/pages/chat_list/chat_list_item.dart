@@ -49,14 +49,14 @@ class ChatListItem extends StatelessWidget {
     if (type == 'whatsapp') {
       return SvgPicture.asset(
         'assets/bridge_icons/whatsapp.svg',
-        width: 12,
-        height: 12,
+        width: 16,
+        height: 16,
         fit: BoxFit.contain,
       );
     }
     return Icon(
       getBridgeTypeIcon(type),
-      size: 12,
+      size: 16,
       color: getBridgeTypeColor(type),
     );
   }
