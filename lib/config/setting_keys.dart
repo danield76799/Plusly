@@ -31,14 +31,9 @@ enum AppSettings<T> {
   enableMatrixNativeOIDC<bool>('xyz.plusly.enable_matrix_native_oidc', false),
   systemFont<bool>('xyz.plusly.systemFont', false),
   translationTargetLanguage<String>('xyz.plusly.translationTargetLanguage', ''),
-  pluslyServiceUrl<String>(
-    'xyz.plusly.serviceUrl',
-    '',
-  ),
   // LLM / AI Features
   llmEnabled<bool>('xyz.plusly.llmEnabled', false),
   llmProvider<String>('xyz.plusly.llmProvider', 'groq'),
-  llmGatewayUrl<String>('xyz.plusly.llmGatewayUrl', ''),
   llmPrivacyAccepted<bool>('xyz.plusly.llmPrivacyAccepted', false),
   llmEncryptedRoomConsent<bool>('xyz.plusly.llmEncryptedRoomConsent', false),
   llmShowSmartReplies<bool>('xyz.plusly.llmShowSmartReplies', true),
