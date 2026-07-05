@@ -274,5 +274,56 @@ class ChatListItem extends StatelessWidget {
                                   ? 2
                                   : 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                color: la...[truncated]
+                                        style: TextStyle(
+                                        color: unread || room.hasNewMessages
+                                            ? theme.colorScheme.onSurface
+                                            : theme.colorScheme.outline,
+                                        decoration:
+                                            room.lastEvent?.redacted == true
+                                            ? TextDecoration.lineThrough
+                                            : null,
+                                        ),
+                                        ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                  SizedBox(width: 8),
+                ],
+              ),
+              onTap: onTap,
+              trailing: onForget == null
+                  ? room.membership == Membership.invite
+                        ? IconButton(
+                            tooltip: L10n.of(context).decline,
+                            icon: const Icon(Icons.delete_forever_outlined),
+                            color: theme.colorScheme.error,
+                            onPressed: () async {
+                              final consent = await showOkCancelAlertDialog(
+                                context: context,
+                                title: L10n.of(context).decline,
+                                message: L10n.of(context).areYouSure,
+                                okLabel: L10n.of(context).yes,
+                                isDestructive: true,
+                              );
+                              if (consent != OkCancelResult.ok) return;
+                              if (!context.mounted) return;
+                              await showFutureLoadingDialog(
+                                context: context,
+                                future: room.leave,
+                              );
+                            },
+                          )
+                        : null
+                  : IconButton(
+                      icon: const Icon(Icons.delete_outlined),
+                      onPressed: onForget,
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
