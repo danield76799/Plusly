@@ -149,8 +149,6 @@ Future<void> notificationTap(
       Logs().v('Open room from notification tap', roomId);
 
       // 🚀 NAVIGATE IMMEDIATELY
-      // We skip the 'await' on sync and preloading to avoid the delay.
-      // The UI and TimelineCache will handle the loading state.
       router?.go(
         client.getRoomById(roomId)?.membership == Membership.invite
             ? '/rooms'
@@ -179,73 +177,6 @@ Future<void> notificationTap(
         }
       });
       break;
-    case NotificationResponseType.selectedNotificationAction:
-      // Keep the logic for markAsRead and reply as is since they need the room to be ready
-      final actionType = PluslyNotificationActions.values.singleWhereOrNull(
-        (action) => action.name == notificationResponse.actionId,
-      );
-      if (actionType == null) {
-        throw Exception('Selected notification with action but no action ID');
-      }
-      final roomId = payload.roomId;
-      if (roomId == null) {
-        throw Exception('Selected notification with action but no payload');
-      }
-      await client.userDeviceKeysLoading;
-      final room = client.getRoomById(roomId);
-      if (room == null) {
-        throw Exception(
-          'Selected notification with action but unknown room $roomId',
-        );
-      }
-      switch (actionType) {
-        case PluslyNotificationActions.markAsRead:
-          await room.setReadMarker(
-            payload.eventId ?? room.lastEvent!.eventId,
-            mRead: payload.eventId ?? room.lastEvent!.eventId,
-            public: shouldSendPublicReadReceipts(client, roomId),
-          );
-        case PluslyNotificationActions.reply:
-          final input = notificationResponse.input;
-          if (input == null || input.isEmpty) {
-            throw Exception(
-              'Selected notification with reply action but without input',
-            );
-          }
-          final eventId = await room.sendTextEvent(
-            input,
-            parseCommands: false,
-            displayPendingEvent: false,
-          );
-          if (PlatformInfos.isAndroid) {
-            final ownProfile = await room.client.fetchOwnProfile();
-            final avatar = ownProfile.avatarUrl;
-            final avatarFile = avatar == null
-                ? null
-                : await client
-                    .downloadMxcCached(
-                      avatar,
-                      thumbnailMethod: ThumbnailMethod.crop,
-                      width: notificationAvatarDimension,
-                      height: notificationAvatarDimension,
-                      animated: false,
-                      isThumbnail: true,
-                      rounded: true,
-                    )
-                    .timeout(const Duration(seconds: 3));
-            final messagingStyleInformation =
-                await AndroidFlutterLocalNotificationsPlugin()
-                    .getActiveNotificationMessaging la...[truncated]
-          TimelineCache.setTimeline(roomId, timeline);
-        } catch (e) {
-          Logs().w('Failed to preload timeline for $roomId', e);
-        }
-      }
-      router?.go(
-        client.getRoomById(roomId)?.membership == Membership.invite
-            ? '/rooms'
-            : '/rooms/$roomId',
-      );
     case NotificationResponseType.selectedNotificationAction:
       final actionType = PluslyNotificationActions.values.singleWhereOrNull(
         (action) => action.name == notificationResponse.actionId,
