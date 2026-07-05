@@ -147,22 +147,95 @@ Future<void> notificationTap(
         return;
       }
       Logs().v('Open room from notification tap', roomId);
-      // Verwijder roomsLoading/accountDataLoading await voor snellere navigatie
-      // (timeline cache zorgt voor snel laden)
+
+      // 🚀 NAVIGATE IMMEDIATELY
+      // We skip the 'await' on sync and preloading to avoid the delay.
+      // The UI and TimelineCache will handle the loading state.
+      router.go(
+        client.getRoomById(roomId)?.membership == Membership.invite
+            ? '/rooms'
+            : '/rooms/$roomId',
+      );
+
+      // Sync and preload in the background
+      Future.delayed(Duration.zero, () async {
+        try {
+          final room = client.getRoomById(roomId);
+          if (room == null) {
+            await client
+                .waitForRoomInSync(roomId)
+                .timeout(const Duration(seconds: 30));
+          }
+          final loadedRoom = client.getRoomById(roomId);
+          if (loadedRoom != null) {
+            final timeline = await loadedRoom.getTimeline().timeout(
+              const Duration(seconds: 5),
+              onTimeout: () => loadedRoom.getTimeline(),
+            );
+            TimelineCache.setTimeline(roomId, timeline);
+          }
+        } catch (e) {
+          Logs().w('Background sync failed for $roomId', e);
+        }
+      });
+      break;
+    case NotificationResponseType.selectedNotificationAction:
+      // Keep the logic for markAsRead and reply as is since they need the room to be ready
+      final actionType = PluslyNotificationActions.values.singleWhereOrNull(
+        (action) => action.name == notificationResponse.actionId,
+      );
+      if (actionType == null) {
+        throw Exception('Selected notification with action but no action ID');
+      }
+      final roomId = payload.roomId;
+      if (roomId == null) {
+        throw Exception('Selected notification with action but no payload');
+      }
+      await client.userDeviceKeysLoading;
       final room = client.getRoomById(roomId);
       if (room == null) {
-        await client
-            .waitForRoomInSync(roomId)
-            .timeout(const Duration(seconds: 30));
+        throw Exception(
+          'Selected notification with action but unknown room $roomId',
+        );
       }
-      // Preload timeline voor instant chat opening
-      final loadedRoom = client.getRoomById(roomId);
-      if (loadedRoom != null) {
-        try {
-          final timeline = await loadedRoom.getTimeline().timeout(
-            const Duration(seconds: 5),
-            onTimeout: () => loadedRoom.getTimeline(),
+      switch (actionType) {
+        case PluslyNotificationActions.markAsRead:
+          await room.setReadMarker(
+            payload.eventId ?? room.lastEvent!.eventId,
+            mRead: payload.eventId ?? room.lastEvent!.eventId,
+            public: shouldSendPublicReadReceipts(client, roomId),
           );
+        case PluslyNotificationActions.reply:
+          final input = notificationResponse.input;
+          if (input == null || input.isEmpty) {
+            throw Exception(
+              'Selected notification with reply action but without input',
+            );
+          }
+          final eventId = await room.sendTextEvent(
+            input,
+            parseCommands: false,
+            displayPendingEvent: false,
+          );
+          if (PlatformInfos.isAndroid) {
+            final ownProfile = await room.client.fetchOwnProfile();
+            final avatar = ownProfile.avatarUrl;
+            final avatarFile = avatar == null
+                ? null
+                : await client
+                    .downloadMxcCached(
+                      avatar,
+                      thumbnailMethod: ThumbnailMethod.crop,
+                      width: notificationAvatarDimension,
+                      height: notificationAvatarDimension,
+                      animated: false,
+                      isThumbnail: true,
+                      rounded: true,
+                    )
+                    .timeout(const Duration(seconds: 3));
+            final messagingStyleInformation =
+                await AndroidFlutterLocalNotificationsPlugin()
+                    .getActiveNotificationMessaging la...[truncated]
           TimelineCache.setTimeline(roomId, timeline);
         } catch (e) {
           Logs().w('Failed to preload timeline for $roomId', e);

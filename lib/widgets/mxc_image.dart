@@ -136,11 +136,11 @@ class _MxcImageState extends State<MxcImage> {
     try {
       await _load();
       _retryCount = 0; // reset on success
-    } on IOException catch (_) {
+    } catch (e, s) {
       if (!mounted) return;
+      Logs().d('MxcImage: error loading image ${widget.uri ?? widget.event?.eventId}', e, s);
       _retryCount++;
       if (_retryCount >= _maxRetries) {
-        Logs().d('MxcImage: max retries ($_maxRetries) reached for ${widget.uri}');
         return;
       }
       await Future.delayed(widget.retryDuration);
