@@ -522,6 +522,7 @@ class _InputBarState extends State<InputBar> {
             widget.onChanged!(text);
           },
           textCapitalization: TextCapitalization.sentences,
+          enableInteractiveSelection: true,
         );
       },
       suggestionsCallback: getSuggestions,

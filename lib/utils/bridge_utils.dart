@@ -46,7 +46,7 @@ String getBridgeTypeLabel(String? type) {
 IconData getBridgeTypeIcon(String? type) {
   switch (type) {
     case 'whatsapp':
-      return Icons.chat;
+      return Icons.whatsapp;
     case 'telegram':
       return Icons.send;
     case 'signal':
