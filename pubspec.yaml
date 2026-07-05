@@ -164,6 +164,7 @@ flutter:
     - assets/sounds/
     - assets/sounds/ringtones/
     - assets/font/
+    - assets/bridge_icons/
   fonts:
     - family: Roboto
       fonts:

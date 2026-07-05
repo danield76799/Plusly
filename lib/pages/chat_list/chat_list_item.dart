@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:matrix/matrix.dart';
-
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_list/unread_bubble.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -44,6 +43,23 @@ class ChatListItem extends StatelessWidget {
     this.compactMode = false,
     super.key,
   });
+
+  Widget _buildBridgeIcon(BuildContext context, Room room) {
+    final type = getBridgeType(room);
+    if (type == 'whatsapp') {
+      return SvgPicture.asset(
+        'assets/bridge_icons/whatsapp.svg',
+        width: 12,
+        height: 12,
+        fit: BoxFit.contain,
+      );
+    }
+    return Icon(
+      getBridgeTypeIcon(type),
+      size: 12,
+      color: getBridgeTypeColor(type),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,13 +130,7 @@ class ChatListItem extends StatelessWidget {
                             shape: BoxShape.circle,
                             border: Border.all(color: Colors.white, width: 1.5),
                           ),
-                          child: Icon(
-                            getBridgeTypeIcon(getBridgeType(room)),
-                            size: 12,
-                            color: getBridgeTypeColor(getBridgeType(room)),
-                            // We use a small background circle for the icon to make it pop
-                            // since the bridge icon might be too small on its own
-                          ),
+                          child: _buildBridgeIcon(context, room),
                         ),
                       ),
                     ],
@@ -230,7 +240,6 @@ class ChatListItem extends StatelessWidget {
                               (room.summary.mJoinedMemberCount ?? 1),
                             ),
                             style: TextStyle(color: theme.colorScheme.outline),
-                            // Added overflow handling here for safety
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           )
@@ -240,12 +249,11 @@ class ChatListItem extends StatelessWidget {
                             style: TextStyle(color: theme.colorScheme.primary),
                             maxLines: 1,
                             softWrap: false,
-                            // Added overflow handling here for safety
                             overflow: TextOverflow.ellipsis,
                           )
                         : FutureBuilder(
                             key: ValueKey(
-                              '${lastEvent?.eventId}_${lastEvent?.type}_${lastEvent?.redacted}',
+                                '${lastEvent?.eventId}_${lastEvent?.type}_${lastEvent?.redacted}',
                             ),
                             future: needLastEventSender
                                 ? lastEvent.calcLocalizedBody(
@@ -254,110 +262,17 @@ class ChatListItem extends StatelessWidget {
                                     hideEdit: true,
                                     plaintextBody: true,
                                     removeMarkdown: true,
-                                    withSenderNamePrefix: true, // Show sender name in message preview
+                                    withSenderNamePrefix: true,
                                   )
                                 : null,
                             initialData: lastEvent?.calcLocalizedBodyFallback(
-                              MatrixLocals(L10n.of(context)),
-                              hideReply: true,
-                              hideEdit: true,
-                              plaintextBody: true,
-                              removeMarkdown: true,
-                              withSenderNamePrefix: true, // Show sender name in message preview
-                            ),
-                            builder: (context, snapshot) => Row(
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: 2,
-                              children: [
-                                if (room.membership == Membership.join &&
-                                    ownMessage)
-                                  Icon(
-                                    lastEvent!.receipts
-                                            .where(
-                                              (receipt) =>
-                                                  receipt.user.id !=
-                                                  client.userID!,
-                                            )
-                                            .isNotEmpty
-                                        ? Icons.done_all
-                                        : Icons.done,
-                                    size: 16,
-                                    color: theme.colorScheme.outline,
-                                  ),
-                                Flexible(
-                                  child: Text(
-                                    room.membership == Membership.invite
-                                        ? room
-                                                  .getState(
-                                                    EventTypes.RoomMember,
-                                                    room.client.userID!,
-                                                  )
-                                                  ?.content
-                                                  .tryGet<String>('reason') ??
-                                              (isDirectChat
-                                                  ? L10n.of(
-                                                      context,
-                                                    ).newChatRequest
-                                                  : L10n.of(
-                                                      context,
-                                                    ).inviteGroupChat)
-                                        : snapshot.data?.sanitizePreview() ??
-                                            L10n.of(context).noMessagesYet,
-                                        softWrap: false,
-                                        maxLines: room.notificationCount >= 1
-                                          ? 2
-                                          : 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                        color: unread || room.hasNewMessages
-                                            ? theme.colorScheme.onSurface
-                                            : theme.colorScheme.outline,
-                                        decoration:
-                                            room.lastEvent?.redacted == true
-                                            ? TextDecoration.lineThrough
-                                            : null,
-                                        ),
-                                        ),
-                                ),
-                              ],
-                            ),
-                          ),
-                  ),
-                  const SizedBox(width: 8),
-                ],
-              ),
-              onTap: onTap,
-              trailing: onForget == null
-                  ? room.membership == Membership.invite
-                        ? IconButton(
-                            tooltip: L10n.of(context).decline,
-                            icon: const Icon(Icons.delete_forever_outlined),
-                            color: theme.colorScheme.error,
-                            onPressed: () async {
-                              final consent = await showOkCancelAlertDialog(
-                                context: context,
-                                title: L10n.of(context).decline,
-                                message: L10n.of(context).areYouSure,
-                                okLabel: L10n.of(context).yes,
-                                isDestructive: true,
-                              );
-                              if (consent != OkCancelResult.ok) return;
-                              if (!context.mounted) return;
-                              await showFutureLoadingDialog(
-                                context: context,
-                                future: room.leave,
-                              );
-                            },
-                          )
-                        : null
-                  : IconButton(
-                      icon: const Icon(Icons.delete_outlined),
-                      onPressed: onForget,
-                    ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+                                MatrixLocals(L10n.of(context)),
+                                hideReply: true,
+                               L10n.of(context).noMessagesYet,
+                                softWrap: false,
+                                maxLines: room.notificationCount >= 1
+                                  ? 2
+                                  : 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                color: la...[truncated]
