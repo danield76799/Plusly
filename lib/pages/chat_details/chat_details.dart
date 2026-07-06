@@ -42,7 +42,19 @@ class ChatDetailsController extends State<ChatDetails> {
   String? get roomId => widget.roomId;
 
   void setDisplaynameAction() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
+    if (roomId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Room ID is null')),
+      );
+      return;
+    }
+    final room = Matrix.of(context).client.getRoomById(roomId);
+    if (room == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Room not found')),
+      );
+      return;
+    }
     final input = await showTextInputDialog(
       context: context,
       title: L10n.of(context).changeTheNameOfTheGroup,
@@ -63,7 +75,19 @@ class ChatDetailsController extends State<ChatDetails> {
   }
 
   void setTopicAction() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!)!;
+    if (roomId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Room ID is null')),
+      );
+      return;
+    }
+    final room = Matrix.of(context).client.getRoomById(roomId);
+    if (room == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Room not found')),
+      );
+      return;
+    }
     final input = await showTextInputDialog(
       context: context,
       title: L10n.of(context).setChatDescription,
@@ -102,7 +126,19 @@ class ChatDetailsController extends State<ChatDetails> {
   }
 
   void setAvatarAction() async {
-    final room = Matrix.of(context).client.getRoomById(roomId!);
+    if (roomId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Room ID is null')),
+      );
+      return;
+    }
+    final room = Matrix.of(context).client.getRoomById(roomId);
+    if (room == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Room not found')),
+      );
+      return;
+    }
     final actions = [
       if (PlatformInfos.isMobile)
         AdaptiveModalAction(

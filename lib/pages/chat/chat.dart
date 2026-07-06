@@ -1358,7 +1358,11 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   List<Client?> get currentRoomBundle {
-    final clients = Matrix.of(context).currentBundle!;
+    final clients = Matrix.of(context).currentBundle;
+    if (clients == null) {
+      Logs().w('currentBundle is null, returning empty list');
+      return [];
+    }
     clients.removeWhere((c) => c!.getRoomById(roomId) == null);
     return clients;
   }

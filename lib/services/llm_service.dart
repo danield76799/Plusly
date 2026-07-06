@@ -86,8 +86,16 @@ class LlmService {
     );
   }
 
-  static LlmProviderConfig get _config =>
-      providerConfigs[currentProvider]!;
+  static LlmProviderConfig get _config {
+    final config = providerConfigs[currentProvider];
+    if (config == null) {
+      throw StateError(
+        'LLM provider "${currentProvider.name}" not configured. '
+        'Check providerConfigs initialization.',
+      );
+    }
+    return config;
+  }
 
   static String get _baseUrl => _config.baseUrl;
 
@@ -114,7 +122,11 @@ class LlmService {
 
     Exception? lastError;
     for (final provider in chain) {
-      final config = providerConfigs[provider]!;
+      final config = providerConfigs[provider];
+      if (config == null) {
+        Logs().w('Provider ${provider.name} not configured, skipping');
+        continue;
+      }
       if (config.apiKey.isEmpty) continue; // skip unconfigured
       try {
         final result = await _sendToProvider(config, history);

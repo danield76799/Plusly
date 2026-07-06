@@ -126,7 +126,15 @@ enum AppSettings<T> {
 
   const AppSettings(this.key, this.defaultValue);
 
-  static SharedPreferences get store => _store!;
+  static SharedPreferences get store {
+    if (_store == null) {
+      throw StateError(
+        'SharedPreferences not initialized. '
+        'Call AppSettings.init() before accessing settings.',
+      );
+    }
+    return _store;
+  }
   static SharedPreferences? _store;
 
   static Future<SharedPreferences> init({bool loadWebConfigFile = true}) async {
