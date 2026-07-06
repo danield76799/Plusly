@@ -118,13 +118,23 @@ class SendFileDialogState extends State<SendFileDialog> {
           }
 
           scaffoldMessenger.showLoadingSnackBar(l10n.prepareSendingAttachment);
-          file = MatrixFile(
-            bytes: Uint8List.fromList(
-              ExifCleaner.removeExifData(await xfile.readAsBytes()),
-            ),
-            name: name,
-            mimeType: mimeType,
-          ).detectFileType;
+          try {
+            file = MatrixFile(
+              bytes: Uint8List.fromList(
+                ExifCleaner.removeExifData(await xfile.readAsBytes()),
+              ),
+              name: name,
+              mimeType: mimeType,
+            ).detectFileType;
+          } catch (e) {
+            // Exif clean faalde, gebruik origineel
+            Logs().w('EXIF cleanup failed, using original', e);
+            file = MatrixFile(
+              bytes: await xfile.readAsBytes(),
+              name: name,
+              mimeType: mimeType,
+            ).detectFileType;
+          }
         } else {
           if (length > maxUploadSize) {
             throw FileTooBigMatrixException(length, maxUploadSize);

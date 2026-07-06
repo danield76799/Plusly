@@ -63,11 +63,21 @@ class ImageResizer {
       // Encode as JPEG with compression
       final resizedBytes = img.encodeJpg(resized, quality: quality);
 
-      return MatrixImageFile.create(
-        bytes: Uint8List.fromList(resizedBytes),
-        name: xfile.name,
-        mimeType: 'image/jpeg', // Always output as JPEG for size
-      );
+      try {
+        return MatrixImageFile.create(
+          bytes: Uint8List.fromList(resizedBytes),
+          name: xfile.name,
+          mimeType: 'image/jpeg', // Always output as JPEG for size
+        );
+      } catch (e) {
+        // MatrixImageFile.create faalde, fallback naar eenvoudige MatrixFile
+        Logs().w('MatrixImageFile.create failed, using MatrixFile', e);
+        return MatrixImageFile(
+          bytes: Uint8List.fromList(resizedBytes),
+          name: xfile.name,
+          mimeType: 'image/jpeg',
+        );
+      }
     } catch (e) {
       // If resize fails, return null to let caller handle it
       return null;

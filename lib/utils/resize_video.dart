@@ -11,6 +11,7 @@ extension ResizeImage on XFile {
 
   Future<MatrixVideoFile> resizeVideo() async {
     MediaInfo? mediaInfo;
+    bool compressFailed = false;
     try {
       if (PlatformInfos.isMobile) {
         // will throw an error e.g. on Android SDK < 18
@@ -18,9 +19,16 @@ extension ResizeImage on XFile {
       }
     } catch (e, s) {
       Logs().w('Error while compressing video', e, s);
+      compressFailed = true;
     }
+    
+    // Fallback naar originele bytes als compressie faalde
+    final bytes = (compressFailed || mediaInfo?.file == null) 
+        ? await readAsBytes() 
+        : await mediaInfo!.file!.readAsBytes();
+    
     return MatrixVideoFile(
-      bytes: (await mediaInfo?.file?.readAsBytes()) ?? await readAsBytes(),
+      bytes: bytes,
       name: name,
       mimeType: mimeType,
       width: mediaInfo?.width,
