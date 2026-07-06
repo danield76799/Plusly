@@ -75,7 +75,7 @@ class SendFileDialogState extends State<SendFileDialog> {
       }
 
       for (final xfile in widget.files) {
-        final MatrixFile file;
+        MatrixFile file;
         MatrixImageFile? thumbnail;
         final length = await xfile.length();
         final mimeType = xfile.mimeType ?? lookupMimeType(xfile.path);
