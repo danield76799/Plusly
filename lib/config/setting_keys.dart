@@ -133,7 +133,7 @@ enum AppSettings<T> {
         'Call AppSettings.init() before accessing settings.',
       );
     }
-    return _store;
+    return _store!; // Safe: checked above
   }
   static SharedPreferences? _store;
 
