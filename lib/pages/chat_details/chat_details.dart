@@ -42,13 +42,14 @@ class ChatDetailsController extends State<ChatDetails> {
   String? get roomId => widget.roomId;
 
   void setDisplaynameAction() async {
-    if (roomId == null) {
+    final localRoomId = widget.roomId;
+    if (localRoomId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Room ID is null')),
       );
       return;
     }
-    final room = Matrix.of(context).client.getRoomById(roomId);
+    final room = Matrix.of(context).client.getRoomById(localRoomId);
     if (room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Room not found')),
@@ -75,13 +76,14 @@ class ChatDetailsController extends State<ChatDetails> {
   }
 
   void setTopicAction() async {
-    if (roomId == null) {
+    final localRoomId = widget.roomId;
+    if (localRoomId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Room ID is null')),
       );
       return;
     }
-    final room = Matrix.of(context).client.getRoomById(roomId);
+    final room = Matrix.of(context).client.getRoomById(localRoomId);
     if (room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Room not found')),
@@ -126,13 +128,14 @@ class ChatDetailsController extends State<ChatDetails> {
   }
 
   void setAvatarAction() async {
-    if (roomId == null) {
+    final localRoomId = widget.roomId;
+    if (localRoomId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Room ID is null')),
       );
       return;
     }
-    final room = Matrix.of(context).client.getRoomById(roomId);
+    final room = Matrix.of(context).client.getRoomById(localRoomId);
     if (room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Room not found')),
