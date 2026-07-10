@@ -429,7 +429,7 @@ class MatrixEmojiPickerState extends State<MatrixEmojiPicker>
               IconButton(
                 onPressed: widget.onBackspacePressed,
                 icon: const Icon(Icons.backspace_outlined),
-                color: Colors.grey[700],
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ],
           ),
@@ -445,7 +445,7 @@ class MatrixEmojiPickerState extends State<MatrixEmojiPicker>
             controller: _tabController,
             isScrollable: true,
             labelColor: theme.colorScheme.secondary,
-            unselectedLabelColor: Colors.grey,
+            unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
             indicatorColor: theme.colorScheme.secondary,
             padding: .zero,
             tabAlignment: .start,
@@ -532,7 +532,7 @@ class MatrixEmojiPickerState extends State<MatrixEmojiPicker>
                     width: 4,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[400],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       shape: BoxShape.circle,
                     ),
                   ),

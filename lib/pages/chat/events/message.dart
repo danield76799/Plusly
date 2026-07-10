@@ -288,7 +288,7 @@ class _MessageState extends State<Message> {
 
     if (ownMessage) {
       color = displayEvent.status.isError
-          ? Colors.redAccent
+          ? theme.colorScheme.error
           : theme.bubbleColor;
     }
 
@@ -409,7 +409,7 @@ class _MessageState extends State<Message> {
                         width: 16,
                         height: 16,
                         child: event.status == EventStatus.error
-                            ? const Icon(Icons.error, color: Colors.red)
+                            ? Icon(Icons.error, color: theme.colorScheme.error)
                             : event.fileSendingStatus != null
                             ? const CircularProgressIndicator.adaptive(
                                 strokeWidth: 1,

@@ -330,7 +330,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                   border: Border(
                     bottom: BorderSide(
                       color: isActive
-                          ? const Color(0xFF49AFC2)
+                          ? theme.colorScheme.primary
                           : Colors.transparent,
                       width: 2,
                     ),
@@ -343,7 +343,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: isActive
-                          ? const Color(0xFF49AFC2)
+                          ? theme.colorScheme.primary
                           : theme.colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),

@@ -83,13 +83,13 @@ class ChatListView extends StatelessWidget {
                         child: FloatingActionButton.extended(
                           onPressed: () =>
                               context.go('/rooms/newprivatechat'),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.chat_outlined,
-                            color: Colors.black87,
+                            color: Theme.of(context).colorScheme.onPrimaryContainer,
                           ),
                           label: Text(
                             L10n.of(context).newChat,
-                            style: const TextStyle(color: Colors.black87),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
                           ),
                           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                         ),
