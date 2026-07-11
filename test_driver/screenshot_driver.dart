@@ -1,13 +1,7 @@
 import 'dart:io';
-import 'package:integration_test/integration_test_driver_extended.dart';
 
 Future<void> main() async {
-  await integrationDriver(
-    onScreenshot: (String screenshotName, List<int> screenshotBytes, [Map<String, Object?>? args]) async {
-      final File image = File(screenshotName);
-      await image.writeAsBytes(screenshotBytes);
-      print('Screenshot saved: $screenshotName');
-      return true;
-    },
-  );
+  // Standalone screenshot driver stub.
+  // The project no longer depends on integration_test, so this just no-ops.
+  stderr.writeln('screenshot_driver is disabled: integration_test dependency removed.');
 }
