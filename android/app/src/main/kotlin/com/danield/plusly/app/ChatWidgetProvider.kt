@@ -1,35 +1,69 @@
 package com.danield.plusly.app
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.os.SystemClock
+import android.util.Log
 import android.widget.RemoteViews
-import android.app.PendingIntent
 import org.json.JSONArray
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class ChatWidgetProvider : AppWidgetProvider() {
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
-    ) {
-        for (appWidgetId in appWidgetIds) {
-            Companion.updateAppWidget(context, appWidgetManager, appWidgetId)
-        }
-    }
-    override fun onEnabled(context: Context) { }
-    override fun onDisabled(context: Context) { }
     companion object {
+        private const val TAG = "ChatWidgetProvider"
+        private const val INTERVAL_MILLIS = 15 * 60 * 1000L
+        private const val REQUEST_CODE = 0x3A7E
         private const val CHAT_DATA_FILE = "chat_widget_data.json"
         private const val COLOR_ONLINE = "#4CAF50"
         private const val COLOR_OFFLINE = "#9E9E9E"
-        private const val COLOR_HEADER = "#6750A4"
+
+        fun scheduleNextUpdate(context: Context) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+            val intent = Intent(context, ChatWidgetProvider::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            val triggerAt = SystemClock.elapsedRealtime() + INTERVAL_MILLIS
+            try {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    triggerAt,
+                    pendingIntent,
+                )
+                Log.d(TAG, "Next widget update scheduled in 15 min")
+            } catch (e: SecurityException) {
+                Log.w(TAG, "Failed to schedule exact alarm, falling back to inexact", e)
+                alarmManager.set(
+                    AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    triggerAt,
+                    pendingIntent,
+                )
+            }
+        }
+
+        fun cancelUpdateAlarm(context: Context) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+            val intent = Intent(context, ChatWidgetProvider::class.java).apply {
+                action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            alarmManager.cancel(pendingIntent)
+        }
 
         fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
             val views = RemoteViews(context.packageName, R.layout.plusly_widget)
@@ -66,6 +100,7 @@ class ChatWidgetProvider : AppWidgetProvider() {
             }
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
+
         private fun readChatData(context: Context): List<Quadruple<String, String, Boolean, String>> {
             return try {
                 val file = File(context.filesDir, CHAT_DATA_FILE)
@@ -85,5 +120,27 @@ class ChatWidgetProvider : AppWidgetProvider() {
             } catch (e: Exception) { emptyList() }
         }
     }
+
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray,
+    ) {
+        for (appWidgetId in appWidgetIds) {
+            updateAppWidget(context, appWidgetManager, appWidgetId)
+        }
+        scheduleNextUpdate(context)
+    }
+
+    override fun onEnabled(context: Context) {
+        Log.d(TAG, "Widget enabled — starting update alarm")
+        scheduleNextUpdate(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        Log.d(TAG, "Widget disabled — cancelling update alarm")
+        cancelUpdateAlarm(context)
+    }
 }
+
 data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)

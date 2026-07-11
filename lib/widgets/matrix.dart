@@ -411,8 +411,12 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
     await FeatureFlags.init();
 
-    // 🆕 UP-only push systeem (geen legacy/FCM meer)
-    await initLegacyPushSystem();
+    // Use new push system by default; legacy is fallback only
+    if (FeatureFlags.useNewPushSystem) {
+      await initNewPushSystem();
+    } else {
+      await initLegacyPushSystem();
+    }
   }
 
   void createVoipPlugin() async {
