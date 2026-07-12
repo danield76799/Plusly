@@ -49,52 +49,19 @@ Future<void> pushHelper(
       onEventLoaded: onEventLoaded,
     );
   } catch (e, s) {
-    // Only show fallback if the main flow didn't already show a notification.
-    // The main flow uses '${clientName}_${roomId}'.hashCode as ID.
-    // We check if that ID already exists before showing the fallback.
-    final expectedId = '${instance}_${notification.roomId}'.hashCode;
-    try {
-      final active = await flutterLocalNotificationsPlugin.getActiveNotifications();
-      final alreadyShown = active.any((n) => n.id == expectedId);
-      if (alreadyShown) {
-        Logs().w('Push helper threw after notification was shown. Not showing fallback.', e, s);
-        if (e is! TimeoutException && e is! IOException) {
-          Logs().e('Push Helper error (notification already shown)', e, s);
-        }
-        return;
-      }
-    } catch (_) {
-      // If we can't check, don't risk a duplicate — just log
-      Logs().w('Push helper threw and could not check for existing notification. Skipping fallback to avoid duplicate.', e, s);
-      return;
-    }
-
-    l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
-    await flutterLocalNotificationsPlugin.show(
-      id: notification.hashCode,
-      title: l10n.newMessageInFluffyChat,
-      body: l10n.openAppToReadMessages,
-      notificationDetails: NotificationDetails(
-        iOS: const DarwinNotificationDetails(),
-        android: AndroidNotificationDetails(
-          AppConfig.pushNotificationsChannelId,
-          l10n.incomingMessages,
-          number: notification.counts?.unread,
-          ticker: l10n.unreadChatsInApp(
-            AppConfig.applicationName,
-            (notification.counts?.unread ?? 0).toString(),
-          ),
-          importance: Importance.high,
-          priority: Priority.max,
-          shortcutId: notification.roomId,
-        ),
-      ),
+    // Don't show a duplicate/broken fallback notification.
+    // The main flow already showed a properly formatted notification
+    // before throwing. If it threw before showing, we'd rather show nothing
+    // than a confusing "Open app to read messages" placeholder.
+    Logs().w(
+      'Push helper threw — NOT showing fallback to avoid duplicate/confusing notification',
+      e,
+      s,
     );
-
     if (e is! TimeoutException && e is! IOException) {
       Logs().e('Push Helper has crashed!', e, s);
     }
-    rethrow;
+    // Don't rethrow — caller would try to show its own notification
   }
 }
 
