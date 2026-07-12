@@ -234,7 +234,7 @@ Future<void> notificationTap(
                       .timeout(const Duration(seconds: 3));
             final messagingStyleInformation =
                 await AndroidFlutterLocalNotificationsPlugin()
-                    .getActiveNotificationMessagingStyle(id: room.id.hashCode);
+                    .getActiveNotificationMessagingStyle(id: '${room.client.clientName}_${room.id}'.hashCode);
             if (messagingStyleInformation == null) return;
             l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
             messagingStyleInformation.messages?.add(
@@ -252,7 +252,7 @@ Future<void> notificationTap(
             );
 
             await FlutterLocalNotificationsPlugin().show(
-              id: room.id.hashCode,
+              id: '${room.client.clientName}_${room.id}'.hashCode,
               title: room.getLocalizedDisplayname(MatrixLocals(l10n)),
               body: input,
               notificationDetails: NotificationDetails(
@@ -262,7 +262,7 @@ Future<void> notificationTap(
                   category: AndroidNotificationCategory.message,
                   shortcutId: room.id,
                   styleInformation: messagingStyleInformation,
-                  groupKey: room.id,
+                  groupKey: room.client.clientName,
                   playSound: false,
                   enableVibration: false,
                   actions: <AndroidNotificationAction>[

@@ -362,10 +362,14 @@ class UnifiedPushProvider implements PushProvider {
         return;
       }
 
-      // Remove old pushers for this device
+      // Remove old pushers for this device — including different appIds
+      // (prevents duplicates from FCM/UP coexistence)
       for (final pusher in pushers) {
-        if (pusher.appId == appId && pusher.pushkey != token) {
+        final isThisDevice = pusher.appId.startsWith(AppConfig.pushNotificationsAppId) ||
+            pusher.appId.contains(client.deviceID ?? '');
+        if (isThisDevice && pusher.pushkey != token) {
           await client.deletePusher(pusher);
+          Logs().i('[UnifiedPush] Removed stale pusher ${pusher.appId} for ${client.clientName}');
         }
       }
 
