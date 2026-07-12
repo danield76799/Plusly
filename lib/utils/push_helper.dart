@@ -346,36 +346,10 @@ class PushHelper {
           >()
           ?.createNotificationChannel(roomsChannel);
 
-      // ── FAST PATH: show notification immediately with basic content ──
+      // ── RICH NOTIFICATION: show with avatar + messaging style ──
+      // (Pre-fetch fast notification was already shown in _newPushHandler if needed;
+      //  we go straight to the rich upgrade to avoid duplicate notification flicker.)
       final notificationId = notification.roomId?.hashCode ?? 0;
-      final fastDetails = NotificationDetails(
-        android: AndroidNotificationDetails(
-          event!.room.id,
-          roomName,
-          number: notification.counts?.unread,
-          subText: client!.clientName,
-          category: AndroidNotificationCategory.message,
-          shortcutId: event!.room.id,
-          importance: Importance.high,
-          priority: Priority.max,
-          groupKey: event!.room.spaceParents.firstOrNull?.roomId ?? 'rooms',
-        ),
-      );
-
-      await flutterLocalNotificationsPlugin.show(
-        id: notificationId,
-        title: title,
-        body: body,
-        notificationDetails: fastDetails,
-        payload: NotificationPushPayload(
-          client!.clientName,
-          event!.room.id,
-          event!.eventId,
-        ).toString(),
-      );
-      Logs().v('Push helper: fast notification shown');
-
-      // ── SLOW PATH: upgrade notification with rich content (avatar, messaging style) ──
       try {
         final platformChannelSpecifics = await _getPlatformChannelSpecifics(
           notificationId,
