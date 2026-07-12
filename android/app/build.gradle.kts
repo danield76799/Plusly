@@ -83,6 +83,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Speed up R8: use compat mode (less aggressive, faster)
+            // Configured via gradle.properties: android.enableR8.fullMode=false
         }
     }
 
