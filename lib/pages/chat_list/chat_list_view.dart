@@ -53,13 +53,15 @@ class ChatListView extends StatelessWidget {
               onHorizontalDragEnd: (details) {
                 final velocity = details.primaryVelocity ?? 0;
                 if (velocity.abs() < 300) return; // ignore slow drags
-                final filters = [
+                if (controller.isSearchMode || controller.activeSpaceId != null) {
+                  return;
+                }
+                const filters = [
                   ActiveFilter.allChats,
                   ActiveFilter.unread,
                   ActiveFilter.groups,
+                  ActiveFilter.pinned,
                   ActiveFilter.favorites,
-                  if (controller.activeFilter == ActiveFilter.people)
-                    ActiveFilter.people,
                 ];
                 final currentIndex = filters.indexOf(controller.activeFilter);
                 if (currentIndex == -1) return;
