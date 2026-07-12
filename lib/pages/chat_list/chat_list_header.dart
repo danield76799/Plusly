@@ -320,13 +320,15 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
           ),
         ),
       ),
-      child: Row(
-        children: filters.map((filter) {
-          final isActive = controller.activeFilter == filter;
-          return Expanded(
-            child: InkWell(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: filters.map((filter) {
+            final isActive = controller.activeFilter == filter;
+            return InkWell(
               onTap: () => controller.setActiveFilter(filter),
               child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
@@ -350,9 +352,9 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                   ),
                 ),
               ),
-            ),
-          );
-        }).toList(),
+            );
+          }).toList(),
+        ),
       ),
     );
   }
