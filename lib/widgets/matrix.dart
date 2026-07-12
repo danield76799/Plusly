@@ -377,7 +377,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   Future<void> initNewPushSystem() async {
     if (!PlatformInfos.isMobile) return;
     
-    // Cleanup legacy
+    // Cleanup legacy — reset the static singleton so its UnifiedPush callbacks
+    // and isolate port listeners don't interfere with the new system
+    BackgroundPush.resetInstance();
     backgroundPush = null;
     
     // Initialiseer nieuwe

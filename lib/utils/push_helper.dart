@@ -49,6 +49,26 @@ Future<void> pushHelper(
       onEventLoaded: onEventLoaded,
     );
   } catch (e, s) {
+    // Only show fallback if the main flow didn't already show a notification.
+    // The main flow uses '${clientName}_${roomId}'.hashCode as ID.
+    // We check if that ID already exists before showing the fallback.
+    final expectedId = '${instance}_${notification.roomId}'.hashCode;
+    try {
+      final active = await flutterLocalNotificationsPlugin.getActiveNotifications();
+      final alreadyShown = active.any((n) => n.id == expectedId);
+      if (alreadyShown) {
+        Logs().w('Push helper threw after notification was shown. Not showing fallback.', e, s);
+        if (e is! TimeoutException && e is! IOException) {
+          Logs().e('Push Helper error (notification already shown)', e, s);
+        }
+        return;
+      }
+    } catch (_) {
+      // If we can't check, don't risk a duplicate — just log
+      Logs().w('Push helper threw and could not check for existing notification. Skipping fallback to avoid duplicate.', e, s);
+      return;
+    }
+
     l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
     await flutterLocalNotificationsPlugin.show(
       id: notification.hashCode,
@@ -254,34 +274,8 @@ Future<void> _tryPushHelper(
 
   final roomName = event.room.getLocalizedDisplayname(MatrixLocals(l10n));
 
-  // ── Channel groups ──
-  final notificationGroupId = event.room.isDirectChat
-      ? 'directChats'
-      : 'groupChats';
-  final groupName = event.room.isDirectChat ? l10n.directChats : l10n.groups;
-
-  final messageRooms = AndroidNotificationChannelGroup(
-    notificationGroupId,
-    groupName,
-  );
-  final roomsChannel = AndroidNotificationChannel(
-    event.room.id,
-    roomName,
-    groupId: notificationGroupId,
-  );
-
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin
-      >()
-      ?.createNotificationChannelGroup(messageRooms);
-  await flutterLocalNotificationsPlugin
-      .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin
-      >()
-      ?.createNotificationChannel(roomsChannel);
-
   // ── Build notification details ──
+  // Single global channel (FluffyChat pattern) — no per-room channels
   final androidPlatformChannelSpecifics = AndroidNotificationDetails(
     AppConfig.pushNotificationsChannelId,
     l10n.incomingMessages,

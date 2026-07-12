@@ -137,6 +137,12 @@ class BackgroundPush {
     return _instance ??= BackgroundPush._([client]);
   }
 
+  /// Reset the static singleton. Called when switching to the new push system
+  /// to prevent the old instance's UnifiedPush callbacks from interfering.
+  static void resetInstance() {
+    _instance = null;
+  }
+
   factory BackgroundPush(MatrixState matrix) {
     final instance = BackgroundPush.clientOnly(matrix.client);
     instance.matrix = matrix;
