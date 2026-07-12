@@ -45,7 +45,6 @@ class PushController extends ChangeNotifier {
     this._clients, {
     FlutterLocalNotificationsPlugin? notificationsPlugin,
   }) : _notificationsPlugin = notificationsPlugin ?? FlutterLocalNotificationsPlugin();
-
   // ─── Public API ───
 
   PushState get state => _state;
@@ -63,6 +62,9 @@ class PushController extends ChangeNotifier {
   /// Initialiseer push met automatische fallback:
   Future<void> initialize() async {
     _setState(_state.copyWith(status: PushStatus.initializing));
+
+    // Initialize deduplicator (loads persisted event IDs from disk)
+    await _deduplicator.init();
 
     final factory = PushProviderFactory(_store, _clients);
     final result = await factory.createWithFallback();
@@ -135,7 +137,7 @@ class PushController extends ChangeNotifier {
 
   /// Verwerk inkomende push message
   void _handleMessage(PushMessage message) {
-    Logs().v('[PushController] Message received: $message');
+    Logs().v('[PushController] Message received: ${message.eventId} for room ${message.roomId}');
 
     // Deduplicatie: check of we deze al hebben gehad
     if (_deduplicator.isDuplicate(message.eventId)) {
