@@ -307,6 +307,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
       ActiveFilter.allChats,
       ActiveFilter.unread,
       ActiveFilter.groups,
+      ActiveFilter.pinned,
       ActiveFilter.favorites,
     ];
 

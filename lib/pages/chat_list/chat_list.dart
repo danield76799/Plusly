@@ -38,7 +38,7 @@ import '../../widgets/matrix.dart';
 
 enum PopupMenuAction { settings, invite, newGroup, newSpace, archive, syncDebug }
 
-enum ActiveFilter { allChats, messages, groups, unread, favorites, people }
+enum ActiveFilter { allChats, messages, unread, groups, favorites, pinned, people }
 
 enum SearchScope { local, public }
 
@@ -54,7 +54,9 @@ extension LocalizedActiveFilter on ActiveFilter {
       case ActiveFilter.groups:
         return L10n.of(context).groups;
       case ActiveFilter.favorites:
-        return "Favorieten";
+        return "Opgeslagen";
+      case ActiveFilter.pinned:
+        return "Gepind";
       case ActiveFilter.people:
         return L10n.of(context).people;
     }
@@ -73,6 +75,8 @@ extension LocalizedActiveFilter on ActiveFilter {
         return outline ? Icons.people_outline : Icons.people;
       case ActiveFilter.favorites:
         return Icons.star_outline;
+      case ActiveFilter.pinned:
+        return Icons.push_pin_outlined;
       case ActiveFilter.people:
         return Icons.person_outline;
     }
@@ -248,7 +252,13 @@ class ChatListController extends State<ChatList>
       case .unread:
         return (room) => room.isUnreadOrInvited && _isBridgeTypeVisible(room);
       case .favorites:
-        return (room) => true; // Show all rooms for favorites tab
+        return (room) => true; // Show all rooms for saved messages search
+      case .pinned:
+        return (room) =>
+            !room.isSpace &&
+            room.isFavourite &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
       case .people:
         return (room) =>
             !room.isSpace &&
@@ -279,6 +289,20 @@ class ChatListController extends State<ChatList>
         .where(getRoomFilterByActiveFilter(activeFilter))
         .where(_isBridgeTypeVisible)
         .toList();
+
+    // Sort pinned rooms to the top in non-pinned tabs.
+    if (activeFilter != ActiveFilter.pinned) {
+      _cachedFilteredRooms.sort((a, b) {
+        final aPinned = a.isFavourite ? 1 : 0;
+        final bPinned = b.isFavourite ? 1 : 0;
+        if (aPinned != bPinned) return bPinned - aPinned;
+        return b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime);
+      });
+    } else {
+      _cachedFilteredRooms.sort((a, b) =>
+          b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime));
+    }
+
     _lastFilterCalc = now;
     _lastActiveFilter = activeFilter;
     _lastVisibleBridgeTypes = Set<String>.from(visibleBridgeTypes);
@@ -325,6 +349,11 @@ class ChatListController extends State<ChatList>
         return room.isUnreadOrInvited;
       case .favorites:
         return true;
+      case .pinned:
+        return !room.isSpace &&
+            room.isFavourite &&
+            (AppSettings.showSpaceRoomsInGlobalList.value ||
+                room.spaceParents.isEmpty);
       case .people:
         return !room.isSpace &&
             room.isDirectChat &&

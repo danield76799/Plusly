@@ -513,21 +513,23 @@ class BackgroundPush {
       );
     }
     Logs().i('[Push] UnifiedPush using endpoint $endpoint');
-    final client = clientFromInstance(i, clients) ?? clients.first;
-    await setupPusher(
-      gatewayUrl: endpoint,
-      token: newEndpoint,
-      useDeviceSpecificAppId: true,
-      client: client,
-    );
-    await matrix?.store.setString(
-      client.clientName + AppSettings.unifiedPushEndpoint.key,
-      newEndpoint,
-    );
-    await matrix?.store.setBool(
-      client.clientName + AppSettings.unifiedPushRegistered.key,
-      true,
-    );
+    // Register a pusher for every logged-in client using this endpoint.
+    for (final client in clients.where((c) => c.isLogged())) {
+      await setupPusher(
+        gatewayUrl: endpoint,
+        token: newEndpoint,
+        useDeviceSpecificAppId: true,
+        client: client,
+      );
+      await matrix?.store.setString(
+        client.clientName + AppSettings.unifiedPushEndpoint.key,
+        newEndpoint,
+      );
+      await matrix?.store.setBool(
+        client.clientName + AppSettings.unifiedPushRegistered.key,
+        true,
+      );
+    }
   }
 
   Future<void> _upUnregistered(String i) async {
