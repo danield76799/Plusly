@@ -12,7 +12,6 @@ class LoginView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
 
     final homeserver = controller.widget.client.homeserver
         ?.toString()

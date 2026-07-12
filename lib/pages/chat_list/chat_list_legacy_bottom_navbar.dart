@@ -17,7 +17,6 @@ class ChatListLegacyBottomNavbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final client = Matrix.of(context).client;
     final theme = Theme.of(context);
 
     final filters = [

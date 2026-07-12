@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -100,15 +101,15 @@ class ImageViewerController extends State<ImageViewer> {
     final currentIndex = _index;
     // Preload next image
     if (currentIndex < allEvents.length - 1) {
-      allEvents[currentIndex + 1].downloadAndDecryptAttachment(
+      unawaited(allEvents[currentIndex + 1].downloadAndDecryptAttachment(
         getThumbnail: false,
-      ).catchError((_) => null);
+      ));
     }
     // Preload previous image
     if (currentIndex > 0) {
-      allEvents[currentIndex - 1].downloadAndDecryptAttachment(
+      unawaited(allEvents[currentIndex - 1].downloadAndDecryptAttachment(
         getThumbnail: false,
-      ).catchError((_) => null);
+      ));
     }
   }
 

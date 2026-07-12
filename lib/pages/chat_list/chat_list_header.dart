@@ -4,7 +4,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
 
-import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';

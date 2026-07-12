@@ -6,7 +6,6 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';
-import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/navigation_rail.dart';
 import 'chat_list_body.dart';
@@ -18,8 +17,6 @@ class ChatListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final client = Matrix.of(context).client;
-    final theme = Theme.of(context);
 
     return PopScope(
       canPop: !controller.isSearchMode && controller.activeSpaceId == null,

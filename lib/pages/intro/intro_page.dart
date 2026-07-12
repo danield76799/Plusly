@@ -70,8 +70,7 @@ class IntroPage extends StatelessWidget {
       ),
       child: Builder(
         builder: (context) {
-          final theme = Theme.of(context);
-          return LoginScaffold(
+                return LoginScaffold(
             appBar: AppBar(
               centerTitle: true,
               leading: IconButton(

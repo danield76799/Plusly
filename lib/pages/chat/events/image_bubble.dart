@@ -12,7 +12,6 @@ import 'package:Pulsly/pages/image_viewer/image_viewer.dart';
 import 'package:Pulsly/utils/size_string.dart';
 import 'package:Pulsly/utils/url_launcher.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
-import '../../../widgets/blur_hash.dart';
 
 class ImageBubble extends StatelessWidget {
   final Event event;

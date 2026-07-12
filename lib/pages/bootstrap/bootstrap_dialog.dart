@@ -569,6 +569,17 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                   () => _recoveryKeyInputError =
                                       'Timeout: ${e.message}\n\nThe server is taking too long. Try again later or use "Transfer from another device".',
                                 );
+                              } on InvalidPassphraseException catch (e) {
+                                setState(
+                                  () => _recoveryKeyInputError = e
+                                      .toLocalizedString(context),
+                                );
+                              } on FormatException catch (_) {
+                                setState(
+                                  () => _recoveryKeyInputError = L10n.of(
+                                    context,
+                                  ).wrongRecoveryKey,
+                                );
                               } on Exception catch (e) {
                                 // Handle specific cross-signing errors
                                 final errorMsg = e.toString();
@@ -583,17 +594,6 @@ class BootstrapDialogState extends State<BootstrapDialog> {
                                 } else {
                                   rethrow;
                                 }
-                              } on InvalidPassphraseException catch (e) {
-                                setState(
-                                  () => _recoveryKeyInputError = e
-                                      .toLocalizedString(context),
-                                );
-                              } on FormatException catch (_) {
-                                setState(
-                                  () => _recoveryKeyInputError = L10n.of(
-                                    context,
-                                  ).wrongRecoveryKey,
-                                );
                               } catch (e, s) {
                                 ErrorReporter(
                                   context,

@@ -39,17 +39,10 @@ class ChatDetailsController extends State<ChatDetails> {
   void toggleDisplaySettings() =>
       setState(() => displaySettings = !displaySettings);
 
-  String? get roomId => widget.roomId;
+  String get roomId => widget.roomId;
 
   void setDisplaynameAction() async {
-    final localRoomId = widget.roomId;
-    if (localRoomId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Room ID is null')),
-      );
-      return;
-    }
-    final room = Matrix.of(context).client.getRoomById(localRoomId);
+    final room = Matrix.of(context).client.getRoomById(widget.roomId);
     if (room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Room not found')),
@@ -76,14 +69,7 @@ class ChatDetailsController extends State<ChatDetails> {
   }
 
   void setTopicAction() async {
-    final localRoomId = widget.roomId;
-    if (localRoomId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Room ID is null')),
-      );
-      return;
-    }
-    final room = Matrix.of(context).client.getRoomById(localRoomId);
+    final room = Matrix.of(context).client.getRoomById(widget.roomId);
     if (room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Room not found')),
@@ -128,14 +114,7 @@ class ChatDetailsController extends State<ChatDetails> {
   }
 
   void setAvatarAction() async {
-    final localRoomId = widget.roomId;
-    if (localRoomId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Room ID is null')),
-      );
-      return;
-    }
-    final room = Matrix.of(context).client.getRoomById(localRoomId);
+    final room = Matrix.of(context).client.getRoomById(widget.roomId);
     if (room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Room not found')),
@@ -155,7 +134,7 @@ class ChatDetailsController extends State<ChatDetails> {
         label: L10n.of(context).openGallery,
         icon: const Icon(Icons.photo_outlined),
       ),
-      if (room?.avatar != null)
+      if (room.avatar != null)
         AdaptiveModalAction(
           value: AvatarAction.remove,
           label: L10n.of(context).delete,
@@ -175,7 +154,7 @@ class ChatDetailsController extends State<ChatDetails> {
     if (action == AvatarAction.remove) {
       await showFutureLoadingDialog(
         context: context,
-        future: () => room!.setAvatar(null),
+        future: () => room.setAvatar(null),
       );
       return;
     }
@@ -204,7 +183,7 @@ class ChatDetailsController extends State<ChatDetails> {
     }
     await showFutureLoadingDialog(
       context: context,
-      future: () => room!.setAvatar(file),
+      future: () => room.setAvatar(file),
     );
   }
 

@@ -234,8 +234,9 @@ Future<void> _tryPushHelper(
   );
 
   final messagingStyleInformation = PlatformInfos.isAndroid
-      ? await AndroidFlutterLocalNotificationsPlugin()
-            .getActiveNotificationMessagingStyle(id: id)
+      ? await flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+            ?.getActiveNotificationMessagingStyle(id: id)
       : null;
   messagingStyleInformation?.messages?.add(newMessage);
 

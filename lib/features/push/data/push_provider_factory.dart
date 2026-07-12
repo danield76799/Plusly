@@ -4,7 +4,6 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../domain/push_provider.dart';
-import '../domain/push_state.dart';
 import 'unified_push_provider.dart';
 
 /// Factory die de UnifiedPush provider kiest.
@@ -26,16 +25,17 @@ class PushProviderFactory {
       if (up.isAvailable) {
         final initialized = await up.initialize();
         if (initialized) {
-          final token = await up.register();
-
-          // Wacht even op async endpoint callback
-          await Future.delayed(const Duration(milliseconds: 500));
-
+          await up.register();
           if (up.isActive) {
-            return PushProviderResult.success(up, PushProviderType.unifiedPush);
+            // Wacht even op async endpoint callback
+            await Future.delayed(const Duration(milliseconds: 500));
+
+            if (up.isActive) {
+              return PushProviderResult.success(up, PushProviderType.unifiedPush);
+            }
           }
+          up.dispose();
         }
-        up.dispose();
       }
     }
 

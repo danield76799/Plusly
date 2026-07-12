@@ -136,7 +136,7 @@ class PushController extends ChangeNotifier {
   }
 
   /// Verwerk inkomende push message
-  void _handleMessage(PushMessage message) {
+  Future<void> _handleMessage(PushMessage message) async {
     Logs().v('[PushController] Message received: ${message.eventId} for room ${message.roomId}');
 
     // Deduplicatie: check of we deze al hebben gehad
@@ -158,16 +158,14 @@ class PushController extends ChangeNotifier {
           });
 
     // FIX #5: await pushHelper so errors are caught, not silently lost
-    pushHelper(
+    await pushHelper(
       notification,
       clients: _clients,
       activeRoomId: _activeRoomId,
       activeClient: _activeClient,
       flutterLocalNotificationsPlugin: _notificationsPlugin,
       instance: message.clientName,
-    ).catchError((e, s) {
-      Logs().e('[PushController] pushHelper failed for ${message.eventId}', e, s);
-    });
+    );
   }
 
   /// Initialiseer lokale notificaties (voor Android/iOS)

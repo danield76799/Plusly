@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
@@ -24,7 +23,6 @@ class UnifiedPushProvider implements PushProvider {
   final _messageController = StreamController<PushMessage>.broadcast();
 
   bool _isActive = false;
-  String? _currentEndpoint;
 
   @override
   String get id => 'unifiedpush';
@@ -123,7 +121,6 @@ class UnifiedPushProvider implements PushProvider {
       Logs().w('[UnifiedPush] Unregister failed', e, s);
     }
     _isActive = false;
-    _currentEndpoint = null;
   }
 
   @override
@@ -152,7 +149,6 @@ class UnifiedPushProvider implements PushProvider {
       await _store.setBool('${client.clientName}_up_registered', true);
     }
 
-    _currentEndpoint = url;
     _isActive = true;
 
     Logs().i('[UnifiedPush] Registered pusher for all ${_clients.where((c) => c.isLogged()).length} clients: $url');
@@ -268,7 +264,7 @@ class UnifiedPushProvider implements PushProvider {
     // Toon picker dialog als er meerdere distributors zijn
     try {
       // Gebruik PluslyApp.router.routerDelegate.navigatorKey
-      final context = PluslyApp.router?.routerDelegate.navigatorKey?.currentContext;
+      final context = PluslyApp.router.routerDelegate.navigatorKey?.currentContext;
       if (context == null) {
         Logs().w('[UnifiedPush] No navigator context, using first distributor');
         return distributors.first;
