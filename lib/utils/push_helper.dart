@@ -24,8 +24,6 @@ const notificationAvatarDimension = 128;
 
 /// ─── FluffyChat-style push helper ───────────────────────────────────────────
 /// Single show() call, global channel, summary notification, no pre-fetch.
-/// This is the proven FluffyChat pattern that avoids duplicate/separate
-/// notifications and delivers a clean, grouped notification experience.
 
 Future<void> pushHelper(
   PushNotification notification, {
@@ -132,14 +130,13 @@ Future<void> _tryPushHelper(
     }
   }
 
-  // ── Fetch the event (FluffyChat: no timeout, just wait) ──
+  // ── Fetch the event ──
   final event = await client.getEventByPushNotification(
     notification,
-    storeInDatabase: false,
+    storeInDatabase: isBackgroundMessage,  // FIX #7: persist in background
   );
 
   // ── Sync so the room moves to the top of the chat list immediately ──
-  // Without this, the room stays at its old position until the next sync cycle.
   final awaitingOneShotSync = client.oneShotSync();
 
   l10n ??= await L10n.delegate.load(PlatformDispatcher.instance.locale);
@@ -152,21 +149,23 @@ Future<void> _tryPushHelper(
         notification.counts?.unread == 0) {
       await flutterLocalNotificationsPlugin.cancelAll();
     } else {
-      // Make sure client is fully loaded and synced before dismiss notifications:
       await client.roomsLoading;
       await awaitingOneShotSync;
       final activeNotifications = await flutterLocalNotificationsPlugin
           .getActiveNotifications();
-      activeNotifications.where((n) => n.groupKey == client.clientName).toList();
+      // FIX #22: use the filtered list
+      final clientNotifications = activeNotifications
+          .where((n) => n.groupKey == client.clientName)
+          .toList();
       var needsUpdateForSummaryNotification = false;
-      for (final activeNotification in activeNotifications) {
+      for (final activeNotification in clientNotifications) {
         final room = client.rooms.singleWhereOrNull(
           (room) =>
               '${client.clientName}_${room.id}'.hashCode ==
               activeNotification.id,
         );
         if (room != null && !room.isUnreadOrInvited) {
-          flutterLocalNotificationsPlugin.cancel(id: activeNotification.id!);
+          await flutterLocalNotificationsPlugin.cancel(id: activeNotification.id!);  // FIX #12: await cancel
           if (PlatformInfos.isAndroid) needsUpdateForSummaryNotification = true;
         }
       }
@@ -178,6 +177,12 @@ Future<void> _tryPushHelper(
         );
       }
     }
+    return;
+  }
+
+  // FIX #6: Check push rules — skip muted rooms
+  if (!client.pushruleEvaluator.match(event).notify) {
+    Logs().v('Push rule says do not notify for this event. Skipping.');
     return;
   }
 
@@ -195,12 +200,7 @@ Future<void> _tryPushHelper(
     Logs().v('Push message is a m.call but not invite. Do not display.');
     return;
   }
-  if ((event.type.startsWith('m.call') &&
-          event.type != EventTypes.CallInvite) ||
-      event.type == 'org.matrix.call.sdp_stream_metadata_changed') {
-    Logs().v('Push message was for a call, but not call invite.');
-    return;
-  }
+  // FIX #23: removed redundant second call-type check
 
   final matrixLocals = MatrixLocals(l10n);
 
@@ -283,7 +283,7 @@ Future<void> _tryPushHelper(
 
   // ── Build notification details ──
   final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-    AppConfig.pushNotificationsChannelId,  // ← GLOBAL channel (FluffyChat)
+    AppConfig.pushNotificationsChannelId,
     l10n.incomingMessages,
     number: notification.counts?.unread,
     category: AndroidNotificationCategory.message,
@@ -313,7 +313,7 @@ Future<void> _tryPushHelper(
     ),
     importance: Importance.high,
     priority: Priority.max,
-    groupKey: client.clientName,  // ← Group by account (FluffyChat)
+    groupKey: client.clientName,
     actions: event.type == EventTypes.RoomMember || !useNotificationActions
         ? null
         : <AndroidNotificationAction>[
@@ -349,7 +349,6 @@ Future<void> _tryPushHelper(
     await _setShortcut(event, l10n, title, roomAvatarFile);
   }
 
-  // ── On Android, MessagingStyle handles title/body; set null ──
   final needsTitleAndBody = !PlatformInfos.isAndroid;
 
   // ── SINGLE show() call (FluffyChat pattern) ──
@@ -364,6 +363,10 @@ Future<void> _tryPushHelper(
       event.eventId,
     ).toString(),
   );
+
+  // ── Await sync so chat list updates before we finish ──
+  // FIX #4: await oneShotSync in normal path too, so room moves to top
+  await awaitingOneShotSync;
 
   // ── Summary notification (FluffyChat pattern) ──
   if (PlatformInfos.isAndroid) {
@@ -382,10 +385,8 @@ Future<void> _tryPushHelper(
 Client? _clientFromInstance(String? instance, List<Client> clients) {
   if (clients.isEmpty) return null;
   if (instance == null) return clients.first;
-  return clients.firstWhereOrNull(
-        (client) => client.clientName == instance,
-      ) ??
-      clients.first;
+  // FIX #16: don't fallback to first client — return null if no match
+  return clients.firstWhereOrNull((client) => client.clientName == instance);
 }
 
 void updateAppBadge(int unreadCount) {
@@ -400,8 +401,6 @@ void updateAppBadge(int unreadCount) {
 }
 
 /// Shows a grouped summary notification at the top of the notification shade.
-/// This is the FluffyChat pattern: when 2+ notifications from the same
-/// account are active, show an InboxStyle summary.
 Future<void> updateSummaryNotification({
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   required String clientName,
@@ -417,12 +416,8 @@ Future<void> updateSummaryNotification({
     return;
   }
 
-  if (activeNotifications.any(
-    (notification) => notification.id == clientName.hashCode,
-  )) {
-    // Already have a visible summary notification!
-    return;
-  }
+  // FIX #11: cancel stale summary and re-show with updated content
+  await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
 
   await flutterLocalNotificationsPlugin.show(
     id: clientName.hashCode,
@@ -441,9 +436,6 @@ Future<void> updateSummaryNotification({
   );
 }
 
-/// Creates a shortcut for Android platform but does not block displaying the
-/// notification. This is optional but provides a nicer view of the
-/// notification popup.
 Future<void> _setShortcut(
   Event event,
   L10n l10n,

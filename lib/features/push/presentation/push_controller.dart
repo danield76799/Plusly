@@ -52,6 +52,8 @@ class PushController extends ChangeNotifier {
   PushProvider? get activeProvider => _activeProvider;
   bool get isActive => _state.isActive;
 
+  StreamSubscription? _messageSub;
+
   /// Set active room/client for foreground detection
   void setActiveRoom(String? roomId, Client? client) {
     _activeRoomId = roomId;
@@ -59,9 +61,6 @@ class PushController extends ChangeNotifier {
   }
 
   /// Initialiseer push met automatische fallback:
-  /// 1. UnifiedPush (als beschikbaar)
-  /// 2. Firebase Cloud Messaging (fallback)
-  /// 3. Failed (als niets werkt)
   Future<void> initialize() async {
     _setState(_state.copyWith(status: PushStatus.initializing));
 
@@ -70,7 +69,7 @@ class PushController extends ChangeNotifier {
 
     if (result.isSuccess && result.provider != null) {
       _activeProvider = result.provider;
-      _activeProvider!.messageStream.listen(
+      _messageSub = _activeProvider!.messageStream.listen(
         _handleMessage,
         onError: (e, s) => Logs().e('[PushController] Message stream error', e, s),
       );
@@ -119,7 +118,8 @@ class PushController extends ChangeNotifier {
     final token = await newProvider.register();
     if (token != null || newProvider.isActive) {
       _activeProvider = newProvider;
-      _activeProvider!.messageStream.listen(_handleMessage);
+      _messageSub?.cancel();
+      _messageSub = _activeProvider!.messageStream.listen(_handleMessage);
       _setState(PushState(
         status: PushStatus.active,
         activeProvider: type,
@@ -144,8 +144,6 @@ class PushController extends ChangeNotifier {
     }
 
     // Gebruik de volledige ruwe Matrix push payload (net als FluffyChat/BackgroundPush).
-    // Niet een gereconstrueerde subset — getEventByPushNotification heeft alle
-    // metadata nodig om snel het event te vinden zonder volledige sync.
     final notification = message.rawNotification != null
         ? PushNotification.fromJson(message.rawNotification!)
         : PushNotification.fromJson({
@@ -157,6 +155,7 @@ class PushController extends ChangeNotifier {
             'devices': [],
           });
 
+    // FIX #5: await pushHelper so errors are caught, not silently lost
     pushHelper(
       notification,
       clients: _clients,
@@ -164,7 +163,9 @@ class PushController extends ChangeNotifier {
       activeClient: _activeClient,
       flutterLocalNotificationsPlugin: _notificationsPlugin,
       instance: message.clientName,
-    );
+    ).catchError((e, s) {
+      Logs().e('[PushController] pushHelper failed for ${message.eventId}', e, s);
+    });
   }
 
   /// Initialiseer lokale notificaties (voor Android/iOS)
@@ -209,9 +210,12 @@ class PushController extends ChangeNotifier {
   /// Cleanup
   @override
   void dispose() {
-    _activeProvider?.unregister();
-    _activeProvider?.dispose();
+    _messageSub?.cancel();
+    _messageSub = null;
+    final provider = _activeProvider;
     _activeProvider = null;
+    // Fire and forget — unregister is async but dispose is void
+    provider?.unregister().then((_) => provider.dispose());
     NotificationRouter.dispose();
     super.dispose();
   }

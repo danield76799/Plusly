@@ -73,7 +73,25 @@ class UnifiedPushProvider implements PushProvider {
     if (savedDistributor != null && savedDistributor.isNotEmpty) {
       if (await _hasValidEndpoint()) {
         _isActive = true;
-        return _getStoredEndpoint();
+        final endpoint = _getStoredEndpoint();
+        // FIX #10: register pusher for any clients that don't have one yet
+        if (endpoint != null) {
+          final gatewayUrl = await _detectGatewayUrl(endpoint);
+          for (final client in _clients.where((c) => c.isLogged())) {
+            final hasEndpoint = _store.getString('${client.clientName}_up_endpoint');
+            if (hasEndpoint == null || hasEndpoint.isEmpty) {
+              await _setupPusher(
+                client: client,
+                gatewayUrl: gatewayUrl,
+                token: endpoint,
+                useDeviceSpecificAppId: true,
+              );
+              await _store.setString('${client.clientName}_up_endpoint', endpoint);
+              await _store.setBool('${client.clientName}_up_registered', true);
+            }
+          }
+        }
+        return endpoint;
       }
     }
 

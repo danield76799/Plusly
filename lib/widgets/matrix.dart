@@ -483,10 +483,11 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
 
-    onRoomKeyRequestSub.values.map((s) => s.cancel());
-    onKeyVerificationRequestSub.values.map((s) => s.cancel());
-    onLoginStateChanged.values.map((s) => s.cancel());
-    onNotification.values.map((s) => s.cancel());
+    // FIX #9: .map() returns lazy Iterable — must iterate to actually cancel
+    for (final s in onRoomKeyRequestSub.values) s.cancel();
+    for (final s in onKeyVerificationRequestSub.values) s.cancel();
+    for (final s in onLoginStateChanged.values) s.cancel();
+    for (final s in onNotification.values) s.cancel();
     client.httpClient.close();
 
     linuxNotifications?.close();

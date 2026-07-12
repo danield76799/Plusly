@@ -133,9 +133,13 @@ Future<void> _initializeApp() async {
       client.syncPresence = PresenceType.offline;
     }
 
-    // In the background fetch mode we do not want to waste ressources with
-    // starting the Flutter engine but process incoming push notifications.
-    BackgroundPush.clientOnly(clients.first);
+    // FIX #1: Only use BackgroundPush in background fetch mode if the legacy
+    // push system is active. With the new push system, the PushController
+    // handles background messages via UnifiedPush directly.
+    await FeatureFlags.init();
+    if (!FeatureFlags.useNewPushSystem) {
+      BackgroundPush.clientOnly(clients.first);
+    }
     // To start the flutter engine afterwards we add an custom observer.
     WidgetsBinding.instance.addObserver(AppStarter(clients, store));
     Logs().i(
