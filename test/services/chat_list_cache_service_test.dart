@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart' show Event, PushRuleState, Room;

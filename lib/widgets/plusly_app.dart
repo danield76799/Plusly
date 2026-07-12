@@ -79,11 +79,6 @@ class _PluslyAppState extends State<PluslyApp> {
     }
   }
 
-  static Future<ByteData> _readFileBytes(String path) async {
-    final bytes = await File(path).readAsBytes();
-    return ByteData.view(bytes.buffer);
-  }
-
   // Platform messages are asynchronous, so we initialize in an async method.
   // DISABLED - android_system_font plugin causes Kotlin daemon crash on cross-drive builds
   Future<void> initPlatformState() async {

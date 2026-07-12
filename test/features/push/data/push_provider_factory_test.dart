@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:Pulsly/features/push/domain/push_provider.dart';
-import 'package:Pulsly/features/push/domain/push_state.dart';
 
 // Fake provider voor testing zonder externe dependencies
 class FakeUnifiedPushProvider implements PushProvider {

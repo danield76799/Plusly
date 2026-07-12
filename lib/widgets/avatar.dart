@@ -112,12 +112,6 @@ class _AvatarVisuals extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Efficient fallback logic
-    final hasNoPic =
-        mxContent == null ||
-        mxContent!.path.isEmpty ||
-        mxContent.toString() == 'null';
-
     return SizedBox(
       width: size,
       height: size,
