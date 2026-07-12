@@ -88,19 +88,23 @@ class ChatListViewBody extends StatelessWidget {
         return ChatListShortcuts(
           onPreviousChat: () {
             if (controller.activeChat == null) return;
+            if (rooms.isEmpty) return;
             var i = rooms.indexWhere(
               (room) => room.id == controller.activeChat,
             );
-            if (i - 1 < 0) i = rooms.length - 1;
-            controller.onChatTap(rooms[i - 1]);
+            if (i == -1) return;
+            i = (i - 1 + rooms.length) % rooms.length;
+            controller.onChatTap(rooms[i]);
           },
           onNextChat: () {
             if (controller.activeChat == null) return;
+            if (rooms.isEmpty) return;
             var i = rooms.indexWhere(
               (room) => room.id == controller.activeChat,
             );
-            if (i >= rooms.length) i = 0;
-            controller.onChatTap(rooms[i + 1]);
+            if (i == -1) return;
+            i = (i + 1) % rooms.length;
+            controller.onChatTap(rooms[i]);
           },
           child: SafeArea(
             child: CustomScrollView(

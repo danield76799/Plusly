@@ -48,6 +48,8 @@ class FakePushMessage implements PushMessage {
   final int? unreadCount;
   @override
   final String? clientName;
+  @override
+  final Map<String, dynamic>? rawNotification;
 
   FakePushMessage({
     this.roomId = '',
@@ -58,6 +60,7 @@ class FakePushMessage implements PushMessage {
     DateTime? receivedAt,
     this.unreadCount,
     this.clientName,
+    this.rawNotification,
   }) : receivedAt = receivedAt ?? DateTime.now();
 
   @override
@@ -70,6 +73,7 @@ class FakePushMessage implements PushMessage {
     'received_at': receivedAt.toIso8601String(),
     'unread_count': unreadCount,
     'client_name': clientName,
+    'raw_notification': rawNotification,
   };
 
   @override

@@ -127,6 +127,7 @@ class ChatListController extends State<ChatList>
     final room = Matrix.of(context).client.getRoomById(spaceId);
     if (room == null) return;
     await room.postLoad();
+    if (!mounted) return;
 
     setState(() {
       _activeSpaceId = spaceId;
@@ -635,7 +636,7 @@ class ChatListController extends State<ChatList>
     // For sharing images coming from outside the app while the app is in the memory
     _intentFileStreamSubscription = ReceiveSharingIntent.instance
         .getMediaStream()
-        .listen(_processIncomingSharedMedia, onError: print);
+        .listen(_processIncomingSharedMedia, onError: (e, s) => Logs().e('Intent stream error', e, s));
 
     // For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.instance.getInitialMedia().then(
@@ -660,7 +661,6 @@ class ChatListController extends State<ChatList>
 
   Timer? _cacheSaveTimer;
 
-  @override
   void _preloadChats() {
     // Preload chat timelines in background — instant opens.
     // preloadRooms sorts by most recent and limits to 40.

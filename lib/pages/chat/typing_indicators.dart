@@ -27,8 +27,10 @@ class TypingIndicators extends StatelessWidget {
             false,
       ),
       builder: (context, _) {
+        // FIX #13: create a copy to avoid mutating SDK internal list
         final typingUsers = controller.room.typingUsers
-          ..removeWhere((u) => u.stateKey == Matrix.of(context).client.userID);
+            .where((u) => u.stateKey != Matrix.of(context).client.userID)
+            .toList();
 
         return Container(
           width: double.infinity,
@@ -41,7 +43,7 @@ class TypingIndicators extends StatelessWidget {
             duration: FluffyThemes.animationDuration,
             curve: FluffyThemes.animationCurve,
             alignment:
-                controller.timeline!.events.isNotEmpty &&
+                (controller.timeline?.events.isNotEmpty ?? false) &&
                     controller.timeline!.events.first.senderId ==
                         Matrix.of(context).client.userID
                 ? Alignment.topRight

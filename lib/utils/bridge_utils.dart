@@ -265,17 +265,9 @@ bool isBridgeRoom(Room room) {
     }
   }
 
-  // Fallback for groups: if we can't find the bridge bot in loaded members
-  // (SDK only loads ~20), use group size as heuristic
-  // Groups are likely WhatsApp bridges if not detected otherwise
-  if (!room.isDirectChat) {
-    final memberCount = room.summary?.mJoinedMemberCount;
-    // If memberCount is known, check range. If unknown (null), assume it's a group
-    if (memberCount == null || (memberCount > 2 && memberCount < 200)) {
-      return true;
-    }
-  }
-
+  // FIX #12: Removed false-positive fallback that classified ALL group chats
+  // with 2-200 members as WhatsApp bridges. Only use concrete evidence
+  // (state events, bridge bot user IDs, name patterns) for detection.
   return false;
 }
 
@@ -411,16 +403,10 @@ String? getBridgeType(Room room) {
     }
   }
 
-  // Fallback for groups: if we can't find the bridge bot in loaded members
-  // but the room is a group, assume WhatsApp
-  if (!room.isDirectChat) {
-    final memberCount = room.summary?.mJoinedMemberCount;
-    if (memberCount == null || (memberCount > 2 && memberCount < 200)) {
-      return 'whatsapp';
-    }
-  }
+  // FIX #12: Removed false-positive fallback that returned 'whatsapp' for
+  // all group chats with 2-200 members. Only use concrete evidence.
 
-    // If isBridgeRoom is true but we can't determine type, it's a generic bridge
+  // If isBridgeRoom is true but we can't determine type, it's a generic bridge
   if (isBridgeRoom(room)) {
     return 'other';
   }
