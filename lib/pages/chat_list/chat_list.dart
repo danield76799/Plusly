@@ -688,6 +688,17 @@ class ChatListController extends State<ChatList>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final spaceId = GoRouterState.of(context).uri.queryParameters['space'];
+    if (spaceId != null &&
+        spaceId.isNotEmpty &&
+        spaceId != _activeSpaceId) {
+      setActiveSpace(spaceId);
+    }
+  }
+
+  @override
   void dispose() {
     _cacheSaveTimer?.cancel();
     _intentDataStreamSubscription?.cancel();

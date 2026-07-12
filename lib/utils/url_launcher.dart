@@ -395,9 +395,7 @@ class UrlLauncher {
       servers.addAll(identityParts.via);
       if (room != null) {
         if (room.isSpace) {
-          // TODO: Implement navigate to space
-          context.go('/rooms/${room.id}');
-
+          context.go('/rooms?space=${room.id}');
           return;
         }
         // we have the room, so....just open it

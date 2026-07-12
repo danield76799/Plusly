@@ -668,9 +668,9 @@ class ChatController extends State<ChatPageWithRoom>
         Matrix.of(
           context,
         ).backgroundPush?.cancelNotification(room.client, roomId);
+        // This also cancels notifications for thread messages in this room.
       }
     }
-    // TODO same for Threads
   }
 
   @override
