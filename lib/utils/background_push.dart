@@ -563,7 +563,7 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
-    await PushHelper.pushHelper(
+    await pushHelper(
       PushNotification.fromJson(data),
       clients: clients,
       l10n: l10n,

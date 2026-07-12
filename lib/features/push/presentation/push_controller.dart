@@ -154,7 +154,7 @@ class PushController extends ChangeNotifier {
     });
 
     // Gebruik bestaande PushHelper voor notificatie weergave
-    PushHelper.pushHelper(
+    pushHelper(
       notification,
       clients: _clients,
       activeRoomId: _activeRoomId,
