@@ -297,11 +297,13 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         // Wait for full initialization before setting up push
         Future.delayed(const Duration(seconds: 3), () {
           Logs().i('[Matrix] Login complete, setting up push notifications...');
-          backgroundPush?.upAction = false;
-          backgroundPush?.setupPush(widget.clients);
-          // Ook nieuw systeem triggeren (pusher registreren nu client ingelogd is)
           if (FeatureFlags.useNewPushSystem) {
+            // Only use new push system — no legacy
             _pushController?.reRegister();
+          } else {
+            // Legacy only
+            backgroundPush?.upAction = false;
+            backgroundPush?.setupPush(widget.clients);
           }
         });
       }

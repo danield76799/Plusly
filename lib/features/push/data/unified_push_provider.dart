@@ -121,23 +121,23 @@ class UnifiedPushProvider implements PushProvider {
     }
 
     final gatewayUrl = await _detectGatewayUrl(url);
-    final client = _clientFromInstance(instance);
-    if (client == null) return;
 
-    await _setupPusher(
-      client: client,
-      gatewayUrl: gatewayUrl,
-      token: url,
-      useDeviceSpecificAppId: true,
-    );
-
-    await _store.setString('${client.clientName}_up_endpoint', url);
-    await _store.setBool('${client.clientName}_up_registered', true);
+    // Register a pusher for every logged-in client using this endpoint.
+    for (final client in _clients.where((c) => c.isLogged())) {
+      await _setupPusher(
+        client: client,
+        gatewayUrl: gatewayUrl,
+        token: url,
+        useDeviceSpecificAppId: true,
+      );
+      await _store.setString('${client.clientName}_up_endpoint', url);
+      await _store.setBool('${client.clientName}_up_registered', true);
+    }
 
     _currentEndpoint = url;
     _isActive = true;
 
-    Logs().i('[UnifiedPush] Registered for ${client.clientName}: $url');
+    Logs().i('[UnifiedPush] Registered pusher for all ${_clients.where((c) => c.isLogged()).length} clients: $url');
   }
 
   Future<void> _onRegistrationFailed(String error, String instance) async {

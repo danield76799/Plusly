@@ -119,10 +119,43 @@ class PushHelper {
         return null;
       }
 
-      final event = await client.getEventByPushNotification(
-        notification,
-        storeInDatabase: helper.isBackgroundMessage ?? false,
-      );
+      Event? event;
+      try {
+        event = await client.getEventByPushNotification(
+          notification,
+          storeInDatabase: helper.isBackgroundMessage ?? false,
+        ).timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            throw TimeoutException('getEventByPushNotification timed out');
+          },
+        );
+      } on TimeoutException {
+        Logs().w('Push helper: timed out fetching event, showing fallback notification');
+        // Show a basic notification immediately without rich content
+        l10n ??= await L10n.delegate.load(PlatformDispatcher.instance.locale);
+        await flutterLocalNotificationsPlugin.show(
+          id: notification.roomId?.hashCode ?? 0,
+          title: '💬 ${AppConfig.applicationName}',
+          body: l10n!.openAppToReadMessages,
+          notificationDetails: NotificationDetails(
+            android: AndroidNotificationDetails(
+              AppConfig.pushNotificationsChannelId,
+              l10n!.incomingMessages,
+              number: notification.counts?.unread,
+              importance: Importance.high,
+              priority: Priority.max,
+              shortcutId: notification.roomId,
+            ),
+          ),
+          payload: NotificationPushPayload(
+            client.clientName,
+            notification.roomId ?? '',
+            notification.eventId ?? '',
+          ).toString(),
+        );
+        return null;
+      }
 
       if (event == null) {
         Logs().v('Notification is a clearing indicator.');
@@ -272,24 +305,59 @@ class PushHelper {
           >()
           ?.createNotificationChannel(roomsChannel);
 
-      final platformChannelSpecifics = await _getPlatformChannelSpecifics(
-        notification.roomId?.hashCode ?? 0,
-        body,
-        title,
-        roomName,
+      // ── FAST PATH: show notification immediately with basic content ──
+      final notificationId = notification.roomId?.hashCode ?? 0;
+      final fastDetails = NotificationDetails(
+        android: AndroidNotificationDetails(
+          AppConfig.pushNotificationsChannelId,
+          l10n!.incomingMessages,
+          number: notification.counts?.unread,
+          subText: client!.clientName,
+          category: AndroidNotificationCategory.message,
+          shortcutId: event!.room.id,
+          importance: Importance.high,
+          priority: Priority.max,
+          groupKey: event!.room.spaceParents.firstOrNull?.roomId ?? 'rooms',
+        ),
       );
 
       await flutterLocalNotificationsPlugin.show(
-        id: notification.roomId?.hashCode ?? 0,
+        id: notificationId,
         title: title,
         body: body,
-        notificationDetails: platformChannelSpecifics,
+        notificationDetails: fastDetails,
         payload: NotificationPushPayload(
           client!.clientName,
           event!.room.id,
           event!.eventId,
         ).toString(),
       );
+      Logs().v('Push helper: fast notification shown');
+
+      // ── SLOW PATH: upgrade notification with rich content (avatar, messaging style) ──
+      try {
+        final platformChannelSpecifics = await _getPlatformChannelSpecifics(
+          notificationId,
+          body,
+          title,
+          roomName,
+        );
+        await flutterLocalNotificationsPlugin.show(
+          id: notificationId,
+          title: title,
+          body: body,
+          notificationDetails: platformChannelSpecifics,
+          payload: NotificationPushPayload(
+            client!.clientName,
+            event!.room.id,
+            event!.eventId,
+          ).toString(),
+        );
+        Logs().v('Push helper: rich notification upgrade complete');
+      } catch (e, s) {
+        Logs().w('Push helper: rich upgrade failed, keeping fast notification', e, s);
+      }
+
       Logs().v('Push helper has been completed!');
     } catch (e, s) {
       await _crashHandler(e, s);
