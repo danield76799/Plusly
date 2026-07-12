@@ -143,17 +143,20 @@ class PushController extends ChangeNotifier {
       return;
     }
 
-    // Converteer naar Matrix PushNotification format
-    final notification = PushNotification.fromJson({
-      'room_id': message.roomId,
-      'event_id': message.eventId,
-      'sender': message.sender,
-      'content': {'body': message.body},
-      'counts': {'unread': message.unreadCount},
-      'devices': [],
-    });
+    // Gebruik de volledige ruwe Matrix push payload (net als FluffyChat/BackgroundPush).
+    // Niet een gereconstrueerde subset — getEventByPushNotification heeft alle
+    // metadata nodig om snel het event te vinden zonder volledige sync.
+    final notification = message.rawNotification != null
+        ? PushNotification.fromJson(message.rawNotification!)
+        : PushNotification.fromJson({
+            'room_id': message.roomId,
+            'event_id': message.eventId,
+            'sender': message.sender,
+            'content': {'body': message.body},
+            'counts': {'unread': message.unreadCount},
+            'devices': [],
+          });
 
-    // Gebruik bestaande PushHelper voor notificatie weergave
     pushHelper(
       notification,
       clients: _clients,

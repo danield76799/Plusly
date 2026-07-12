@@ -45,6 +45,10 @@ class PushMessage {
   final DateTime receivedAt;
   final int? unreadCount;
   final String? clientName;
+  /// De volledige ruwe Matrix push notification payload.
+  /// Dit is nodig zodat getEventByPushNotification alle metadata heeft
+  /// (device_id, prio, counts, etc.) om snel het event te vinden.
+  final Map<String, dynamic>? rawNotification;
 
   const PushMessage({
     required this.roomId,
@@ -55,6 +59,7 @@ class PushMessage {
     required this.receivedAt,
     this.unreadCount,
     this.clientName,
+    this.rawNotification,
   });
 
   factory PushMessage.fromJson(Map<String, dynamic> json) {
@@ -70,6 +75,7 @@ class PushMessage {
       receivedAt: DateTime.tryParse(json['received_at'] as String? ?? '') ?? DateTime.now(),
       unreadCount: json['unread_count'] as int?,
       clientName: json['client_name'] as String?,
+      rawNotification: json['raw_notification'] as Map<String, dynamic>?,
     );
   }
 
@@ -82,6 +88,7 @@ class PushMessage {
     'received_at': receivedAt.toIso8601String(),
     'unread_count': unreadCount,
     'client_name': clientName,
+    'raw_notification': rawNotification,
   };
 
   /// Payload string voor notification tap handling

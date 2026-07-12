@@ -171,7 +171,23 @@ class UnifiedPushProvider implements PushProvider {
       );
       data['devices'] ??= [];
 
-      _messageController.add(PushMessage.fromJson(data));
+      // Extract client_name from devices for multi-account routing
+      String? clientName;
+      try {
+        clientName = data['devices']?.firstOrNull?['data']?['client_name'];
+      } catch (_) {}
+
+      _messageController.add(PushMessage(
+        roomId: data['room_id'] as String? ?? '',
+        eventId: data['event_id'] as String? ?? '',
+        sender: data['sender'] as String? ?? '',
+        body: data['body'] as String? ?? '',
+        source: PushProviderType.unifiedPush,
+        receivedAt: DateTime.now(),
+        unreadCount: data['counts']?['unread'] as int?,
+        clientName: clientName ?? instance,
+        rawNotification: data,  // ← volledige payload voor getEventByPushNotification
+      ));
     } catch (e, s) {
       Logs().e('[UnifiedPush] Failed to parse message', e, s);
     }

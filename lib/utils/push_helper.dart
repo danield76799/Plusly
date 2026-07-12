@@ -135,8 +135,12 @@ Future<void> _tryPushHelper(
   // ── Fetch the event (FluffyChat: no timeout, just wait) ──
   final event = await client.getEventByPushNotification(
     notification,
-    storeInDatabase: isBackgroundMessage,
+    storeInDatabase: false,
   );
+
+  // ── Sync so the room moves to the top of the chat list immediately ──
+  // Without this, the room stays at its old position until the next sync cycle.
+  final awaitingOneShotSync = client.oneShotSync();
 
   l10n ??= await L10n.delegate.load(PlatformDispatcher.instance.locale);
 
@@ -148,19 +152,30 @@ Future<void> _tryPushHelper(
         notification.counts?.unread == 0) {
       await flutterLocalNotificationsPlugin.cancelAll();
     } else {
+      // Make sure client is fully loaded and synced before dismiss notifications:
       await client.roomsLoading;
-      await client.oneShotSync();
+      await awaitingOneShotSync;
       final activeNotifications = await flutterLocalNotificationsPlugin
           .getActiveNotifications();
+      activeNotifications.where((n) => n.groupKey == client.clientName).toList();
+      var needsUpdateForSummaryNotification = false;
       for (final activeNotification in activeNotifications) {
         final room = client.rooms.singleWhereOrNull(
-          (room) => room.id.hashCode == activeNotification.id,
+          (room) =>
+              '${client.clientName}_${room.id}'.hashCode ==
+              activeNotification.id,
         );
-        if (room == null || !room.isUnreadOrInvited) {
-          flutterLocalNotificationsPlugin.cancel(
-            id: activeNotification.id!,
-          );
+        if (room != null && !room.isUnreadOrInvited) {
+          flutterLocalNotificationsPlugin.cancel(id: activeNotification.id!);
+          if (PlatformInfos.isAndroid) needsUpdateForSummaryNotification = true;
         }
+      }
+      if (needsUpdateForSummaryNotification) {
+        await updateSummaryNotification(
+          clientName: client.clientName,
+          l10n: l10n,
+          flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+        );
       }
     }
     return;
