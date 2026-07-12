@@ -119,6 +119,67 @@ class PushHelper {
         return null;
       }
 
+      // ── FAST PATH: show a basic notification IMMEDIATELY using only push payload data ──
+      // This ensures the user sees a notification within milliseconds, before the
+      // slow getEventByPushNotification network call completes.
+      final notificationId = notification.roomId?.hashCode ?? 0;
+      l10n ??= await L10n.delegate.load(PlatformDispatcher.instance.locale);
+
+      // Try to get room name from already-loaded rooms (instant, no network)
+      String fastTitle = '💬 ${AppConfig.applicationName}';
+      Room? fastRoom;
+      try {
+        fastRoom = client.getRoomById(notification.roomId ?? '');
+        if (fastRoom != null) {
+          fastTitle = fastRoom.getLocalizedDisplayname(MatrixLocals(l10n!));
+        }
+      } catch (_) {}
+
+      // Only show fast notification if the room isn't already fully loaded
+      // (if room is loaded, we can show rich content quickly without waiting for event fetch)
+      final showFastNotification = fastRoom == null ||
+          fastRoom.lastEvent == null ||
+          fastRoom.lastEvent!.eventId != notification.eventId;
+
+      if (showFastNotification) {
+        // Use the same per-room channel as the rich notification to avoid
+        // duplicate/separate notifications.
+        final fastChannel = AndroidNotificationChannel(
+          notification.roomId ?? AppConfig.pushNotificationsChannelId,
+          fastTitle,
+        );
+        await flutterLocalNotificationsPlugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >()
+            ?.createNotificationChannel(fastChannel);
+
+        await flutterLocalNotificationsPlugin.show(
+          id: notificationId,
+          title: fastTitle,
+          body: l10n!.openAppToReadMessages,
+          notificationDetails: NotificationDetails(
+            android: AndroidNotificationDetails(
+              notification.roomId ?? AppConfig.pushNotificationsChannelId,
+              l10n!.incomingMessages,
+              number: notification.counts?.unread,
+              subText: client.clientName,
+              category: AndroidNotificationCategory.message,
+              shortcutId: notification.roomId,
+              importance: Importance.high,
+              priority: Priority.max,
+              groupKey: fastRoom?.spaceParents.firstOrNull?.roomId ?? 'rooms',
+            ),
+          ),
+          payload: NotificationPushPayload(
+            client.clientName,
+            notification.roomId ?? '',
+            notification.eventId ?? '',
+          ).toString(),
+        );
+        Logs().v('Push helper: instant notification shown (pre-event-fetch)');
+      }
+
       Event? event;
       try {
         event = await client.getEventByPushNotification(
@@ -131,29 +192,9 @@ class PushHelper {
           },
         );
       } on TimeoutException {
-        Logs().w('Push helper: timed out fetching event, showing fallback notification');
-        // Show a basic notification immediately without rich content
-        l10n ??= await L10n.delegate.load(PlatformDispatcher.instance.locale);
-        await flutterLocalNotificationsPlugin.show(
-          id: notification.roomId?.hashCode ?? 0,
-          title: '💬 ${AppConfig.applicationName}',
-          body: l10n!.openAppToReadMessages,
-          notificationDetails: NotificationDetails(
-            android: AndroidNotificationDetails(
-              AppConfig.pushNotificationsChannelId,
-              l10n!.incomingMessages,
-              number: notification.counts?.unread,
-              importance: Importance.high,
-              priority: Priority.max,
-              shortcutId: notification.roomId,
-            ),
-          ),
-          payload: NotificationPushPayload(
-            client.clientName,
-            notification.roomId ?? '',
-            notification.eventId ?? '',
-          ).toString(),
-        );
+        // Fast notification was already shown pre-event-fetch.
+        // Just skip rich upgrade — the basic notification is already visible.
+        Logs().w('Push helper: timed out fetching event, keeping instant notification');
         return null;
       }
 
@@ -309,8 +350,8 @@ class PushHelper {
       final notificationId = notification.roomId?.hashCode ?? 0;
       final fastDetails = NotificationDetails(
         android: AndroidNotificationDetails(
-          AppConfig.pushNotificationsChannelId,
-          l10n!.incomingMessages,
+          event!.room.id,
+          roomName,
           number: notification.counts?.unread,
           subText: client!.clientName,
           category: AndroidNotificationCategory.message,
@@ -415,8 +456,8 @@ class PushHelper {
     final matrixLocals = MatrixLocals(l10n!);
 
     final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      AppConfig.pushNotificationsChannelId,
-      l10n!.incomingMessages,
+      event!.room.id,
+      roomName,
       number: notification.counts?.unread,
       subText: client!.clientName,
       category: AndroidNotificationCategory.message,
