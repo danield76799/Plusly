@@ -344,11 +344,15 @@ Future<void> _tryPushHelper(
   }
 
   // ── Summary notification (FluffyChat pattern) ──
+  // Run summary update in background after sync so active notifications are
+  // accurate, but don't block the push helper completion.
   if (PlatformInfos.isAndroid) {
-    await updateSummaryNotification(
-      clientName: client.clientName,
-      l10n: l10n,
-      flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+    unawaited(
+      updateSummaryNotification(
+        clientName: client.clientName,
+        l10n: l10n,
+        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+      ),
     );
   }
 

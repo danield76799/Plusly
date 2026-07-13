@@ -99,7 +99,7 @@ class ChatList extends StatefulWidget {
 }
 
 class ChatListController extends State<ChatList>
-    with TickerProviderStateMixin, RouteAware {
+    with TickerProviderStateMixin, RouteAware, WidgetsBindingObserver {
   StreamSubscription? _intentDataStreamSubscription;
 
   StreamSubscription? _intentFileStreamSubscription;
@@ -274,16 +274,20 @@ class ChatListController extends State<ChatList>
     return true;
   }
 
-  // Cached filteredRooms - 2s cache + room count hash for stability
+  // Cached filteredRooms - short cache for performance, but invalidated on sync
+  // so push notifications appear immediately.
   List<Room> get filteredRooms {
     final now = DateTime.now();
     final client = Matrix.of(context).client;
     final currentRoomCount = client.rooms.length;
-    // Cache duration lowered: push notifications should appear immediately
+    // Cache duration lowered: push notifications should appear immediately.
+    // Also invalidate when the sync state changes to ensure fresh ordering.
+    final currentSyncState = client.onSyncStatus.value?.status;
     if (now.difference(_lastFilterCalc) < const Duration(milliseconds: 500) &&
         _lastActiveFilter == activeFilter &&
         _lastVisibleBridgeTypes == visibleBridgeTypes &&
-        _lastRoomCount == currentRoomCount) {
+        _lastRoomCount == currentRoomCount &&
+        _lastSyncState == currentSyncState) {
       return _cachedFilteredRooms;
     }
 
@@ -309,10 +313,12 @@ class ChatListController extends State<ChatList>
     _lastActiveFilter = activeFilter;
     _lastVisibleBridgeTypes = Set<String>.from(visibleBridgeTypes);
     _lastRoomCount = currentRoomCount;
+    _lastSyncState = currentSyncState;
     return _cachedFilteredRooms;
   }
 
   int _lastRoomCount = 0;
+  SyncStatus? _lastSyncState;
 
   // Lazy loading pagination
   static const int _pageSize = 40;
@@ -689,6 +695,7 @@ class ChatListController extends State<ChatList>
 
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     _initReceiveSharingIntent();
 
     scrollController.addListener(_onScroll);
@@ -729,7 +736,36 @@ class ChatListController extends State<ChatList>
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // When app resumes, invalidate the filtered rooms cache and trigger a sync
+    // so push notifications show up immediately in the chat list.
+    if (state == AppLifecycleState.resumed) {
+      _invalidateRoomCache();
+      final client = Matrix.of(context).client;
+      client.oneShotSync().then((_) {
+        if (mounted) setState(() {});
+      }).catchError((e) {
+        Logs().w('Resume sync failed', e);
+      });
+    }
+  }
+
+  void _invalidateRoomCache() {
+    _lastFilterCalc = DateTime(2000);
+    _lastBridgeSync = DateTime(2000);
+    _lastUnreadCalc = DateTime(2000);
+  }
+
+  @override
+  void didPopNext() {
+    // Returning from a chat screen: refresh list immediately.
+    _invalidateRoomCache();
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _cacheSaveTimer?.cancel();
     _intentDataStreamSubscription?.cancel();
     _intentFileStreamSubscription?.cancel();
