@@ -747,12 +747,17 @@ class ChatListController extends State<ChatList>
     // so push notifications show up immediately in the chat list.
     if (state == AppLifecycleState.resumed) {
       _invalidateRoomCache();
+      // Forceer een sync zodat de chat list direct de nieuwste rooms toont.
+      // De StreamBuilder reageert op SyncStatus.finished.
       final client = Matrix.of(context).client;
-      client.oneShotSync().then((_) {
-        if (mounted) setState(() {});
-      }).catchError((e) {
-        Logs().w('Resume sync failed', e);
-      });
+      unawaited(
+        client.oneShotSync().then((_) {
+          if (mounted) setState(() {});
+        }).catchError((e) {
+          Logs().w('Resume sync failed', e);
+          return null;
+        }),
+      );
     }
   }
 

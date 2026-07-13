@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:async/async.dart';
 import 'package:Pulsly/pages/favorites/favorites_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -76,9 +79,16 @@ class ChatListViewBody extends StatelessWidget {
 
     return StreamBuilder(
       key: ValueKey(client.userID.toString()),
-      // Rebuild on every room-affecting sync update so push notifications
-      // move the right chat to the top immediately.
-      stream: client.onSync.stream.where((s) => s.hasRoomUpdate),
+      // Rebuild wanneer sync een kamer-update bevat EN wanneer een sync-run
+      // helemaal klaar is. De 'finished' status garandeert dat client.rooms
+      // up-to-date is; sommige SDK-versies rapporteren hasRoomUpdate niet
+      // betrouwbaar, waardoor push-chats niet meteen zichtbaar worden.
+      stream: StreamGroup.merge([
+        client.onSync.stream.where((s) => s.hasRoomUpdate).map((_) {}),
+        client.onSyncStatus.stream
+            .where((s) => s.status == SyncStatus.finished)
+            .map((_) {}),
+      ]),
       builder: (context, _) {
         controller.syncBridgeTypes();
         // Bewaar de chat list cache direct na elke sync-update, zodat de
