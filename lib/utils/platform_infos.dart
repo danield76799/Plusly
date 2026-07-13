@@ -40,7 +40,14 @@ abstract class PlatformInfos {
   static Future<String> getVersion() async {
     var version = kIsWeb ? 'Web' : 'Unknown';
     try {
-      version = (await PackageInfo.fromPlatform()).version;
+      final info = await PackageInfo.fromPlatform();
+      version = info.version;
+      // Op Android bevatten tags zoals v1.4.17+2310 ook het buildnummer.
+      // Zonder buildnummer ziet de updater een nieuwe release met hetzelfde
+      // semver nummer niet als update.
+      if (isAndroid && info.buildNumber.isNotEmpty) {
+        version = '$version+${info.buildNumber}';
+      }
     } catch (_) {}
     return version;
   }
