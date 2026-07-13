@@ -131,7 +131,7 @@ abstract class ClientManager {
         EventTypes.CallReject,
         EventTypes.CallHangup,
         EventTypes.GroupCallMember,
-        PollEvents.PollStart,
+        PollEvents.pollStart,
       },
       logLevel: kReleaseMode ? Level.warning : Level.verbose,
       database: await flutterMatrixSdkDatabaseBuilder(clientName),

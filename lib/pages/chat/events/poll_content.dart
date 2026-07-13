@@ -44,7 +44,7 @@ class PollWidgetState extends State<PollWidget> {
 
   void _loadPollData() {
     final event = widget.event;
-    final content = event.content[PollEvents.PollStart] as Map<String, dynamic>;
+    final content = event.content[PollEvents.pollStart] as Map<String, dynamic>;
 
     // Check if user has already voted
     _checkExistingVote();
@@ -176,7 +176,7 @@ class PollWidgetState extends State<PollWidget> {
 
       // Recalculate results for disclosed polls
       final content =
-          widget.event.content[PollEvents.PollStart] as Map<String, dynamic>;
+          widget.event.content[PollEvents.pollStart] as Map<String, dynamic>;
       final kind = content['kind'] as String?;
       if (kind == 'org.matrix.msc3381.poll.disclosed') {
         _calculateResults();
@@ -199,7 +199,7 @@ class PollWidgetState extends State<PollWidget> {
 
   void _onAnswerSelected(String answerId, bool selected) {
     final content =
-        widget.event.content[PollEvents.PollStart] as Map<String, dynamic>;
+        widget.event.content[PollEvents.pollStart] as Map<String, dynamic>;
     final maxSelections = content['max_selections'] as int? ?? 1;
 
     setState(() {
@@ -231,7 +231,7 @@ class PollWidgetState extends State<PollWidget> {
 
   bool _shouldShowResults() {
     final content =
-        widget.event.content[PollEvents.PollStart] as Map<String, dynamic>;
+        widget.event.content[PollEvents.pollStart] as Map<String, dynamic>;
     final kind = content['kind'] as String?;
     final isDisclosed = kind == 'org.matrix.msc3381.poll.disclosed';
     final isEnded = _isPollEnded();
@@ -273,7 +273,7 @@ class PollWidgetState extends State<PollWidget> {
     final theme = Theme.of(context);
     final client = Matrix.of(context).client;
     final event = widget.event;
-    final content = event.content[PollEvents.PollStart] as Map<String, dynamic>;
+    final content = event.content[PollEvents.pollStart] as Map<String, dynamic>;
     final question =
         content['question']?['m.text'] as String? ??
         content['question']?['org.matrix.msc1767.text'] as String? ??

@@ -251,7 +251,7 @@ class ExploreRoomsView extends StatelessWidget {
     );
   }
 
-  void _showRoomDetails(BuildContext context, PublicRoomsChunk room) {
+  void _showRoomDetails(BuildContext context, PublishedRoomsChunk room) {
     final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,

@@ -42,13 +42,16 @@ class ChatSearchController extends State<ChatSearchPage>
 
   List<Event> _applyFilters(List<Event> events) {
     return events.where((event) {
-      if (filterSenderId != null && event.senderId != filterSenderId)
+      if (filterSenderId != null && event.senderId != filterSenderId) {
         return false;
+      }
       if (filterFromDate != null &&
-          event.originServerTs.isBefore(filterFromDate!))
+          event.originServerTs.isBefore(filterFromDate!)) {
         return false;
-      if (filterToDate != null && event.originServerTs.isAfter(filterToDate!))
+      }
+      if (filterToDate != null && event.originServerTs.isAfter(filterToDate!)) {
         return false;
+      }
       return true;
     }).toList();
   }

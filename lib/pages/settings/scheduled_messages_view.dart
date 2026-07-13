@@ -111,7 +111,7 @@ class _PendingTab extends StatelessWidget {
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         itemCount: messages.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 4),
+        separatorBuilder: (_, _) => const SizedBox(height: 4),
         itemBuilder: (context, index) {
           return _PendingCard(
             message: messages[index],
@@ -145,7 +145,7 @@ class _PendingCard extends StatelessWidget {
   String _roomName(BuildContext context) {
     final client = Matrix.of(context).client;
     final room = client.getRoomById(message.roomId);
-    return room?.displayname ?? message.roomId;
+    return room?.getLocalizedDisplayname() ?? message.roomId;
   }
 
   String _preview() {
@@ -336,7 +336,7 @@ class _MissedTab extends StatelessWidget {
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
         itemCount: messages.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 4),
+        separatorBuilder: (_, _) => const SizedBox(height: 4),
         itemBuilder: (context, index) {
           return _MissedCard(
             message: messages[index],
@@ -362,7 +362,7 @@ class _MissedCard extends StatelessWidget {
   String _roomName(BuildContext context) {
     final client = Matrix.of(context).client;
     final room = client.getRoomById(message.roomId);
-    return room?.displayname ?? message.roomId;
+    return room?.getLocalizedDisplayname() ?? message.roomId;
   }
 
   String _preview() {

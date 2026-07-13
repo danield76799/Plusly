@@ -3,6 +3,12 @@ import 'dart:io';
 
 /// Script to generate web stubs for mobile-only packages
 /// Run this before building for web
+///
+/// Usage:
+/// ```bash
+/// dart run scripts/generate_web_stubs.dart
+/// ```
+library;
 
 final packagesToStub = [
   'camera',
@@ -33,7 +39,7 @@ final packagesToStub = [
 void main() async {
   final libDir = Directory('lib');
   if (!libDir.existsSync()) {
-    print('Error: lib directory not found');
+    _log('Error: lib directory not found');
     exit(1);
   }
 
@@ -43,7 +49,12 @@ void main() async {
   // Replace imports in all dart files
   await _replaceImports(libDir);
 
-  print('Done! Web stubs generated and imports replaced.');
+  _log('Done! Web stubs generated and imports replaced.');
+}
+
+void _log(String message) {
+  // ignore: avoid_print
+  print(message);
 }
 
 Future<void> _generateStubs() async {
@@ -54,12 +65,12 @@ Future<void> _generateStubs() async {
 
   for (final package in packagesToStub) {
     final stubFile = File('lib/web_stubs/${package}_stub.dart');
-    
+
     // Generate stub content based on package name
-    String stubContent = _generateStubContent(package);
-    
+    final stubContent = _generateStubContent(package);
+
     await stubFile.writeAsString(stubContent);
-    print('Generated stub for $package');
+    _log('Generated stub for $package');
   }
 }
 
@@ -84,8 +95,8 @@ export '${package}_stub.dart' if (dart.library.io) 'package:$package/$package.da
 Future<void> _replaceImports(Directory dir) async {
   await for (final entity in dir.list(recursive: true)) {
     if (entity is File && entity.path.endsWith('.dart')) {
-      String content = await entity.readAsString();
-      bool modified = false;
+      var content = await entity.readAsString();
+      var modified = false;
 
       for (final package in packagesToStub) {
         // Replace direct imports with conditional imports
@@ -102,7 +113,7 @@ Future<void> _replaceImports(Directory dir) async {
 
       if (modified) {
         await entity.writeAsString(content);
-        print('Modified: ${entity.path}');
+        _log('Modified: ${entity.path}');
       }
     }
   }

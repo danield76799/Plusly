@@ -463,11 +463,13 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         // Trigger immediate sync when app returns to foreground
         // so new messages appear instantly instead of waiting for next sync cycle
         if (foreground) {
-          client.oneShotSync().then((_) {
-            Logs().v('Immediate sync triggered on app resume');
-          }).catchError((e) {
-            Logs().w('Failed to sync on resume', e);
-          });
+          unawaited(
+            client.oneShotSync().then((_) {
+              Logs().v('Immediate sync triggered on app resume');
+            }).catchError((e) {
+              Logs().w('Failed to sync on resume', e);
+            }),
+          );
         }
       }
       // Update Android home screen widget when app resumes
@@ -486,10 +488,18 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
 
     // FIX #9: .map() returns lazy Iterable — must iterate to actually cancel
-    for (final s in onRoomKeyRequestSub.values) s.cancel();
-    for (final s in onKeyVerificationRequestSub.values) s.cancel();
-    for (final s in onLoginStateChanged.values) s.cancel();
-    for (final s in onNotification.values) s.cancel();
+    for (final s in onRoomKeyRequestSub.values) {
+      s.cancel();
+    }
+    for (final s in onKeyVerificationRequestSub.values) {
+      s.cancel();
+    }
+    for (final s in onLoginStateChanged.values) {
+      s.cancel();
+    }
+    for (final s in onNotification.values) {
+      s.cancel();
+    }
     client.httpClient.close();
 
     linuxNotifications?.close();

@@ -502,8 +502,9 @@ class BootstrapDialogState extends State<BootstrapDialog> {
 
                               // Progress tracking
                               void updateStep(String step) {
-                                if (mounted)
+                                if (mounted) {
                                   setState(() => _currentStep = step);
+                                }
                               }
 
                               try {

@@ -5,11 +5,11 @@ import 'package:matrix/matrix.dart';
 extension MessagePreviewCleaner on String {
   /// Removes bridge prefixes like ". (WA): " or "Facebook (WA): " and leading punctuation
   String sanitizePreview() {
-    if (this.isEmpty) return this;
-    
+    if (isEmpty) return this;
+
     // 1. Remove known bridge prefixes (e.g., "WhatsApp (WA): ", "bridge bot: ")
     final prefixRegex = RegExp(r'^(\.?\s*([a-zA-Z]+)?\s*\(WA\):?|bridge bot:?)\s*', caseSensitive: false);
-    String cleaned = this.replaceFirst(prefixRegex, '');
+    var cleaned = replaceFirst(prefixRegex, '');
 
     // 2. Remove leading punctuation/whitespace that might remain (e.g., ". Hello")
     cleaned = cleaned.replaceFirst(RegExp(r'^[\.\s,\-]+'), '');

@@ -30,6 +30,7 @@ class ParticipantListItem extends StatelessWidget {
         ? L10n.of(context).moderator
         : '';
 
+    // ignore: deprecated_member_use
     var statusMsg = user.presence?.presence.statusMsg;
 
     if (statusMsg != null && statusMsg.trimLeft().startsWith('@')) {

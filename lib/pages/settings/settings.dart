@@ -358,7 +358,7 @@ class SettingsController extends State<Settings> {
     final needsBootstrap =
         client.encryption?.keyManager.isCached() == false ||
         client.encryption?.crossSigning.enabled == false ||
-        crossSigning == false;
+        !crossSigning;
     final isUnknownSession = client.isUnknownSession;
     setState(() {
       showChatBackupBanner = needsBootstrap || isUnknownSession;

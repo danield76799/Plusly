@@ -103,7 +103,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             Icon(
               Icons.star_outline,
               size: 64,
-              color: theme.colorScheme.onSurface.withOpacity(0.5),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -114,7 +114,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             Text(
               'Lang druk op een bericht om op te slaan',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.7),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
             ),
           ],
@@ -183,7 +183,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.8),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                       ),
                     ),
                   ],

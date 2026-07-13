@@ -20,7 +20,7 @@ Future<void> showPollResultsDialog(
   Event pollEvent,
 ) async {
   final content =
-      pollEvent.content[PollEvents.PollStart] as Map<String, dynamic>;
+      pollEvent.content[PollEvents.pollStart] as Map<String, dynamic>;
   final kind = content['kind'] as String?;
   final isDisclosed = kind == 'org.matrix.msc3381.poll.disclosed';
 
@@ -145,7 +145,7 @@ class _PollResultsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final content =
-        pollEvent.content[PollEvents.PollStart] as Map<String, dynamic>;
+        pollEvent.content[PollEvents.pollStart] as Map<String, dynamic>;
     final question =
         content['question']?['m.text'] as String? ??
         content['question']?['org.matrix.msc1767.text'] as String? ??

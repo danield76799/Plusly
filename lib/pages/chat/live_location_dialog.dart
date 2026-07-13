@@ -104,7 +104,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
       // Send info message
       final endTime = DateTime.now().add(Duration(minutes: _selectedMinutes));
       await widget.room.sendTextEvent(
-        '📍 Live locatie actief voor ${_selectedMinutes} minuten (tot ${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')})',
+        '📍 Live locatie actief voor $_selectedMinutes minuten (tot ${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')})',
       );
 
       // Start periodic updates
@@ -187,7 +187,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
               ButtonSegment(value: 30, label: Text('30m')),
               ButtonSegment(value: 60, label: Text('1u')),
             ],
-            selected: {_selectedMinutes},
+            selected: _selectedMinutes,
             onSelectionChanged: (selection) {
               setState(() => _selectedMinutes = selection.first);
             },

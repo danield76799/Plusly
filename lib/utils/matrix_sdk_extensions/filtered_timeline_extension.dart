@@ -64,7 +64,7 @@ extension IsStateExtension on Event {
       // if we enabled to hide all unknown events, don't show those
       (!AppSettings.hideUnknownEvents.value ||
           isEventTypeKnown ||
-          type == PollEvents.PollStart) &&
+          type == PollEvents.pollStart) &&
       // remove state events that we don't want to render
       (isState || !AppConfig.hideAllStateEvents) &&
       // hide simple join/leave member events in public rooms

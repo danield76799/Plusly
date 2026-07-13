@@ -224,7 +224,7 @@ class _MxcImagePlaceholder extends StatelessWidget {
 /// Simple LRU cache for image data
 class _LruCache<K, V> {
   final int maxSize;
-  final _map = LinkedHashMap<K, V>();
+  final _map = <K, V>{};
 
   _LruCache({required this.maxSize});
 

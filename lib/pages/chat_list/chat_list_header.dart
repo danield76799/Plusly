@@ -193,7 +193,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                                 color: status.error != null
                                     ? theme.colorScheme.error
                                     : theme.colorScheme.onSecondaryContainer
-                                          .withOpacity(0.87), // 10% darker
+                                          .withValues(alpha: 0.87), // 10% darker
                                 fontWeight: FontWeight.normal,
                               ),
                               prefixIcon: hide
@@ -346,7 +346,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                       fontWeight: FontWeight.w600,
                       color: isActive
                           ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface.withOpacity(0.6),
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ),

@@ -1,3 +1,5 @@
+library;
+
 /// Export file voor de push feature module.
 ///
 /// Gebruik:

@@ -20,7 +20,7 @@ class ChatListCacheService {
             final lastEvent = r.lastEvent;
             return {
               'id': r.id,
-              'name': r.displayname,
+              'name': r.getLocalizedDisplayname(),
               'avatarUrl': r.avatar?.toString(),
               'lastMessage': lastEvent?.body ?? '',
               'lastTimestamp': (lastEvent?.originServerTs as int?) ?? 0,

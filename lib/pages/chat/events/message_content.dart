@@ -113,7 +113,7 @@ class MessageContent extends StatelessWidget {
       case EventTypes.Message:
       case EventTypes.Encrypted:
       case EventTypes.Sticker:
-      case PollEvents.PollStart:
+      case PollEvents.pollStart:
         // temporary solution
         switch (event.messageType) {
           case MessageTypes.Poll:

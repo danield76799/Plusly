@@ -274,20 +274,26 @@ class ChatListController extends State<ChatList>
     return true;
   }
 
-  // Cached filteredRooms - short cache for performance, but invalidated on sync
-  // so push notifications appear immediately.
+  // Cached filteredRooms - intentionally short cache for performance,
+  // but invalidated immediately on sync/room changes so push notifications
+  // appear at the top right away.
   List<Room> get filteredRooms {
     final now = DateTime.now();
     final client = Matrix.of(context).client;
     final currentRoomCount = client.rooms.length;
-    // Cache duration lowered: push notifications should appear immediately.
-    // Also invalidate when the sync state changes to ensure fresh ordering.
-    final currentSyncState = client.onSyncStatus.value?.status;
-    if (now.difference(_lastFilterCalc) < const Duration(milliseconds: 500) &&
+    // Use the latest event timestamp across all rooms as a cache invalidation
+    // signal. This catches ordering changes even when the sync status stays idle.
+    final currentMaxEventTime = client.rooms.isEmpty
+        ? 0
+        : client.rooms
+            .map((r) => r.latestEventReceivedTime.millisecondsSinceEpoch)
+            .reduce((a, b) => a > b ? a : b);
+
+    if (now.difference(_lastFilterCalc) < const Duration(milliseconds: 100) &&
         _lastActiveFilter == activeFilter &&
         _lastVisibleBridgeTypes == visibleBridgeTypes &&
         _lastRoomCount == currentRoomCount &&
-        _lastSyncState == currentSyncState) {
+        _lastMaxEventTime == currentMaxEventTime) {
       return _cachedFilteredRooms;
     }
 
@@ -313,12 +319,12 @@ class ChatListController extends State<ChatList>
     _lastActiveFilter = activeFilter;
     _lastVisibleBridgeTypes = Set<String>.from(visibleBridgeTypes);
     _lastRoomCount = currentRoomCount;
-    _lastSyncState = currentSyncState;
+    _lastMaxEventTime = currentMaxEventTime;
     return _cachedFilteredRooms;
   }
 
   int _lastRoomCount = 0;
-  SyncStatus? _lastSyncState;
+  int _lastMaxEventTime = 0;
 
   // Lazy loading pagination
   static const int _pageSize = 40;
@@ -440,7 +446,7 @@ class ChatListController extends State<ChatList>
           final roomId = response.roomId;
           if (roomId != null) {
             roomSearchResult.chunk.add(
-              PublicRoomsChunk(
+              PublishedRoomsChunk(
                 name: searchQuery,
                 guestCanJoin: false,
                 numJoinedMembers: 0,
@@ -754,6 +760,7 @@ class ChatListController extends State<ChatList>
     _lastFilterCalc = DateTime(2000);
     _lastBridgeSync = DateTime(2000);
     _lastUnreadCalc = DateTime(2000);
+    _lastMaxEventTime = 0;
   }
 
   @override

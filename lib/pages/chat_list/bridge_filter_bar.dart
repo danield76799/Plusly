@@ -115,7 +115,7 @@ class BridgeFilterBar extends StatelessWidget {
               onChanged(newSet);
             },
             backgroundColor: theme.colorScheme.surfaceContainerHighest,
-            selectedColor: color.withOpacity(0.2),
+            selectedColor: color.withValues(alpha: 0.2),
             checkmarkColor: color,
             labelStyle: TextStyle(
               color: isSelected

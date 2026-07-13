@@ -105,7 +105,7 @@ class ExploreRoomsController extends State<ExploreRooms> {
     });
   }
 
-  void joinRoomAction(PublicRoomsChunk room) async {
+  void joinRoomAction(PublishedRoomsChunk room) async {
     final client = Matrix.of(context).client;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 

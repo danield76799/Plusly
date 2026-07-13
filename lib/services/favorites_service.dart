@@ -45,7 +45,7 @@ class FavoritesService {
       final prefs = await SharedPreferences.getInstance();
       final String? data = prefs.getString(_key);
       if (data != null && data.isNotEmpty) {
-        final List<dynamic> jsonList = jsonDecode(data);
+        final jsonList = jsonDecode(data) as List<dynamic>;
         _cache = jsonList.map((e) => SavedMessage.fromJson(e)).toList();
       }
     } catch (e) {
@@ -75,7 +75,7 @@ class FavoritesService {
   static Future<void> _persist() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String data = jsonEncode(_cache.map((e) => e.toJson()).toList());
+      final data = jsonEncode(_cache.map((e) => e.toJson()).toList());
       await prefs.setString(_key, data);
     } catch (e) {
       debugPrint('Favorites persist error: $e');
@@ -94,7 +94,7 @@ class FavoritesService {
   static Future<List<SavedMessage>> searchFavorites(String query) async {
     final favorites = await getFavorites();
     if (query.isEmpty) return favorites;
-    return favorites.where((msg) => 
+    return favorites.where((msg) =>
       msg.content.toLowerCase().contains(query.toLowerCase()) ||
       msg.sender.toLowerCase().contains(query.toLowerCase())
     ).toList();
@@ -102,15 +102,15 @@ class FavoritesService {
 
   static Future<Map<String, List<SavedMessage>>> getFavoritesByPerson() async {
     final favorites = await getFavorites();
-    final Map<String, List<SavedMessage>> result = {};
-    
+    final result = <String, List<SavedMessage>>{};
+
     for (final msg in favorites) {
       if (!result.containsKey(msg.sender)) {
         result[msg.sender] = [];
       }
       result[msg.sender]!.add(msg);
     }
-    
+
     return result;
   }
 }

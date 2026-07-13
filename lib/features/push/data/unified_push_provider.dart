@@ -9,8 +9,8 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unifiedpush/unifiedpush.dart' as up;
 
-import '../domain/push_provider.dart' hide PushMessage;
 import '../domain/push_provider.dart' show PushProvider, PushProviderType, PushMessage;
+
 import '../../../config/app_config.dart';
 import '../../../utils/platform_infos.dart';
 import '../../../widgets/plusly_app.dart';

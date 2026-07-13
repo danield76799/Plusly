@@ -76,11 +76,9 @@ class ChatListViewBody extends StatelessWidget {
 
     return StreamBuilder(
       key: ValueKey(client.userID.toString()),
-      // Rate limit lowered to 500ms so push notifications appear quickly
-      // without causing a rebuild storm.
-      stream: client.onSync.stream
-          .where((s) => s.hasRoomUpdate)
-          .rateLimit(const Duration(milliseconds: 500)),
+      // Rebuild on every room-affecting sync update so push notifications
+      // move the right chat to the top immediately.
+      stream: client.onSync.stream.where((s) => s.hasRoomUpdate),
       builder: (context, _) {
         controller.syncBridgeTypes();
         final rooms = controller.isSearchMode
@@ -350,7 +348,7 @@ class ChatListViewBody extends StatelessWidget {
 class PublicRoomsHorizontalList extends StatelessWidget {
   const PublicRoomsHorizontalList({super.key, required this.publicRooms});
 
-  final List<PublicRoomsChunk>? publicRooms;
+  final List<PublishedRoomsChunk>? publicRooms;
 
   @override
   Widget build(BuildContext context) {

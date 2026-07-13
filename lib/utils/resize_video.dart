@@ -11,7 +11,7 @@ extension ResizeImage on XFile {
 
   Future<MatrixVideoFile> resizeVideo() async {
     MediaInfo? mediaInfo;
-    bool compressFailed = false;
+    var compressFailed = false;
     try {
       if (PlatformInfos.isMobile) {
         // will throw an error e.g. on Android SDK < 18

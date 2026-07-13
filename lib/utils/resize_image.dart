@@ -37,8 +37,8 @@ class ImageResizer {
       }
 
       // Calculate new dimensions maintaining aspect ratio
-      int newWidth = image.width;
-      int newHeight = image.height;
+      var newWidth = image.width;
+      var newHeight = image.height;
       
       if (image.width > image.height) {
         if (image.width > maxDimension) {

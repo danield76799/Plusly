@@ -115,7 +115,9 @@ List<_MockRoom> _createMockRooms(int count) {
 /// Minimale Room mock die alleen de velden exposeert die
 /// ChatListCacheService.saveRooms() nodig heeft.
 class _MockRoom implements Room {
+  @override
   final String id;
+  @override
   final String name;
   final bool isDirect;
   final bool _isSpace;

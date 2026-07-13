@@ -208,13 +208,13 @@ class ChatInputRow extends StatelessWidget {
                           borderRadius: BorderRadius.circular(24.0),
                           border: Border.all(
                             color: controller.sendController.text.isNotEmpty
-                                ? theme.colorScheme.primary.withOpacity(0.3)
-                                : theme.colorScheme.outline.withOpacity(0.2),
+                                ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                                : theme.colorScheme.outline.withValues(alpha: 0.2),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: theme.colorScheme.shadow.withOpacity(0.05),
+                              color: theme.colorScheme.shadow.withValues(alpha: 0.05),
                               blurRadius: 8.0,
                               offset: const Offset(0, 2),
                             ),
@@ -284,7 +284,7 @@ class ChatInputRow extends StatelessWidget {
                                         alignment: Alignment.center,
                                         child: IconButton(
                                           tooltip: L10n.of(context).emojis,
-                                          color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                           icon: Icon(
                                             controller.showEmojiPicker
                                                 ? Icons.emoji_emotions
@@ -425,7 +425,7 @@ class ChatInputRow extends StatelessWidget {
                                 boxShadow: controller.sendController.text.isNotEmpty
                                     ? [
                                         BoxShadow(
-                                          color: const Color(0xFF49AFC2).withOpacity(0.3),
+                                          color: const Color(0xFF49AFC2).withValues(alpha: 0.3),
                                           blurRadius: 8.0,
                                           offset: const Offset(0, 2),
                                         ),

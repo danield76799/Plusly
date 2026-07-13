@@ -181,7 +181,8 @@ class ChatController extends State<ChatPageWithRoom>
         MessageTypes.File,
       }.contains(selectedEvents.single.messageType);
 
-  void saveSelectedEvent(context) => selectedEvents.single.saveFile(context);
+  void saveSelectedEvent(BuildContext context) =>
+      selectedEvents.single.saveFile(context);
 
   List<Event> selectedEvents = [];
 
@@ -210,20 +211,16 @@ class ChatController extends State<ChatPageWithRoom>
 
   // Local recent emojis storage
   static const String _recentEmojisKey = 'recent_emojis_local';
-  List<String> _localRecentEmojis = [];
+  List<String> localRecentEmojis = [];
 
-  List<String> get localRecentEmojis => _localRecentEmojis;
-  set localRecentEmojis(List<String> value) => _localRecentEmojis = value;
-
-  Future<void> _loadLocalRecentEmojis() async {
-    _localRecentEmojis = AppSettings.store.getStringList(_recentEmojisKey) ?? [];
+  void _loadLocalRecentEmojis() {
+    localRecentEmojis = AppSettings.store.getStringList(_recentEmojisKey) ?? [];
   }
 
   Future<void> _saveLocalRecentEmojis() async {
-    await AppSettings.store.setStringList(_recentEmojisKey, _localRecentEmojis);
+    await AppSettings.store.setStringList(_recentEmojisKey, localRecentEmojis);
   }
 
-  // Public wrapper for saving emojis from other classes
   Future<void> saveLocalRecentEmojis() async => _saveLocalRecentEmojis();
 
   void acceptInvite() async {
@@ -1508,12 +1505,12 @@ class ChatController extends State<ChatPageWithRoom>
     final emojiChar = emoji.customData ?? emoji.standardEmoji!.char;
 
     // Add to local recent emojis list
-    _localRecentEmojis.remove(
+    localRecentEmojis.remove(
       emojiChar,
     ); // Remove if already exists (to move to front)
-    _localRecentEmojis.insert(0, emojiChar); // Add to front
-    if (_localRecentEmojis.length > 50) {
-      _localRecentEmojis = _localRecentEmojis.sublist(
+    localRecentEmojis.insert(0, emojiChar); // Add to front
+    if (localRecentEmojis.length > 50) {
+      localRecentEmojis = localRecentEmojis.sublist(
         0,
         50,
       ); // Keep only last 50
@@ -1646,10 +1643,10 @@ class ChatController extends State<ChatPageWithRoom>
     for (final event in events) {
       await room.sendReaction(event.eventId, emoji!);
       // Add to recent emojis when sending reaction
-      _localRecentEmojis.remove(emoji);
-      _localRecentEmojis.insert(0, emoji);
-      if (_localRecentEmojis.length > 50) {
-        _localRecentEmojis = _localRecentEmojis.sublist(0, 50);
+      localRecentEmojis.remove(emoji);
+      localRecentEmojis.insert(0, emoji);
+      if (localRecentEmojis.length > 50) {
+        localRecentEmojis = localRecentEmojis.sublist(0, 50);
       }
       await _saveLocalRecentEmojis();
       // Also try to add to SDK

@@ -60,7 +60,7 @@ extension Msc4140Extension on matrix.Room {
       enrichedContent['m.relates_to'] = {
         'rel_type': 'm.thread',
         'event_id': threadRootEventId,
-        if (threadLastEventId != null) 'm.relatesto': threadLastEventId,
+        'm.relatesto': threadLastEventId,
         'is_falling_back': inReplyTo == null,
       };
     }

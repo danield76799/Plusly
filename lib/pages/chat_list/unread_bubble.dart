@@ -34,7 +34,7 @@ class UnreadBubble extends StatelessWidget {
             ? const Color(0xFFFF6B6B) // Coral red for notifications
             : const Color(
                 0xFFFF6B6B,
-              ).withOpacity(0.5), // Light coral for unread
+              ).withValues(alpha: 0.5), // Light coral for unread
         borderRadius: BorderRadius.circular(7),
       ),
       child: hasNotifications
