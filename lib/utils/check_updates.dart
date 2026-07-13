@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
@@ -22,12 +23,14 @@ class GitHubRelease {
   final String downloadUrl;
   final String browserDownloadUrl;
   final bool hasApk;
+  final Map<String, String> apkUrlsByAbi;
 
   GitHubRelease({
     required this.tagName,
     required this.downloadUrl,
     required this.browserDownloadUrl,
     this.hasApk = false,
+    this.apkUrlsByAbi = const {},
   });
 
   factory GitHubRelease.fromJson(Map<String, dynamic> json) {
@@ -35,14 +38,24 @@ class GitHubRelease {
     var browserUrl = '';
     var apkUrl = '';
     var aabUrl = '';
+    final apkUrlsByAbi = <String, String>{};
 
-    // Find the first APK or AAB asset
+    // Find APK or AAB assets, grouped by ABI when possible.
     final assets = json['assets'] as List<dynamic>? ?? [];
     for (final asset in assets) {
       final name = (asset['name'] as String? ?? '').toLowerCase();
       final url = asset['browser_download_url'] as String? ?? '';
       if (name.endsWith('.apk')) {
-        apkUrl = url;
+        apkUrl = apkUrl.isEmpty ? url : apkUrl;
+        if (name.contains('arm64-v8a')) {
+          apkUrlsByAbi['arm64-v8a'] = url;
+        } else if (name.contains('armeabi-v7a')) {
+          apkUrlsByAbi['armeabi-v7a'] = url;
+        } else if (name.contains('x86_64')) {
+          apkUrlsByAbi['x86_64'] = url;
+        } else if (name.contains('x86')) {
+          apkUrlsByAbi['x86'] = url;
+        }
       } else if (name.endsWith('.aab')) {
         aabUrl = url;
       }
@@ -59,6 +72,7 @@ class GitHubRelease {
       downloadUrl: downloadUrl,
       browserDownloadUrl: browserUrl,
       hasApk: apkUrl.isNotEmpty,
+      apkUrlsByAbi: apkUrlsByAbi,
     );
   }
 
@@ -68,6 +82,7 @@ class GitHubRelease {
       'download_url': downloadUrl,
       'browser_download_url': browserDownloadUrl,
       'has_apk': hasApk,
+      'apk_urls_by_abi': apkUrlsByAbi,
     };
   }
 }
@@ -500,7 +515,33 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
   }
 }
 
-void checkForUpdates(BuildContext context) async {
+Future<String> _pickBestApkUrl(GitHubRelease release) async {
+  if (release.apkUrlsByAbi.isEmpty) return release.downloadUrl;
+
+  // Kies de beste APK op basis van de ondersteunde ABI's van dit toestel.
+  // Dit voorkomt dat we een 32-bit APK proberen te installeren op een
+  // 64-bit toestel (of andersom), wat stilzwijgend mislukt.
+  if (Platform.isAndroid) {
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    final supported = [
+      ...androidInfo.supported64BitAbis,
+      ...androidInfo.supported32BitAbis,
+    ];
+    for (final abi in supported) {
+      final url = release.apkUrlsByAbi[abi];
+      if (url != null && url.isNotEmpty) return url;
+    }
+  }
+
+  // Fallback: arm64-v8a is de meest voorkomende moderne architectuur.
+  return release.apkUrlsByAbi['arm64-v8a'] ??
+      release.apkUrlsByAbi['armeabi-v7a'] ??
+      release.apkUrlsByAbi['x86_64'] ??
+      release.apkUrlsByAbi['x86'] ??
+      release.downloadUrl;
+}
+
+Future<void> checkForUpdates(BuildContext context) async {
   // Reset the check flag so we can check again
   AppConfig.alreadyCheckedUpdates = false;
   
@@ -526,7 +567,17 @@ void checkForUpdates(BuildContext context) async {
       'Latest version: $latestVersion | Current version: $currentVersion',
     );
 
-    if (!isNewerVersion(latestVersion, currentVersion)) return;
+    if (!isNewerVersion(latestVersion, currentVersion)) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Je hebt al de nieuwste versie.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+      return;
+    }
 
     AppConfig.alreadyCheckedUpdates = true;
 
@@ -554,10 +605,13 @@ void checkForUpdates(BuildContext context) async {
                   title: Text(release.hasApk ? 'Download & installeer APK' : 'Download beschikbaar (geen APK)'),
                   subtitle: Text(release.hasApk ? 'Directe installatie' : 'Alleen AAB beschikbaar - gebruik browser'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
+                  onTap: () async {
                     if (release.hasApk) {
                       Navigator.of(ctx).pop();
-                      downloadAndInstallApk(context, release.downloadUrl);
+                      final apkUrl = await _pickBestApkUrl(release);
+                      if (context.mounted) {
+                        downloadAndInstallApk(context, apkUrl);
+                      }
                     } else {
                       // No APK available, show message
                       Navigator.of(ctx).pop();
