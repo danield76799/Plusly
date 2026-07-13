@@ -81,6 +81,11 @@ class ChatListViewBody extends StatelessWidget {
       stream: client.onSync.stream.where((s) => s.hasRoomUpdate),
       builder: (context, _) {
         controller.syncBridgeTypes();
+        // Bewaar de chat list cache direct na elke sync-update, zodat de
+        // volgorde altijd up-to-date is bij koude start.
+        if (client.prevBatch != null && client.rooms.isNotEmpty) {
+          ChatListCacheService.saveRooms(client.rooms);
+        }
         final rooms = controller.isSearchMode
             ? controller.searchRooms
             : controller.visibleRooms;

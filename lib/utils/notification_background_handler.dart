@@ -148,22 +148,28 @@ Future<void> notificationTap(
       }
       Logs().v('Open room from notification tap', roomId);
 
-      // 🚀 NAVIGATE IMMEDIATELY
+      // Zorg dat de kamer beschikbaar is voor we navigeren. Bij een koude
+      // start duurt het even voordat sync de kamer heeft geladen; pas dan
+      // openen we de chat om een leeg scherm te voorkomen.
+      if (client.getRoomById(roomId) == null) {
+        try {
+          await client
+              .waitForRoomInSync(roomId)
+              .timeout(const Duration(seconds: 5));
+        } catch (e) {
+          Logs().w('Room not available after timeout, navigating anyway', e);
+        }
+      }
+
       router?.go(
         client.getRoomById(roomId)?.membership == Membership.invite
             ? '/rooms'
             : '/rooms/$roomId',
       );
 
-      // Sync and preload in the background
+      // Preload timeline in the background after navigation
       Future.delayed(Duration.zero, () async {
         try {
-          final room = client.getRoomById(roomId);
-          if (room == null) {
-            await client
-                .waitForRoomInSync(roomId)
-                .timeout(const Duration(seconds: 30));
-          }
           final loadedRoom = client.getRoomById(roomId);
           if (loadedRoom != null) {
             final timeline = await loadedRoom.getTimeline().timeout(
@@ -173,7 +179,7 @@ Future<void> notificationTap(
             TimelineCache.setTimeline(roomId, timeline);
           }
         } catch (e) {
-          Logs().w('Background sync failed for $roomId', e);
+          Logs().w('Background preload failed for $roomId', e);
         }
       });
       break;

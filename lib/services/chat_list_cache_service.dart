@@ -46,12 +46,26 @@ class ChatListCacheService {
     }
   }
 
+  static const _maxCacheAge = Duration(minutes: 10);
+
   static Future<List<Map<String, dynamic>>?> loadRooms() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_key);
       if (raw == null || raw.isEmpty) return null;
       final data = jsonDecode(raw) as Map<String, dynamic>;
+
+      // Negeer verouderde cache zodat de chat list niet een oude volgorde toont
+      // na een push notificatie of lange periode zonder sync.
+      final savedAtStr = data['savedAt'] as String?;
+      if (savedAtStr != null) {
+        final savedAt = DateTime.parse(savedAtStr);
+        if (DateTime.now().difference(savedAt) > _maxCacheAge) {
+          await prefs.remove(_key);
+          return null;
+        }
+      }
+
       final rooms = (data['rooms'] as List?)?.cast<Map<String, dynamic>>();
       return rooms;
     } catch (e, stackTrace) {

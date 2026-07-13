@@ -103,6 +103,10 @@ Future<void> _tryPushHelper(
     return;
   }
 
+  // Zorg dat rooms geladen zijn voordat we het push-event ophalen of
+  // deduplicatie doen. Bij een koude start kan dit even duren.
+  await client.roomsLoading;
+
   // ── Deduplicate across multi-account ──
   if (notification.roomId != null && clients.isNotEmpty) {
     final firstClientInRoom = clients.firstWhereOrNull(
@@ -121,10 +125,30 @@ Future<void> _tryPushHelper(
   // FluffyChat pattern: do NOT store in database from the push helper.
   // The event will arrive through the regular sync triggered by oneShotSync(),
   // which is more reliable for encrypted messages and room ordering.
-  final event = await client.getEventByPushNotification(
+  var event = await client.getEventByPushNotification(
     notification,
     storeInDatabase: false,
   );
+
+  // Bij een koude start kan roomsLoading wel klaar zijn maar de sync nog niet
+  // de kamer bevatten. Als we een room_id hebben maar geen event, forceren
+  // we een sync en wachten tot de kamer beschikbaar is.
+  if (event == null &&
+      notification.roomId != null &&
+      client.getRoomById(notification.roomId!) == null) {
+    Logs().v('Push event not resolved yet; forcing sync for room');
+    try {
+      await client
+          .waitForRoomInSync(notification.roomId!)
+          .timeout(const Duration(seconds: 10));
+      event = await client.getEventByPushNotification(
+        notification,
+        storeInDatabase: false,
+      );
+    } catch (_) {
+      // Event komt later wel via sync; toon notificatie op basis van payload.
+    }
+  }
 
   // ── Start sync so the room moves to the top of the chat list immediately ──
   // In the background the normal sync loop is paused, so oneShotSync can stall.
@@ -405,6 +429,8 @@ Future<void> updateSummaryNotification({
 
   await flutterLocalNotificationsPlugin.show(
     id: clientName.hashCode,
+    title: l10n.incomingMessages,
+    body: l10n.incomingMessages,
     notificationDetails: NotificationDetails(
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,
