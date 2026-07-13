@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:io';
-
 /// Script to generate web stubs for mobile-only packages
 /// Run this before building for web
 ///
@@ -9,6 +6,9 @@ import 'dart:io';
 /// dart run scripts/generate_web_stubs.dart
 /// ```
 library;
+
+import 'dart:async';
+import 'dart:io';
 
 final packagesToStub = [
   'camera',

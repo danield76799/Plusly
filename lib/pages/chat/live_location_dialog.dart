@@ -187,7 +187,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
               ButtonSegment(value: 30, label: Text('30m')),
               ButtonSegment(value: 60, label: Text('1u')),
             ],
-            selected: _selectedMinutes,
+            selected: {_selectedMinutes},
             onSelectionChanged: (selection) {
               setState(() => _selectedMinutes = selection.first);
             },

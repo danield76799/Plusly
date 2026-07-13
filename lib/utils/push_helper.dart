@@ -126,13 +126,21 @@ Future<void> _tryPushHelper(
     storeInDatabase: false,
   );
 
-  // ── Sync so the room moves to the top of the chat list immediately ──
+  // ── Start sync so the room moves to the top of the chat list immediately ──
   // In the background the normal sync loop is paused, so oneShotSync can stall.
-  // Temporarily enable background sync for background messages, then restore it.
+  // Temporarily enable background sync for background messages, then restore it
+  // via whenComplete without blocking the push handler (avoid ANR).
   if (isBackgroundMessage) {
     client.backgroundSync = true;
   }
-  final awaitingOneShotSync = client.oneShotSync();
+  final syncFuture = client.oneShotSync();
+  unawaited(
+    syncFuture.whenComplete(() {
+      if (isBackgroundMessage) {
+        client.backgroundSync = false;
+      }
+    }),
+  );
 
   l10n ??= await L10n.delegate.load(PlatformDispatcher.instance.locale);
 
@@ -145,7 +153,7 @@ Future<void> _tryPushHelper(
       await flutterLocalNotificationsPlugin.cancelAll();
     } else {
       await client.roomsLoading;
-      await awaitingOneShotSync;
+      await syncFuture;
       final activeNotifications = await flutterLocalNotificationsPlugin
           .getActiveNotifications();
       // FIX #22: use the filtered list
@@ -336,12 +344,9 @@ Future<void> _tryPushHelper(
 
   // ── Await sync so chat list updates before we finish ──
   // FIX #4: await oneShotSync in normal path too, so room moves to top
-  await awaitingOneShotSync;
+  await syncFuture;
 
-  // Restore previous background sync state if we changed it.
-  if (isBackgroundMessage) {
-    client.backgroundSync = false;
-  }
+  // No need to restore backgroundSync here; whenComplete already handled it.
 
   // ── Summary notification (FluffyChat pattern) ──
   // Run summary update in background after sync so active notifications are
