@@ -347,8 +347,8 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
           'Accept': 'application/vnd.android.package-archive, application/octet-stream, */*',
           'User-Agent': 'PluslyApp',
         },
-        // 30 seconden timeout voor connect + receive
-        receiveTimeout: const Duration(seconds: 30),
+        // APK's kunnen 50-100 MB zijn; geef langzamere verbindingen de tijd.
+        receiveTimeout: const Duration(minutes: 5),
         sendTimeout: const Duration(seconds: 10),
       ),
       onReceiveProgress: (received, total) {
