@@ -76,9 +76,11 @@ class ChatListViewBody extends StatelessWidget {
 
     return StreamBuilder(
       key: ValueKey(client.userID.toString()),
+      // Rate limit lowered to 500ms so push notifications appear quickly
+      // without causing a rebuild storm.
       stream: client.onSync.stream
           .where((s) => s.hasRoomUpdate)
-          .rateLimit(const Duration(seconds: 3)),
+          .rateLimit(const Duration(milliseconds: 500)),
       builder: (context, _) {
         controller.syncBridgeTypes();
         final rooms = controller.isSearchMode

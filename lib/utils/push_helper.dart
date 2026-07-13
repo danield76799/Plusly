@@ -118,9 +118,12 @@ Future<void> _tryPushHelper(
   }
 
   // ── Fetch the event ──
+  // FluffyChat pattern: do NOT store in database from the push helper.
+  // The event will arrive through the regular sync triggered by oneShotSync(),
+  // which is more reliable for encrypted messages and room ordering.
   final event = await client.getEventByPushNotification(
     notification,
-    storeInDatabase: isBackgroundMessage,  // FIX #7: persist in background
+    storeInDatabase: false,
   );
 
   // ── Sync so the room moves to the top of the chat list immediately ──

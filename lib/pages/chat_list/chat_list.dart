@@ -279,7 +279,8 @@ class ChatListController extends State<ChatList>
     final now = DateTime.now();
     final client = Matrix.of(context).client;
     final currentRoomCount = client.rooms.length;
-    if (now.difference(_lastFilterCalc) < Duration(seconds: 2) &&
+    // Cache duration lowered: push notifications should appear immediately
+    if (now.difference(_lastFilterCalc) < const Duration(milliseconds: 500) &&
         _lastActiveFilter == activeFilter &&
         _lastVisibleBridgeTypes == visibleBridgeTypes &&
         _lastRoomCount == currentRoomCount) {
