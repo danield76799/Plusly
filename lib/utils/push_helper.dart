@@ -127,6 +127,11 @@ Future<void> _tryPushHelper(
   );
 
   // ── Sync so the room moves to the top of the chat list immediately ──
+  // In the background the normal sync loop is paused, so oneShotSync can stall.
+  // Temporarily enable background sync for background messages, then restore it.
+  if (isBackgroundMessage) {
+    client.backgroundSync = true;
+  }
   final awaitingOneShotSync = client.oneShotSync();
 
   l10n ??= await L10n.delegate.load(PlatformDispatcher.instance.locale);
@@ -332,6 +337,11 @@ Future<void> _tryPushHelper(
   // ── Await sync so chat list updates before we finish ──
   // FIX #4: await oneShotSync in normal path too, so room moves to top
   await awaitingOneShotSync;
+
+  // Restore previous background sync state if we changed it.
+  if (isBackgroundMessage) {
+    client.backgroundSync = false;
+  }
 
   // ── Summary notification (FluffyChat pattern) ──
   if (PlatformInfos.isAndroid) {
