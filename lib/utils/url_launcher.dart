@@ -350,7 +350,12 @@ class UrlLauncher {
 
   void openMatrixToUrl() async {
     final matrix = Matrix.of(context);
-    final url = this.url!.replaceFirst(
+    final rawUrl = url;
+    if (rawUrl == null) {
+      Logs().w('openMatrixToUrl called with null url');
+      return;
+    }
+    final matrixToUrl = rawUrl.replaceFirst(
       AppConfig.deepLinkPrefix,
       AppConfig.inviteLinkPrefix,
     );
@@ -358,14 +363,18 @@ class UrlLauncher {
     // The identifier might be a matrix.to url and needs escaping. Or, it might have multiple
     // identifiers (room id & event id), or it might also have a query part.
     // All this needs parsing.
+    final lastSegment = Uri.tryParse(matrixToUrl)?.pathSegments
+        .lastWhereOrNull((_) => true);
     final identityParts =
-        url.parseIdentifierIntoParts() ??
-        Uri.tryParse(url)?.host.parseIdentifierIntoParts() ??
-        Uri.tryParse(url)?.pathSegments
-            .lastWhereOrNull((_) => true)
-            ?.parseIdentifierIntoParts();
+        matrixToUrl.parseIdentifierIntoParts() ??
+        Uri.tryParse(matrixToUrl)?.host.parseIdentifierIntoParts() ??
+        lastSegment?.parseIdentifierIntoParts();
     if (identityParts == null) {
-      return; // no match, nothing to do
+      Logs().w('Could not parse matrix.to url: $matrixToUrl');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(L10n.of(context).cantOpenUri(matrixToUrl))),
+      );
+      return;
     }
     if (identityParts.primaryIdentifier.sigil == '#' ||
         identityParts.primaryIdentifier.sigil == '!') {

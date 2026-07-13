@@ -71,13 +71,14 @@
             </intent-filter>
 
             <!-- App can open https://matrix.to urls -->
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="https"
-                    android:host="matrix.to" />
+                    android:host="matrix.to"
+                    android:pathPattern="/.*" />
             </intent-filter>
 
             <!-- App can open matrix: uris -->
