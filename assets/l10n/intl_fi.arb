@@ -800,7 +800,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} kutsui sinut Pluslytiin.\n1. Viereaile sivulla: https://plusly.app ja asenna sovellus\n2. Rekisteröidy tai kirjaudu sisään\n3. Avaa kutsulinkki:\n{link}",
+  "inviteText": "{username} kutsui sinut Pluslytiin.\n1. Viereaile sivulla: https://plusly.im ja asenna sovellus\n2. Rekisteröidy tai kirjaudu sisään\n3. Avaa kutsulinkki:\n{link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

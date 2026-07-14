@@ -876,7 +876,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username}がPluslyにあなたを招待しました. \n1. Pluslyをインストールしてください: https://plusly.app \n2. 新しくアカウントを作成するかサインインしてください\n3. 招待リンクを開いてください: {link}",
+  "inviteText": "{username}がPluslyにあなたを招待しました. \n1. Pluslyをインストールしてください: https://plusly.im \n2. 新しくアカウントを作成するかサインインしてください\n3. 招待リンクを開いてください: {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

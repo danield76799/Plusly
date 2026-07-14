@@ -824,7 +824,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} har invitert deg til Plusly. \n1. Installer Plusly: https://plusly.app \n2. Registrer deg eller logg inn \n3. Åpne invitasjonslenken: {link}",
+  "inviteText": "{username} har invitert deg til Plusly. \n1. Installer Plusly: https://plusly.im \n2. Registrer deg eller logg inn \n3. Åpne invitasjonslenken: {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

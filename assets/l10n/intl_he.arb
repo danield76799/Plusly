@@ -735,7 +735,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} הזמין אותך ל-Plusly.\n1. התקן את Plusly: https://plusly.app\n2. הירשם או היכנס\n3. פתח את קישור ההזמנה: {link}",
+  "inviteText": "{username} הזמין אותך ל-Plusly.\n1. התקן את Plusly: https://plusly.im\n2. הירשם או היכנס\n3. פתח את קישור ההזמנה: {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

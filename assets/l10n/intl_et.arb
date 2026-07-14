@@ -998,7 +998,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} kutsus sind kasutama Matrix'i-põhist suhtlusrakendust Plusly. \n1. Ava plusly.app ja paigalda Plusly'i rakendus \n2. Liitu kasutajaks või logi sisse olemasoleva Matrix'i kasutajakontoga\n3. Ava kutse link: \n {link}",
+  "inviteText": "{username} kutsus sind kasutama Matrix'i-põhist suhtlusrakendust Plusly. \n1. Ava plusly.im ja paigalda Plusly'i rakendus \n2. Liitu kasutajaks või logi sisse olemasoleva Matrix'i kasutajakontoga\n3. Ava kutse link: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

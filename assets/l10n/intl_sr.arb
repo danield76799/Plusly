@@ -945,7 +945,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} вас позива у Plusly. \n1. Инсталирајте Plusly: https://plusly.app \n2. Региструјте се или пријавите \n3. Отворите везу позивнице: {link}",
+  "inviteText": "{username} вас позива у Plusly. \n1. Инсталирајте Plusly: https://plusly.im \n2. Региструјте се или пријавите \n3. Отворите везу позивнице: {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

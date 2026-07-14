@@ -766,7 +766,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} t'ha convidat a Plusly.\n1. Visita plusly.app i instaŀla l'app\n2. Registra't o inicia sessió\n3. Obre l'enllaç d'invitació:\n{link}",
+  "inviteText": "{username} t'ha convidat a Plusly.\n1. Visita plusly.im i instaŀla l'app\n2. Registra't o inicia sessió\n3. Obre l'enllaç d'invitació:\n{link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

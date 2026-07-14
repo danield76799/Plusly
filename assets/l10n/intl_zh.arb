@@ -965,7 +965,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} 邀请你使用 Plusly。 \n1. 安装 Plusly：https://plusly.app \n2. 注册或登录 \n3. 打开邀请链接：\n {link}",
+  "inviteText": "{username} 邀请你使用 Plusly。 \n1. 安装 Plusly：https://plusly.im \n2. 注册或登录 \n3. 打开邀请链接：\n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

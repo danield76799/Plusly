@@ -98,7 +98,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} mengundang kamu ke Plusly. \n1. Kunjungi plusly.app dan instal aplikasi\n2. Daftar atau masuk \n3. Buka tautan undangan: \n {link}",
+  "inviteText": "{username} mengundang kamu ke Plusly. \n1. Kunjungi plusly.im dan instal aplikasi\n2. Daftar atau masuk \n3. Buka tautan undangan: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

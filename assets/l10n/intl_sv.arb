@@ -811,7 +811,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} bjöd in dig till Plusly.\n1. Besök plusly.app och installera appen\n2. Registrera dig eller logga in\n3. Öppna inbjudningslänk:\n {link}",
+  "inviteText": "{username} bjöd in dig till Plusly.\n1. Besök plusly.im och installera appen\n2. Registrera dig eller logga in\n3. Öppna inbjudningslänk:\n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

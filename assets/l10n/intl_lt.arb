@@ -1842,7 +1842,7 @@
       }
     }
   },
-  "inviteText": "{username} pakvietė jus prisijungti prie Plusly. \n1. Įdiekite Plusly: https://plusly.app \n2. Prisiregistruokite arba prisijunkite \n3. Atidarykite pakvietimo nuorodą: {link}",
+  "inviteText": "{username} pakvietė jus prisijungti prie Plusly. \n1. Įdiekite Plusly: https://plusly.im \n2. Prisiregistruokite arba prisijunkite \n3. Atidarykite pakvietimo nuorodą: {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

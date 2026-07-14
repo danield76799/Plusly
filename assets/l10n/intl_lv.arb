@@ -714,7 +714,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} uzaicināja pievienoties Plusly.\n1. Jāapmeklē plusly.app un jāuzstāda lietotne \n2. Jāizveido konts vai jāpiesakās \n3. Jāatver uzaicinājuma saite: \n {link}",
+  "inviteText": "{username} uzaicināja pievienoties Plusly.\n1. Jāapmeklē plusly.im un jāuzstāda lietotne \n2. Jāizveido konts vai jāpiesakās \n3. Jāatver uzaicinājuma saite: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

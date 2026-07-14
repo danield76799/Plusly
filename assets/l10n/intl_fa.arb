@@ -1640,7 +1640,7 @@
   },
   "serverRequiresEmail": "برای ثبت‌نام، این سرور باید آدرس ایمیل شما را تایید کند.",
   "@serverRequiresEmail": {},
-  "inviteText": "{username} شما را به فلافی‌چت دعوت کرد.\n۱. به plusly.app مراجعه کرده و کاره را نصب کنید\n۲. ثبت نام کنید یا وارد شوید.\n۳. لینک دعوت را باز کنید:\n {link}",
+  "inviteText": "{username} شما را به فلافی‌چت دعوت کرد.\n۱. به plusly.im مراجعه کرده و کاره را نصب کنید\n۲. ثبت نام کنید یا وارد شوید.\n۳. لینک دعوت را باز کنید:\n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

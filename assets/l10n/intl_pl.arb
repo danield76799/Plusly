@@ -890,7 +890,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} zaprosił/-a Cię do Plusly.\n1. Odwiedź plusly.app i zainstaluj aplikację\n2. Zarejestuj się lub zaloguj\n3. Otwórz link zaproszenia:\n{link}",
+  "inviteText": "{username} zaprosił/-a Cię do Plusly.\n1. Odwiedź plusly.im i zainstaluj aplikację\n2. Zarejestuj się lub zaloguj\n3. Otwórz link zaproszenia:\n{link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

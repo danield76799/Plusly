@@ -979,7 +979,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} te je pozvao/la u Plusly. \n1. Posjeti strnicu plusly.app i instaliraj aplikaciju \n2. Registriraj ili prijavi se \n3. Otvori poveznicu poziva: \n {link}",
+  "inviteText": "{username} te je pozvao/la u Plusly. \n1. Posjeti strnicu plusly.im i instaliraj aplikaciju \n2. Registriraj ili prijavi se \n3. Otvori poveznicu poziva: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

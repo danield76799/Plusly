@@ -997,7 +997,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} hat Dich zu Extera eingeladen. \n1. Gehe auf plusly.app und installiere die App \n2. Melde Dich in der App an \n3. Öffne den Einladungslink: \n {link}",
+  "inviteText": "{username} hat Dich zu Extera eingeladen. \n1. Gehe auf plusly.im und installiere die App \n2. Melde Dich in der App an \n3. Öffne den Einladungslink: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

@@ -680,7 +680,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} meghívott a Plusly-be.\n1. Keresse fel a plusly.app oldalt, és telepítse az alkalmazást \n2. Regisztráljon vagy jelentkezzen be \n3. Nyissa meg a meghívó linket: \n {link}",
+  "inviteText": "{username} meghívott a Plusly-be.\n1. Keresse fel a plusly.im oldalt, és telepítse az alkalmazást \n2. Regisztráljon vagy jelentkezzen be \n3. Nyissa meg a meghívó linket: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

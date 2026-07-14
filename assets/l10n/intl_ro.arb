@@ -977,7 +977,7 @@
       }
     }
   },
-  "inviteText": "{username} v-a invitat la Plusly.\n1. Instalați Plusly: https://plusly.app\n2. Înregistrați-vă sau conectați-vă\n3. Deschideți invitația: {link}",
+  "inviteText": "{username} v-a invitat la Plusly.\n1. Instalați Plusly: https://plusly.im\n2. Înregistrați-vă sau conectați-vă\n3. Deschideți invitația: {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

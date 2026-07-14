@@ -868,7 +868,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} ti ha invitato/a a Plusly.\n1. Visita plusly.app e installa l'applicazione\n2. Iscriviti o accedi\n3. Apri il collegamento di invito: \n {link}",
+  "inviteText": "{username} ti ha invitato/a a Plusly.\n1. Visita plusly.im e installa l'applicazione\n2. Iscriviti o accedi\n3. Apri il collegamento di invito: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

@@ -1288,7 +1288,7 @@
   },
   "scanQrCode": "Scan cód QR",
   "@scanQrCode": {},
-  "inviteText": "Thug {username} cuireadh duit chuig Plusly.\n1. Tabhair cuairt ar plusly.app agus a shuiteáil an app\n2. Cláraigh nó sínigh isteach\n3. Oscail an nasc cuirí:\n {link}",
+  "inviteText": "Thug {username} cuireadh duit chuig Plusly.\n1. Tabhair cuairt ar plusly.im agus a shuiteáil an app\n2. Cláraigh nó sínigh isteach\n3. Oscail an nasc cuirí:\n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

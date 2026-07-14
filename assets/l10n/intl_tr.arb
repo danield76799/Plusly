@@ -1002,7 +1002,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} sizi Plusly'e davet etti.\n1. plusly.app adresini ziyaret edin ve uygulamayı kurun \n2. Kaydolun veya oturum açın \n3. Davet bağlantısını açın: \n {link}",
+  "inviteText": "{username} sizi Plusly'e davet etti.\n1. plusly.im adresini ziyaret edin ve uygulamayı kurun \n2. Kaydolun veya oturum açın \n3. Davet bağlantısını açın: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

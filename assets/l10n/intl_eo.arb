@@ -987,7 +987,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} invitis vin al Plusly. \n1. Instalu la aplikaĵon Plusly: https://plusly.app \n2. Registriĝu aŭ salutu \n3. Malfermu la invitan ligilon: {link}",
+  "inviteText": "{username} invitis vin al Plusly. \n1. Instalu la aplikaĵon Plusly: https://plusly.im \n2. Registriĝu aŭ salutu \n3. Malfermu la invitan ligilon: {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

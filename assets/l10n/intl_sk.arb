@@ -617,7 +617,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} vás pozval na Plusly.\n1. Nainštalujte si Plusly: https://plusly.app\n2. Zaregistrujte sa alebo sa prihláste\n3. Otvorte odkaz na pozvánku: {link}",
+  "inviteText": "{username} vás pozval na Plusly.\n1. Nainštalujte si Plusly: https://plusly.im\n2. Zaregistrujte sa alebo sa prihláste\n3. Otvorte odkaz na pozvánku: {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

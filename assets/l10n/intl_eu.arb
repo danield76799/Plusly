@@ -635,7 +635,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username}(e)k Pluslyera gonbidatu zaitu.\n1. Bisitatu https://plusly.app eta instalatu aplikazioa\n2. Eman izena edo hasi saioa\n3. Ireki gonbidapen-esteka:\n{link}",
+  "inviteText": "{username}(e)k Pluslyera gonbidatu zaitu.\n1. Bisitatu https://plusly.im eta instalatu aplikazioa\n2. Eman izena edo hasi saioa\n3. Ireki gonbidapen-esteka:\n{link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

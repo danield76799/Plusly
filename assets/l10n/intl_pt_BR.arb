@@ -997,7 +997,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} convidou você para o Plusly. \n1. Visite plusly.app e instale o aplicativo\n2. Entre ou crie uma conta \n3. Abra o link do convite:\n {link}",
+  "inviteText": "{username} convidou você para o Plusly. \n1. Visite plusly.im e instale o aplicativo\n2. Entre ou crie uma conta \n3. Abra o link do convite:\n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

@@ -1004,7 +1004,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} heeft je uitgenodigd voor Plusly.\n1. Bezoek https://plusly.app en installeer de app\n2. Registreer of log in\n3. Open deze uitnodigingslink:\n{link}",
+  "inviteText": "{username} heeft je uitgenodigd voor Plusly.\n1. Bezoek https://plusly.im en installeer de app\n2. Registreer of log in\n3. Open deze uitnodigingslink:\n{link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

@@ -1872,7 +1872,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username}님이 당신을 Plusly에 초대했습니다.\n1. Plusly 설치: https://plusly.app \n2. 가입하거나 로그인 \n3. 초대 링크 열기: \n {link}",
+  "inviteText": "{username}님이 당신을 Plusly에 초대했습니다.\n1. Plusly 설치: https://plusly.im \n2. 가입하거나 로그인 \n3. 초대 링크 열기: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

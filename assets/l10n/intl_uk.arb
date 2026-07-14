@@ -635,7 +635,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} запрошує вас у Plusly. \n1. Перейдіть на plusly.app й установіть застосунок \n2. Зареєструйтесь або ввійдіть \n3. Відкрийте запрошувальне посилання:\n {link}",
+  "inviteText": "{username} запрошує вас у Plusly. \n1. Перейдіть на plusly.im й установіть застосунок \n2. Зареєструйтесь або ввійдіть \n3. Відкрийте запрошувальне посилання:\n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
