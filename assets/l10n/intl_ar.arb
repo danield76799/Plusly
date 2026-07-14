@@ -528,7 +528,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "فلافي-شات",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -650,7 +650,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "دعاك {username} إلى Extera.\n1. قم بزيارة موقع fluffychat.im وقم بتثبيت التطبيق\n2. قم بإنشاءحساب أو تسجيل الدخول\n3. افتح رابط الدعوة:\n {link}",
+  "inviteText": "دعاك {username} إلى Extera.\n1. قم بزيارة موقع plusly.app وقم بتثبيت التطبيق\n2. قم بإنشاءحساب أو تسجيل الدخول\n3. افتح رابط الدعوة:\n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {

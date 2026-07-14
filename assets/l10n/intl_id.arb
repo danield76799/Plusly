@@ -98,7 +98,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} mengundang kamu ke FluffyChat. \n1. Kunjungi fluffychat.im dan instal aplikasi\n2. Daftar atau masuk \n3. Buka tautan undangan: \n {link}",
+  "inviteText": "{username} mengundang kamu ke Plusly. \n1. Kunjungi plusly.app dan instal aplikasi\n2. Daftar atau masuk \n3. Buka tautan undangan: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -247,7 +247,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -991,7 +991,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Pesan baru di FluffyChat",
+  "newMessageInFluffyChat": "💬 Pesan baru di Plusly",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1399,7 +1399,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2344,7 +2344,7 @@
   "@hydrate": {},
   "indexedDbErrorTitle": "Masalah dengan mode privat",
   "@indexedDbErrorTitle": {},
-  "indexedDbErrorLong": "Penyimpanan pesan sayangnya tidak diaktifkan dalam mode privat secara default.\nMohon kunjungi\n- about:config\n- tetapkan dom.indexedDB.privateBrowsing.enabled ke true\nJika tidak ditetapkan, FluffyChat tidak akan dapat dijalankan.",
+  "indexedDbErrorLong": "Penyimpanan pesan sayangnya tidak diaktifkan dalam mode privat secara default.\nMohon kunjungi\n- about:config\n- tetapkan dom.indexedDB.privateBrowsing.enabled ke true\nJika tidak ditetapkan, Plusly tidak akan dapat dijalankan.",
   "@indexedDbErrorLong": {},
   "dehydrate": "Ekspor sesi dan bersihkan perangkat",
   "@dehydrate": {},
@@ -2379,9 +2379,9 @@
   "@commandHint_markasgroup": {},
   "screenSharingTitle": "membagikan layar",
   "@screenSharingTitle": {},
-  "appearOnTopDetails": "Memperbolehkan aplikasi untuk ditampilkan di atas (tidak dibutuhkan jika kamu memiliki FluffyChat ditetapkan sebagai akun pemanggilan)",
+  "appearOnTopDetails": "Memperbolehkan aplikasi untuk ditampilkan di atas (tidak dibutuhkan jika kamu memiliki Plusly ditetapkan sebagai akun pemanggilan)",
   "@appearOnTopDetails": {},
-  "callingAccountDetails": "Memperbolehkan FluffyChat untuk menggunakan aplikasi penelepon Android bawaan.",
+  "callingAccountDetails": "Memperbolehkan Plusly untuk menggunakan aplikasi penelepon Android bawaan.",
   "@callingAccountDetails": {},
   "noKeyForThisMessage": "Hal ini bisa terjadi jika pesan dikirim sebelum kamu masuk ke akunmu di perangkat ini.\n\nMungkin juga pengirim telah memblokir perangkatmu atau ada yang tidak beres dengan koneksi internet.\n\nApakah kamu bisa membaca pesan pada sesi lain? Maka kamu bisa mentransfer pesan dari sesi tersebut! Buka Pengaturan > Perangkat dan pastikan bahwa perangkat Anda telah ditandatangani secara silang. Ketika kamu membuka ruangan di lain waktu dan kedua sesi berada di latar depan, kunci akan ditransmisikan secara otomatis.\n\nApakah kamu tidak mau kehilangan kunci saat keluar atau berpindah perangkat? Pastikan bahwa kamu telah mengaktifkan cadangan obrolan dalam pengaturan.",
   "@noKeyForThisMessage": {},
@@ -2393,7 +2393,7 @@
   "@appearOnTop": {},
   "callingAccount": "Akun pemanggilan",
   "@callingAccount": {},
-  "otherCallingPermissions": "Mikrofon, kamera dan perizinan FluffyChat lainnya",
+  "otherCallingPermissions": "Mikrofon, kamera dan perizinan Plusly lainnya",
   "@otherCallingPermissions": {},
   "whyIsThisMessageEncrypted": "Mengapa pesan ini tidak bisa dibaca?",
   "@whyIsThisMessageEncrypted": {},
@@ -2407,7 +2407,7 @@
   "@enterRoom": {},
   "allSpaces": "Semua space",
   "@allSpaces": {},
-  "screenSharingDetail": "Kamu membagikan layarmu di FluffyChat",
+  "screenSharingDetail": "Kamu membagikan layarmu di Plusly",
   "@screenSharingDetail": {},
   "numChats": "{number} obrolan",
   "@numChats": {
@@ -3120,7 +3120,7 @@
   "@oneOfYourDevicesIsNotVerified": {},
   "noticeChatBackupDeviceVerification": "Catatan: Ketika Anda menghubungkan semua perangkat Anda ke cadangan chat, mereka akan diverifikasi secara otomatis.",
   "@noticeChatBackupDeviceVerification": {},
-  "welcomeText": "Halo 👋 Ini FluffyChat. Kamu bisa masuk ke homeserver mana pun, yang kompatibel dengan https://matrix.org. Lalu, chat dengan siapa pun. Ini merupakan jaringan perpesanan besar yang terdesentralisasi!",
+  "welcomeText": "Halo 👋 Ini Plusly. Kamu bisa masuk ke homeserver mana pun, yang kompatibel dengan https://matrix.org. Lalu, chat dengan siapa pun. Ini merupakan jaringan perpesanan besar yang terdesentralisasi!",
   "@welcomeText": {},
   "continueText": "Lanjutkan",
   "@continueText": {},
@@ -3295,7 +3295,7 @@
   "@crossVerifiedDevices": {},
   "waitingForServer": "Menunggu server...",
   "@waitingForServer": {},
-  "appIntroduction": "FluffyChat memungkinkanmu untuk mengobrol dengan teman-temanmu di berbagai perpesanan. Pelajari lebih lanjut di https://matrix.org atau ketuk *Lanjutkan* saja.",
+  "appIntroduction": "Plusly memungkinkanmu untuk mengobrol dengan teman-temanmu di berbagai perpesanan. Pelajari lebih lanjut di https://matrix.org atau ketuk *Lanjutkan* saja.",
   "@appIntroduction": {},
   "notificationRuleContainsDisplayNameDescription": "Memberi tahu pengguna ketika pesan berisi nama tampilannya.",
   "@notificationRuleContainsDisplayNameDescription": {},

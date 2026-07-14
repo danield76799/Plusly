@@ -518,7 +518,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Extera",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -635,7 +635,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username}(e)k FluffyChatera gonbidatu zaitu.\n1. Bisitatu https://fluffychat.im eta instalatu aplikazioa\n2. Eman izena edo hasi saioa\n3. Ireki gonbidapen-esteka:\n{link}",
+  "inviteText": "{username}(e)k Pluslyera gonbidatu zaitu.\n1. Bisitatu https://plusly.app eta instalatu aplikazioa\n2. Eman izena edo hasi saioa\n3. Ireki gonbidapen-esteka:\n{link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -777,7 +777,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Mezu berria FluffyChaten",
+  "newMessageInFluffyChat": "💬 Mezu berria Pluslyen",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -2381,7 +2381,7 @@
   "@appearOnTopDetails": {},
   "screenSharingTitle": "pantaila-partekatzea",
   "@screenSharingTitle": {},
-  "screenSharingDetail": "Pantaila FluffyChaten partekatzen ari zara",
+  "screenSharingDetail": "Pantaila Pluslyen partekatzen ari zara",
   "@screenSharingDetail": {},
   "callingPermissions": "Deitzeko baimenak",
   "@callingPermissions": {},
@@ -2391,7 +2391,7 @@
   "@callingAccountDetails": {},
   "appearOnTop": "Gainean erakutsi",
   "@appearOnTop": {},
-  "otherCallingPermissions": "Mikrofono, kamera eta FluffyChaten beste baimen batzuk",
+  "otherCallingPermissions": "Mikrofono, kamera eta Pluslyen beste baimen batzuk",
   "@otherCallingPermissions": {},
   "numChats": "{number} txat",
   "@numChats": {
@@ -3228,7 +3228,7 @@
   "@otherNotificationSettings": {},
   "waitingForServer": "Zerbitzariaren zain…",
   "@waitingForServer": {},
-  "appIntroduction": "FluffyChatek mezularitza-programa desberdinak erabiltzen dituzten lagunekin txateatzea ahalbidetzen dizu. Ikasi gehiago https://matrix.org estekan edo sakatu *Jarraitu*.",
+  "appIntroduction": "Pluslyek mezularitza-programa desberdinak erabiltzen dituzten lagunekin txateatzea ahalbidetzen dizu. Ikasi gehiago https://matrix.org estekan edo sakatu *Jarraitu*.",
   "@appIntroduction": {},
   "synchronizingPleaseWaitCounter": " Sinkronizatzen… (%{percentage})",
   "@synchronizingPleaseWaitCounter": {

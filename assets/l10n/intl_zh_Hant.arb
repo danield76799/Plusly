@@ -691,7 +691,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -858,7 +858,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} 邀請您使用 FluffyChat\n1. 安裝 FluffyChat：https://fluffychat.im\n2. 登入或註冊\n3. 打開該邀請網址：\n{link}",
+  "inviteText": "{username} 邀請您使用 Plusly\n1. 安裝 Plusly：https://plusly.app\n2. 登入或註冊\n3. 打開該邀請網址：\n{link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1020,7 +1020,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 來自 FluffyChat 的新訊息",
+  "newMessageInFluffyChat": "💬 來自 Plusly 的新訊息",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1055,7 +1055,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "noGoogleServicesWarning": "您手機上沒有安裝 Google 服務框架。這或許對於保護您的隱私而言是個好事！但為了收到 FluffyChat 的推播通知，我們建議您使用 https://microg.org 或 https://unifiedpush.org。",
+  "noGoogleServicesWarning": "您手機上沒有安裝 Google 服務框架。這或許對於保護您的隱私而言是個好事！但為了收到 Plusly 的推播通知，我們建議您使用 https://microg.org 或 https://unifiedpush.org。",
   "@noGoogleServicesWarning": {
     "type": "String",
     "placeholders": {}
@@ -1541,7 +1541,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2141,7 +2141,7 @@
   },
   "unlockOldMessages": "解鎖舊消息",
   "@unlockOldMessages": {},
-  "callingAccountDetails": "允許 FluffyChat 使用原生 Android 撥號應用程式。",
+  "callingAccountDetails": "允許 Plusly 使用原生 Android 撥號應用程式。",
   "@callingAccountDetails": {},
   "noOtherDevicesFound": "未找到其他裝置",
   "@noOtherDevicesFound": {},
@@ -2238,7 +2238,7 @@
   "@enterRoom": {},
   "allSpaces": "所有空間",
   "@allSpaces": {},
-  "indexedDbErrorLong": "預設情況下，私密模式不啟用消息存儲。\n請訪問\n - about:config\n - 將 dom.indexedDB.privateBrowsing.enabled 設定為 true\n否則，無法運行 FluffyChat。",
+  "indexedDbErrorLong": "預設情況下，私密模式不啟用消息存儲。\n請訪問\n - about:config\n - 將 dom.indexedDB.privateBrowsing.enabled 設定為 true\n否則，無法運行 Plusly。",
   "@indexedDbErrorLong": {},
   "youKickedAndBanned": "🙅 您踢出並封鎖了 {user}",
   "@youKickedAndBanned": {
@@ -2744,7 +2744,7 @@
       }
     }
   },
-  "otherCallingPermissions": "麥克風、相機和其他 FluffyChat 權限",
+  "otherCallingPermissions": "麥克風、相機和其他 Plusly 權限",
   "@otherCallingPermissions": {},
   "disableEncryptionWarning": "出於安全原因，您不能在之前已加密的聊天室中停用加密。",
   "@disableEncryptionWarning": {},
@@ -3142,7 +3142,7 @@
       }
     }
   },
-  "welcomeText": "嘿，嘿👋這是FluffyChat。 您可以登入任何與https://matrix.org相容的歸屬伺服器後和任何人聊天。 這是一個巨大的去中心化訊息網路！",
+  "welcomeText": "嘿，嘿👋這是Plusly。 您可以登入任何與https://matrix.org相容的歸屬伺服器後和任何人聊天。 這是一個巨大的去中心化訊息網路！",
   "@welcomeText": {},
   "setWallpaper": "設定背景樣式",
   "@setWallpaper": {},
@@ -3240,7 +3240,7 @@
   "@open": {},
   "waitingForServer": "等待伺服器中...",
   "@waitingForServer": {},
-  "appIntroduction": "FluffyChat 讓你和你的朋友跨越工具聊天。在 https://matrix.org 了解更多或*繼續*。",
+  "appIntroduction": "Plusly 讓你和你的朋友跨越工具聊天。在 https://matrix.org 了解更多或*繼續*。",
   "@appIntroduction": {},
   "previous": "上一個",
   "@previous": {},

@@ -773,7 +773,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -945,7 +945,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} вас позива у FluffyChat. \n1. Инсталирајте FluffyChat: https://fluffychat.im \n2. Региструјте се или пријавите \n3. Отворите везу позивнице: {link}",
+  "inviteText": "{username} вас позива у Plusly. \n1. Инсталирајте Plusly: https://plusly.app \n2. Региструјте се или пријавите \n3. Отворите везу позивнице: {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1107,7 +1107,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "Нова порука — FluffyChat",
+  "newMessageInFluffyChat": "Нова порука — Plusly",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1142,7 +1142,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "noGoogleServicesWarning": "Чини се да немате Гугл услуге на телефону. То је добра одлука за вашу приватност! Да би се протурале нотификације у FluffyChat, препоручујемо коришћење https://microg.org/ или https://unifiedpush.org/",
+  "noGoogleServicesWarning": "Чини се да немате Гугл услуге на телефону. То је добра одлука за вашу приватност! Да би се протурале нотификације у Plusly, препоручујемо коришћење https://microg.org/ или https://unifiedpush.org/",
   "@noGoogleServicesWarning": {
     "type": "String",
     "placeholders": {}
@@ -1678,7 +1678,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",

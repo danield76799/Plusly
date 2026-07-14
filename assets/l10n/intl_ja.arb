@@ -704,7 +704,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -876,7 +876,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username}がFluffyChatにあなたを招待しました. \n1. FluffyChatをインストールしてください: https://fluffychat.im \n2. 新しくアカウントを作成するかサインインしてください\n3. 招待リンクを開いてください: {link}",
+  "inviteText": "{username}がPluslyにあなたを招待しました. \n1. Pluslyをインストールしてください: https://plusly.app \n2. 新しくアカウントを作成するかサインインしてください\n3. 招待リンクを開いてください: {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1038,7 +1038,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 FluffyChatに新しいメッセージがあります",
+  "newMessageInFluffyChat": "💬 Pluslyに新しいメッセージがあります",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1579,7 +1579,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2202,7 +2202,7 @@
   "@storeSecurlyOnThisDevice": {},
   "whyIsThisMessageEncrypted": "このメッセージが読めない理由",
   "@whyIsThisMessageEncrypted": {},
-  "otherCallingPermissions": "マイク、カメラ、その他FluffyChatの権限",
+  "otherCallingPermissions": "マイク、カメラ、その他Pluslyの権限",
   "@otherCallingPermissions": {},
   "appearOnTopDetails": "アプリをトップに表示できるようにする（すでに通話アカウントとしてFluffychatを設定している場合は必要ありません）",
   "@appearOnTopDetails": {},

@@ -830,7 +830,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -1002,7 +1002,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} sizi FluffyChat'e davet etti.\n1. fluffychat.im adresini ziyaret edin ve uygulamayı kurun \n2. Kaydolun veya oturum açın \n3. Davet bağlantısını açın: \n {link}",
+  "inviteText": "{username} sizi Plusly'e davet etti.\n1. plusly.app adresini ziyaret edin ve uygulamayı kurun \n2. Kaydolun veya oturum açın \n3. Davet bağlantısını açın: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1174,7 +1174,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 FluffyChat'te yeni mesaj",
+  "newMessageInFluffyChat": "💬 Plusly'te yeni mesaj",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1801,7 +1801,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2357,7 +2357,7 @@
   "@dehydrateWarning": {},
   "hydrateTorLong": "TOR'da en son oturumunuzu dışa aktardınız mı? Hızlıca içe aktarın ve sohbete devam edin.",
   "@hydrateTorLong": {},
-  "indexedDbErrorLong": "Mesaj saklama özelliği ne yazık ki öntanımlı olarak gizli modda etkin değildir.\nLütfen\n - about:config sayfasına gidin ve\n - dom.indexedDB.privateBrowsing.enabled seçeneğini true olarak ayarlayın\nAksi takdirde FluffyChat çalıştırılamaz.",
+  "indexedDbErrorLong": "Mesaj saklama özelliği ne yazık ki öntanımlı olarak gizli modda etkin değildir.\nLütfen\n - about:config sayfasına gidin ve\n - dom.indexedDB.privateBrowsing.enabled seçeneğini true olarak ayarlayın\nAksi takdirde Plusly çalıştırılamaz.",
   "@indexedDbErrorLong": {},
   "user": "Kullanıcı",
   "@user": {},
@@ -2386,7 +2386,7 @@
   "@screenSharingTitle": {},
   "callingPermissions": "Arama izinleri",
   "@callingPermissions": {},
-  "callingAccountDetails": "FluffyChat'in yerel android telefon uygulamasını kullanmasına izin verir.",
+  "callingAccountDetails": "Plusly'in yerel android telefon uygulamasını kullanmasına izin verir.",
   "@callingAccountDetails": {},
   "appearOnTop": "Üstte görün",
   "@appearOnTop": {},
@@ -2396,7 +2396,7 @@
   "@enterRoom": {},
   "allSpaces": "Tüm alanlar",
   "@allSpaces": {},
-  "otherCallingPermissions": "Mikrofon, kamera ve diğer FluffyChat izinleri",
+  "otherCallingPermissions": "Mikrofon, kamera ve diğer Plusly izinleri",
   "@otherCallingPermissions": {},
   "foregroundServiceRunning": "Bu bildirim, ön plan hizmeti çalışırken görünür.",
   "@foregroundServiceRunning": {},
@@ -3181,7 +3181,7 @@
       }
     }
   },
-  "welcomeText": "Hey Hey 👋 Karşınızda FluffyChat. https://matrix.org ile uyumlu herhangi bir homeserver'a giriş yapabilirsiniz. Ve herkesle konuşabilirsiniz. Bu koca bir merkeziyetsiz mesajlaşma ağı!",
+  "welcomeText": "Hey Hey 👋 Karşınızda Plusly. https://matrix.org ile uyumlu herhangi bir homeserver'a giriş yapabilirsiniz. Ve herkesle konuşabilirsiniz. Bu koca bir merkeziyetsiz mesajlaşma ağı!",
   "@welcomeText": {},
   "registerPushNotifications": "Register push notifications",
   "registerPushSubtitle": "Manually re-register push notifications",

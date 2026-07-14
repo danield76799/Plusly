@@ -696,7 +696,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -868,7 +868,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} ti ha invitato/a a FluffyChat.\n1. Visita fluffychat.im e installa l'applicazione\n2. Iscriviti o accedi\n3. Apri il collegamento di invito: \n {link}",
+  "inviteText": "{username} ti ha invitato/a a Plusly.\n1. Visita plusly.app e installa l'applicazione\n2. Iscriviti o accedi\n3. Apri il collegamento di invito: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1030,7 +1030,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Nuovo messaggio in FluffyChat",
+  "newMessageInFluffyChat": "💬 Nuovo messaggio in Plusly",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1561,7 +1561,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2033,7 +2033,7 @@
   "@widgetJitsi": {},
   "messageType": "Tipo del Messaggio",
   "@messageType": {},
-  "indexedDbErrorLong": "Sfortunatamente l'archiviazione dei messaggi non è abilitata in modalità privata per impostazione predefinita.\nPer favore visita\n - about:config\n - imposta dom.indexedDB.privateBrowsing.enabled su true\nAltrimenti, non è possibile eseguire FluffyChat.",
+  "indexedDbErrorLong": "Sfortunatamente l'archiviazione dei messaggi non è abilitata in modalità privata per impostazione predefinita.\nPer favore visita\n - about:config\n - imposta dom.indexedDB.privateBrowsing.enabled su true\nAltrimenti, non è possibile eseguire Plusly.",
   "@indexedDbErrorLong": {},
   "oneClientLoggedOut": "Uno dei tuoi client è stato disconnesso",
   "@oneClientLoggedOut": {},
@@ -2112,7 +2112,7 @@
   "@sendOnEnter": {},
   "youRejectedTheInvitation": "Hai rifiutato l'invito",
   "@youRejectedTheInvitation": {},
-  "otherCallingPermissions": "Microfono, fotocamera e altri permessi di FluffyChat",
+  "otherCallingPermissions": "Microfono, fotocamera e altri permessi di Plusly",
   "@otherCallingPermissions": {},
   "messagesStyle": "Messaggi:",
   "@messagesStyle": {},
@@ -2124,7 +2124,7 @@
   "@newSpaceDescription": {},
   "chatDescription": "Descrizione della chat",
   "@chatDescription": {},
-  "callingAccountDetails": "Dai l'autorizzazione a FluffyChat di usare l'app di composizione Android nativa.",
+  "callingAccountDetails": "Dai l'autorizzazione a Plusly di usare l'app di composizione Android nativa.",
   "@callingAccountDetails": {},
   "enterSpace": "Unirsi allo spazio",
   "@enterSpace": {},
@@ -3133,7 +3133,7 @@
   },
   "continueText": "Continua",
   "@continueText": {},
-  "welcomeText": "Hey Hey 👋 Questa è FluffyChat. Puoi accedere a qualsiasi homeserver compatibile con https://matrix.org. E poi chattare con chiunque. È un'enorme rete di messaggistica decentralizzata!",
+  "welcomeText": "Hey Hey 👋 Questa è Plusly. Puoi accedere a qualsiasi homeserver compatibile con https://matrix.org. E poi chattare con chiunque. È un'enorme rete di messaggistica decentralizzata!",
   "@welcomeText": {},
   "blur": "Sfocatura:",
   "@blur": {},
@@ -3306,7 +3306,7 @@
   "@open": {},
   "appWantsToUseForLoginDescription": "Con la presente consenti all'app e al sito web di condividere informazioni su di te.",
   "@appWantsToUseForLoginDescription": {},
-  "appIntroduction": "FluffyChat ti consente di chattare con i tuoi amici attraverso diverse app di messaggistica. Ulteriori informazioni su https://matrix.org o semplicemente tocca *Continua*.",
+  "appIntroduction": "Plusly ti consente di chattare con i tuoi amici attraverso diverse app di messaggistica. Ulteriori informazioni su https://matrix.org o semplicemente tocca *Continua*.",
   "@appIntroduction": {},
   "waitingForServer": "In attesa del server...",
   "@waitingForServer": {},

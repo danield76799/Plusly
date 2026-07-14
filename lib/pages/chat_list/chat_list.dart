@@ -386,7 +386,7 @@ class ChatListController extends State<ChatList>
 
   bool isSearching = false;
   SearchScope searchScope = SearchScope.local;
-  static const String _serverStoreNamespace = 'im.fluffychat.search.server';
+  static const String _serverStoreNamespace = 'com.danield.plusly.search.server';
 
   void triggerSearch() => _search();
 

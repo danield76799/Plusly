@@ -649,7 +649,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -811,7 +811,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} bjöd in dig till FluffyChat.\n1. Besök fluffychat.im och installera appen\n2. Registrera dig eller logga in\n3. Öppna inbjudningslänk:\n {link}",
+  "inviteText": "{username} bjöd in dig till Plusly.\n1. Besök plusly.app och installera appen\n2. Registrera dig eller logga in\n3. Öppna inbjudningslänk:\n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -973,7 +973,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Nya meddelanden i FluffyChat",
+  "newMessageInFluffyChat": "💬 Nya meddelanden i Plusly",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1003,7 +1003,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "noGoogleServicesWarning": "De ser ut som att du inte har google-tjänster på din telefon. Det är ett bra beslut för din integritet! För att få aviseringar i FluffyChat rekommenderar vi att använda https://microg.org/ eller https://unifiedpush.org/ .",
+  "noGoogleServicesWarning": "De ser ut som att du inte har google-tjänster på din telefon. Det är ett bra beslut för din integritet! För att få aviseringar i Plusly rekommenderar vi att använda https://microg.org/ eller https://unifiedpush.org/ .",
   "@noGoogleServicesWarning": {
     "type": "String",
     "placeholders": {}
@@ -1484,7 +1484,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2351,7 +2351,7 @@
   "@commandHint_markasdm": {},
   "user": "Användare",
   "@user": {},
-  "indexedDbErrorLong": "Meddelandelagring är tyvärr inte aktiverat i privat läge som standard.\nGå till\n - about:config\n - sätt dom.indexedDB.privateBrowsing.enabled till true\nAnnars går det inte att använda FluffyChat.",
+  "indexedDbErrorLong": "Meddelandelagring är tyvärr inte aktiverat i privat läge som standard.\nGå till\n - about:config\n - sätt dom.indexedDB.privateBrowsing.enabled till true\nAnnars går det inte att använda Plusly.",
   "@indexedDbErrorLong": {},
   "storeInSecureStorageDescription": "Lagra återställningsnyckeln på säker plats på denna enhet.",
   "@storeInSecureStorageDescription": {},
@@ -2398,7 +2398,7 @@
   },
   "hydrate": "Återställ från säkerhetskopia",
   "@hydrate": {},
-  "screenSharingDetail": "Du delar din skärm i FluffyChat",
+  "screenSharingDetail": "Du delar din skärm i Plusly",
   "@screenSharingDetail": {},
   "youRejectedTheInvitation": "Du avvisade inbjudan",
   "@youRejectedTheInvitation": {},
@@ -2442,13 +2442,13 @@
   "@callingPermissions": {},
   "callingAccount": "Samtalskonto",
   "@callingAccount": {},
-  "callingAccountDetails": "Tillåt FluffyChat att använda Androids ring-app.",
+  "callingAccountDetails": "Tillåt Plusly att använda Androids ring-app.",
   "@callingAccountDetails": {},
   "appearOnTop": "Visa ovanpå",
   "@appearOnTop": {},
-  "appearOnTopDetails": "Tillåt att appen visas ovanpå (behövs inte om du redan har FluffyChat konfigurerat som ett samtalskonto)",
+  "appearOnTopDetails": "Tillåt att appen visas ovanpå (behövs inte om du redan har Plusly konfigurerat som ett samtalskonto)",
   "@appearOnTopDetails": {},
-  "otherCallingPermissions": "Mikrofon, kamera och andra behörigheter för FluffyChat",
+  "otherCallingPermissions": "Mikrofon, kamera och andra behörigheter för Plusly",
   "@otherCallingPermissions": {},
   "whyIsThisMessageEncrypted": "Varför kan inte detta meddelande läsas?",
   "@whyIsThisMessageEncrypted": {},

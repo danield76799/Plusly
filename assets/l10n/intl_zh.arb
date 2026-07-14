@@ -793,7 +793,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -965,7 +965,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} 邀请你使用 FluffyChat。 \n1. 安装 FluffyChat：https://fluffychat.im \n2. 注册或登录 \n3. 打开邀请链接：\n {link}",
+  "inviteText": "{username} 邀请你使用 Plusly。 \n1. 安装 Plusly：https://plusly.app \n2. 注册或登录 \n3. 打开邀请链接：\n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1127,7 +1127,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 FluffyChat 新消息",
+  "newMessageInFluffyChat": "💬 Plusly 新消息",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1162,7 +1162,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "noGoogleServicesWarning": "看起来你手机上没有 Firebase Cloud Messaging。如果仍希望接收 FluffyChat 的推送通知，推荐安装 ntfy。借助 ntfy 或另一个 Unified Push 程序，你可以以一种数据安全的方式接收推送通知。你可以从 PlayStore 或 F-Droid 商店下载 ntfy。",
+  "noGoogleServicesWarning": "看起来你手机上没有 Firebase Cloud Messaging。如果仍希望接收 Plusly 的推送通知，推荐安装 ntfy。借助 ntfy 或另一个 Unified Push 程序，你可以以一种数据安全的方式接收推送通知。你可以从 PlayStore 或 F-Droid 商店下载 ntfy。",
   "@noGoogleServicesWarning": {
     "type": "String",
     "placeholders": {}
@@ -1717,7 +1717,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2355,7 +2355,7 @@
   "@dehydrateWarning": {},
   "indexedDbErrorTitle": "私有模式问题",
   "@indexedDbErrorTitle": {},
-  "indexedDbErrorLong": "遗憾的是，默认情况下未在私有模式下启用消息存储。\n请访问\n - about:config\n - 将 dom.indexedDB.privateBrowsing.enabled 设置为 true\n否则，无法运行 FluffyChat。",
+  "indexedDbErrorLong": "遗憾的是，默认情况下未在私有模式下启用消息存储。\n请访问\n - about:config\n - 将 dom.indexedDB.privateBrowsing.enabled 设置为 true\n否则，无法运行 Plusly。",
   "@indexedDbErrorLong": {},
   "hydrateTorLong": "你上次是否导出 TOR 会话？ 快速导入它并继续聊天。",
   "@hydrateTorLong": {},
@@ -2396,11 +2396,11 @@
   "@appearOnTop": {},
   "appearOnTopDetails": "允许应用显示在顶部（如果你已经将 Fluffychat 设置为呼叫账户，则不需要授予此权限）",
   "@appearOnTopDetails": {},
-  "otherCallingPermissions": "麦克风、摄像头和其它 FluffyChat 权限",
+  "otherCallingPermissions": "麦克风、摄像头和其它 Plusly 权限",
   "@otherCallingPermissions": {},
   "callingPermissions": "呼叫权限",
   "@callingPermissions": {},
-  "callingAccountDetails": "允许 FluffyChat 使用本机 android 拨号器应用。",
+  "callingAccountDetails": "允许 Plusly 使用本机 android 拨号器应用。",
   "@callingAccountDetails": {},
   "foregroundServiceRunning": "此通知在前台服务运行时出现。",
   "@foregroundServiceRunning": {},
@@ -2408,7 +2408,7 @@
   "@screenSharingTitle": {},
   "callingAccount": "呼叫账户",
   "@callingAccount": {},
-  "screenSharingDetail": "你正在 FluffyChat 中共享屏幕",
+  "screenSharingDetail": "你正在 Plusly 中共享屏幕",
   "@screenSharingDetail": {},
   "numChats": "{number} 个聊天",
   "@numChats": {
@@ -2877,7 +2877,7 @@
       }
     }
   },
-  "appLockDescription": "用 pin 码在不用 FluffyChat 时锁定它",
+  "appLockDescription": "用 pin 码在不用 Plusly 时锁定它",
   "@appLockDescription": {},
   "globalChatId": "全局聊天 ID",
   "@globalChatId": {},
@@ -3121,7 +3121,7 @@
   "@oneOfYourDevicesIsNotVerified": {},
   "noticeChatBackupDeviceVerification": "注意：当你连接所有设备到聊天备份时，这些设备将被自动验证。",
   "@noticeChatBackupDeviceVerification": {},
-  "welcomeText": "你好呀 👋 欢迎来到 FluffyChat。你可以登录任意兼容 https://matrix.org 的 homeserver，然后和任何人聊天。这是个巨大的去中心化消息网络！",
+  "welcomeText": "你好呀 👋 欢迎来到 Plusly。你可以登录任意兼容 https://matrix.org 的 homeserver，然后和任何人聊天。这是个巨大的去中心化消息网络！",
   "@welcomeText": {},
   "continueText": "继续",
   "@continueText": {},
@@ -3215,7 +3215,7 @@
       }
     }
   },
-  "appIntroduction": "FluffyChat 让使用不同即时通信工具的你和你的好友得以聊天。 访问 https://matrix.org 了解详情或轻按 *继续*。",
+  "appIntroduction": "Plusly 让使用不同即时通信工具的你和你的好友得以聊天。 访问 https://matrix.org 了解详情或轻按 *继续*。",
   "@appIntroduction": {},
   "newChatRequest": "📩 新的聊天请求",
   "@newChatRequest": {},

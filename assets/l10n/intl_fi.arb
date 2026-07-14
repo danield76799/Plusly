@@ -1,7 +1,7 @@
 {
   "repeatPassword": "Salasana uudelleen",
   "@repeatPassword": {},
-  "about": "Tietoa FluffyChatista",
+  "about": "Tietoa Pluslyista",
   "@about": {
     "type": "String",
     "placeholders": {}
@@ -800,7 +800,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} kutsui sinut FluffyChattiin.\n1. Viereaile sivulla: https://fluffychat.im ja asenna sovellus\n2. Rekisteröidy tai kirjaudu sisään\n3. Avaa kutsulinkki:\n{link}",
+  "inviteText": "{username} kutsui sinut Pluslytiin.\n1. Viereaile sivulla: https://plusly.app ja asenna sovellus\n2. Rekisteröidy tai kirjaudu sisään\n3. Avaa kutsulinkki:\n{link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1239,7 +1239,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -1645,7 +1645,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2337,7 +2337,7 @@
   "@pleaseEnterRecoveryKeyDescription": {},
   "unlockOldMessages": "Pura vanhojen viestien salaus",
   "@unlockOldMessages": {},
-  "indexedDbErrorLong": "Viestivarasto ei ole käytössä yksityisselauksessa oletuksena.\nKäythän osoitteessa\n - about:config\n - Aseta dom.indexedDB.privateBrowsing.enabled arvoon true\nMuuten FluffyChatin käyttäminen ei ole mahdollista.",
+  "indexedDbErrorLong": "Viestivarasto ei ole käytössä yksityisselauksessa oletuksena.\nKäythän osoitteessa\n - about:config\n - Aseta dom.indexedDB.privateBrowsing.enabled arvoon true\nMuuten Pluslyin käyttäminen ei ole mahdollista.",
   "@indexedDbErrorLong": {},
   "saveKeyManuallyDescription": "Tallenna tämä avain manuaalisesti käyttäen järjestelmän jakodialogia tai leikepöytää.",
   "@saveKeyManuallyDescription": {},
@@ -2386,11 +2386,11 @@
   "@callingPermissions": {},
   "callingAccount": "Soittamistunnus",
   "@callingAccount": {},
-  "callingAccountDetails": "Sallii FluffyChatin käyttää Androidin omaa Puhelut-sovellusta.",
+  "callingAccountDetails": "Sallii Pluslyin käyttää Androidin omaa Puhelut-sovellusta.",
   "@callingAccountDetails": {},
   "appearOnTop": "Näy päällä",
   "@appearOnTop": {},
-  "appearOnTopDetails": "Sallii sovelluksen näkyä muiden sovellusten päällä (tätä ei tarvita, mikäli olet jo määrittänyt FluffyChatin puhelin-tunnukseksi)",
+  "appearOnTopDetails": "Sallii sovelluksen näkyä muiden sovellusten päällä (tätä ei tarvita, mikäli olet jo määrittänyt Pluslyin puhelin-tunnukseksi)",
   "@appearOnTopDetails": {},
   "newSpace": "Uusi tila",
   "@newSpace": {},
@@ -2402,11 +2402,11 @@
   "@allSpaces": {},
   "screenSharingTitle": "ruudunjako",
   "@screenSharingTitle": {},
-  "otherCallingPermissions": "Mikrofoni, kamera ja muut FluffyChatin oikeudet",
+  "otherCallingPermissions": "Mikrofoni, kamera ja muut Pluslyin oikeudet",
   "@otherCallingPermissions": {},
   "newGroup": "Uusi ryhmä",
   "@newGroup": {},
-  "screenSharingDetail": "Jaat ruutuasi FluffyChatissä",
+  "screenSharingDetail": "Jaat ruutuasi Pluslyissä",
   "@screenSharingDetail": {},
   "hugContent": "{senderName} halaa sinua",
   "@hugContent": {

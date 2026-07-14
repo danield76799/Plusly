@@ -162,7 +162,7 @@
   },
   "messageType": "Ziņas veids",
   "@messageType": {},
-  "indexedDbErrorLong": "Diemžēl ziņu krātuve pēc noklusējuma nav iespējota privātajā režīmā.\nLūgums apmeklēt\n - about:config\n - iestatīt dom.indexedDB.privateBrowsing.enabled kā true\nPretējā gadījumā nav iespējams palaist FluffyChat.",
+  "indexedDbErrorLong": "Diemžēl ziņu krātuve pēc noklusējuma nav iespējota privātajā režīmā.\nLūgums apmeklēt\n - about:config\n - iestatīt dom.indexedDB.privateBrowsing.enabled kā true\nPretējā gadījumā nav iespējams palaist Plusly.",
   "@indexedDbErrorLong": {},
   "oneClientLoggedOut": "Viens no klientiem ir atteicies",
   "@oneClientLoggedOut": {},
@@ -185,7 +185,7 @@
       }
     }
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -524,7 +524,7 @@
   },
   "youRejectedTheInvitation": "Tu noraidīji uzaicinājumu",
   "@youRejectedTheInvitation": {},
-  "otherCallingPermissions": "Mikrofons, kamera un citas FluffyChat atļaujas",
+  "otherCallingPermissions": "Mikrofons, kamera un citas Plusly atļaujas",
   "@otherCallingPermissions": {},
   "messagesStyle": "Ziņas:",
   "@messagesStyle": {},
@@ -552,7 +552,7 @@
   "@newSpaceDescription": {},
   "chatDescription": "Tērzēšanas apraksts",
   "@chatDescription": {},
-  "callingAccountDetails": "Ļauj FluffyChat izmantot iebūvēto Android zvanīšanas lietotni.",
+  "callingAccountDetails": "Ļauj Plusly izmantot iebūvēto Android zvanīšanas lietotni.",
   "@callingAccountDetails": {},
   "next": "Nākamais",
   "@next": {
@@ -714,7 +714,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} uzaicināja pievienoties FluffyChat.\n1. Jāapmeklē fluffychat.im un jāuzstāda lietotne \n2. Jāizveido konts vai jāpiesakās \n3. Jāatver uzaicinājuma saite: \n {link}",
+  "inviteText": "{username} uzaicināja pievienoties Plusly.\n1. Jāapmeklē plusly.app un jāuzstāda lietotne \n2. Jāizveido konts vai jāpiesakās \n3. Jāatver uzaicinājuma saite: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1168,7 +1168,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Jauna ziņa FluffyChat",
+  "newMessageInFluffyChat": "💬 Jauna ziņa Plusly",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1503,7 +1503,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "appearOnTopDetails": "Ļauj lietotnei parādīties virspusē (nav nepieciešams, ja FluffyChat jau ir iestatīts kā zvanīšanas konts)",
+  "appearOnTopDetails": "Ļauj lietotnei parādīties virspusē (nav nepieciešams, ja Plusly jau ir iestatīts kā zvanīšanas konts)",
   "@appearOnTopDetails": {},
   "roomHasBeenUpgraded": "Istaba tika atjaunināta",
   "@roomHasBeenUpgraded": {
@@ -1774,7 +1774,7 @@
   },
   "unverified": "Neapliecināta",
   "@unverified": {},
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -2591,7 +2591,7 @@
   },
   "pinMessage": "Piespraust istabai",
   "@pinMessage": {},
-  "screenSharingDetail": "Tu kopīgo savu ekrānu FluffyChat",
+  "screenSharingDetail": "Tu kopīgo savu ekrānu Plusly",
   "@screenSharingDetail": {},
   "muteChat": "Apklusināt tērzēšanu",
   "@muteChat": {
@@ -3101,7 +3101,7 @@
   "@noticeChatBackupDeviceVerification": {},
   "continueText": "Turpināt",
   "@continueText": {},
-  "welcomeText": "Sveicieni! 👋 Šis ir FluffyChat. Tu vari pieteikties jebkurā mājasserverī, kas ir saderīgs ar https://matrix.org. Tad vari tērzēt ar ikvienu. Tas ir milzīgs decentralizētās saziņas tīkls!",
+  "welcomeText": "Sveicieni! 👋 Šis ir Plusly. Tu vari pieteikties jebkurā mājasserverī, kas ir saderīgs ar https://matrix.org. Tad vari tērzēt ar ikvienu. Tas ir milzīgs decentralizētās saziņas tīkls!",
   "@welcomeText": {},
   "blur": "Aizmiglojums:",
   "@blur": {},
@@ -3167,7 +3167,7 @@
   "@unableToJoinChat": {},
   "appWantsToUseForLoginDescription": "Ar šo tiek ļauts lietotnei un tīmekļvietnei kopīgot informāciju par Tevi.",
   "@appWantsToUseForLoginDescription": {},
-  "appIntroduction": "FluffyChat ļauj tērzēt ar draugiem, kuri izmanto dažādas ziņojumapmaiņas lietotnes. Vairāk var uzzināt https://matrix.org vai vienkārši piesitot *Turpināt*.",
+  "appIntroduction": "Plusly ļauj tērzēt ar draugiem, kuri izmanto dažādas ziņojumapmaiņas lietotnes. Vairāk var uzzināt https://matrix.org vai vienkārši piesitot *Turpināt*.",
   "@appIntroduction": {},
   "synchronizingPleaseWaitCounter": " Sinhronizē... ({percentage}%)",
   "@synchronizingPleaseWaitCounter": {

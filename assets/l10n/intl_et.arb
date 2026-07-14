@@ -826,7 +826,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -998,7 +998,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} kutsus sind kasutama Matrix'i-põhist suhtlusrakendust FluffyChat. \n1. Ava fluffychat.im ja paigalda FluffyChat'i rakendus \n2. Liitu kasutajaks või logi sisse olemasoleva Matrix'i kasutajakontoga\n3. Ava kutse link: \n {link}",
+  "inviteText": "{username} kutsus sind kasutama Matrix'i-põhist suhtlusrakendust Plusly. \n1. Ava plusly.app ja paigalda Plusly'i rakendus \n2. Liitu kasutajaks või logi sisse olemasoleva Matrix'i kasutajakontoga\n3. Ava kutse link: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1170,7 +1170,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Uus sõnum FluffyChat'i vahendusel",
+  "newMessageInFluffyChat": "💬 Uus sõnum Plusly'i vahendusel",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1205,7 +1205,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "noGoogleServicesWarning": "Tundub, et sinu nutiseadmes pole Firebase Cloud Messaging teenuseid. Sinu privaatsuse mõttes on see kindlasti hea otsus! Kui sa soovid FluffyChatis näha tõuketeavitusi, siis soovitame, et selle jaoks kasutad ntfy liidestust. Kasutades ntfyd või mõnda muud Unified Push standardil põhinevat liidestust saad tõuketeavitusi turvalisel moel. Ntfy rakendus on saadaval nii PlayStore kui F-Droidi rakendusepoodides.",
+  "noGoogleServicesWarning": "Tundub, et sinu nutiseadmes pole Firebase Cloud Messaging teenuseid. Sinu privaatsuse mõttes on see kindlasti hea otsus! Kui sa soovid Pluslyis näha tõuketeavitusi, siis soovitame, et selle jaoks kasutad ntfy liidestust. Kasutades ntfyd või mõnda muud Unified Push standardil põhinevat liidestust saad tõuketeavitusi turvalisel moel. Ntfy rakendus on saadaval nii PlayStore kui F-Droidi rakendusepoodides.",
   "@noGoogleServicesWarning": {
     "type": "String",
     "placeholders": {}
@@ -1797,7 +1797,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2355,7 +2355,7 @@
   "@dehydrateWarning": {},
   "dehydrateTorLong": "Kui oled TOR'i võrgu kasutaja, siis enne akna sulgemist palun ekspordi viimase sessiooni andmed.",
   "@dehydrateTorLong": {},
-  "indexedDbErrorLong": "Privaatse akna puhul andmete salvestamine vaikimisi pole kasutusel.\nPalun toimi alljärgnevalt:\n- ava about:config\n- määra dom.indexedDB.privateBrowsing.enabled väärtuseks true\nVastasel juhul sa ei saa FluffyChat'i kasutada.",
+  "indexedDbErrorLong": "Privaatse akna puhul andmete salvestamine vaikimisi pole kasutusel.\nPalun toimi alljärgnevalt:\n- ava about:config\n- määra dom.indexedDB.privateBrowsing.enabled väärtuseks true\nVastasel juhul sa ei saa Plusly'i kasutada.",
   "@indexedDbErrorLong": {},
   "hydrate": "Taasta varundatud failist",
   "@hydrate": {},
@@ -2384,11 +2384,11 @@
   "@noKeyForThisMessage": {},
   "callingPermissions": "Helistamise õigused",
   "@callingPermissions": {},
-  "callingAccountDetails": "Võimaldab FluffyChat'il kasutada Androidi helistamisrakendust.",
+  "callingAccountDetails": "Võimaldab Plusly'il kasutada Androidi helistamisrakendust.",
   "@callingAccountDetails": {},
   "appearOnTop": "Luba pealmise rakendusena",
   "@appearOnTop": {},
-  "otherCallingPermissions": "Mikrofoni, kaamera ja muud FluffyChat'i õigused",
+  "otherCallingPermissions": "Mikrofoni, kaamera ja muud Plusly'i õigused",
   "@otherCallingPermissions": {},
   "newGroup": "Uus jututuba",
   "@newGroup": {},
@@ -3123,7 +3123,7 @@
   "@noticeChatBackupDeviceVerification": {},
   "continueText": "Jätka",
   "@continueText": {},
-  "welcomeText": "Tere, tere 👋 See on FluffyChat. Sa võid sisse logida igasse koduserverisse, mis ühildub https://matrix.org serveriga. Ja seejärel saad suhelda kõigiga. Tegemist on ikka väga suure detsentraliseeritud sõnumivõrguga!",
+  "welcomeText": "Tere, tere 👋 See on Plusly. Sa võid sisse logida igasse koduserverisse, mis ühildub https://matrix.org serveriga. Ja seejärel saad suhelda kõigiga. Tegemist on ikka väga suure detsentraliseeritud sõnumivõrguga!",
   "@welcomeText": {},
   "setWallpaper": "Määra taustapildiks",
   "@setWallpaper": {},
@@ -3206,7 +3206,7 @@
   },
   "waitingForServer": "Ootame serveri vastust...",
   "@waitingForServer": {},
-  "appIntroduction": "FluffyChat võimaldab sul suhelda sõprade ja tuttavatega, kes kasutavad erinevaid sõnumikliente. Lisateavet leiad https://matrix.org saidist või lihtsalt klõpsi „Jätka“.",
+  "appIntroduction": "Plusly võimaldab sul suhelda sõprade ja tuttavatega, kes kasutavad erinevaid sõnumikliente. Lisateavet leiad https://matrix.org saidist või lihtsalt klõpsi „Jätka“.",
   "@appIntroduction": {},
   "synchronizingPleaseWaitCounter": " Sünkroniseerime… ({percentage}%)",
   "@synchronizingPleaseWaitCounter": {

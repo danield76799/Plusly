@@ -807,7 +807,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -979,7 +979,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} te je pozvao/la u FluffyChat. \n1. Posjeti strnicu fluffychat.im i instaliraj aplikaciju \n2. Registriraj ili prijavi se \n3. Otvori poveznicu poziva: \n {link}",
+  "inviteText": "{username} te je pozvao/la u Plusly. \n1. Posjeti strnicu plusly.app i instaliraj aplikaciju \n2. Registriraj ili prijavi se \n3. Otvori poveznicu poziva: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1141,7 +1141,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Nova poruka u FluffyChatu",
+  "newMessageInFluffyChat": "💬 Nova poruka u Pluslyu",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1736,7 +1736,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2225,7 +2225,7 @@
   "@dehydrateTor": {},
   "emojis": "Emojiji",
   "@emojis": {},
-  "indexedDbErrorLong": "Spremište poruka nažalost nije standarno uključena u privatnom modusu.\nOtvori stranicu\n - about:config\n - postavi dom.indexedDB.privateBrowsing.enabled na true\nFluffyChat se inače neće moći pokrenuti.",
+  "indexedDbErrorLong": "Spremište poruka nažalost nije standarno uključena u privatnom modusu.\nOtvori stranicu\n - about:config\n - postavi dom.indexedDB.privateBrowsing.enabled na true\nPlusly se inače neće moći pokrenuti.",
   "@indexedDbErrorLong": {},
   "storeSecurlyOnThisDevice": "Spremi sigurno na ovom uređaju",
   "@storeSecurlyOnThisDevice": {},
@@ -2419,7 +2419,7 @@
   "@foregroundServiceRunning": {},
   "callingPermissions": "Dozvole za pozivanje",
   "@callingPermissions": {},
-  "callingAccountDetails": "Omogućuje FluffyChatu korištenje izvorne Android aplikacije za pozivanje.",
+  "callingAccountDetails": "Omogućuje Pluslyu korištenje izvorne Android aplikacije za pozivanje.",
   "@callingAccountDetails": {},
   "callingAccount": "Račun za pozivanje",
   "@callingAccount": {},
@@ -2444,7 +2444,7 @@
   "@enterRoom": {},
   "screenSharingDetail": "Dijeliš svoj ekran u FuffyChatu",
   "@screenSharingDetail": {},
-  "appearOnTopDetails": "Omogućuje prikaz aplikacije ispred drugih (nije potrebno ako je FluffyChat već postavljen kao račun za pozivanje)",
+  "appearOnTopDetails": "Omogućuje prikaz aplikacije ispred drugih (nije potrebno ako je Plusly već postavljen kao račun za pozivanje)",
   "@appearOnTopDetails": {},
   "appearOnTop": "Prikaz ispred drugih",
   "@appearOnTop": {},
@@ -2454,7 +2454,7 @@
   "@allSpaces": {},
   "screenSharingTitle": "dijeljenje ekrana",
   "@screenSharingTitle": {},
-  "otherCallingPermissions": "Mikrofon, kamera i druge FluffyChat dozvole",
+  "otherCallingPermissions": "Mikrofon, kamera i druge Plusly dozvole",
   "@otherCallingPermissions": {},
   "enterSpace": "Uđi u prostor",
   "@enterSpace": {},

@@ -826,7 +826,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -998,7 +998,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} vás pozvali na FluffyChat.\n1. Navštivte fluffychat.im a nainstalujte si aplikaci.\n2. Zaregistrujte se anebo se přihlašte.\n3. Otevřete pozvánku: \n {link}",
+  "inviteText": "{username} vás pozvali na Plusly.\n1. Navštivte plusly.app a nainstalujte si aplikaci.\n2. Zaregistrujte se anebo se přihlašte.\n3. Otevřete pozvánku: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1170,7 +1170,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "Nová zpráva ve FluffyChatu",
+  "newMessageInFluffyChat": "Nová zpráva ve Pluslyu",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1797,7 +1797,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2496,13 +2496,13 @@
   "@unlockOldMessages": {},
   "foregroundServiceRunning": "Toto oznámení se zobrazuje když běží služba na pozadí.",
   "@foregroundServiceRunning": {},
-  "screenSharingDetail": "Sdílíte svou obrazovku přes FluffyChat",
+  "screenSharingDetail": "Sdílíte svou obrazovku přes Plusly",
   "@screenSharingDetail": {},
-  "callingAccountDetails": "Opravňuje FluffyChat používat Android systémovou aplikaci pro vytáčení.",
+  "callingAccountDetails": "Opravňuje Plusly používat Android systémovou aplikaci pro vytáčení.",
   "@callingAccountDetails": {},
   "appearOnTop": "Zobrazovat nahoře",
   "@appearOnTop": {},
-  "otherCallingPermissions": "Mikrofon, kamera a ostatní oprávnění FluffyChat",
+  "otherCallingPermissions": "Mikrofon, kamera a ostatní oprávnění Plusly",
   "@otherCallingPermissions": {},
   "encryptThisChat": "Zašifrovat tuto konverzaci",
   "@encryptThisChat": {},
@@ -2631,7 +2631,7 @@
   },
   "block": "Blokovat",
   "@block": {},
-  "indexedDbErrorLong": "Ukládání zpráv bohužel není ve výchozím nastavení v soukromém režimu povoleno.\nNavštivte prosím\n - about:config\n - nastavte dom.indexedDB.privateBrowsing.enabled na true\nV opačném případě nebude možné FluffyChat spustit.",
+  "indexedDbErrorLong": "Ukládání zpráv bohužel není ve výchozím nastavení v soukromém režimu povoleno.\nNavštivte prosím\n - about:config\n - nastavte dom.indexedDB.privateBrowsing.enabled na true\nV opačném případě nebude možné Plusly spustit.",
   "@indexedDbErrorLong": {},
   "youInvitedToBy": "📩 Prostřednictvím odkazu jste byli pozváni na:\n{alias}",
   "@youInvitedToBy": {

@@ -22,7 +22,7 @@ import 'package:Pulsly/utils/poll_events.dart';
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 
 abstract class ClientManager {
-  static const String clientNamespace = 'im.fluffychat.store.clients';
+  static const String clientNamespace = 'com.danield.plusly.store.clients';
 
   static Future<List<Client>> getClients({
     bool initialize = true,

@@ -548,7 +548,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "FluffyChat",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -680,7 +680,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} meghívott a FluffyChat-be.\n1. Keresse fel a fluffychat.im oldalt, és telepítse az alkalmazást \n2. Regisztráljon vagy jelentkezzen be \n3. Nyissa meg a meghívó linket: \n {link}",
+  "inviteText": "{username} meghívott a Plusly-be.\n1. Keresse fel a plusly.app oldalt, és telepítse az alkalmazást \n2. Regisztráljon vagy jelentkezzen be \n3. Nyissa meg a meghívó linket: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -827,7 +827,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Új FluffyChat üzenet",
+  "newMessageInFluffyChat": "💬 Új Plusly üzenet",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -1209,7 +1209,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "title": "FluffyChat",
+  "title": "Plusly",
   "@title": {
     "description": "Title for the application",
     "type": "String",
@@ -2081,7 +2081,7 @@
   "@widgetJitsi": {},
   "messageType": "Üzenet típus",
   "@messageType": {},
-  "indexedDbErrorLong": "Sajnos az üzenet mentés alapból nincs bekapcsolva privát módban.\nKeresse meg a\n - about:config\n - állítsa a dom.indexedDB.privateBrowsing.enabled \"true\"-ra\nMáskülönben nem lehetséges a FluffyChat futtatása.",
+  "indexedDbErrorLong": "Sajnos az üzenet mentés alapból nincs bekapcsolva privát módban.\nKeresse meg a\n - about:config\n - állítsa a dom.indexedDB.privateBrowsing.enabled \"true\"-ra\nMáskülönben nem lehetséges a Plusly futtatása.",
   "@indexedDbErrorLong": {},
   "oneClientLoggedOut": "Az egyik kliense kijelentkezett",
   "@oneClientLoggedOut": {},
@@ -2156,7 +2156,7 @@
   },
   "youRejectedTheInvitation": "Visszautasította a meghívást",
   "@youRejectedTheInvitation": {},
-  "otherCallingPermissions": "Mikrofon, kamera, és más egyéb FluffyChat engedélyek",
+  "otherCallingPermissions": "Mikrofon, kamera, és más egyéb Plusly engedélyek",
   "@otherCallingPermissions": {},
   "messagesStyle": "Üzenetek:",
   "@messagesStyle": {},
@@ -2168,7 +2168,7 @@
   "@newSpaceDescription": {},
   "chatDescription": "Csevegés leírás",
   "@chatDescription": {},
-  "callingAccountDetails": "Engedélyezés a FluffyChat számára hogy használja a natív android hívás applikációt.",
+  "callingAccountDetails": "Engedélyezés a Plusly számára hogy használja a natív android hívás applikációt.",
   "@callingAccountDetails": {},
   "pleaseFollowInstructionsOnWeb": "Kérem kövesse az instrukciókat az oldalon, és nyomjon a tovább gombra.",
   "@pleaseFollowInstructionsOnWeb": {
@@ -2378,7 +2378,7 @@
       }
     }
   },
-  "appearOnTopDetails": "Engedélyezi az app számára, hogy mindig legfelül jelenjen meg (nem szükséges, ha a FluffyChat hívó fiókként lett beállítva)",
+  "appearOnTopDetails": "Engedélyezi az app számára, hogy mindig legfelül jelenjen meg (nem szükséges, ha a Plusly hívó fiókként lett beállítva)",
   "@appearOnTopDetails": {},
   "enterRoom": "Belépés a szobába",
   "@enterRoom": {},
@@ -2641,7 +2641,7 @@
   "@unsupportedAndroidVersionLong": {},
   "storeSecurlyOnThisDevice": "Biztonságos tárolás az eszközön",
   "@storeSecurlyOnThisDevice": {},
-  "screenSharingDetail": "Megosztja a képernyőjét a FluffyChat-ben",
+  "screenSharingDetail": "Megosztja a képernyőjét a Plusly-ben",
   "@screenSharingDetail": {},
   "placeCall": "Tér hívás",
   "@placeCall": {},
