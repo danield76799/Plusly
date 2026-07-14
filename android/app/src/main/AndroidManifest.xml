@@ -129,7 +129,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Push notifications worden nu door FirebaseMessaging SDK zelf afgehandeld -->
+        <!-- Push notifications worden door UnifiedPush afgehandeld -->
 
         <service android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
             android:foregroundServiceType="camera|microphone|mediaProjection">
@@ -152,16 +152,6 @@
         </receiver>
 
         <receiver android:exported="false" android:enabled="true"
-            android:name=".UnifiedPushReceiver">
-            <intent-filter>
-                <action android:name="org.unifiedpush.flutter.connector.MESSAGE" />
-                <action android:name="org.unifiedpush.flutter.connector.UNREGISTERED" />
-                <action android:name="org.unifiedpush.flutter.connector.NEW_ENDPOINT" />
-                <action android:name="org.unifiedpush.flutter.connector.REGISTRATION_FAILED" />
-            </intent-filter>
-        </receiver>
-
-        <receiver android:exported="false"
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
 
         <!-- Chat Widget Provider (Legacy) -->

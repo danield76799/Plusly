@@ -103,8 +103,27 @@ Future<void> _tryPushHelper(
     return;
   }
 
-  // Zorg dat rooms geladen zijn voordat we het push-event ophalen of
-  // deduplicatie doen. Bij een koude start kan dit even duren.
+  // Fast background path: if we have a push payload, show a notification
+  // immediately without waiting for rooms/database to load. This avoids losing
+  // notifications when Android kills the background handler.
+  if (isBackgroundMessage && notification.roomId != null) {
+    unawaited(
+      (_buildFallbackNotification(
+        notification,
+        client: client,
+        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+      ) as Future)
+          .catchError((e) {
+        Logs().w('Fallback notification failed', e);
+      }),
+    );
+    // In background we don't need the rich notification; stop here to keep
+    // the handler fast and under the OS time budget.
+    return;
+  }
+
+  // Zorg dat rooms geladen zijn voordat we het push-event ophalen.
+  // Bij een koude start kan dit even duren; de fallback above already notified.
   await client.roomsLoading;
 
   // ── Deduplicate across multi-account ──
@@ -386,6 +405,64 @@ Future<void> _tryPushHelper(
   }
 
   Logs().v('Push helper has been completed!');
+}
+
+Future<void>? _buildFallbackNotification(
+  PushNotification notification, {
+  required Client client,
+  required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+}) async {
+  // Extract what we can directly from the Matrix push payload without
+  // waiting for rooms/database to load.
+  final l10n = await L10n.delegate.load(PlatformDispatcher.instance.locale);
+  final senderName = notification.senderDisplayName?.trim() ??
+      notification.sender?.trim() ??
+      _roomDisplayName(client, notification.roomId, l10n) ??
+      '';
+  final body = (notification.content?['body'] as String?)?.trim();
+  if (senderName.isEmpty && (body == null || body.isEmpty)) {
+    return null;
+  }
+
+  final roomName = _roomDisplayName(client, notification.roomId, l10n) ?? l10n.incomingMessages;
+  final id = '${client.clientName}_${notification.roomId}'.hashCode;
+
+  await flutterLocalNotificationsPlugin.show(
+    id: id,
+    title: senderName.isNotEmpty ? senderName : roomName,
+    body: body ?? l10n.newMessageInFluffyChat,
+    notificationDetails: NotificationDetails(
+      android: AndroidNotificationDetails(
+        AppConfig.pushNotificationsChannelId,
+        l10n.incomingMessages,
+        groupKey: client.clientName,
+        importance: Importance.high,
+        priority: Priority.max,
+        category: AndroidNotificationCategory.message,
+        shortcutId: notification.roomId,
+      ),
+      iOS: DarwinNotificationDetails(threadIdentifier: notification.roomId),
+    ),
+    payload: NotificationPushPayload(
+      client.clientName,
+      notification.roomId,
+      notification.eventId,
+    ).toString(),
+  );
+
+  updateAppBadge(notification.counts?.unread ?? 0);
+  return;
+}
+
+String? _roomDisplayName(Client client, String? roomId, L10n l10n) {
+  if (roomId == null) return null;
+  try {
+    final room = client.getRoomById(roomId);
+    if (room == null) return null;
+    return room.getLocalizedDisplayname(MatrixLocals(l10n));
+  } catch (_) {
+    return null;
+  }
 }
 
 /// ─── Helpers ────────────────────────────────────────────────────────────────

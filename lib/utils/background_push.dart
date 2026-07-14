@@ -570,54 +570,64 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
-    await pushHelper(
-      PushNotification.fromJson(data),
-      clients: clients,
-      l10n: l10n,
-      activeRoomId: matrix?.activeRoomId,
-      activeClient: clientFromInstance(i, clients),
-      flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-      instance: i,
-      useNotificationActions:
-          false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
-      onEventLoaded: (event) async {
-        // Preload the room timeline so the chat opens instantly when tapped
-        final room = event.room;
-        try {
-          final timeline = await room.getTimeline();
-          TimelineCache.setTimeline(room.id, timeline);
-          Logs().v('Timeline preloaded for room ${room.id} after push');
-        } catch (e) {
-          Logs().w('Failed to preload timeline after push', e);
-        }
 
-        // Preload image/video thumbnail so it appears instantly in chat/gallery
-        if ({
-          MessageTypes.Image,
-          MessageTypes.Video,
-        }.contains(event.messageType)) {
-          try {
-            await event.downloadAndDecryptAttachment(
-              getThumbnail: true,
-            );
-            Logs().v('Thumbnail preloaded after push for ${event.eventId}');
-          } catch (e) {
-            Logs().w('Failed to preload thumbnail after push', e);
-          }
-        }
-      },
-    );
-
-    // Trigger immediate sync so the new message appears in the chat instantly
-    // (without this, the timeline can take 15+ seconds to update)
     final client = clientFromInstance(i, clients);
+
+    // Fast path: show the notification immediately and do all heavy work
+    // (sync, timeline preload, attachment preload) asynchronously afterwards.
+    // This keeps the UnifiedPush background handler under the OS time budget.
+    try {
+      await pushHelper(
+        PushNotification.fromJson(data),
+        clients: clients,
+        l10n: l10n,
+        activeRoomId: matrix?.activeRoomId,
+        activeClient: client,
+        flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+        instance: i,
+        useNotificationActions:
+            false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
+        onEventLoaded: (event) async {
+          // Preload the room timeline so the chat opens instantly when tapped
+          final room = event.room;
+          try {
+            final timeline = await room.getTimeline();
+            TimelineCache.setTimeline(room.id, timeline);
+            Logs().v('Timeline preloaded for room ${room.id} after push');
+          } catch (e) {
+            Logs().w('Failed to preload timeline after push', e);
+          }
+
+          // Preload image/video thumbnail so it appears instantly in chat/gallery
+          if ({
+            MessageTypes.Image,
+            MessageTypes.Video,
+          }.contains(event.messageType)) {
+            try {
+              await event.downloadAndDecryptAttachment(
+                getThumbnail: true,
+              );
+              Logs().v('Thumbnail preloaded after push for ${event.eventId}');
+            } catch (e) {
+              Logs().w('Failed to preload thumbnail after push', e);
+            }
+          }
+        },
+      );
+    } catch (e, s) {
+      Logs().e('[Push] pushHelper failed in background handler', e, s);
+    }
+
+    // Trigger immediate sync in the background so the new message appears in
+    // the chat list, but don't await it here.
     if (client != null) {
-      try {
-        await client.oneShotSync();
-        Logs().v('Immediate sync triggered after push notification');
-      } catch (e) {
-        Logs().w('Failed to trigger immediate sync after push', e);
-      }
+      unawaited(
+        client.oneShotSync().then((_) {
+          Logs().v('Immediate sync completed after push notification');
+        }).catchError((e) {
+          Logs().w('Immediate sync failed after push', e);
+        }),
+      );
     }
   }
 }
