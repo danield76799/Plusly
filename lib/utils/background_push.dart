@@ -565,69 +565,54 @@ class BackgroundPush {
     Logs().wtf('Push Notification from UP received', pushMessage);
     final message = pushMessage.content;
     upAction = true;
-    final data = Map<String, dynamic>.from(
-      json.decode(utf8.decode(message))['notification'],
-    );
-    // UP may strip the devices list
-    data['devices'] ??= [];
 
-    final client = clientFromInstance(i, clients);
-
-    // Fast path: show the notification immediately and do all heavy work
-    // (sync, timeline preload, attachment preload) asynchronously afterwards.
-    // This keeps the UnifiedPush background handler under the OS time budget.
     try {
-      await pushHelper(
-        PushNotification.fromJson(data),
-        clients: clients,
-        l10n: l10n,
-        activeRoomId: matrix?.activeRoomId,
-        activeClient: client,
-        flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-        instance: i,
-        useNotificationActions:
-            false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
-        onEventLoaded: (event) async {
-          // Preload the room timeline so the chat opens instantly when tapped
-          final room = event.room;
-          try {
-            final timeline = await room.getTimeline();
-            TimelineCache.setTimeline(room.id, timeline);
-            Logs().v('Timeline preloaded for room ${room.id} after push');
-          } catch (e) {
-            Logs().w('Failed to preload timeline after push', e);
-          }
+      final decoded = json.decode(utf8.decode(message));
+      final notif = decoded['notification'] as Map<String, dynamic>?;
+      if (notif == null) {
+        Logs().w('[Push] No notification field in UP message');
+        return;
+      }
 
-          // Preload image/video thumbnail so it appears instantly in chat/gallery
-          if ({
-            MessageTypes.Image,
-            MessageTypes.Video,
-          }.contains(event.messageType)) {
-            try {
-              await event.downloadAndDecryptAttachment(
-                getThumbnail: true,
-              );
-              Logs().v('Thumbnail preloaded after push for ${event.eventId}');
-            } catch (e) {
-              Logs().w('Failed to preload thumbnail after push', e);
-            }
-          }
-        },
+      final roomId = notif['room_id'] as String? ?? '';
+      final eventId = notif['event_id'] as String? ?? '';
+      final sender = notif['sender'] as String? ?? '';
+      final content = notif['content'] as Map<String, dynamic>?;
+      final body = content?['body'] as String?;
+      final unread = notif['counts']?['unread'] as int?;
+
+      // Show notification directly — no pushHelper, no client, no rooms
+      final l10n = await L10n.delegate.load(PlatformDispatcher.instance.locale);
+      final id = '${i}_$roomId'.hashCode;
+
+      await _flutterLocalNotificationsPlugin.show(
+        id: id,
+        title: sender.isNotEmpty ? sender : l10n.incomingMessages,
+        body: body ?? l10n.newMessageInFluffyChat,
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            AppConfig.pushNotificationsChannelId,
+            l10n.incomingMessages,
+            groupKey: i,
+            importance: Importance.high,
+            priority: Priority.max,
+            category: AndroidNotificationCategory.message,
+            shortcutId: roomId.isNotEmpty ? roomId : null,
+          ),
+          iOS: DarwinNotificationDetails(
+            threadIdentifier: roomId.isNotEmpty ? roomId : null,
+          ),
+        ),
+        payload: NotificationPushPayload(i, roomId, eventId).toString(),
       );
+
+      if (unread != null && unread > 0) {
+        FlutterNewBadger.setBadge(unread);
+      }
+
+      Logs().v('[Push] Notification shown directly from UP payload');
     } catch (e, s) {
-      Logs().e('[Push] pushHelper failed in background handler', e, s);
-    }
-
-    // Trigger immediate sync in the background so the new message appears in
-    // the chat list, but don't await it here.
-    if (client != null) {
-      unawaited(
-        client.oneShotSync().then((_) {
-          Logs().v('Immediate sync completed after push notification');
-        }).catchError((e) {
-          Logs().w('Immediate sync failed after push', e);
-        }),
-      );
+      Logs().e('[Push] Failed to show notification from UP message', e, s);
     }
   }
 }
