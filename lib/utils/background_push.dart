@@ -565,34 +565,30 @@ class BackgroundPush {
     Logs().wtf('Push Notification from UP received', pushMessage);
     final message = pushMessage.content;
     upAction = true;
+    final data = Map<String, dynamic>.from(
+      json.decode(utf8.decode(message))['notification'],
+    );
+    data['devices'] ??= [];
+
+    final client = clientFromInstance(i, clients);
+
+    // Fase 1: toon direct een placeholder notificatie zodat de gebruiker
+    // meteen iets ziet, zelfs als het ophalen van het event lang duurt.
+    final roomId = data['room_id'] as String? ?? '';
+    final sender = data['sender_display_name'] as String? ??
+        data['sender'] as String? ??
+        '';
+    final id = '${i}_$roomId'.hashCode;
 
     try {
-      final decoded = json.decode(utf8.decode(message));
-      final notif = decoded['notification'] as Map<String, dynamic>?;
-      if (notif == null) {
-        Logs().w('[Push] No notification field in UP message');
-        return;
-      }
-
-      final roomId = notif['room_id'] as String? ?? '';
-      final eventId = notif['event_id'] as String? ?? '';
-      final sender = notif['sender'] as String? ?? '';
-      final content = notif['content'] as Map<String, dynamic>?;
-      final body = content?['body'] as String?;
-      final unread = notif['counts']?['unread'] as int?;
-
-      // Show notification directly — no pushHelper, no client, no rooms
-      final l10n = await L10n.delegate.load(PlatformDispatcher.instance.locale);
-      final id = '${i}_$roomId'.hashCode;
-
       await _flutterLocalNotificationsPlugin.show(
         id: id,
-        title: sender.isNotEmpty ? sender : l10n.incomingMessages,
-        body: body ?? l10n.newMessageInFluffyChat,
+        title: sender.isNotEmpty ? sender : 'Plusly',
+        body: 'Nieuw bericht…',
         notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             AppConfig.pushNotificationsChannelId,
-            l10n.incomingMessages,
+            'Berichten',
             groupKey: i,
             importance: Importance.high,
             priority: Priority.max,
@@ -603,16 +599,33 @@ class BackgroundPush {
             threadIdentifier: roomId.isNotEmpty ? roomId : null,
           ),
         ),
-        payload: NotificationPushPayload(i, roomId, eventId).toString(),
+        payload: NotificationPushPayload(i, roomId, data['event_id'] as String? ?? '').toString(),
       );
+    } catch (_) {}
 
-      if (unread != null && unread > 0) {
-        FlutterNewBadger.setBadge(unread);
+    // Fase 2: forceer een snelle sync zodat rooms geladen zijn,
+    // haal dan het echte bericht op en update de notificatie.
+    if (client != null) {
+      try {
+        await client.oneShotSync().timeout(const Duration(seconds: 5));
+      } catch (_) {
+        Logs().w('[Push] Quick sync failed, trying pushHelper anyway');
       }
+    }
 
-      Logs().v('[Push] Notification shown directly from UP payload');
-    } catch (e, s) {
-      Logs().e('[Push] Failed to show notification from UP message', e, s);
+    try {
+      await pushHelper(
+        PushNotification.fromJson(data),
+        clients: clients,
+        l10n: l10n,
+        activeRoomId: matrix?.activeRoomId,
+        activeClient: client,
+        flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+        instance: i,
+        useNotificationActions: false,
+      ).timeout(const Duration(seconds: 8));
+    } catch (e) {
+      Logs().w('[Push] Rich notification update failed, keeping placeholder', e);
     }
   }
 }
