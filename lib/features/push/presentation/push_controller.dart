@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -135,15 +136,17 @@ class PushController extends ChangeNotifier {
     }
   }
 
-  /// Verwerk inkomende push message
   Future<void> _handleMessage(PushMessage message) async {
     Logs().v('[PushController] Message received: ${message.eventId} for room ${message.roomId}');
-
+    
     // Deduplicatie: check of we deze al hebben gehad
     if (_deduplicator.isDuplicate(message.eventId)) {
       Logs().v('[PushController] Duplicate message ignored: ${message.eventId}');
       return;
     }
+
+    // Bepaal of we in de achtergrond draaien — dan fast path gebruiken
+    final isBackground = WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed;
 
     // Gebruik de volledige ruwe Matrix push payload (net als FluffyChat/BackgroundPush).
     final notification = message.rawNotification != null
@@ -157,10 +160,10 @@ class PushController extends ChangeNotifier {
             'devices': [],
           });
 
-    // FIX #5: await pushHelper so errors are caught, not silently lost
+    // FIX: achtergrond = clients null om fast path te triggeren in pushHelper
     await pushHelper(
       notification,
-      clients: _clients,
+      clients: isBackground ? null : _clients,
       activeRoomId: _activeRoomId,
       activeClient: _activeClient,
       flutterLocalNotificationsPlugin: _notificationsPlugin,
