@@ -568,64 +568,29 @@ class BackgroundPush {
     final data = Map<String, dynamic>.from(
       json.decode(utf8.decode(message))['notification'],
     );
+    // UP may strip the devices list
     data['devices'] ??= [];
+    await pushHelper(
+      PushNotification.fromJson(data),
+      clients: clients,
+      l10n: l10n,
+      activeRoomId: matrix?.activeRoomId,
+      activeClient: clientFromInstance(i, clients),
+      flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+      instance: i,
+      useNotificationActions:
+          false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
+    );
 
+    // Trigger immediate sync so the new message appears in the chat instantly
     final client = clientFromInstance(i, clients);
-
-    // Fase 1: toon direct een placeholder notificatie zodat de gebruiker
-    // meteen iets ziet, zelfs als het ophalen van het event lang duurt.
-    final roomId = data['room_id'] as String? ?? '';
-    final sender = data['sender_display_name'] as String? ??
-        data['sender'] as String? ??
-        '';
-    final id = '${i}_$roomId'.hashCode;
-
-    try {
-      await _flutterLocalNotificationsPlugin.show(
-        id: id,
-        title: sender.isNotEmpty ? sender : 'Plusly',
-        body: 'Nieuw bericht…',
-        notificationDetails: NotificationDetails(
-          android: AndroidNotificationDetails(
-            AppConfig.pushNotificationsChannelId,
-            'Berichten',
-            groupKey: i,
-            importance: Importance.high,
-            priority: Priority.max,
-            category: AndroidNotificationCategory.message,
-            shortcutId: roomId.isNotEmpty ? roomId : null,
-          ),
-          iOS: DarwinNotificationDetails(
-            threadIdentifier: roomId.isNotEmpty ? roomId : null,
-          ),
-        ),
-        payload: NotificationPushPayload(i, roomId, data['event_id'] as String? ?? '').toString(),
-      );
-    } catch (_) {}
-
-    // Fase 2: forceer een snelle sync zodat rooms geladen zijn,
-    // haal dan het echte bericht op en update de notificatie.
     if (client != null) {
       try {
-        await client.oneShotSync().timeout(const Duration(seconds: 5));
-      } catch (_) {
-        Logs().w('[Push] Quick sync failed, trying pushHelper anyway');
+        await client.oneShotSync();
+        Logs().v('Immediate sync triggered after push notification');
+      } catch (e) {
+        Logs().w('Failed to trigger immediate sync after push', e);
       }
-    }
-
-    try {
-      await pushHelper(
-        PushNotification.fromJson(data),
-        clients: clients,
-        l10n: l10n,
-        activeRoomId: matrix?.activeRoomId,
-        activeClient: client,
-        flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-        instance: i,
-        useNotificationActions: false,
-      ).timeout(const Duration(seconds: 8));
-    } catch (e) {
-      Logs().w('[Push] Rich notification update failed, keeping placeholder', e);
     }
   }
 }
