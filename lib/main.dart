@@ -12,6 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/feature_flags.dart';
+import 'package:Pulsly/features/push/presentation/push_controller.dart';
+import 'package:Pulsly/features/push/presentation/notification_router.dart';
 import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
@@ -137,7 +139,19 @@ Future<void> _initializeApp() async {
     // push system is active. With the new push system, the PushController
     // handles background messages via UnifiedPush directly.
     await FeatureFlags.init();
-    if (!FeatureFlags.useNewPushSystem) {
+    if (FeatureFlags.useNewPushSystem) {
+      // Nieuwe push systeem: initialiseer PushController voor background fetch
+      Logs().i('[Main] Background-fetch mode with NEW push system');
+      NotificationRouter.initialize(
+        router: null, // geen router in background mode
+        clients: clients,
+      );
+      final pushController = PushController(store, clients);
+      await pushController.initializeLocalNotifications();
+      await pushController.initialize();
+    } else {
+      // Legacy push systeem
+      Logs().i('[Main] Background-fetch mode with LEGACY push system');
       BackgroundPush.clientOnly(clients.first);
     }
     // To start the flutter engine afterwards we add an custom observer.

@@ -17,7 +17,7 @@ class NotificationRouter {
 
   /// Initialiseer de router met dependencies
   static void initialize({
-    required GoRouter router,
+    GoRouter? router,
     required List<Client> clients,
   }) {
     _router = router;
