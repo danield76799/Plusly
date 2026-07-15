@@ -758,6 +758,10 @@ class ChatController extends State<ChatPageWithRoom>
       threadLastEventId:
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
     );
+    // Refresh the timeline immediately after sending so the message
+    // appears at once without waiting for the server echo.
+    if (mounted) updateView();
+
     sendController.value = TextEditingValue(
       text: pendingText,
       selection: const TextSelection.collapsed(offset: 0),
