@@ -252,7 +252,10 @@ jobs:
         with:
           tag_name: v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
           name: Plusly v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
-          files: output/*
+          files: |
+            ${{ github.workspace }}/output/plusly-arm64-v8a-release.apk
+            ${{ github.workspace }}/output/plusly-armeabi-v7a-release.apk
+            ${{ github.workspace }}/output/plusly-release.aab
           generate_release_notes: true
           fail_on_unmatched_files: false
         env:

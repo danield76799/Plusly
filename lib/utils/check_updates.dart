@@ -397,8 +397,27 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
 
     Logs().v('Download complete: $fileSize bytes');
 
+    // Only accept APK/AAB; all other assets are skipped.
+    if (!fileName.toLowerCase().endsWith('.apk') &&
+        !fileName.toLowerCase().endsWith('.aab')) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Text('Dit releasebestand is geen APK/AAB. Open de releasepagina voor een directe downloadlink.'),
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Open Pagina',
+              onPressed: () => launchUrlString('https://github.com/danield76799/Plusly/releases/latest'),
+            ),
+          ),
+        );
+      }
+      return;
+    }
+
     // Check if it's an AAB file - redirect to browser for manual install
-    if (fileName.endsWith('.aab')) {
+    if (fileName.toLowerCase().endsWith('.aab')) {
       if (context.mounted) {
         Navigator.of(context).pop();
         scaffold.showSnackBar(
