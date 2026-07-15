@@ -635,7 +635,8 @@ class ChatController extends State<ChatPageWithRoom>
 
     if (eventId == null &&
         !room.hasNewMessages &&
-        room.notificationCount == 0) {
+        room.notificationCount == 0 &&
+        !room.markedUnread) {
       return;
     }
 

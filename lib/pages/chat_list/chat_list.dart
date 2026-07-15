@@ -178,10 +178,10 @@ class ChatListController extends State<ChatList>
   Set<String> allBridgeTypes = {};
   Set<String> visibleBridgeTypes = {};
 
-  // Cached getter voor ongelezen counts - 2 second cache
+  // Cached getter voor ongelezen counts - 500ms cache
   Map<String, int> get unreadBridgeCounts {
     final now = DateTime.now();
-    if (now.difference(_lastUnreadCalc) < Duration(seconds: 2)) {
+    if (now.difference(_lastUnreadCalc) < const Duration(milliseconds: 500)) {
       return _cachedUnreadCounts;
     }
 
