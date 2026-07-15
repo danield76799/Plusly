@@ -747,8 +747,7 @@ class ChatController extends State<ChatPageWithRoom>
       parseCommands = false;
     }
 
-    // ignore: unawaited_futures
-    room.sendTextEvent(
+    final sentEventId = await room.sendTextEvent(
       sendController.text,
       inReplyTo: replyEvent,
       replyMention: replyMention,
@@ -758,8 +757,9 @@ class ChatController extends State<ChatPageWithRoom>
       threadLastEventId:
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
     );
-    // Refresh the timeline immediately after sending so the message
-    // appears at once without waiting for the server echo.
+    Logs().v('Message sent with local txid/eventId', sentEventId);
+    // Refresh the timeline after the SDK has created the pending event so
+    // the message appears instantly instead of waiting for the server echo.
     if (mounted) updateView();
 
     sendController.value = TextEditingValue(
