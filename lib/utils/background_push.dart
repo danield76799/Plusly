@@ -582,11 +582,13 @@ class BackgroundPush {
           false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
     );
 
-    // Trigger immediate sync so the new message appears in the chat instantly
+    // Trigger immediate sync so the new message appears in the chat instantly.
+    // Abort the in-flight long-poll first so the new sync doesn't wait up to 30s.
     final client = clientFromInstance(i, clients);
     if (client != null) {
       try {
-        await client.oneShotSync();
+        client.abortSync();
+        await client.oneShotSync(timeout: Duration.zero);
         Logs().v('Immediate sync triggered after push notification');
       } catch (e) {
         Logs().w('Failed to trigger immediate sync after push', e);

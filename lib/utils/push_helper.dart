@@ -170,17 +170,21 @@ Future<void> _tryPushHelper(
   }
 
   // ── Start sync so the room moves to the top of the chat list immediately ──
-  // In the background the normal sync loop is paused, so oneShotSync can stall.
-  // Temporarily enable background sync for background messages, then restore it
-  // via whenComplete without blocking the push handler (avoid ANR).
-  if (isBackgroundMessage) {
-    client.backgroundSync = true;
-  }
-  final syncFuture = client.oneShotSync();
+  // The Matrix SDK's oneShotSync() reuses the in-flight long-poll sync (which
+  // has a 30s timeout). If we just call oneShotSync(), we'd wait up to 30s for
+  // the current sync cycle to finish before the new message appears in the list.
+  // Abort the in-flight long-poll first, then do an immediate sync (timeout 0 =
+  // no long-poll wait) so the new message is fetched right away.
+  final wasBackgroundSync = client.syncPending;
+  client.abortSync();
+  final syncFuture = client.oneShotSync(timeout: Duration.zero);
   unawaited(
     syncFuture.whenComplete(() {
       if (isBackgroundMessage) {
         client.backgroundSync = false;
+      } else if (wasBackgroundSync) {
+        // Restore the continuous sync loop that abortSync() stopped.
+        client.backgroundSync = true;
       }
     }),
   );
