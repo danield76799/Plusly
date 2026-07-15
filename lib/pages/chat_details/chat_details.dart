@@ -42,7 +42,7 @@ class ChatDetailsController extends State<ChatDetails> {
   String get roomId => widget.roomId;
 
   void setDisplaynameAction() async {
-    final room = Matrix.of(context).client.getRoomById(widget.roomId);
+    final room = Matrix.of(context).client.getRoomById(roomId);
     if (room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Room not found')),

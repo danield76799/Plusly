@@ -59,9 +59,12 @@ class SettingsBackup {
     final tempDir = await getTemporaryDirectory();
     final file = File('${tempDir.path}/$_backupFileName');
     await file.writeAsString(jsonString);
-    await Share.shareXFiles([
-      XFile(file.path),
-    ], subject: 'Plusly Settings Backup');
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path)],
+        subject: 'Plusly Settings Backup',
+      ),
+    );
   }
 
   static Future<Map<String, dynamic>?> pickAndRead() async {

@@ -107,7 +107,6 @@ class ChatListController extends State<ChatList>
   StreamSubscription? _intentUriStreamSubscription;
 
   // Performance cache variables
-  Set<String> _cachedBridgeTypes = {};
   DateTime _lastBridgeSync = DateTime(2000);
   Map<String, int> _cachedUnreadCounts = {};
   DateTime _lastUnreadCalc = DateTime(2000);
@@ -202,10 +201,6 @@ class ChatListController extends State<ChatList>
     return counts;
   }
 
-  void _initVisibleBridgeTypes() {
-    syncBridgeTypes();
-  }
-
   void syncBridgeTypes() {
     // Cache for 5 seconds to avoid recomputation
     if (DateTime.now().difference(_lastBridgeSync) < Duration(seconds: 5)) {
@@ -228,7 +223,6 @@ class ChatListController extends State<ChatList>
       ...detectedTypes.where((t) => !allBridgeTypes.contains(t)),
     };
     allBridgeTypes = detectedTypes;
-    _cachedBridgeTypes = detectedTypes;
     _lastBridgeSync = DateTime.now();
   }
 

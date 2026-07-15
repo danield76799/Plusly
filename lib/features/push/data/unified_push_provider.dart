@@ -264,7 +264,7 @@ class UnifiedPushProvider implements PushProvider {
     // Toon picker dialog als er meerdere distributors zijn
     try {
       // Gebruik PluslyApp.router.routerDelegate.navigatorKey
-      final context = PluslyApp.router.routerDelegate.navigatorKey?.currentContext;
+      final context = PluslyApp.router.routerDelegate.navigatorKey.currentContext;
       if (context == null) {
         Logs().w('[UnifiedPush] No navigator context, using first distributor');
         return distributors.first;

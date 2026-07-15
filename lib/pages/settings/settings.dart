@@ -356,8 +356,8 @@ class SettingsController extends State<Settings> {
     final crossSigning =
         await client.encryption?.crossSigning.isCached() ?? false;
     final needsBootstrap =
-        client.encryption?.keyManager.isCached() == false ||
-        client.encryption?.crossSigning.enabled == false ||
+        (client.encryption?.keyManager.isCached() ?? false) == false ||
+        (client.encryption?.crossSigning.enabled ?? false) == false ||
         !crossSigning;
     final isUnknownSession = client.isUnknownSession;
     setState(() {

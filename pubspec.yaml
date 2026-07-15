@@ -9,10 +9,6 @@ environment:
 
 dependencies:
   action_slider: ^0.7.0
-  # android_system_font: DISABLED - causes Kotlin daemon crash on cross-drive builds
-  #   git:
-  #     url: https://github.com/re7gog/android_system_font.git
-  #     ref: master
   app_links: ^7.0.0
   archive: ^4.0.9
   async: ^2.13.0
@@ -114,7 +110,6 @@ dependencies:
   wakelock_plus: ^1.4.0
   webrtc_interface: ^1.4.0
   webview_flutter: ^4.10.0
-
 dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3

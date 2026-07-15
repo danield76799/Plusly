@@ -7,7 +7,6 @@ import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';
 import 'package:Pulsly/widgets/unread_rooms_badge.dart';
-import '../../widgets/matrix.dart';
 
 class ChatListBottomNavbar extends StatelessWidget {
   final ChatListController controller;

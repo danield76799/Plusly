@@ -9,8 +9,6 @@ import 'package:Pulsly/pages/chat/recording_view_model.dart';
 import 'package:Pulsly/pages/chat/video_note_recording_dialog.dart';
 import 'package:Pulsly/shortcuts/chat/paste_shortcut.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
-import 'package:Pulsly/widgets/avatar.dart';
-import 'package:Pulsly/widgets/matrix.dart';
 import '../../config/themes.dart';
 import 'chat.dart';
 import 'input_bar.dart';

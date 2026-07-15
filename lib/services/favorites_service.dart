@@ -43,7 +43,7 @@ class FavoritesService {
     if (_initialized) return;
     try {
       final prefs = await SharedPreferences.getInstance();
-      final String? data = prefs.getString(_key);
+      final data = prefs.getString(_key);
       if (data != null && data.isNotEmpty) {
         final jsonList = jsonDecode(data) as List<dynamic>;
         _cache = jsonList.map((e) => SavedMessage.fromJson(e)).toList();

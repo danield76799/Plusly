@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:async/async.dart';
 import 'package:Pulsly/pages/favorites/favorites_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,7 +19,6 @@ import 'package:Pulsly/pages/dialer/back_to_call_button.dart';
 import 'package:Pulsly/shortcuts/chat_list/chat_list_shortcuts.dart';
 import 'package:Pulsly/services/chat_list_cache_service.dart';
 import 'package:Pulsly/utils/show_profile.dart';
-import 'package:Pulsly/utils/stream_extension.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/mini_audio_player.dart';

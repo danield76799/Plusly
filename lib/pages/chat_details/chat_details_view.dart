@@ -28,7 +28,7 @@ class ChatDetailsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final room = Matrix.of(context).client.getRoomById(controller.roomId!);
+    final room = Matrix.of(context).client.getRoomById(controller.roomId);
     if (room == null) {
       return Scaffold(
         appBar: AppBar(title: Text(L10n.of(context).oopsSomethingWentWrong)),
@@ -431,7 +431,7 @@ class ChatDetailsView extends StatelessWidget {
                                     ),
                                   ),
                                   onTap: () => context.push(
-                                    '/rooms/${controller.roomId!}/details/members',
+                                    '/rooms/${controller.roomId}/details/members',
                                   ),
                                   trailing: const Icon(
                                     Icons.chevron_right_outlined,

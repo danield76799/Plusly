@@ -421,7 +421,7 @@ Future<void>? _buildFallbackNotification(
       '';
   final body = (notification.content?['body'] as String?)?.trim();
   if (senderName.isEmpty && (body == null || body.isEmpty)) {
-    return null;
+    return;
   }
 
   final roomName = _roomDisplayName(client, notification.roomId, l10n) ?? l10n.incomingMessages;

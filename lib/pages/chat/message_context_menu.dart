@@ -643,7 +643,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                   id: event.eventId,
                                   roomId: room.id,
                                   sender: event.senderFromMemoryOrFallback.displayName ?? event.senderId,
-                                  content: event.plaintextBody ?? 'Geen tekst',
+                                  content: event.plaintextBody,
                                   savedAt: DateTime.now(),
                                 ));
                                 ScaffoldMessenger.of(context).showSnackBar(
