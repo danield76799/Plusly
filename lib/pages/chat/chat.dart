@@ -532,17 +532,28 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void>? loadTimelineFuture;
   Map<String, Thread>? threads = {};
 
+  void _onNewTimelineEvent() {
+    // Use a microtask so multiple inserts in one frame only rebuild once.
+    Future.microtask(() {
+      if (mounted) updateView();
+    });
+  }
+
   Future<void> _loadRoomTimeline({String? eventContextId}) async {
     try {
       timeline?.cancelSubscriptions();
       timeline = await room.getTimeline(
         onUpdate: updateView,
+        onNewEvent: _onNewTimelineEvent,
         eventContextId: eventContextId,
       );
     } catch (e, s) {
       Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
       if (!mounted) return;
-      timeline = await room.getTimeline(onUpdate: updateView);
+      timeline = await room.getTimeline(
+        onUpdate: updateView,
+        onNewEvent: _onNewTimelineEvent,
+      );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
         _showScrollUpMaterialBanner(eventContextId!);
@@ -560,6 +571,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
+        onNewEvent: _onNewTimelineEvent,
         eventContextId: eventContextId,
       );
       Logs().v("Thread timeline loaded");
