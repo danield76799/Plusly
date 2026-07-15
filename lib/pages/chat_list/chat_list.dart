@@ -54,7 +54,7 @@ extension LocalizedActiveFilter on ActiveFilter {
       case ActiveFilter.groups:
         return L10n.of(context).groups;
       case ActiveFilter.favorites:
-        return "Opgeslagen";
+        return L10n.of(context).favorites;
       case ActiveFilter.pinned:
         return "Gepind";
       case ActiveFilter.people:
@@ -171,6 +171,12 @@ class ChatListController extends State<ChatList>
       setActiveSpace(room.id);
       return;
     }
+
+    // Reset caches so the chat list refreshes immediately on return.
+    _cachedFilteredRooms = [];
+    _lastFilterCalc = DateTime(2000);
+    _cachedUnreadCounts = {};
+    _lastUnreadCalc = DateTime(2000);
 
     context.go('/rooms/${room.id}');
   }
