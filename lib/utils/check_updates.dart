@@ -180,19 +180,28 @@ bool isNewerVersion(String latest, String current) {
   latest = latest.startsWith('v') ? latest.substring(1) : latest;
   current = current.startsWith('v') ? current.substring(1) : current;
 
-  // Strip build metadata (+NNN) from both versions for comparison
+  // Extract build metadata (+NNN) from both versions
   final latestPlusIndex = latest.indexOf('+');
+  final latestBuildNumber = latestPlusIndex != -1 ? latest.substring(latestPlusIndex + 1) : '';
   if (latestPlusIndex != -1) {
     latest = latest.substring(0, latestPlusIndex);
   }
   final currentPlusIndex = current.indexOf('+');
+  final currentBuildNumber = currentPlusIndex != -1 ? current.substring(currentPlusIndex + 1) : '';
   if (currentPlusIndex != -1) {
     current = current.substring(0, currentPlusIndex);
   }
 
+  // If both versions share the same semver core, compare build numbers if present.
+  if (latest == current && latestBuildNumber.isNotEmpty && currentBuildNumber.isNotEmpty) {
+    final latestBuild = int.tryParse(latestBuildNumber) ?? 0;
+    final currentBuild = int.tryParse(currentBuildNumber) ?? 0;
+    return latestBuild > currentBuild;
+  }
+
   // Check if versions look like Plusly build tags (e.g., "0.9.9-build421", "1.1.3+863", "playstore-240")
-  final latestIsBuildTag = latest.contains('+') || latest.contains('build') || latest.startsWith('playstore-') || latest.startsWith('playstore-v');
-  final currentIsBuildTag = current.contains('+') || current.contains('build');
+  final latestIsBuildTag = latestBuildNumber.isNotEmpty || latest.contains('build') || latest.startsWith('playstore-') || latest.startsWith('playstore-v');
+  final currentIsBuildTag = currentBuildNumber.isNotEmpty || current.contains('build');
 
   // Special case: playstore- tags are only newer if current is also a playstore tag
   // and the build number is higher. Otherwise, compare semver normally.
@@ -224,6 +233,8 @@ bool isNewerVersion(String latest, String current) {
     
     if (latestPlaystoreMatch != null) {
       latestBuild = int.tryParse(latestPlaystoreMatch.group(1) ?? '0');
+    } else if (latestBuildNumber.isNotEmpty) {
+      latestBuild = int.tryParse(latestBuildNumber);
     } else {
       final latestBuildMatch = RegExp(r'(\d+)$').firstMatch(latest);
       latestBuild = latestBuildMatch != null ? int.tryParse(latestBuildMatch.group(1) ?? '0') : null;
@@ -231,6 +242,8 @@ bool isNewerVersion(String latest, String current) {
     
     if (currentPlaystoreMatch != null) {
       currentBuild = int.tryParse(currentPlaystoreMatch.group(1) ?? '0');
+    } else if (currentBuildNumber.isNotEmpty) {
+      currentBuild = int.tryParse(currentBuildNumber);
     } else {
       final currentBuildMatch = RegExp(r'(\d+)$').firstMatch(current);
       currentBuild = currentBuildMatch != null ? int.tryParse(currentBuildMatch.group(1) ?? '0') : null;

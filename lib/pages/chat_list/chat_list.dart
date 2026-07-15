@@ -178,6 +178,11 @@ class ChatListController extends State<ChatList>
     _cachedUnreadCounts = {};
     _lastUnreadCalc = DateTime(2000);
 
+    // Drop TimelineCache for this room so we get a fresh timeline
+    // on next open. This ensures newly sent messages appear promptly
+    // instead of being hidden behind a stale cached timeline.
+    TimelineCache.clearTimeline(room.id);
+
     context.go('/rooms/${room.id}');
   }
 
