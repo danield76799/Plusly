@@ -115,9 +115,14 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
   }
 
   try {
-    // Fetch all releases and find the latest semver release with APK
+    // Fetch latest release directly from GitHub API.
+    // Using /releases/latest is more reliable than iterating /releases,
+    // because the releases list is not guaranteed to be newest-first
+    // and we may otherwise pick an older release that happens to have
+    // an APK asset while a newer one is available.
+    final latestUrl = '$url/latest';
     final response = await Dio().get(
-      url,
+      latestUrl,
       options: Options(
         headers: {
           'Accept': 'application/vnd.github+json',
@@ -128,47 +133,32 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
       ),
     );
 
-    if (response.statusCode == 200 && response.data is List) {
-      final releases = response.data as List<dynamic>;
-      
-      // Find the latest semver release (not playstore-vNNN tags)
-      // Prefer releases with APK assets
-      GitHubRelease? latestSemverRelease;
-      
-      for (final releaseData in releases) {
-        if (releaseData is! Map<String, dynamic>) continue;
-        
-        final release = GitHubRelease.fromJson(releaseData);
-        final tagName = release.tagName;
-        
-        // Skip playstore-vNNN tags - these are Play Store only, not for APK updates
-        if (tagName.startsWith('playstore-') || tagName.startsWith('playstore-v')) {
-          continue;
-        }
-        
-        // Only accept releases with APK - skip AAB-only releases
-        if (release.hasApk) {
-          latestSemverRelease = release;
-          break; // First semver release with APK is the latest
-        }
+    if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+      final release = GitHubRelease.fromJson(response.data as Map<String, dynamic>);
+      final tagName = release.tagName;
+
+      // Skip playstore-only tags
+      if (tagName.startsWith('playstore-') || tagName.startsWith('playstore-v')) {
+        Logs().v('Latest release is playstore-only, no update available');
+        return null;
       }
 
-      // If no release with APK found, return null (no update available)
-      if (latestSemverRelease == null) {
-        Logs().v('No semver release with APK found');
+      // Only accept releases with APK - skip AAB-only releases
+      if (!release.hasApk) {
+        Logs().v('Latest release has no APK asset');
         return null;
       }
 
       // Cache the result
       try {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(cacheKey, jsonEncode(latestSemverRelease.toJson()));
+        await prefs.setString(cacheKey, jsonEncode(release.toJson()));
         await prefs.setInt(cacheTimeKey, DateTime.now().millisecondsSinceEpoch);
       } catch (e) {
         Logs().v('Cache write failed: $e');
       }
 
-      return latestSemverRelease;
+      return release;
     } else {
       Logs().w('GitHub API returned status ${response.statusCode}');
     }
