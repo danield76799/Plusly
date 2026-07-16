@@ -529,6 +529,10 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void>? loadTimelineFuture;
   Map<String, Thread>? threads = {};
 
+  void _onTimelineInsert(int index) {
+    if (mounted) updateView(immediate: true);
+  }
+
   void _onNewTimelineEvent() {
     if (mounted) updateView(immediate: true);
   }
@@ -538,6 +542,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await room.getTimeline(
         onUpdate: updateView,
+        onInsert: _onTimelineInsert,
         onNewEvent: _onNewTimelineEvent,
         eventContextId: eventContextId,
       );
@@ -546,6 +551,7 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await room.getTimeline(
         onUpdate: updateView,
+        onInsert: _onTimelineInsert,
         onNewEvent: _onNewTimelineEvent,
       );
       if (!mounted) return;
@@ -565,6 +571,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
+        onInsert: _onTimelineInsert,
         onNewEvent: _onNewTimelineEvent,
         eventContextId: eventContextId,
       );
@@ -578,6 +585,7 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
+        onInsert: _onTimelineInsert,
         onNewEvent: _onNewTimelineEvent,
       );
       if (!mounted) return;
