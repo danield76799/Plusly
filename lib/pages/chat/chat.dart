@@ -770,8 +770,10 @@ class ChatController extends State<ChatPageWithRoom>
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
     );
     Logs().v('Message sent with local txid/eventId', sentEventId);
-    // Refresh the timeline after the SDK has created the pending event so
-    // the message appears instantly instead of waiting for the server echo.
+    // Give the SDK a brief moment to insert the pending event into the
+    // timeline before refreshing the UI. Without this delay, updateView()
+    // can run while the pending event is still not visible.
+    await Future.delayed(const Duration(milliseconds: 120));
     if (mounted) updateView();
 
     sendController.value = TextEditingValue(
