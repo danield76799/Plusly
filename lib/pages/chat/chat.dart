@@ -769,19 +769,29 @@ class ChatController extends State<ChatPageWithRoom>
       threadLastEventId:
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
     );
+    // Clear the input immediately so the text never lingers in the
+    // composer after sending (fixes "double text" where the sent message
+    // also stayed in the input bar).
+    _clearComposer();
     Logs().v('Message sent with local txid/eventId', sentEventId);
     // Wait for our message to actually appear in the timeline before
     // refreshing the UI. A fixed delay (120ms) is not enough for replies:
     // the SDK needs extra time to process m.in_reply_to relations.
     // Poll the timeline every 50ms until our local echo shows up,
-    // with a 3-second safety timeout.
-    final sw = Stopwatch()..start();
-    while (sw.elapsedMilliseconds < 3000) {
-      if (timeline?.events.isNotEmpty == true) {
-        final last = timeline!.events.last;
-        if (last.status.isSending || last.eventId == sentEventId) break;
+    // with a 3-second safety timeout. Never throw — we must always
+    // continue to clear the input below.
+    try {
+      final sw = Stopwatch()..start();
+      while (sw.elapsedMilliseconds < 3000) {
+        final events = timeline?.events;
+        if (events != null && events.isNotEmpty) {
+          final last = events.last;
+          if (last.status.isSending || last.eventId == sentEventId) break;
+        }
+        await Future.delayed(const Duration(milliseconds: 50));
       }
-      await Future.delayed(const Duration(milliseconds: 50));
+    } catch (_) {
+      // Timeline may have been disposed mid-poll; ignore and refresh anyway.
     }
     if (mounted) updateView();
 
@@ -795,19 +805,12 @@ class ChatController extends State<ChatPageWithRoom>
       scrollController.jumpTo(scrollController.position.maxScrollExtent);
     });
 
-    sendController.value = TextEditingValue(
-      text: pendingText,
-      selection: const TextSelection.collapsed(offset: 0),
-    );
-
-    setState(() {
-      _isSending = false;
-      sendController.text = pendingText;
-      _inputTextIsEmpty = pendingText.isEmpty;
-      replyEvent = null;
-      editEvent = null;
-      pendingText = '';
-    });
+    _clearComposer();
+    if (mounted) {
+      setState(() {
+        _isSending = false;
+      });
+    }
   }
 
   void sendPollAction() async {
@@ -1932,6 +1935,17 @@ class ChatController extends State<ChatPageWithRoom>
 
   Timer? _storeInputTimeoutTimer;
   static const Duration _storeInputTimeout = Duration(milliseconds: 500);
+
+  /// Empties the composer without triggering the draft-save timer or
+  /// leaving the sent text lingering in the input field.
+  void _clearComposer() {
+    _storeInputTimeoutTimer?.cancel();
+    sendController.clear();
+    _inputTextIsEmpty = true;
+    replyEvent = null;
+    editEvent = null;
+    pendingText = '';
+  }
 
   void onInputBarChanged(String text) {
     if (_inputTextIsEmpty != text.isEmpty) {
