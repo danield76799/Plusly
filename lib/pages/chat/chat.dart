@@ -494,27 +494,13 @@ class ChatController extends State<ChatPageWithRoom>
   });
 
   bool firstUpdateReceived = false;
-  Timer? _updateViewDebounce;
 
   Future<void> updateView({bool immediate = false}) async {
     if (!mounted) return;
-    if (immediate) {
-      setReadMarker();
-      updateThreads();
-      setState(() {
-        firstUpdateReceived = true;
-      });
-      return;
-    }
-    // Debounce rapid updates to prevent excessive rebuilds
-    _updateViewDebounce?.cancel();
-    _updateViewDebounce = Timer(Duration(milliseconds: 100), () {
-      if (!mounted) return;
-      setReadMarker();
-      updateThreads();
-      setState(() {
-        firstUpdateReceived = true;
-      });
+    setReadMarker();
+    updateThreads();
+    setState(() {
+      firstUpdateReceived = true;
     });
   }
 
@@ -694,7 +680,6 @@ class ChatController extends State<ChatPageWithRoom>
 
   @override
   void dispose() {
-    _updateViewDebounce?.cancel();
     typingCoolDown?.cancel();
     typingTimeout?.cancel();
     scrollController.removeListener(_updateScrollController);
