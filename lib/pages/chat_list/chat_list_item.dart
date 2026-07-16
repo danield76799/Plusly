@@ -193,8 +193,10 @@ class ChatListItem extends StatelessWidget {
                                 context,
                               ),
                               style: TextStyle(
-                                fontSize: compactMode ? 10 : 12,
-                                color: theme.colorScheme.outline,
+                                fontSize: compactMode ? 11 : 13,
+                                fontWeight: FontWeight.w500,
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.6),
                               ),
                             ),
                             const SizedBox(width: 6),

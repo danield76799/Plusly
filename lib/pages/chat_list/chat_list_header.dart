@@ -327,8 +327,9 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_tabScrollController.hasClients) return;
       if (activeIndex < 0) return;
-      // Approximate target offset: each tab is ~96px wide. Clamp to range.
-      const tabWidth = 96.0;
+      // Approximate target offset: each tab is ~104px wide (16+text+16+8 padding).
+      // Clamp to range so we never overshoot the scroll position.
+      const tabWidth = 104.0;
       final viewport = _tabScrollController.position.viewportDimension;
       final target = (activeIndex * tabWidth - viewport / 2 + tabWidth / 2)
           .clamp(0.0, _tabScrollController.position.maxScrollExtent);
@@ -356,29 +357,37 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
         child: Row(
           children: filters.map((filter) {
             final isActive = controller.activeFilter == filter;
-            return InkWell(
-              onTap: () => controller.setActiveFilter(filter),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: isActive
-                          ? theme.colorScheme.primary
-                          : Colors.transparent,
-                      width: 2,
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+              child: InkWell(
+                onTap: () => controller.setActiveFilter(filter),
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
+                        : null,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: isActive
+                            ? theme.colorScheme.primary
+                            : Colors.transparent,
+                        width: 2,
+                      ),
                     ),
                   ),
-                ),
-                child: Center(
-                  child: Text(
-                    filter.toLocalizedString(context),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: isActive
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  child: Center(
+                    child: Text(
+                      filter.toLocalizedString(context),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isActive
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
                     ),
                   ),
                 ),
