@@ -800,9 +800,12 @@ class ChatController extends State<ChatPageWithRoom>
     // because the event arrives via a separate relation-aggregation sync.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !scrollController.hasClients) return;
-      // Don't yank the user away if they're reading older messages
+      // Don't yank the user away if they're reading older messages.
+      // The event list is reverse:true, so pixels==0 is the newest message
+      // (visual bottom) and maxScrollExtent is the oldest (visual top).
+      // "Reading older messages" means scrolled up visually (pixels > 0).
       if (scrollController.position.pixels > 50) return;
-      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      scrollController.jumpTo(0);
     });
 
     _clearComposer();
