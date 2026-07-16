@@ -770,11 +770,30 @@ class ChatController extends State<ChatPageWithRoom>
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
     );
     Logs().v('Message sent with local txid/eventId', sentEventId);
-    // Give the SDK a brief moment to insert the pending event into the
-    // timeline before refreshing the UI. Without this delay, updateView()
-    // can run while the pending event is still not visible.
-    await Future.delayed(const Duration(milliseconds: 120));
+    // Wait for our message to actually appear in the timeline before
+    // refreshing the UI. A fixed delay (120ms) is not enough for replies:
+    // the SDK needs extra time to process m.in_reply_to relations.
+    // Poll the timeline every 50ms until our local echo shows up,
+    // with a 3-second safety timeout.
+    final sw = Stopwatch()..start();
+    while (sw.elapsedMilliseconds < 3000) {
+      if (timeline?.events.isNotEmpty == true) {
+        final last = timeline!.events.last;
+        if (last.status.isSending || last.eventId == sentEventId) break;
+      }
+      await Future.delayed(const Duration(milliseconds: 50));
+    }
     if (mounted) updateView();
+
+    // Explicitly scroll to the bottom so the user sees their message
+    // immediately. AutoScrollController sometimes misses this for replies
+    // because the event arrives via a separate relation-aggregation sync.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !scrollController.hasClients) return;
+      // Don't yank the user away if they're reading older messages
+      if (scrollController.position.pixels > 50) return;
+      scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    });
 
     sendController.value = TextEditingValue(
       text: pendingText,
