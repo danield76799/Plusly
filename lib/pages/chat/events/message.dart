@@ -891,8 +891,8 @@ class BubblePainter extends CustomPainter {
         scrollableRect.topCenter,
         scrollableRect.bottomCenter,
         AppSettings.enableChatFrostedGlass.value
-            ? colors.map((x) => x.withValues(alpha: 0.7)).toList()
-            : colors,
+            ? colors.map((x) => x.withValues(alpha: 0.6)).toList()
+            : colors.map((x) => x.withValues(alpha: 0.85)).toList(),
         [0.0, 1.0],
         TileMode.clamp,
         Matrix4.translationValues(-origin.dx, -origin.dy, 0.0).storage,
