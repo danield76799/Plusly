@@ -53,10 +53,10 @@ extension LocalizedActiveFilter on ActiveFilter {
         return L10n.of(context).unread;
       case ActiveFilter.groups:
         return L10n.of(context).groups;
-      case ActiveFilter.favorites:
-        return "Opgeslagen";
-      case ActiveFilter.pinned:
-        return "Gepind";
+      case .favorites:
+        return L10n.of(context).saved;
+      case .pinned:
+        return L10n.of(context).pinned;
       case ActiveFilter.people:
         return L10n.of(context).people;
     }

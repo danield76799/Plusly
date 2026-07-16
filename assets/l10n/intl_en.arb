@@ -1665,6 +1665,16 @@
     "type": "String",
     "placeholders": {}
   },
+  "saved": "Saved",
+  "@saved": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "pinned": "Pinned",
+  "@pinned": {
+    "type": "String",
+    "placeholders": {}
+  },
   "play": "Play {fileName}",
   "@play": {
     "type": "String",
