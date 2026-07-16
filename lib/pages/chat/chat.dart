@@ -496,6 +496,10 @@ class ChatController extends State<ChatPageWithRoom>
   bool firstUpdateReceived = false;
   int timelineVersion = 0;
 
+  String? _pendingEventText;
+
+  String? get pendingEventText => _pendingEventText;
+
   Future<void> updateView({bool immediate = false}) async {
     if (!mounted) return;
     timelineVersion++;
@@ -530,6 +534,13 @@ class ChatController extends State<ChatPageWithRoom>
   Map<String, Thread>? threads = {};
 
   void _onTimelineInsert(int index) {
+    if (_pendingEventText != null) {
+      if (mounted) {
+        setState(() {
+          _pendingEventText = null;
+        });
+      }
+    }
     if (mounted) updateView(immediate: true);
   }
 
@@ -797,6 +808,14 @@ class ChatController extends State<ChatPageWithRoom>
       return null;
     });
     Logs().v('Message sent (optimistic)', textToSend);
+
+    // Show local echo immediately so the user sees their message without
+    // waiting for the SDK DB write (≈150ms). Cleared by _onTimelineInsert.
+    if (mounted) {
+      setState(() {
+        _pendingEventText = textToSend;
+      });
+    }
 
     if (mounted) updateView(immediate: true);
 

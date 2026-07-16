@@ -119,6 +119,28 @@ class ChatEventList extends StatelessWidget {
                 }
 
                 if (i == events.length + 1) {
+                  final pending = controller.pendingEventText;
+                  if (pending != null) {
+                    return Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Text(pending),
+                        ),
+                      ),
+                    );
+                  }
+
                   if (timeline.canRequestHistory) {
                     WidgetsBinding.instance.addPostFrameCallback(
                       controller.requestHistory,
