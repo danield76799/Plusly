@@ -781,18 +781,17 @@ class ChatController extends State<ChatPageWithRoom>
     // composer after sending (fixes "double text" where the sent message
     // also stayed in the input bar).
     _clearComposer();
+    if (mounted) {
+      setState(() {
+        _isSending = false;
+      });
+    }
     Logs().v('Message sent with local txid/eventId', sentEventId);
 
     // The SDK inserts the pending event into the timeline quickly; the
     // _onNewTimelineEvent callback refreshes it immediately via
     // updateView(immediate: true). No artificial delay or poll needed.
     if (mounted) updateView(immediate: true);
-
-    if (mounted) {
-      setState(() {
-        _isSending = false;
-      });
-    }
 
     // Scroll so the user sees their message immediately. reverse:true
     // list: pixels==0 is newest (visual bottom).
