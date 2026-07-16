@@ -755,8 +755,23 @@ class ChatController extends State<ChatPageWithRoom>
       parseCommands = false;
     }
 
-    final sentEventId = await room.sendTextEvent(
-      sendController.text,
+    // Capture the text before clearing the composer so we can send
+    // optimistically — the user sees instant feedback while the network
+    // request runs in the background.
+    final textToSend = sendController.text;
+    _clearComposer();
+    if (mounted) {
+      setState(() {
+        _isSending = false;
+      });
+    }
+
+    // Fire-and-forget: the SDK inserts a local echo into the timeline
+    // immediately, and _onNewTimelineEvent + updateView make it visible.
+    // No need to await — the user already sees the cleared input.
+    // ignore: unawaited_futures
+    room.sendTextEvent(
+      textToSend,
       inReplyTo: replyEvent,
       replyMention: replyMention,
       editEventId: editEvent?.eventId,
@@ -764,21 +779,17 @@ class ChatController extends State<ChatPageWithRoom>
       threadRootEventId: thread?.rootEvent.eventId,
       threadLastEventId:
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
-    );
-    // Clear the input immediately so the text never lingers in the
-    // composer after sending (fixes "double text" where the sent message
-    // also stayed in the input bar).
-    _clearComposer();
-    if (mounted) {
-      setState(() {
-        _isSending = false;
-      });
-    }
-    Logs().v('Message sent with local txid/eventId', sentEventId);
+    ).catchError((e) {
+      Logs().e('Failed to send message', e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(L10n.of(context).errorSendingMessage)),
+        );
+      }
+      return null;
+    });
+    Logs().v('Message sent (optimistic)', textToSend);
 
-    // The SDK inserts the pending event into the timeline quickly; the
-    // _onNewTimelineEvent callback refreshes it immediately via
-    // updateView(immediate: true). No artificial delay or poll needed.
     if (mounted) updateView(immediate: true);
 
     // Force the chat list to refresh immediately so the room jumps to
