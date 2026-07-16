@@ -495,8 +495,16 @@ class ChatController extends State<ChatPageWithRoom>
   bool firstUpdateReceived = false;
   Timer? _updateViewDebounce;
 
-  Future<void> updateView() async {
+  Future<void> updateView({bool immediate = false}) async {
     if (!mounted) return;
+    if (immediate) {
+      setReadMarker();
+      updateThreads();
+      setState(() {
+        firstUpdateReceived = true;
+      });
+      return;
+    }
     // Debounce rapid updates to prevent excessive rebuilds
     _updateViewDebounce?.cancel();
     _updateViewDebounce = Timer(Duration(milliseconds: 100), () {
@@ -535,7 +543,7 @@ class ChatController extends State<ChatPageWithRoom>
   void _onNewTimelineEvent() {
     // Use a microtask so multiple inserts in one frame only rebuild once.
     Future.microtask(() {
-      if (mounted) updateView();
+      if (mounted) updateView(immediate: true);
     });
   }
 
@@ -793,7 +801,7 @@ class ChatController extends State<ChatPageWithRoom>
     } catch (_) {
       // Timeline may have been disposed mid-poll; ignore and refresh anyway.
     }
-    if (mounted) updateView();
+    if (mounted) updateView(immediate: true);
 
     // Explicitly scroll to the bottom so the user sees their message
     // immediately. AutoScrollController sometimes misses this for replies
