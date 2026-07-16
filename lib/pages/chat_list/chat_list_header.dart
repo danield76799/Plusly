@@ -62,6 +62,15 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
   bool shouldRebuild(covariant _ChatListHeaderDelegate oldDelegate) => true;
 
+  /// Keeps the active filter tab visible when the tab bar overflows.
+  /// Without auto-scroll, "Opgeslagen" is unreachable on narrow screens.
+  final ScrollController _tabScrollController = ScrollController();
+
+  // Called by the SliverPersistentHeader when the delegate is disposed.
+  void dispose() {
+    _tabScrollController.dispose();
+  }
+
   @override
   Widget build(
     BuildContext context,
@@ -309,6 +318,28 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
       ActiveFilter.pinned,
       ActiveFilter.favorites,
     ];
+    final activeIndex = filters.indexOf(controller.activeFilter);
+
+    // Auto-scroll the active tab into view after layout. Without this,
+    // tabs that are off-screen on narrow devices can't be activated
+    // visually even though the underlying SingleChildScrollView allows
+    // horizontal scrolling.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_tabScrollController.hasClients) return;
+      if (activeIndex < 0) return;
+      // Approximate target offset: each tab is ~96px wide. Clamp to range.
+      const tabWidth = 96.0;
+      final viewport = _tabScrollController.position.viewportDimension;
+      final target = (activeIndex * tabWidth - viewport / 2 + tabWidth / 2)
+          .clamp(0.0, _tabScrollController.position.maxScrollExtent);
+      if ((_tabScrollController.offset - target).abs() > 16) {
+        _tabScrollController.animateTo(
+          target,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
 
     return Container(
       decoration: BoxDecoration(
@@ -320,6 +351,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
         ),
       ),
       child: SingleChildScrollView(
+        controller: _tabScrollController,
         scrollDirection: Axis.horizontal,
         child: Row(
           children: filters.map((filter) {
