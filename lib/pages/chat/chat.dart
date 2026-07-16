@@ -782,46 +782,25 @@ class ChatController extends State<ChatPageWithRoom>
     // also stayed in the input bar).
     _clearComposer();
     Logs().v('Message sent with local txid/eventId', sentEventId);
-    // Wait for our message to actually appear in the timeline before
-    // refreshing the UI. A fixed delay (120ms) is not enough for replies:
-    // the SDK needs extra time to process m.in_reply_to relations.
-    // Poll the timeline every 50ms until our local echo shows up,
-    // with a 3-second safety timeout. Never throw — we must always
-    // continue to clear the input below.
-    try {
-      final sw = Stopwatch()..start();
-      while (sw.elapsedMilliseconds < 3000) {
-        final events = timeline?.events;
-        if (events != null && events.isNotEmpty) {
-          final last = events.last;
-          if (last.status.isSending || last.eventId == sentEventId) break;
-        }
-        await Future.delayed(const Duration(milliseconds: 50));
-      }
-    } catch (_) {
-      // Timeline may have been disposed mid-poll; ignore and refresh anyway.
-    }
+
+    // The SDK inserts the pending event into the timeline quickly; the
+    // _onNewTimelineEvent callback refreshes it immediately via
+    // updateView(immediate: true). No artificial delay or poll needed.
     if (mounted) updateView(immediate: true);
 
-    // Explicitly scroll to the bottom so the user sees their message
-    // immediately. AutoScrollController sometimes misses this for replies
-    // because the event arrives via a separate relation-aggregation sync.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !scrollController.hasClients) return;
-      // Don't yank the user away if they're reading older messages.
-      // The event list is reverse:true, so pixels==0 is the newest message
-      // (visual bottom) and maxScrollExtent is the oldest (visual top).
-      // "Reading older messages" means scrolled up visually (pixels > 0).
-      if (scrollController.position.pixels > 50) return;
-      scrollController.jumpTo(0);
-    });
-
-    _clearComposer();
     if (mounted) {
       setState(() {
         _isSending = false;
       });
     }
+
+    // Scroll so the user sees their message immediately. reverse:true
+    // list: pixels==0 is newest (visual bottom).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !scrollController.hasClients) return;
+      if (scrollController.position.pixels > 50) return;
+      scrollController.jumpTo(0);
+    });
   }
 
   void sendPollAction() async {
