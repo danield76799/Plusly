@@ -540,6 +540,7 @@ class ChatView extends StatelessWidget {
                       child: GestureDetector(
                         onTap: controller.clearSingleSelectedEvent,
                         child: ChatEventList(
+                          key: ValueKey(controller.timelineVersion),
                           controller: controller,
                           showThreadRoots: controller.showThreadRoots,
                         ),

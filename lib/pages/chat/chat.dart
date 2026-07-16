@@ -494,9 +494,11 @@ class ChatController extends State<ChatPageWithRoom>
   });
 
   bool firstUpdateReceived = false;
+  int timelineVersion = 0;
 
   Future<void> updateView({bool immediate = false}) async {
     if (!mounted) return;
+    timelineVersion++;
     setReadMarker();
     updateThreads();
     setState(() {
