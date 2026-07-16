@@ -25,6 +25,7 @@ import 'package:Pulsly/widgets/mini_audio_player.dart';
 import '../../config/themes.dart';
 import '../../widgets/matrix.dart';
 import 'chat_list_header.dart';
+import '../../services/chat_list_refresh_bus.dart';
 
 class ChatListViewBody extends StatelessWidget {
   final ChatListController controller;
@@ -81,6 +82,7 @@ class ChatListViewBody extends StatelessWidget {
       // up-to-date is; sommige SDK-versies rapporteren hasRoomUpdate niet
       // betrouwbaar, waardoor push-chats niet meteen zichtbaar worden.
       stream: StreamGroup.merge([
+        ChatListRefreshBus.stream,
         client.onSync.stream.where((s) => s.hasRoomUpdate).map((_) {}),
         client.onSyncStatus.stream
             .where((s) => s.status == SyncStatus.finished)

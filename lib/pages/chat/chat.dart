@@ -30,6 +30,7 @@ import 'package:Pulsly/pages/chat/send_poll_dialog.dart';
 import 'package:Pulsly/pages/chat/send_later_dialog.dart';
 import 'package:Pulsly/pages/chat/translated_event_dialog.dart';
 import 'package:Pulsly/services/timeline_cache.dart';
+import 'package:Pulsly/services/chat_list_refresh_bus.dart';
 import 'package:Pulsly/pages/chat/vote_results_dialog.dart';
 import 'package:Pulsly/pages/chat_details/chat_details.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
@@ -541,10 +542,7 @@ class ChatController extends State<ChatPageWithRoom>
   Map<String, Thread>? threads = {};
 
   void _onNewTimelineEvent() {
-    // Use a microtask so multiple inserts in one frame only rebuild once.
-    Future.microtask(() {
-      if (mounted) updateView(immediate: true);
-    });
+    if (mounted) updateView(immediate: true);
   }
 
   Future<void> _loadRoomTimeline({String? eventContextId}) async {
@@ -590,7 +588,10 @@ class ChatController extends State<ChatPageWithRoom>
         s,
       );
       if (!mounted) return;
-      timeline = await thread!.getTimeline(onUpdate: updateView);
+      timeline = await thread!.getTimeline(
+        onUpdate: updateView,
+        onNewEvent: _onNewTimelineEvent,
+      );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
         _showScrollUpMaterialBanner(eventContextId!);
@@ -792,6 +793,11 @@ class ChatController extends State<ChatPageWithRoom>
     // _onNewTimelineEvent callback refreshes it immediately via
     // updateView(immediate: true). No artificial delay or poll needed.
     if (mounted) updateView(immediate: true);
+
+    // Force the chat list to refresh immediately so the room jumps to
+    // the top of the list without waiting for the next sync (fixes the
+    // 4-second delay before replies appear in the overview).
+    ChatListRefreshBus.refresh();
 
     // Scroll so the user sees their message immediately. reverse:true
     // list: pixels==0 is newest (visual bottom).
