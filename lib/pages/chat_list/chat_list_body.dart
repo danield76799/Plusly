@@ -88,7 +88,10 @@ class ChatListViewBody extends StatelessWidget {
             .where((s) => s.status == SyncStatus.finished)
             .map((_) {}),
       ]),
-      builder: (context, _) {
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.active) {
+          controller.invalidateRoomCache();
+        }
         controller.syncBridgeTypes();
         // Bewaar de chat list cache direct na elke sync-update, zodat de
         // volgorde altijd up-to-date is bij koude start.

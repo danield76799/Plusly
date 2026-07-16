@@ -111,7 +111,6 @@ class ChatListController extends State<ChatList>
   Map<String, int> _cachedUnreadCounts = {};
   DateTime _lastUnreadCalc = DateTime(2000);
   List<Room> _cachedFilteredRooms = [];
-  DateTime _lastFilterCalc = DateTime(2000);
   ActiveFilter _lastActiveFilter = ActiveFilter.allChats;
   Set<String> _lastVisibleBridgeTypes = {};
 
@@ -174,9 +173,10 @@ class ChatListController extends State<ChatList>
 
     // Reset caches so the chat list refreshes immediately on return.
     _cachedFilteredRooms = [];
-    _lastFilterCalc = DateTime(2000);
     _cachedUnreadCounts = {};
     _lastUnreadCalc = DateTime(2000);
+    _lastBridgeSync = DateTime(2000);
+    _lastMaxEventTime = 0;
 
     // Drop TimelineCache for this room so we get a fresh timeline
     // on next open. This ensures newly sent messages appear promptly
@@ -279,11 +279,9 @@ class ChatListController extends State<ChatList>
     return true;
   }
 
-  // Cached filteredRooms - intentionally short cache for performance,
-  // but invalidated immediately on sync/room changes so push notifications
-  // appear at the top right away.
+  // Cached filteredRooms - invalidated immediately when ChatListRefreshBus
+  // fires, so push notifications and outgoing replies jump to the top right away.
   List<Room> get filteredRooms {
-    final now = DateTime.now();
     final client = Matrix.of(context).client;
     final currentRoomCount = client.rooms.length;
     // Use the latest event timestamp across all rooms as a cache invalidation
@@ -294,8 +292,7 @@ class ChatListController extends State<ChatList>
             .map((r) => r.latestEventReceivedTime.millisecondsSinceEpoch)
             .reduce((a, b) => a > b ? a : b);
 
-    if (now.difference(_lastFilterCalc) < const Duration(milliseconds: 100) &&
-        _lastActiveFilter == activeFilter &&
+    if (_lastActiveFilter == activeFilter &&
         _lastVisibleBridgeTypes == visibleBridgeTypes &&
         _lastRoomCount == currentRoomCount &&
         _lastMaxEventTime == currentMaxEventTime) {
@@ -320,7 +317,6 @@ class ChatListController extends State<ChatList>
           b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime));
     }
 
-    _lastFilterCalc = now;
     _lastActiveFilter = activeFilter;
     _lastVisibleBridgeTypes = Set<String>.from(visibleBridgeTypes);
     _lastRoomCount = currentRoomCount;
@@ -345,6 +341,14 @@ class ChatListController extends State<ChatList>
   void resetPagination() {
     _visibleCount = _pageSize;
     setState(() {}); // State gebruikt setState, geen notifyListeners
+  }
+
+  /// Invalidate cached filtered/sorted room list so the next build recomputes
+  /// immediately. Called from the chat list body when ChatListRefreshBus fires.
+  void invalidateRoomCache() {
+    _lastActiveFilter = ActiveFilter.messages; // any value != current
+    _lastMaxEventTime = 0;
+    _lastRoomCount = 0;
   }
   
   void loadMoreRooms() {
@@ -767,7 +771,6 @@ class ChatListController extends State<ChatList>
   }
 
   void _invalidateRoomCache() {
-    _lastFilterCalc = DateTime(2000);
     _lastBridgeSync = DateTime(2000);
     _lastUnreadCalc = DateTime(2000);
     _lastMaxEventTime = 0;
