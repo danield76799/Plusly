@@ -500,26 +500,11 @@ class ChatController extends State<ChatPageWithRoom>
 
   String? get pendingEventText => _pendingEventText;
 
-  /// Set by onInsert/onNewEvent so updateView knows whether to re-run the
-  /// (relatively expensive) updateThreads DB lookup. room.onUpdate fires for
-  /// receipts, typing, and other non-event changes too — we skip the thread
-  /// reload in those cases.
-  bool _newEventReceived = false;
-
-  /// Public accessor so external code (e.g. message_context_menu) can signal
-  /// that a new event (reaction, redaction) was sent and updateView should
-  /// re-run updateThreads.
-  set newEventReceived(bool v) => _newEventReceived = v;
-
   Future<void> updateView({bool immediate = false}) async {
     if (!mounted) return;
     timelineVersion++;
     setReadMarker();
-    final shouldUpdateThreads = _newEventReceived;
-    _newEventReceived = false;
-    if (shouldUpdateThreads) {
-      updateThreads();
-    }
+    updateThreads();
     setState(() {
       firstUpdateReceived = true;
     });
@@ -558,18 +543,14 @@ class ChatController extends State<ChatPageWithRoom>
 
   void _onTimelineInsert(int index) {
     // Clear the optimistic placeholder once the SDK confirms an event was
-    // inserted into the timeline.
+    // inserted into the timeline. onUpdate will handle the actual rebuild.
     if (_pendingEventText != null) {
       _clearPendingEvent();
     }
-    // onInsert means a real event was added — update threads + view.
-    _newEventReceived = true;
-    if (mounted) updateView(immediate: true);
   }
 
   void _onNewTimelineEvent() {
-    _newEventReceived = true;
-    if (mounted) updateView(immediate: true);
+    // FluffyChat pattern: leave this empty. onUpdate handles the rebuild.
   }
 
   Future<void> _loadRoomTimeline({String? eventContextId}) async {
@@ -853,7 +834,9 @@ class ChatController extends State<ChatPageWithRoom>
       }
     });
 
-    if (mounted) updateView(immediate: true);
+    // Don't call updateView here — the SDK's onUpdate callback fires once
+    // when the local echo is inserted, which triggers exactly one rebuild.
+    // Calling updateView manually would cause a double rebuild.
 
     // Force the chat list to refresh immediately so the room jumps to
     // the top of the list without waiting for the next sync.
@@ -1746,10 +1729,7 @@ class ChatController extends State<ChatPageWithRoom>
       }
       _saveLocalRecentEmojis();
       room.client.addRecentEmoji(emoji);
-      // Force immediate refresh so the reaction is visible without waiting
-      // for onInsert/onUpdate.
-      _newEventReceived = true;
-      if (mounted) updateView(immediate: true);
+      // SDK onUpdate fires once when the reaction is inserted → one rebuild.
     }
   }
 

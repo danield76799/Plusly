@@ -264,12 +264,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                           event.room.sendReaction(
                                             event.eventId,
                                             emoji,
-                                          ).then((_) {
-                                            controller.newEventReceived = true;
-                                            if (controller.mounted) {
-                                              controller.updateView(immediate: true);
-                                            }
-                                          });
+                                          );
                                         },
                                 ),
                               ),
@@ -423,10 +418,6 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                     event.eventId,
                                     emoji,
                                   );
-                                  controller.newEventReceived = true;
-                                  if (controller.mounted) {
-                                    controller.updateView(immediate: true);
-                                  }
                                 },
                               ),
                             ],
