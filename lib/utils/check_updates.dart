@@ -193,10 +193,18 @@ bool isNewerVersion(String latest, String current) {
   }
 
   // If both versions share the same semver core, compare build numbers if present.
-  if (latest == current && latestBuildNumber.isNotEmpty && currentBuildNumber.isNotEmpty) {
-    final latestBuild = int.tryParse(latestBuildNumber) ?? 0;
-    final currentBuild = int.tryParse(currentBuildNumber) ?? 0;
-    return latestBuild > currentBuild;
+  if (latest == current) {
+    if (latestBuildNumber.isNotEmpty && currentBuildNumber.isNotEmpty) {
+      final latestBuild = int.tryParse(latestBuildNumber) ?? 0;
+      final currentBuild = int.tryParse(currentBuildNumber) ?? 0;
+      return latestBuild > currentBuild;
+    }
+    // A tagged CI build (e.g. +2350) is newer than a local/package build that
+    // only reports the semver core (no build number).
+    if (latestBuildNumber.isNotEmpty && currentBuildNumber.isEmpty) {
+      return true;
+    }
+    return false;
   }
 
   // Check if versions look like Plusly build tags (e.g., "0.9.9-build421", "1.1.3+863", "playstore-240")
