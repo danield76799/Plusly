@@ -36,12 +36,8 @@ class LoginView extends StatelessWidget {
                 Hero(
                   tag: 'info-logo',
                   child: SvgPicture.asset(
-                    'assets/plusly_icon_white.svg',
+                    'assets/plusly_icon.svg',
                     height: 120,
-                    colorFilter: const ColorFilter.mode(
-                      Color(0xFF49AFC2),
-                      BlendMode.srcIn,
-                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
