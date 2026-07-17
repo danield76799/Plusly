@@ -494,15 +494,9 @@ class ChatController extends State<ChatPageWithRoom>
   });
 
   bool firstUpdateReceived = false;
-  int timelineVersion = 0;
 
-  String? _pendingEventText;
-
-  String? get pendingEventText => _pendingEventText;
-
-  Future<void> updateView({bool immediate = false}) async {
+  Future<void> updateView() async {
     if (!mounted) return;
-    timelineVersion++;
     setReadMarker();
     updateThreads();
     setState(() {
@@ -533,33 +527,14 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void>? loadTimelineFuture;
   Map<String, Thread>? threads = {};
 
-  void _clearPendingEvent() {
-    if (mounted) {
-      setState(() {
-        _pendingEventText = null;
-      });
-    }
-  }
-
-  void _onTimelineInsert(int index) {
-    // Clear the optimistic placeholder once the SDK confirms an event was
-    // inserted into the timeline. onUpdate will handle the actual rebuild.
-    if (_pendingEventText != null) {
-      _clearPendingEvent();
-    }
-  }
-
-  void _onNewTimelineEvent() {
-    // FluffyChat pattern: leave this empty. onUpdate handles the rebuild.
-  }
+  void _onNewEvent() {}
 
   Future<void> _loadRoomTimeline({String? eventContextId}) async {
     try {
       timeline?.cancelSubscriptions();
       timeline = await room.getTimeline(
         onUpdate: updateView,
-        onInsert: _onTimelineInsert,
-        onNewEvent: _onNewTimelineEvent,
+        onNewEvent: _onNewEvent,
         eventContextId: eventContextId,
       );
     } catch (e, s) {
@@ -567,8 +542,7 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await room.getTimeline(
         onUpdate: updateView,
-        onInsert: _onTimelineInsert,
-        onNewEvent: _onNewTimelineEvent,
+        onNewEvent: _onNewEvent,
       );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
@@ -587,8 +561,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
-        onInsert: _onTimelineInsert,
-        onNewEvent: _onNewTimelineEvent,
+        onNewEvent: _onNewEvent,
         eventContextId: eventContextId,
       );
       Logs().v("Thread timeline loaded");
@@ -601,8 +574,7 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
-        onInsert: _onTimelineInsert,
-        onNewEvent: _onNewTimelineEvent,
+        onNewEvent: _onNewEvent,
       );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
@@ -779,34 +751,9 @@ class ChatController extends State<ChatPageWithRoom>
       parseCommands = false;
     }
 
-    // Capture the text before clearing the composer so we can send
-    // optimistically — the user sees instant feedback while the network
-    // request runs in the background.
-    final textToSend = sendController.text;
-    _clearComposer();
-    if (mounted) {
-      setState(() {
-        _isSending = false;
-      });
-    }
-
-    // Show local echo BEFORE calling sendTextEvent. The SDK may insert the
-    // local echo synchronously (before its first await), which would fire
-    // onInsert and clear the placeholder before it was ever shown. By setting
-    // the placeholder first, we guarantee the user sees instant feedback,
-    // and onInsert cleanly replaces it with the real event.
-    if (mounted) {
-      setState(() {
-        _pendingEventText = textToSend;
-      });
-    }
-
-    // Fire-and-forget: the SDK inserts a local echo into the timeline
-    // immediately, and _onNewTimelineEvent + updateView make it visible.
-    // No need to await — the user already sees the cleared input.
     // ignore: unawaited_futures
     room.sendTextEvent(
-      textToSend,
+      sendController.text,
       inReplyTo: replyEvent,
       replyMention: replyMention,
       editEventId: editEvent?.eventId,
@@ -823,23 +770,16 @@ class ChatController extends State<ChatPageWithRoom>
       }
       return null;
     });
-    Logs().v('Message sent (optimistic)', textToSend);
 
-    // Safety timeout: clear the placeholder if the SDK hasn't fired onInsert
-    // within 300ms (e.g. if the local echo is delayed or the callback is
-    // unreliable in this SDK version).
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (_pendingEventText == textToSend) {
-        _clearPendingEvent();
-      }
+    _clearComposer();
+
+    setState(() {
+      _isSending = false;
+      replyEvent = null;
+      editEvent = null;
     });
 
-    // Don't call updateView here — the SDK's onUpdate callback fires once
-    // when the local echo is inserted, which triggers exactly one rebuild.
-    // Calling updateView manually would cause a double rebuild.
-
-    // Force the chat list to refresh immediately so the room jumps to
-    // the top of the list without waiting for the next sync.
+    // Force the chat list to refresh so the room jumps to the top.
     ChatListRefreshBus.refreshForRoom(room.id);
 
     // Scroll so the user sees their message immediately. reverse:true
@@ -1721,7 +1661,7 @@ class ChatController extends State<ChatPageWithRoom>
     setState(() => selectedEvents.clear());
     for (final event in events) {
       await room.sendReaction(event.eventId, emoji!);
-      // Add to recent emojis — fire-and-forget so the UI doesn't wait.
+      // Add to recent emojis — fire-and-forget
       localRecentEmojis.remove(emoji);
       localRecentEmojis.insert(0, emoji);
       if (localRecentEmojis.length > 50) {
@@ -1729,7 +1669,6 @@ class ChatController extends State<ChatPageWithRoom>
       }
       _saveLocalRecentEmojis();
       room.client.addRecentEmoji(emoji);
-      // SDK onUpdate fires once when the reaction is inserted → one rebuild.
     }
   }
 
