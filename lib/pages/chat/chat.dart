@@ -427,8 +427,16 @@ class ChatController extends State<ChatPageWithRoom>
     // je de chat verliet (en de timeline vers geladen werd). room.onUpdate
     // firet bij elke room-wijziging, dus hierop abonneren garandeert dat de
     // lijst herbouwt zodra het event écht in timeline.events staat.
+    //
+    // Debounce 50ms: bij een sync-burst vuurt room.onUpdate meerdere keren
+    // achter elkaar (receipts, events, typing). Eén updateView-oproep per
+    // burst is voldoende — Flutter batcht setState toch, maar setReadMarker
+    // en setState overhead worden zo geminimaliseerd.
     _roomUpdateSub = room.onUpdate.stream.listen((_) {
-      if (mounted) updateView(immediate: true);
+      _roomUpdateTimer?.cancel();
+      _roomUpdateTimer = Timer(const Duration(milliseconds: 50), () {
+        if (mounted) updateView(immediate: true);
+      });
     });
 
     // Non-blocking initialization
@@ -437,6 +445,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   StreamSubscription? _roomUpdateSub;
+  Timer? _roomUpdateTimer;
 
   Future<void> _asyncInit() async {
     // INSTANT: check cache and show immediately (WhatsApp-style)
@@ -512,11 +521,21 @@ class ChatController extends State<ChatPageWithRoom>
 
   String? get pendingEventText => _pendingEventText;
 
+  /// Set by onInsert/onNewEvent so updateView knows whether to re-run the
+  /// (relatively expensive) updateThreads DB lookup. room.onUpdate fires for
+  /// receipts, typing, and other non-event changes too — we skip the thread
+  /// reload in those cases.
+  bool _newEventReceived = false;
+
   Future<void> updateView({bool immediate = false}) async {
     if (!mounted) return;
     timelineVersion++;
     setReadMarker();
-    updateThreads();
+    final shouldUpdateThreads = _newEventReceived;
+    _newEventReceived = false;
+    if (shouldUpdateThreads) {
+      updateThreads();
+    }
     setState(() {
       firstUpdateReceived = true;
     });
@@ -559,10 +578,13 @@ class ChatController extends State<ChatPageWithRoom>
     if (_pendingEventText != null) {
       _clearPendingEvent();
     }
+    // onInsert means a real event was added — update threads + view.
+    _newEventReceived = true;
     if (mounted) updateView(immediate: true);
   }
 
   void _onNewTimelineEvent() {
+    _newEventReceived = true;
     if (mounted) updateView(immediate: true);
   }
 
@@ -722,6 +744,7 @@ class ChatController extends State<ChatPageWithRoom>
     typingCoolDown?.cancel();
     typingTimeout?.cancel();
     _roomUpdateSub?.cancel();
+    _roomUpdateTimer?.cancel();
     scrollController.removeListener(_updateScrollController);
     scrollController.dispose();
     _scrolledUp.dispose();
@@ -804,6 +827,17 @@ class ChatController extends State<ChatPageWithRoom>
       });
     }
 
+    // Show local echo BEFORE calling sendTextEvent. The SDK may insert the
+    // local echo synchronously (before its first await), which would fire
+    // onInsert and clear the placeholder before it was ever shown. By setting
+    // the placeholder first, we guarantee the user sees instant feedback,
+    // and onInsert cleanly replaces it with the real event.
+    if (mounted) {
+      setState(() {
+        _pendingEventText = textToSend;
+      });
+    }
+
     // Fire-and-forget: the SDK inserts a local echo into the timeline
     // immediately, and _onNewTimelineEvent + updateView make it visible.
     // No need to await — the user already sees the cleared input.
@@ -828,14 +862,9 @@ class ChatController extends State<ChatPageWithRoom>
     });
     Logs().v('Message sent (optimistic)', textToSend);
 
-    // Show local echo immediately so the user sees their message without
-    // waiting for the SDK DB write (≈150ms). Cleared by _onTimelineInsert,
-    // with a safety timeout so the placeholder never sticks around.
-    if (mounted) {
-      setState(() {
-        _pendingEventText = textToSend;
-      });
-    }
+    // Safety timeout: clear the placeholder if the SDK hasn't fired onInsert
+    // within 300ms (e.g. if the local echo is delayed or the callback is
+    // unreliable in this SDK version).
     Future.delayed(const Duration(milliseconds: 300), () {
       if (_pendingEventText == textToSend) {
         _clearPendingEvent();
