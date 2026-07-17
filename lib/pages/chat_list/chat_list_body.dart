@@ -77,13 +77,20 @@ class ChatListViewBody extends StatelessWidget {
 
     return StreamBuilder(
       key: ValueKey(client.userID.toString()),
-      // Rebuild wanneer sync een kamer-update bevat EN wanneer een sync-run
-      // helemaal klaar is. De 'finished' status garandeert dat client.rooms
-      // up-to-date is; sommige SDK-versies rapporteren hasRoomUpdate niet
-      // betrouwbaar, waardoor push-chats niet meteen zichtbaar worden.
+      // Rebuild zodra er iets in een kamer verandert. We luisteren naar
+      // drie signalen:
+      //  1. ChatListRefreshBus — direct na verzenden/ontvangen actie.
+      //  2. onSync (per sync-response) op hasRoomUpdate — sneller dan wachten
+      //     op onSyncStatus.finished, wat pas komt na een volledige (soms
+      //     seconden durende) sync. Binnenkomende berichten zijn zo meteen
+      //     zichtbaar in de lijst.
+      //  3. onSyncStatus.finished — vangt SDK-versies die hasRoomUpdate niet
+      //     betrouwbaar zetten.
       stream: StreamGroup.merge<String?>([
         ChatListRefreshBus.stream,
-        client.onSync.stream.where((s) => s.hasRoomUpdate).map((_) => null),
+        client.onSync.stream
+            .where((s) => s.hasRoomUpdate)
+            .map((_) => null),
         client.onSyncStatus.stream
             .where((s) => s.status == SyncStatus.finished)
             .map((_) => null),

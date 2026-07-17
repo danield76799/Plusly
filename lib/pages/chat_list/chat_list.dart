@@ -129,7 +129,7 @@ class ChatListController extends State<ChatList>
       _recentlyActiveRoomIds.add(roomId);
     });
     _recentlyActiveTimer?.cancel();
-    _recentlyActiveTimer = Timer(const Duration(milliseconds: 800), () {
+    _recentlyActiveTimer = Timer(const Duration(seconds: 3), () {
       if (!mounted) return;
       setState(() {
         _recentlyActiveRoomIds.clear();
