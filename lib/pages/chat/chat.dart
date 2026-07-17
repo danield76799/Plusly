@@ -527,6 +527,11 @@ class ChatController extends State<ChatPageWithRoom>
   /// reload in those cases.
   bool _newEventReceived = false;
 
+  /// Public accessor so external code (e.g. message_context_menu) can signal
+  /// that a new event (reaction, redaction) was sent and updateView should
+  /// re-run updateThreads.
+  set newEventReceived(bool v) => _newEventReceived = v;
+
   Future<void> updateView({bool immediate = false}) async {
     if (!mounted) return;
     timelineVersion++;
@@ -1756,15 +1761,18 @@ class ChatController extends State<ChatPageWithRoom>
     setState(() => selectedEvents.clear());
     for (final event in events) {
       await room.sendReaction(event.eventId, emoji!);
-      // Add to recent emojis when sending reaction
+      // Add to recent emojis — fire-and-forget so the UI doesn't wait.
       localRecentEmojis.remove(emoji);
       localRecentEmojis.insert(0, emoji);
       if (localRecentEmojis.length > 50) {
         localRecentEmojis = localRecentEmojis.sublist(0, 50);
       }
-      await _saveLocalRecentEmojis();
-      // Also try to add to SDK
-      await room.client.addRecentEmoji(emoji);
+      _saveLocalRecentEmojis();
+      room.client.addRecentEmoji(emoji);
+      // Force immediate refresh so the reaction is visible without waiting
+      // for onInsert/onUpdate.
+      _newEventReceived = true;
+      if (mounted) updateView(immediate: true);
     }
   }
 

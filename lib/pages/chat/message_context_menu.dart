@@ -264,7 +264,12 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                           event.room.sendReaction(
                                             event.eventId,
                                             emoji,
-                                          );
+                                          ).then((_) {
+                                            controller.newEventReceived = true;
+                                            if (controller.mounted) {
+                                              controller.updateView(immediate: true);
+                                            }
+                                          });
                                         },
                                 ),
                               ),
@@ -403,7 +408,7 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                     return;
                                   }
                                   controller.closeMessageMenu();
-                                  // Add to recent emojis when sending reaction
+                                  // Add to recent emojis — fire-and-forget
                                   controller.localRecentEmojis.remove(emoji);
                                   controller.localRecentEmojis.insert(0, emoji);
                                   if (controller.localRecentEmojis.length >
@@ -412,13 +417,16 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                         .localRecentEmojis
                                         .sublist(0, 50);
                                   }
-                                  await controller.saveLocalRecentEmojis();
-                                  // Also try to add to SDK
-                                  await room.client.addRecentEmoji(emoji);
+                                  controller.saveLocalRecentEmojis();
+                                  room.client.addRecentEmoji(emoji);
                                   await event.room.sendReaction(
                                     event.eventId,
                                     emoji,
                                   );
+                                  controller.newEventReceived = true;
+                                  if (controller.mounted) {
+                                    controller.updateView(immediate: true);
+                                  }
                                 },
                               ),
                             ],
