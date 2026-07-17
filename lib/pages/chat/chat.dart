@@ -533,13 +533,19 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void>? loadTimelineFuture;
   Map<String, Thread>? threads = {};
 
+  void _clearPendingEvent() {
+    if (mounted) {
+      setState(() {
+        _pendingEventText = null;
+      });
+    }
+  }
+
   void _onTimelineInsert(int index) {
+    // Clear the optimistic placeholder once the SDK confirms an event was
+    // inserted into the timeline.
     if (_pendingEventText != null) {
-      if (mounted) {
-        setState(() {
-          _pendingEventText = null;
-        });
-      }
+      _clearPendingEvent();
     }
     if (mounted) updateView(immediate: true);
   }
@@ -810,19 +816,24 @@ class ChatController extends State<ChatPageWithRoom>
     Logs().v('Message sent (optimistic)', textToSend);
 
     // Show local echo immediately so the user sees their message without
-    // waiting for the SDK DB write (≈150ms). Cleared by _onTimelineInsert.
+    // waiting for the SDK DB write (≈150ms). Cleared by _onTimelineInsert,
+    // with a safety timeout so the placeholder never sticks around.
     if (mounted) {
       setState(() {
         _pendingEventText = textToSend;
       });
     }
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (_pendingEventText == textToSend) {
+        _clearPendingEvent();
+      }
+    });
 
     if (mounted) updateView(immediate: true);
 
     // Force the chat list to refresh immediately so the room jumps to
-    // the top of the list without waiting for the next sync (fixes the
-    // 4-second delay before replies appear in the overview).
-    ChatListRefreshBus.refresh();
+    // the top of the list without waiting for the next sync.
+    ChatListRefreshBus.refreshForRoom(room.id);
 
     // Scroll so the user sees their message immediately. reverse:true
     // list: pixels==0 is newest (visual bottom).

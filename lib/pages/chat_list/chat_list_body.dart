@@ -81,16 +81,17 @@ class ChatListViewBody extends StatelessWidget {
       // helemaal klaar is. De 'finished' status garandeert dat client.rooms
       // up-to-date is; sommige SDK-versies rapporteren hasRoomUpdate niet
       // betrouwbaar, waardoor push-chats niet meteen zichtbaar worden.
-      stream: StreamGroup.merge([
+      stream: StreamGroup.merge<String?>([
         ChatListRefreshBus.stream,
-        client.onSync.stream.where((s) => s.hasRoomUpdate).map((_) {}),
+        client.onSync.stream.where((s) => s.hasRoomUpdate).map((_) => null),
         client.onSyncStatus.stream
             .where((s) => s.status == SyncStatus.finished)
-            .map((_) {}),
+            .map((_) => null),
       ]),
       builder: (context, snapshot) {
+        final roomId = snapshot.data;
         if (snapshot.connectionState == ConnectionState.active) {
-          controller.invalidateRoomCache();
+          controller.invalidateRoomCache(roomId: roomId);
         }
         controller.syncBridgeTypes();
         // Bewaar de chat list cache direct na elke sync-update, zodat de

@@ -118,6 +118,25 @@ class ChatListController extends State<ChatList>
       ? ActiveFilter.messages
       : ActiveFilter.allChats;
 
+  // Optimistically bump rooms to the top immediately after sending a message,
+  // before the SDK updates latestEventReceivedTime.
+  final Set<String> _recentlyActiveRoomIds = {};
+  Timer? _recentlyActiveTimer;
+
+  void markRoomRecentlyActive(String roomId) {
+    if (!mounted) return;
+    setState(() {
+      _recentlyActiveRoomIds.add(roomId);
+    });
+    _recentlyActiveTimer?.cancel();
+    _recentlyActiveTimer = Timer(const Duration(milliseconds: 800), () {
+      if (!mounted) return;
+      setState(() {
+        _recentlyActiveRoomIds.clear();
+      });
+    });
+  }
+
   String? _activeSpaceId;
   String? get activeSpaceId => _activeSpaceId;
 
@@ -304,12 +323,16 @@ class ChatListController extends State<ChatList>
         .where(_isBridgeTypeVisible)
         .toList();
 
-    // Sort pinned rooms to the top in non-pinned tabs.
+    // Sort pinned rooms to the top in non-pinned tabs, then recently active
+    // rooms (optimistic send bump), then by latest event time.
     if (activeFilter != ActiveFilter.pinned) {
       _cachedFilteredRooms.sort((a, b) {
         final aPinned = a.isFavourite ? 1 : 0;
         final bPinned = b.isFavourite ? 1 : 0;
         if (aPinned != bPinned) return bPinned - aPinned;
+        final aRecent = _recentlyActiveRoomIds.contains(a.id) ? 1 : 0;
+        final bRecent = _recentlyActiveRoomIds.contains(b.id) ? 1 : 0;
+        if (aRecent != bRecent) return bRecent - aRecent;
         return b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime);
       });
     } else {
@@ -343,12 +366,13 @@ class ChatListController extends State<ChatList>
     setState(() {}); // State gebruikt setState, geen notifyListeners
   }
 
-  /// Invalidate cached filtered/sorted room list so the next build recomputes
-  /// immediately. Called from the chat list body when ChatListRefreshBus fires.
-  void invalidateRoomCache() {
+  void invalidateRoomCache({String? roomId}) {
     _lastActiveFilter = ActiveFilter.messages; // any value != current
     _lastMaxEventTime = 0;
     _lastRoomCount = 0;
+    if (roomId != null) {
+      markRoomRecentlyActive(roomId);
+    }
   }
   
   void loadMoreRooms() {
