@@ -427,17 +427,11 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> _asyncInit() async {
-    // INSTANT: check cache and show immediately (WhatsApp-style)
-    final cached = TimelineCache.getTimeline(roomId);
-    if (cached != null) {
-      timeline = cached;
-      loadTimelineFuture = Future.value(); // mark as done so FutureBuilder shows instantly
-      _getTimeline(); // background sync — don't await
-      _getThreads();  // background sync
-      setReadMarker(); // ensure read marker is sent even on cached timeline
-      return;
-    }
-    // No cache — load in parallel but show ASAP
+    // Load a fresh timeline WITH the onUpdate callback wired up. We used to
+    // show a cached Timeline instance here (TimelineCache), but that instance
+    // had no onUpdate callback, so a sent message never triggered updateView
+    // and the user didn't see their own reply until reopening the chat.
+    // Extera/FluffyChat always load a fresh timeline — do the same.
     await Future.wait([
       _tryLoadTimeline(),
       _getThreads(),
