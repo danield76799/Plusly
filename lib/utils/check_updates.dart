@@ -115,14 +115,13 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
   }
 
   try {
-    // Fetch latest release directly from GitHub API.
-    // Using /releases/latest is more reliable than iterating /releases,
-    // because the releases list is not guaranteed to be newest-first
-    // and we may otherwise pick an older release that happens to have
-    // an APK asset while a newer one is available.
-    final latestUrl = '$url/latest';
+    // GitHub's /releases/latest endpoint lags behind: it can keep pointing at
+    // an older release even after newer tags have been published. We therefore
+    // fetch the last page of releases, filter out non-APK / playstore-only
+    // releases, and pick the one with the highest version/build number ourselves.
     final response = await Dio().get(
-      latestUrl,
+      url,
+      queryParameters: {'per_page': '20'},
       options: Options(
         headers: {
           'Accept': 'application/vnd.github+json',
@@ -133,32 +132,42 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
       ),
     );
 
-    if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
-      final release = GitHubRelease.fromJson(response.data as Map<String, dynamic>);
-      final tagName = release.tagName;
+    if (response.statusCode == 200 && response.data is List) {
+      final releases = (response.data as List)
+          .whereType<Map<String, dynamic>>()
+          .map(GitHubRelease.fromJson)
+          .where((r) {
+        final tag = r.tagName;
+        if (tag.startsWith('playstore-') || tag.startsWith('playstore-v')) {
+          return false;
+        }
+        return r.hasApk;
+      })
+          .toList();
 
-      // Skip playstore-only tags
-      if (tagName.startsWith('playstore-') || tagName.startsWith('playstore-v')) {
-        Logs().v('Latest release is playstore-only, no update available');
+      if (releases.isEmpty) {
+        Logs().v('No suitable releases with APK found');
         return null;
       }
 
-      // Only accept releases with APK - skip AAB-only releases
-      if (!release.hasApk) {
-        Logs().v('Latest release has no APK asset');
-        return null;
+      // Pick the newest release according to our own version comparison.
+      GitHubRelease newest = releases.first;
+      for (final candidate in releases.skip(1)) {
+        if (isNewerVersion(candidate.tagName, newest.tagName)) {
+          newest = candidate;
+        }
       }
 
       // Cache the result
       try {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(cacheKey, jsonEncode(release.toJson()));
+        await prefs.setString(cacheKey, jsonEncode(newest.toJson()));
         await prefs.setInt(cacheTimeKey, DateTime.now().millisecondsSinceEpoch);
       } catch (e) {
         Logs().v('Cache write failed: $e');
       }
 
-      return release;
+      return newest;
     } else {
       Logs().w('GitHub API returned status ${response.statusCode}');
     }
