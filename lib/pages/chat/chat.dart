@@ -420,11 +420,23 @@ class ChatController extends State<ChatPageWithRoom>
 
     sendingClient = Matrix.of(context).client;
     WidgetsBinding.instance.addObserver(this);
-    
+
+    // Betrouwbare refresh: de getTimeline-callbacks (onInsert/onNewEvent)
+    // firen niet altijd op de lokale echo / binnenkomende events in deze
+    // SDK-versie, waardoor het verzonden bericht soms pas zichtbaar werd als
+    // je de chat verliet (en de timeline vers geladen werd). room.onUpdate
+    // firet bij elke room-wijziging, dus hierop abonneren garandeert dat de
+    // lijst herbouwt zodra het event écht in timeline.events staat.
+    _roomUpdateSub = room.onUpdate.stream.listen((_) {
+      if (mounted) updateView(immediate: true);
+    });
+
     // Non-blocking initialization
     loadTimelineFuture = Future.value(); // show chat instantly, messages load async
     _asyncInit();
   }
+
+  StreamSubscription? _roomUpdateSub;
 
   Future<void> _asyncInit() async {
     // INSTANT: check cache and show immediately (WhatsApp-style)
@@ -709,6 +721,7 @@ class ChatController extends State<ChatPageWithRoom>
   void dispose() {
     typingCoolDown?.cancel();
     typingTimeout?.cancel();
+    _roomUpdateSub?.cancel();
     scrollController.removeListener(_updateScrollController);
     scrollController.dispose();
     _scrolledUp.dispose();
