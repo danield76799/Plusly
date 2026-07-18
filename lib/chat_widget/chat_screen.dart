@@ -41,46 +41,50 @@ class ChatScreen extends StatelessWidget {
       backgroundColor:
           isDark ? const Color(0xFF0E1116) : theme.colorScheme.surface,
       appBar: _buildAppBar(context, theme, isDark),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              reverse: true,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                final realIndex = messages.length - 1 - index;
-                final previousMessage =
-                    realIndex > 0 ? messages[realIndex - 1] : null;
+      // SafeArea beschermt de body (incl. de bottom input bar) tegen de
+      // OS home-indicator onderaan het scherm.
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                reverse: true,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final message = messages[index];
+                  final realIndex = messages.length - 1 - index;
+                  final previousMessage =
+                      realIndex > 0 ? messages[realIndex - 1] : null;
 
-                final isMe = message.isMe;
-                final isFirst =
-                    previousMessage == null ||
-                    previousMessage.isMe != isMe ||
-                    previousMessage.senderName != message.senderName;
+                  final isMe = message.isMe;
+                  final isFirst =
+                      previousMessage == null ||
+                      previousMessage.isMe != isMe ||
+                      previousMessage.senderName != message.senderName;
 
-                return ChatBubble(
-                  key: ValueKey('${message.timestamp.millisecondsSinceEpoch}-${message.text.hashCode}'),
-                  message: message,
-                  showAvatar: isFirst && !isMe,
-                  showName: isFirst && !isMe,
-                  isFirstInGroup: isFirst,
-                  onAvatarTap: () {},
-                );
-              },
+                  return ChatBubble(
+                    key: ValueKey('${message.timestamp.millisecondsSinceEpoch}-${message.text.hashCode}'),
+                    message: message,
+                    showAvatar: isFirst && !isMe,
+                    showName: isFirst && !isMe,
+                    isFirstInGroup: isFirst,
+                    onAvatarTap: () {},
+                  );
+                },
+              ),
             ),
-          ),
-          ChatInputBar(
-            onSend: onSend ?? () {},
-            onMicTap: onMicTap,
-            onAttachmentSelected: onAttachmentSelected ?? () {},
-            onEmojiTap: onEmojiTap ?? () {},
-            onChanged: onInputChanged,
-            controller: inputController,
-            isLoading: isLoading,
-          ),
-        ],
+            ChatInputBar(
+              onSend: onSend ?? () {},
+              onMicTap: onMicTap,
+              onAttachmentSelected: onAttachmentSelected ?? () {},
+              onEmojiTap: onEmojiTap ?? () {},
+              onChanged: onInputChanged,
+              controller: inputController,
+              isLoading: isLoading,
+            ),
+          ],
+        ),
       ),
     );
   }

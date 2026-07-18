@@ -6,6 +6,7 @@ class ChatMessage {
   final DateTime timestamp;
   final String senderName;
   final String? avatarUrl;
+  final bool isGroupChat; // true = groepschat, false = 1-on-1
 
   const ChatMessage({
     required this.text,
@@ -13,6 +14,7 @@ class ChatMessage {
     required this.timestamp,
     required this.senderName,
     this.avatarUrl,
+    this.isGroupChat = false,
   });
 }
 
@@ -81,7 +83,9 @@ class ChatBubble extends StatelessWidget {
             )
           else
             const SizedBox(width: 40),
-          if (showName && showAvatar)
+          // Naam alléén tonen in groepschats (isGroupChat) en bij inkomende
+          // berichten. In een 1-op-1 gesprek is de naam overbodig (rustiger).
+          if (showName && showAvatar && message.isGroupChat)
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
