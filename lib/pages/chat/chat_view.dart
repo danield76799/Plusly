@@ -483,33 +483,42 @@ class ChatView extends StatelessWidget {
                   ),
                 ),
               ),
-              floatingActionButton: ValueListenableBuilder<bool>(
-                valueListenable: controller.scrolledUpNotifier,
-                builder: (context, scrolledUp, _) {
-                  final show =
-                      (scrolledUp ||
-                          controller.timeline?.allowNewEvent == false) &&
-                      controller.selectedEvents.isEmpty;
-                  if (!show) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 56.0),
-                    child: FloatingActionButton(
-                      onPressed: controller.scrollDown,
-                      heroTag: null,
-                      mini: true,
-                      elevation: 6,
-                      backgroundColor: theme.colorScheme.surface,
-                      foregroundColor: theme.colorScheme.onSurface,
-                      shape: CircleBorder(
-                        side: BorderSide(
-                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                          width: 0.5,
-                        ),
+              floatingActionButton: ValueListenableBuilder<double>(
+                valueListenable: controller.inputBarHeight,
+                builder: (context, inputBarHeight, _) =>
+                    ValueListenableBuilder<bool>(
+                  valueListenable: controller.scrolledUpNotifier,
+                  builder: (context, scrolledUp, _) {
+                    final show =
+                        (scrolledUp || controller.timeline?.allowNewEvent == false) &&
+                        controller.selectedEvents.isEmpty;
+                    if (!show) return const SizedBox.shrink();
+                    // Float just above the input bar (which can grow with the
+                    // emoji picker / keyboard) plus the bottom safe area, so
+                    // the button never overlaps the last message or image.
+                    final safeBottom = MediaQuery.paddingOf(context).bottom;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: inputBarHeight + safeBottom + 8.0,
                       ),
-                      child: const Icon(Icons.arrow_downward_outlined),
-                    ),
-                  );
-                },
+                      child: FloatingActionButton(
+                        onPressed: controller.scrollDown,
+                        heroTag: null,
+                        mini: true,
+                        elevation: 6,
+                        backgroundColor: theme.colorScheme.surface,
+                        foregroundColor: theme.colorScheme.onSurface,
+                        shape: CircleBorder(
+                          side: BorderSide(
+                            color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                            width: 0.5,
+                          ),
+                        ),
+                        child: const Icon(Icons.arrow_downward_outlined),
+                      ),
+                    );
+                  },
+                ),
               ),
               body: DropTarget(
                 onDragDone: controller.onDragDone,

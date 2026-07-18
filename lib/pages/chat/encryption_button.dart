@@ -28,12 +28,14 @@ class EncryptionButton extends StatelessWidget {
             icon: Icon(
               room.encrypted ? Icons.lock_outlined : Icons.lock_open_outlined,
               size: 20,
-              color: room.joinRules != JoinRules.public && !room.encrypted
-                  ? Colors.red
-                  : room.joinRules != JoinRules.public &&
-                        snapshot.data == EncryptionHealthState.unverifiedDevices
+              // Red is reserved for destructive actions (block/delete). For the
+              // E2EE indicator we use a subtle green when encrypted, and amber
+              // as a non-destructive warning when unencrypted / unverified.
+              color: !room.encrypted
                   ? Colors.orange
-                  : null,
+                  : snapshot.data == EncryptionHealthState.unverifiedDevices
+                      ? Colors.orange
+                      : Colors.green,
             ),
             onPressed: () => context.go('/rooms/${room.id}/encryption'),
           ),

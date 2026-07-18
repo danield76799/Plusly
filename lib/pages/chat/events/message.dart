@@ -753,11 +753,11 @@ class _MessageState extends State<Message> {
           if (displayTime || widget.selected)
             Padding(
               padding: displayTime
-                  ? const EdgeInsets.symmetric(vertical: 8.0)
+                  ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4.0)
                   : EdgeInsets.zero,
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
+                  padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
                   child: Material(
                     borderRadius: BorderRadius.circular(
                       AppConfig.borderRadius * 2,
@@ -765,8 +765,8 @@ class _MessageState extends State<Message> {
                     color: theme.colorScheme.surface.withAlpha(128),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 2.0,
+                        horizontal: 12.0,
+                        vertical: 4.0,
                       ),
                       child: Text(
                         event.originServerTs.localizedTime(context),
@@ -858,9 +858,9 @@ class _MessageState extends State<Message> {
             padding: EdgeInsets.only(
               left: 8.0,
               right: 8.0,
-              // Compact grouping: same sender -> 2px, new sender -> 10px break.
-              top: nextEventSameSender ? 2.0 : 10.0,
-              bottom: previousEventSameSender ? 2.0 : 2.0,
+              // Compact grouping: same sender -> 4px, new sender -> 14px break.
+              top: nextEventSameSender ? 4.0 : 14.0,
+              bottom: previousEventSameSender ? 4.0 : 14.0,
             ),
             // Own messages get extra left margin so the bubble never hugs
             // the screen edge and the alignment reads clearly right.
