@@ -439,32 +439,33 @@ class _MessageState extends State<Message> {
                       if (!nextEventSameSender)
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0, bottom: 4),
-                          child: !ownMessage &&
-                                  event.room.isDirectChat
-                              ? const SizedBox.shrink()
-                              : Text(
-                                  displayname,
-                                  style: TextStyle(
-                                    fontSize: 12.5 *
-                                        AppSettings.fontSizeFactor.value,
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.1,
-                                    color: (theme.brightness == Brightness.light
-                                        ? displayname.color
-                                        : displayname.lightColorText),
-                                    shadows: !widget.wallpaperMode
-                                        ? null
-                                        : [
-                                            const Shadow(
-                                              offset: Offset(0.0, 0.0),
-                                              blurRadius: 3,
-                                              color: Colors.black,
-                                            ),
-                                          ],
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                          child: ownMessage
+                              ? const SizedBox(height: 12)
+                              : event.room.isDirectChat
+                                  ? const SizedBox.shrink()
+                                  : Text(
+                                      displayname,
+                                      style: TextStyle(
+                                        fontSize: 12.5 *
+                                            AppSettings.fontSizeFactor.value,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.1,
+                                        color: (theme.brightness == Brightness.light
+                                            ? displayname.color
+                                            : displayname.lightColorText),
+                                        shadows: !widget.wallpaperMode
+                                            ? null
+                                            : [
+                                                const Shadow(
+                                                  offset: Offset(0.0, 0.0),
+                                                  blurRadius: 3,
+                                                  color: Colors.black,
+                                                ),
+                                              ],
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                         ),
                       Container(
                         alignment: alignment,

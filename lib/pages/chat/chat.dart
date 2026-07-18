@@ -521,7 +521,7 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void>? loadTimelineFuture;
   Map<String, Thread>? threads = {};
 
-  void _onNewEvent() {}
+  void _onNewEvent() => updateView();
 
   Future<void> _loadRoomTimeline({String? eventContextId}) async {
     try {
