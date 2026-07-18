@@ -140,8 +140,6 @@ class ImageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     var borderRadius =
         this.borderRadius ?? BorderRadius.circular(AppConfig.borderRadius);
 
@@ -171,36 +169,65 @@ class ImageBubble extends StatelessWidget {
           constraints: BoxConstraints(maxWidth: width),
           child: AspectRatio(
             aspectRatio: _aspectRatio,
-            child: Container(
-              decoration: BoxDecoration(
-                color: event.messageType == MessageTypes.Sticker
-                    ? Colors.transparent
-                    : theme.colorScheme.surfaceContainerHighest,
-                borderRadius: borderRadius,
-              ),
-              clipBehavior: Clip.hardEdge,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () => _onTap(context),
-                  child: Hero(
-                    tag: event.eventId,
-                    child: loadMedia
-                        ? MxcImage(
-                            event: event,
-                            width: _effectiveImageWidth,
-                            fit: fit,
-                            animated: animated,
-                            isThumbnail: thumbnailOnly,
-                            placeholder:
-                                event.messageType == MessageTypes.Sticker
-                                ? null
-                                : _buildPlaceholder,
-                          )
-                        : _buildUnloaded(context),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    // Transparent: no dead colored bar behind the image.
+                    color: event.messageType == MessageTypes.Sticker
+                        ? Colors.transparent
+                        : Colors.transparent,
+                    borderRadius: borderRadius,
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => _onTap(context),
+                      child: Hero(
+                        tag: event.eventId,
+                        child: loadMedia
+                            ? MxcImage(
+                                event: event,
+                                width: _effectiveImageWidth,
+                                fit: fit,
+                                animated: animated,
+                                isThumbnail: thumbnailOnly,
+                                placeholder: event.messageType == MessageTypes.Sticker
+                                    ? null
+                                    : _buildPlaceholder,
+                              )
+                            : _buildUnloaded(context),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                // Timestamp subtly placed bottom-right, directly on the image.
+                if (fileDescription == null)
+                  Positioned(
+                    right: 8,
+                    bottom: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.45),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        TimeOfDay.fromDateTime(event.originServerTs)
+                            .format(context),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),

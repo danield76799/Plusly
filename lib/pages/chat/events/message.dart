@@ -518,7 +518,7 @@ class _MessageState extends State<Message> {
                                       (_replyEventFuture != null
                                           ? _calculateMediaWidth(displayEvent)
                                           : null) ??
-                                      FluffyThemes.columnWidth * 1.5,
+                                      MediaQuery.sizeOf(context).width * 0.75,
                                 ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
@@ -812,9 +812,17 @@ class _MessageState extends State<Message> {
             padding: EdgeInsets.only(
               left: 8.0,
               right: 8.0,
-              top: nextEventSameSender ? 0.0 : 4.0,
-              bottom: previousEventSameSender ? 0.0 : 4.0,
+              // Compact grouping: same sender -> 2px, new sender -> 10px break.
+              top: nextEventSameSender ? 2.0 : 10.0,
+              bottom: previousEventSameSender ? 2.0 : 2.0,
             ),
+            // Own messages get extra left margin so the bubble never hugs
+            // the screen edge and the alignment reads clearly right.
+            margin: ownMessage
+                ? const EdgeInsets.only(left: 48.0)
+                : (isOneOnOne
+                    ? EdgeInsets.zero
+                    : const EdgeInsets.only(right: 48.0)),
             child: container,
           ),
         ),
