@@ -367,7 +367,7 @@ class ChatListController extends State<ChatList>
   }
 
   void invalidateRoomCache({String? roomId}) {
-    _lastActiveFilter = ActiveFilter.messages; // any value != current
+    _cachedFilteredRooms = []; // forceer her-berekening bij volgende get
     _lastMaxEventTime = 0;
     _lastRoomCount = 0;
     if (roomId != null) {
