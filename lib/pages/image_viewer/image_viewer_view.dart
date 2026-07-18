@@ -96,7 +96,7 @@ class _ImageViewerViewState extends State<ImageViewerView> {
                 focusNode: widget.controller.focusNode,
                 onKeyEvent: widget.controller.onKeyEvent,
                 child: PageView.builder(
-                  scrollDirection: Axis.vertical,
+                  scrollDirection: Axis.horizontal,
                   // Apply the dynamic physics here
                   physics: _pageScrollPhysics,
                   controller: widget.controller.pageController,
@@ -139,7 +139,7 @@ class _ImageViewerViewState extends State<ImageViewerView> {
                           child: IconButton(
                             style: iconButtonStyle,
                             tooltip: L10n.of(context).previous,
-                            icon: const Icon(Icons.arrow_upward_outlined),
+                            icon: const Icon(Icons.arrow_back_outlined),
                             onPressed: widget.controller.prevImage,
                           ),
                         ),
@@ -149,7 +149,7 @@ class _ImageViewerViewState extends State<ImageViewerView> {
                           child: IconButton(
                             style: iconButtonStyle,
                             tooltip: L10n.of(context).next,
-                            icon: const Icon(Icons.arrow_downward_outlined),
+                            icon: const Icon(Icons.arrow_forward_outlined),
                             onPressed: widget.controller.nextImage,
                           ),
                         ),

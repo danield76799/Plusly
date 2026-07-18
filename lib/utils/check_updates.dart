@@ -593,35 +593,61 @@ Future<void> checkForUpdates(BuildContext context) async {
 
   try {
     final currentVersion = await PlatformInfos.getVersion();
-    // Force refresh to bypass cache - ensures we always get latest
-    var release = await getLatestRelease(forceRefresh: true);
 
-    // Fallback: als de GitHub API faalt (timeout, rate-limit, geen
-    // APK-release), probeer dan de versie uit plusly-version.txt.
+    // Primary: the version file on the repo (no API rate-limit, always in
+    // sync because the deploy workflow rewrites it on every release).
+    GitHubRelease? release;
+    try {
+      final response = await Dio().get(
+        AppConfig.updateCheckUrl,
+        options: Options(
+          headers: {'User-Agent': 'PluslyApp'},
+          sendTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      );
+      if (response.statusCode == 200 && response.data is String) {
+        final tag = (response.data as String).trim();
+        if (tag.isNotEmpty) {
+          release = GitHubRelease(
+            tagName: tag,
+            downloadUrl: AppConfig.downloadUpdateUrl,
+            browserDownloadUrl: AppConfig.downloadUpdateUrl,
+          );
+          Logs().v('Using version.txt: $tag');
+        }
+      }
+    } on DioException catch (e) {
+      Logs().w('Version.txt fetch failed, trying GitHub API', e.message);
+    } catch (e) {
+      Logs().w('Version.txt fetch failed, trying GitHub API', e);
+    }
+
+    // Secondary: GitHub Releases API (can be rate-limited on shared mobile IPs).
+    // If the version file already gave us a version, only use the API to
+    // enrich it with a real APK download URL; otherwise use it as the source.
     if (release == null) {
       try {
-        final response = await Dio().get(
-          AppConfig.updateCheckUrl,
-          options: Options(
-            headers: {'User-Agent': 'PluslyApp'},
-            sendTimeout: const Duration(seconds: 10),
-            receiveTimeout: const Duration(seconds: 10),
-          ),
-        );
-        if (response.statusCode == 200 && response.data is String) {
-          final tag = (response.data as String).trim();
-          if (tag.isNotEmpty) {
-            release = GitHubRelease(
-              tagName: tag,
-              downloadUrl: AppConfig.downloadUpdateUrl,
-              browserDownloadUrl: AppConfig.downloadUpdateUrl,
-            );
-          }
-        }
-      } on DioException catch (e) {
-        Logs().w('Fallback version.txt fetch failed', e.message);
+        release = await getLatestRelease(forceRefresh: true);
       } catch (e) {
-        Logs().w('Fallback version.txt fetch failed', e);
+        Logs().w('GitHub release fetch failed', e);
+      }
+    } else {
+      // We have a version from the txt file — try to upgrade it with a real
+      // APK URL from the latest GitHub release so "Download & install" works.
+      try {
+        final apiRelease = await getLatestRelease(forceRefresh: true);
+        if (apiRelease != null && apiRelease.hasApk) {
+          release = GitHubRelease(
+            tagName: release.tagName,
+            downloadUrl: apiRelease.downloadUrl,
+            browserDownloadUrl: apiRelease.browserDownloadUrl,
+            hasApk: true,
+            apkUrlsByAbi: apiRelease.apkUrlsByAbi,
+          );
+        }
+      } catch (e) {
+        Logs().w('GitHub APK URL fetch failed, keeping version.txt release', e);
       }
     }
 

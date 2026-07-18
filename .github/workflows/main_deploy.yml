@@ -125,7 +125,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pubspec.yaml
-          git diff --cached --quiet || git commit -m "Bump version to ${{ steps.version.outputs.version }}+${{ steps.version.outputs.build_number }}"
+          # Keep plusly-version.txt in sync so the in-app update check
+          # (which falls back to this file) always reports the latest tag.
+          echo "${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}" > plusly-version.txt
+          git add plusly-version.txt
+          git diff --cached --quiet || git commit -m "Bump version to ${{ steps.version.outputs.version }}+${{ steps.version.outputs.build_number }} [skip ci]"
           git push || echo "Push failed, continuing anyway"
         continue-on-error: true
         env:
