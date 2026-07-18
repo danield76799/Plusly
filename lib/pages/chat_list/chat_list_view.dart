@@ -46,29 +46,6 @@ class ChatListView extends StatelessWidget {
               onTap: FocusManager.instance.primaryFocus?.unfocus,
               excludeFromSemantics: true,
               behavior: HitTestBehavior.translucent,
-              onHorizontalDragEnd: (details) {
-                final velocity = details.primaryVelocity ?? 0;
-                if (velocity.abs() < 300) return; // ignore slow drags
-                if (controller.isSearchMode || controller.activeSpaceId != null) {
-                  return;
-                }
-                const filters = [
-                  ActiveFilter.allChats,
-                  ActiveFilter.unread,
-                  ActiveFilter.groups,
-                  ActiveFilter.pinned,
-                  ActiveFilter.favorites,
-                ];
-                final currentIndex = filters.indexOf(controller.activeFilter);
-                if (currentIndex == -1) return;
-                if (velocity < 0 && currentIndex < filters.length - 1) {
-                  // Swipe left → next tab
-                  controller.setActiveFilter(filters[currentIndex + 1]);
-                } else if (velocity > 0 && currentIndex > 0) {
-                  // Swipe right → previous tab
-                  controller.setActiveFilter(filters[currentIndex - 1]);
-                }
-              },
               child: Scaffold(
                 body: Stack(
                   children: [
