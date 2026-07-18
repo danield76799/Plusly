@@ -594,10 +594,48 @@ Future<void> checkForUpdates(BuildContext context) async {
   try {
     final currentVersion = await PlatformInfos.getVersion();
     // Force refresh to bypass cache - ensures we always get latest
-    final release = await getLatestRelease(forceRefresh: true);
+    var release = await getLatestRelease(forceRefresh: true);
+
+    // Fallback: als de GitHub API faalt (timeout, rate-limit, geen
+    // APK-release), probeer dan de versie uit plusly-version.txt.
+    if (release == null) {
+      try {
+        final response = await Dio().get(
+          AppConfig.updateCheckUrl,
+          options: Options(
+            headers: {'User-Agent': 'PluslyApp'},
+            sendTimeout: const Duration(seconds: 10),
+            receiveTimeout: const Duration(seconds: 10),
+          ),
+        );
+        if (response.statusCode == 200 && response.data is String) {
+          final tag = (response.data as String).trim();
+          if (tag.isNotEmpty) {
+            release = GitHubRelease(
+              tagName: tag,
+              downloadUrl: AppConfig.downloadUpdateUrl,
+              browserDownloadUrl: AppConfig.downloadUpdateUrl,
+            );
+          }
+        }
+      } on DioException catch (e) {
+        Logs().w('Fallback version.txt fetch failed', e.message);
+      } catch (e) {
+        Logs().w('Fallback version.txt fetch failed', e);
+      }
+    }
 
     if (release == null) {
-      Logs().v('No release found or failed to fetch');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Kon updates niet controleren. Probeer het later opnieuw.',
+            ),
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
       return;
     }
 
@@ -618,6 +656,8 @@ Future<void> checkForUpdates(BuildContext context) async {
       return;
     }
 
+    final safeRelease = release;
+
     AppConfig.alreadyCheckedUpdates = true;
 
     if (!context.mounted) return;
@@ -635,19 +675,19 @@ Future<void> checkForUpdates(BuildContext context) async {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(l10n.updateAvailable(latestVersion)),
+                child: Text(l10n.updateAvailable(safeRelease.tagName)),
               ),
               const Divider(),
-              if (release.downloadUrl.isNotEmpty)
+              if (safeRelease.downloadUrl.isNotEmpty)
                 ListTile(
-                  leading: Icon(release.hasApk ? Icons.android : Icons.warning),
-                  title: Text(release.hasApk ? 'Download & installeer APK' : 'Download beschikbaar (geen APK)'),
-                  subtitle: Text(release.hasApk ? 'Directe installatie' : 'Alleen AAB beschikbaar - gebruik browser'),
+                  leading: Icon(safeRelease.hasApk ? Icons.android : Icons.warning),
+                  title: Text(safeRelease.hasApk ? 'Download & installeer APK' : 'Download beschikbaar (geen APK)'),
+                  subtitle: Text(safeRelease.hasApk ? 'Directe installatie' : 'Alleen AAB beschikbaar - gebruik browser'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    if (release.hasApk) {
+                    if (safeRelease.hasApk) {
                       Navigator.of(ctx).pop();
-                      final apkUrl = await _pickBestApkUrl(release);
+                      final apkUrl = await _pickBestApkUrl(safeRelease);
                       if (context.mounted) {
                         downloadAndInstallApk(context, apkUrl);
                       }
@@ -675,13 +715,13 @@ Future<void> checkForUpdates(BuildContext context) async {
                   );
                 },
               ),
-              if (release.browserDownloadUrl.isNotEmpty)
+              if (safeRelease.browserDownloadUrl.isNotEmpty)
                 ListTile(
                   leading: const Icon(Icons.source),
                   title: const Text('Download source code'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
-                    launchUrlString(release.browserDownloadUrl);
+                    launchUrlString(safeRelease.browserDownloadUrl);
                   },
                 ),
             ],
@@ -691,5 +731,13 @@ Future<void> checkForUpdates(BuildContext context) async {
     );
   } catch (e) {
     Logs().e('Failed to check for updates', e);
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Updatecontrole mislukt: $e'),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
   }
 }
