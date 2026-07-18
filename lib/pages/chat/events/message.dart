@@ -225,6 +225,13 @@ class _MessageState extends State<Message> {
     final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
     final hasBeenRead = widget.hasBeenRead;
 
+    // Een gesprek telt als 1-op-1 wanneer de room als direct-chat is
+    // gemarkeerd (echte 1-op-1) OF maximaal 4 deelnemers heeft.
+    // Bridge-chats (WA/TG) missen vaak de isDirect-flag maar hebben wel
+    // extra members (bot/puppet), dus <=4 vangt die ook op.
+    final isOneOnOne =
+        event.room.isDirectChat || event.room.getParticipants().length <= 4;
+
     var color = theme.colorScheme.surfaceContainerHigh;
     final displayTime =
         event.type == EventTypes.RoomCreate ||
@@ -441,7 +448,7 @@ class _MessageState extends State<Message> {
                           padding: const EdgeInsets.only(left: 8.0, bottom: 4),
                           child: ownMessage
                               ? const SizedBox(height: 12)
-                              : event.room.isDirectChat
+                              : isOneOnOne
                                   ? const SizedBox.shrink()
                                   : Text(
                                       displayname,
