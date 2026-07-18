@@ -125,75 +125,7 @@ class ChatInputRow extends StatelessWidget {
                       : const SizedBox.shrink(),
                 ]
               : <Widget>[
-                  const SizedBox(width: 4),
-                  // Attachment menu (links)
-                  Container(
-                    height: height,
-                    width: height,
-                    alignment: Alignment.center,
-                    child: Semantics(
-                      label: 'Add attachment',
-                      button: true,
-                      child: PopupMenuButton<String>(
-                        icon: const Icon(Icons.attach_file),
-                        color: theme.colorScheme.surface,
-                        onSelected: controller.onAddPopupMenuButtonSelected,
-                        itemBuilder: (BuildContext context) => [
-                          PopupMenuItem(
-                            value: 'camera',
-                            child: ListTile(
-                              leading: const Icon(Icons.camera_alt_outlined),
-                              title: Text(L10n.of(context).openCamera),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'image',
-                            child: ListTile(
-                              leading: const Icon(Icons.photo_outlined),
-                              title: Text(L10n.of(context).sendImage),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'video',
-                            child: ListTile(
-                              leading: const Icon(Icons.video_library_outlined),
-                              title: Text(L10n.of(context).sendVideo),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'camera-video',
-                            child: ListTile(
-                              leading: const Icon(Icons.videocam_outlined),
-                              title: Text(L10n.of(context).openVideoCamera),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'location',
-                            child: ListTile(
-                              leading: const Icon(Icons.location_on_outlined),
-                              title: Text(L10n.of(context).shareLocation),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'file',
-                            child: ListTile(
-                              leading: const Icon(Icons.attachment_outlined),
-                              title: Text(L10n.of(context).sendFile),
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'poll',
-                            child: ListTile(
-                              leading: const Icon(Icons.poll_outlined),
-                              title: Text(L10n.of(context).startPoll),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  // Input bar met emoji knop erin (WhatsApp stijl)
+                  // Input bar met bijlage-icoon en emoji-knop erin (WhatsApp stijl)
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -245,7 +177,7 @@ class ChatInputRow extends StatelessWidget {
                                     controller: controller.sendController,
                                     decoration: InputDecoration(
                                       contentPadding: const EdgeInsets.only(
-                                        left: 16.0,
+                                        left: 10.0,
                                         right: 8.0,
                                         bottom: 12.0,
                                         top: 12.0,
@@ -256,6 +188,65 @@ class ChatInputRow extends StatelessWidget {
                                       border: InputBorder.none,
                                       enabledBorder: InputBorder.none,
                                       filled: false,
+                                      prefixIcon: PopupMenuButton<String>(
+                                        tooltip: L10n.of(context).sendFile,
+                                        onSelected: controller.onAddPopupMenuButtonSelected,
+                                        itemBuilder: (BuildContext context) => [
+                                          PopupMenuItem(
+                                            value: 'camera',
+                                            child: ListTile(
+                                              leading: const Icon(Icons.camera_alt_outlined),
+                                              title: Text(L10n.of(context).openCamera),
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'image',
+                                            child: ListTile(
+                                              leading: const Icon(Icons.photo_outlined),
+                                              title: Text(L10n.of(context).sendImage),
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'video',
+                                            child: ListTile(
+                                              leading: const Icon(Icons.video_library_outlined),
+                                              title: Text(L10n.of(context).sendVideo),
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'camera-video',
+                                            child: ListTile(
+                                              leading: const Icon(Icons.videocam_outlined),
+                                              title: Text(L10n.of(context).openVideoCamera),
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'location',
+                                            child: ListTile(
+                                              leading: const Icon(Icons.location_on_outlined),
+                                              title: Text(L10n.of(context).shareLocation),
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'file',
+                                            child: ListTile(
+                                              leading: const Icon(Icons.attachment_outlined),
+                                              title: Text(L10n.of(context).sendFile),
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'poll',
+                                            child: ListTile(
+                                              leading: const Icon(Icons.poll_outlined),
+                                              title: Text(L10n.of(context).startPoll),
+                                            ),
+                                          ),
+                                        ],
+                                        child: Icon(
+                                          Icons.attach_file,
+                                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                        ),
+                                      ),
                                     ),
                                     onChanged: controller.onInputBarChanged,
                                   ),
