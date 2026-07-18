@@ -375,40 +375,11 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
         },
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return ShaderMask(
-              blendMode: BlendMode.dstIn,
-              shaderCallback: (bounds) {
-                final maxScroll = _tabScrollController.hasClients
-                    ? _tabScrollController.position.maxScrollExtent
-                    : 0.0;
-                final currentScroll = _tabScrollController.hasClients
-                    ? _tabScrollController.offset
-                    : 0.0;
-                // Show fade at the right edge if there's content hidden off-screen
-                final showFade = maxScroll - currentScroll > 24;
-                return LinearGradient(
-                  begin: Alignment.centerRight,
-                  end: Alignment.centerRight,
-                  stops: showFade
-                      ? const [0.0, 0.4, 1.0]
-                      : const [0.0, 0.0, 1.0],
-                  colors: showFade
-                      ? [
-                          Colors.black,
-                          Colors.black,
-                          Colors.transparent,
-                        ]
-                      : [
-                          Colors.black,
-                          Colors.transparent,
-                        ],
-                ).createShader(bounds);
-              },
-              child: SingleChildScrollView(
-                controller: _tabScrollController,
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: filters.map((filter) {
+            return SingleChildScrollView(
+              controller: _tabScrollController,
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: filters.map((filter) {
                     final isActive = controller.activeFilter == filter;
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -457,8 +428,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                     );
                   }).toList(),
                 ),
-              ),
-            );
+              );
           },
         ),
       ),
