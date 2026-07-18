@@ -20,6 +20,7 @@ import 'package:Pulsly/utils/string_color.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/member_actions_popup_menu_button.dart';
+import 'stacked_bubble_painter.dart';
 import '../../../config/app_config.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
@@ -296,6 +297,14 @@ class _MessageState extends State<Message> {
             event.numberEmotes > 0 &&
             event.numberEmotes <= 3);
 
+    // Media bubbles keep the plain rounded shape (edge-to-edge image); the
+    // eigenwijze notch/tail geometry only applies to text bubbles.
+    final isMedia = {
+      MessageTypes.Image,
+      MessageTypes.Video,
+      MessageTypes.Sticker,
+    }.contains(event.messageType);
+
     if (ownMessage) {
       color = displayEvent.status.isError
           ? theme.colorScheme.error
@@ -490,24 +499,8 @@ class _MessageState extends State<Message> {
                                   HapticFeedback.heavyImpact();
                                   widget.onSelect(event, _tapPosition);
                                 },
-                          child: Material(
-                            color: noBubble
-                                ? Colors.transparent
-                                : AppSettings.enableChatFrostedGlass.value &&
-                                      AppSettings.wallpaperPath.value.isNotEmpty
-                                ? color.withValues(alpha: 0.7)
-                                : color,
-                            borderRadius: borderRadius,
-                            clipBehavior: Clip.antiAlias,
-                            child: BubbleBackground(
-                              colors: widget.colors,
-                              ignore:
-                                  noBubble ||
-                                  !ownMessage ||
-                                  !widget.gradient ||
-                                  MediaQuery.highContrastOf(context),
-                              scrollController: widget.scrollController,
-                              child: Container(
+                          child: () {
+                            final bubbleInner = Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(
                                     AppConfig.borderRadius,
@@ -622,9 +615,62 @@ class _MessageState extends State<Message> {
                                     ),
                                   ],
                                 ),
-                              ),
-                            ),
-                          ),
+                              );
+                              final bubbleColor = AppSettings
+                                      .enableChatFrostedGlass.value &&
+                                  AppSettings.wallpaperPath.value.isNotEmpty
+                              ? color.withValues(alpha: 0.7)
+                              : color;
+                              final bubble = isMedia
+                                  ? Material(
+                                      color: noBubble
+                                          ? Colors.transparent
+                                          : bubbleColor,
+                                      borderRadius: borderRadius,
+                                      clipBehavior: Clip.antiAlias,
+                                      child: BubbleBackground(
+                                        colors: widget.colors,
+                                        ignore: noBubble ||
+                                            !ownMessage ||
+                                            !widget.gradient ||
+                                            MediaQuery.highContrastOf(context),
+                                        scrollController: widget.scrollController,
+                                        child: bubbleInner,
+                                      ),
+                                    )
+                                  : Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        Positioned.fill(
+                                          child: CustomPaint(
+                                            painter: StackedBubblePainter(
+                                              color: bubbleColor,
+                                              shape: StackedBubbleShape(
+                                                isOwn: ownMessage,
+                                                isFirst:
+                                                    !previousEventSameSender,
+                                                isLast: !nextEventSameSender,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                            left: ownMessage
+                                                ? kNotchDepth
+                                                : 10,
+                                            right: ownMessage
+                                                ? 10
+                                                : kNotchDepth,
+                                            top: 10,
+                                            bottom: 10,
+                                          ),
+                                          child: bubbleInner,
+                                        ),
+                                      ],
+                                    );
+                              return bubble;
+                            }(),
                         ),
                       ),
                       if (widget.thread != null)

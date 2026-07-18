@@ -497,8 +497,15 @@ class ChatView extends StatelessWidget {
                       onPressed: controller.scrollDown,
                       heroTag: null,
                       mini: true,
+                      elevation: 6,
                       backgroundColor: theme.colorScheme.surface,
                       foregroundColor: theme.colorScheme.onSurface,
+                      shape: CircleBorder(
+                        side: BorderSide(
+                          color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                          width: 0.5,
+                        ),
+                      ),
                       child: const Icon(Icons.arrow_downward_outlined),
                     ),
                   );
