@@ -12,6 +12,7 @@ import 'package:mime/mime.dart';
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/services/chat_list_refresh_bus.dart';
 import 'package:Pulsly/utils/clean_exif.dart';
 import 'package:Pulsly/utils/loading_snackbar_extension.dart';
 import 'package:Pulsly/utils/localized_exception_extension.dart';
@@ -34,6 +35,7 @@ class SendFileDialog extends StatefulWidget {
   final BuildContext outerContext;
   final Event? replyEvent;
   final void Function()? onClearReply;
+  final void Function()? onSent;
 
   const SendFileDialog({
     required this.room,
@@ -42,6 +44,7 @@ class SendFileDialog extends StatefulWidget {
     required this.outerContext,
     this.onClearReply,
     this.replyEvent,
+    this.onSent,
     super.key,
   });
 
@@ -223,6 +226,12 @@ class SendFileDialogState extends State<SendFileDialog> {
                 widget.thread?.rootEvent.eventId,
             threadRootEventId: widget.thread?.rootEvent.eventId,
           );
+          // Force the chat list (and the open conversation) to rebuild so the
+          // freshly sent photo appears immediately, the same way text messages
+          // do after send(). sendFileEvent adds the placeholder then the real
+          // event after upload, which can cause onUpdate to miss the bubble.
+          ChatListRefreshBus.refreshForRoom(widget.room.id);
+          widget.onSent?.call();
         } on MatrixException catch (e) {
           final retryAfterMs = e.retryAfterMs;
           if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {

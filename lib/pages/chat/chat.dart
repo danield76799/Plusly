@@ -845,6 +845,19 @@ class ChatController extends State<ChatPageWithRoom>
     // replyEvent = null;
   }
 
+  // Scrolls to the bottom after a media file has been sent, mirroring the
+  // behaviour of send() for text. Media uploads resolve after the dialog
+  // closes, so the conversation would otherwise stay where it was.
+  void scrollDownAfterSend() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final sc = scrollController;
+      if (!sc.hasClients) return;
+      // Only auto-scroll if the user is already near the bottom.
+      if (sc.position.pixels <= 80) sc.jumpTo(0);
+    });
+  }
+
   void sendImageFromClipBoard(Uint8List? image) async {
     if (PlatformInfos.isLinux) {
       final pastedImage = await getImageFromClipboardLinux();
@@ -866,6 +879,7 @@ class ChatController extends State<ChatPageWithRoom>
           onClearReply: () {
             replyEvent = null;
           },
+          onSent: scrollDownAfterSend,
         ),
       );
       return;
@@ -883,6 +897,7 @@ class ChatController extends State<ChatPageWithRoom>
         onClearReply: () {
           replyEvent = null;
         },
+        onSent: scrollDownAfterSend,
       ),
     );
   }
@@ -906,6 +921,7 @@ class ChatController extends State<ChatPageWithRoom>
         room: room,
         thread: thread,
         outerContext: context,
+        onSent: scrollDownAfterSend,
       ),
     );
   }
@@ -933,6 +949,7 @@ class ChatController extends State<ChatPageWithRoom>
         onClearReply: () {
           replyEvent = null;
         },
+        onSent: scrollDownAfterSend,
       ),
     );
   }
@@ -954,6 +971,7 @@ class ChatController extends State<ChatPageWithRoom>
         room: room,
         thread: thread,
         outerContext: context,
+        onSent: scrollDownAfterSend,
       ),
     );
   }
