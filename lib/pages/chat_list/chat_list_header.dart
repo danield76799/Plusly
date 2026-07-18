@@ -216,7 +216,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                                 color: status.error != null
                                     ? theme.colorScheme.error
                                     : theme.colorScheme.onSecondaryContainer
-                                          .withValues(alpha: 0.87), // 10% darker
+                                          .withValues(alpha: 0.95),
                                 fontWeight: FontWeight.normal,
                               ),
                               prefixIcon: hide
@@ -365,49 +365,92 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
           ),
         ),
       ),
-      child: SingleChildScrollView(
-        controller: _tabScrollController,
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: filters.map((filter) {
-            final isActive = controller.activeFilter == filter;
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-              child: InkWell(
-                onTap: () => controller.setActiveFilter(filter),
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isActive
-                        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
-                        : null,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border(
-                      bottom: BorderSide(
-                        color: isActive
-                            ? theme.colorScheme.primary
-                            : Colors.transparent,
-                        width: 2,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (notification) {
+          // Rebuild to update fade indicator on scroll.
+          // We avoid setState because this is a StatelessWidget; instead,
+          // the fade is driven by ShaderMask + LinearGradient which
+          // depends on the ScrollController offset.
+          return false;
+        },
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return ShaderMask(
+              blendMode: BlendMode.dstIn,
+              shaderCallback: (bounds) {
+                final maxScroll = _tabScrollController.hasClients
+                    ? _tabScrollController.position.maxScrollExtent
+                    : 0.0;
+                final currentScroll = _tabScrollController.hasClients
+                    ? _tabScrollController.offset
+                    : 0.0;
+                // Show fade at the right edge if there's content hidden off-screen
+                final showFade = maxScroll - currentScroll > 24;
+                return LinearGradient(
+                  begin: Alignment.centerRight,
+                  end: Alignment.centerRight,
+                  stops: showFade
+                      ? const [0.0, 0.4, 1.0]
+                      : const [0.0, 0.0, 1.0],
+                  colors: showFade
+                      ? [
+                          Colors.black,
+                          Colors.black,
+                          Colors.transparent,
+                        ]
+                      : [
+                          Colors.black,
+                          Colors.transparent,
+                        ],
+                ).createShader(bounds);
+              },
+              child: SingleChildScrollView(
+                controller: _tabScrollController,
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: filters.map((filter) {
+                    final isActive = controller.activeFilter == filter;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      child: InkWell(
+                        onTap: () => controller.setActiveFilter(filter),
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
+                                : null,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border(
+                              bottom: BorderSide(
+                                color: isActive
+                                    ? theme.colorScheme.primary
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              filter.toLocalizedString(context),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isActive
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      filter.toLocalizedString(context),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: isActive
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
-                    ),
-                  ),
+                    );
+                  }).toList(),
                 ),
               ),
             );
-          }).toList(),
+          },
         ),
       ),
     );

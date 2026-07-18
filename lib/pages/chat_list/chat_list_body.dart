@@ -22,8 +22,8 @@ import 'package:Pulsly/utils/show_profile.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/mini_audio_player.dart';
-import '../../config/themes.dart';
-import '../../widgets/matrix.dart';
+import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 import 'chat_list_header.dart';
 import '../../services/chat_list_refresh_bus.dart';
 
@@ -31,6 +31,8 @@ class ChatListViewBody extends StatelessWidget {
   final ChatListController controller;
 
   const ChatListViewBody(this.controller, {super.key});
+
+  static const double _fabBottomPadding = 96.0; // 56 FAB + 40 marge
 
   @override
   Widget build(BuildContext context) {
@@ -359,8 +361,8 @@ class ChatListViewBody extends StatelessWidget {
                     },
                   ),
                 SliverToBoxAdapter(
-                  child: const SizedBox(height: 120),
-                ), // Increased padding for FAB to prevent overlap
+                  child: const SizedBox(height: _fabBottomPadding),
+                ), // FAB/GestureDetector bottom spacing
               ],
             ),
           ),
