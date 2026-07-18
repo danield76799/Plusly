@@ -439,7 +439,8 @@ class _MessageState extends State<Message> {
                       if (!nextEventSameSender)
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0, bottom: 4),
-                          child: !ownMessage && event.room.isDirectChat
+                          child: !ownMessage &&
+                                  event.room.isDirectChat
                               ? const SizedBox.shrink()
                               : Text(
                                   displayname,
