@@ -415,11 +415,20 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                       child: InkWell(
                         onTap: () => controller.setActiveFilter(filter),
                         borderRadius: BorderRadius.circular(10),
+                        overlayColor: WidgetStateProperty.resolveWith((states) {
+                          if (states.contains(WidgetState.pressed)) {
+                            return theme.colorScheme.primary.withValues(alpha: 0.12);
+                          }
+                          if (states.contains(WidgetState.hovered)) {
+                            return theme.colorScheme.primary.withValues(alpha: 0.08);
+                          }
+                          return Colors.transparent;
+                        }),
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
                             color: isActive
-                                ? theme.colorScheme.primaryContainer.withValues(alpha: 0.4)
+                                ? theme.colorScheme.primaryContainer
                                 : null,
                             borderRadius: BorderRadius.circular(10),
                             border: Border(
