@@ -85,8 +85,7 @@ class _MxcImageState extends State<MxcImage> {
   Uint8List? _currentData;
   bool _isLoading = false;
   bool _loadFailed = false;
-  int _retryCount = 0;
-  static const int _maxRetries = 3;
+  bool _timedOut = false;
 
   String? get _effectiveCacheKey {
     if (widget.cacheKey != null) return widget.cacheKey;
@@ -121,7 +120,8 @@ class _MxcImageState extends State<MxcImage> {
     if (oldWidget.uri != widget.uri ||
         oldWidget.event != widget.event ||
         oldWidget.cacheKey != widget.cacheKey) {
-      _retryCount = 0;
+      _loadFailed = false;
+      _timedOut = false;
       final cached = _getFromCache();
       if (cached != null) {
         setState(() {
@@ -153,15 +153,16 @@ class _MxcImageState extends State<MxcImage> {
     }
   }
 
+  void _handleFailure() {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+      _loadFailed = true;
+    });
+  }
+
   Future<void> _load() async {
     if (_isLoading || !mounted) return;
-
-    if (_retryCount >= _maxRetries) {
-      Logs().w(
-        'MxcImage failed to load after $_maxRetries attempts: ${widget.uri}',
-      );
-      return;
-    }
 
     final effectiveKey = _effectiveCacheKey;
 
@@ -174,8 +175,8 @@ class _MxcImageState extends State<MxcImage> {
         setState(() {
           _currentData = cached;
           _isLoading = false;
-          _retryCount = 0;
           _loadFailed = false;
+          _timedOut = false;
         });
       }
       return;
@@ -192,11 +193,11 @@ class _MxcImageState extends State<MxcImage> {
           setState(() {
             _currentData = shared;
             _isLoading = false;
-            _retryCount = 0;
             _loadFailed = false;
+            _timedOut = false;
           });
         } else {
-          _scheduleRetry();
+          _handleFailure();
         }
         return;
       }
@@ -204,6 +205,8 @@ class _MxcImageState extends State<MxcImage> {
 
     setState(() {
       _isLoading = true;
+      _loadFailed = false;
+      _timedOut = false;
     });
 
     final completer = Completer<Uint8List?>();
@@ -214,10 +217,15 @@ class _MxcImageState extends State<MxcImage> {
     Uint8List? loadedBytes;
     try {
       loadedBytes = await _fetchBytes();
+    } on TimeoutException catch (e, s) {
+      Logs().w('MxcImage timed out', e, s);
+      if (mounted) {
+        setState(() => _timedOut = true);
+      }
     } on Exception catch (e, s) {
-      Logs().d('MxcImage load failed', e, s);
+      Logs().w('MxcImage load failed', e, s);
     } catch (e, s) {
-      Logs().d('Unexpected error loading mxc image', e, s);
+      Logs().w('Unexpected error loading mxc image', e, s);
     }
 
     if (effectiveKey != null) {
@@ -232,11 +240,11 @@ class _MxcImageState extends State<MxcImage> {
       setState(() {
         _currentData = loadedBytes;
         _isLoading = false;
-        _retryCount = 0;
         _loadFailed = false;
+        _timedOut = false;
       });
     } else {
-      _scheduleRetry();
+      _handleFailure();
     }
   }
 
@@ -302,24 +310,6 @@ class _MxcImageState extends State<MxcImage> {
     return null;
   }
 
-  void _scheduleRetry() {
-    if (!mounted) return;
-
-    setState(() => _isLoading = false);
-
-    _retryCount++;
-
-    // Exponential backoff: 2s, 4s, 8s, 16s...
-    final delay = widget.retryDuration * pow(2, _retryCount - 1);
-
-    Future.delayed(delay, () {
-      if (mounted && _currentData == null) {
-        setState(() => _loadFailed = false);
-        _load();
-      }
-    });
-  }
-
   Widget _buildPlaceholder(BuildContext context) =>
       widget.placeholder?.call(context) ??
       SizedBox(
@@ -344,7 +334,7 @@ class _MxcImageState extends State<MxcImage> {
             // arrived via backup in the meantime, the image will now decode.
             setState(() {
               _loadFailed = false;
-              _retryCount = 0;
+              _timedOut = false;
             });
             _load();
           },
@@ -352,13 +342,14 @@ class _MxcImageState extends State<MxcImage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.lock_outline_rounded,
+                _timedOut ? Icons.refresh : Icons.lock_outline_rounded,
                 size: min(widget.height ?? 64, 48),
                 color: theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 4),
               Text(
-                'Kan niet decoderen',
+                _timedOut ? 'Laden mislukt, tik om opnieuw te proberen' : 'Kan niet decoderen',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 11,
                   color: theme.colorScheme.onSurfaceVariant,
@@ -378,10 +369,17 @@ class _MxcImageState extends State<MxcImage> {
         height: widget.height,
         child: Material(
           color: Theme.of(context).colorScheme.surfaceContainer,
-          child: Icon(
-            Icons.broken_image_outlined,
-            size: min(widget.height ?? 64, 64),
+          child: IconButton(
+            icon: const Icon(Icons.broken_image_outlined),
+            iconSize: min(widget.height ?? 64, 64),
             color: Theme.of(context).colorScheme.onSurface,
+            onPressed: () {
+              setState(() {
+                _loadFailed = false;
+                _timedOut = false;
+              });
+              _load();
+            },
           ),
         ),
       );
@@ -393,9 +391,6 @@ class _MxcImageState extends State<MxcImage> {
     if (data == null || data.isEmpty) {
       if (_loadFailed && !_isLoading) {
         return _buildDecryptError(context);
-      }
-      if (_retryCount >= _maxRetries && !_isLoading) {
-        return _buildError(context);
       }
 
       return KeyedSubtree(
