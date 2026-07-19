@@ -78,6 +78,7 @@ class MxcImage extends StatefulWidget {
 class _MxcImageState extends State<MxcImage> {
   Uint8List? _currentData;
   bool _isLoading = false;
+  bool _loadFailed = false;
   int _retryCount = 0;
   static const int _maxRetries = 3;
 
@@ -226,6 +227,7 @@ class _MxcImageState extends State<MxcImage> {
           _currentData = loadedBytes;
           _isLoading = false;
           _retryCount = 0;
+          _loadFailed = false;
         });
       } else {
         _scheduleRetry();
@@ -235,7 +237,10 @@ class _MxcImageState extends State<MxcImage> {
     } catch (e, s) {
       Logs().d('Unexpected error loading mxc image', e, s);
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _loadFailed = true;
+        });
       }
     }
   }
@@ -252,6 +257,7 @@ class _MxcImageState extends State<MxcImage> {
 
     Future.delayed(delay, () {
       if (mounted && _currentData == null) {
+        setState(() => _loadFailed = false);
         _load();
       }
     });
@@ -266,6 +272,47 @@ class _MxcImageState extends State<MxcImage> {
           child: CircularProgressIndicator.adaptive(strokeWidth: 2),
         ),
       );
+
+  Widget _buildDecryptError(BuildContext context) {
+    final theme = Theme.of(context);
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: Material(
+        color: theme.colorScheme.surfaceContainerHighest,
+        child: InkWell(
+          onTap: () {
+            // The Matrix SDK already requests the missing room key during
+            // downloadAndDecryptAttachment. Tapping just retries — if a key
+            // arrived via backup in the meantime, the image will now decode.
+            setState(() {
+              _loadFailed = false;
+              _retryCount = 0;
+            });
+            _load();
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.lock_outline_rounded,
+                size: min(widget.height ?? 64, 48),
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Kan niet decoderen',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildError(BuildContext context) =>
       widget.placeholder?.call(context) ??
@@ -287,6 +334,9 @@ class _MxcImageState extends State<MxcImage> {
     final data = _currentData;
 
     if (data == null || data.isEmpty) {
+      if (_loadFailed && !_isLoading) {
+        return _buildDecryptError(context);
+      }
       if (_retryCount >= _maxRetries && !_isLoading) {
         return _buildError(context);
       }
