@@ -276,17 +276,18 @@ class ChatController extends State<ChatPageWithRoom>
 
   EmojiPickerType emojiPickerType = EmojiPickerType.keyboard;
 
-  void requestHistory([_]) async {
+  Future<void> requestHistory([_]) async {
+    if (timeline == null || timeline!.isRequestingHistory) return;
     Logs().v('Requesting history...');
     await timeline?.requestHistory(historyCount: _loadHistoryCount);
+    if (mounted) _updateScrollController();
   }
 
   bool _requestingFuture = false;
 
-  void requestFuture() async {
+  Future<void> requestFuture() async {
     final timeline = this.timeline;
-    if (timeline == null) return;
-    if (_requestingFuture) return;
+    if (timeline == null || _requestingFuture) return;
     _requestingFuture = true;
     Logs().v('Requesting future...');
     final visibleEvents = timeline.events.filterByVisibleInGui();
@@ -322,6 +323,7 @@ class ChatController extends State<ChatPageWithRoom>
       setReadMarker(eventId: mostRecentEvent.eventId);
     }
     _requestingFuture = false;
+    if (mounted) _updateScrollController();
   }
 
   void _updateScrollController() {
@@ -500,7 +502,8 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void> updateView() async {
     if (!mounted) return;
     setReadMarker();
-    updateThreads();
+    await updateThreads();
+    if (!mounted) return;
     setState(() {
       firstUpdateReceived = true;
       _timelineTick++;
@@ -508,7 +511,7 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void> updateThreads() async {
-    if (timeline?.events == null) return;
+    if (timeline?.events == null || !mounted) return;
     final lastEvent = timeline?.events[timeline!.events.length - 1];
 
     if (lastEvent == null) return;
@@ -519,6 +522,7 @@ class ChatController extends State<ChatPageWithRoom>
         lastEvent.relationshipEventId!,
         room.client,
       );
+      if (!mounted) return;
       if (thread != null) {
         setState(() {
           threads?[lastEvent.eventId] = thread;
@@ -737,7 +741,7 @@ class ChatController extends State<ChatPageWithRoom>
     _isSending = true;
     _storeInputTimeoutTimer?.cancel();
     await AppSettings.store.remove('draft_$roomId');
-    var parseCommands = true;
+    final parseCommands = true;
 
     final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
     if (commandMatch != null &&
@@ -751,29 +755,31 @@ class ChatController extends State<ChatPageWithRoom>
         cancelLabel: l10n.cancel,
       );
       if (dialogResult == OkCancelResult.cancel) return;
-      parseCommands = false;
+      // parseCommands = false;
     }
 
-    // ignore: unawaited_futures
-    room.sendTextEvent(
-      sendController.text,
-      inReplyTo: replyEvent,
-      replyMention: replyMention,
-      editEventId: editEvent?.eventId,
-      parseCommands: parseCommands,
-      threadRootEventId: thread?.rootEvent.eventId,
-      threadLastEventId:
-          thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
-    ).catchError((e) {
+    try {
+      await room.sendTextEvent(
+        sendController.text,
+        inReplyTo: replyEvent,
+        replyMention: replyMention,
+        editEventId: editEvent?.eventId,
+        parseCommands: parseCommands,
+        threadRootEventId: thread?.rootEvent.eventId,
+        threadLastEventId:
+            thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
+      );
+    } catch (e) {
       Logs().e('Failed to send message', e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(L10n.of(context).errorSendingMessage)),
         );
       }
-      return null;
-    });
+      return;
+    }
 
+    if (!mounted) return;
     _clearComposer();
 
     setState(() {

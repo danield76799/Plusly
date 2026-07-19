@@ -126,10 +126,10 @@ class ChatEventList extends StatelessWidget {
                 }
 
                 if (i == events.length + 1) {
-                  if (timeline.canRequestHistory) {
-                    WidgetsBinding.instance.addPostFrameCallback(
-                      controller.requestHistory,
-                    );
+                  if (timeline.canRequestHistory && !timeline.isRequestingHistory) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (controller.mounted) controller.requestHistory();
+                    });
                     final hasScrollBanner =
                         controller.scrollUpBannerEventId != null;
                     return Padding(
