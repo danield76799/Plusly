@@ -9,24 +9,6 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Fallback: parse versionCode/versionName straight from pubspec.yaml so a
-// stale local.properties (common on reusable GHA runners) can never leak an
-// old versionCode into the APK. Flutter's plugin normally writes these, but
-// on some runners the file persists across jobs.
-fun parsePubspecVersion(): Pair<Int, String> {
-    val pubspec = rootProject.file("../pubspec.yaml")
-    if (!pubspec.exists()) return Pair(flutter.versionCode, flutter.versionName)
-    val versionLine = pubspec.readLines().firstOrNull { it.startsWith("version:") }
-        ?: return Pair(flutter.versionCode, flutter.versionName)
-    val version = versionLine.substringAfter("version:").trim()
-    val parts = version.split("+")
-    val versionName = parts[0]
-    val versionCode = parts.getOrNull(1)?.toIntOrNull() ?: flutter.versionCode
-    return Pair(versionCode, versionName)
-}
-
-val (pubspecVersionCode, pubspecVersionName) = parsePubspecVersion()
-
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
 }
@@ -86,8 +68,13 @@ android {
         applicationId = "com.danield.plusly.app"
         minSdk = 24  // Required for modern features
         targetSdk = flutter.targetSdkVersion
-        versionCode = pubspecVersionCode
-        versionName = pubspecVersionName
+        // Read versionCode / versionName from GITHUB_ENV (set by the bump step
+        // in main_deploy.yml). This is the single source of truth and cannot
+        // be influenced by a stale local.properties on the GHA runner.
+        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull()
+            ?: flutter.versionCode
+        versionName = System.getenv("ANDROID_VERSION_NAME")
+            ?: flutter.versionName
     }
 
     buildTypes {
