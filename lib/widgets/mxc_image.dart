@@ -205,9 +205,23 @@ class _MxcImageState extends State<MxcImage> {
             'Event of type ${event.messageType} has no thumbnail!',
           );
         }
-        final data = await event.downloadAndDecryptAttachment(
-          getThumbnail: useThumbnail,
-        );
+        MatrixFile data;
+        try {
+          data = await event.downloadAndDecryptAttachment(
+            getThumbnail: useThumbnail,
+          );
+        } on Exception catch (_) {
+          // Thumbnail failed (missing on server, key gap, etc.). Fall back to
+          // the full-resolution original before giving up — many old media
+          // only have the full file, not a generated thumbnail.
+          if (useThumbnail) {
+            data = await event.downloadAndDecryptAttachment(
+              getThumbnail: false,
+            );
+          } else {
+            rethrow;
+          }
+        }
         if (data.detectFileType is MatrixImageFile) {
           loadedBytes = data.bytes;
         }

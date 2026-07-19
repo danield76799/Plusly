@@ -203,7 +203,7 @@ class ChatController extends State<ChatPageWithRoom>
 
   bool get selectMode => selectedEvents.isNotEmpty;
 
-  final int _loadHistoryCount = 100;
+  final int _loadHistoryCount = 200;
 
   String pendingText = '';
 
