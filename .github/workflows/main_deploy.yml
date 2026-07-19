@@ -61,17 +61,14 @@ jobs:
           ndk-version: r27
           add-to-path: false
 
-      - name: Configure NDK
+      - name: Export NDK env
         run: |
           echo "ANDROID_NDK_HOME=${{ steps.setup_ndk.outputs.ndk-path }}" >> $GITHUB_ENV
           echo "ANDROID_NDK_ROOT=${{ steps.setup_ndk.outputs.ndk-path }}" >> $GITHUB_ENV
-          # Make sure AGP/Flutter actually uses the installed NDK
-          echo "ndk.dir=${{ steps.setup_ndk.outputs.ndk-path }}" >> android/local.properties
 
-      - name: Verify NDK version
+      - name: Verify NDK path
         run: |
           echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME"
-          cat android/local.properties
 
       - name: Cache Flutter dependencies
         uses: actions/cache@v4
@@ -88,20 +85,16 @@ jobs:
 
       - name: Clean stale local.properties
         run: |
-          # Flutter will regenerate this from pubspec.yaml if absent. A stale
-          # local.properties from a reusable GHA runner can leak an old
-          # versionCode into the APK (observed as +2000 offset). Remove it so
-          # each build starts fresh.
           rm -f android/local.properties
 
       - name: Clean Flutter build
         run: flutter clean && cd android && ./gradlew clean 2>&1 | tail -n 5
 
-      - name: Generate localization
-        run: flutter gen-l10n
-
       - name: Install Flutter dependencies
         run: flutter pub get
+
+      - name: Generate localization
+        run: flutter gen-l10n
 
       - name: Run tests
         run: flutter test
@@ -120,15 +113,8 @@ jobs:
           BUILD_NUMBER=$(echo "$VERSION" | sed 's/.*+//')
           NEW_BUILD_NUMBER=$((BUILD_NUMBER + 1))
 
-          # Update pubspec.yaml
           sed -i "s/^version: .*/version: ${VERSION_NAME}+${NEW_BUILD_NUMBER}/" pubspec.yaml
 
-          # The GHA runner's flutter.versionCode is consistently
-          # (bumped pubspec build number + 2000). The APK the user installs
-          # therefore reports that offset version. We write plusly-version.txt
-          # with the SAME offset so the in-app update check compares
-          # like-for-like (no false "already latest"). The release tag uses
-          # the offset version too.
           ANDROID_BUILD_NUMBER=$((NEW_BUILD_NUMBER + 2000))
 
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
@@ -137,17 +123,20 @@ jobs:
           echo "full_version=${VERSION_NAME}+${NEW_BUILD_NUMBER}" >> $GITHUB_OUTPUT
           echo "Bumped ${VERSION_NAME}+${BUILD_NUMBER} → ${VERSION_NAME}+${NEW_BUILD_NUMBER} (APK reports +2000 → ${VERSION_NAME}+${ANDROID_BUILD_NUMBER})"
 
+      - name: Configure NDK
+        run: |
+          # Make sure AGP/Flutter actually uses the installed NDK.
+          # local.properties was cleaned above, so write it fresh here.
+          echo "ndk.dir=${{ steps.setup_ndk.outputs.ndk-path }}" >> android/local.properties
+
       - name: Commit version bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pubspec.yaml
-          # Keep plusly-version.txt in sync with the APK the user actually
-          # installs. flutter.versionCode on the runner is (pubspec + 2001),
-          # so write that offset version here.
           echo "${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.android_build_number }}" > plusly-version.txt
           git add plusly-version.txt
-          git diff --cached --quiet || git commit -m "Bump version to ${{ steps.version.outputs.version }}+${{ steps.version.outputs.build_number }} [skip ci]"
+          git diff --cached --quiet || git commit -m "Bump version to ${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }} [skip ci]"
           git push || echo "Push failed, continuing anyway"
         continue-on-error: true
         env:
