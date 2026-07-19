@@ -609,8 +609,8 @@ class _MessageState extends State<Message> {
                                   scrollController: widget.scrollController,
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                      vertical: 10.0,
-                                      horizontal: 14.0,
+                                      vertical: 6.0,
+                                      horizontal: 10.0,
                                     ),
                                     child: bubbleInner,
                                   ),
