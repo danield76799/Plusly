@@ -193,7 +193,7 @@ class _MxcImageState extends State<MxcImage> {
           thumbnailMethod: widget.thumbnailMethod,
           isThumbnail: originalIsThumbnail,
           animated: originalAnimated,
-        );
+        ).timeout(const Duration(seconds: 15));
       } else if (event != null) {
         final useThumbnail = originalIsThumbnail && event.hasThumbnail;
         if (!useThumbnail &&
@@ -209,7 +209,7 @@ class _MxcImageState extends State<MxcImage> {
         try {
           data = await event.downloadAndDecryptAttachment(
             getThumbnail: useThumbnail,
-          );
+          ).timeout(const Duration(seconds: 15));
         } on Exception catch (_) {
           // Thumbnail failed (missing on server, key gap, etc.). Fall back to
           // the full-resolution original before giving up — many old media
@@ -217,7 +217,7 @@ class _MxcImageState extends State<MxcImage> {
           if (useThumbnail) {
             data = await event.downloadAndDecryptAttachment(
               getThumbnail: false,
-            );
+            ).timeout(const Duration(seconds: 30));
           } else {
             rethrow;
           }
