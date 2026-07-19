@@ -471,19 +471,43 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
 
     // Check and request install packages permission on Android
     if (PlatformInfos.isAndroid) {
-      final status = await Permission.requestInstallPackages.status;
-      if (!status.isGranted) {
-        final result = await Permission.requestInstallPackages.request();
-        if (!result.isGranted) {
-          throw Exception('Permission denied: android.permission.REQUEST_INSTALL_PACKAGES');
+      try {
+        final status = await Permission.requestInstallPackages.status;
+        if (!status.isGranted) {
+          final result = await Permission.requestInstallPackages.request();
+          if (!result.isGranted) {
+            // Don't throw — fall through to a friendly message + browser fallback.
+            if (context.mounted) {
+              scaffold.showSnackBar(
+                SnackBar(
+                  content: const Text(
+                    'Installatie-toestemming geweigerd. Sta "Onbekende bronnen" '
+                    'toe of gebruik de browser-optie.',
+                  ),
+                  duration: const Duration(seconds: 6),
+                  action: SnackBarAction(
+                    label: 'Open Pagina',
+                    onPressed: () => launchUrlString(
+                      'https://github.com/danield76799/Plusly/releases',
+                    ),
+                  ),
+                ),
+              );
+            }
+            return;
+          }
         }
+      } on Exception catch (e) {
+        // Permission plugin itself failed (no activity, etc.) — log and continue,
+        // the OpenFile call below will surface a more specific error if it matters.
+        Logs().w('requestInstallPackages failed', e);
       }
     }
 
     // Open the APK — Android will show the install prompt
-    final result = await OpenFile.open(filePath);
-    if (result.type != ResultType.done) {
-      throw Exception('Kon APK niet openen: ${result.message}');
+    final openResult = await OpenFile.open(filePath);
+    if (openResult.type != ResultType.done) {
+      throw Exception('Kon APK niet openen: ${openResult.message}');
     }
   } on DioException catch (e) {
     // Handle Dio specific errors
@@ -769,9 +793,29 @@ Future<void> checkForUpdates(BuildContext context) async {
                   onTap: () async {
                     if (safeRelease.hasApk) {
                       Navigator.of(ctx).pop();
-                      final apkUrl = await _pickBestApkUrl(safeRelease);
-                      if (context.mounted) {
-                        downloadAndInstallApk(context, apkUrl);
+                      try {
+                        final apkUrl = await _pickBestApkUrl(safeRelease);
+                        if (context.mounted) {
+                          // downloadAndInstallApk has its own try/catch and
+                          // shows a snackbar on any failure — no fatal crash.
+                          await downloadAndInstallApk(context, apkUrl);
+                        }
+                      } catch (e) {
+                        Logs().e('APK URL pick failed', e);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Kon download niet starten: $e'),
+                              duration: const Duration(seconds: 5),
+                              action: SnackBarAction(
+                                label: 'Open Pagina',
+                                onPressed: () => launchUrlString(
+                                  'https://github.com/danield76799/Plusly/releases',
+                                ),
+                              ),
+                            ),
+                          );
+                        }
                       }
                     } else {
                       // No APK available, show message
