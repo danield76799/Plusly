@@ -115,6 +115,20 @@ jobs:
           # Update pubspec.yaml
           sed -i "s/^version: .*/version: ${VERSION_NAME}+${NEW_BUILD_NUMBER}/" pubspec.yaml
 
+          # CRITICAL: also sync android/local.properties. Flutter only writes
+          # flutter.versionCode/Name into local.properties if the file does NOT
+          # already exist. On reusable GHA runners a stale local.properties from
+          # a previous run can persist (e.g. versionCode=4390) and leak into the
+          # built APK, desyncing it from pubspec.yaml and plusly-version.txt.
+          # This forced sync keeps APK versionCode == pubspec build number.
+          if [ -f android/local.properties ]; then
+            sed -i "s/^flutter.versionName=.*/flutter.versionName=${VERSION_NAME}/" android/local.properties
+            sed -i "s/^flutter.versionCode=.*/flutter.versionCode=${NEW_BUILD_NUMBER}/" android/local.properties
+          else
+            echo "flutter.versionName=${VERSION_NAME}" > android/local.properties
+            echo "flutter.versionCode=${NEW_BUILD_NUMBER}" >> android/local.properties
+          fi
+
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "build_number=$NEW_BUILD_NUMBER" >> $GITHUB_OUTPUT
           echo "full_version=${VERSION_NAME}+${NEW_BUILD_NUMBER}" >> $GITHUB_OUTPUT
