@@ -335,7 +335,7 @@ class _MessageState extends State<Message> {
       children: [
         Text(
           event.originServerTs.localizedTimeOfDay(context),
-          style: TextStyle(color: statusColor, fontSize: 11),
+          style: TextStyle(color: statusColor, fontSize: 12),
         ),
         if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit))
           Padding(

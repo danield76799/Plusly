@@ -160,29 +160,40 @@ class ChatView extends StatelessWidget {
           )
         else if (AppSettings.experimentalJitsi.value)
           JitsiPopupButton(controller.room),
-        EncryptionButton(controller.room),
         SizedBox(
           width: 65,
-          child: StreamBuilder(
-            stream: Stream.periodic(const Duration(minutes: 1)),
-            builder: (context, _) {
-              final now = DateTime.now();
-              final timeString =
-                  '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Center(
-                  child: Text(
-                    timeString,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Fixed-spacing lock icon: sits directly left of the clock so
+              // it never collides with a long contact name in the title.
+              const SizedBox(width: 4),
+              EncryptionButton(controller.room),
+              const SizedBox(width: 6),
+              Expanded(
+                child: StreamBuilder(
+                  stream: Stream.periodic(const Duration(minutes: 1)),
+                  builder: (context, _) {
+                    final now = DateTime.now();
+                    final timeString =
+                        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Center(
+                        child: Text(
+                          timeString,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+            ],
           ),
         ),
         ChatSettingsPopupMenu(controller.room, true),

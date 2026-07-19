@@ -177,17 +177,30 @@ class ChatInputRow extends StatelessWidget {
                                     controller: controller.sendController,
                                     decoration: InputDecoration(
                                       contentPadding: const EdgeInsets.only(
-                                        left: 10.0,
-                                        right: 8.0,
+                                        left: 4.0,
+                                        right: 4.0,
                                         bottom: 12.0,
                                         top: 12.0,
                                       ),
                                       counter: const SizedBox.shrink(),
                                       hintText: L10n.of(context).writeAMessage,
+                                      hintStyle: TextStyle(
+                                        fontSize:
+                                            15 * AppSettings.fontSizeFactor.value,
+                                        color: theme.colorScheme.onSurface
+                                            .withValues(alpha: 0.5),
+                                      ),
                                       hintMaxLines: 1,
                                       border: InputBorder.none,
                                       enabledBorder: InputBorder.none,
                                       filled: false,
+                                      // Symmetric, generous spacing around the
+                                      // paperclip so it lines up visually with
+                                      // the emoji button on the right edge.
+                                      prefixIconConstraints: const BoxConstraints(
+                                        minWidth: 44,
+                                        minHeight: 44,
+                                      ),
                                       prefixIcon: PopupMenuButton<String>(
                                         tooltip: L10n.of(context).sendFile,
                                         onSelected: controller.onAddPopupMenuButtonSelected,
@@ -380,15 +393,26 @@ class ChatInputRow extends StatelessWidget {
                                 duration: MediaQuery.of(context).disableAnimations
                                     ? Duration.zero
                                     : const Duration(milliseconds: 200),
-                                child: Icon(
-                                  recordingViewModel.recordingMode ==
-                                          RecordingMode.video
-                                      ? Icons.videocam_outlined
-                                      : Icons.mic_none_outlined,
-                                  key: ValueKey(
-                                    recordingViewModel.recordingMode,
+                                child: Container(
+                                  // Subtle filled circle gives the mic button
+                                  // contrast against the deep-black background
+                                  // and ties it to the outgoing-bubble accent.
+                                  padding: const EdgeInsets.all(8.0),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primary
+                                        .withValues(alpha: 0.15),
+                                    shape: BoxShape.circle,
                                   ),
-                                  color: theme.colorScheme.onSurface,
+                                  child: Icon(
+                                    recordingViewModel.recordingMode ==
+                                            RecordingMode.video
+                                        ? Icons.videocam_outlined
+                                        : Icons.mic_none_outlined,
+                                    key: ValueKey(
+                                      recordingViewModel.recordingMode,
+                                    ),
+                                    color: theme.colorScheme.primary,
+                                  ),
                                 ),
                               ),
                             ),

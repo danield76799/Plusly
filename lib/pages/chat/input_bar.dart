@@ -7,6 +7,7 @@ import 'package:matrix/matrix.dart';
 import 'package:slugify/slugify.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/utils/markdown_context_builder.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 import '../../widgets/avatar.dart';
@@ -511,6 +512,12 @@ class _InputBarState extends State<InputBar> {
           keyboardType: widget.keyboardType!,
           textInputAction: widget.textInputAction,
           autofocus: widget.autofocus!,
+          // Larger, readable input text that matches the chat bubble text
+          // size so typing feels consistent with the conversation.
+          style: TextStyle(
+            fontSize: 15 * AppSettings.fontSizeFactor.value,
+            height: 1.2,
+          ),
           inputFormatters: [
             LengthLimitingTextInputFormatter((maxPDUSize / 3).floor()),
           ],
