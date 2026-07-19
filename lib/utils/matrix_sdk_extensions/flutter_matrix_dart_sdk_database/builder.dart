@@ -116,9 +116,13 @@ Future<MatrixSdkDatabase> _constructDatabase(String clientName) async {
   return await MatrixSdkDatabase.init(
     clientName,
     database: database,
-    maxFileSize: 1000 * 1000 * 10,
+    // Media (thumbnail + decrypted attachment) disk cache. The old 10 MB cap
+    // purged almost every image the moment a new one landed, so reopening a
+    // chat re-downloaded all photos. 200 MB keeps a meaningful history of
+    // thumbnails on disk across chat opens.
+    maxFileSize: 1000 * 1000 * 200,
     fileStorageLocation: fileStorageLocation?.uri,
-    deleteFilesAfterDuration: const Duration(days: 30),
+    deleteFilesAfterDuration: const Duration(days: 90),
   );
 }
 

@@ -460,11 +460,11 @@ class ChatController extends State<ChatPageWithRoom>
             .indexWhere((e) => e.eventId == readMarkerEventId);
       }
 
-      if (readMarkerEventIndex > 1) {
-        Logs().v('Scroll up to visible event', readMarkerEventId);
+      if (readMarkerEventIndex >= 0) {
+        Logs().v('Scroll to read marker', readMarkerEventId);
         scrollToEventId(readMarkerEventId, highlightEvent: false);
         return;
-      } else if (readMarkerEventId.isNotEmpty && readMarkerEventIndex == -1) {
+      } else if (readMarkerEventId.isNotEmpty) {
         _showScrollUpMaterialBanner(readMarkerEventId);
       }
 

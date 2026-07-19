@@ -47,7 +47,7 @@ class MxcImage extends StatefulWidget {
   });
 
   /// LRU cache shared across all MxcImage instances
-  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 300);
+  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 500);
 
   /// Preload a single image into cache
   static Future<void> preload(Event event, {required double thumbnailSize}) async {
