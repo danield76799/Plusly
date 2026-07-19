@@ -4,6 +4,14 @@ import 'package:image/image.dart' as img;
 import 'package:matrix/matrix.dart';
 
 extension ClientDownloadContentExtension on Client {
+  static const int _thumbnailBucketSize = 128;
+
+  int? _bucket(num? value) {
+    if (value == null) return null;
+    return ((value / _thumbnailBucketSize).ceil() * _thumbnailBucketSize)
+        .toInt();
+  }
+
   Future<Uint8List> downloadMxcCached(
     Uri mxc, {
     num? width,
@@ -13,13 +21,19 @@ extension ClientDownloadContentExtension on Client {
     ThumbnailMethod? thumbnailMethod,
     bool rounded = false,
   }) async {
+    // Bucket the requested size so similar thumbnails share one disk cache
+    // entry. Without bucketing the same image at 98px, 101px and 104px would
+    // each get their own row, quickly filling the DB and lowering hit rates.
+    final effectiveWidth = _bucket(width);
+    final effectiveHeight = _bucket(height);
+
     // To stay compatible with previous storeKeys:
     final cacheKey = isThumbnail
         // ignore: deprecated_member_use
         ? mxc.getThumbnail(
             this,
-            width: width,
-            height: height,
+            width: effectiveWidth,
+            height: effectiveHeight,
             animated: animated,
             method: thumbnailMethod,
           )
@@ -31,8 +45,8 @@ extension ClientDownloadContentExtension on Client {
     final httpUri = isThumbnail
         ? await mxc.getThumbnailUri(
             this,
-            width: width,
-            height: height,
+            width: effectiveWidth,
+            height: effectiveHeight,
             animated: animated,
             method: thumbnailMethod,
           )
@@ -43,7 +57,7 @@ extension ClientDownloadContentExtension on Client {
       headers: accessToken == null
           ? null
           : {'authorization': 'Bearer $accessToken'},
-    );
+    ).timeout(const Duration(seconds: 15));
     if (response.statusCode != 200) {
       throw Exception();
     }

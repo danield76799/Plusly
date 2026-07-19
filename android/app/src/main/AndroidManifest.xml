@@ -131,6 +131,17 @@
             </intent-filter>
         </activity>
 
+        <!-- FileProvider for APK install via open_filex / open_file. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <!-- Push notifications worden door UnifiedPush afgehandeld -->
 
         <service android:name="com.pravera.flutter_foreground_task.service.ForegroundService"

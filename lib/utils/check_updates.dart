@@ -152,7 +152,7 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
       }
 
       // Pick the newest release according to our own version comparison.
-      GitHubRelease newest = releases.first;
+      var newest = releases.first;
       for (final candidate in releases.skip(1)) {
         if (isNewerVersion(candidate.tagName, newest.tagName)) {
           newest = candidate;
@@ -327,50 +327,67 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
   final l10n = L10n.of(context);
   final scaffold = ScaffoldMessenger.of(context);
 
-  // Progress state
-  var progress = 0.0;
-  var statusText = 'Downloaden...';
+  final progressNotifier = ValueNotifier<double?>(null);
+  final statusNotifier = ValueNotifier<String>('Downloaden...');
+  BuildContext? dialogContext;
 
-  try {
-    // Show downloading indicator with progress
-    if (context.mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(l10n.downloadUpdateButton),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  CircularProgressIndicator(
-                    value: progress > 0 ? progress : null,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    statusText,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  if (progress > 0)
-                    Text(
-                      '${(progress * 100).toStringAsFixed(0)}%',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                ],
-              ),
-            );
-          },
-        ),
-      );
+  void closeDialog() {
+    final ctx = dialogContext;
+    if (ctx != null && ctx.mounted && Navigator.of(ctx).canPop()) {
+      Navigator.of(ctx).pop();
     }
+    dialogContext = null;
+  }
 
+  if (context.mounted) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        dialogContext = ctx;
+        return AlertDialog(
+          title: Text(l10n.downloadUpdateButton),
+          content: ValueListenableBuilder<double?>(
+            valueListenable: progressNotifier,
+            builder: (_, progress, __) {
+              return ValueListenableBuilder<String>(
+                valueListenable: statusNotifier,
+                builder: (_, status, __) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(
+                        value: progress != null && progress > 0 ? progress : null,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        status,
+                        style: Theme.of(ctx).textTheme.bodyMedium,
+                      ),
+                      if (progress != null)
+                        Text(
+                          '${(progress * 100).toStringAsFixed(0)}%',
+                          style: Theme.of(ctx).textTheme.bodySmall,
+                        ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  String? filePath;
+  try {
     final tempDir = await getTemporaryDirectory();
     final fileName = url.split('/').last;
-    if (fileName.isEmpty) {
-      throw Exception('Ongeldige download URL');
+    if (fileName.isEmpty || !fileName.toLowerCase().endsWith('.apk')) {
+      throw Exception('Ongeldige APK download URL');
     }
-    final filePath = '${tempDir.path}/$fileName';
+    filePath = '${tempDir.path}/$fileName';
 
     Logs().v('Starting download from: $url');
     Logs().v('Saving to: $filePath');
@@ -383,30 +400,22 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
           'Accept': 'application/vnd.android.package-archive, application/octet-stream, */*',
           'User-Agent': 'PluslyApp',
         },
-        // APK's kunnen 50-100 MB zijn; geef langzamere verbindingen de tijd.
         receiveTimeout: const Duration(minutes: 5),
         sendTimeout: const Duration(seconds: 10),
       ),
       onReceiveProgress: (received, total) {
         if (total > 0) {
-          progress = received / total;
-          statusText = 'Downloaden... ${(progress * 100).toStringAsFixed(0)}%';
+          progressNotifier.value = received / total;
+          statusNotifier.value =
+              'Downloaden... ${(progressNotifier.value! * 100).toStringAsFixed(0)}%';
         } else {
-          statusText =
+          progressNotifier.value = null;
+          statusNotifier.value =
               'Downloaden... ${(received / 1024 / 1024).toStringAsFixed(1)} MB';
-        }
-        // Force dialog rebuild safely
-        if (context.mounted) {
-          try {
-            (context as Element).markNeedsBuild();
-          } catch (_) {
-            // Ignore if context is no longer valid
-          }
         }
       },
     );
 
-    // Verify file exists and has content
     final file = File(filePath);
     if (!await file.exists()) {
       throw Exception('Bestand niet gevonden na download');
@@ -418,49 +427,8 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
 
     Logs().v('Download complete: $fileSize bytes');
 
-    // Only accept APK/AAB; all other assets are skipped.
-    if (!fileName.toLowerCase().endsWith('.apk') &&
-        !fileName.toLowerCase().endsWith('.aab')) {
-      if (context.mounted) {
-        Navigator.of(context).pop();
-        scaffold.showSnackBar(
-          SnackBar(
-            content: Text('Dit releasebestand is geen APK/AAB. Open de releasepagina voor een directe downloadlink.'),
-            duration: const Duration(seconds: 5),
-            action: SnackBarAction(
-              label: 'Open Pagina',
-              onPressed: () => launchUrlString('https://github.com/danield76799/Plusly/releases/latest'),
-            ),
-          ),
-        );
-      }
-      return;
-    }
+    closeDialog();
 
-    // Check if it's an AAB file - redirect to browser for manual install
-    if (fileName.toLowerCase().endsWith('.aab')) {
-      if (context.mounted) {
-        Navigator.of(context).pop();
-        scaffold.showSnackBar(
-          SnackBar(
-            content: Text('AAB bestand vereist Play Store of bundletool. Open de release pagina voor installatie instructies.'),
-            duration: const Duration(seconds: 5),
-            action: SnackBarAction(
-              label: 'Open Pagina',
-              onPressed: () => launchUrlString(url),
-            ),
-          ),
-        );
-      }
-      return;
-    }
-
-    if (context.mounted) {
-      // Close downloading dialog
-      Navigator.of(context).pop();
-    }
-
-    // Show success message
     if (context.mounted) {
       scaffold.showSnackBar(
         SnackBar(
@@ -470,21 +438,17 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
       );
     }
 
-    // Check and request install packages permission on Android
     if (PlatformInfos.isAndroid) {
       try {
         final status = await Permission.requestInstallPackages.status;
         if (!status.isGranted) {
           final result = await Permission.requestInstallPackages.request();
           if (result.isDenied || result.isPermanentlyDenied) {
-            // On Android 8+ the runtime request is not enough; the user must
-            // explicitly enable "Install unknown apps" in system settings for
-            // this package. Open that settings page and let the user retry.
             if (context.mounted) {
               scaffold.showSnackBar(
                 SnackBar(
                   content: const Text(
-                    'Plusly mag geen APK\'s installeren. Zet dit aan in de '
+                    "Plusly mag geen APK's installeren. Zet dit aan in de "
                     'instellingen en probeer het opnieuw.',
                   ),
                   duration: const Duration(seconds: 6),
@@ -501,26 +465,16 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
           }
         }
       } on Exception catch (e) {
-        // Permission plugin itself failed (no activity, etc.) — log and continue,
-        // the OpenFile call below will surface a more specific error if it matters.
         Logs().w('requestInstallPackages failed', e);
       }
     }
 
-    // Open the APK — Android will show the install prompt
     final openResult = await OpenFile.open(filePath);
     if (openResult.type != ResultType.done) {
       throw Exception('Kon APK niet openen: ${openResult.message}');
     }
   } on DioException catch (e) {
-    // Handle Dio specific errors
-    try {
-      if (context.mounted && Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-    } catch (_) {
-      // Ignore navigation errors
-    }
+    closeDialog();
 
     String errorMsg;
     switch (e.type) {
@@ -528,17 +482,14 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
         errorMsg = 'Download timeout - check je internetverbinding';
-        break;
       case DioExceptionType.badResponse:
         if (e.response?.statusCode == 404) {
           errorMsg = 'Download link niet gevonden (404). Probeer de browser optie.';
         } else {
           errorMsg = 'Server fout: ${e.response?.statusCode ?? 'onbekend'}';
         }
-        break;
       case DioExceptionType.cancel:
         errorMsg = 'Download geannuleerd';
-        break;
       default:
         errorMsg = 'Download mislukt: ${e.message}';
     }
@@ -552,19 +503,13 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
           duration: const Duration(seconds: 5),
           action: SnackBarAction(
             label: 'Open Pagina',
-            onPressed: () => launchUrlString('https://github.com/danield76799/Plusly/releases'),
+            onPressed: () => launchUrlString(AppConfig.downloadUpdateUrl),
           ),
         ),
       );
     }
   } catch (e) {
-    try {
-      if (context.mounted && Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
-    } catch (_) {
-      // Ignore navigation errors
-    }
+    closeDialog();
     Logs().e('Download failed: $e');
     if (context.mounted) {
       scaffold.showSnackBar(
@@ -573,11 +518,14 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
           duration: const Duration(seconds: 5),
           action: SnackBarAction(
             label: 'Open Pagina',
-            onPressed: () => launchUrlString('https://github.com/danield76799/Plusly/releases'),
+            onPressed: () => launchUrlString(AppConfig.downloadUpdateUrl),
           ),
         ),
       );
     }
+  } finally {
+    progressNotifier.dispose();
+    statusNotifier.dispose();
   }
 }
 
