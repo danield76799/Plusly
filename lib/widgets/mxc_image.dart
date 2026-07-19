@@ -117,9 +117,13 @@ class _MxcImageState extends State<MxcImage> {
   @override
   void didUpdateWidget(MxcImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.uri != widget.uri ||
-        oldWidget.event != widget.event ||
-        oldWidget.cacheKey != widget.cacheKey) {
+    final oldKey = oldWidget.cacheKey ??
+        oldWidget.event?.eventId ??
+        oldWidget.uri?.toString();
+    final newKey = widget.cacheKey ??
+        widget.event?.eventId ??
+        widget.uri?.toString();
+    if (oldKey != newKey) {
       _loadFailed = false;
       _timedOut = false;
       final cached = _getFromCache();
