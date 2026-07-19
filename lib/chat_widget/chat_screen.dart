@@ -167,7 +167,7 @@ class ChatScreen extends StatelessWidget {
           onPressed: () {},
           icon: Icon(
             Icons.lock_outline_rounded,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+            color: theme.colorScheme.primary,
             size: 20,
           ),
         ),
