@@ -496,7 +496,8 @@ class _MessageState extends State<Message> {
                                           : null) ??
                                       MediaQuery.sizeOf(context).width * 0.75,
                                 ),
-                                child: Column(
+                                child: IntrinsicWidth(
+                                  child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
@@ -586,7 +587,8 @@ class _MessageState extends State<Message> {
                                       ),
                                   ],
                                 ),
-                              );
+                              ),
+                            );
                               final bubbleColor = AppSettings
                                       .enableChatFrostedGlass.value &&
                                   AppSettings.wallpaperPath.value.isNotEmpty
