@@ -123,28 +123,29 @@ jobs:
           # Update pubspec.yaml
           sed -i "s/^version: .*/version: ${VERSION_NAME}+${NEW_BUILD_NUMBER}/" pubspec.yaml
 
-          # Export the resolved version to GITHUB_ENV. build.gradle.kts reads
-          # ANDROID_VERSION_CODE / ANDROID_VERSION_NAME from the environment,
-          # which is the ONLY source of truth — a stale local.properties on a
-          # reusable GHA runner can no longer leak a wrong versionCode.
-          {
-            echo "ANDROID_VERSION_CODE=$NEW_BUILD_NUMBER"
-            echo "ANDROID_VERSION_NAME=$VERSION_NAME"
-          } >> "$GITHUB_ENV"
+          # The GHA runner's flutter.versionCode is consistently
+          # (bumped pubspec build number + 2000). The APK the user installs
+          # therefore reports that offset version. We write plusly-version.txt
+          # with the SAME offset so the in-app update check compares
+          # like-for-like (no false "already latest"). The release tag uses
+          # the offset version too.
+          ANDROID_BUILD_NUMBER=$((NEW_BUILD_NUMBER + 2000))
 
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "build_number=$NEW_BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "android_build_number=$ANDROID_BUILD_NUMBER" >> $GITHUB_OUTPUT
           echo "full_version=${VERSION_NAME}+${NEW_BUILD_NUMBER}" >> $GITHUB_OUTPUT
-          echo "Bumped ${VERSION_NAME}+${BUILD_NUMBER} → ${VERSION_NAME}+${NEW_BUILD_NUMBER}"
+          echo "Bumped ${VERSION_NAME}+${BUILD_NUMBER} → ${VERSION_NAME}+${NEW_BUILD_NUMBER} (APK reports +2000 → ${VERSION_NAME}+${ANDROID_BUILD_NUMBER})"
 
       - name: Commit version bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pubspec.yaml
-          # Keep plusly-version.txt in sync so the in-app update check
-          # (which falls back to this file) always reports the latest tag.
-          echo "${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}" > plusly-version.txt
+          # Keep plusly-version.txt in sync with the APK the user actually
+          # installs. flutter.versionCode on the runner is (pubspec + 2001),
+          # so write that offset version here.
+          echo "${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.android_build_number }}" > plusly-version.txt
           git add plusly-version.txt
           git diff --cached --quiet || git commit -m "Bump version to ${{ steps.version.outputs.version }}+${{ steps.version.outputs.build_number }} [skip ci]"
           git push || echo "Push failed, continuing anyway"
@@ -271,8 +272,8 @@ jobs:
         id: release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
-          name: Plusly v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }}
+          tag_name: v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.android_build_number }}
+          name: Plusly v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.android_build_number }}
           files: |
             ${{ github.workspace }}/output/plusly-arm64-v8a-release.apk
             ${{ github.workspace }}/output/plusly-armeabi-v7a-release.apk

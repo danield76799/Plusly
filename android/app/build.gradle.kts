@@ -1,6 +1,5 @@
 import java.util.Properties
 import java.io.FileInputStream
-import java.io.File
 
 plugins {
     id("com.android.application")
@@ -68,13 +67,11 @@ android {
         applicationId = "com.danield.plusly.app"
         minSdk = 24  // Required for modern features
         targetSdk = flutter.targetSdkVersion
-        // Read versionCode / versionName from GITHUB_ENV (set by the bump step
-        // in main_deploy.yml). This is the single source of truth and cannot
-        // be influenced by a stale local.properties on the GHA runner.
-        versionCode = System.getenv("ANDROID_VERSION_CODE")?.toIntOrNull()
-            ?: flutter.versionCode
-        versionName = System.getenv("ANDROID_VERSION_NAME")
-            ?: flutter.versionName
+        // flutter.versionCode consistently yields pubspec build number + 2001
+        // on the GHA runner. We accept that offset and compensate in the
+        // update-check (plusly-version.txt is written with the same offset).
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     buildTypes {
