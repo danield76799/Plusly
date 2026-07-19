@@ -315,15 +315,9 @@ class _MessageState extends State<Message> {
         ? (noBubble ? theme.colorScheme.onSurface : theme.onBubbleColor)
         : theme.colorScheme.onSurface;
 
-    final statusColor = theme.brightness == Brightness.dark
-        ? (noBubble
-              ? theme.colorScheme.onSurface
-              : (ownMessage
-                    ? theme.colorScheme.onPrimaryContainer
-                    : theme.colorScheme.onSecondaryContainer))
-        : ownMessage
-        ? theme.colorScheme.tertiaryContainer
-        : theme.colorScheme.tertiary;
+    // Timestamp/status color: muted version of the bubble text so it sits
+    // unobtrusively inside every bubble, regardless of bubble color.
+    final statusColor = textColor.withValues(alpha: 0.55);
 
     final linkColor = ownMessage
         ? theme.brightness == Brightness.light
@@ -580,6 +574,16 @@ class _MessageState extends State<Message> {
                                             : true,
                                       ),
                                     ),
+                                    if (showTimestamp)
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 4.0,
+                                          ),
+                                          child: messageStatusRow,
+                                        ),
+                                      ),
                                   ],
                                 ),
                               );
@@ -614,26 +618,6 @@ class _MessageState extends State<Message> {
                             }(),
                         ),
                       ),
-                      // Timestamp + status, placed OUTSIDE the bubble (modern
-                      // standard). Muted, small, and only shown on the final
-                      // message of a block or when the next message is in a
-                      // different minute. Right-aligned under own messages,
-                      // left-aligned under incoming ones.
-                      if (showTimestamp)
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top: 0.0,
-                            left: ownMessage ? 0 : 8.0,
-                            right: ownMessage ? 8.0 : 0,
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: ownMessage
-                                ? MainAxisAlignment.end
-                                : MainAxisAlignment.start,
-                            children: [messageStatusRow],
-                          ),
-                        ),
                       if (widget.thread != null)
                         Align(
                           alignment: ownMessage

@@ -203,30 +203,6 @@ class ImageBubble extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Timestamp subtly placed bottom-right, directly on the image.
-                if (fileDescription == null)
-                  Positioned(
-                    right: 8,
-                    bottom: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.45),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        TimeOfDay.fromDateTime(event.originServerTs)
-                            .format(context),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),
