@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:app_settings/app_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -475,20 +476,22 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
         final status = await Permission.requestInstallPackages.status;
         if (!status.isGranted) {
           final result = await Permission.requestInstallPackages.request();
-          if (!result.isGranted) {
-            // Don't throw — fall through to a friendly message + browser fallback.
+          if (result.isDenied || result.isPermanentlyDenied) {
+            // On Android 8+ the runtime request is not enough; the user must
+            // explicitly enable "Install unknown apps" in system settings for
+            // this package. Open that settings page and let the user retry.
             if (context.mounted) {
               scaffold.showSnackBar(
                 SnackBar(
                   content: const Text(
-                    'Installatie-toestemming geweigerd. Sta "Onbekende bronnen" '
-                    'toe of gebruik de browser-optie.',
+                    'Plusly mag geen APK\'s installeren. Zet dit aan in de '
+                    'instellingen en probeer het opnieuw.',
                   ),
                   duration: const Duration(seconds: 6),
                   action: SnackBarAction(
-                    label: 'Open Pagina',
-                    onPressed: () => launchUrlString(
-                      'https://github.com/danield76799/Plusly/releases',
+                    label: 'Instellingen',
+                    onPressed: () => AppSettings.openAppSettings(
+                      asAnotherTask: true,
                     ),
                   ),
                 ),

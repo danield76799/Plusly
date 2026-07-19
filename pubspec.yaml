@@ -110,6 +110,8 @@ dependencies:
   wakelock_plus: ^1.4.0
   webrtc_interface: ^1.4.0
   webview_flutter: ^4.10.0
+  app_settings: ^5.2.0
+
 dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.3
