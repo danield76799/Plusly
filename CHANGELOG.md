@@ -1,3 +1,38 @@
+# Plusly v1.4.17
+
+## Chat & Messaging
+- **Sent photos now update the timeline immediately** — previously a sent image
+  would not appear in the chat until reopened. The timeline now ticks on send
+  and refreshes via a post-frame `updateView`.
+- **Chat UI redesign (WhatsApp-style density)**
+  - Bubbles capped at 75% of screen width with tighter 2px/8px grouping margins.
+  - Incoming messages show an avatar gutter; outgoing messages align flush right.
+  - Images render edge-to-edge inside the bubble; timestamps sit inline at the
+    bottom-right of the last message in a stack.
+  - Uniform Material bubble with a hard top-left/right corner on the first
+    message of a group (tail), rounded elsewhere.
+
+## In-App Updater
+- **Fixed fatal crash when installing an APK update** — the install step threw an
+  uncaught `Exception` (permission denied / `OpenFile` failure) on the 100%
+  download screen. Errors are now caught and shown as a SnackBar instead.
+- **Declared `REQUEST_INSTALL_PACKAGES`** in `AndroidManifest.xml` so the in-app
+  updater can actually request install permission.
+- **Granular install-permission fallback** — when the user denies install
+  permission, a SnackBar opens the system "Install unknown apps" settings page
+  for Plusly so the user can enable it and retry.
+- **Reliable update detection** — the GHA now writes `plusly-version.txt` and the
+  release tag using the same `+2000` version offset that the built APK reports,
+  so "Check for updates" no longer falsely reports "already latest".
+
+## Build System
+- **Disabled Android Jetifier** (`android.enableJetifier=false`) — it forced a
+  `JetifyTransform` on the Flutter native-lib JARs which OOM'd the GHA runner
+  (`Java heap space` in `mergeReleaseNativeLibs`). Heap raised to `-Xmx4g`.
+- Split-per-ABI APKs (arm64-v8a, armeabi-v7a) and AAB builds are now stable.
+
+---
+
 # Plusly v1.4.9 — UnifiedPush Edition
 
 ## Breaking Changes
