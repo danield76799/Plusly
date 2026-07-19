@@ -349,10 +349,10 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
           title: Text(l10n.downloadUpdateButton),
           content: ValueListenableBuilder<double?>(
             valueListenable: progressNotifier,
-            builder: (_, progress, __) {
+            builder: (context, progress, child) {
               return ValueListenableBuilder<String>(
                 valueListenable: statusNotifier,
-                builder: (_, status, __) {
+                builder: (context, status, child) {
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
