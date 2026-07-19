@@ -596,16 +596,24 @@ Future<void> checkForUpdates(BuildContext context) async {
 
     // Primary: the version file on the repo (no API rate-limit, always in
     // sync because the deploy workflow rewrites it on every release).
+    // NOTE: we MUST set responseType to plain. Without it Dio tries to
+    // JSON-parse the txt body, which silently fails on Android, leaving
+    // `response.data` as null and breaking the whole update check.
     GitHubRelease? release;
     try {
       final response = await Dio().get(
         AppConfig.updateCheckUrl,
         options: Options(
-          headers: {'User-Agent': 'PluslyApp'},
+          headers: {
+            'User-Agent': 'PluslyApp',
+            'Accept': 'text/plain',
+          },
+          responseType: ResponseType.plain,
           sendTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
         ),
       );
+      Logs().v('plusly-version.txt response: ${response.statusCode}');
       if (response.statusCode == 200 && response.data is String) {
         final tag = (response.data as String).trim();
         if (tag.isNotEmpty) {
@@ -615,7 +623,13 @@ Future<void> checkForUpdates(BuildContext context) async {
             browserDownloadUrl: AppConfig.downloadUpdateUrl,
           );
           Logs().v('Using version.txt: $tag');
+        } else {
+          Logs().w('plusly-version.txt was empty');
         }
+      } else {
+        Logs().w(
+          'plusly-version.txt unexpected response: ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
       Logs().w('Version.txt fetch failed, trying GitHub API', e.message);
@@ -635,6 +649,7 @@ Future<void> checkForUpdates(BuildContext context) async {
     } else {
       // We have a version from the txt file — try to upgrade it with a real
       // APK URL from the latest GitHub release so "Download & install" works.
+      var gotApkUrls = false;
       try {
         final apiRelease = await getLatestRelease(forceRefresh: true);
         if (apiRelease != null && apiRelease.hasApk) {
@@ -645,9 +660,47 @@ Future<void> checkForUpdates(BuildContext context) async {
             hasApk: true,
             apkUrlsByAbi: apiRelease.apkUrlsByAbi,
           );
+          gotApkUrls = true;
         }
       } catch (e) {
-        Logs().w('GitHub APK URL fetch failed, keeping version.txt release', e);
+        Logs().w('GitHub APK URL fetch failed, falling back to predictable URLs', e);
+      }
+      // Fallback: if the API couldn't enrich the release (rate-limited /
+      // no auth / etc.) but the GHA always names assets the same way
+      // (plusly-<abi>-release.apk), we can build the APK URLs ourselves
+      // from the tag. This keeps "Download & install" working even when
+      // the GitHub API is unreachable from a mobile IP.
+      if (!gotApkUrls) {
+        final previousRelease = release!;
+        final rawTag = previousRelease.tagName.startsWith('v')
+            ? previousRelease.tagName.substring(1)
+            : previousRelease.tagName;
+        final encodedTag = Uri.encodeComponent(rawTag);
+        final base =
+            'https://github.com/danield76799/Plusly/releases/download/$encodedTag';
+        final fallbackApkUrls = <String, String>{
+          'arm64-v8a': '$base/plusly-arm64-v8a-release.apk',
+          'armeabi-v7a': '$base/plusly-armeabi-v7a-release.apk',
+          'x86_64': '$base/plusly-x86_64-release.apk',
+          'x86': '$base/plusly-x86-release.apk',
+        };
+        // GitHub's "/releases/latest/download/<asset>" redirects to the
+        // latest tag's matching asset, so we can use it as a catch-all
+        // when the per-ABI map doesn't cover the device.
+        final latestAssetRedirect =
+            'https://github.com/danield76799/Plusly/releases/latest/download/'
+            'plusly-arm64-v8a-release.apk';
+        final tagName = previousRelease.tagName;
+        release = GitHubRelease(
+          tagName: tagName,
+          downloadUrl: latestAssetRedirect,
+          browserDownloadUrl: previousRelease.browserDownloadUrl,
+          hasApk: true,
+          apkUrlsByAbi: fallbackApkUrls,
+        );
+        Logs().v(
+          'Using predictable APK URLs from tag $tagName',
+        );
       }
     }
 
