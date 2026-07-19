@@ -720,15 +720,18 @@ Future<void> checkForUpdates(BuildContext context) async {
 
     final latestVersion = release.tagName;
     Logs().v(
-      'Latest version: $latestVersion | Current version: $currentVersion',
+      'Latest version: $latestVersion | Current version: $currentVersion | '
+      'isNewer: ${isNewerVersion(latestVersion, currentVersion)}',
     );
 
     if (!isNewerVersion(latestVersion, currentVersion)) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Je hebt al de nieuwste versie.'),
-            duration: Duration(seconds: 3),
+          SnackBar(
+            content: Text(
+              'Je hebt al de nieuwste versie ($currentVersion).',
+            ),
+            duration: const Duration(seconds: 3),
           ),
         );
       }
