@@ -489,12 +489,21 @@ class ChatController extends State<ChatPageWithRoom>
 
   bool firstUpdateReceived = false;
 
+  // Bumped on every timeline update so setState always rebuilds the
+  // chat list. Without this, once firstUpdateReceived is true, every
+  // subsequent onUpdate fires a no-op setState and the freshly sent
+  // event never makes it into the visible list. Read by
+  // ChatEventList.build so any change forces a list rebuild.
+  int get timelineTick => _timelineTick;
+  int _timelineTick = 0;
+
   Future<void> updateView() async {
     if (!mounted) return;
     setReadMarker();
     updateThreads();
     setState(() {
       firstUpdateReceived = true;
+      _timelineTick++;
     });
   }
 
@@ -777,11 +786,15 @@ class ChatController extends State<ChatPageWithRoom>
     ChatListRefreshBus.refreshForRoom(room.id);
 
     // Scroll so the user sees their message immediately. reverse:true
-    // list: pixels==0 is newest (visual bottom).
+    // list: pixels==0 is newest (visual bottom). Also force a view
+    // rebuild so the optimistic placeholder (added by the matrix SDK
+    // right after sendTextEvent) lands in the list before the real
+    // server-acked event arrives, mirroring what we do for media.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !scrollController.hasClients) return;
       if (scrollController.position.pixels > 50) return;
       scrollController.jumpTo(0);
+      updateView();
     });
   }
 

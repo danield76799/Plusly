@@ -27,6 +27,13 @@ class ChatEventList extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeline = controller.timeline;
 
+    // Touch timelineTick so the parent setState (which bumps it inside
+    // ChatController.updateView) always rebuilds this list. Without this
+    // hook Flutter would happily treat the update as a no-op and the
+    // freshly sent event would never make it into the visible list.
+    // ignore: unused_local_variable
+    final tick = controller.timelineTick;
+
     if (timeline == null) {
       return const Center(child: CircularProgressIndicator.adaptive());
     }
