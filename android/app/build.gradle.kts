@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.io.File
 
 plugins {
     id("com.android.application")
@@ -7,6 +8,24 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+// Fallback: parse versionCode/versionName straight from pubspec.yaml so a
+// stale local.properties (common on reusable GHA runners) can never leak an
+// old versionCode into the APK. Flutter's plugin normally writes these, but
+// on some runners the file persists across jobs.
+fun parsePubspecVersion(): Pair<Int, String> {
+    val pubspec = rootProject.file("../pubspec.yaml")
+    if (!pubspec.exists()) return Pair(flutter.versionCode, flutter.versionName)
+    val versionLine = pubspec.readLines().firstOrNull { it.startsWith("version:") }
+        ?: return Pair(flutter.versionCode, flutter.versionName)
+    val version = versionLine.substringAfter("version:").trim()
+    val parts = version.split("+")
+    val versionName = parts[0]
+    val versionCode = parts.getOrNull(1)?.toIntOrNull() ?: flutter.versionCode
+    return Pair(versionCode, versionName)
+}
+
+val (pubspecVersionCode, pubspecVersionName) = parsePubspecVersion()
 
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
@@ -67,8 +86,8 @@ android {
         applicationId = "com.danield.plusly.app"
         minSdk = 24  // Required for modern features
         targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = pubspecVersionCode
+        versionName = pubspecVersionName
     }
 
     buildTypes {

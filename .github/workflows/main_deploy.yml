@@ -86,6 +86,14 @@ jobs:
       - name: Verify Flutter
         run: flutter --version
 
+      - name: Clean stale local.properties
+        run: |
+          # Flutter will regenerate this from pubspec.yaml if absent. A stale
+          # local.properties from a reusable GHA runner can leak an old
+          # versionCode into the APK (observed as +2000 offset). Remove it so
+          # each build starts fresh.
+          rm -f android/local.properties
+
       - name: Clean Flutter build
         run: flutter clean && cd android && ./gradlew clean 2>&1 | tail -n 5
 
