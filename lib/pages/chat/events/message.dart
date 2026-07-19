@@ -560,13 +560,7 @@ class _MessageState extends State<Message> {
                                       ),
                                     Padding(
                                       padding: EdgeInsets.only(
-                                        top: {
-                                          MessageTypes.Text,
-                                          MessageTypes.Emote,
-                                          MessageTypes.Notice,
-                                        }.contains(event.messageType)
-                                            ? 6
-                                            : 0,
+                                        top: 0,
                                       ),
                                       child: MessageContent(
                                         displayEvent,
@@ -628,7 +622,7 @@ class _MessageState extends State<Message> {
                       if (showTimestamp)
                         Padding(
                           padding: EdgeInsets.only(
-                            top: 2.0,
+                            top: 0.0,
                             left: ownMessage ? 0 : 8.0,
                             right: ownMessage ? 8.0 : 0,
                           ),
@@ -823,11 +817,13 @@ class _MessageState extends State<Message> {
               maxWidth: FluffyThemes.columnWidth * 2.5,
             ),
             padding: EdgeInsets.only(
-              left: 8.0,
-              right: 8.0,
-              // Compact grouping: same sender -> 4px, new sender -> 14px break.
-              top: nextEventSameSender ? 4.0 : 14.0,
-              bottom: previousEventSameSender ? 4.0 : 14.0,
+              left: 6.0,
+              right: 6.0,
+              // WhatsApp-style compact grouping: same sender -> 2px, new
+              // sender -> 8px break. Keeps the chat visually dense so
+              // nothing floats in dead space.
+              top: nextEventSameSender ? 2.0 : 8.0,
+              bottom: previousEventSameSender ? 2.0 : 8.0,
             ),
             // Outgoing: no avatar gutter — let the bubble use its full width
             // with a small left inset so it doesn't hug the screen edge.

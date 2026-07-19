@@ -315,19 +315,23 @@ class MessageContent extends StatelessWidget {
               MatrixLocals(L10n.of(context)),
               hideReply: true,
             );
+            // WhatsApp-style line-height: keep text on a tight 1.2 line
+            // height so multi-line messages stay compact, not airy.
             final messageStyle = TextStyle(
               color: textColor,
               fontSize: bigEmotes ? fontSize * 5 : fontSize,
+              height: 1.2,
               decoration: event.redacted ? TextDecoration.lineThrough : null,
             );
             final messageLinkStyle = TextStyle(
               color: linkColor,
               fontSize: fontSize,
+              height: 1.2,
               decoration: TextDecoration.underline,
               decorationColor: linkColor,
             );
             return Padding(
-              padding: const .symmetric(horizontal: 16, vertical: 2),
+              padding: const .symmetric(horizontal: 16, vertical: 0),
               child: selectable
                   ? SelectableLinkify(
                       text: messageText,
