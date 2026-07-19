@@ -20,7 +20,6 @@ import 'package:Pulsly/utils/string_color.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/member_actions_popup_menu_button.dart';
-import 'stacked_bubble_painter.dart';
 import '../../../config/app_config.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
@@ -266,18 +265,25 @@ class _MessageState extends State<Message> {
         ? MainAxisAlignment.end
         : MainAxisAlignment.start;
 
+    // Show the timestamp outside the bubble only on the final message of a
+    // block, or when the next message is in a different minute. This keeps
+    // consecutive messages within the same minute free of per-bubble noise.
+    final nextEventDifferentMinute = widget.nextEvent != null &&
+        widget.nextEvent!.originServerTs.difference(event.originServerTs).inMinutes >= 1;
+    final showTimestamp = !nextEventSameSender || nextEventDifferentMinute;
+
     final displayEvent = event.getDisplayEvent(timeline);
     const hardCorner = Radius.circular(4);
     const roundedCorner = Radius.circular(AppConfig.borderRadius);
     final borderRadius = BorderRadius.only(
-      // Tail (hard corner) only on the OUTER-TOP corner of the FIRST
-      // message in a consecutive group. Subsequent messages (and the last)
-      // get fully rounded corners so the group reads as one unit.
-      // "First" = previous message is NOT from the same sender.
-      topLeft: (!ownMessage && !previousEventSameSender)
+      // Modern grouping: the "tail" (hard corner) sits on the LAST message
+      // of a consecutive block, on the sender's outer-lower corner. Earlier
+      // messages in the block use a continuous (fully rounded) style.
+      //   outgoing -> sharp bottom-right, incoming -> sharp top-left.
+      topLeft: (!ownMessage && !nextEventSameSender)
           ? hardCorner
           : roundedCorner,
-      topRight: (ownMessage && !previousEventSameSender)
+      topRight: (ownMessage && !nextEventSameSender)
           ? hardCorner
           : roundedCorner,
       bottomLeft: roundedCorner,
@@ -298,13 +304,7 @@ class _MessageState extends State<Message> {
             event.numberEmotes <= 3);
 
     // Media bubbles keep the plain rounded shape (edge-to-edge image); the
-    // eigenwijze notch/tail geometry only applies to text bubbles.
-    final isMedia = {
-      MessageTypes.Image,
-      MessageTypes.Video,
-      MessageTypes.Sticker,
-    }.contains(event.messageType);
-
+    // grouping/tail geometry applies uniformly to all bubbles now.
     if (ownMessage) {
       color = displayEvent.status.isError
           ? theme.colorScheme.error
@@ -407,7 +407,7 @@ class _MessageState extends State<Message> {
               ),
             ),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: rowMainAxisAlignment,
               children: [
                 if (widget.longPressSelect)
@@ -597,22 +597,6 @@ class _MessageState extends State<Message> {
                                             : true,
                                       ),
                                     ),
-                                    // Inline timestamp + status: always sits on
-                                    // its own row, right-aligned. Long text pushes
-                                    // it to a new line instead of overlapping it.
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 16,
-                                        bottom: 6,
-                                        top: 2,
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [messageStatusRow],
-                                      ),
-                                    ),
                                   ],
                                 ),
                               );
@@ -621,58 +605,52 @@ class _MessageState extends State<Message> {
                                   AppSettings.wallpaperPath.value.isNotEmpty
                               ? color.withValues(alpha: 0.7)
                               : color;
-                              final bubble = isMedia
-                                  ? Material(
-                                      color: noBubble
-                                          ? Colors.transparent
-                                          : bubbleColor,
-                                      borderRadius: borderRadius,
-                                      clipBehavior: Clip.antiAlias,
-                                      child: BubbleBackground(
-                                        colors: widget.colors,
-                                        ignore: noBubble ||
-                                            !ownMessage ||
-                                            !widget.gradient ||
-                                            MediaQuery.highContrastOf(context),
-                                        scrollController: widget.scrollController,
-                                        child: bubbleInner,
-                                      ),
-                                    )
-                                  : Stack(
-                                      clipBehavior: Clip.none,
-                                      children: [
-                                        Positioned.fill(
-                                          child: CustomPaint(
-                                            painter: StackedBubblePainter(
-                                              color: bubbleColor,
-                                              shape: StackedBubbleShape(
-                                                isOwn: ownMessage,
-                                                isFirst:
-                                                    !previousEventSameSender,
-                                                isLast: !nextEventSameSender,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: EdgeInsets.only(
-                                            left: ownMessage
-                                                ? kNotchDepth
-                                                : 10,
-                                            right: ownMessage
-                                                ? 10
-                                                : kNotchDepth,
-                                            top: 10,
-                                            bottom: 10,
-                                          ),
-                                          child: bubbleInner,
-                                        ),
-                                      ],
-                                    );
+                              final bubble = Material(
+                                color: noBubble
+                                    ? Colors.transparent
+                                    : bubbleColor,
+                                borderRadius: borderRadius,
+                                clipBehavior: Clip.antiAlias,
+                                child: BubbleBackground(
+                                  colors: widget.colors,
+                                  ignore: noBubble ||
+                                      !ownMessage ||
+                                      !widget.gradient ||
+                                      MediaQuery.highContrastOf(context),
+                                  scrollController: widget.scrollController,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0,
+                                      horizontal: 14.0,
+                                    ),
+                                    child: bubbleInner,
+                                  ),
+                                ),
+                              );
                               return bubble;
                             }(),
                         ),
                       ),
+                      // Timestamp + status, placed OUTSIDE the bubble (modern
+                      // standard). Muted, small, and only shown on the final
+                      // message of a block or when the next message is in a
+                      // different minute. Right-aligned under own messages,
+                      // left-aligned under incoming ones.
+                      if (showTimestamp)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: 2.0,
+                            left: ownMessage ? 0 : 8.0,
+                            right: ownMessage ? 8.0 : 0,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: ownMessage
+                                ? MainAxisAlignment.end
+                                : MainAxisAlignment.start,
+                            children: [messageStatusRow],
+                          ),
+                        ),
                       if (widget.thread != null)
                         Align(
                           alignment: ownMessage

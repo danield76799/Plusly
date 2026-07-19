@@ -384,7 +384,7 @@ class ChatView extends StatelessWidget {
     if (controller.room.membership == Membership.invite) {
       return _buildInviteView(context);
     }
-    final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 8.0;
+    final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 10.0;
     final scrollUpBannerEventId = controller.scrollUpBannerEventId;
 
     final wallpaperPath = AppSettings.wallpaperPath.value;
