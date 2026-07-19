@@ -420,24 +420,12 @@ class _MessageState extends State<Message> {
                       onChanged: (_) => widget.onSelect(event, null),
                     ),
                   )
-                else if (nextEventSameSender || ownMessage)
-                  SizedBox(
-                    width: Avatar.defaultSize,
-                    child: Center(
-                      child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: event.status == EventStatus.error
-                            ? Icon(Icons.error, color: theme.colorScheme.error)
-                            : event.fileSendingStatus != null
-                            ? const CircularProgressIndicator.adaptive(
-                                strokeWidth: 1,
-                              )
-                            : null,
-                      ),
-                    ),
-                  )
-                else
+                else if (!ownMessage && nextEventSameSender)
+                  // Grouped incoming message: keep the avatar-column width for
+                  // alignment, but show no avatar here — it lives on the final
+                  // message of the block.
+                  SizedBox(width: Avatar.defaultSize)
+                else if (!ownMessage)
                   Avatar(
                     mxContent: user.avatarUrl,
                     name: user.calcDisplayname(),
@@ -451,6 +439,7 @@ class _MessageState extends State<Message> {
                         ? Colors.transparent
                         : null,
                   ),
+                // Own (outgoing) messages: no avatar and no avatar gutter.
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -840,10 +829,12 @@ class _MessageState extends State<Message> {
               top: nextEventSameSender ? 4.0 : 14.0,
               bottom: previousEventSameSender ? 4.0 : 14.0,
             ),
-            // Own messages get extra left margin so the bubble never hugs
-            // the screen edge and the alignment reads clearly right.
+            // Outgoing: no avatar gutter — let the bubble use its full width
+            // with a small left inset so it doesn't hug the screen edge.
+            // Incoming: reserve right space for the (bottom-aligned) avatar
+            // shown on the final message of a group.
             margin: ownMessage
-                ? const EdgeInsets.only(left: 48.0)
+                ? const EdgeInsets.only(left: 8.0)
                 : (isOneOnOne
                     ? EdgeInsets.zero
                     : const EdgeInsets.only(right: 48.0)),
