@@ -557,13 +557,29 @@ class ChatController extends State<ChatPageWithRoom>
     } catch (e, s) {
       Logs().w('Unable to load timeline on event ID $eventContextId', e, s);
       if (!mounted) return;
-      timeline = await room.getTimeline(
-        onUpdate: updateView,
-        onNewEvent: _onNewEvent,
-      );
+      try {
+        timeline = await room.getTimeline(
+          onUpdate: updateView,
+          onNewEvent: _onNewEvent,
+        );
+      } catch (fallbackError, fallbackStack) {
+        Logs().w(
+          'Unable to load timeline fallback on event ID $eventContextId',
+          fallbackError,
+          fallbackStack,
+        );
+        if (mounted) {
+          ErrorReporter(
+            context,
+            'Unable to load timeline fallback',
+          ).onErrorCallback(fallbackError, fallbackStack);
+        }
+        return;
+      }
       if (!mounted) return;
-      if (e is TimeoutException || e is IOException) {
-        _showScrollUpMaterialBanner(eventContextId!);
+      if (eventContextId != null &&
+          (e is TimeoutException || e is IOException)) {
+        _showScrollUpMaterialBanner(eventContextId);
       }
     }
   }
@@ -589,13 +605,29 @@ class ChatController extends State<ChatPageWithRoom>
         s,
       );
       if (!mounted) return;
-      timeline = await thread!.getTimeline(
-        onUpdate: updateView,
-        onNewEvent: _onNewEvent,
-      );
+      try {
+        timeline = await thread!.getTimeline(
+          onUpdate: updateView,
+          onNewEvent: _onNewEvent,
+        );
+      } catch (fallbackError, fallbackStack) {
+        Logs().w(
+          'Unable to load thread timeline fallback on event ID $eventContextId',
+          fallbackError,
+          fallbackStack,
+        );
+        if (mounted) {
+          ErrorReporter(
+            context,
+            'Unable to load thread timeline fallback',
+          ).onErrorCallback(fallbackError, fallbackStack);
+        }
+        return;
+      }
       if (!mounted) return;
-      if (e is TimeoutException || e is IOException) {
-        _showScrollUpMaterialBanner(eventContextId!);
+      if (eventContextId != null &&
+          (e is TimeoutException || e is IOException)) {
+        _showScrollUpMaterialBanner(eventContextId);
       }
     }
     if (timeline is ThreadTimeline) {
