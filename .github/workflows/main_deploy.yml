@@ -175,9 +175,10 @@ jobs:
 
       # === AAB BUILD (Play Store) ===
       # AABs are built as a universal bundle; Play Store handles ABI filtering.
+      # Exclude x86_64 to avoid vodozemac Rust linker failures on the GHA runner.
       - name: Build Android App Bundle
         run: |
-          flutter build appbundle --release --no-tree-shake-icons --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
+          flutter build appbundle --release --target-platform android-arm64,android-arm --no-tree-shake-icons --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           mkdir -p output
           echo "=== Searching for AAB in build/app/outputs/bundle ==="
           find build/app/outputs/bundle -type f -name "*.aab" -exec ls -lh {} \;
