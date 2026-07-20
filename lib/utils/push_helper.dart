@@ -374,7 +374,7 @@ Future<void> _tryPushHelper(
     await _setShortcut(event, l10n, title, roomAvatarFile);
   }
 
-  final needsTitleAndBody = !PlatformInfos.isAndroid;
+  final needsTitleAndBody = !PlatformInfos.isAndroid || event.room.isDirectChat;
 
   // ── SINGLE show() call (FluffyChat pattern) ──
   await flutterLocalNotificationsPlugin.show(
