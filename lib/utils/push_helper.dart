@@ -322,12 +322,13 @@ Future<void> _tryPushHelper(
     await _setShortcut(event, l10n, title, roomAvatarFile);
   }
 
-  final needsTitleAndBody = !PlatformInfos.isAndroid;
-
+  // Always show title/body as a fallback. On Android the MessagingStyle
+  // renders the conversation, but some OEMs/1-on-1 direct chats need the
+  // explicit title/body to show up at all. iOS always needs them.
   await flutterLocalNotificationsPlugin.show(
     id: id,
-    title: needsTitleAndBody ? title : null,
-    body: needsTitleAndBody ? body : null,
+    title: title,
+    body: body,
     notificationDetails: platformChannelSpecifics,
     payload: NotificationPushPayload(
       client.clientName,
