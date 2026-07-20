@@ -18,15 +18,24 @@ class QrScannerModal extends StatefulWidget {
 class QrScannerModalState extends State<QrScannerModal> {
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
   QRViewController? controller;
+  StreamSubscription? _scanSub;
 
   @override
   void reassemble() {
     super.reassemble();
     if (Platform.isAndroid) {
-      controller!.pauseCamera();
+      controller?.pauseCamera();
     } else if (Platform.isIOS) {
-      controller!.resumeCamera();
+      controller?.resumeCamera();
     }
+  }
+
+  @override
+  void dispose() {
+    _scanSub?.cancel();
+    _scanSub = null;
+    controller = null;
+    super.dispose();
   }
 
   @override
@@ -65,10 +74,10 @@ class QrScannerModalState extends State<QrScannerModal> {
       controller.pauseCamera();
     }
     controller.resumeCamera();
-    late StreamSubscription sub;
-    sub = controller.scannedDataStream.listen((scanData) {
-      sub.cancel();
-      Navigator.of(context).pop();
+    _scanSub = controller.scannedDataStream.listen((scanData) {
+      _scanSub?.cancel();
+      _scanSub = null;
+      if (mounted) Navigator.of(context).pop();
       final data = scanData.code;
       if (data != null) widget.onScan(data);
     });

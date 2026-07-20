@@ -59,9 +59,9 @@ class ChatListShortcutsState extends State<ChatListShortcuts> {
 
   @override
   void dispose() {
-    super.dispose();
     hotKeyManager.unregister(prevChatKey);
     hotKeyManager.unregister(nextChatKey);
+    super.dispose();
   }
 
   @override

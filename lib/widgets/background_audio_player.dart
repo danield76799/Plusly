@@ -83,7 +83,6 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
   StreamSubscription? _positionSub;
   StreamSubscription? _durationSub;
   StreamSubscription? _stateSub;
-  StreamSubscription? _completeSub;
 
   final ValueNotifier<BackgroundAudioStatus> statusNotifier = ValueNotifier(
     BackgroundAudioStatus.idle,
@@ -408,7 +407,6 @@ class BackgroundAudioPlayerState extends State<BackgroundAudioPlayer>
     _positionSub?.cancel();
     _durationSub?.cancel();
     _stateSub?.cancel();
-    _completeSub?.cancel();
     audioPlayer.release();
     audioPlayer.dispose();
     statusNotifier.dispose();
