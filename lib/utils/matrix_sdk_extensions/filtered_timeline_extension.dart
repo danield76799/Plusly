@@ -5,6 +5,23 @@ import 'package:Pulsly/utils/poll_events.dart';
 import '../../config/app_config.dart';
 
 extension VisibleInGuiExtension on List<Event> {
+  /// Returns the exact list of events that ChatEventList renders, taking the
+  /// same filters (threadRoots, threaded, visibleInGui) into account. This is
+  /// used by scroll-to-index calculations so the index always matches the UI.
+  List<Event> visibleEventsForChat({
+    bool showThreadRoots = false,
+    bool isThreadView = false,
+    String? exceptionEventId,
+  }) {
+    var events = this;
+    if (showThreadRoots) {
+      events = events.filterThreadRoots();
+    } else {
+      events = events.filterByThreaded(isThreadView);
+    }
+    return events.filterByVisibleInGui(exceptionEventId: exceptionEventId);
+  }
+
   List<Event> filterByThreaded(bool threaded) {
     return where(
       (e) =>

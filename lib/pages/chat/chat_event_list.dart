@@ -60,6 +60,9 @@ class ChatEventList extends StatelessWidget {
     final thisEventsKeyMap = <String, int>{};
     for (var i = 0; i < events.length; i++) {
       thisEventsKeyMap[events[i].eventId] = i;
+      if (events[i].transactionId != null) {
+        thisEventsKeyMap[events[i].transactionId!] = i;
+      }
     }
 
     final hasWallpaper = AppSettings.wallpaperPath.value.isNotEmpty;
@@ -176,7 +179,7 @@ class ChatEventList extends StatelessWidget {
                   child: RepaintBoundary(
                     child: Message(
                       event,
-                      // key: ValueKey(event.eventId),
+                      key: ValueKey(event.eventId),
                       animateIn: animateIn,
                       thread: thread,
                       singleSelected:
