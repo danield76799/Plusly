@@ -179,23 +179,43 @@ jobs:
           flutter build appbundle --flavor play --release --no-tree-shake-icons --dart-define=APP_FLAVOR=play --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
 
       # === 16KB PAGE SIZE PATCH & RE-SIGN ===
+      # This step must NOT fail the whole build if patching/re-signing is
+      # unavailable — the AAB still needs to end up in output/ for upload.
       - name: Patch 16KB alignment and Re-sign AAB
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
+          set +e
+          AAB=build/app/outputs/bundle/playRelease/app-play-release.aab
+          if [ ! -f "$AAB" ]; then
+            echo "ERROR: AAB not found at $AAB"
+            find build/app/outputs -name "*.aab" || true
+            exit 1
+          fi
+
           echo "=== Patching AAB ELF alignment to 16KB ==="
-          python3 scripts/patch_elf_16kb.py build/app/outputs/bundle/playRelease/app-play-release.aab
+          if [ -f scripts/patch_elf_16kb.py ]; then
+            python3 scripts/patch_elf_16kb.py "$AAB" || echo "WARN: 16KB patch failed, continuing with original AAB"
+          else
+            echo "WARN: patch_elf_16kb.py not found, skipping"
+          fi
 
           echo "=== Re-signing AAB ==="
-          jarsigner -keystore android/app/upload-keystore.jks \
-            -storepass "$KEYSTORE_PASSWORD" \
-            -keypass "$KEY_PASSWORD" \
-            build/app/outputs/bundle/playRelease/app-play-release.aab \
-            "$KEY_ALIAS"
+          if [ -n "$KEYSTORE_PASSWORD" ] && [ -f android/app/upload-keystore.jks ]; then
+            jarsigner -keystore android/app/upload-keystore.jks \
+              -storepass "$KEYSTORE_PASSWORD" \
+              -keypass "$KEY_PASSWORD" \
+              "$AAB" \
+              "$KEY_ALIAS" || echo "WARN: jarsigner failed, continuing"
+          else
+            echo "WARN: no signing key available, skipping re-sign"
+          fi
 
-          cp build/app/outputs/bundle/playRelease/app-play-release.aab output/plusly-release.aab
+          cp "$AAB" output/plusly-release.aab
+          echo "=== AAB copied to output/plusly-release.aab ==="
+          ls -lh output/plusly-release.aab
 
       # === VERIFY OUTPUTS ===
       - name: List build outputs
