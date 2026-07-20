@@ -175,28 +175,52 @@ jobs:
         run: |
           flutter build appbundle --release --no-tree-shake-icons --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           mkdir -p output
-          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
+          echo "=== Searching for AAB in build/app/outputs/bundle ==="
+          find build/app/outputs/bundle -type f -name "*.aab" -exec ls -lh {} \;
+          AAB=$(find build/app/outputs/bundle -type f -name "*.aab" | head -n1)
+          if [ -z "$AAB" ]; then
+            echo "ERROR: No AAB produced by flutter build appbundle"
+            exit 1
+          fi
+          cp "$AAB" output/plusly-release.aab
           echo "=== AAB copied to output/plusly-release.aab ==="
           ls -lh output/plusly-release.aab
 
       # === 16KB PAGE SIZE PATCH & RE-SIGN ===
+      # Non-fatal: if patching or re-signing fails, the original AAB is still uploaded.
       - name: Patch 16KB alignment and Re-sign AAB
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
+          set +e
+          AAB=output/plusly-release.aab
+          if [ ! -f "$AAB" ]; then
+            echo "WARN: AAB not in output, skipping patch"
+            exit 0
+          fi
+
           echo "=== Patching AAB ELF alignment to 16KB ==="
-          python3 scripts/patch_elf_16kb.py build/app/outputs/bundle/release/app-release.aab
+          if [ -f scripts/patch_elf_16kb.py ]; then
+            python3 scripts/patch_elf_16kb.py "$AAB" || echo "WARN: 16KB patch failed, continuing"
+          else
+            echo "WARN: patch_elf_16kb.py not found, skipping"
+          fi
 
           echo "=== Re-signing AAB ==="
-          jarsigner -keystore android/app/upload-keystore.jks \
-            -storepass "$KEYSTORE_PASSWORD" \
-            -keypass "$KEY_PASSWORD" \
-            build/app/outputs/bundle/release/app-release.aab \
-            "$KEY_ALIAS"
+          if [ -n "$KEYSTORE_PASSWORD" ] && [ -f android/app/upload-keystore.jks ]; then
+            jarsigner -keystore android/app/upload-keystore.jks \
+              -storepass "$KEYSTORE_PASSWORD" \
+              -keypass "$KEY_PASSWORD" \
+              "$AAB" \
+              "$KEY_ALIAS" || echo "WARN: jarsigner failed, continuing"
+          else
+            echo "WARN: no signing secrets available, skipping re-sign"
+          fi
 
-          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
+          echo "=== Final AAB ==="
+          ls -lh "$AAB"
 
       # === VERIFY OUTPUTS ===
       - name: List build outputs
