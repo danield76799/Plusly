@@ -8,12 +8,12 @@ allprojects {
     // (e.g. receive_sharing_intent) default to Java 1.8 while Kotlin
     // uses 17, causing "Inconsistent JVM-target compatibility" builds errors.
     tasks.withType<JavaCompile>().configureEach {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = JavaVersion.VERSION_17.toString()
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
 }
