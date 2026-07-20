@@ -82,6 +82,9 @@ class _MxcImageState extends State<MxcImage> {
   int _retryCount = 0;
   static const int _maxRetries = 2;
 
+  /// The last failure type so we can show a helpful retry tile.
+  _ImageFailureType _failureType = _ImageFailureType.none;
+
   String? get _effectiveCacheKey {
     if (widget.cacheKey != null) return widget.cacheKey;
     if (widget.event != null) {
@@ -176,14 +179,24 @@ class _MxcImageState extends State<MxcImage> {
     setState(() => _isLoading = true);
 
     Uint8List? loadedBytes;
+    var failureType = _ImageFailureType.unknown;
 
     try {
       loadedBytes = await _fetchBytes();
     } on DecryptException catch (e, s) {
+      failureType = _ImageFailureType.decrypt;
       Logs().w('MxcImage decrypt failed', e, s);
     } on TimeoutException catch (e, s) {
+      failureType = _ImageFailureType.timeout;
       Logs().w('MxcImage timed out', e, s);
     } on Exception catch (e, s) {
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('status code') ||
+          msg.contains('404') ||
+          msg.contains('403') ||
+          msg.contains('failed to download')) {
+        failureType = _ImageFailureType.serverError;
+      }
       Logs().w('MxcImage load failed', e, s);
     }
 
@@ -201,19 +214,20 @@ class _MxcImageState extends State<MxcImage> {
         _currentData = loadedBytes;
         _isLoading = false;
         _retryCount = 0;
+        _failureType = _ImageFailureType.none;
       });
       return;
     }
 
     // If we got here the load did not produce usable bytes.
     _retryCount++;
-    setState(() => _isLoading = false);
+    setState(() {
+      _isLoading = false;
+      _failureType = failureType;
+    });
 
     if (_retryCount >= _maxRetries) {
-      // Final state: show retry tile. If it was specifically a decrypt error,
-      // we still render the same retry tile. The user can tap to retry; if keys
-      // arrive via backup in the meantime it will succeed.
-      setState(() {});
+      // Final state: show retry tile.
       return;
     }
 
@@ -305,6 +319,22 @@ class _MxcImageState extends State<MxcImage> {
 
   Widget _buildRetryTile(BuildContext context) {
     final theme = Theme.of(context);
+    final String label;
+    final IconData icon;
+    switch (_failureType) {
+      case _ImageFailureType.serverError:
+        label = 'Foto niet beschikbaar';
+        icon = Icons.image_not_supported_outlined;
+      case _ImageFailureType.timeout:
+        label = 'Laden duurt te lang, tik om opnieuw';
+        icon = Icons.refresh;
+      case _ImageFailureType.decrypt:
+        label = 'Kan niet decoderen, tik om opnieuw';
+        icon = Icons.lock_outline_rounded;
+      default:
+        label = 'Laden mislukt, tik om opnieuw';
+        icon = Icons.refresh;
+    }
     return SizedBox(
       width: widget.width,
       height: widget.height,
@@ -316,6 +346,7 @@ class _MxcImageState extends State<MxcImage> {
             setState(() {
               _retryCount = 0;
               _isLoading = false;
+              _failureType = _ImageFailureType.none;
             });
             _load();
           },
@@ -323,13 +354,13 @@ class _MxcImageState extends State<MxcImage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.refresh,
+                icon,
                 size: min(widget.height ?? 64, 48),
                 color: theme.colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 4),
               Text(
-                'Laden mislukt, tik om opnieuw',
+                label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 11,
@@ -426,3 +457,5 @@ class DecryptException implements Exception {
   @override
   String toString() => message;
 }
+
+enum _ImageFailureType { none, unknown, timeout, decrypt, serverError }
