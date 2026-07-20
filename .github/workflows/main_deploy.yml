@@ -177,10 +177,25 @@ jobs:
       - name: Build Android App Bundle
         run: |
           flutter build appbundle --flavor play --release --no-tree-shake-icons --dart-define=APP_FLAVOR=play --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
+          mkdir -p output
+          # Copy the AAB to output/ immediately, before any patching, using a
+          # robust find in case the exact flavor path differs between AGP versions.
+          AAB=$(find build/app/outputs/bundle -name "app-play-release.aab" -type f | head -n1)
+          if [ -z "$AAB" ]; then
+            AAB=$(find build/app/outputs/bundle -name "*.aab" -type f | head -n1)
+          fi
+          if [ -z "$AAB" ]; then
+            echo "ERROR: AAB not found after build"
+            find build/app/outputs -name "*.aab" || true
+            exit 1
+          fi
+          cp "$AAB" output/plusly-release.aab
+          echo "=== AAB copied to output/plusly-release.aab ==="
+          ls -lh output/plusly-release.aab
 
       # === 16KB PAGE SIZE PATCH & RE-SIGN ===
-      # This step must NOT fail the whole build if patching/re-signing is
-      # unavailable — the AAB still needs to end up in output/ for upload.
+      # Operates on the already-copied AAB in output/. Non-fatal: if patching
+      # or re-signing is unavailable, the original AAB is still uploaded.
       - name: Patch 16KB alignment and Re-sign AAB
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -188,10 +203,9 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
           set +e
-          AAB=build/app/outputs/bundle/playRelease/app-play-release.aab
+          AAB=output/plusly-release.aab
           if [ ! -f "$AAB" ]; then
-            echo "ERROR: AAB not found at $AAB"
-            find build/app/outputs -name "*.aab" || true
+            echo "ERROR: AAB missing at $AAB — nothing to patch"
             exit 1
           fi
 
@@ -213,8 +227,7 @@ jobs:
             echo "WARN: no signing key available, skipping re-sign"
           fi
 
-          cp "$AAB" output/plusly-release.aab
-          echo "=== AAB copied to output/plusly-release.aab ==="
+          echo "=== Final AAB ==="
           ls -lh output/plusly-release.aab
 
       # === VERIFY OUTPUTS ===
