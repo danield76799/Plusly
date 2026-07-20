@@ -131,6 +131,13 @@ class PIPViewState extends State<PIPView> with TickerProviderStateMixin {
   }
 
   @override
+  void dispose() {
+    _toggleFloatingAnimationController.dispose();
+    _dragAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var windowPadding = MediaQuery.paddingOf(context);
     if (widget.avoidKeyboard) {
