@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:matrix/matrix.dart';
 
 class TimelineCache {
@@ -46,7 +48,7 @@ class TimelineCache {
   /// Preload the first N rooms' timelines in the background.
   /// Call this once at app startup (non-blocking).
   /// Loads the most recent chats first in parallel batches of 10.
-  static Future<void> preloadRooms(List<Room> rooms, {int limit = 40}) async {
+  static Future<void> preloadRooms(List<Room> rooms, {int limit = 40, Duration timeout = const Duration(seconds: 10)}) async {
     final toLoad = rooms
         .where((r) => r.isDirectChat || !r.isSpace)
         .toList()
@@ -58,23 +60,30 @@ class TimelineCache {
       });
 
     final limited = toLoad.take(limit).toList();
+    if (limited.isEmpty) return;
 
-    // Eagerly await the top 5 most recent rooms so chat opens instantly
+    Future<MapEntry<String, Timeline>?> loadRoomTimeline(Room room) => room
+        .getTimeline()
+        .timeout(timeout)
+        .then(
+          (t) => MapEntry(room.id, t),
+          onError: (e) {
+            Logs().w('Timeline preload failed for ${room.id}', e);
+            return null;
+          },
+        );
+
+    // Eagerly await the top 5 most recent rooms so chat opens instantly.
     final priorityRooms = limited.take(5).toList();
     final priorityResults = await Future.wait(
-      priorityRooms.map((room) => room.getTimeline().then(
-            (t) => MapEntry(room.id, t),
-            onError: (_) => null,
-          )),
+      priorityRooms.map(loadRoomTimeline),
       eagerError: false,
     );
     for (final entry in priorityResults) {
-      if (entry != null) {
-        setTimeline(entry.key, entry.value);
-      }
+      if (entry != null) setTimeline(entry.key, entry.value);
     }
 
-    // Then load the rest in the background
+    // Then load the rest in the background.
     final remaining = limited.skip(5).toList();
     if (remaining.isEmpty) return;
 
@@ -82,16 +91,11 @@ class TimelineCache {
     for (var i = 0; i < remaining.length; i += batchSize) {
       final batch = remaining.skip(i).take(batchSize);
       final results = await Future.wait(
-        batch.map((room) => room.getTimeline().then(
-              (t) => MapEntry(room.id, t),
-              onError: (_) => null,
-            )),
+        batch.map(loadRoomTimeline),
         eagerError: false,
       );
       for (final entry in results) {
-        if (entry != null) {
-          setTimeline(entry.key, entry.value);
-        }
+        if (entry != null) setTimeline(entry.key, entry.value);
       }
     }
   }
