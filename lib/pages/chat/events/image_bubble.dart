@@ -194,6 +194,12 @@ class ImageBubble extends StatelessWidget {
                                 fit: fit,
                                 animated: animated,
                                 isThumbnail: thumbnailOnly,
+                                // Stable per-event cache key so the shared in-memory
+                                // LRU survives widget rebuilds / off-screen disposal
+                                // while scrolling. Without it every re-render reloads
+                                // the thumbnail from disk.
+                                cacheKey:
+                                    '${event.eventId}_thumb_${_effectiveImageWidth.toInt()}',
                                 placeholder: event.messageType == MessageTypes.Sticker
                                     ? null
                                     : _buildPlaceholder,
