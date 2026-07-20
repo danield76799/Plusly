@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -79,7 +80,7 @@ class _MxcImageState extends State<MxcImage> {
   Uint8List? _currentData;
   bool _isLoading = false;
   int _retryCount = 0;
-  static const int _maxRetries = 3;
+  static const int _maxRetries = 2;
 
   String? get _effectiveCacheKey {
     if (widget.cacheKey != null) return widget.cacheKey;
@@ -111,9 +112,13 @@ class _MxcImageState extends State<MxcImage> {
   @override
   void didUpdateWidget(MxcImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.uri != widget.uri ||
-        oldWidget.event != widget.event ||
-        oldWidget.cacheKey != widget.cacheKey) {
+    final oldKey = oldWidget.cacheKey ??
+        oldWidget.event?.eventId ??
+        oldWidget.uri?.toString();
+    final newKey = widget.cacheKey ??
+        widget.event?.eventId ??
+        widget.uri?.toString();
+    if (oldKey != newKey) {
       _retryCount = 0;
       final cached = _getFromCache();
       if (cached != null) {
@@ -146,115 +151,146 @@ class _MxcImageState extends State<MxcImage> {
     }
   }
 
+  void _removeFromCache() {
+    final key = _effectiveCacheKey;
+    if (key != null) {
+      MxcImage._imageDataCache.remove(key);
+    }
+  }
+
   Future<void> _load() async {
     if (_isLoading || !mounted) return;
 
     if (_retryCount >= _maxRetries) {
       Logs().w(
-        'MxcImage failed to load after $_maxRetries attempts: ${widget.uri}',
+        'MxcImage failed after $_maxRetries attempts: ${widget.uri ?? widget.event?.eventId}',
       );
+      if (mounted) setState(() => _isLoading = false);
       return;
     }
 
     final originalUri = widget.uri;
     final originalEvent = widget.event;
     final originalCacheKey = widget.cacheKey;
-    final originalIsThumbnail = widget.isThumbnail;
-    final originalAnimated = widget.animated;
-    final originalWidth = widget.width;
-    final originalHeight = widget.height;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
+
+    Uint8List? loadedBytes;
 
     try {
-      final client =
-          widget.client ?? widget.event?.room.client ?? Matrix.of(context).client;
-      final uri = originalUri;
-      final event = originalEvent;
-
-      Uint8List? loadedBytes;
-
-      if (uri != null) {
-        final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-        final realWidth = originalWidth != null
-            ? originalWidth * devicePixelRatio
-            : null;
-        final realHeight = originalHeight != null
-            ? originalHeight * devicePixelRatio
-            : null;
-
-        loadedBytes = await client.downloadMxcCached(
-          uri,
-          width: realWidth,
-          height: realHeight,
-          thumbnailMethod: widget.thumbnailMethod,
-          isThumbnail: originalIsThumbnail,
-          animated: originalAnimated,
-        );
-      } else if (event != null) {
-        final useThumbnail = originalIsThumbnail && event.hasThumbnail;
-        if (!useThumbnail &&
-            !{
-              MessageTypes.Image,
-              MessageTypes.Sticker,
-            }.contains(event.messageType)) {
-          throw Exception(
-            'Event of type ${event.messageType} has no thumbnail!',
-          );
-        }
-        final data = await event.downloadAndDecryptAttachment(
-          getThumbnail: useThumbnail,
-        );
-        if (data.detectFileType is MatrixImageFile) {
-          loadedBytes = data.bytes;
-        }
-      }
-
-      if (!mounted) return;
-
-      if (originalUri != widget.uri ||
-          originalEvent != widget.event ||
-          originalCacheKey != widget.cacheKey) {
-        return;
-      }
-
-      if (loadedBytes != null && loadedBytes.isNotEmpty) {
-        _saveToCache(loadedBytes);
-        setState(() {
-          _currentData = loadedBytes;
-          _isLoading = false;
-          _retryCount = 0;
-        });
-      } else {
-        _scheduleRetry();
-      }
-    } on Exception catch (_) {
-      _scheduleRetry();
-    } catch (e, s) {
-      Logs().d('Unexpected error loading mxc image', e, s);
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      loadedBytes = await _fetchBytes();
+    } on DecryptException catch (e, s) {
+      Logs().w('MxcImage decrypt failed', e, s);
+    } on TimeoutException catch (e, s) {
+      Logs().w('MxcImage timed out', e, s);
+    } on Exception catch (e, s) {
+      Logs().w('MxcImage load failed', e, s);
     }
-  }
 
-  void _scheduleRetry() {
     if (!mounted) return;
 
+    if (originalUri != widget.uri ||
+        originalEvent != widget.event ||
+        originalCacheKey != widget.cacheKey) {
+      return;
+    }
+
+    if (loadedBytes != null && loadedBytes.isNotEmpty) {
+      _saveToCache(loadedBytes);
+      setState(() {
+        _currentData = loadedBytes;
+        _isLoading = false;
+        _retryCount = 0;
+      });
+      return;
+    }
+
+    // If we got here the load did not produce usable bytes.
+    _retryCount++;
     setState(() => _isLoading = false);
 
-    _retryCount++;
+    if (_retryCount >= _maxRetries) {
+      // Final state: show retry tile. If it was specifically a decrypt error,
+      // we still render the same retry tile. The user can tap to retry; if keys
+      // arrive via backup in the meantime it will succeed.
+      setState(() {});
+      return;
+    }
 
-    // Exponential backoff: 2s, 4s, 8s, 16s...
     final delay = widget.retryDuration * pow(2, _retryCount - 1);
-
     Future.delayed(delay, () {
       if (mounted && _currentData == null) {
         _load();
       }
     });
+  }
+
+  Future<Uint8List?> _fetchBytes() async {
+    final originalUri = widget.uri;
+    final originalEvent = widget.event;
+    final originalIsThumbnail = widget.isThumbnail;
+
+    final client =
+        widget.client ?? widget.event?.room.client ?? Matrix.of(context).client;
+    final uri = originalUri;
+    final event = originalEvent;
+
+    if (uri != null) {
+      final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+      final realWidth = widget.width != null
+          ? widget.width! * devicePixelRatio
+          : null;
+      final realHeight = widget.height != null
+          ? widget.height! * devicePixelRatio
+          : null;
+
+      return await client.downloadMxcCached(
+        uri,
+        width: realWidth,
+        height: realHeight,
+        thumbnailMethod: widget.thumbnailMethod,
+        isThumbnail: originalIsThumbnail,
+        animated: widget.animated,
+      ).timeout(const Duration(seconds: 30));
+    }
+
+    if (event != null) {
+      final useThumbnail = originalIsThumbnail && event.hasThumbnail;
+      if (!useThumbnail &&
+          !{
+            MessageTypes.Image,
+            MessageTypes.Sticker,
+          }.contains(event.messageType)) {
+        throw Exception(
+          'Event of type ${event.messageType} has no thumbnail!',
+        );
+      }
+
+      try {
+        final data = await event.downloadAndDecryptAttachment(
+          getThumbnail: useThumbnail,
+        ).timeout(const Duration(seconds: 60));
+        if (data.detectFileType is MatrixImageFile) {
+          return data.bytes;
+        }
+      } on MatrixException catch (e) {
+        // Real decryption/key gap: Matrix tells us it could not decrypt.
+        throw DecryptException(e.toString());
+      } on TimeoutException {
+        // Thumbnail decryption timed out. Try the full-resolution original
+        // before giving up; large old media may take longer to fetch/keys.
+        if (useThumbnail) {
+          final data = await event.downloadAndDecryptAttachment(
+            getThumbnail: false,
+          ).timeout(const Duration(seconds: 60));
+          if (data.detectFileType is MatrixImageFile) {
+            return data.bytes;
+          }
+        }
+        rethrow;
+      }
+    }
+    return null;
   }
 
   Widget _buildPlaceholder(BuildContext context) =>
@@ -267,20 +303,45 @@ class _MxcImageState extends State<MxcImage> {
         ),
       );
 
-  Widget _buildError(BuildContext context) =>
-      widget.placeholder?.call(context) ??
-      SizedBox(
-        width: widget.width,
-        height: widget.height,
-        child: Material(
-          color: Theme.of(context).colorScheme.surfaceContainer,
-          child: Icon(
-            Icons.broken_image_outlined,
-            size: min(widget.height ?? 64, 64),
-            color: Theme.of(context).colorScheme.onSurface,
+  Widget _buildRetryTile(BuildContext context) {
+    final theme = Theme.of(context);
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: Material(
+        color: theme.colorScheme.surfaceContainerHighest,
+        child: InkWell(
+          onTap: () {
+            _removeFromCache();
+            setState(() {
+              _retryCount = 0;
+              _isLoading = false;
+            });
+            _load();
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.refresh,
+                size: min(widget.height ?? 64, 48),
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Laden mislukt, tik om opnieuw',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -288,7 +349,7 @@ class _MxcImageState extends State<MxcImage> {
 
     if (data == null || data.isEmpty) {
       if (_retryCount >= _maxRetries && !_isLoading) {
-        return _buildError(context);
+        return _buildRetryTile(context);
       }
 
       return KeyedSubtree(
@@ -313,12 +374,13 @@ class _MxcImageState extends State<MxcImage> {
       gaplessPlayback: true,
       filterQuality: widget.isThumbnail
           ? (widget.width ?? 0) < 100
-              ? FilterQuality.none // Scherpe pixels bij kleine thumbnails
+              ? FilterQuality.none
               : FilterQuality.low
           : FilterQuality.medium,
       errorBuilder: (context, e, s) {
-        Logs().d('Unable to render mxc image', e, s);
-        return _buildError(context);
+        Logs().w('Unable to render mxc image, clearing cache', e, s);
+        _removeFromCache();
+        return _buildRetryTile(context);
       },
     );
 
@@ -329,7 +391,6 @@ class _MxcImageState extends State<MxcImage> {
   }
 }
 
-/// Simple LRU cache for image data
 class _LruCache<K, V> {
   final int maxSize;
   final _map = <K, V>{};
@@ -354,5 +415,14 @@ class _LruCache<K, V> {
     }
   }
 
+  void remove(K key) => _map.remove(key);
+
   void clear() => _map.clear();
+}
+
+class DecryptException implements Exception {
+  final String message;
+  DecryptException(this.message);
+  @override
+  String toString() => message;
 }
