@@ -63,7 +63,7 @@ dependencies:
   http: ^1.6.0
   image: ^4.8.0
   image_picker: ^1.2.1
-  in_app_update: ^5.0.0
+  in_app_update: ^4.2.5
   intl: ^0.20.2
   latext: ^0.5.1
   latlong2: ^0.9.1
