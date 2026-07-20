@@ -576,14 +576,14 @@ Future<String> _pickBestApkUrl(GitHubRelease release) async {
       );
     for (final abi in ordered) {
       final url = release.apkUrlsByAbi[abi];
-      if (isValidUrl(url)) return url;
+      if (isValidUrl(url)) return url!;
     }
   }
 
   // Fallback: pick the best available APK URL regardless of device ABI.
   for (final abi in preferredAbiOrder) {
     final url = release.apkUrlsByAbi[abi];
-    if (isValidUrl(url)) return url;
+    if (isValidUrl(url)) return url!;
   }
 
   return release.downloadUrl;
