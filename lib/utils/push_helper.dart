@@ -388,13 +388,13 @@ Future<void> _tryPushHelper(
     await _setShortcut(event, l10n, title, roomAvatarFile);
   }
 
-  final needsTitleAndBody = !PlatformInfos.isAndroid || event.room.isDirectChat;
-
-  // ── SINGLE show() call (FluffyChat pattern) ──
+  // Always provide title/body so the OS never falls back to the generic
+  // payload text "New message in Plusly". The MessagingStyle handles
+  // conversation grouping separately.
   await flutterLocalNotificationsPlugin.show(
     id: id,
-    title: needsTitleAndBody ? title : null,
-    body: needsTitleAndBody ? body : null,
+    title: title,
+    body: body,
     notificationDetails: platformChannelSpecifics,
     payload: NotificationPushPayload(
       client.clientName,
