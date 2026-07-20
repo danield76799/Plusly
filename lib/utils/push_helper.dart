@@ -199,6 +199,15 @@ Future<void> _tryPushHelper(
         notification.counts?.unread == 0) {
       await flutterLocalNotificationsPlugin.cancelAll();
     } else {
+      // The push payload says there are unread messages but we couldn't
+      // resolve the event yet (cold start / timeout). Show a best-effort
+      // fallback notification immediately so the user is not left without
+      // any signal, then refresh the existing shade after sync completes.
+      await _buildFallbackNotification(
+        notification,
+        client: client,
+        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+      );
       await client.roomsLoading;
       await syncFuture;
       final activeNotifications = await flutterLocalNotificationsPlugin
@@ -416,25 +425,67 @@ Future<void>? _buildFallbackNotification(
   required Client client,
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
 }) async {
-  // Extract what we can directly from the Matrix push payload without
-  // waiting for rooms/database to load.
+  // Extract what we can directly from the Matrix push payload or local cache
+  // without waiting for a full sync. Encrypted payloads rarely contain plaintext
+  // sender/body, so we fall back to the room name + a concise message label.
   final l10n = await L10n.delegate.load(PlatformDispatcher.instance.locale);
+  final matrixLocals = MatrixLocals(l10n);
+
+  final room = notification.roomId == null
+      ? null
+      : client.getRoomById(notification.roomId!);
+  final roomName = room?.getLocalizedDisplayname(matrixLocals) ??
+      notification.senderDisplayName?.trim() ??
+      l10n.incomingMessages;
+
   final senderName = notification.senderDisplayName?.trim() ??
       notification.sender?.trim() ??
-      _roomDisplayName(client, notification.roomId, l10n) ??
       '';
-  final body = (notification.content?['body'] as String?)?.trim();
-  if (senderName.isEmpty && (body == null || body.isEmpty)) {
-    return;
+
+  final id = '${client.clientName}_${notification.roomId}'.hashCode;
+
+  // Best-effort avatar download from the already-known room; don't wait long.
+  Uint8List? avatarFile;
+  final avatarUrl = room?.avatar;
+  if (avatarUrl != null) {
+    try {
+      avatarFile = await client
+          .downloadMxcCached(
+            avatarUrl,
+            thumbnailMethod: ThumbnailMethod.crop,
+            width: notificationAvatarDimension,
+            height: notificationAvatarDimension,
+            animated: false,
+            isThumbnail: true,
+            rounded: true,
+          )
+          .timeout(const Duration(seconds: 3));
+    } catch (_) {
+      avatarFile = null;
+    }
   }
 
-  final roomName = _roomDisplayName(client, notification.roomId, l10n) ?? l10n.incomingMessages;
-  final id = '${client.clientName}_${notification.roomId}'.hashCode;
+  final body = (notification.content?['body'] as String?)?.trim();
+  final hasSender = senderName.isNotEmpty;
+  final isDirectChat = room?.isDirectChat ?? true;
+
+  String title;
+  String notificationBody;
+  if (isDirectChat) {
+    title = roomName;
+    notificationBody = body ?? l10n.newMessageInFluffyChat;
+  } else if (hasSender) {
+    title = roomName;
+    notificationBody = body ?? '$senderName: ${l10n.newMessageInFluffyChat}';
+  } else {
+    title = roomName;
+    notificationBody = l10n.newMessageInFluffyChat;
+  }
 
   await flutterLocalNotificationsPlugin.show(
     id: id,
-    title: senderName.isNotEmpty ? senderName : roomName,
-    body: body ?? l10n.newMessageInFluffyChat,
+    title: title,
+    body: notificationBody,
     notificationDetails: NotificationDetails(
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,
@@ -444,6 +495,7 @@ Future<void>? _buildFallbackNotification(
         priority: Priority.max,
         category: AndroidNotificationCategory.message,
         shortcutId: notification.roomId,
+        largeIcon: avatarFile == null ? null : ByteArrayAndroidBitmap(avatarFile),
       ),
       iOS: DarwinNotificationDetails(threadIdentifier: notification.roomId),
     ),
@@ -456,17 +508,6 @@ Future<void>? _buildFallbackNotification(
 
   updateAppBadge(notification.counts?.unread ?? 0);
   return;
-}
-
-String? _roomDisplayName(Client client, String? roomId, L10n l10n) {
-  if (roomId == null) return null;
-  try {
-    final room = client.getRoomById(roomId);
-    if (room == null) return null;
-    return room.getLocalizedDisplayname(MatrixLocals(l10n));
-  } catch (_) {
-    return null;
-  }
 }
 
 /// ─── Helpers ────────────────────────────────────────────────────────────────
