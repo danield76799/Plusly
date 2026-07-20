@@ -13,6 +13,7 @@ import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/play_store_update.dart';
 
 /// GitHub Releases API response for a release.
 class GitHubRelease {
@@ -528,6 +529,21 @@ Future<void> checkForUpdates(BuildContext context) async {
     AppConfig.alreadyCheckedUpdates = true;
 
     if (!context.mounted) return;
+
+    // Android apps distributed via Google Play can use the official
+    // In-App Updates API. This does not require REQUEST_INSTALL_PACKAGES
+    // and is the Play-Store-compliant way to update. Side-loaded APKs fall
+    // back to the browser/GitHub page automatically.
+    if (PlatformInfos.isAndroid) {
+      await showPlayStoreUpdateIfAvailable(
+        context,
+        latestTag: safeRelease.tagName,
+        releaseUrl: safeRelease.browserDownloadUrl.isNotEmpty
+            ? safeRelease.browserDownloadUrl
+            : 'https://github.com/danield76799/Plusly/releases',
+      );
+      return;
+    }
 
     final l10n = L10n.of(context);
 
