@@ -4,10 +4,6 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:app_settings/app_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -335,239 +331,23 @@ bool isNewerVersion(String latest, String current) {
   return false;
 }
 
-Future<void> downloadAndInstallApk(BuildContext context, String url) async {
-  final l10n = L10n.of(context);
-  final scaffold = ScaffoldMessenger.of(context);
-
-  final progressNotifier = ValueNotifier<double?>(null);
-  final statusNotifier = ValueNotifier<String>('Downloaden...');
-  BuildContext? dialogContext;
-
-  void closeDialog() {
-    final ctx = dialogContext;
-    if (ctx != null && ctx.mounted && Navigator.of(ctx).canPop()) {
-      Navigator.of(ctx).pop();
-    }
-    dialogContext = null;
-  }
-
-  if (context.mounted) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        dialogContext = ctx;
-        return AlertDialog(
-          title: Text(l10n.downloadUpdateButton),
-          content: ValueListenableBuilder<double?>(
-            valueListenable: progressNotifier,
-            builder: (context, progress, child) {
-              return ValueListenableBuilder<String>(
-                valueListenable: statusNotifier,
-                builder: (context, status, child) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(
-                        value: progress != null && progress > 0 ? progress : null,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        status,
-                        style: Theme.of(ctx).textTheme.bodyMedium,
-                      ),
-                      if (progress != null)
-                        Text(
-                          '${(progress * 100).toStringAsFixed(0)}%',
-                          style: Theme.of(ctx).textTheme.bodySmall,
-                        ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-        );
-      },
-    );
-  }
-
-  String? filePath;
-  try {
-    final tempDir = await getTemporaryDirectory();
-    final fileName = url.split('/').last;
-    if (fileName.isEmpty || !fileName.toLowerCase().endsWith('.apk')) {
-      throw Exception('Ongeldige APK download URL');
-    }
-    filePath = '${tempDir.path}/$fileName';
-
-    Logs().v('Starting download from: $url');
-    Logs().v('Saving to: $filePath');
-
-    await Dio().download(
-      url,
-      filePath,
-      options: Options(
-        headers: {
-          'Accept': 'application/vnd.android.package-archive, application/octet-stream, */*',
-          'User-Agent': 'PluslyApp',
-        },
-        receiveTimeout: const Duration(minutes: 5),
-        sendTimeout: const Duration(seconds: 10),
-      ),
-      onReceiveProgress: (received, total) {
-        if (total > 0) {
-          progressNotifier.value = received / total;
-          statusNotifier.value =
-              'Downloaden... ${(progressNotifier.value! * 100).toStringAsFixed(0)}%';
-        } else {
-          progressNotifier.value = null;
-          statusNotifier.value =
-              'Downloaden... ${(received / 1024 / 1024).toStringAsFixed(1)} MB';
-        }
-      },
-    );
-
-    final file = File(filePath);
-    if (!await file.exists()) {
-      throw Exception('Bestand niet gevonden na download');
-    }
-    final fileSize = await file.length();
-    if (fileSize == 0) {
-      throw Exception('Gedownload bestand is leeg');
-    }
-
-    Logs().v('Download complete: $fileSize bytes');
-
-    closeDialog();
-
-    if (context.mounted) {
-      scaffold.showSnackBar(
-        SnackBar(
-          content: Text('Download compleet! Installeren...'),
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
-
-    if (PlatformInfos.isAndroid) {
-      try {
-        final status = await Permission.requestInstallPackages.status;
-        if (!status.isGranted) {
-          final result = await Permission.requestInstallPackages.request();
-          if (result.isDenied || result.isPermanentlyDenied) {
-            if (context.mounted) {
-              scaffold.showSnackBar(
-                SnackBar(
-                  content: const Text(
-                    "Plusly mag geen APK's installeren. Zet dit aan in de "
-                    'instellingen en probeer het opnieuw.',
-                  ),
-                  duration: const Duration(seconds: 6),
-                  action: SnackBarAction(
-                    label: 'Instellingen',
-                    onPressed: () => AppSettings.openAppSettings(
-                      asAnotherTask: true,
-                    ),
-                  ),
-                ),
-              );
-            }
-            return;
-          }
-        }
-      } on Exception catch (e) {
-        Logs().w('requestInstallPackages failed', e);
-      }
-    }
-
-    final openResult = await OpenFile.open(filePath);
-    if (openResult.type != ResultType.done) {
-      throw Exception('Kon APK niet openen: ${openResult.message}');
-    }
-  } on DioException catch (e) {
-    closeDialog();
-
-    String errorMsg;
-    switch (e.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-        errorMsg = 'Download timeout - check je internetverbinding';
-      case DioExceptionType.badResponse:
-        if (e.response?.statusCode == 404) {
-          errorMsg = 'Download link niet gevonden (404). Probeer de browser optie.';
-        } else {
-          errorMsg = 'Server fout: ${e.response?.statusCode ?? 'onbekend'}';
-        }
-      case DioExceptionType.cancel:
-        errorMsg = 'Download geannuleerd';
-      default:
-        errorMsg = 'Download mislukt: ${e.message}';
-    }
-
-    Logs().e('Download failed: $errorMsg', e);
-
-    if (context.mounted) {
-      scaffold.showSnackBar(
-        SnackBar(
-          content: Text(errorMsg),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: 'Open Pagina',
-            onPressed: () => launchUrlString(AppConfig.downloadUpdateUrl),
-          ),
-        ),
-      );
-    }
-  } catch (e) {
-    closeDialog();
-    Logs().e('Download failed: $e');
-    if (context.mounted) {
-      scaffold.showSnackBar(
-        SnackBar(
-          content: Text('Download mislukt: $e'),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: 'Open Pagina',
-            onPressed: () => launchUrlString(AppConfig.downloadUpdateUrl),
-          ),
-        ),
-      );
-    }
-  } finally {
-    progressNotifier.dispose();
-    statusNotifier.dispose();
-  }
-}
-
-Future<String> _pickBestApkUrl(GitHubRelease release) async {
-  if (release.apkUrlsByAbi.isEmpty) return release.downloadUrl;
-
-  /// Preferred ABI order for Android. 64-bit before 32-bit, ARM before x86.
-  const preferredAbiOrder = [
-    'arm64-v8a',
-    'x86_64',
-    'armeabi-v7a',
-    'x86',
-  ];
-
-  bool isValidUrl(String? url) {
-    return url != null &&
-        url.isNotEmpty &&
-        (url.startsWith('http://') || url.startsWith('https://'));
-  }
-
-  if (Platform.isAndroid) {
+Future<String?> _bestReleasePageUrl(GitHubRelease release) async {
+  // Prefer a direct per-ABI APK URL so the browser can immediately download
+  // the right architecture. If none is available, fall back to the release page.
+  if (release.apkUrlsByAbi.isNotEmpty && Platform.isAndroid) {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
     final supported = [
       ...androidInfo.supported64BitAbis,
       ...androidInfo.supported32BitAbis,
     ];
 
-    // Order the device's supported ABIs by our preference, then pick the first
-    // matching APK URL. This ensures we prefer arm64-v8a over armeabi-v7a even
-    // if the device lists the 32-bit ABI first.
+    const preferredAbiOrder = [
+      'arm64-v8a',
+      'x86_64',
+      'armeabi-v7a',
+      'x86',
+    ];
+
     final ordered = supported.toSet().toList()
       ..sort(
         (a, b) => preferredAbiOrder.indexOf(a).compareTo(
@@ -576,17 +356,13 @@ Future<String> _pickBestApkUrl(GitHubRelease release) async {
       );
     for (final abi in ordered) {
       final url = release.apkUrlsByAbi[abi];
-      if (isValidUrl(url)) return url!;
+      if (url != null && url.startsWith('https://')) return url;
     }
   }
 
-  // Fallback: pick the best available APK URL regardless of device ABI.
-  for (final abi in preferredAbiOrder) {
-    final url = release.apkUrlsByAbi[abi];
-    if (isValidUrl(url)) return url!;
-  }
-
-  return release.downloadUrl;
+  return release.browserDownloadUrl.isNotEmpty
+      ? release.browserDownloadUrl
+      : AppConfig.downloadUpdateUrl;
 }
 
 Future<void> checkForUpdates(BuildContext context) async {
@@ -769,69 +545,29 @@ Future<void> checkForUpdates(BuildContext context) async {
                 child: Text(l10n.updateAvailable(safeRelease.tagName)),
               ),
               const Divider(),
-              if (safeRelease.downloadUrl.isNotEmpty)
-                ListTile(
-                  leading: Icon(safeRelease.hasApk ? Icons.android : Icons.warning),
-                  title: Text(safeRelease.hasApk ? 'Download & installeer APK' : 'Download beschikbaar (geen APK)'),
-                  subtitle: Text(safeRelease.hasApk ? 'Directe installatie' : 'Alleen AAB beschikbaar - gebruik browser'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    if (safeRelease.hasApk) {
-                      Navigator.of(ctx).pop();
-                      try {
-                        final apkUrl = await _pickBestApkUrl(safeRelease);
-                        if (context.mounted) {
-                          // downloadAndInstallApk has its own try/catch and
-                          // shows a snackbar on any failure — no fatal crash.
-                          await downloadAndInstallApk(context, apkUrl);
-                        }
-                      } catch (e) {
-                        Logs().e('APK URL pick failed', e);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Kon download niet starten: $e'),
-                              duration: const Duration(seconds: 5),
-                              action: SnackBarAction(
-                                label: 'Open Pagina',
-                                onPressed: () => launchUrlString(
-                                  'https://github.com/danield76799/Plusly/releases',
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                    } else {
-                      // No APK available, show message
-                      Navigator.of(ctx).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Geen APK beschikbaar voor directe download. Gebruik de browser optie.'),
-                          duration: Duration(seconds: 5),
-                        ),
-                      );
-                    }
-                  },
-                ),
               ListTile(
                 leading: const Icon(Icons.open_in_browser),
-                title: const Text('Open GitHub releasepagina'),
-                subtitle: const Text('Direct downloaden via browser'),
+                title: const Text('Open releasepagina'),
+                subtitle: const Text('Download de laatste versie via je browser'),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () {
+                onTap: () async {
                   Navigator.of(ctx).pop();
-                  launchUrlString(
-                    'https://github.com/danield76799/Plusly/releases',
-                  );
+                  final url = await _bestReleasePageUrl(safeRelease);
+                  if (context.mounted) {
+                    await launchUrlString(
+                      url ?? 'https://github.com/danield76799/Plusly/releases',
+                      mode: LaunchMode.externalApplication,
+                    );
+                  }
                 },
               ),
               if (safeRelease.browserDownloadUrl.isNotEmpty)
                 ListTile(
                   leading: const Icon(Icons.source),
-                  title: const Text('Download source code'),
+                  title: const Text('Bekijk release op GitHub'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
+                    Navigator.of(ctx).pop();
                     launchUrlString(safeRelease.browserDownloadUrl);
                   },
                 ),
