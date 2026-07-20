@@ -216,8 +216,14 @@ class PushController extends ChangeNotifier {
     _messageSub = null;
     final provider = _activeProvider;
     _activeProvider = null;
-    // Fire and forget — unregister is async but dispose is void
-    provider?.unregister().then((_) => provider.dispose());
+    // Synchronously dispose the provider; unregister is async but ChangeNotifier
+    // dispose must not be awaited. The provider's dispose cancels its own streams.
+    provider?.dispose();
+    // Fire-and-forget unregister to keep the old pusher from staying active.
+    provider?.unregister().catchError((e, s) {
+      Logs().w('[PushController] unregister failed during dispose', e, s);
+      return null;
+    });
     NotificationRouter.dispose();
     super.dispose();
   }

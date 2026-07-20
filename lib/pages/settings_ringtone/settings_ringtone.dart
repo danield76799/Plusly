@@ -19,11 +19,21 @@ class SettingsRingtone extends StatefulWidget {
 class SettingsRingtoneController extends State<SettingsRingtone> {
   late final SharedPreferences store;
   bool ringtonePlaying = false;
+  Timer? _ringtoneTimer;
 
   @override
   void initState() {
     super.initState();
     store = Matrix.of(context).store;
+  }
+
+  @override
+  void dispose() {
+    _ringtoneTimer?.cancel();
+    if (ringtonePlaying) {
+      Matrix.of(context).voipPlugin?.stopRingtone();
+    }
+    super.dispose();
   }
 
   String get currentRingtone {
@@ -43,12 +53,17 @@ class SettingsRingtoneController extends State<SettingsRingtone> {
     final voipPlugin = Matrix.of(context).voipPlugin;
     if (ringtonePlaying) {
       ringtonePlaying = false;
+      _ringtoneTimer?.cancel();
       voipPlugin?.stopRingtone();
       return;
     }
     ringtonePlaying = true;
     voipPlugin?.playRingtone();
-    Timer(const Duration(seconds: 15), voipPlugin!.stopRingtone);
+    _ringtoneTimer = Timer(const Duration(seconds: 15), () {
+      if (!mounted) return;
+      voipPlugin?.stopRingtone();
+      if (mounted) setState(() => ringtonePlaying = false);
+    });
   }
 
   @override
