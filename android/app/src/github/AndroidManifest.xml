@@ -1,6 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- GitHub/sideload flavor only: keeps the in-app APK install permission.
-         The Play flavor (src/play) and the main manifest do NOT declare this,
-         so the AAB uploaded to Google Play stays Play-Store compliant. -->
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-</manifest>

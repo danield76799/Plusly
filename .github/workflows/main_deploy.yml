@@ -162,73 +162,41 @@ jobs:
             echo "WARNING: No signing secrets found — using debug signing"
           fi
 
-      # === APK BUILD (github/sideload flavor, split per architecture) ===
-      # This flavor keeps REQUEST_INSTALL_PACKAGES for direct APK install.
+      # === APK BUILD (split per architecture — 32-bit + 64-bit) ===
       - name: Build Android APK (split ABIs)
         run: |
-          flutter build apk --flavor github --release --split-per-abi --no-tree-shake-icons --dart-define=APP_FLAVOR=github --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
+          flutter build apk --release --split-per-abi --no-tree-shake-icons --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           mkdir -p output
-          # Flavors change the output file names (app-github-<abi>-release.apk).
-          # Use find as a robust fallback in case the exact name differs.
-          cp $(find build/app/outputs/flutter-apk -name "app-github-armeabi-v7a-release.apk" | head -n1) output/plusly-armeabi-v7a-release.apk
-          cp $(find build/app/outputs/flutter-apk -name "app-github-arm64-v8a-release.apk" | head -n1) output/plusly-arm64-v8a-release.apk
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
 
-      # === AAB BUILD (Play Store flavor — no install permission) ===
+      # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
         run: |
-          flutter build appbundle --flavor play --release --no-tree-shake-icons --dart-define=APP_FLAVOR=play --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
+          flutter build appbundle --release --no-tree-shake-icons --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           mkdir -p output
-          # Copy the AAB to output/ immediately, before any patching, using a
-          # robust find in case the exact flavor path differs between AGP versions.
-          AAB=$(find build/app/outputs/bundle -name "app-play-release.aab" -type f | head -n1)
-          if [ -z "$AAB" ]; then
-            AAB=$(find build/app/outputs/bundle -name "*.aab" -type f | head -n1)
-          fi
-          if [ -z "$AAB" ]; then
-            echo "ERROR: AAB not found after build"
-            find build/app/outputs -name "*.aab" || true
-            exit 1
-          fi
-          cp "$AAB" output/plusly-release.aab
+          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
           echo "=== AAB copied to output/plusly-release.aab ==="
           ls -lh output/plusly-release.aab
 
       # === 16KB PAGE SIZE PATCH & RE-SIGN ===
-      # Operates on the already-copied AAB in output/. Non-fatal: if patching
-      # or re-signing is unavailable, the original AAB is still uploaded.
       - name: Patch 16KB alignment and Re-sign AAB
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
-          set +e
-          AAB=output/plusly-release.aab
-          if [ ! -f "$AAB" ]; then
-            echo "ERROR: AAB missing at $AAB — nothing to patch"
-            exit 1
-          fi
-
           echo "=== Patching AAB ELF alignment to 16KB ==="
-          if [ -f scripts/patch_elf_16kb.py ]; then
-            python3 scripts/patch_elf_16kb.py "$AAB" || echo "WARN: 16KB patch failed, continuing with original AAB"
-          else
-            echo "WARN: patch_elf_16kb.py not found, skipping"
-          fi
+          python3 scripts/patch_elf_16kb.py build/app/outputs/bundle/release/app-release.aab
 
           echo "=== Re-signing AAB ==="
-          if [ -n "$KEYSTORE_PASSWORD" ] && [ -f android/app/upload-keystore.jks ]; then
-            jarsigner -keystore android/app/upload-keystore.jks \
-              -storepass "$KEYSTORE_PASSWORD" \
-              -keypass "$KEY_PASSWORD" \
-              "$AAB" \
-              "$KEY_ALIAS" || echo "WARN: jarsigner failed, continuing"
-          else
-            echo "WARN: no signing key available, skipping re-sign"
-          fi
+          jarsigner -keystore android/app/upload-keystore.jks \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            build/app/outputs/bundle/release/app-release.aab \
+            "$KEY_ALIAS"
 
-          echo "=== Final AAB ==="
-          ls -lh output/plusly-release.aab
+          cp build/app/outputs/bundle/release/app-release.aab output/plusly-release.aab
 
       # === VERIFY OUTPUTS ===
       - name: List build outputs
@@ -240,7 +208,7 @@ jobs:
           echo "=== AAB files ==="
           find build/app/outputs -name "*.aab" -type f || echo "No AAB files found"
           echo "=== AAB size ==="
-          ls -lh build/app/outputs/bundle/playRelease/app-play-release.aab || echo "AAB not found"
+          ls -lh build/app/outputs/bundle/release/app-release.aab || echo "AAB not found"
 
       # === UPLOAD ARTIFACTS (split — download only what you need) ===
       - name: Upload armeabi-v7a APK

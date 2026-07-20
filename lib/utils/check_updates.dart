@@ -9,7 +9,6 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:Pulsly/config/flavor_config.dart';
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
@@ -531,10 +530,11 @@ Future<void> checkForUpdates(BuildContext context) async {
 
     if (!context.mounted) return;
 
-    // The Play-Store flavor uses the official (compliant) In-App Updates API.
-    // The GitHub/sideload flavor keeps REQUEST_INSTALL_PACKAGES and therefore
-    // falls back to the browser/GitHub download sheet instead.
-    if (PlatformInfos.isAndroid && isPlayFlavor) {
+    // Android apps distributed via Google Play can use the official
+    // In-App Updates API. This does not require REQUEST_INSTALL_PACKAGES
+    // and is the Play-Store-compliant way to update. Side-loaded APKs fall
+    // back to the browser/GitHub page automatically.
+    if (PlatformInfos.isAndroid) {
       await showPlayStoreUpdateIfAvailable(
         context,
         latestTag: safeRelease.tagName,
