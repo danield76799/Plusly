@@ -49,19 +49,35 @@ Future<void> pushHelper(
       onEventLoaded: onEventLoaded,
     );
   } catch (e, s) {
-    // Don't show a duplicate/broken fallback notification.
-    // The main flow already showed a properly formatted notification
-    // before throwing. If it threw before showing, we'd rather show nothing
-    // than a confusing "Open app to read messages" placeholder.
-    Logs().w(
-      'Push helper threw — NOT showing fallback to avoid duplicate/confusing notification',
-      e,
-      s,
-    );
+    // Extera pattern: always show "Open app" placeholder on crash.
+    // This ensures the user always sees *something* when a push arrives,
+    // even if the rich notification fails to build.
+    l10n ??= await L10n.delegate.load(PlatformDispatcher.instance.locale);
     if (e is! TimeoutException && e is! IOException) {
       Logs().e('Push Helper has crashed!', e, s);
+      await flutterLocalNotificationsPlugin.show(
+        id: notification.roomId?.hashCode ?? notification.hashCode,
+        title: l10n.newMessageInFluffyChat,
+        body: l10n.openAppToReadMessages,
+        notificationDetails: NotificationDetails(
+          iOS: const DarwinNotificationDetails(),
+          android: AndroidNotificationDetails(
+            AppConfig.pushNotificationsChannelId,
+            l10n.incomingMessages,
+            number: notification.counts?.unread,
+            ticker: l10n.unreadChatsInApp(
+              AppConfig.applicationName,
+              (notification.counts?.unread ?? 0).toString(),
+            ),
+            importance: Importance.high,
+            priority: Priority.max,
+            shortcutId: notification.roomId,
+          ),
+        ),
+      );
+    } else {
+      Logs().w('Push helper threw', e, s);
     }
-    // Don't rethrow — caller would try to show its own notification
   }
 }
 
@@ -97,19 +113,9 @@ Future<void> _tryPushHelper(
     store: await AppSettings.init(),
   );
 
-  final client = _clientFromInstance(instance, clients);
-  if (client == null) {
-    // No exact match — fallback to first client (handles bridge push where
-    // instance != clientName). Same pattern as FluffyChat.
-    if (clients.isNotEmpty) {
-      Logs().v(
-        'Instance "$instance" not found, using ${clients.first.clientName}',
-      );
-    } else {
-      Logs().e('No client for instance $instance');
-      return;
-    }
-  }
+  // Extera pattern: fallback to first client if instance doesn't match.
+  // This handles bridge push where instance != clientName.
+  final client = _clientFromInstance(instance, clients) ?? clients.first;
 
   // Fast background path: if we have a push payload, show a notification
   // immediately without waiting for rooms/database to load. This avoids losing
@@ -125,9 +131,7 @@ Future<void> _tryPushHelper(
         Logs().w('Fallback notification failed', e);
       }),
     );
-    // In background we don't need the rich notification; stop here to keep
-    // the handler fast and under the OS time budget.
-    return;
+    // Continue to full flow: Extera pattern — no early return.
   }
 
   // Zorg dat rooms geladen zijn voordat we het push-event ophalen.
@@ -152,9 +156,11 @@ Future<void> _tryPushHelper(
   // FluffyChat pattern: do NOT store in database from the push helper.
   // The event will arrive through the regular sync triggered by oneShotSync(),
   // which is more reliable for encrypted messages and room ordering.
+  // Extera pattern: store in DB when in background so messages aren't lost
+  // when Android kills the background handler.
   var event = await client.getEventByPushNotification(
     notification,
-    storeInDatabase: false,
+    storeInDatabase: isBackgroundMessage,
   );
 
   // Bij een koude start kan roomsLoading wel klaar zijn maar de sync nog niet
@@ -170,7 +176,7 @@ Future<void> _tryPushHelper(
           .timeout(const Duration(seconds: 10));
       event = await client.getEventByPushNotification(
         notification,
-        storeInDatabase: false,
+        storeInDatabase: isBackgroundMessage,
       );
     } catch (_) {
       // Event komt later wel via sync; toon notificatie op basis van payload.
