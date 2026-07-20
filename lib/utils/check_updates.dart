@@ -544,27 +544,49 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
 Future<String> _pickBestApkUrl(GitHubRelease release) async {
   if (release.apkUrlsByAbi.isEmpty) return release.downloadUrl;
 
-  // Kies de beste APK op basis van de ondersteunde ABI's van dit toestel.
-  // Dit voorkomt dat we een 32-bit APK proberen te installeren op een
-  // 64-bit toestel (of andersom), wat stilzwijgend mislukt.
+  /// Preferred ABI order for Android. 64-bit before 32-bit, ARM before x86.
+  const preferredAbiOrder = [
+    'arm64-v8a',
+    'x86_64',
+    'armeabi-v7a',
+    'x86',
+  ];
+
+  bool isValidUrl(String? url) {
+    return url != null &&
+        url.isNotEmpty &&
+        (url.startsWith('http://') || url.startsWith('https://'));
+  }
+
   if (Platform.isAndroid) {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
     final supported = [
       ...androidInfo.supported64BitAbis,
       ...androidInfo.supported32BitAbis,
     ];
-    for (final abi in supported) {
+
+    // Order the device's supported ABIs by our preference, then pick the first
+    // matching APK URL. This ensures we prefer arm64-v8a over armeabi-v7a even
+    // if the device lists the 32-bit ABI first.
+    final ordered = supported.toSet().toList()
+      ..sort(
+        (a, b) => preferredAbiOrder.indexOf(a).compareTo(
+              preferredAbiOrder.indexOf(b),
+            ),
+      );
+    for (final abi in ordered) {
       final url = release.apkUrlsByAbi[abi];
-      if (url != null && url.isNotEmpty) return url;
+      if (isValidUrl(url)) return url;
     }
   }
 
-  // Fallback: arm64-v8a is de meest voorkomende moderne architectuur.
-  return release.apkUrlsByAbi['arm64-v8a'] ??
-      release.apkUrlsByAbi['armeabi-v7a'] ??
-      release.apkUrlsByAbi['x86_64'] ??
-      release.apkUrlsByAbi['x86'] ??
-      release.downloadUrl;
+  // Fallback: pick the best available APK URL regardless of device ABI.
+  for (final abi in preferredAbiOrder) {
+    final url = release.apkUrlsByAbi[abi];
+    if (isValidUrl(url)) return url;
+  }
+
+  return release.downloadUrl;
 }
 
 Future<void> checkForUpdates(BuildContext context) async {
