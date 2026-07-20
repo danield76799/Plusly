@@ -98,6 +98,23 @@ android {
         }
     }
 
+    // Two flavors:
+    //  - play : Play-Store compliant build (AAB). No REQUEST_INSTALL_PACKAGES.
+    //           In-app updates go through the official Play In-App Updates API.
+    //  - github: sideload/APK build. Keeps REQUEST_INSTALL_PACKAGES for direct
+    //           APK install + browser download. Not uploaded to Play Store.
+    // The install permission lives only in src/github/AndroidManifest.xml, so
+    // the play flavor's AAB stays free of it and passes Play review.
+    flavorDimensions += "store"
+    productFlavors {
+        create("play") {
+            dimension = "store"
+        }
+        create("github") {
+            dimension = "store"
+        }
+    }
+
     // Play Store requires app bundles instead of APKs
     bundle {
         language {
