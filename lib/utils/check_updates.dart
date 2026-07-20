@@ -95,10 +95,13 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
   const cacheTimeKey = 'cached_github_release_time';
   const cacheDuration = Duration(hours: 24);
 
+  // When the user explicitly asks for a refresh (e.g. pull-to-refresh in
+  // settings), skip the in-memory cache too.
+  final prefs = await SharedPreferences.getInstance();
+
   // Try to get from cache first (if not forcing refresh)
   if (!forceRefresh) {
     try {
-      final prefs = await SharedPreferences.getInstance();
       final cachedData = prefs.getString(cacheKey);
       final cachedTime = prefs.getInt(cacheTimeKey);
 
@@ -112,6 +115,15 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
       }
     } catch (e) {
       Logs().v('Cache read failed: $e, fetching from GitHub');
+    }
+  } else {
+    // Force refresh: clear the stale cache so the new result is always saved.
+    try {
+      await prefs.remove(cacheKey);
+      await prefs.remove(cacheTimeKey);
+      Logs().v('Cleared GitHub release cache for forced refresh');
+    } catch (e) {
+      Logs().v('Failed to clear release cache: $e');
     }
   }
 
