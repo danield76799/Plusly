@@ -2,7 +2,7 @@ name: Pulsly
 description: Plusly - Chat with your friends.
 publish_to: none
 # Version schema: <YEAR>.<MAJOR UPDATE>.<MINOR><PATCH>
-version: 1.4.17+11018
+version: 1.4.17+16000
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
@@ -111,6 +111,7 @@ dependencies:
   webrtc_interface: ^1.4.0
   webview_flutter: ^4.10.0
   app_settings: ^5.2.0
+  in_app_update: ^4.2.5
 
 dev_dependencies:
   flutter_lints: ^6.0.0

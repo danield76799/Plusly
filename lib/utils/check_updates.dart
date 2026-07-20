@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
@@ -9,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:Pulsly/utils/play_store_update.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import 'package:matrix/matrix.dart';
@@ -541,32 +541,6 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
   }
 }
 
-Future<String> _pickBestApkUrl(GitHubRelease release) async {
-  if (release.apkUrlsByAbi.isEmpty) return release.downloadUrl;
-
-  // Kies de beste APK op basis van de ondersteunde ABI's van dit toestel.
-  // Dit voorkomt dat we een 32-bit APK proberen te installeren op een
-  // 64-bit toestel (of andersom), wat stilzwijgend mislukt.
-  if (Platform.isAndroid) {
-    final androidInfo = await DeviceInfoPlugin().androidInfo;
-    final supported = [
-      ...androidInfo.supported64BitAbis,
-      ...androidInfo.supported32BitAbis,
-    ];
-    for (final abi in supported) {
-      final url = release.apkUrlsByAbi[abi];
-      if (url != null && url.isNotEmpty) return url;
-    }
-  }
-
-  // Fallback: arm64-v8a is de meest voorkomende moderne architectuur.
-  return release.apkUrlsByAbi['arm64-v8a'] ??
-      release.apkUrlsByAbi['armeabi-v7a'] ??
-      release.apkUrlsByAbi['x86_64'] ??
-      release.apkUrlsByAbi['x86'] ??
-      release.downloadUrl;
-}
-
 Future<void> checkForUpdates(BuildContext context) async {
   // Reset the check flag so we can check again
   AppConfig.alreadyCheckedUpdates = false;
@@ -733,6 +707,9 @@ Future<void> checkForUpdates(BuildContext context) async {
 
     final l10n = L10n.of(context);
 
+    // Detecteer of de app via Play Store geïnstalleerd is.
+    final installedViaPlay = await PlayStoreUpdate.isInstalledViaPlay();
+
     await showAdaptiveBottomSheet(
       context: context,
       useRootNavigator: false,
@@ -747,55 +724,57 @@ Future<void> checkForUpdates(BuildContext context) async {
                 child: Text(l10n.updateAvailable(safeRelease.tagName)),
               ),
               const Divider(),
-              if (safeRelease.downloadUrl.isNotEmpty)
+              if (installedViaPlay)
                 ListTile(
-                  leading: Icon(safeRelease.hasApk ? Icons.android : Icons.warning),
-                  title: Text(safeRelease.hasApk ? 'Download & installeer APK' : 'Download beschikbaar (geen APK)'),
-                  subtitle: Text(safeRelease.hasApk ? 'Directe installatie' : 'Alleen AAB beschikbaar - gebruik browser'),
+                  leading: const Icon(Icons.system_update_alt),
+                  title: const Text('Update via Play Store'),
+                  subtitle: const Text('Aanbevolen — gebruik de officiële update'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    if (safeRelease.hasApk) {
-                      Navigator.of(ctx).pop();
-                      try {
-                        final apkUrl = await _pickBestApkUrl(safeRelease);
-                        if (context.mounted) {
-                          // downloadAndInstallApk has its own try/catch and
-                          // shows a snackbar on any failure — no fatal crash.
-                          await downloadAndInstallApk(context, apkUrl);
-                        }
-                      } catch (e) {
-                        Logs().e('APK URL pick failed', e);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Kon download niet starten: $e'),
-                              duration: const Duration(seconds: 5),
-                              action: SnackBarAction(
-                                label: 'Open Pagina',
-                                onPressed: () => launchUrlString(
-                                  'https://github.com/danield76799/Plusly/releases',
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                    } else {
-                      // No APK available, show message
-                      Navigator.of(ctx).pop();
+                    Navigator.of(ctx).pop();
+                    final started = await PlayStoreUpdate.startUpdate();
+                    if (!started && context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Geen APK beschikbaar voor directe download. Gebruik de browser optie.'),
+                        SnackBar(
+                          content: Text(
+                            'Play Store update niet beschikbaar. '
+                            'Open de Play Store handmatig.',
+                          ),
                           duration: Duration(seconds: 5),
+                          action: SnackBarAction(
+                            label: 'Open',
+                            onPressed: () => launchUrlString(
+                              'https://play.google.com/store/apps/details?id=chat.plusly',
+                            ),
+                          ),
                         ),
                       );
                     }
                   },
+                )
+              else ...[
+                ListTile(
+                  leading: const Icon(Icons.android),
+                  title: const Text('Download APK (GitHub)'),
+                  subtitle: const Text(
+                    'Download en installeer handmatig vanuit je bestandsapp',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    // Open de release-pagina; gebruiker downloadt en tikt de
+                    // APK aan om te installeren (app mag niet zelf installeren
+                    // wegens Play Store policy zonder REQUEST_INSTALL_PACKAGES).
+                    launchUrlString(
+                      'https://github.com/danield76799/Plusly/releases/latest',
+                    );
+                  },
                 ),
+              ],
               ListTile(
                 leading: const Icon(Icons.open_in_browser),
                 title: const Text('Open GitHub releasepagina'),
-                subtitle: const Text('Direct downloaden via browser'),
+                subtitle: const Text('Alle downloads en broncode'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.of(ctx).pop();
