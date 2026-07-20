@@ -414,7 +414,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
 
     await FeatureFlags.init();
 
-    // Use new push system by default; legacy is fallback only
+    // Default is legacy BackgroundPush (proven stable). New system is opt-in.
     if (FeatureFlags.useNewPushSystem) {
       await initNewPushSystem();
     } else {

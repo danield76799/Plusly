@@ -32,16 +32,15 @@ import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 
+import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/main.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_helper.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
-import '../config/app_config.dart';
-import '../config/setting_keys.dart';
-import '../services/timeline_cache.dart';
-import '../widgets/matrix.dart';
-import 'platform_infos.dart';
 
 class BackgroundPush {
   static BackgroundPush? _instance;
@@ -469,14 +468,12 @@ class BackgroundPush {
     await UnifiedPush.saveDistributor(selectedDistributor);
     
     // Check if we already have an endpoint for any client
-    var hasExistingEndpoint = false;
     for (final client in clients) {
       if (client.isLogged()) {
         final endpoint = matrix?.store.getString(
           client.clientName + AppSettings.unifiedPushEndpoint.key,
         );
         if (endpoint != null && endpoint.isNotEmpty) {
-          hasExistingEndpoint = true;
           // Re-register pusher with existing endpoint
           await setupPusher(
             gatewayUrl: 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify',
@@ -575,18 +572,10 @@ class BackgroundPush {
       clients: clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
-      activeClient: clientFromInstance(i, clients),
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-      instance: i,
       useNotificationActions:
           false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
     );
-
-    // NOTE: Do NOT trigger another sync here.
-    // `pushHelper` already handles abortSync + oneShotSync internally,
-    // including restoring backgroundSync when needed.
-    // A second abortSync here can race with the first and corrupt
-    // room/event state, causing wrong notification content.
   }
 }
 

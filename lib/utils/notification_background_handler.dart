@@ -161,8 +161,9 @@ Future<void> notificationTap(
         }
       }
 
-      router?.go(
-        client.getRoomById(roomId)?.membership == Membership.invite
+      final room = client.getRoomById(roomId);
+      router.go(
+        room != null && room.membership == Membership.invite
             ? '/rooms'
             : '/rooms/$roomId',
       );
@@ -304,3 +305,21 @@ Future<void> notificationTap(
 }
 
 enum PluslyNotificationActions { markAsRead, reply }
+
+/// Minimal payload carried in a notification's `payload` field.
+class NotificationPushPayload {
+  final String? clientName, roomId, eventId;
+
+  NotificationPushPayload(this.clientName, this.roomId, this.eventId);
+
+  factory NotificationPushPayload.fromString(String payload) {
+    final parts = payload.split('|');
+    if (parts.length != 3) {
+      return NotificationPushPayload(null, null, null);
+    }
+    return NotificationPushPayload(parts.first, parts[1], parts[2]);
+  }
+
+  @override
+  String toString() => '$clientName|$roomId|$eventId';
+}
