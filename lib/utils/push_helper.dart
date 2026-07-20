@@ -99,8 +99,16 @@ Future<void> _tryPushHelper(
 
   final client = _clientFromInstance(instance, clients);
   if (client == null) {
-    Logs().e('No client could be found for instance $instance');
-    return;
+    // No exact match — fallback to first client (handles bridge push where
+    // instance != clientName). Same pattern as FluffyChat.
+    if (clients.isNotEmpty) {
+      Logs().v(
+        'Instance "$instance" not found, using ${clients.first.clientName}',
+      );
+    } else {
+      Logs().e('No client for instance $instance');
+      return;
+    }
   }
 
   // Fast background path: if we have a push payload, show a notification
