@@ -163,12 +163,14 @@ jobs:
           fi
 
       # === APK BUILD (split per architecture — 32-bit + 64-bit) ===
+      # Uses --build-type apk to include REQUEST_INSTALL_PACKAGES permission
+      # via the src/apk/ source set (Play Store AAB does NOT include it).
       - name: Build Android APK (split ABIs)
         run: |
-          flutter build apk --release --split-per-abi --no-tree-shake-icons --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
+          flutter build apk --build-type apk --split-per-abi --no-tree-shake-icons --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           mkdir -p output
-          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/plusly-armeabi-v7a-release.apk || true
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/plusly-arm64-v8a-release.apk || true
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-apk.apk output/plusly-armeabi-v7a-release.apk || true
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-apk.apk output/plusly-arm64-v8a-release.apk || true
 
       # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
