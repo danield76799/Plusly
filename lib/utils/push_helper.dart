@@ -98,14 +98,8 @@ Future<void> _tryPushHelper(
     notification.toJson(),
   );
 
-  // ── Foreground check ──
-  if (notification.roomId != null &&
-      activeRoomId == notification.roomId &&
-      activeClient != null &&
-      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
-    Logs().v('Room is in foreground. Stop push helper here.');
-    return;
-  }
+  // ── Foreground check (Extera pattern: after client resolution) ──
+  // Skipped for now; we check it below once we know which client is notified.
 
   // ── Resolve client ──
   clients ??= await ClientManager.getClients(
@@ -116,6 +110,15 @@ Future<void> _tryPushHelper(
   // Extera pattern: fallback to first client if instance doesn't match.
   // This handles bridge push where instance != clientName.
   final client = _clientFromInstance(instance, clients) ?? clients.first;
+
+  // Foreground check now that we know the notified client.
+  if (notification.roomId != null &&
+      activeRoomId == notification.roomId &&
+      activeClient == client &&
+      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+    Logs().v('Room is in foreground for ${client.clientName}. Stop push helper here.');
+    return;
+  }
 
   // Fast background path: if we have a push payload, show a notification
   // immediately without waiting for rooms/database to load. This avoids losing
@@ -191,12 +194,13 @@ Future<void> _tryPushHelper(
   // no long-poll wait) so the new message is fetched right away.
   final wasBackgroundSync = client.syncPending;
   client.abortSync();
+  // Extera pattern: don't turn off backgroundSync after a background sync.
+  // The Matrix SDK reuses the sync loop and killing it can cause the next
+  // background push to fail. Let the SDK manage its own lifecycle.
   final syncFuture = client.oneShotSync(timeout: Duration.zero);
   unawaited(
     syncFuture.whenComplete(() {
-      if (isBackgroundMessage) {
-        client.backgroundSync = false;
-      } else if (wasBackgroundSync) {
+      if (!isBackgroundMessage && wasBackgroundSync) {
         // Restore the continuous sync loop that abortSync() stopped.
         client.backgroundSync = true;
       }
@@ -488,7 +492,7 @@ String? _roomDisplayName(Client client, String? roomId, L10n l10n) {
 Client? _clientFromInstance(String? instance, List<Client> clients) {
   if (clients.isEmpty) return null;
   if (instance == null) return clients.first;
-  // FIX #16: don't fallback to first client — return null if no match
+  // Extera/FluffyChat pattern: exact match only; caller falls back to first.
   return clients.firstWhereOrNull((client) => client.clientName == instance);
 }
 
