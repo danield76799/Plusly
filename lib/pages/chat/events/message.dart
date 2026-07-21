@@ -49,6 +49,7 @@ class Message extends StatefulWidget {
   final Thread? thread;
   final bool hasBeenRead;
   final List<Receipt>? readReceipts; // NEW: Read receipts for this message
+  final bool isOneOnOne; // Pre-computed by ChatEventList to avoid getParticipants() per bubble
 
   const Message(
     this.event, {
@@ -61,6 +62,7 @@ class Message extends StatefulWidget {
     this.hasBeenRead = false,
     this.readReceipts, // NEW
     this.thread,
+    this.isOneOnOne = false,
     required this.onSelect,
     required this.onInfoTab,
     required this.scrollToEventId,
@@ -225,8 +227,9 @@ class _MessageState extends State<Message> {
     // gemarkeerd (echte 1-op-1) OF maximaal 4 deelnemers heeft.
     // Bridge-chats (WA/TG) missen vaak de isDirect-flag maar hebben wel
     // extra members (bot/puppet), dus <=4 vangt die ook op.
-    final isOneOnOne =
-        event.room.isDirectChat || event.room.getParticipants().length <= 4;
+    // Pre-computed by ChatEventList to avoid calling getParticipants()
+    // for every message bubble on every rebuild (50x+ per frame).
+    final isOneOnOne = widget.isOneOnOne;
 
     var color = theme.colorScheme.surfaceContainerHigh;
     final displayTime =

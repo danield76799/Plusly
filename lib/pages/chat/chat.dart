@@ -517,6 +517,7 @@ class ChatController extends State<ChatPageWithRoom>
   // every rebuild. Invalidated when _timelineTick changes.
   List<Event>? cachedFilteredEvents;
   int? cachedEventsTick;
+  Map<String, int>? cachedEventsKeyMap;
 
   Future<void> updateView() async {
     if (!mounted) return;

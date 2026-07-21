@@ -68,12 +68,25 @@ class ChatEventList extends StatelessWidget {
 
     final threads = controller.room.threads;
 
-    final thisEventsKeyMap = <String, int>{};
-    for (var i = 0; i < events.length; i++) {
-      thisEventsKeyMap[events[i].eventId] = i;
-      if (events[i].transactionId != null) {
-        thisEventsKeyMap[events[i].transactionId!] = i;
+    // Compute isOneOnOne once for the whole list — avoids calling
+    // getParticipants() (O(n) over room members) for every message bubble.
+    final isOneOnOne = controller.room.isDirectChat ||
+        controller.room.getParticipants().length <= 4;
+
+    // Cache the events key map — only rebuild when the tick changes.
+    Map<String, int> thisEventsKeyMap;
+    if (controller.cachedEventsKeyMap != null &&
+        controller.cachedEventsTick == tick) {
+      thisEventsKeyMap = controller.cachedEventsKeyMap!;
+    } else {
+      thisEventsKeyMap = <String, int>{};
+      for (var i = 0; i < events.length; i++) {
+        thisEventsKeyMap[events[i].eventId] = i;
+        if (events[i].transactionId != null) {
+          thisEventsKeyMap[events[i].transactionId!] = i;
+        }
       }
+      controller.cachedEventsKeyMap = thisEventsKeyMap;
     }
 
     final hasWallpaper = AppSettings.wallpaperPath.value.isNotEmpty;
@@ -204,6 +217,7 @@ class ChatEventList extends StatelessWidget {
                           latestReadEventIndex != -1 &&
                           latestReadEventIndex <= i,
                       readReceipts: event.receipts.toList(), // NEW: Pass read receipts to Message
+                      isOneOnOne: isOneOnOne,
                       // onQuote: () {
                       //   controller.replyAction(replyTo: event);
                       //   controller.sendController.text = "> ";
