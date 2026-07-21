@@ -43,22 +43,31 @@ extension VisibleInGuiExtension on List<Event> {
     // Hide creation state events:
     if (visibleEvents.isNotEmpty &&
         visibleEvents.last.type == EventTypes.RoomCreate) {
+      // Build a new list instead of removeAt (O(n²) → O(n)).
+      final result = <Event>[];
       var i = visibleEvents.length - 2;
       while (i > 0) {
         final event = visibleEvents[i];
         if (!event.isState) break;
         if (event.type == EventTypes.Encryption) {
+          result.insert(0, event);
           i--;
           continue;
         }
         if (event.type == EventTypes.RoomMember &&
             event.roomMemberChangeType == RoomMemberChangeType.acceptInvite) {
+          result.insert(0, event);
           i--;
           continue;
         }
-        visibleEvents.removeAt(i);
         i--;
       }
+      // Prepend remaining events (index 0..i) + result + last event
+      return [
+        ...visibleEvents.sublist(0, i + 1 > 0 ? i + 1 : 1),
+        ...result,
+        visibleEvents.last,
+      ];
     }
     return visibleEvents;
   }

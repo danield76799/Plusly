@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -9,6 +10,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ChatListCacheService {
   static const _key = 'chat_list_cache_v1';
   static const _maxItems = 20;
+
+  // Debounce timer — prevents writing to disk on every sync cycle.
+  static Timer? _saveDebounce;
+  static List<Room>? _pendingRooms;
+
+  /// Debounced version of saveRooms — coalesces rapid calls into a single
+  /// disk write at most once every 10 seconds. This prevents the UI from
+  /// doing SharedPreferences I/O on every sync response.
+  static void saveRoomsDebounced(List<Room> rooms) {
+    _pendingRooms = rooms;
+    _saveDebounce?.cancel();
+    _saveDebounce = Timer(const Duration(seconds: 10), () {
+      final r = _pendingRooms;
+      _pendingRooms = null;
+      _saveDebounce = null;
+      if (r != null) saveRooms(r);
+    });
+  }
 
   static Future<void> saveRooms(List<Room> rooms) async {
     try {
