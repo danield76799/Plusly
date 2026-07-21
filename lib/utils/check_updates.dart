@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -757,17 +758,29 @@ Future<void> checkForUpdates(BuildContext context) async {
                   leading: const Icon(Icons.android),
                   title: const Text('Download APK (GitHub)'),
                   subtitle: const Text(
-                    'Download en installeer handmatig vanuit je bestandsapp',
+                    'Download en installeer direct vanuit de app',
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {
+                  onTap: () async {
                     Navigator.of(ctx).pop();
-                    // Open de release-pagina; gebruiker downloadt en tikt de
-                    // APK aan om te installeren (app mag niet zelf installeren
-                    // wegens Play Store policy zonder REQUEST_INSTALL_PACKAGES).
-                    launchUrlString(
-                      'https://github.com/danield76799/Plusly/releases/latest',
-                    );
+                    // Pick the ABI-specific APK URL if available, otherwise
+                    // fall back to the generic download URL.
+                    var apkUrl = safeRelease.downloadUrl;
+                    try {
+                      final info = await DeviceInfoPlugin().androidInfo;
+                      final abis = info.supportedAbis;
+                      if (safeRelease.apkUrlsByAbi.isNotEmpty) {
+                        for (final abi in abis) {
+                          if (safeRelease.apkUrlsByAbi.containsKey(abi)) {
+                            apkUrl = safeRelease.apkUrlsByAbi[abi]!;
+                            break;
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      Logs().w('Could not detect device ABI, using generic URL', e);
+                    }
+                    await downloadAndInstallApk(context, apkUrl);
                   },
                 ),
               ],
