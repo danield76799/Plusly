@@ -513,6 +513,11 @@ class ChatController extends State<ChatPageWithRoom>
   int get timelineTick => _timelineTick;
   int _timelineTick = 0;
 
+  // Cached filtered events — avoids re-filtering hundreds of events on
+  // every rebuild. Invalidated when _timelineTick changes.
+  List<Event>? cachedFilteredEvents;
+  int? cachedEventsTick;
+
   Future<void> updateView() async {
     if (!mounted) return;
     setReadMarker();
@@ -657,11 +662,21 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   Future<void>? _setReadMarkerFuture;
+  DateTime? _lastReadMarkerTime;
 
   void setReadMarker({String? eventId}) {
     if (_setReadMarkerFuture != null) return;
     if (_scrolledUp.value) return;
     if (scrollUpBannerEventId != null) return;
+
+    // Throttle — max 2x per seconde voorkomt onnodige server calls
+    // bij snelle opeenvolgende updateView() aanroepen.
+    final now = DateTime.now();
+    if (_lastReadMarkerTime != null &&
+        now.difference(_lastReadMarkerTime!) < const Duration(milliseconds: 500)) {
+      return;
+    }
+    _lastReadMarkerTime = now;
 
     if (eventId == null &&
         !room.hasNewMessages &&

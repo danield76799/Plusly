@@ -53,7 +53,18 @@ class ChatEventList extends StatelessWidget {
       events = events.filterByThreaded(controller.thread != null);
     }
 
-    events = events.filterByVisibleInGui();
+    // Cache the filtered list — only re-filter when the timeline tick
+    // changes (i.e. when updateView() bumps it after a new event).
+    // Without this, every rebuild re-filters potentially hundreds of
+    // events through filterByThreaded + filterByVisibleInGui.
+    if (controller.cachedFilteredEvents != null &&
+        controller.cachedEventsTick == tick) {
+      events = controller.cachedFilteredEvents!;
+    } else {
+      events = events.filterByVisibleInGui();
+      controller.cachedFilteredEvents = events;
+      controller.cachedEventsTick = tick;
+    }
 
     final threads = controller.room.threads;
 
@@ -122,9 +133,11 @@ class ChatEventList extends StatelessWidget {
                       ),
                     );
                   }
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [TypingIndicators(controller)],
+                  return RepaintBoundary(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [TypingIndicators(controller)],
+                    ),
                   );
                 }
 
