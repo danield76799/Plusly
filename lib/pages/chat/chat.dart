@@ -516,7 +516,11 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void> updateView() async {
     if (!mounted) return;
     setReadMarker();
-    await updateThreads();
+    // Extera pattern: don't await updateThreads — fire-and-forget.
+    // Awaiting does an async DB read that can delay setState long enough
+    // for the widget to unmount, causing sent messages to never appear
+    // until the chat is reopened.
+    unawaited(updateThreads());
     if (!mounted) return;
     setState(() {
       firstUpdateReceived = true;
