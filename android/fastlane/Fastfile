@@ -5,7 +5,7 @@ platform :android do
   lane :deploy_internal_test do
     upload_to_play_store(
       track: "internal",
-      aab: "../build/app/outputs/bundle/release/app-release.aab",
+      aab: "../build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab",
       json_key: "keys.json",
       package_name: "com.danield.plusly.app",
       skip_upload_metadata: true,
