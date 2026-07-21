@@ -773,7 +773,12 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     try {
-      await room.sendTextEvent(
+      // Extera pattern: fire-and-forget — don't await sendTextEvent.
+      // Awaiting blocks the UI until the server accepts the message;
+      // the SDK's _handleFakeSync inserts the optimistic placeholder
+      // immediately and triggers onUpdate → updateView.
+      // ignore: unawaited_futures
+      room.sendTextEvent(
         sendController.text,
         inReplyTo: replyEvent,
         replyMention: replyMention,
