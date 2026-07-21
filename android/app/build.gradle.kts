@@ -75,6 +75,24 @@ android {
     }
 
     buildTypes {
+        // APK build type: includes REQUEST_INSTALL_PACKAGES permission
+        // via the src/apk/ source set. Used for GitHub Release APKs.
+        // Play Store AAB uses the default release type (no install permission).
+        create("apk") {
+            initWith(getByName("release"))
+            // Only use release signing if key.properties was found
+            if (signingConfigs.findByName("release") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
+            // Match the release version name/code
+            matchingFallbacks += listOf("release")
+        }
         release {
             // Only use release signing if key.properties was found
             if (signingConfigs.findByName("release") != null) {

@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- APK builds (GitHub Releases) only: allows in-app APK download & install.
+         Play Store (AAB) builds do NOT include this permission per Google policy. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+</manifest>
