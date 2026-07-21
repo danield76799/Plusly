@@ -161,7 +161,7 @@ Future<void> notificationTap(
         }
       }
 
-      router?.go(
+      router.go(
         client.getRoomById(roomId)?.membership == Membership.invite
             ? '/rooms'
             : '/rooms/$roomId',

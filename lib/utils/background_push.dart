@@ -39,7 +39,6 @@ import 'package:Pulsly/utils/push_helper.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
-import '../services/timeline_cache.dart';
 import '../widgets/matrix.dart';
 import 'platform_infos.dart';
 
@@ -151,8 +150,8 @@ class BackgroundPush {
 
   Future<void> cancelNotification(Client client, String roomId) async {
     Logs().v('Cancel notification for room', roomId);
-    // FIX #3: use same ID formula as push_helper: '${clientName}_${roomId}'.hashCode
-    await _flutterLocalNotificationsPlugin.cancel(id: '${client.clientName}_$roomId'.hashCode);
+    // Must match push_helper.dart ID formula: roomId.hashCode (Extera pattern)
+    await _flutterLocalNotificationsPlugin.cancel(id: roomId.hashCode);
 
     // Workaround for app icon badge not updating
     if (Platform.isIOS) {
@@ -469,14 +468,12 @@ class BackgroundPush {
     await UnifiedPush.saveDistributor(selectedDistributor);
     
     // Check if we already have an endpoint for any client
-    var hasExistingEndpoint = false;
     for (final client in clients) {
       if (client.isLogged()) {
         final endpoint = matrix?.store.getString(
           client.clientName + AppSettings.unifiedPushEndpoint.key,
         );
         if (endpoint != null && endpoint.isNotEmpty) {
-          hasExistingEndpoint = true;
           // Re-register pusher with existing endpoint
           await setupPusher(
             gatewayUrl: 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify',
