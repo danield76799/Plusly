@@ -2,14 +2,21 @@ import 'package:flutter/material.dart';
 
 extension LoadingSnackbarExtension on ScaffoldMessengerState {
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showLoadingSnackBar(
-    String title,
-  ) {
+    String title, {
+    VoidCallback? onCancel,
+  }) {
     clearSnackBars();
     return showSnackBar(
       SnackBar(
         duration: const Duration(minutes: 5),
         dismissDirection: DismissDirection.none,
         showCloseIcon: true,
+        action: onCancel != null
+            ? SnackBarAction(
+                label: 'Stop',
+                onPressed: onCancel,
+              )
+            : null,
         content: Row(
           children: [
             const SizedBox(
@@ -19,12 +26,6 @@ extension LoadingSnackbarExtension on ScaffoldMessengerState {
             ),
             const SizedBox(width: 16),
             Expanded(child: Text(title)),
-            // IconButton(
-            //   onPressed: () {
-            //     clearSnackBars();
-            //   },
-            //   icon: const Icon(Icons.close),
-            // ),
           ],
         ),
       ),
