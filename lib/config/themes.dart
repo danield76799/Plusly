@@ -61,17 +61,15 @@ abstract class FluffyThemes {
     final colorScheme = ColorScheme.fromSeed(
       brightness: brightness,
       seedColor: seed ?? Color(AppSettings.colorSchemeSeed.value),
-      surface: extraDarkColors['surface'],
+      surface: extraDarkColors['background'] ?? extraDarkColors['surface'],
       surfaceBright: extraDarkColors['surfaceBright'],
       surfaceContainer: extraDarkColors['surfaceContainer'],
       surfaceContainerHigh: extraDarkColors['surfaceContainerHigh'],
-      surfaceContainerHighest: extraDarkColors['surfaceContainerHighest'],
+      surfaceContainerHighest: extraDarkColors['surfaceVariant'] ?? extraDarkColors['surfaceContainerHighest'],
       surfaceContainerLow: extraDarkColors['surfaceContainerLow'],
       surfaceContainerLowest: extraDarkColors['surfaceContainerLowest'],
       surfaceDim: extraDarkColors['surfaceDim'],
       surfaceTint: extraDarkColors['surfaceTint'],
-      surfaceVariant: extraDarkColors['surfaceVariant'],
-      background: extraDarkColors['background'],
       dynamicSchemeVariant: variant ?? DynamicSchemeVariant.tonalSpot,
     );
     final isColumnMode = FluffyThemes.isColumnMode(context);

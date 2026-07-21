@@ -23,7 +23,6 @@ import 'package:Pulsly/widgets/adaptive_dialogs/dialog_text_field.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/image_editor_dialog.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import '../../utils/resize_video.dart';
-import '../../utils/resize_image.dart';
 
 // ignore: implementation_imports
 // ignore: depend_on_referenced_packages
@@ -98,20 +97,19 @@ class SendFileDialogState extends State<SendFileDialog> {
             mimeType.startsWith('image') &&
             length > minSizeToCompress &&
             compress) {
-          // Resize image before upload (much faster sending)
-          // EXIF wordt automatisch verwijderd tijdens resize + JPEG encode
-          scaffoldMessenger.showLoadingSnackBar(l10n.compress);
-          final resizedImage = await ImageResizer.resizeImage(xfile);
-          if (resizedImage != null) {
-            file = resizedImage;
-          } else {
-            // Resize faalde, gebruik origineel
-            file = MatrixFile(
-              bytes: await xfile.readAsBytes(),
-              name: name,
-              mimeType: mimeType,
-            ).detectFileType;
+          // Let the Matrix SDK handle image shrinking natively via
+          // shrinkImageMaxDimension (passed to sendFileEvent below).
+          // The SDK uses platform-native image compression which is much
+          // faster than the pure-Dart `image` package (ImageResizer).
+          if (length > maxUploadSize) {
+            throw FileTooBigMatrixException(length, maxUploadSize);
           }
+          scaffoldMessenger.showLoadingSnackBar(l10n.prepareSendingAttachment);
+          file = MatrixFile(
+            bytes: await xfile.readAsBytes(),
+            name: name,
+            mimeType: mimeType,
+          ).detectFileType;
         } else if (mimeType != null &&
             mimeType.startsWith('image') &&
             AppSettings.cleanExif.value) {
@@ -219,7 +217,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           await widget.room.sendFileEvent(
             file,
             thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 1600 : null,
+            shrinkImageMaxDimension: compress ? 1200 : null,
             extraContent: extraContent,
             threadLastEventId:
                 widget.thread?.lastEvent?.eventId ??
@@ -255,7 +253,7 @@ class SendFileDialogState extends State<SendFileDialog> {
           await widget.room.sendFileEvent(
             file,
             thumbnail: thumbnail,
-            shrinkImageMaxDimension: compress ? 1600 : null,
+            shrinkImageMaxDimension: compress ? 1200 : null,
             extraContent: extraContent,
             threadLastEventId:
                 widget.thread?.lastEvent?.eventId ??
