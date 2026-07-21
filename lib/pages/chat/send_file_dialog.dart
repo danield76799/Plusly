@@ -54,11 +54,19 @@ class SendFileDialog extends StatefulWidget {
 class SendFileDialogState extends State<SendFileDialog> {
   bool compress = true;
   bool isSending = false;
+  bool _cancelled = false;
 
   /// Images smaller than 20kb don't need compression.
   static const int minSizeToCompress = 20 * 1000;
 
   final TextEditingController _labelTextController = TextEditingController();
+
+  void _cancelSending() {
+    setState(() {
+      _cancelled = true;
+      isSending = false;
+    });
+  }
 
   Future<void> _send() async {
     final scaffoldMessenger = ScaffoldMessenger.of(widget.outerContext);
@@ -67,8 +75,12 @@ class SendFileDialogState extends State<SendFileDialog> {
     try {
       setState(() {
         isSending = true;
+        _cancelled = false;
       });
-      scaffoldMessenger.showLoadingSnackBar(l10n.prepareSendingAttachment);
+      scaffoldMessenger.showLoadingSnackBar(
+        l10n.prepareSendingAttachment,
+        onCancel: _cancelSending,
+      );
       final clientConfig = await widget.room.client.getConfig();
       final maxUploadSize = clientConfig.mUploadSize ?? 100 * 1000 * 1000;
 
@@ -77,6 +89,9 @@ class SendFileDialogState extends State<SendFileDialog> {
       }
 
       for (final xfile in widget.files) {
+        if (_cancelled) {
+          throw Exception('Verzenden gestopt');
+        }
         MatrixFile file;
         MatrixImageFile? thumbnail;
         final length = await xfile.length();
@@ -91,7 +106,10 @@ class SendFileDialogState extends State<SendFileDialog> {
             mimeType.startsWith('video') &&
             length > minSizeToCompress &&
             compress) {
-          scaffoldMessenger.showLoadingSnackBar(l10n.compressVideo);
+          scaffoldMessenger.showLoadingSnackBar(
+            l10n.compressVideo,
+            onCancel: _cancelSending,
+          );
           file = await xfile.resizeVideo();
         } else if (mimeType != null &&
             mimeType.startsWith('image') &&
@@ -104,7 +122,10 @@ class SendFileDialogState extends State<SendFileDialog> {
           if (length > maxUploadSize) {
             throw FileTooBigMatrixException(length, maxUploadSize);
           }
-          scaffoldMessenger.showLoadingSnackBar(l10n.prepareSendingAttachment);
+          scaffoldMessenger.showLoadingSnackBar(
+            l10n.prepareSendingAttachment,
+            onCancel: _cancelSending,
+          );
           file = MatrixFile(
             bytes: await xfile.readAsBytes(),
             name: name,
@@ -118,7 +139,10 @@ class SendFileDialogState extends State<SendFileDialog> {
             throw FileTooBigMatrixException(length, maxUploadSize);
           }
 
-          scaffoldMessenger.showLoadingSnackBar(l10n.prepareSendingAttachment);
+          scaffoldMessenger.showLoadingSnackBar(
+            l10n.prepareSendingAttachment,
+            onCancel: _cancelSending,
+          );
           try {
             file = MatrixFile(
               bytes: Uint8List.fromList(
@@ -161,11 +185,15 @@ class SendFileDialogState extends State<SendFileDialog> {
           try {
             scaffoldMessenger.showLoadingSnackBar(
               l10n.generatingVideoThumbnail,
+              onCancel: _cancelSending,
             );
             thumbnail = await xfile.getVideoThumbnail();
           } catch (e) {
             Logs().e("Failed to generate video thumbnail", e);
-            scaffoldMessenger.showLoadingSnackBar(e.toLocalizedString(context));
+            scaffoldMessenger.showLoadingSnackBar(
+              e.toLocalizedString(context),
+              onCancel: _cancelSending,
+            );
           }
         }
 
@@ -175,6 +203,7 @@ class SendFileDialogState extends State<SendFileDialog> {
               widget.files.indexOf(xfile) + 1,
               widget.files.length,
             ),
+            onCancel: _cancelSending,
           );
         } else {
           scaffoldMessenger.clearSnackBars();
@@ -248,7 +277,10 @@ class SendFileDialogState extends State<SendFileDialog> {
           );
           await Future.delayed(retryAfterDuration);
 
-          scaffoldMessenger.showLoadingSnackBar(l10n.sendingAttachment);
+          scaffoldMessenger.showLoadingSnackBar(
+            l10n.sendingAttachment,
+            onCancel: _cancelSending,
+          );
 
           await widget.room.sendFileEvent(
             file,
