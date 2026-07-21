@@ -74,25 +74,9 @@ android {
         versionName = flutter.versionName
     }
 
+    // No custom build type — Flutter doesn't support --build-type.
+    // We use product flavors instead (see flavorDimensions below).
     buildTypes {
-        // APK build type: includes REQUEST_INSTALL_PACKAGES permission
-        // via the src/apk/ source set. Used for GitHub Release APKs.
-        // Play Store AAB uses the default release type (no install permission).
-        create("apk") {
-            initWith(getByName("release"))
-            // Only use release signing if key.properties was found
-            if (signingConfigs.findByName("release") != null) {
-                signingConfig = signingConfigs.getByName("release")
-            }
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-            // Match the release version name/code
-            matchingFallbacks += listOf("release")
-        }
         release {
             // Only use release signing if key.properties was found
             if (signingConfigs.findByName("release") != null) {
@@ -106,6 +90,19 @@ android {
             )
             // Speed up R8: use compat mode (less aggressive, faster)
             // Configured via gradle.properties: android.enableR8.fullMode=false
+        }
+    }
+
+    // Product flavors: "apk" (GitHub Releases, includes REQUEST_INSTALL_PACKAGES)
+    // and "playstore" (Play Store AAB, no install permission).
+    // Flutter supports --flavor, not --build-type.
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("apk") {
+            dimension = "distribution"
+        }
+        create("playstore") {
+            dimension = "distribution"
         }
     }
 
