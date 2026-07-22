@@ -76,34 +76,11 @@ class ChatListViewBody extends StatelessWidget {
     const dummyChatCount = 4;
     final filter = controller.searchController.text.toLowerCase();
 
-    return StreamBuilder(
-      key: ValueKey(client.userID.toString()),
-      // Rebuild on every sync that touches a room — the SDK is the single
-      // source of truth (Extera-style). No optimistic bus needed.
-      stream: StreamGroup.merge<String?>([
-        client.onSync.stream
-            .where((s) => s.hasRoomUpdate)
-            .map((_) => null),
-        client.onSyncStatus.stream
-            .where((s) => s.status == SyncStatus.finished)
-            .map((_) => null),
-      ]),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.active) {
-          controller.invalidateRoomCache();
-        }
-        controller.syncBridgeTypes();
-        // Bewaar de chat list cache, maar niet bij elke sync — debounce
-        // naar maximaal 1x per 10 seconden om disk I/O op de main thread
-        // te voorkomen.
-        if (client.prevBatch != null && client.rooms.isNotEmpty) {
-          ChatListCacheService.saveRoomsDebounced(client.rooms);
-        }
-        final rooms = controller.isSearchMode
-            ? controller.searchRooms
-            : controller.visibleRooms;
+    final rooms = controller.isSearchMode
+        ? controller.searchRooms
+        : controller.visibleRooms;
 
-        return ChatListShortcuts(
+    return ChatListShortcuts(
           onPreviousChat: () {
             if (controller.activeChat == null) return;
             if (rooms.isEmpty) return;
@@ -319,10 +296,31 @@ class ChatListViewBody extends StatelessWidget {
                     },
                   ),
                 if (client.prevBatch != null)
-                  SliverList.builder(
-                    itemCount: rooms.length + (controller.hasMoreRooms ? 1 : 0),
+                  StreamBuilder<String?>(
+                    key: ValueKey(client.userID.toString()),
+                    stream: StreamGroup.merge<String?>([
+                      client.onSync.stream
+                          .where((s) => s.hasRoomUpdate)
+                          .map((_) => null),
+                      client.onSyncStatus.stream
+                          .where((s) => s.status == SyncStatus.finished)
+                          .map((_) => null),
+                    ]),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.active) {
+                        controller.invalidateRoomCache();
+                      }
+                      controller.syncBridgeTypes();
+                      if (client.prevBatch != null && client.rooms.isNotEmpty) {
+                        ChatListCacheService.saveRoomsDebounced(client.rooms);
+                      }
+                      final liveRooms = controller.isSearchMode
+                          ? controller.searchRooms
+                          : controller.visibleRooms;
+                      return SliverList.builder(
+                    itemCount: liveRooms.length + (controller.hasMoreRooms ? 1 : 0),
                     itemBuilder: (BuildContext context, int i) {
-                      if (i == rooms.length) {
+                      if (i == liveRooms.length) {
                         return Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Center(
@@ -334,7 +332,7 @@ class ChatListViewBody extends StatelessWidget {
                           ),
                         );
                       }
-                      final room = rooms[i];
+                      final room = liveRooms[i];
                       final space = spaceDelegateCandidates[room.id];
                       return ChatListItem(
                         room,
@@ -346,9 +344,11 @@ class ChatListViewBody extends StatelessWidget {
                             controller.chatContextAction(room, context, space),
                         activeChat: controller.activeChat == room.id,
                         firstElement: i == 0,
-                        lastElement: rooms.length - 1 == i,
+                        lastElement: liveRooms.length - 1 == i,
                         compactMode: AppSettings.chatListCompactMode.value,
                       );
+                    },
+                  );
                     },
                   ),
                 SliverToBoxAdapter(
@@ -358,8 +358,6 @@ class ChatListViewBody extends StatelessWidget {
             ),
           ),
         );
-      },
-    );
   }
 }
 
