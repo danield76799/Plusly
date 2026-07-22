@@ -257,8 +257,8 @@ class SendFileDialogState extends State<SendFileDialog> {
           // freshly sent photo appears immediately, the same way text messages
           // do after send(). sendFileEvent adds the placeholder then the real
           // event after upload, which can cause onUpdate to miss the bubble.
-          ChatListRefreshBus.refreshForRoom(widget.room.id);
           widget.onSent?.call();
+          ChatListRefreshBus.refreshForRoom(widget.room.id);
         } on MatrixException catch (e) {
           final retryAfterMs = e.retryAfterMs;
           if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {

@@ -129,7 +129,9 @@ class ChatListController extends State<ChatList>
       _recentlyActiveRoomIds.add(roomId);
     });
     _recentlyActiveTimer?.cancel();
-    _recentlyActiveTimer = Timer(const Duration(seconds: 3), () {
+    // 10s window: file uploads can take several seconds, and we want the room
+    // to stay pinned to the top of the list until the event actually lands.
+    _recentlyActiveTimer = Timer(const Duration(seconds: 10), () {
       if (!mounted) return;
       setState(() {
         _recentlyActiveRoomIds.clear();
