@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
@@ -5,8 +7,9 @@ import 'package:matrix/matrix.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/image_viewer/video_player.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:Pulsly/widgets/hover_builder.dart';
-import 'package:Pulsly/widgets/mxc_image.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 import 'image_viewer.dart';
 
 class ImageViewerView extends StatelessWidget {
@@ -93,29 +96,7 @@ class ImageViewerView extends StatelessWidget {
                       case MessageTypes.Image:
                       case MessageTypes.Sticker:
                       default:
-                        final size = MediaQuery.sizeOf(context);
-                        return InteractiveViewer(
-                          minScale: 1.0,
-                          maxScale: 10.0,
-                          onInteractionEnd: controller.onInteractionEnds,
-                          child: Center(
-                            child: Hero(
-                              tag: event.eventId,
-                              child: GestureDetector(
-                                onTap: () {},
-                                child: MxcImage(
-                                  key: ValueKey(event.eventId),
-                                  event: event,
-                                  width: size.width,
-                                  height: size.height,
-                                  fit: BoxFit.contain,
-                                  isThumbnail: false,
-                                  animated: true,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
+                        return _RawZoomableImage(event: event);
                     }
                   },
                 ),
@@ -150,6 +131,83 @@ class ImageViewerView extends StatelessWidget {
                   ),
                 ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Loads the image bytes directly via downloadAndDecryptAttachment and renders
+/// them in a plain Image.memory inside InteractiveViewer. Bypasses MxcImage
+/// entirely to test whether MxcImage's RepaintBoundary/ClipRRect/cache logic
+/// is interfering with pinch-to-zoom.
+class _RawZoomableImage extends StatefulWidget {
+  final Event event;
+
+  const _RawZoomableImage({required this.event});
+
+  @override
+  State<_RawZoomableImage> createState() => _RawZoomableImageState();
+}
+
+class _RawZoomableImageState extends State<_RawZoomableImage> {
+  Uint8List? _bytes;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final data = await widget.event.downloadAndDecryptAttachment(
+        getThumbnail: false,
+      );
+      if (mounted) {
+        setState(() {
+          _bytes = data.bytes;
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(
+        child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+      );
+    }
+    if (_error != null || _bytes == null || _bytes!.isEmpty) {
+      return const Center(
+        child: Icon(Icons.broken_image_outlined, size: 64, color: Colors.white54),
+      );
+    }
+    return InteractiveViewer(
+      minScale: 1.0,
+      maxScale: 10.0,
+      child: Center(
+        child: GestureDetector(
+          onTap: () {},
+          child: Image.memory(
+            _bytes!,
+            fit: BoxFit.contain,
+            gaplessPlayback: true,
+            errorBuilder: (context, e, s) => const Center(
+              child: Icon(Icons.broken_image_outlined, size: 64, color: Colors.white54),
+            ),
           ),
         ),
       ),
