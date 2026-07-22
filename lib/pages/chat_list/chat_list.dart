@@ -700,15 +700,15 @@ class ChatListController extends State<ChatList>
 
     // checkForUpdates disabled
 
-    // Invalidate + rebuild the chat list on any sync that touches a room.
-    // The StreamBuilder in chat_list_body also listens, but this is a
-    // belt-and-suspenders fallback so the list never gets stuck stale.
+    // Redundant with the StreamBuilder in chat_list_body, which already
+    // rebuilds the room list on every sync. Only invalidate the cache here;
+    // do NOT call setState(), or the whole tree (incl. the header) rebuilds
+    // and the SliverPersistentHeader re-plays its collapse animation.
     _syncSubscription = Matrix.of(context).client.onSync.stream
         .where((s) => s.hasRoomUpdate)
         .listen((_) {
       _cachedFilteredRooms = null;
       _cachedSpaces = null;
-      if (mounted) setState(() {});
     });
 
     super.initState();

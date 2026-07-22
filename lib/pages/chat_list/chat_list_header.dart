@@ -60,7 +60,10 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _titleHeight + _searchBarHeight + _tabBarHeight + topPadding;
 
   @override
-  bool shouldRebuild(covariant _ChatListHeaderDelegate oldDelegate) => true;
+  bool shouldRebuild(covariant _ChatListHeaderDelegate oldDelegate) =>
+      oldDelegate.controller != controller ||
+      oldDelegate.globalSearch != globalSearch ||
+      oldDelegate.topPadding != topPadding;
 
   /// Keeps the active filter tab visible when the tab bar overflows.
   /// Without auto-scroll, "Opgeslagen" is unreachable on narrow screens.
