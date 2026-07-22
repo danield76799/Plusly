@@ -27,13 +27,6 @@ class ChatEventList extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeline = controller.timeline;
 
-    // Touch timelineTick so the parent setState (which bumps it inside
-    // ChatController.updateView) always rebuilds this list. Without this
-    // hook Flutter would happily treat the update as a no-op and the
-    // freshly sent event would never make it into the visible list.
-    // ignore: unused_local_variable
-    final tick = controller.timelineTick;
-
     if (timeline == null) {
       return const Center(child: CircularProgressIndicator.adaptive());
     }
@@ -53,18 +46,7 @@ class ChatEventList extends StatelessWidget {
       events = events.filterByThreaded(controller.thread != null);
     }
 
-    // Cache the filtered list — only re-filter when the timeline tick
-    // changes (i.e. when updateView() bumps it after a new event).
-    // Without this, every rebuild re-filters potentially hundreds of
-    // events through filterByThreaded + filterByVisibleInGui.
-    if (controller.cachedFilteredEvents != null &&
-        controller.cachedEventsTick == tick) {
-      events = controller.cachedFilteredEvents!;
-    } else {
-      events = events.filterByVisibleInGui();
-      controller.cachedFilteredEvents = events;
-      controller.cachedEventsTick = tick;
-    }
+    events = events.filterByVisibleInGui();
 
     final threads = controller.room.threads;
 
@@ -73,20 +55,13 @@ class ChatEventList extends StatelessWidget {
     final isOneOnOne = controller.room.isDirectChat ||
         controller.room.getParticipants().length <= 4;
 
-    // Cache the events key map — only rebuild when the tick changes.
-    Map<String, int> thisEventsKeyMap;
-    if (controller.cachedEventsKeyMap != null &&
-        controller.cachedEventsTick == tick) {
-      thisEventsKeyMap = controller.cachedEventsKeyMap!;
-    } else {
-      thisEventsKeyMap = <String, int>{};
-      for (var i = 0; i < events.length; i++) {
-        thisEventsKeyMap[events[i].eventId] = i;
-        if (events[i].transactionId != null) {
-          thisEventsKeyMap[events[i].transactionId!] = i;
-        }
+    // Build the events key map for findChildIndexCallback.
+    final thisEventsKeyMap = <String, int>{};
+    for (var i = 0; i < events.length; i++) {
+      thisEventsKeyMap[events[i].eventId] = i;
+      if (events[i].transactionId != null) {
+        thisEventsKeyMap[events[i].transactionId!] = i;
       }
-      controller.cachedEventsKeyMap = thisEventsKeyMap;
     }
 
     final hasWallpaper = AppSettings.wallpaperPath.value.isNotEmpty;
