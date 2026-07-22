@@ -9,7 +9,6 @@ import 'package:slugify/slugify.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/utils/markdown_context_builder.dart';
-import 'package:Pulsly/services/chat_list_refresh_bus.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 import '../../widgets/avatar.dart';
 import '../../widgets/matrix.dart';
@@ -506,7 +505,6 @@ class _InputBarState extends State<InputBar> {
                 name: content.uri.split('/').last,
               );
               room.sendFileEvent(file, shrinkImageMaxDimension: 1200);
-              ChatListRefreshBus.refreshForRoom(room.id);
             },
           ),
           minLines: widget.minLines,

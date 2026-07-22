@@ -12,7 +12,6 @@ import 'package:mime/mime.dart';
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
-import 'package:Pulsly/services/chat_list_refresh_bus.dart';
 import 'package:Pulsly/utils/clean_exif.dart';
 import 'package:Pulsly/utils/loading_snackbar_extension.dart';
 import 'package:Pulsly/utils/localized_exception_extension.dart';
@@ -258,7 +257,6 @@ class SendFileDialogState extends State<SendFileDialog> {
           // do after send(). sendFileEvent adds the placeholder then the real
           // event after upload, which can cause onUpdate to miss the bubble.
           widget.onSent?.call();
-          ChatListRefreshBus.refreshForRoom(widget.room.id);
         } on MatrixException catch (e) {
           final retryAfterMs = e.retryAfterMs;
           if (e.error != MatrixError.M_LIMIT_EXCEEDED || retryAfterMs == null) {

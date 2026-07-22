@@ -30,7 +30,6 @@ import 'package:Pulsly/pages/chat/send_poll_dialog.dart';
 import 'package:Pulsly/pages/chat/send_later_dialog.dart';
 import 'package:Pulsly/pages/chat/translated_event_dialog.dart';
 import 'package:Pulsly/services/timeline_cache.dart';
-import 'package:Pulsly/services/chat_list_refresh_bus.dart';
 import 'package:Pulsly/pages/chat/vote_results_dialog.dart';
 import 'package:Pulsly/pages/chat_details/chat_details.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
@@ -828,7 +827,6 @@ class ChatController extends State<ChatPageWithRoom>
     });
 
     // Force the chat list to refresh so the room jumps to the top.
-    ChatListRefreshBus.refreshForRoom(room.id);
 
     // Scroll so the user sees their message immediately. reverse:true
     // list: pixels==0 is newest (visual bottom). Also force a view

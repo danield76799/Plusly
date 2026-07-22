@@ -106,38 +106,18 @@ class ChatListController extends State<ChatList>
 
   StreamSubscription? _intentUriStreamSubscription;
 
+  StreamSubscription? _syncSubscription;
+
   // Performance cache variables
   DateTime _lastBridgeSync = DateTime(2000);
   Map<String, int> _cachedUnreadCounts = {};
   DateTime _lastUnreadCalc = DateTime(2000);
-  List<Room> _cachedFilteredRooms = [];
   ActiveFilter _lastActiveFilter = ActiveFilter.allChats;
   Set<String> _lastVisibleBridgeTypes = {};
 
   ActiveFilter activeFilter = AppSettings.separateChatTypes.value
       ? ActiveFilter.messages
       : ActiveFilter.allChats;
-
-  // Optimistically bump rooms to the top immediately after sending a message,
-  // before the SDK updates latestEventReceivedTime.
-  final Set<String> _recentlyActiveRoomIds = {};
-  Timer? _recentlyActiveTimer;
-
-  void markRoomRecentlyActive(String roomId) {
-    if (!mounted) return;
-    setState(() {
-      _recentlyActiveRoomIds.add(roomId);
-    });
-    _recentlyActiveTimer?.cancel();
-    // 10s window: file uploads can take several seconds, and we want the room
-    // to stay pinned to the top of the list until the event actually lands.
-    _recentlyActiveTimer = Timer(const Duration(seconds: 10), () {
-      if (!mounted) return;
-      setState(() {
-        _recentlyActiveRoomIds.clear();
-      });
-    });
-  }
 
   String? _activeSpaceId;
   String? get activeSpaceId => _activeSpaceId;
@@ -191,13 +171,6 @@ class ChatListController extends State<ChatList>
       setActiveSpace(room.id);
       return;
     }
-
-    // Reset caches so the chat list refreshes immediately on return.
-    _cachedFilteredRooms = [];
-    _cachedUnreadCounts = {};
-    _lastUnreadCalc = DateTime(2000);
-    _lastBridgeSync = DateTime(2000);
-    _lastMaxEventTime = 0;
 
     // Drop TimelineCache for this room so we get a fresh timeline
     // on next open. This ensures newly sent messages appear promptly
@@ -300,57 +273,31 @@ class ChatListController extends State<ChatList>
     return true;
   }
 
-  // Cached filteredRooms - invalidated immediately when ChatListRefreshBus
-  // fires, so push notifications and outgoing replies jump to the top right away.
+  // Simple cache: invalidated on every sync with a room update (see
+  // _syncSubscription in initState), exactly like Extera Next. No optimistic
+  // bumps, no timestamp tracking — the SDK sync is the single source of truth.
+  List<Room>? _cachedFilteredRooms;
+  List<Room>? _cachedSpaces;
+
   List<Room> get filteredRooms {
-    final client = Matrix.of(context).client;
-    final currentRoomCount = client.rooms.length;
-    // Use the latest event timestamp across all rooms as a cache invalidation
-    // signal. This catches ordering changes even when the sync status stays idle.
-    final currentMaxEventTime = client.rooms.isEmpty
-        ? 0
-        : client.rooms
-            .map((r) => r.latestEventReceivedTime.millisecondsSinceEpoch)
-            .reduce((a, b) => a > b ? a : b);
-
-    if (_lastActiveFilter == activeFilter &&
-        _lastVisibleBridgeTypes == visibleBridgeTypes &&
-        _lastRoomCount == currentRoomCount &&
-        _lastMaxEventTime == currentMaxEventTime) {
-      return _cachedFilteredRooms;
-    }
-
-    _cachedFilteredRooms = client.rooms
+    _cachedFilteredRooms ??= Matrix.of(context)
+        .client
+        .rooms
         .where(getRoomFilterByActiveFilter(activeFilter))
         .where(_isBridgeTypeVisible)
-        .toList();
-
-    // Sort pinned rooms to the top in non-pinned tabs, then recently active
-    // rooms (optimistic send bump), then by latest event time.
-    if (activeFilter != ActiveFilter.pinned) {
-      _cachedFilteredRooms.sort((a, b) {
+        .toList()
+      ..sort((a, b) {
         final aPinned = a.isFavourite ? 1 : 0;
         final bPinned = b.isFavourite ? 1 : 0;
         if (aPinned != bPinned) return bPinned - aPinned;
-        final aRecent = _recentlyActiveRoomIds.contains(a.id) ? 1 : 0;
-        final bRecent = _recentlyActiveRoomIds.contains(b.id) ? 1 : 0;
-        if (aRecent != bRecent) return bRecent - aRecent;
         return b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime);
       });
-    } else {
-      _cachedFilteredRooms.sort((a, b) =>
-          b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime));
-    }
-
-    _lastActiveFilter = activeFilter;
-    _lastVisibleBridgeTypes = Set<String>.from(visibleBridgeTypes);
-    _lastRoomCount = currentRoomCount;
-    _lastMaxEventTime = currentMaxEventTime;
-    return _cachedFilteredRooms;
+    return _cachedFilteredRooms!;
   }
 
-  int _lastRoomCount = 0;
-  int _lastMaxEventTime = 0;
+  void invalidateRoomCache() {
+    _cachedFilteredRooms = null;
+  }
 
   // Lazy loading pagination
   static const int _pageSize = 40;
@@ -368,15 +315,6 @@ class ChatListController extends State<ChatList>
     setState(() {}); // State gebruikt setState, geen notifyListeners
   }
 
-  void invalidateRoomCache({String? roomId}) {
-    _cachedFilteredRooms = []; // forceer her-berekening bij volgende get
-    _lastMaxEventTime = 0;
-    _lastRoomCount = 0;
-    if (roomId != null) {
-      markRoomRecentlyActive(roomId);
-    }
-  }
-  
   void loadMoreRooms() {
     _visibleCount += _pageSize;
     setState(() {}); // State gebruikt setState, geen notifyListeners
@@ -762,6 +700,15 @@ class ChatListController extends State<ChatList>
 
     // checkForUpdates disabled
 
+    // Extera-style: invalidate the room list cache on any sync that touches a
+    // room. This is the single source of truth — no optimistic timers needed.
+    _syncSubscription = Matrix.of(context).client.onSync.stream
+        .where((s) => s.hasRoomUpdate)
+        .listen((_) {
+      _cachedFilteredRooms = null;
+      _cachedSpaces = null;
+    });
+
     super.initState();
   }
 
@@ -778,12 +725,8 @@ class ChatListController extends State<ChatList>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // When app resumes, invalidate the filtered rooms cache and trigger a sync
-    // so push notifications show up immediately in the chat list.
     if (state == AppLifecycleState.resumed) {
-      _invalidateRoomCache();
-      // Forceer een sync zodat de chat list direct de nieuwste rooms toont.
-      // De StreamBuilder reageert op SyncStatus.finished.
+      invalidateRoomCache();
       final client = Matrix.of(context).client;
       unawaited(
         client.oneShotSync().then((_) {
@@ -796,16 +739,10 @@ class ChatListController extends State<ChatList>
     }
   }
 
-  void _invalidateRoomCache() {
-    _lastBridgeSync = DateTime(2000);
-    _lastUnreadCalc = DateTime(2000);
-    _lastMaxEventTime = 0;
-  }
-
   @override
   void didPopNext() {
     // Returning from a chat screen: refresh list immediately.
-    _invalidateRoomCache();
+    invalidateRoomCache();
     if (mounted) setState(() {});
   }
 
@@ -818,6 +755,7 @@ class ChatListController extends State<ChatList>
     _intentUriStreamSubscription?.cancel();
     scrollController.removeListener(_onScroll);
     _clientStream.close();
+    _syncSubscription?.cancel();
     searchController.dispose();
     searchFocusNode.dispose();
     _coolDown?.cancel();
