@@ -19,19 +19,15 @@ class ImageViewerView extends StatefulWidget {
 }
 
 class _ImageViewerViewState extends State<ImageViewerView> {
-  // Default physics allowing scroll
-  ScrollPhysics _pageScrollPhysics = const BouncingScrollPhysics();
+  // PageView scroll is locked as soon as any pointer goes down inside an
+  // InteractiveViewer item, and unlocked when the user is zoomed back out.
+  // This stops horizontal swipes from stealing the pinch gesture.
+  var _pageScrollLocked = false;
 
-  /// Locks the PageView scroll.
-  /// Used when the user starts pinching or is zoomed in.
   void _lockScroll(bool locked) {
-    final newPhysics = locked
-        ? const NeverScrollableScrollPhysics()
-        : const BouncingScrollPhysics();
-
-    if (_pageScrollPhysics.runtimeType != newPhysics.runtimeType) {
+    if (_pageScrollLocked != locked) {
       setState(() {
-        _pageScrollPhysics = newPhysics;
+        _pageScrollLocked = locked;
       });
     }
   }
@@ -97,8 +93,9 @@ class _ImageViewerViewState extends State<ImageViewerView> {
                 onKeyEvent: widget.controller.onKeyEvent,
                 child: PageView.builder(
                   scrollDirection: Axis.horizontal,
-                  // Apply the dynamic physics here
-                  physics: _pageScrollPhysics,
+                  physics: _pageScrollLocked
+                      ? const NeverScrollableScrollPhysics()
+                      : null,
                   controller: widget.controller.pageController,
                   itemCount: widget.controller.allEvents.length,
                   itemBuilder: (context, i) {
@@ -117,11 +114,10 @@ class _ImageViewerViewState extends State<ImageViewerView> {
                       case MessageTypes.Image:
                       case MessageTypes.Sticker:
                       default:
-                        // Use the wrapper widget to handle zoom logic
                         return _ZoomableImage(
                           event: event,
                           controller: widget.controller,
-                          onZoomStatusChanged: _lockScroll,
+                          onLockChanged: _lockScroll,
                         );
                     }
                   },
@@ -164,16 +160,15 @@ class _ImageViewerViewState extends State<ImageViewerView> {
   }
 }
 
-/// A wrapper widget to handle InteractiveViewer state and notify the parent
 class _ZoomableImage extends StatefulWidget {
   final Event event;
   final ImageViewerController controller;
-  final ValueChanged<bool> onZoomStatusChanged;
+  final ValueChanged<bool> onLockChanged;
 
   const _ZoomableImage({
     required this.event,
     required this.controller,
-    required this.onZoomStatusChanged,
+    required this.onLockChanged,
   });
 
   @override
@@ -181,51 +176,51 @@ class _ZoomableImage extends StatefulWidget {
 }
 
 class _ZoomableImageState extends State<_ZoomableImage> {
-  late final TransformationController _transformController;
-
-  @override
-  void initState() {
-    super.initState();
-    _transformController = TransformationController();
-  }
+  final _transformationController = TransformationController();
 
   @override
   void dispose() {
-    _transformController.dispose();
+    _transformationController.dispose();
     super.dispose();
+  }
+
+  bool get _isZoomed {
+    final scale = _transformationController.value.getMaxScaleOnAxis();
+    return scale > 1.01;
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
     return InteractiveViewer(
-      transformationController: _transformController,
+      transformationController: _transformationController,
       minScale: 1.0,
       maxScale: 10.0,
-      // When the user puts fingers on screen, disable PageView scroll
-      onInteractionStart: (_) {
-        widget.onZoomStatusChanged(true);
-      },
-      // When interaction ends, check if we are still zoomed in
+      boundaryMargin: EdgeInsets.zero,
+      clipBehavior: Clip.none,
+      // Lock the PageView as soon as the user touches the image. This makes
+      // pinch-to-zoom reliable; if they weren't zooming, the lock is removed
+      // on interaction end.
+      onInteractionStart: (_) => widget.onLockChanged(true),
       onInteractionEnd: (details) {
         widget.controller.onInteractionEnds(details);
-
-        // Identity matrix means scale is 1.0 and offset is 0,0
-        final isZoomed = _transformController.value.row0[0] != 1.0;
-        if (!isZoomed) {
-          widget.onZoomStatusChanged(false);
-        }
+        widget.onLockChanged(_isZoomed);
       },
       child: Center(
-        child: Hero(
-          tag: widget.event.eventId,
-          child: GestureDetector(
-            onTap: () {},
-            child: MxcImage(
-              key: ValueKey(widget.event.eventId),
-              event: widget.event,
-              fit: BoxFit.contain,
-              isThumbnail: false,
-              animated: true,
+        child: SizedBox.expand(
+          child: Hero(
+            tag: widget.event.eventId,
+            child: GestureDetector(
+              onTap: () {},
+              child: MxcImage(
+                key: ValueKey(widget.event.eventId),
+                event: widget.event,
+                width: size.width,
+                height: size.height,
+                fit: BoxFit.contain,
+                isThumbnail: false,
+                animated: true,
+              ),
             ),
           ),
         ),
