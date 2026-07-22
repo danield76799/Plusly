@@ -28,6 +28,21 @@ class ChatAppBarTitle extends StatelessWidget {
       );
     }
     final centerTitle = AppSettings.enableAppBarCenterTitle.value;
+    final displayName = controller.thread == null
+        ? room.getLocalizedDisplayname(MatrixLocals(L10n.of(context)))
+        : '${controller.thread!.rootEvent.senderFromMemoryOrFallback.displayName ?? controller.thread!.rootEvent.senderId}: ${controller.thread!.rootEvent.text}';
+    final avatar = controller.thread == null
+        ? Avatar(
+            mxContent: room.avatar,
+            name: room.getLocalizedDisplayname(MatrixLocals(L10n.of(context))),
+            size: centerTitle ? 28 : 32,
+          )
+        : Icon(
+            Icons.chat_bubble_outline,
+            color: Theme.of(context).colorScheme.onSurface.withAlpha(200),
+            size: centerTitle ? 18 : 20,
+          );
+
     return InkWell(
       hoverColor: Colors.transparent,
       splashColor: Colors.transparent,
@@ -57,30 +72,11 @@ class ChatAppBarTitle extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Hero(
-                      tag: 'content_banner',
-                      child: controller.thread == null
-                          ? Avatar(
-                              mxContent: room.avatar,
-                              name: room.getLocalizedDisplayname(
-                                MatrixLocals(L10n.of(context)),
-                              ),
-                              size: 28,
-                            )
-                          : Icon(
-                              Icons.chat_bubble_outline,
-                              color: Theme.of(context).colorScheme.onSurface.withAlpha(200),
-                              size: 18,
-                            ),
-                    ),
+                    Hero(tag: 'content_banner', child: avatar),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
-                        controller.thread == null
-                            ? room.getLocalizedDisplayname(
-                                MatrixLocals(L10n.of(context)),
-                              )
-                            : '${controller.thread!.rootEvent.senderFromMemoryOrFallback.displayName ?? controller.thread!.rootEvent.senderId}: ${controller.thread!.rootEvent.text}',
+                        displayName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
@@ -89,220 +85,121 @@ class ChatAppBarTitle extends StatelessWidget {
                     ),
                   ],
                 ),
-                StreamBuilder(
-                  stream: room.client.onSyncStatus.stream,
-                  builder: (context, snapshot) {
-                    final status =
-                        room.client.onSyncStatus.value ??
-                        const SyncStatusUpdate(SyncStatus.waitingForResponse);
-                    final hide =
-                        FluffyThemes.isColumnMode(context) ||
-                        (room.client.onSync.value != null &&
-                            status.status != SyncStatus.error &&
-                            room.client.prevBatch != null);
-                    return AnimatedSize(
-                      duration: FluffyThemes.animationDuration,
-                      child: hide
-                          ? PresenceBuilder(
-                              userId: room.directChatMatrixID,
-                              builder: (context, presence) {
-                                final lastActiveTimestamp =
-                                    presence?.lastActiveTimestamp;
-                                final style = Theme.of(
-                                  context,
-                                ).textTheme.bodySmall?.copyWith(fontSize: 11);
-                                if (presence?.currentlyActive == true) {
-                                  return OverflowMarquee(
-                                    text:
-                                        "${L10n.of(context).currentlyActive}${presence?.statusMsg != null ? " | ${presence?.statusMsg}" : ""}",
-                                    style: style!,
-                                    velocity: 20.0,
-                                    height: (style.fontSize ?? 11) + 2,
-                                  );
-                                }
-                                if (lastActiveTimestamp != null) {
-                                  return OverflowMarquee(
-                                    text:
-                                        L10n.of(context).lastActiveAgo(
-                                          lastActiveTimestamp
-                                              .localizedTimeShort(context),
-                                        ) +
-                                        (presence?.statusMsg != null
-                                            ? " | ${presence?.statusMsg}"
-                                            : ""),
-                                    style: style!,
-                                    velocity: 20.0,
-                                    height: (style.fontSize ?? 11) + 2,
-                                  );
-                                }
-                                return const SizedBox.shrink();
-                              },
-                            )
-                          : Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox.square(
-                                  dimension: 10,
-                                  child: CircularProgressIndicator.adaptive(
-                                    strokeWidth: 1,
-                                    value: status.progress,
-                                    valueColor: status.error != null
-                                        ? AlwaysStoppedAnimation<Color>(
-                                            Theme.of(context).colorScheme.error,
-                                          )
-                                        : null,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    status.calcLocalizedString(context),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: status.error != null
-                                          ? Theme.of(context).colorScheme.error
-                                          : null,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                    );
-                  },
-                ),
+                _SyncStatusText(room: room, centerTitle: centerTitle),
               ],
             )
           : Row(
               children: [
-                Hero(
-                  tag: 'content_banner',
-                  child: controller.thread == null
-                      ? Avatar(
-                          mxContent: room.avatar,
-                          name: room.getLocalizedDisplayname(
-                            MatrixLocals(L10n.of(context)),
-                          ),
-                          size: 32,
-                        )
-                      : Icon(
-                          Icons.chat_bubble_outline,
-                          color: Theme.of(context).colorScheme.onSurface.withAlpha(200),
-                          size: 20,
-                        ),
-                ),
+                Hero(tag: 'content_banner', child: avatar),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        controller.thread == null
-                            ? room.getLocalizedDisplayname(
-                                MatrixLocals(L10n.of(context)),
-                              )
-                            : '${controller.thread!.rootEvent.senderFromMemoryOrFallback.displayName ?? controller.thread!.rootEvent.senderId}: ${controller.thread!.rootEvent.text}',
+                        displayName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(fontSize: 16),
                       ),
-                      StreamBuilder(
-                        stream: room.client.onSyncStatus.stream,
-                        builder: (context, snapshot) {
-                          final status =
-                              room.client.onSyncStatus.value ??
-                              const SyncStatusUpdate(
-                                SyncStatus.waitingForResponse,
-                              );
-                          final hide =
-                              FluffyThemes.isColumnMode(context) ||
-                              (room.client.onSync.value != null &&
-                                  status.status != SyncStatus.error &&
-                                  room.client.prevBatch != null);
-                          return AnimatedSize(
-                            duration: FluffyThemes.animationDuration,
-                            child: hide
-                                ? PresenceBuilder(
-                                    userId: room.directChatMatrixID,
-                                    builder: (context, presence) {
-                                      final lastActiveTimestamp =
-                                          presence?.lastActiveTimestamp;
-                                      final style = Theme.of(
-                                        context,
-                                      ).textTheme.bodySmall;
-                                      if (presence?.currentlyActive == true) {
-                                        return OverflowMarquee(
-                                          text:
-                                              "${L10n.of(context).currentlyActive}${presence?.statusMsg != null ? " | ${presence?.statusMsg}" : ""}",
-                                          style: style!,
-                                          velocity: 20.0,
-                                          height: (style.fontSize ?? 12) + 2,
-                                        );
-                                      }
-                                      if (lastActiveTimestamp != null) {
-                                        return OverflowMarquee(
-                                          text:
-                                              L10n.of(context).lastActiveAgo(
-                                                lastActiveTimestamp
-                                                    .localizedTimeShort(
-                                                      context,
-                                                    ),
-                                              ) +
-                                              (presence?.statusMsg != null
-                                                  ? " | ${presence?.statusMsg}"
-                                                  : ""),
-                                          style: style!,
-                                          velocity: 20.0,
-                                          height: (style.fontSize ?? 12) + 2,
-                                        );
-                                      }
-                                      return const SizedBox.shrink();
-                                    },
-                                  )
-                                : Row(
-                                    children: [
-                                      SizedBox.square(
-                                        dimension: 10,
-                                        child:
-                                            CircularProgressIndicator.adaptive(
-                                              strokeWidth: 1,
-                                              value: status.progress,
-                                              valueColor: status.error != null
-                                                  ? AlwaysStoppedAnimation<
-                                                      Color
-                                                    >(
-                                                      Theme.of(
-                                                        context,
-                                                      ).colorScheme.error,
-                                                    )
-                                                  : null,
-                                            ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          status.calcLocalizedString(context),
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: status.error != null
-                                                ? Theme.of(
-                                                    context,
-                                                  ).colorScheme.error
-                                                : null,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                          );
-                        },
-                      ),
+                      _SyncStatusText(room: room, centerTitle: centerTitle),
                     ],
                   ),
                 ),
               ],
             ),
+    );
+  }
+}
+
+/// Isolated sync-status subtitle. Its own StreamBuilder means the parent
+/// app-bar title (and the AnimatedSize that changes its height) does NOT
+/// rebuild on every sync status change — only this small widget does.
+class _SyncStatusText extends StatelessWidget {
+  final Room room;
+  final bool centerTitle;
+
+  const _SyncStatusText({required this.room, required this.centerTitle});
+
+  @override
+  Widget build(BuildContext context) {
+    final client = room.client;
+    return StreamBuilder<SyncStatusUpdate>(
+      stream: client.onSyncStatus.stream,
+      builder: (context, snapshot) {
+        final status = client.onSyncStatus.value ??
+            const SyncStatusUpdate(SyncStatus.waitingForResponse);
+        final hide = FluffyThemes.isColumnMode(context) ||
+            (client.onSync.value != null &&
+                status.status != SyncStatus.error &&
+                client.prevBatch != null);
+        if (hide) {
+          return PresenceBuilder(
+            userId: room.directChatMatrixID,
+            builder: (context, presence) {
+              final lastActiveTimestamp = presence?.lastActiveTimestamp;
+              final style = Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: centerTitle ? 11 : 12,
+                  );
+              if (presence?.currentlyActive == true) {
+                return OverflowMarquee(
+                  text:
+                      "${L10n.of(context).currentlyActive}${presence?.statusMsg != null ? " | ${presence?.statusMsg}" : ""}",
+                  style: style!,
+                  velocity: 20.0,
+                  height: (style.fontSize ?? (centerTitle ? 11 : 12)) + 2,
+                );
+              }
+              if (lastActiveTimestamp != null) {
+                return OverflowMarquee(
+                  text:
+                      L10n.of(context).lastActiveAgo(
+                        lastActiveTimestamp.localizedTimeShort(context),
+                      ) +
+                      (presence?.statusMsg != null
+                          ? " | ${presence?.statusMsg}"
+                          : ""),
+                  style: style!,
+                  velocity: 20.0,
+                  height: (style.fontSize ?? (centerTitle ? 11 : 12)) + 2,
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          );
+        }
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox.square(
+              dimension: 10,
+              child: CircularProgressIndicator.adaptive(
+                strokeWidth: 1,
+                value: status.progress,
+                valueColor: status.error != null
+                    ? AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.error,
+                      )
+                    : null,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                status.calcLocalizedString(context),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: centerTitle ? 11 : 12,
+                  color: status.error != null
+                      ? Theme.of(context).colorScheme.error
+                      : null,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
