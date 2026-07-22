@@ -1,98 +1,95 @@
 import 'package:flutter/material.dart';
-
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
-import 'package:Pulsly/pages/chat/chat.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
 import 'package:Pulsly/utils/date_time_extension.dart';
-import 'package:Pulsly/utils/platform_infos.dart';
-import 'package:Pulsly/utils/room_status_extension.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/list_divider.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 
 class SeenByRow extends StatelessWidget {
-  final ChatController controller;
-  const SeenByRow(this.controller, {super.key});
+  final Event event;
+  const SeenByRow({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final timeline = controller.timeline;
-    if (timeline == null) {
-      return const SizedBox.shrink();
-    }
-
-    // Get receipts for the most recent message (first event in reversed timeline = newest)
-    final lastEvent = timeline.events.isNotEmpty ? timeline.events.first : null;
-    final allReceipts = lastEvent != null
-        ? controller.room.getReceipts(timeline, eventId: lastEvent.eventId)
-        : <Receipt>[];
-    // Filter out own receipts AND sender receipts - only show OTHER people's receipts
-    final receipts = allReceipts
-        .where((r) => r.user.id != controller.room.client.userID)
-        .where((r) => r.user.id != lastEvent?.senderId)
-        .toList();
     const maxAvatars = 7;
-    return Container(
-      width: double.infinity,
-      alignment: Alignment.center,
-      child: AnimatedContainer(
-        constraints: const BoxConstraints(
-          maxWidth: FluffyThemes.columnWidth * 2.5,
-        ),
-        height: receipts.isEmpty ? 0 : 24,
-        duration: receipts.isEmpty
-            ? Duration.zero
-            : FluffyThemes.animationDuration,
-        curve: FluffyThemes.animationCurve,
-        alignment: Alignment.topRight,
-        padding: const EdgeInsets.only(left: 8, right: 8, bottom: 4),
-        child: GestureDetector(
-          onLongPress: () {
-            SeenByDialog(receipts).show(context);
-          },
-          onTap: () {
-            // single tap for desktop
-            if (!PlatformInfos.isMobile) {
-              SeenByDialog(receipts).show(context);
-            }
-          },
-          child: Wrap(
-            spacing: 4,
-            children: [
-              ...(receipts.length > maxAvatars
-                      ? receipts.sublist(0, maxAvatars)
-                      : receipts)
-                  .map(
-                    (receipt) => Avatar(
-                      mxContent: receipt.user.avatarUrl,
-                      name: receipt.user.calcDisplayname(),
-                      size: 16,
+    return StreamBuilder(
+      stream: event.room.client.onSync.stream.where(
+        (syncUpdate) =>
+            syncUpdate.rooms?.join?[event.room.id]?.ephemeral?.any(
+              (ephemeral) => ephemeral.type == 'm.receipt',
+            ) ??
+            false,
+      ),
+      builder: (context, asyncSnapshot) {
+        final seenByUsers = event.receipts
+            .map((r) => r.user)
+            .where(
+              (user) =>
+                  user.id != event.room.client.userID &&
+                  user.id != event.senderId,
+            )
+            .toList();
+        return Container(
+          width: double.infinity,
+          alignment: Alignment.center,
+          child: AnimatedContainer(
+            constraints: const BoxConstraints(
+              maxWidth: FluffyThemes.columnWidth * 2.5,
+            ),
+            height: seenByUsers.isEmpty ? 0 : 24,
+            duration: seenByUsers.isEmpty
+                ? Duration.zero
+                : FluffyThemes.animationDuration,
+            curve: FluffyThemes.animationCurve,
+            alignment: event.senderId == Matrix.of(context).client.userID
+                ? Alignment.topRight
+                : Alignment.topLeft,
+            padding: const EdgeInsets.only(
+              bottom: 4,
+              top: 1,
+              left: 8,
+              right: 8,
+            ),
+            child: Wrap(
+              spacing: 4,
+              children: [
+                ...(seenByUsers.length > maxAvatars
+                        ? seenByUsers.sublist(0, maxAvatars)
+                        : seenByUsers)
+                    .map(
+                      (user) => Avatar(
+                        mxContent: user.avatarUrl,
+                        name: user.calcDisplayname(),
+                        size: 16,
+                      ),
                     ),
-                  ),
-              if (receipts.length > maxAvatars)
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: Material(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(32),
-                    child: Center(
-                      child: Text(
-                        '+${receipts.length - maxAvatars}',
-                        style: const TextStyle(fontSize: 9),
+                if (seenByUsers.length > maxAvatars)
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: Material(
+                      color: theme.colorScheme.surface,
+                      borderRadius: BorderRadius.circular(32),
+                      child: Center(
+                        child: Text(
+                          '+${seenByUsers.length - maxAvatars}',
+                          style: const TextStyle(fontSize: 9),
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -114,7 +111,7 @@ class SeenByDialog extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(8),
         child: Material(
-          clipBehavior: .hardEdge,
+          clipBehavior: Clip.hardEdge,
           color: theme.colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(AppConfig.borderRadius),
           child: ListView.builder(

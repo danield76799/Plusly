@@ -16,18 +16,14 @@ class ReplyDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
-      height: controller.editEvent != null || controller.replyEvent != null
-          ? ReplyDisplay.height
-          : 0,
-      clipBehavior: Clip.hardEdge,
-      decoration: BoxDecoration(),
+    final show = controller.editEvent != null || controller.replyEvent != null;
+    if (!show) return const SizedBox.shrink();
+    return SizedBox(
+      height: ReplyDisplay.height,
       child: Row(
         children: <Widget>[
           Padding(
-            padding: const .symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: IconButton(
               tooltip: L10n.of(context).close,
               icon: const Icon(Icons.close),
@@ -45,7 +41,7 @@ class ReplyDisplay extends StatelessWidget {
                   ),
           ),
           Padding(
-            padding: const .symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: IconButton(
               tooltip: L10n.of(context).mention,
               icon: controller.replyMention

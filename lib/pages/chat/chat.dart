@@ -527,11 +527,28 @@ class ChatController extends State<ChatPageWithRoom>
     // until the chat is reopened.
     unawaited(updateThreads());
     if (!mounted) return;
+    // Only rebuild if the timeline actually changed. The SDK fires onUpdate
+    // on every sync ping even when nothing new arrived; rebuilding then
+    // re-triggers the AnimatedContainers in the input row (ReplyDisplay,
+    // SeenByRow) and makes the bottom of the chat jump on every sync.
+    final events = timeline?.events;
+    final newCount = events?.length ?? 0;
+    final newLastId = events != null && newCount > 0
+        ? events.first.eventId
+        : null;
+    if (_lastViewCount == newCount && _lastViewLastId == newLastId) {
+      return;
+    }
+    _lastViewCount = newCount;
+    _lastViewLastId = newLastId;
     setState(() {
       firstUpdateReceived = true;
       _timelineTick++;
     });
   }
+
+  int _lastViewCount = -1;
+  String? _lastViewLastId;
 
   Future<void> updateThreads() async {
     if (timeline?.events == null || !mounted) return;

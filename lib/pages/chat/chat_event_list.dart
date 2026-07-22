@@ -111,7 +111,7 @@ class ChatEventList extends StatelessWidget {
             builder: (context, height, _) => Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SeenByRow(controller),
+                SeenByRow(event: timeline.events.first),
                 SizedBox(height: height + 8),
               ],
             ),
