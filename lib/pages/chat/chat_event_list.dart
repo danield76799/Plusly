@@ -108,7 +108,13 @@ class ChatEventList extends StatelessWidget {
         SliverToBoxAdapter(
           child: ValueListenableBuilder<double>(
             valueListenable: controller.inputBarHeight,
-            builder: (context, height, _) => SizedBox(height: height + 8),
+            builder: (context, height, _) => Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (events.isNotEmpty) SeenByRow(event: events.first),
+                SizedBox(height: height + 8),
+              ],
+            ),
           ),
         ),
         SliverPadding(
