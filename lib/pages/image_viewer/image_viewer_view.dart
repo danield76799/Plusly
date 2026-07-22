@@ -93,10 +93,7 @@ class ImageViewerView extends StatelessWidget {
                       case MessageTypes.Image:
                       case MessageTypes.Sticker:
                       default:
-                        // Plain InteractiveViewer — no TransformationController,
-                        // no setState during interaction, no scroll locking.
-                        // The inner GestureDetector absorbs taps so the outer
-                        // GestureDetector doesn't close the viewer.
+                        final size = MediaQuery.sizeOf(context);
                         return InteractiveViewer(
                           minScale: 1.0,
                           maxScale: 10.0,
@@ -109,6 +106,8 @@ class ImageViewerView extends StatelessWidget {
                                 child: MxcImage(
                                   key: ValueKey(event.eventId),
                                   event: event,
+                                  width: size.width,
+                                  height: size.height,
                                   fit: BoxFit.contain,
                                   isThumbnail: false,
                                   animated: true,
