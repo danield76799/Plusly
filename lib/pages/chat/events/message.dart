@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -88,6 +87,7 @@ class _MessageState extends State<Message> {
 
   // Cached futures to avoid re-creating them on every build
   late Future<User?> _senderUserFuture;
+  Future<Event?>? _replyEventFuture;
   Future<User?>? _threadSenderFuture;
 
   bool loadMedia = false;
@@ -118,6 +118,7 @@ class _MessageState extends State<Message> {
 
   void _initFutures() {
     _senderUserFuture = fetchSenderUser();
+    _initReplyFuture();
     _initThreadFuture();
   }
 
@@ -128,6 +129,14 @@ class _MessageState extends State<Message> {
     }
     // we don't render avatar/displayname for own messages
     return User(client.userID!, room: widget.event.room);
+  }
+
+  void _initReplyFuture() {
+    if (widget.event.inReplyToEventId(includingFallback: false) != null) {
+      _replyEventFuture = widget.event.getReplyEvent(widget.timeline);
+    } else {
+      _replyEventFuture = null;
+    }
   }
 
   void _initThreadFuture() {
@@ -263,18 +272,6 @@ class _MessageState extends State<Message> {
     final showTimestamp = !nextEventSameSender || nextEventDifferentMinute;
 
     final displayEvent = event.getDisplayEvent(timeline);
-
-    // Sync lookup of the reply target — avoids an async FutureBuilder that
-    // reloads on every list rebuild and makes the reply quote bar pop in
-    // (shifting the bubble). Most replies reference an earlier event that
-    // is already in the loaded timeline, so this resolves instantly.
-    final inReplyTo = event.inReplyToEventId(includingFallback: false);
-    final Event? _replyEvent = inReplyTo != null
-        ? timeline.events.firstWhereOrNull(
-            (e) => e.eventId == inReplyTo,
-          )
-        : null;
-    final bool hasReply = _replyEvent != null;
     const hardCorner = Radius.circular(4);
     const roundedCorner = Radius.circular(AppConfig.borderRadius);
     final borderRadius = BorderRadius.only(
@@ -487,7 +484,7 @@ class _MessageState extends State<Message> {
                                 ),
                                 constraints: BoxConstraints(
                                   maxWidth:
-                                      (hasReply
+                                      (_replyEventFuture != null
                                           ? _calculateMediaWidth(displayEvent)
                                           : null) ??
                                       MediaQuery.sizeOf(context).width * 0.75,
@@ -497,24 +494,27 @@ class _MessageState extends State<Message> {
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    if (hasReply)
-                                      Builder(
-                                        builder: (BuildContext context) {
-                                          final replyEvent = _replyEvent
-                                              ?? Event(
-                                                  eventId: event
-                                                          .inReplyToEventId() ??
-                                                      '\$fake_event_id',
-                                                  content: {
-                                                    'msgtype': 'm.text',
-                                                    'body': '...',
-                                                  },
-                                                  senderId: event.senderId,
-                                                  type: 'm.room.message',
-                                                  room: event.room,
-                                                  status: EventStatus.sent,
-                                                  originServerTs: DateTime.now(),
-                                                );
+                                    if (_replyEventFuture != null)
+                                      FutureBuilder<Event?>(
+                                        future: _replyEventFuture,
+                                        builder: (BuildContext context, snapshot) {
+                                          final replyEvent =
+                                              snapshot.hasData
+                                                  ? snapshot.data!
+                                                  : Event(
+                                                      eventId: event
+                                                              .inReplyToEventId() ??
+                                                          '\$fake_event_id',
+                                                      content: {
+                                                        'msgtype': 'm.text',
+                                                        'body': '...',
+                                                      },
+                                                      senderId: event.senderId,
+                                                      type: 'm.room.message',
+                                                      room: event.room,
+                                                      status: EventStatus.sent,
+                                                      originServerTs: DateTime.now(),
+                                                    );
                                           return Padding(
                                             padding: const EdgeInsets.only(
                                               left: 16,

@@ -20,6 +20,7 @@ import 'package:Pulsly/pages/chat/encryption_button.dart';
 import 'package:Pulsly/pages/chat/jitsi_popup_button.dart';
 import 'package:Pulsly/pages/chat/pinned_events.dart';
 import 'package:Pulsly/pages/chat/reply_display.dart';
+import 'package:Pulsly/pages/chat/seen_by_row.dart';
 import 'package:Pulsly/pages/dialer/back_to_call_button.dart';
 import 'package:Pulsly/utils/url_launcher.dart';
 import 'package:Pulsly/widgets/avatar.dart';
@@ -715,6 +716,17 @@ class ChatView extends StatelessWidget {
                                             : Column(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
+                                                  if (controller
+                                                          .timeline
+                                                          ?.events
+                                                          .isNotEmpty ==
+                                                      true)
+                                                    SeenByRow(
+                                                      event: controller
+                                                          .timeline!
+                                                          .events
+                                                          .first,
+                                                    ),
                                                   ReplyDisplay(controller),
                                                   ChatInputRow(controller),
                                                   ChatEmojiPicker(controller),
