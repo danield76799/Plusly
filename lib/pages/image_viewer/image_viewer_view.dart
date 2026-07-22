@@ -190,6 +190,7 @@ class _ZoomableImageState extends State<_ZoomableImage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
     return InteractiveViewer(
       transformationController: _transformationController,
       minScale: 1.0,
@@ -209,6 +210,8 @@ class _ZoomableImageState extends State<_ZoomableImage> {
               child: MxcImage(
                 key: ValueKey(widget.event.eventId),
                 event: widget.event,
+                width: size.width,
+                height: size.height,
                 fit: BoxFit.contain,
                 isThumbnail: false,
                 animated: true,
