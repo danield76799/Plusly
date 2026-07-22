@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
 
@@ -11,6 +10,7 @@ import 'package:Pulsly/pages/chat/events/html_message.dart';
 import 'package:Pulsly/pages/image_viewer/image_viewer.dart';
 import 'package:Pulsly/utils/size_string.dart';
 import 'package:Pulsly/utils/url_launcher.dart';
+import 'package:Pulsly/widgets/blur_hash.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 
 class ImageBubble extends StatelessWidget {
@@ -55,7 +55,6 @@ class ImageBubble extends StatelessWidget {
   double get _effectiveImageWidth => imageWidth ?? width;
 
   double get _aspectRatio {
-    // Get image dimensions from event metadata
     final infoMap = event.infoMap;
     final imageWidth = infoMap['w'] as int?;
     final imageHeight = infoMap['h'] as int?;
@@ -64,27 +63,10 @@ class ImageBubble extends StatelessWidget {
         imageHeight != null &&
         imageWidth > 0 &&
         imageHeight > 0) {
-      // Return aspect ratio (width / height)
       return imageWidth / imageHeight;
     }
 
-    // Fallback to square aspect ratio if metadata is not available
     return 1.0;
-  }
-
-  Widget _buildPlaceholder(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Container(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          child: const Center(
-            child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-          ),
-        );
-      },
-    );
   }
 
   Widget _buildUnloaded(BuildContext context) {
@@ -104,7 +86,7 @@ class ImageBubble extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onLoadMedia,
                 child: Row(
-                  mainAxisSize: .min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.image),
                     const SizedBox(width: 12),
@@ -123,23 +105,10 @@ class ImageBubble extends StatelessWidget {
     );
   }
 
-  void _onTap(BuildContext context) {
-    if (!loadMedia) return;
-    if (onTap != null) {
-      onTap!();
-      return;
-    }
-    if (!tapToView) return;
-    showDialog(
-      context: context,
-      useRootNavigator: false,
-      builder: (_) =>
-          ImageViewer(event, timeline: timeline, outerContext: context),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     var borderRadius =
         this.borderRadius ?? BorderRadius.circular(AppConfig.borderRadius);
 
@@ -169,47 +138,59 @@ class ImageBubble extends StatelessWidget {
           constraints: BoxConstraints(maxWidth: width),
           child: AspectRatio(
             aspectRatio: _aspectRatio,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    // Transparent: no dead colored bar behind the image.
-                    color: event.messageType == MessageTypes.Sticker
-                        ? Colors.transparent
-                        : Colors.transparent,
-                    borderRadius: borderRadius,
-                  ),
-                  clipBehavior: Clip.hardEdge,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => _onTap(context),
-                      child: Hero(
-                        tag: event.eventId,
-                        child: loadMedia
-                            ? MxcImage(
-                                event: event,
-                                width: _effectiveImageWidth,
-                                fit: fit,
-                                animated: animated,
-                                isThumbnail: thumbnailOnly,
-                                // Stable per-event cache key so the shared in-memory
-                                // LRU survives widget rebuilds / off-screen disposal
-                                // while scrolling. Without it every re-render reloads
-                                // the thumbnail from disk.
-                                cacheKey:
-                                    '${event.eventId}_thumb_${_effectiveImageWidth.toInt()}',
-                                placeholder: event.messageType == MessageTypes.Sticker
-                                    ? null
-                                    : _buildPlaceholder,
-                              )
-                            : _buildUnloaded(context),
-                      ),
-                    ),
-                  ),
+            child: Material(
+              color: Colors.transparent,
+              clipBehavior: Clip.hardEdge,
+              shape: RoundedRectangleBorder(
+                borderRadius: borderRadius,
+                side: BorderSide(
+                  color: event.messageType == MessageTypes.Sticker
+                      ? Colors.transparent
+                      : theme.dividerColor,
                 ),
-              ],
+              ),
+              child: InkWell(
+                onTap: loadMedia ? () {
+                  if (onTap != null) {
+                    onTap!();
+                    return;
+                  }
+                  if (!tapToView) return;
+                  showDialog(
+                    context: context,
+                    useRootNavigator: false,
+                    builder: (_) =>
+                        ImageViewer(event, timeline: timeline, outerContext: context),
+                  );
+                } : null,
+                borderRadius: borderRadius,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Hero(
+                      tag: event.eventId,
+                      child: loadMedia
+                          ? MxcImage(
+                              event: event,
+                              width: _effectiveImageWidth,
+                              height: height,
+                              fit: fit,
+                              animated: animated,
+                              isThumbnail: thumbnailOnly,
+                              placeholder: event.messageType == MessageTypes.Sticker
+                                  ? null
+                                  : (context) => _ImageBubblePlaceholder(
+                                        event: event,
+                                        width: _effectiveImageWidth,
+                                        height: height,
+                                        fit: fit,
+                                      ),
+                            )
+                          : _buildUnloaded(context),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -275,6 +256,36 @@ class ImageBubble extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _ImageBubblePlaceholder extends StatelessWidget {
+  final Event event;
+  final double width, height;
+  final BoxFit fit;
+
+  const _ImageBubblePlaceholder({
+    required this.event,
+    required this.width,
+    required this.height,
+    required this.fit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final blurHashString =
+        event.infoMap.tryGet<String>('xyz.amorgan.blurhash') ??
+        'LEHV6nWB2yk8pyo0adR*.7kCMdnj';
+    return SizedBox(
+      width: width,
+      height: height,
+      child: BlurHash(
+        blurhash: blurHashString,
+        width: width,
+        height: height,
+        fit: fit,
+      ),
     );
   }
 }
