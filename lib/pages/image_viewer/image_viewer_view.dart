@@ -9,10 +9,20 @@ import 'package:Pulsly/widgets/hover_builder.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 import 'image_viewer.dart';
 
-class ImageViewerView extends StatelessWidget {
+class ImageViewerView extends StatefulWidget {
   final ImageViewerController controller;
 
   const ImageViewerView(this.controller, {super.key});
+
+  @override
+  State<ImageViewerView> createState() => _ImageViewerViewState();
+}
+
+class _ImageViewerViewState extends State<ImageViewerView> {
+  // PageView physics is locked only while the user is actually zoomed in.
+  // This keeps single-finger swipes working for paging and two-finger pinches
+  // working for zoom, without them fighting each other.
+  var _pageScrollLocked = false;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +49,7 @@ class ImageViewerView extends StatelessWidget {
             IconButton(
               style: iconButtonStyle,
               icon: const Icon(Icons.reply_outlined),
-              onPressed: controller.forwardAction,
+              onPressed: widget.controller.forwardAction,
               color: Colors.white,
               tooltip: L10n.of(context).share,
             ),
@@ -47,7 +57,7 @@ class ImageViewerView extends StatelessWidget {
             IconButton(
               style: iconButtonStyle,
               icon: const Icon(Icons.download_outlined),
-              onPressed: () => controller.saveFileAction(context),
+              onPressed: () => widget.controller.saveFileAction(context),
               color: Colors.white,
               tooltip: L10n.of(context).downloadFile,
             ),
@@ -58,7 +68,7 @@ class ImageViewerView extends StatelessWidget {
                 child: Builder(
                   builder: (context) => IconButton(
                     style: iconButtonStyle,
-                    onPressed: () => controller.shareFileAction(context),
+                    onPressed: () => widget.controller.shareFileAction(context),
                     tooltip: L10n.of(context).share,
                     color: Colors.white,
                     icon: Icon(Icons.adaptive.share_outlined),
@@ -71,52 +81,41 @@ class ImageViewerView extends StatelessWidget {
           builder: (context, hovered) => Stack(
             children: [
               KeyboardListener(
-                focusNode: controller.focusNode,
-                onKeyEvent: controller.onKeyEvent,
+                focusNode: widget.controller.focusNode,
+                onKeyEvent: widget.controller.onKeyEvent,
                 child: PageView.builder(
-                  scrollDirection: Axis.vertical,
-                  controller: controller.pageController,
-                  itemCount: controller.allEvents.length,
+                  scrollDirection: Axis.horizontal,
+                  physics: _pageScrollLocked
+                      ? const NeverScrollableScrollPhysics()
+                      : null,
+                  controller: widget.controller.pageController,
+                  itemCount: widget.controller.allEvents.length,
                   itemBuilder: (context, i) {
-                    final event = controller.allEvents[i];
+                    final event = widget.controller.allEvents[i];
                     switch (event.messageType) {
                       case MessageTypes.Video:
                         return Padding(
                           padding: const EdgeInsets.only(top: 52.0),
                           child: Center(
                             child: GestureDetector(
-                              // Ignore taps to not go back here.
                               onTap: () {},
-                              child: EventVideoPlayer(event, controller),
+                              child: EventVideoPlayer(event, widget.controller),
                             ),
                           ),
                         );
                       case MessageTypes.Image:
                       case MessageTypes.Sticker:
                       default:
-                        // FluffyChat-style: direct InteractiveViewer in the
-                        // page. No _ZoomableImage wrapper, no scroll locking
-                        // state, so pinch-to-zoom does not fight with paging.
-                        return InteractiveViewer(
-                          minScale: 1.0,
-                          maxScale: 10.0,
-                          onInteractionEnd: controller.onInteractionEnds,
-                          child: Center(
-                            child: Hero(
-                              tag: event.eventId,
-                              child: GestureDetector(
-                                // Ignore taps to not go back here.
-                                onTap: () {},
-                                child: MxcImage(
-                                  key: ValueKey(event.eventId),
-                                  event: event,
-                                  fit: BoxFit.contain,
-                                  isThumbnail: false,
-                                  animated: true,
-                                ),
-                              ),
-                            ),
-                          ),
+                        return _ZoomableImage(
+                          event: event,
+                          controller: widget.controller,
+                          onZoomChanged: (zoomed) {
+                            if (mounted) {
+                              setState(() {
+                                _pageScrollLocked = zoomed;
+                              });
+                            }
+                          },
                         );
                     }
                   },
@@ -128,30 +127,92 @@ class ImageViewerView extends StatelessWidget {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (controller.canGoBack)
+                      if (widget.controller.canGoBack)
                         Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: IconButton(
                             style: iconButtonStyle,
                             tooltip: L10n.of(context).previous,
-                            icon: const Icon(Icons.arrow_upward_outlined),
-                            onPressed: controller.prevImage,
+                            icon: const Icon(Icons.arrow_back_outlined),
+                            onPressed: widget.controller.prevImage,
                           ),
                         ),
-                      if (controller.canGoNext)
+                      if (widget.controller.canGoNext)
                         Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: IconButton(
                             style: iconButtonStyle,
                             tooltip: L10n.of(context).next,
-                            icon: const Icon(Icons.arrow_downward_outlined),
-                            onPressed: controller.nextImage,
+                            icon: const Icon(Icons.arrow_forward_outlined),
+                            onPressed: widget.controller.nextImage,
                           ),
                         ),
                     ],
                   ),
                 ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ZoomableImage extends StatefulWidget {
+  final Event event;
+  final ImageViewerController controller;
+  final ValueChanged<bool> onZoomChanged;
+
+  const _ZoomableImage({
+    required this.event,
+    required this.controller,
+    required this.onZoomChanged,
+  });
+
+  @override
+  State<_ZoomableImage> createState() => _ZoomableImageState();
+}
+
+class _ZoomableImageState extends State<_ZoomableImage> {
+  final _transformationController = TransformationController();
+
+  @override
+  void dispose() {
+    _transformationController.dispose();
+    super.dispose();
+  }
+
+  void _updateZoomState() {
+    final scale = _transformationController.value.getMaxScaleOnAxis();
+    final zoomed = scale > 1.01;
+    widget.onZoomChanged(zoomed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InteractiveViewer(
+      transformationController: _transformationController,
+      minScale: 1.0,
+      maxScale: 10.0,
+      // Track the actual zoom level on every interaction update so the PageView
+      // is only frozen while the user is genuinely zoomed in.
+      onInteractionUpdate: (_) => _updateZoomState(),
+      onInteractionEnd: (details) {
+        widget.controller.onInteractionEnds(details);
+        _updateZoomState();
+      },
+      child: Center(
+        child: Hero(
+          tag: widget.event.eventId,
+          child: GestureDetector(
+            onTap: () {},
+            child: MxcImage(
+              key: ValueKey(widget.event.eventId),
+              event: widget.event,
+              fit: BoxFit.contain,
+              isThumbnail: false,
+              animated: true,
+            ),
           ),
         ),
       ),
