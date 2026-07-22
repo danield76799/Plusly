@@ -497,6 +497,20 @@ class _MessageState extends State<Message> {
                                     if (_replyEventFuture != null)
                                       FutureBuilder<Event?>(
                                         future: _replyEventFuture,
+                                        initialData: Event(
+                                          eventId: event
+                                                  .inReplyToEventId() ??
+                                              '\$fake_event_id',
+                                          content: {
+                                            'msgtype': 'm.text',
+                                            'body': '...',
+                                          },
+                                          senderId: event.senderId,
+                                          type: 'm.room.message',
+                                          room: event.room,
+                                          status: EventStatus.sent,
+                                          originServerTs: DateTime.now(),
+                                        ),
                                         builder: (BuildContext context, snapshot) {
                                           final replyEvent =
                                               snapshot.hasData
