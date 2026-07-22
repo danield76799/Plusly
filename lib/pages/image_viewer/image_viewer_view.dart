@@ -74,7 +74,7 @@ class ImageViewerView extends StatelessWidget {
                 focusNode: controller.focusNode,
                 onKeyEvent: controller.onKeyEvent,
                 child: PageView.builder(
-                  scrollDirection: Axis.horizontal,
+                  scrollDirection: Axis.vertical,
                   controller: controller.pageController,
                   itemCount: controller.allEvents.length,
                   itemBuilder: (context, i) {
@@ -134,7 +134,7 @@ class ImageViewerView extends StatelessWidget {
                           child: IconButton(
                             style: iconButtonStyle,
                             tooltip: L10n.of(context).previous,
-                            icon: const Icon(Icons.arrow_back_outlined),
+                            icon: const Icon(Icons.arrow_upward_outlined),
                             onPressed: controller.prevImage,
                           ),
                         ),
@@ -144,7 +144,7 @@ class ImageViewerView extends StatelessWidget {
                           child: IconButton(
                             style: iconButtonStyle,
                             tooltip: L10n.of(context).next,
-                            icon: const Icon(Icons.arrow_forward_outlined),
+                            icon: const Icon(Icons.arrow_downward_outlined),
                             onPressed: controller.nextImage,
                           ),
                         ),
