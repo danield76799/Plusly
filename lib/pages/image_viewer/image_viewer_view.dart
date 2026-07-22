@@ -203,19 +203,16 @@ class _ZoomableImageState extends State<_ZoomableImage> {
       },
       child: Center(
         child: SizedBox.expand(
-          child: Hero(
-            tag: widget.event.eventId,
-            child: GestureDetector(
-              onTap: () {},
-              child: MxcImage(
-                key: ValueKey(widget.event.eventId),
-                event: widget.event,
-                width: size.width,
-                height: size.height,
-                fit: BoxFit.contain,
-                isThumbnail: false,
-                animated: true,
-              ),
+          child: GestureDetector(
+            onTap: () {},
+            child: MxcImage(
+              key: ValueKey(widget.event.eventId),
+              event: widget.event,
+              width: size.width,
+              height: size.height,
+              fit: BoxFit.contain,
+              isThumbnail: false,
+              animated: true,
             ),
           ),
         ),
