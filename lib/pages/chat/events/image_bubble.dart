@@ -104,7 +104,7 @@ class ImageBubble extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: onLoadMedia,
                 child: Row(
-                  mainAxisSize: .min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.image),
                     const SizedBox(width: 12),
@@ -130,11 +130,18 @@ class ImageBubble extends StatelessWidget {
       return;
     }
     if (!tapToView) return;
-    showDialog(
-      context: context,
-      useRootNavigator: false,
-      builder: (_) =>
-          ImageViewer(event, timeline: timeline, outerContext: context),
+
+    // Push a full-screen page (FluffyChat-style) instead of a dialog so the
+    // image viewer owns the whole screen and InteractiveViewer can work without
+    // layout/focus fights.
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ImageViewer(
+          event,
+          timeline: timeline,
+          outerContext: context,
+        ),
+      ),
     );
   }
 
@@ -174,10 +181,7 @@ class ImageBubble extends StatelessWidget {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    // Transparent: no dead colored bar behind the image.
-                    color: event.messageType == MessageTypes.Sticker
-                        ? Colors.transparent
-                        : Colors.transparent,
+                    color: Colors.transparent,
                     borderRadius: borderRadius,
                   ),
                   clipBehavior: Clip.hardEdge,
@@ -194,10 +198,6 @@ class ImageBubble extends StatelessWidget {
                                 fit: fit,
                                 animated: animated,
                                 isThumbnail: thumbnailOnly,
-                                // Stable per-event cache key so the shared in-memory
-                                // LRU survives widget rebuilds / off-screen disposal
-                                // while scrolling. Without it every re-render reloads
-                                // the thumbnail from disk.
                                 cacheKey:
                                     '${event.eventId}_thumb_${_effectiveImageWidth.toInt()}',
                                 placeholder: event.messageType == MessageTypes.Sticker
