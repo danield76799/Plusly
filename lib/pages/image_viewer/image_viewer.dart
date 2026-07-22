@@ -51,6 +51,7 @@ class ImageViewerController extends State<ImageViewer> {
     );
     if (index < 0) index = 0;
     pageController = PageController(initialPage: index);
+    // Preload adjacent images for instant swiping
     WidgetsBinding.instance.addPostFrameCallback((_) => _preloadAdjacent());
   }
 
@@ -95,13 +96,16 @@ class ImageViewerController extends State<ImageViewer> {
 
   bool get canGoBack => _index > 0;
 
+  /// Preload adjacent images for instant swiping
   void _preloadAdjacent() {
     final currentIndex = _index;
+    // Preload next image
     if (currentIndex < allEvents.length - 1) {
       unawaited(allEvents[currentIndex + 1].downloadAndDecryptAttachment(
         getThumbnail: false,
       ));
     }
+    // Preload previous image
     if (currentIndex > 0) {
       unawaited(allEvents[currentIndex - 1].downloadAndDecryptAttachment(
         getThumbnail: false,
@@ -109,15 +113,30 @@ class ImageViewerController extends State<ImageViewer> {
     }
   }
 
+  /// Forward this image to another room.
   void forwardAction() => showScaffoldDialog(
     context: context,
     builder: (context) =>
         ShareScaffoldDialog(items: [ContentShareItem(currentEvent.content)]),
   );
 
+  /// Save this file with a system call.
   void saveFileAction(BuildContext context) => currentEvent.saveFile(context);
 
+  /// Save this file with a system call.
   void shareFileAction(BuildContext context) => currentEvent.shareFile(context);
+
+  static const maxScaleFactor = 1.5;
+
+  /// Go back if user swiped it away
+  void onInteractionEnds(ScaleEndDetails endDetails) {
+    if (PlatformInfos.usesTouchscreen == false) {
+      if (endDetails.velocity.pixelsPerSecond.dy >
+          MediaQuery.sizeOf(context).height * maxScaleFactor) {
+        Navigator.of(context, rootNavigator: false).pop();
+      }
+    }
+  }
 
   @override
   void dispose() {
