@@ -477,6 +477,13 @@ class ChatController extends State<ChatPageWithRoom>
 
   bool firstUpdateReceived = false;
 
+  // Bumped on every timeline update so the chat list always rebuilds.
+  // The timeline.events list mutates in place, so a plain setState is not
+  // enough for ChatEventList to notice the change. ChatEventList reads this
+  // tick in its build method, forcing a fresh render on every update.
+  int get timelineTick => _timelineTick;
+  int _timelineTick = 0;
+
   Future<void> updateView() async {
     if (!mounted) return;
     setReadMarker();
@@ -484,6 +491,7 @@ class ChatController extends State<ChatPageWithRoom>
     if (!mounted) return;
     setState(() {
       firstUpdateReceived = true;
+      _timelineTick++;
     });
   }
 

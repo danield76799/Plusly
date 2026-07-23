@@ -30,6 +30,12 @@ class ChatEventList extends StatelessWidget {
     if (timeline == null) {
       return const Center(child: CircularProgressIndicator.adaptive());
     }
+
+    // Touch timelineTick so any timeline mutation (e.g. a sent message)
+    // forces this list to rebuild. timeline.events mutates in place, so
+    // Flutter would otherwise treat the update as a no-op.
+    // ignore: unused_local_variable
+    final tick = controller.timelineTick;
     final theme = Theme.of(context);
 
     final colors = [theme.secondaryBubbleColor, theme.bubbleColor];
