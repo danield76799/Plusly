@@ -126,30 +126,23 @@ class ChatEventList extends StatelessWidget {
                 }
 
                 if (i == events.length + 1) {
+                  // Auto-request history when within 50 events of the top,
+                  // matching FluffyChat behaviour — no "Load More" button needed.
                   if (timeline.canRequestHistory && !timeline.isRequestingHistory) {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (controller.mounted) controller.requestHistory();
-                    });
-                    final hasScrollBanner =
-                        controller.scrollUpBannerEventId != null;
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        top: hasScrollBanner ? 72.0 : 0.0,
-                      ),
-                      child: Center(
-                        child: ElevatedButton(
-                          onPressed: controller.requestHistory,
-                          child: timeline.isRequestingHistory
-                              ? const LinearProgressIndicator()
-                              : Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.arrow_upward),
-                                    const SizedBox(width: 5),
-                                    Text(L10n.of(context).loadMore),
-                                  ],
-                                ),
-                        ),
+                    final visibleIndex = timeline.events.lastIndexWhere(
+                      (event) => event.isVisibleInGui,
+                    );
+                    if (visibleIndex > timeline.events.length - 50) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (controller.mounted) controller.requestHistory();
+                      });
+                    }
+                  }
+                  if (timeline.isRequestingHistory) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 16.0),
+                        child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                       ),
                     );
                   }
