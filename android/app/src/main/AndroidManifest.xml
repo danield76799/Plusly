@@ -30,7 +30,11 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE"
         android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Required so the in-app updater can download and install APK updates. -->
+    <!-- Required so the in-app updater can download and install APK updates.
+         This permission is declared in the main manifest, but we keep it only
+         for the GitHub/apk build. It is removed for the Play Store release build
+         via tools:node="remove" in src/release/AndroidManifest.xml because Google
+         Play rejects it as not core to the app purpose. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- FIX #31: For incoming calls on lock screen (Android 14+) -->
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />

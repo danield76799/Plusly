@@ -91,6 +91,18 @@ android {
         }
     }
 
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("github") {
+            dimension = "distribution"
+            // Keep REQUEST_INSTALL_PACKAGES for in-app APK updates.
+        }
+        create("playstore") {
+            dimension = "distribution"
+            // REQUEST_INSTALL_PACKAGES is removed via src/playstore/AndroidManifest.xml.
+        }
+    }
+
     // 16KB page size support — extract native libs uncompressed
     packaging {
         jniLibs {
