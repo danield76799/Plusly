@@ -1,12 +1,12 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/image_viewer/video_player.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
-import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
+import 'package:Pulsly/widgets/hover_builder.dart';
+import 'package:Pulsly/widgets/mxc_image.dart';
 import 'image_viewer.dart';
 
 class ImageViewerView extends StatelessWidget {
@@ -65,66 +65,19 @@ class ImageViewerView extends StatelessWidget {
             ),
         ],
       ),
-      body: _RawZoomableImage(event: controller.allEvents[controller.initialIndex]),
-    );
-  }
-}
-
-class _RawZoomableImage extends StatefulWidget {
-  final Event event;
-
-  const _RawZoomableImage({required this.event});
-
-  @override
-  State<_RawZoomableImage> createState() => _RawZoomableImageState();
-}
-
-class _RawZoomableImageState extends State<_RawZoomableImage> {
-  Uint8List? _bytes;
-  bool _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    try {
-      final data = await widget.event.downloadAndDecryptAttachment(
-        getThumbnail: false,
-      );
-      if (mounted) {
-        setState(() {
-          _bytes = data.bytes;
-          _loading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-      );
-    }
-    if (_bytes == null || _bytes!.isEmpty) {
-      return const Center(
-        child: Icon(Icons.broken_image_outlined, size: 64, color: Colors.white54),
-      );
-    }
-    // BARE MINIMUM: InteractiveViewer + Image.memory. Nothing else.
-    return InteractiveViewer(
-      minScale: 1.0,
-      maxScale: 10.0,
-      child: Image.memory(
-        _bytes!,
-        fit: BoxFit.contain,
-        gaplessPlayback: true,
+      // Layer 1: bare InteractiveViewer + MxcImage (no PageView, no outer GestureDetector)
+      body: InteractiveViewer(
+        minScale: 1.0,
+        maxScale: 10.0,
+        child: Center(
+          child: MxcImage(
+            key: ValueKey(controller.allEvents[controller.initialIndex].eventId),
+            event: controller.allEvents[controller.initialIndex],
+            fit: BoxFit.contain,
+            isThumbnail: false,
+            animated: true,
+          ),
+        ),
       ),
     );
   }
