@@ -554,7 +554,7 @@ class _MessageState extends State<Message> {
                                         },
                                       ),
                                     Padding(
-                                      padding: EdgeInsets.only(
+                                      padding: const EdgeInsets.only(
                                         top: 0,
                                       ),
                                       child: MessageContent(
@@ -575,16 +575,6 @@ class _MessageState extends State<Message> {
                                             : true,
                                       ),
                                     ),
-                                    if (showTimestamp)
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 4.0,
-                                          ),
-                                          child: messageStatusRow,
-                                        ),
-                                      ),
                                   ],
                                 ),
                               ),
@@ -730,6 +720,20 @@ class _MessageState extends State<Message> {
               ),
             ),
           row,
+          if (showTimestamp)
+            Align(
+              alignment: ownMessage
+                  ? Alignment.centerRight
+                  : Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: 2.0,
+                  left: ownMessage ? 0 : (Avatar.defaultSize) + 12.0,
+                  right: ownMessage ? 12.0 : 0,
+                ),
+                child: messageStatusRow,
+              ),
+            ),
           if (showReactionsRow)
             Padding(
               padding: EdgeInsets.only(
