@@ -793,17 +793,28 @@ class ChatController extends State<ChatPageWithRoom>
     // Force the chat list to refresh so the room jumps to the top.
     ChatListRefreshBus.refreshForRoom(room.id);
 
-    // Scroll so the user sees their message immediately. reverse:true
-    // list: pixels==0 is newest (visual bottom). Also force a view
-    // rebuild so the optimistic placeholder (added by the matrix SDK
-    // right after sendTextEvent) lands in the list before the real
-    // server-acked event arrives, mirroring what we do for media.
+    // Make sure the sent bubble shows up immediately. The Matrix SDK appends
+    // the local echo asynchronously (after encryption), so we bump the
+    // timelineTick right away AND shortly after, mirroring how media sends
+    // force a rebuild. This is the known "timeline doesn't refresh on send"
+    // fix — do NOT remove the tick bumps.
+    updateView();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !scrollController.hasClients) return;
-      if (scrollController.position.pixels > 50) return;
-      scrollController.jumpTo(0);
+      if (!mounted) return;
+      // Scroll so the user sees their message: pixels==0 is newest (bottom)
+      // in the reversed list. Only auto-jump if already near the bottom.
+      if (scrollController.hasClients &&
+          scrollController.position.pixels <= 50) {
+        scrollController.jumpTo(0);
+      }
       updateView();
     });
+    // Second bump after the local echo has (almost certainly) landed.
+    unawaited(
+      Future.delayed(const Duration(milliseconds: 150)).then((_) {
+        if (mounted) updateView();
+      }),
+    );
   }
 
   void sendPollAction() async {
