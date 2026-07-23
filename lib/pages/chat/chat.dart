@@ -718,17 +718,32 @@ class ChatController extends State<ChatPageWithRoom>
   bool _isSending = false;
 
   Future<void> send() async {
-    if (sendController.text.trim().isEmpty) return;
+    final text = sendController.text;
+    if (text.trim().isEmpty) return;
+
+    // --- Optimistic UI (WhatsApp-style) ---
+    // Clear the composer and focus FIRST, without awaiting the network/
+    // encryption round-trip. The Matrix SDK appends a local-echo event
+    // immediately and notifies us via onNewEvent -> updateView, so the
+    // bubble shows up instantly. Only if sendTextEvent throws do we
+    // surface an error.
+    _isSending = true;
+    _clearComposer();
+    setState(() {
+      _isSending = false;
+      replyEvent = null;
+      editEvent = null;
+    });
+
     if (inputFocus.hasFocus) {
       inputFocus.unfocus();
     }
     FocusScope.of(context).requestFocus(inputFocus);
-    _isSending = true;
     _storeInputTimeoutTimer?.cancel();
     await AppSettings.store.remove('draft_$roomId');
-    final parseCommands = true;
 
-    final commandMatch = RegExp(r'^\/(\w+)').firstMatch(sendController.text);
+    final parseCommands = true;
+    final commandMatch = RegExp(r'^\\/(\w+)').firstMatch(text);
     if (commandMatch != null &&
         !sendingClient.commands.keys.contains(commandMatch[1]!.toLowerCase())) {
       final l10n = L10n.of(context);
@@ -740,38 +755,33 @@ class ChatController extends State<ChatPageWithRoom>
         cancelLabel: l10n.cancel,
       );
       if (dialogResult == OkCancelResult.cancel) return;
-      // parseCommands = false;
     }
 
-    try {
-      await room.sendTextEvent(
-        sendController.text,
-        inReplyTo: replyEvent,
-        replyMention: replyMention,
-        editEventId: editEvent?.eventId,
-        parseCommands: parseCommands,
-        threadRootEventId: thread?.rootEvent.eventId,
-        threadLastEventId:
-            thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
-      );
-    } catch (e) {
-      Logs().e('Failed to send message', e);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(L10n.of(context).errorSendingMessage)),
-        );
-      }
-      return;
-    }
-
-    if (!mounted) return;
-    _clearComposer();
-
-    setState(() {
-      _isSending = false;
-      replyEvent = null;
-      editEvent = null;
-    });
+    // Fire-and-forget. The optimistic local echo is already rendered by the
+    // SDK; we only react to failures here.
+    unawaited(
+      () async {
+        try {
+          await room.sendTextEvent(
+            text,
+            inReplyTo: replyEvent,
+            replyMention: replyMention,
+            editEventId: editEvent?.eventId,
+            parseCommands: parseCommands,
+            threadRootEventId: thread?.rootEvent.eventId,
+            threadLastEventId:
+                thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
+          );
+        } catch (e) {
+          Logs().e('Failed to send message', e);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(L10n.of(context).errorSendingMessage)),
+            );
+          }
+        }
+      }(),
+    );
 
     // Force the chat list to refresh so the room jumps to the top.
     ChatListRefreshBus.refreshForRoom(room.id);
