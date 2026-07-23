@@ -27,13 +27,6 @@ class ChatEventList extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeline = controller.timeline;
 
-    // Touch timelineTick so the parent setState (which bumps it inside
-    // ChatController.updateView) always rebuilds this list. Without this
-    // hook Flutter would happily treat the update as a no-op and the
-    // freshly sent event would never make it into the visible list.
-    // ignore: unused_local_variable
-    final tick = controller.timelineTick;
-
     if (timeline == null) {
       return const Center(child: CircularProgressIndicator.adaptive());
     }
@@ -166,46 +159,39 @@ class ChatEventList extends StatelessWidget {
                   key: ValueKey(event.transactionId ?? event.eventId),
                   index: i,
                   controller: controller.scrollController,
-                  child: RepaintBoundary(
-                    child: Message(
-                      event,
-                      // key: ValueKey(event.eventId),
-                      animateIn: animateIn,
-                      thread: thread,
-                      singleSelected:
-                          controller.selectedEvents.length == 1 &&
-                          controller.selectedEvents.first.eventId ==
-                              event.eventId,
-                      onSwipe: () => controller.replyAction(replyTo: event),
-                      hasBeenRead:
-                          latestReadEventIndex != -1 &&
-                          latestReadEventIndex <= i,
-                      readReceipts: event.receipts.toList(), // NEW: Pass read receipts to Message
-                      // onQuote: () {
-                      //   controller.replyAction(replyTo: event);
-                      //   controller.sendController.text = "> ";
-                      // },
-                      onInfoTab: controller.showEventInfo,
-                      onMention: () => controller.sendController.text +=
-                          '${event.senderFromMemoryOrFallback.mention} ',
-                      highlightMarker:
-                          controller.scrollToEventIdMarker == event.eventId,
-                      onSelect: controller.onSelectMessage,
-                      scrollToEventId: (String eventId) =>
-                          controller.scrollToEventId(eventId),
-                      longPressSelect: controller.selectedEvents.isNotEmpty,
-                      selected: controller.selectedEvents.any(
-                        (e) => e.eventId == event.eventId,
-                      ),
-                      timeline: timeline,
-                      displayReadMarker:
-                          controller.readMarkerEventId == event.eventId,
-                      nextEvent: i + 1 < events.length ? events[i + 1] : null,
-                      previousEvent: i > 0 ? events[i - 1] : null,
-                      wallpaperMode: hasWallpaper,
-                      colors: colors,
-                      gradient: AppSettings.enableGradient.value,
+                  child: Message(
+                    event,
+                    animateIn: animateIn,
+                    thread: thread,
+                    singleSelected:
+                        controller.selectedEvents.length == 1 &&
+                        controller.selectedEvents.first.eventId ==
+                            event.eventId,
+                    onSwipe: () => controller.replyAction(replyTo: event),
+                    hasBeenRead:
+                        latestReadEventIndex != -1 &&
+                        latestReadEventIndex <= i,
+                    readReceipts: event.receipts.toList(),
+                    onInfoTab: controller.showEventInfo,
+                    onMention: () => controller.sendController.text +=
+                        '${event.senderFromMemoryOrFallback.mention} ',
+                    highlightMarker:
+                        controller.scrollToEventIdMarker == event.eventId,
+                    onSelect: controller.onSelectMessage,
+                    scrollToEventId: (String eventId) =>
+                        controller.scrollToEventId(eventId),
+                    longPressSelect: controller.selectedEvents.isNotEmpty,
+                    selected: controller.selectedEvents.any(
+                      (e) => e.eventId == event.eventId,
                     ),
+                    timeline: timeline,
+                    displayReadMarker:
+                        controller.readMarkerEventId == event.eventId,
+                    nextEvent: i + 1 < events.length ? events[i + 1] : null,
+                    previousEvent: i > 0 ? events[i - 1] : null,
+                    wallpaperMode: hasWallpaper,
+                    colors: colors,
+                    gradient: AppSettings.enableGradient.value,
                   ),
                 );
               },

@@ -423,21 +423,7 @@ class ChatController extends State<ChatPageWithRoom>
     sendingClient = Matrix.of(context).client;
     WidgetsBinding.instance.addObserver(this);
 
-    // Non-blocking initialization
-    loadTimelineFuture = Future.value(); // show chat instantly, messages load async
-    _asyncInit();
-  }
-
-  Future<void> _asyncInit() async {
-    // Load a fresh timeline WITH the onUpdate callback wired up. We used to
-    // show a cached Timeline instance here (TimelineCache), but that instance
-    // had no onUpdate callback, so a sent message never triggered updateView
-    // and the user didn't see their own reply until reopening the chat.
-    // Extera/FluffyChat always load a fresh timeline — do the same.
-    await Future.wait([
-      _tryLoadTimeline(),
-      _getThreads(),
-    ]);
+    loadTimelineFuture = _tryLoadTimeline();
   }
 
   Future<void> _tryLoadTimeline() async {
@@ -491,14 +477,6 @@ class ChatController extends State<ChatPageWithRoom>
 
   bool firstUpdateReceived = false;
 
-  // Bumped on every timeline update so setState always rebuilds the
-  // chat list. Without this, once firstUpdateReceived is true, every
-  // subsequent onUpdate fires a no-op setState and the freshly sent
-  // event never makes it into the visible list. Read by
-  // ChatEventList.build so any change forces a list rebuild.
-  int get timelineTick => _timelineTick;
-  int _timelineTick = 0;
-
   Future<void> updateView() async {
     if (!mounted) return;
     setReadMarker();
@@ -506,7 +484,6 @@ class ChatController extends State<ChatPageWithRoom>
     if (!mounted) return;
     setState(() {
       firstUpdateReceived = true;
-      _timelineTick++;
     });
   }
 
