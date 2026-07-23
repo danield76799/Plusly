@@ -19,52 +19,55 @@ class ImageViewerView extends StatelessWidget {
       backgroundColor: Colors.black.withAlpha(200),
       foregroundColor: Colors.white,
     );
-    return Scaffold(
-      backgroundColor: Colors.black,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        elevation: 0,
-        leading: IconButton(
-          style: iconButtonStyle,
-          icon: const Icon(Icons.close),
-          onPressed: Navigator.of(context).pop,
-          color: Colors.white,
-          tooltip: L10n.of(context).close,
-        ),
-        backgroundColor: Colors.transparent,
-        actions: [
-          IconButton(
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pop(),
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          elevation: 0,
+          leading: IconButton(
             style: iconButtonStyle,
-            icon: const Icon(Icons.reply_outlined),
-            onPressed: controller.forwardAction,
+            icon: const Icon(Icons.close),
+            onPressed: Navigator.of(context).pop,
             color: Colors.white,
-            tooltip: L10n.of(context).share,
+            tooltip: L10n.of(context).close,
           ),
-          const SizedBox(width: 8),
-          IconButton(
-            style: iconButtonStyle,
-            icon: const Icon(Icons.download_outlined),
-            onPressed: () => controller.saveFileAction(context),
-            color: Colors.white,
-            tooltip: L10n.of(context).downloadFile,
-          ),
-          const SizedBox(width: 8),
-          if (PlatformInfos.isMobile)
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Builder(
-                builder: (context) => IconButton(
-                  style: iconButtonStyle,
-                  onPressed: () => controller.shareFileAction(context),
-                  tooltip: L10n.of(context).share,
-                  color: Colors.white,
-                  icon: Icon(Icons.adaptive.share_outlined),
+          backgroundColor: Colors.transparent,
+          actions: [
+            IconButton(
+              style: iconButtonStyle,
+              icon: const Icon(Icons.reply_outlined),
+              onPressed: controller.forwardAction,
+              color: Colors.white,
+              tooltip: L10n.of(context).share,
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              style: iconButtonStyle,
+              icon: const Icon(Icons.download_outlined),
+              onPressed: () => controller.saveFileAction(context),
+              color: Colors.white,
+              tooltip: L10n.of(context).downloadFile,
+            ),
+            const SizedBox(width: 8),
+            if (PlatformInfos.isMobile)
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Builder(
+                  builder: (context) => IconButton(
+                    style: iconButtonStyle,
+                    onPressed: () => controller.shareFileAction(context),
+                    tooltip: L10n.of(context).share,
+                    color: Colors.white,
+                    icon: Icon(Icons.adaptive.share_outlined),
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
+        body: _PagedZoomableImages(controller: controller),
       ),
-      body: _PagedZoomableImages(controller: controller),
     );
   }
 }
@@ -79,7 +82,6 @@ class _PagedZoomableImages extends StatefulWidget {
 }
 
 class _PagedZoomableImagesState extends State<_PagedZoomableImages> {
-  // Track active pointers. When 2+ are down (pinch), lock the PageView.
   final ValueNotifier<bool> _scrollLocked = ValueNotifier<bool>(false);
   int _activePointers = 0;
 
@@ -135,12 +137,18 @@ class _PagedZoomableImagesState extends State<_PagedZoomableImages> {
                   minScale: 1.0,
                   maxScale: 10.0,
                   child: Center(
-                    child: MxcImage(
-                      key: ValueKey(event.eventId),
-                      event: event,
-                      fit: BoxFit.contain,
-                      isThumbnail: false,
-                      animated: true,
+                    child: Hero(
+                      tag: event.eventId,
+                      child: GestureDetector(
+                        onTap: () {},
+                        child: MxcImage(
+                          key: ValueKey(event.eventId),
+                          event: event,
+                          fit: BoxFit.contain,
+                          isThumbnail: false,
+                          animated: true,
+                        ),
+                      ),
                     ),
                   ),
                 );
