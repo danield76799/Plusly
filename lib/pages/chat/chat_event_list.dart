@@ -58,7 +58,15 @@ class ChatEventList extends StatelessWidget {
 
     final thisEventsKeyMap = <String, int>{};
     for (var i = 0; i < events.length; i++) {
-      thisEventsKeyMap[events[i].eventId] = i;
+      // Index by both eventId AND transactionId. A local echo has a
+      // transactionId but no eventId yet; findChildIndexCallback keys on the
+      // AutoScrollTag's ValueKey(event.transactionId ?? event.eventId), so we
+      // must register the transactionId too or the sent bubble won't resolve
+      // to an index and Flutter drops it until the server echo arrives.
+      final e = events[i];
+      thisEventsKeyMap[e.eventId] = i;
+      final txid = e.transactionId;
+      if (txid != null) thisEventsKeyMap[txid] = i;
     }
 
     final hasWallpaper = AppSettings.wallpaperPath.value.isNotEmpty;
