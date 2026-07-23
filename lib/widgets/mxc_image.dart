@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -204,11 +205,22 @@ class _MxcImageState extends State<MxcImage> {
             'Event of type ${event.messageType} has no thumbnail!',
           );
         }
-        final data = await event.downloadAndDecryptAttachment(
-          getThumbnail: useThumbnail,
+
+        // Try disk cache first (survives app restarts).
+        final diskCacheKey = Uri.parse(
+          _effectiveCacheKey ?? '${event.eventId}_${useThumbnail ? 'thumb' : 'full'}',
         );
-        if (data.detectFileType is MatrixImageFile) {
-          loadedBytes = data.bytes;
+        loadedBytes = await client.database.getFile(diskCacheKey);
+
+        if (loadedBytes == null) {
+          final data = await event.downloadAndDecryptAttachment(
+            getThumbnail: useThumbnail,
+          );
+          if (data.detectFileType is MatrixImageFile) {
+            loadedBytes = data.bytes;
+            // Persist decrypted bytes so next app start is instant.
+            unawaited(client.database.storeFile(diskCacheKey, loadedBytes, 0));
+          }
         }
       }
 
@@ -322,10 +334,7 @@ class _MxcImageState extends State<MxcImage> {
       },
     );
 
-    return RepaintBoundary(
-      key: repaintKey,
-      child: ClipRRect(borderRadius: widget.borderRadius, child: imageWidget),
-    );
+    return ClipRRect(borderRadius: widget.borderRadius, child: imageWidget);
   }
 }
 
