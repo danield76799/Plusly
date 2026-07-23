@@ -680,7 +680,8 @@ class _MessageState extends State<Message> {
     if (showReactionsRow ||
         displayTime ||
         widget.selected ||
-        widget.displayReadMarker) {
+        widget.displayReadMarker ||
+        showTimestamp) {
       container = Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: ownMessage
