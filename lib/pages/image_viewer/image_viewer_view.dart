@@ -65,7 +65,7 @@ class ImageViewerView extends StatelessWidget {
             ),
         ],
       ),
-      body: _RawZoomableImage(event: controller.currentEvent),
+      body: _RawZoomableImage(event: controller.allEvents[controller.initialIndex]),
     );
   }
 }

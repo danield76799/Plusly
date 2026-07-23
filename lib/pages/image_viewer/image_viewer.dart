@@ -50,6 +50,7 @@ class ImageViewerController extends State<ImageViewer> {
       (event) => event.eventId == widget.event.eventId,
     );
     if (index < 0) index = 0;
+    initialIndex = index;
     pageController = PageController(initialPage: index);
     // Preload adjacent images for instant swiping
     WidgetsBinding.instance.addPostFrameCallback((_) => _preloadAdjacent());
@@ -58,6 +59,8 @@ class ImageViewerController extends State<ImageViewer> {
   late final PageController pageController;
 
   late final List<Event> allEvents;
+
+  late final int initialIndex;
 
   void onKeyEvent(KeyEvent event) {
     switch (event.logicalKey) {
