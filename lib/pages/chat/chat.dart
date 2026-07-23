@@ -450,7 +450,14 @@ class ChatController extends State<ChatPageWithRoom>
 
       if (readMarkerEventIndex >= 0) {
         Logs().v('Scroll to read marker', readMarkerEventId);
-        scrollToEventId(readMarkerEventId, highlightEvent: false);
+        // Scroll the unread marker to the bottom of the screen so the newest
+        // messages (which sit below it in a reversed list) are visible when
+        // you open the chat — matching what users expect from WhatsApp.
+        scrollToEventId(
+          readMarkerEventId,
+          highlightEvent: false,
+          position: AutoScrollPosition.end,
+        );
         return;
       } else if (readMarkerEventId.isNotEmpty) {
         _showScrollUpMaterialBanner(readMarkerEventId);
@@ -1486,7 +1493,11 @@ class ChatController extends State<ChatPageWithRoom>
     });
   }
 
-  void scrollToEventId(String eventId, {bool highlightEvent = true}) async {
+  void scrollToEventId(
+    String eventId, {
+    bool highlightEvent = true,
+    AutoScrollPosition position = AutoScrollPosition.middle,
+  }) async {
     final foundEvent = timeline!.events.firstWhereOrNull(
       (event) => event.eventId == eventId,
     );
@@ -1494,8 +1505,8 @@ class ChatController extends State<ChatPageWithRoom>
     final eventIndex = foundEvent == null
         ? -1
         : timeline!.events
-              .filterByVisibleInGui(exceptionEventId: eventId)
-              .indexOf(foundEvent);
+            .filterByVisibleInGui(exceptionEventId: eventId)
+            .indexOf(foundEvent);
 
     if (eventIndex == -1) {
       setState(() {
@@ -1511,7 +1522,7 @@ class ChatController extends State<ChatPageWithRoom>
       await loadTimelineFuture;
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         if (!mounted) return;
-        scrollToEventId(eventId);
+        scrollToEventId(eventId, position: position);
       });
       return;
     }
@@ -1523,7 +1534,7 @@ class ChatController extends State<ChatPageWithRoom>
     await scrollController.scrollToIndex(
       eventIndex + 1,
       duration: FluffyThemes.animationDuration,
-      preferPosition: AutoScrollPosition.middle,
+      preferPosition: position,
     );
     _updateScrollController();
   }
