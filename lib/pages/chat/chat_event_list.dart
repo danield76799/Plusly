@@ -129,10 +129,10 @@ class ChatEventList extends StatelessWidget {
                   // Auto-request history when within 50 events of the top,
                   // matching FluffyChat behaviour — no "Load More" button needed.
                   if (timeline.canRequestHistory && !timeline.isRequestingHistory) {
-                    final visibleIndex = timeline.events.lastIndexWhere(
+                    final visibleIndex = events.lastIndexWhere(
                       (event) => event.isVisibleInGui,
                     );
-                    if (visibleIndex > timeline.events.length - 50) {
+                    if (visibleIndex > events.length - 50) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (controller.mounted) controller.requestHistory();
                       });
