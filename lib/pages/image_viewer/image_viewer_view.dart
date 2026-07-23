@@ -64,40 +64,89 @@ class ImageViewerView extends StatelessWidget {
             ),
         ],
       ),
-      // Layer 2: PageView + InteractiveViewer + MxcImage
-      // No outer GestureDetector, no HoverBuilder, no KeyboardListener.
-      body: PageView.builder(
-        scrollDirection: Axis.horizontal,
-        controller: controller.pageController,
-        itemCount: controller.allEvents.length,
-        itemBuilder: (context, i) {
-          final event = controller.allEvents[i];
-          switch (event.messageType) {
-            case MessageTypes.Video:
-              return Padding(
-                padding: const EdgeInsets.only(top: 52.0),
-                child: Center(
-                  child: EventVideoPlayer(event, controller),
-                ),
-              );
-            case MessageTypes.Image:
-            case MessageTypes.Sticker:
-            default:
-              return InteractiveViewer(
-                minScale: 1.0,
-                maxScale: 10.0,
-                child: Center(
-                  child: MxcImage(
-                    key: ValueKey(event.eventId),
-                    event: event,
-                    fit: BoxFit.contain,
-                    isThumbnail: false,
-                    animated: true,
+      body: _PagedZoomableImages(controller: controller),
+    );
+  }
+}
+
+class _PagedZoomableImages extends StatefulWidget {
+  final ImageViewerController controller;
+
+  const _PagedZoomableImages({required this.controller});
+
+  @override
+  State<_PagedZoomableImages> createState() => _PagedZoomableImagesState();
+}
+
+class _PagedZoomableImagesState extends State<_PagedZoomableImages> {
+  // Track active pointers. When 2+ are down (pinch), lock the PageView.
+  final ValueNotifier<bool> _scrollLocked = ValueNotifier<bool>(false);
+  int _activePointers = 0;
+
+  void _onPointerDown(PointerDownEvent _) {
+    _activePointers++;
+    if (_activePointers >= 2) {
+      _scrollLocked.value = true;
+    }
+  }
+
+  void _onPointerUp(PointerUpEvent _) {
+    _activePointers = (_activePointers - 1).clamp(0, 999);
+    if (_activePointers < 2) {
+      _scrollLocked.value = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollLocked.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: _onPointerDown,
+      onPointerUp: _onPointerUp,
+      onPointerCancel: (_) => _onPointerUp,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: _scrollLocked,
+        builder: (context, locked, _) => PageView.builder(
+          scrollDirection: Axis.horizontal,
+          physics: locked
+              ? const NeverScrollableScrollPhysics()
+              : const BouncingScrollPhysics(),
+          controller: widget.controller.pageController,
+          itemCount: widget.controller.allEvents.length,
+          itemBuilder: (context, i) {
+            final event = widget.controller.allEvents[i];
+            switch (event.messageType) {
+              case MessageTypes.Video:
+                return Padding(
+                  padding: const EdgeInsets.only(top: 52.0),
+                  child: Center(
+                    child: EventVideoPlayer(event, widget.controller),
                   ),
-                ),
-              );
-          }
-        },
+                );
+              case MessageTypes.Image:
+              case MessageTypes.Sticker:
+              default:
+                return InteractiveViewer(
+                  minScale: 1.0,
+                  maxScale: 10.0,
+                  child: Center(
+                    child: MxcImage(
+                      key: ValueKey(event.eventId),
+                      event: event,
+                      fit: BoxFit.contain,
+                      isThumbnail: false,
+                      animated: true,
+                    ),
+                  ),
+                );
+            }
+          },
+        ),
       ),
     );
   }
