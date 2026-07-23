@@ -31,11 +31,6 @@ class ChatEventList extends StatelessWidget {
       return const Center(child: CircularProgressIndicator.adaptive());
     }
 
-    // Touch timelineTick so any timeline mutation (e.g. a sent message)
-    // forces this list to rebuild. timeline.events mutates in place, so
-    // Flutter would otherwise treat the update as a no-op.
-    // ignore: unused_local_variable
-    final tick = controller.timelineTick;
     final theme = Theme.of(context);
 
     final colors = [theme.secondaryBubbleColor, theme.bubbleColor];
@@ -58,15 +53,7 @@ class ChatEventList extends StatelessWidget {
 
     final thisEventsKeyMap = <String, int>{};
     for (var i = 0; i < events.length; i++) {
-      // Index by both eventId AND transactionId. A local echo has a
-      // transactionId but no eventId yet; findChildIndexCallback keys on the
-      // AutoScrollTag's ValueKey(event.transactionId ?? event.eventId), so we
-      // must register the transactionId too or the sent bubble won't resolve
-      // to an index and Flutter drops it until the server echo arrives.
-      final e = events[i];
-      thisEventsKeyMap[e.eventId] = i;
-      final txid = e.transactionId;
-      if (txid != null) thisEventsKeyMap[txid] = i;
+      thisEventsKeyMap[events[i].eventId] = i;
     }
 
     final hasWallpaper = AppSettings.wallpaperPath.value.isNotEmpty;
@@ -159,11 +146,9 @@ class ChatEventList extends StatelessWidget {
 
                 final event = events[i];
                 final animateIn =
-                    i == 0 &&
-                    (DateTime.now().millisecondsSinceEpoch -
-                            event.originServerTs.millisecondsSinceEpoch) <
-                        1000 &&
-                    controller.firstUpdateReceived;
+                    controller.animateInEventId == event.eventId ||
+                    (event.transactionId != null &&
+                        controller.animateInEventId == event.transactionId);
 
                 final thread = threads.containsKey(event.eventId)
                     ? threads[event.eventId]

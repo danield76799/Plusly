@@ -482,24 +482,12 @@ class ChatController extends State<ChatPageWithRoom>
     scrollUpBannerEventId = eventId;
   });
 
-  bool firstUpdateReceived = false;
-
-  // Bumped on every timeline update so the chat list always rebuilds.
-  // The timeline.events list mutates in place, so a plain setState is not
-  // enough for ChatEventList to notice the change. ChatEventList reads this
-  // tick in its build method, forcing a fresh render on every update.
-  int get timelineTick => _timelineTick;
-  int _timelineTick = 0;
-
-  Future<void> updateView() async {
+  // FluffyChat-style: a plain setState is enough. The matrix SDK notifies us
+  // via onUpdate/onInsert on every timeline mutation (including the local
+  // echo after send), so the list rebuilds without a manual tick counter.
+  void updateView() {
     if (!mounted) return;
-    setReadMarker();
-    await updateThreads();
-    if (!mounted) return;
-    setState(() {
-      firstUpdateReceived = true;
-      _timelineTick++;
-    });
+    setState(() {});
   }
 
   Future<void> updateThreads() async {
@@ -526,14 +514,12 @@ class ChatController extends State<ChatPageWithRoom>
   Future<void>? loadTimelineFuture;
   Map<String, Thread>? threads = {};
 
-  void _onNewEvent() => updateView();
-
   Future<void> _loadRoomTimeline({String? eventContextId}) async {
     try {
       timeline?.cancelSubscriptions();
       timeline = await room.getTimeline(
         onUpdate: updateView,
-        onNewEvent: _onNewEvent,
+        onInsert: _insert,
         eventContextId: eventContextId,
       );
     } catch (e, s) {
@@ -541,7 +527,7 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await room.getTimeline(
         onUpdate: updateView,
-        onNewEvent: _onNewEvent,
+        onInsert: _insert,
       );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
@@ -560,7 +546,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
-        onNewEvent: _onNewEvent,
+        onInsert: _insert,
         eventContextId: eventContextId,
       );
       Logs().v("Thread timeline loaded");
@@ -573,7 +559,7 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
-        onNewEvent: _onNewEvent,
+        onInsert: _insert,
       );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
@@ -623,6 +609,19 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   String? scrollToEventIdMarker;
+
+  // Event id (or transactionId for local echoes) that should animate in when
+  // inserted, mirroring FluffyChat's onInsert animation.
+  String? animateInEventId;
+
+  Future<void> _insert(int index) async {
+    if (index > 0) return;
+    final firstEvent = timeline?.events.firstOrNull;
+    final eventId = firstEvent?.transactionId ?? firstEvent?.eventId;
+    animateInEventId = eventId;
+    await Future.delayed(FluffyThemes.animationDuration);
+    if (animateInEventId == eventId) animateInEventId = null;
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -764,57 +763,70 @@ class ChatController extends State<ChatPageWithRoom>
       if (dialogResult == OkCancelResult.cancel) return;
     }
 
-    // Fire-and-forget. The optimistic local echo is already rendered by the
-    // SDK; we only react to failures here.
+    // Fire-and-forget the actual send. We only react to failures here.
+    final sendFuture = room.sendTextEvent(
+      text,
+      inReplyTo: replyEvent,
+      replyMention: replyMention,
+      editEventId: editEvent?.eventId,
+      parseCommands: parseCommands,
+      threadRootEventId: thread?.rootEvent.eventId,
+      threadLastEventId:
+          thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
+    );
     unawaited(
-      () async {
-        try {
-          await room.sendTextEvent(
-            text,
-            inReplyTo: replyEvent,
-            replyMention: replyMention,
-            editEventId: editEvent?.eventId,
-            parseCommands: parseCommands,
-            threadRootEventId: thread?.rootEvent.eventId,
-            threadLastEventId:
-                thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
-          );
-        } catch (e) {
+      sendFuture.then(
+        (_) {},
+        onError: (e) {
           Logs().e('Failed to send message', e);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(L10n.of(context).errorSendingMessage)),
             );
           }
-        }
-      }(),
+        },
+      ),
     );
 
     // Force the chat list to refresh so the room jumps to the top.
     ChatListRefreshBus.refreshForRoom(room.id);
 
-    // Make sure the sent bubble shows up immediately. The Matrix SDK appends
-    // the local echo asynchronously (after encryption), so we bump the
-    // timelineTick right away AND shortly after, mirroring how media sends
-    // force a rebuild. This is the known "timeline doesn't refresh on send"
-    // fix — do NOT remove the tick bumps.
-    updateView();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      // Scroll so the user sees their message: pixels==0 is newest (bottom)
-      // in the reversed list. Only auto-jump if already near the bottom.
-      if (scrollController.hasClients &&
-          scrollController.position.pixels <= 50) {
-        scrollController.jumpTo(0);
+    // Deterministic: the Matrix SDK appends the local echo asynchronously.
+    // The onUpdate/onInsert callbacks are racy (sometimes the bubble shows up
+    // only on the next server sync), so we poll until the sent event is
+    // actually in timeline.events and rebuild every frame. This guarantees
+    // the bubble appears immediately, every time — no reliance on the SDK
+    // firing its callback at the right moment.
+    final tl = timeline;
+    if (tl != null) {
+      var frames = 0;
+      while (mounted && frames < 120) {
+        // The sent event is recognizable by being a local echo (no eventId yet
+        // or status == sending) at the top of the reversed list.
+        final events = tl.events;
+        final hasPending = events.any(
+          (e) =>
+              (e.status == EventStatus.sending || e.eventId == null) &&
+              e.body == text,
+        );
+        updateView();
+        if (hasPending) {
+          // Jump to bottom so the user sees their message right away.
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted &&
+                scrollController.hasClients &&
+                scrollController.position.pixels <= 50) {
+              scrollController.jumpTo(0);
+            }
+          });
+          break;
+        }
+        await Future.delayed(const Duration(milliseconds: 16));
+        frames++;
       }
+      // Final rebuild in case it landed just after the loop.
       updateView();
-    });
-    // Second bump after the local echo has (almost certainly) landed.
-    unawaited(
-      Future.delayed(const Duration(milliseconds: 150)).then((_) {
-        if (mounted) updateView();
-      }),
-    );
+    }
   }
 
   void sendPollAction() async {
