@@ -5,7 +5,6 @@ import 'package:matrix/matrix.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/image_viewer/video_player.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
-import 'package:Pulsly/widgets/hover_builder.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 import 'image_viewer.dart';
 
@@ -65,19 +64,40 @@ class ImageViewerView extends StatelessWidget {
             ),
         ],
       ),
-      // Layer 1: bare InteractiveViewer + MxcImage (no PageView, no outer GestureDetector)
-      body: InteractiveViewer(
-        minScale: 1.0,
-        maxScale: 10.0,
-        child: Center(
-          child: MxcImage(
-            key: ValueKey(controller.allEvents[controller.initialIndex].eventId),
-            event: controller.allEvents[controller.initialIndex],
-            fit: BoxFit.contain,
-            isThumbnail: false,
-            animated: true,
-          ),
-        ),
+      // Layer 2: PageView + InteractiveViewer + MxcImage
+      // No outer GestureDetector, no HoverBuilder, no KeyboardListener.
+      body: PageView.builder(
+        scrollDirection: Axis.horizontal,
+        controller: controller.pageController,
+        itemCount: controller.allEvents.length,
+        itemBuilder: (context, i) {
+          final event = controller.allEvents[i];
+          switch (event.messageType) {
+            case MessageTypes.Video:
+              return Padding(
+                padding: const EdgeInsets.only(top: 52.0),
+                child: Center(
+                  child: EventVideoPlayer(event, controller),
+                ),
+              );
+            case MessageTypes.Image:
+            case MessageTypes.Sticker:
+            default:
+              return InteractiveViewer(
+                minScale: 1.0,
+                maxScale: 10.0,
+                child: Center(
+                  child: MxcImage(
+                    key: ValueKey(event.eventId),
+                    event: event,
+                    fit: BoxFit.contain,
+                    isThumbnail: false,
+                    animated: true,
+                  ),
+                ),
+              );
+          }
+        },
       ),
     );
   }
