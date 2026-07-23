@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 // import 'package:android_system_font/android_system_font.dart'; // TEMPORARILY DISABLED - causes Kotlin daemon crash on cross-drive builds
@@ -58,6 +59,7 @@ class PluslyApp extends StatefulWidget {
 
 class _PluslyAppState extends State<PluslyApp> {
   // final _androidSystemFontPlugin = AndroidSystemFont(); // DISABLED
+  Timer? _updateCheckTimer;
 
   @override
   void initState() {
@@ -74,6 +76,21 @@ class _PluslyAppState extends State<PluslyApp> {
         checkForUpdates(routerContext);
       }
     });
+
+    // Repeat update check every 12 hours while the app is running.
+    _updateCheckTimer = Timer.periodic(const Duration(hours: 12), (_) {
+      final routerContext =
+          PluslyApp.router.routerDelegate.navigatorKey.currentContext;
+      if (mounted && routerContext != null) {
+        checkForUpdates(routerContext);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _updateCheckTimer?.cancel();
+    super.dispose();
   }
 
   void _startScheduler() {
