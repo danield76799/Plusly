@@ -8,6 +8,7 @@ import 'package:badges/badges.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:matrix/matrix.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
@@ -765,6 +766,7 @@ class ChatView extends StatelessWidget {
                                   onPressed: () {
                                     controller.scrollToEventId(
                                       scrollUpBannerEventId,
+                                      position: AutoScrollPosition.end,
                                     );
                                     controller.discardScrollUpBannerEventId();
                                     // controller.setReadMarker();
