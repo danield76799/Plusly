@@ -138,57 +138,55 @@ class ImageBubble extends StatelessWidget {
           constraints: BoxConstraints(maxWidth: width),
           child: AspectRatio(
             aspectRatio: _aspectRatio,
-            child: Material(
-              color: Colors.transparent,
-              clipBehavior: Clip.hardEdge,
-              shape: RoundedRectangleBorder(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.transparent,
                 borderRadius: borderRadius,
-                side: BorderSide(
-                  color: event.messageType == MessageTypes.Sticker
-                      ? Colors.transparent
-                      : theme.dividerColor,
-                ),
               ),
-              child: InkWell(
-                onTap: loadMedia ? () {
-                  if (onTap != null) {
-                    onTap!();
-                    return;
-                  }
-                  if (!tapToView) return;
-                  showDialog(
-                    context: context,
-                    useRootNavigator: false,
-                    builder: (_) =>
-                        ImageViewer(event, timeline: timeline, outerContext: context),
-                  );
-                } : null,
-                borderRadius: borderRadius,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Hero(
-                      tag: event.eventId,
-                      child: loadMedia
-                          ? MxcImage(
-                              event: event,
-                              width: _effectiveImageWidth,
-                              height: height,
-                              fit: fit,
-                              animated: animated,
-                              isThumbnail: thumbnailOnly,
-                              placeholder: event.messageType == MessageTypes.Sticker
-                                  ? null
-                                  : (context) => _ImageBubblePlaceholder(
+              clipBehavior: Clip.hardEdge,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: loadMedia ? () {
+                    if (onTap != null) {
+                      onTap!();
+                      return;
+                    }
+                    if (!tapToView) return;
+                    showDialog(
+                      context: context,
+                      useRootNavigator: false,
+                      builder: (_) =>
+                          ImageViewer(event, timeline: timeline, outerContext: context),
+                    );
+                  } : null,
+                  borderRadius: borderRadius,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Hero(
+                        tag: event.eventId,
+                        child: loadMedia
+                            ? MxcImage(
+                                event: event,
+                                width: _effectiveImageWidth,
+                                height: height,
+                                fit: fit,
+                                animated: animated,
+                                isThumbnail: thumbnailOnly,
+                                placeholder: event.messageType == MessageTypes.Sticker
+                                    ? null
+                                    : (context) => _ImageBubblePlaceholder(
                                         event: event,
                                         width: _effectiveImageWidth,
                                         height: height,
                                         fit: fit,
                                       ),
-                            )
-                          : _buildUnloaded(context),
-                    ),
-                  ],
+                              )
+                            : _buildUnloaded(context),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
