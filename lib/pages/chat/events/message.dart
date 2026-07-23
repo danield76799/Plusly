@@ -265,12 +265,19 @@ class _MessageState extends State<Message> {
         ? MainAxisAlignment.end
         : MainAxisAlignment.start;
 
-    // Show the timestamp outside the bubble only on the final message of a
-    // block, or when the next message is in a different minute. This keeps
-    // consecutive messages within the same minute free of per-bubble noise.
-    final nextEventDifferentMinute = widget.nextEvent != null &&
-        widget.nextEvent!.originServerTs.difference(event.originServerTs).inMinutes >= 1;
-    final showTimestamp = !nextEventSameSender || nextEventDifferentMinute;
+    // Show the timestamp on the last message of a consecutive block.
+    // Because the list is reversed (newest first), the message visually
+    // below this one is events[i - 1] (previousEvent). We show the timestamp
+    // when there is no previous message, the previous message is from someone
+    // else, or it is in a different minute.
+    final previousEventDifferentMinute = widget.previousEvent != null &&
+        widget.previousEvent!.originServerTs
+            .difference(event.originServerTs)
+            .abs()
+            .inMinutes >= 1;
+    final showTimestamp = widget.previousEvent == null ||
+        !previousEventSameSender ||
+        previousEventDifferentMinute;
 
     final displayEvent = event.getDisplayEvent(timeline);
     const hardCorner = Radius.circular(4);
