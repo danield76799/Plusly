@@ -286,11 +286,15 @@ class _MessageState extends State<Message> {
       // Modern grouping: the "tail" (hard corner) sits on the LAST message
       // of a consecutive block, on the sender's outer-lower corner. Earlier
       // messages in the block use a continuous (fully rounded) style.
+      // Because the list is reversed, the message visually below this one
+      // is previousEvent. The "tail" (hard corner) should sit on the LAST
+      // message of a consecutive block, i.e. when there is no previous
+      // message from the same sender.
       //   outgoing -> sharp bottom-right, incoming -> sharp top-left.
-      topLeft: (!ownMessage && !nextEventSameSender)
+      topLeft: (!ownMessage && !previousEventSameSender)
           ? hardCorner
           : roundedCorner,
-      topRight: (ownMessage && !nextEventSameSender)
+      topRight: (ownMessage && !previousEventSameSender)
           ? hardCorner
           : roundedCorner,
       bottomLeft: roundedCorner,
