@@ -64,9 +64,15 @@ class _PluslyAppState extends State<PluslyApp> {
     super.initState();
     initPlatformState();
     _startScheduler();
-    // Check for updates on app startup (with delay to let UI load)
+    // Check for updates on app startup (with delay to let UI load).
+    // Use the GoRouter navigator context, not the raw PluslyApp state context,
+    // because there is no Navigator above MaterialApp.router yet.
     Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) checkForUpdates(context);
+      final routerContext =
+          PluslyApp.router.routerDelegate.navigatorKey.currentContext;
+      if (mounted && routerContext != null) {
+        checkForUpdates(routerContext);
+      }
     });
   }
 
