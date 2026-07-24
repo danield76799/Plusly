@@ -139,27 +139,6 @@ class BackgroundPush {
       await initialiseLocalNotifications();
       Logs().v('Flutter Local Notifications initialized');
 
-      // ── DIAGNOSE: test of lokale notificaties werken ──
-      try {
-        await _flutterLocalNotificationsPlugin.show(
-          id: 9999,
-          title: 'Plusly Diagnose',
-          body: 'Lokale notificatie-test — als je dit ziet werkt flutter_local_notifications',
-          notificationDetails: const NotificationDetails(
-            android: AndroidNotificationDetails(
-              AppConfig.pushNotificationsChannelId,
-              'Diagnose',
-              channelDescription: 'Diagnose test kanaal',
-              importance: Importance.high,
-              priority: Priority.max,
-            ),
-          ),
-        );
-        Logs().i('[Diagnose] Test notification sent (id=9999)');
-      } catch (e, s) {
-        Logs().e('[Diagnose] Test notification FAILED', e, s);
-      }
-
       if (Platform.isAndroid) {
         await UnifiedPush.initialize(
           onNewEndpoint: _newUpEndpoint,
