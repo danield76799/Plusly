@@ -374,13 +374,14 @@ Future<void> _tryPushHelper(
     await _setShortcut(event, l10n, title, roomAvatarFile);
   }
 
-  final needsTitleAndBody = !PlatformInfos.isAndroid;
-
-  // ── SINGLE show() call (FluffyChat pattern) ──
+  // Always pass explicit title and body on Android too. The
+  // AndroidNotificationDetails (messaging style) handles the rich rendering,
+  // but leaving title/body null can cause some OEMs/Android versions to not
+  // display the notification at all or fall back to a generic placeholder.
   await flutterLocalNotificationsPlugin.show(
     id: id,
-    title: needsTitleAndBody ? title : null,
-    body: needsTitleAndBody ? body : null,
+    title: title,
+    body: body,
     notificationDetails: platformChannelSpecifics,
     payload: NotificationPushPayload(
       client.clientName,
