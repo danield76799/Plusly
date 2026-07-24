@@ -371,7 +371,14 @@ class ChatListController extends State<ChatList>
     _lastMaxEventTime = 0;
     _lastRoomCount = 0;
     if (roomId != null) {
-      markRoomRecentlyActive(roomId);
+      // Don't call setState here: invalidateRoomCache is invoked from the
+      // StreamBuilder builder, and setState during build is illegal in Flutter.
+      // The StreamBuilder already triggers a rebuild, so just update the set.
+      _recentlyActiveRoomIds.add(roomId);
+      _recentlyActiveTimer?.cancel();
+      _recentlyActiveTimer = Timer(const Duration(seconds: 3), () {
+        if (mounted) setState(() => _recentlyActiveRoomIds.clear());
+      });
     }
   }
   
