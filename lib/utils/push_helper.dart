@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:collection/collection.dart';
@@ -49,18 +48,22 @@ Future<void> pushHelper(
       onEventLoaded: onEventLoaded,
     );
   } catch (e, s) {
-    // Don't show a duplicate/broken fallback notification.
-    // The main flow already showed a properly formatted notification
-    // before throwing. If it threw before showing, we'd rather show nothing
-    // than a confusing "Open app to read messages" placeholder.
-    Logs().w(
-      'Push helper threw — NOT showing fallback to avoid duplicate/confusing notification',
-      e,
-      s,
-    );
-    if (e is! TimeoutException && e is! IOException) {
-      Logs().e('Push Helper has crashed!', e, s);
+    // Background messages already showed a fast fallback inside _tryPushHelper
+    // before any heavy work. If we are in the foreground path, however, a crash
+    // here would otherwise be completely silent. Show a minimal fallback so the
+    // user at least knows a message arrived and can open the app.
+    if (clients != null) {
+      unawaited(
+        _buildFallbackNotification(
+          notification,
+          client: activeClient ?? clients.first,
+          flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+        ).catchError((fallbackErr) {
+          Logs().w('Fallback notification also failed', fallbackErr);
+        }),
+      );
     }
+    Logs().e('Push Helper has crashed!', e, s);
     // Don't rethrow — caller would try to show its own notification
   }
 }
@@ -108,12 +111,11 @@ Future<void> _tryPushHelper(
   // notifications when Android kills the background handler.
   if (isBackgroundMessage && notification.roomId != null) {
     unawaited(
-      (_buildFallbackNotification(
+      _buildFallbackNotification(
         notification,
         client: client,
         flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-      ) as Future)
-          .catchError((e) {
+      ).catchError((e) {
         Logs().w('Fallback notification failed', e);
       }),
     );
@@ -412,10 +414,10 @@ Future<void> _tryPushHelper(
   Logs().v('Push helper has been completed!');
 }
 
-Future<void>? _buildFallbackNotification(
-  PushNotification notification, {
-  required Client client,
-  required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+Future<void> _buildFallbackNotification(
+PushNotification notification, {
+required Client client,
+required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
 }) async {
   // Extract what we can directly from the Matrix push payload without
   // waiting for rooms/database to load.
