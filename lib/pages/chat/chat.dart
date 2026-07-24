@@ -821,23 +821,52 @@ class ChatController extends State<ChatPageWithRoom>
       var attempts = 0;
       // 50 + 100 + 200 + 400*7 = max ~3.35s. E2EE/bridge rooms can be slow.
       const maxAttempts = 10;
+      final editEventId = editEvent?.eventId;
+      final isEdit = editEventId != null;
       while (mounted && attempts < maxAttempts) {
         final events = tl.events;
-        final hasPending = events.any(
-          (e) =>
-              (e.status == EventStatus.sending || e.eventId == null) &&
-              e.body == text,
-        );
-        final hasRecentSentByMe = events.any(
-          (e) =>
-              e.body == text &&
-              e.senderId == myUserId &&
-              e.originServerTs.isAfter(sentAtThreshold),
-        );
+        // For new messages: status == sending or eventId == null.
+        // For edits: the SDK prefixes the body with "* " and uses
+        // relationshipType == edit. The original event gets the new content
+        // via getDisplayEvent once the edit is aggregated.
+        final bool hasPending;
+        if (isEdit) {
+          hasPending = events.any(
+            (e) =>
+                e.status == EventStatus.sending &&
+                e.relationshipType == RelationshipTypes.edit &&
+                e.relationshipEventId == editEventId,
+          );
+        } else {
+          hasPending = events.any(
+            (e) => e.status == EventStatus.sending && e.body == text,
+          );
+        }
+        // For new messages, also catch SDK-promoted echoes.
+        // For edits, check if the original event now has aggregated edits
+        // (i.e. the edit landed and the display event has been replaced).
+        final bool hasRecentSentByMe;
+        if (isEdit) {
+          hasRecentSentByMe = events.any(
+            (e) =>
+                e.eventId == editEventId &&
+                e.hasAggregatedEvents(
+                  tl,
+                  RelationshipTypes.edit,
+                ),
+          );
+        } else {
+          hasRecentSentByMe = events.any(
+            (e) =>
+                e.body == text &&
+                e.senderId == myUserId &&
+                e.originServerTs.isAfter(sentAtThreshold),
+          );
+        }
         final found = hasPending || hasRecentSentByMe;
 
         Logs().i(
-          '[SendPoll] attempt=$attempts events=${events.length} pending=$hasPending recentByMe=$hasRecentSentByMe',
+          '[SendPoll] attempt=$attempts events=${events.length} isEdit=$isEdit pending=$hasPending recentByMe=$hasRecentSentByMe',
         );
 
         if (found) {
