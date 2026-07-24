@@ -30,6 +30,8 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE"
         android:maxSdkVersion="29" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Required to request disabling battery optimization for reliable push. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!-- Required so the in-app updater can download and install APK updates.
          This permission is declared in the main manifest, but we keep it only
          for the GitHub build (flavor 'github'). It is removed for the Play

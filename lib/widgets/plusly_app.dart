@@ -18,6 +18,7 @@ import 'package:Pulsly/widgets/theme_builder.dart';
 import '../config/app_config.dart';
 import '../utils/custom_scroll_behaviour.dart';
 import '../utils/scheduler_service.dart';
+import '../utils/first_launch_setup.dart';
 import 'matrix.dart';
 
 class PluslyApp extends StatefulWidget {
@@ -66,6 +67,15 @@ class _PluslyAppState extends State<PluslyApp> {
     super.initState();
     initPlatformState();
     _startScheduler();
+    // First-launch setup: ask for notification + battery permissions.
+    // Delay so the router/navigator context exists for showing dialogs.
+    Future.delayed(const Duration(seconds: 3), () {
+      final routerContext =
+          PluslyApp.router.routerDelegate.navigatorKey.currentContext;
+      if (mounted && routerContext != null) {
+        maybeShowFirstLaunchSetup(routerContext);
+      }
+    });
     // Check for updates on app startup (with delay to let UI load).
     // Use the GoRouter navigator context, not the raw PluslyApp state context,
     // because there is no Navigator above MaterialApp.router yet.
