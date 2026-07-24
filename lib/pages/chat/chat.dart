@@ -799,18 +799,26 @@ class ChatController extends State<ChatPageWithRoom>
     // firing its callback at the right moment.
     final tl = timeline;
     if (tl != null) {
-      var frames = 0;
-      while (mounted && frames < 120) {
-        // The sent event is recognizable by being a local echo (no eventId yet
-        // or status == sending) at the top of the reversed list.
+      // Deterministic: the Matrix SDK appends the local echo asynchronously.
+      // The onUpdate/onInsert callbacks are racy (sometimes the bubble shows up
+      // only on the next server sync), so we poll until the sent event is
+      // actually in timeline.events. We use an exponential backoff so the UI
+      // thread is not hammered with a rebuild every 16ms; instead we start at
+      // 50ms and double up to 400ms. The bubble still appears immediately in
+      // practice, but without jank.
+      var delay = const Duration(milliseconds: 50);
+      var attempts = 0;
+      const maxAttempts = 6; // 50 + 100 + 200 + 400 + 400 + 400 = max ~1.55s
+      while (mounted && attempts < maxAttempts) {
         final events = tl.events;
         final hasPending = events.any(
           (e) =>
               (e.status == EventStatus.sending || e.eventId == null) &&
               e.body == text,
         );
-        updateView();
+
         if (hasPending) {
+          updateView();
           // Jump to bottom so the user sees their message right away.
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted &&
@@ -819,12 +827,17 @@ class ChatController extends State<ChatPageWithRoom>
               scrollController.jumpTo(0);
             }
           });
-          break;
+          return;
         }
-        await Future.delayed(const Duration(milliseconds: 16));
-        frames++;
+
+        await Future.delayed(delay);
+        attempts++;
+        if (delay < const Duration(milliseconds: 400)) {
+          delay *= 2;
+        }
       }
-      // Final rebuild in case it landed just after the loop.
+      // Final rebuild in case the event landed just after the last poll
+      // or the SDK is about to fire its callback.
       updateView();
     }
   }
