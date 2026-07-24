@@ -151,7 +151,7 @@ class BackgroundPush {
 
   Future<void> cancelNotification(Client client, String roomId) async {
     Logs().v('Cancel notification for room', roomId);
-    // FIX #3: use same ID formula as push_helper: '${clientName}_${roomId}'.hashCode
+    // Must use the SAME ID formula as push_helper where notifications are shown.
     await _flutterLocalNotificationsPlugin.cancel(id: '${client.clientName}_$roomId'.hashCode);
 
     // Workaround for app icon badge not updating
@@ -310,6 +310,8 @@ class BackgroundPush {
       return;
     }
     Logs().i("Setting up push notifications...");
+    // DEBUG: print current UnifiedPush state so we can diagnose silent failures.
+    await _logPushState();
     if (!PlatformInfos.isIOS &&
         (await UnifiedPush.getDistributors()).isNotEmpty) {
       // Check if saved distributor exists but endpoint is invalid (post-reset scenario)
@@ -360,6 +362,28 @@ class BackgroundPush {
         );
       }
     });
+  }
+
+  Future<void> _logPushState() async {
+    try {
+      final distributors = await UnifiedPush.getDistributors();
+      final savedDistributor = await UnifiedPush.getDistributor();
+      Logs().i('[Push] Distributors: $distributors');
+      Logs().i('[Push] Saved distributor: $savedDistributor');
+      for (final client in clients.where((c) => c.isLogged())) {
+        final endpoint = matrix?.store.getString(
+          client.clientName + AppSettings.unifiedPushEndpoint.key,
+        );
+        final registered = matrix?.store.getBool(
+          client.clientName + AppSettings.unifiedPushRegistered.key,
+        );
+        Logs().i(
+          '[Push] Client ${client.clientName}: endpoint=${endpoint ?? 'none'}, registered=$registered',
+        );
+      }
+    } catch (e, s) {
+      Logs().w('[Push] Failed to log push state', e, s);
+    }
   }
 
   Future<void> setupUp() async {
