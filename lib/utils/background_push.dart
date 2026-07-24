@@ -65,6 +65,22 @@ class BackgroundPush {
   bool upAction = false;
 
   Future<void> initialiseLocalNotifications() async {
+    // Android 8+ (API 26+) requires a notification channel before any
+    // notification can be shown. Without this, show() silently fails.
+    if (PlatformInfos.isAndroid) {
+      final androidPlugin = _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      await androidPlugin?.createNotificationChannel(
+        const AndroidNotificationChannel(
+          AppConfig.pushNotificationsChannelId,
+          'Berichten',
+          description: 'Inkomende chatberichten',
+          importance: Importance.high,
+        ),
+      );
+    }
+
     await _flutterLocalNotificationsPlugin.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('notifications_icon'),
