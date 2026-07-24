@@ -836,8 +836,13 @@ class ChatController extends State<ChatPageWithRoom>
         );
         final found = hasPending || hasRecentSentByMe;
 
+        Logs().i(
+          '[SendPoll] attempt=$attempts events=${events.length} pending=$hasPending recentByMe=$hasRecentSentByMe',
+        );
+
         if (found) {
           // Force a rebuild so the key map is fresh for the new/updated event.
+          Logs().i('[SendPoll] local echo found, calling updateView()');
           updateView();
           // Jump to bottom so the user sees their message right away.
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -858,7 +863,10 @@ class ChatController extends State<ChatPageWithRoom>
       }
       // Final rebuild in case the event landed just after the last poll
       // or the SDK is about to fire its callback.
+      Logs().i('[SendPoll] local echo NOT found after $attempts attempts, final updateView()');
       updateView();
+    } else {
+      Logs().i('[SendPoll] timeline is null after send');
     }
   }
 
