@@ -806,9 +806,21 @@ class ChatController extends State<ChatPageWithRoom>
       // thread is not hammered with a rebuild every 16ms; instead we start at
       // 50ms and double up to 400ms. The bubble still appears immediately in
       // practice, but without jank.
+      //
+      // We match a local echo by:
+      //   1. status == sending or eventId == null (classic local echo), OR
+      //   2. a recent event with the same body sent by us. This catches the
+      //      case where the SDK already promoted the echo to sent/synced before
+      //      the loop sees it.
+      final myUserId = room.client.userID;
+      final sentAtThreshold = DateTime.now().toUtc().subtract(
+        const Duration(seconds: 30),
+      );
+
       var delay = const Duration(milliseconds: 50);
       var attempts = 0;
-      const maxAttempts = 6; // 50 + 100 + 200 + 400 + 400 + 400 = max ~1.55s
+      // 50 + 100 + 200 + 400*7 = max ~3.35s. E2EE/bridge rooms can be slow.
+      const maxAttempts = 10;
       while (mounted && attempts < maxAttempts) {
         final events = tl.events;
         final hasPending = events.any(
@@ -816,8 +828,16 @@ class ChatController extends State<ChatPageWithRoom>
               (e.status == EventStatus.sending || e.eventId == null) &&
               e.body == text,
         );
+        final hasRecentSentByMe = events.any(
+          (e) =>
+              e.body == text &&
+              e.senderId == myUserId &&
+              e.originServerTs.isAfter(sentAtThreshold),
+        );
+        final found = hasPending || hasRecentSentByMe;
 
-        if (hasPending) {
+        if (found) {
+          // Force a rebuild so the key map is fresh for the new/updated event.
           updateView();
           // Jump to bottom so the user sees their message right away.
           WidgetsBinding.instance.addPostFrameCallback((_) {
