@@ -706,6 +706,23 @@ class ChatListController extends State<ChatList>
   }
 
   Timer? _cacheSaveTimer;
+  Timer? _roomCacheSaveTimer;
+
+  /// Debounced persistence of the chat list so a burst of sync updates
+  /// (or a send-triggered refresh) doesn't hammer SharedPreferences with
+  /// dozens of jsonEncode + setString writes per second on the main isolate.
+  void scheduleRoomCacheSave({
+    Duration delay = const Duration(seconds: 1),
+  }) {
+    _roomCacheSaveTimer?.cancel();
+    _roomCacheSaveTimer = Timer(delay, () {
+      if (!mounted) return;
+      final client = Matrix.of(context).client;
+      if (client.prevBatch != null && client.rooms.isNotEmpty) {
+        ChatListCacheService.saveRooms(client.rooms);
+      }
+    });
+  }
 
   void _preloadChats() {
     // Preload chat timelines in background — instant opens.
@@ -811,6 +828,7 @@ class ChatListController extends State<ChatList>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _cacheSaveTimer?.cancel();
+    _roomCacheSaveTimer?.cancel();
     _intentDataStreamSubscription?.cancel();
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();
