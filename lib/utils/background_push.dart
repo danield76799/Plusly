@@ -65,12 +65,18 @@ class BackgroundPush {
   bool upAction = false;
 
   Future<void> initialiseLocalNotifications() async {
-    // Android 8+ (API 26+) requires a notification channel before any
-    // notification can be shown. Without this, show() silently fails.
+    // Android 13+ requires a runtime notification permission. Ask early so
+    // the diagnostic test (and later real pushes) can actually be displayed.
     if (PlatformInfos.isAndroid) {
       final androidPlugin = _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
               AndroidFlutterLocalNotificationsPlugin>();
+      final granted = await androidPlugin?.requestNotificationsPermission() ??
+          false;
+      Logs().i('[Diagnose] Notification permission granted: $granted');
+
+      // Android 8+ (API 26+) requires a notification channel before any
+      // notification can be shown. Without this, show() silently fails.
       await androidPlugin?.createNotificationChannel(
         const AndroidNotificationChannel(
           AppConfig.pushNotificationsChannelId,
