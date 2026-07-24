@@ -664,6 +664,24 @@ class ChatController extends State<ChatPageWithRoom>
           _setReadMarkerFuture = null;
         });
 
+    // Optimistic local update: the server roundtrip can take seconds before
+    // the next sync updates room.notificationCount / room.fullyRead. Reset
+    // them now so the chat-list badge disappears immediately.
+    if (eventId != null && eventId == room.lastEvent?.eventId) {
+      room.notificationCount = 0;
+      // Also persist locally so the badge stays 0 across rebuilds until the
+      // server confirms with a sync.
+      unawaited(
+        room.client.setAccountDataPerRoom(
+          room.client.userID!,
+          room.id,
+          'm.fully_read',
+          {'event_id': eventId},
+        ),
+      );
+      updateView();
+    }
+
     if (timeline is RoomTimeline) {
       if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
         Matrix.of(
