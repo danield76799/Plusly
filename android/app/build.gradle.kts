@@ -8,6 +8,15 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// CI writes exact versionCode/versionName to local.properties. Load it here
+// because it is not available as a ready-made variable in the app module.
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(FileInputStream(localPropertiesFile))
+    }
+}
+
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
 }
