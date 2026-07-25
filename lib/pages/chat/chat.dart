@@ -634,7 +634,6 @@ class ChatController extends State<ChatPageWithRoom>
   void setReadMarker({String? eventId}) {
     if (_setReadMarkerFuture != null) return;
     if (_scrolledUp.value) return;
-    if (scrollUpBannerEventId != null) return;
 
     if (eventId == null &&
         !room.hasNewMessages &&
@@ -653,6 +652,37 @@ class ChatController extends State<ChatPageWithRoom>
     final timeline = this.timeline;
     if (timeline == null || timeline.events.isEmpty) return;
 
+    // Optimistic local update: the server roundtrip can take seconds before
+    // the next sync updates room.notificationCount / room.fullyRead. Reset
+    // them now so the chat-list badge disappears immediately. This must run
+    // for BOTH explicit (eventId given) and implicit (eventId == null, e.g.
+    // on timeline load / scroll-to-bottom) calls, otherwise the badge stays
+    // stale until the server sync arrives — which can be slow or fail.
+    // Runs regardless of the "scroll up" banner below, so opening a room
+    // always clears the unread badge even if older messages sit above the
+    // read marker.
+    final markerEventId = eventId ?? room.lastEvent?.eventId;
+    if (markerEventId != null) {
+      room.notificationCount = 0;
+      // Also persist locally so the badge stays 0 across rebuilds until the
+      // server confirms with a sync.
+      unawaited(
+        room.client.setAccountDataPerRoom(
+          room.client.userID!,
+          room.id,
+          'm.fully_read',
+          {'event_id': markerEventId},
+        ),
+      );
+      updateView();
+    }
+
+    // Don't send the actual server read marker if a "scroll up" banner is
+    // shown (user hasn't seen messages above the marker yet). The optimistic
+    // badge reset above already ran, so the chat list is cleared; the server
+    // marker is simply deferred until the user scrolls up / taps the banner.
+    if (scrollUpBannerEventId != null) return;
+
     Logs().d('Set read marker...', eventId);
     // ignore: unawaited_futures
     _setReadMarkerFuture = timeline
@@ -663,24 +693,6 @@ class ChatController extends State<ChatPageWithRoom>
         .whenComplete(() {
           _setReadMarkerFuture = null;
         });
-
-    // Optimistic local update: the server roundtrip can take seconds before
-    // the next sync updates room.notificationCount / room.fullyRead. Reset
-    // them now so the chat-list badge disappears immediately.
-    if (eventId != null && eventId == room.lastEvent?.eventId) {
-      room.notificationCount = 0;
-      // Also persist locally so the badge stays 0 across rebuilds until the
-      // server confirms with a sync.
-      unawaited(
-        room.client.setAccountDataPerRoom(
-          room.client.userID!,
-          room.id,
-          'm.fully_read',
-          {'event_id': eventId},
-        ),
-      );
-      updateView();
-    }
 
     if (timeline is RoomTimeline) {
       if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
