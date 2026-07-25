@@ -3907,5 +3907,137 @@
     "type": "String",
     "description": "Button label to start the push setup flow.",
     "placeholders": {}
+  },
+  "pushError": "Push error",
+  "@pushError": {
+    "type": "String",
+    "description": "Title shown when push setup fails.",
+    "placeholders": {}
+  },
+  "pushNotificationsLabel": "Push notifications",
+  "@pushNotificationsLabel": {
+    "type": "String",
+    "description": "Label for the push notifications section.",
+    "placeholders": {}
+  },
+  "choosePushService": "Choose push notification service",
+  "@choosePushService": {
+    "type": "String",
+    "description": "Title of dialog to choose push service.",
+    "placeholders": {}
+  },
+  "downloadCompleteInstall": "Download complete! Installing...",
+  "@downloadCompleteInstall": {
+    "type": "String",
+    "description": "Snackbar shown after APK download completes.",
+    "placeholders": {}
+  },
+  "downloadStartFailed": "Could not start download: {error}",
+  "@downloadStartFailed": {
+    "type": "String",
+    "description": "Snackbar shown when download cannot start. {error} = exception message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "noApkAvailableBrowser": "No APK available for direct download. Use the browser option.",
+  "@noApkAvailableBrowser": {
+    "type": "String",
+    "description": "Snackbar when no APK is available, only AAB.",
+    "placeholders": {}
+  },
+  "openGitHubReleasePage": "Open GitHub release page",
+  "@openGitHubReleasePage": {
+    "type": "String",
+    "description": "List tile to open the GitHub release page.",
+    "placeholders": {}
+  },
+  "downloadViaBrowser": "Download directly via browser",
+  "@downloadViaBrowser": {
+    "type": "String",
+    "description": "Subtitle for opening release page in browser.",
+    "placeholders": {}
+  },
+  "downloadSourceCode": "Download source code",
+  "@downloadSourceCode": {
+    "type": "String",
+    "description": "List tile to download source code.",
+    "placeholders": {}
+  },
+  "updateCheckFailed": "Update check failed: {error}",
+  "@updateCheckFailed": {
+    "type": "String",
+    "description": "Snackbar when update check fails. {error} = exception message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "pushStatusActive": "Active: {provider}",
+  "@pushStatusActive": {
+    "type": "String",
+    "description": "Push status when active. {provider} = provider name.",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "pushStatusInitializing": "Initializing...",
+  "@pushStatusInitializing": {
+    "type": "String",
+    "description": "Push status while initializing.",
+    "placeholders": {}
+  },
+  "pushStatusFailed": "Failed",
+  "@pushStatusFailed": {
+    "type": "String",
+    "description": "Push status when failed.",
+    "placeholders": {}
+  },
+  "pushStatusDisabled": "Disabled",
+  "@pushStatusDisabled": {
+    "type": "String",
+    "description": "Push status when disabled.",
+    "placeholders": {}
+  },
+  "pushStatusInitial": "Not started yet",
+  "@pushStatusInitial": {
+    "type": "String",
+    "description": "Push status before start.",
+    "placeholders": {}
+  },
+  "pushUnknownProvider": "unknown",
+  "@pushUnknownProvider": {
+    "type": "String",
+    "description": "Fallback when provider name is unknown.",
+    "placeholders": {}
+  },
+  "pushUnknownError": "Unknown error",
+  "@pushUnknownError": {
+    "type": "String",
+    "description": "Fallback error message.",
+    "placeholders": {}
+  },
+  "unifiedPushPrivacy": "Privacy-friendly, no Google",
+  "@unifiedPushPrivacy": {
+    "type": "String",
+    "description": "Subtitle describing UnifiedPush privacy.",
+    "placeholders": {}
+  },
+  "notApplicable": "N/A",
+  "@notApplicable": {
+    "type": "String",
+    "description": "Short 'not applicable' label.",
+    "placeholders": {}
+  },
+  "shareFor": "Share for:",
+  "@shareFor": {
+    "type": "String",
+    "description": "Label above the live-location duration picker.",
+    "placeholders": {}
   }
 }

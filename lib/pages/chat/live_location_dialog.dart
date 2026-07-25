@@ -178,7 +178,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
             ),
           ),
           const SizedBox(height: 16),
-          Text('Delen voor:', style: Theme.of(context).textTheme.titleSmall),
+          Text(L10n.of(context).shareFor, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           SegmentedButton<int>(
             segments: const [

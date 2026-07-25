@@ -3531,5 +3531,147 @@
     "type": "String",
     "description": "Button label to start the push setup flow.",
     "placeholders": {}
+  },
+  "pushError": "Push fout",
+  "@pushError": {
+    "type": "String",
+    "description": "Title shown when push setup fails.",
+    "placeholders": {}
+  },
+  "pushNotificationsLabel": "Push notificaties",
+  "@pushNotificationsLabel": {
+    "type": "String",
+    "description": "Label for the push notifications section.",
+    "placeholders": {}
+  },
+  "choosePushService": "Kies push notificatie service",
+  "@choosePushService": {
+    "type": "String",
+    "description": "Title of dialog to choose push service.",
+    "placeholders": {}
+  },
+  "downloadCompleteInstall": "Download compleet! Installeren...",
+  "@downloadCompleteInstall": {
+    "type": "String",
+    "description": "Snackbar shown after APK download completes.",
+    "placeholders": {}
+  },
+  "downloadFailed": "Download mislukt: {error}",
+  "@downloadFailed": {
+    "type": "String",
+    "description": "Snackbar shown when APK download fails. {error} = exception message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "downloadStartFailed": "Kon download niet starten: {error}",
+  "@downloadStartFailed": {
+    "type": "String",
+    "description": "Snackbar shown when download cannot start. {error} = exception message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "noApkAvailableBrowser": "Geen APK beschikbaar voor directe download. Gebruik de browser optie.",
+  "@noApkAvailableBrowser": {
+    "type": "String",
+    "description": "Snackbar when no APK is available, only AAB.",
+    "placeholders": {}
+  },
+  "openGitHubReleasePage": "Open GitHub releasepagina",
+  "@openGitHubReleasePage": {
+    "type": "String",
+    "description": "List tile to open the GitHub release page.",
+    "placeholders": {}
+  },
+  "downloadViaBrowser": "Direct downloaden via browser",
+  "@downloadViaBrowser": {
+    "type": "String",
+    "description": "Subtitle for opening release page in browser.",
+    "placeholders": {}
+  },
+  "downloadSourceCode": "Download source code",
+  "@downloadSourceCode": {
+    "type": "String",
+    "description": "List tile to download source code.",
+    "placeholders": {}
+  },
+  "updateCheckFailed": "Updatecontrole mislukt: {error}",
+  "@updateCheckFailed": {
+    "type": "String",
+    "description": "Snackbar when update check fails. {error} = exception message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "pushStatusActive": "Actief: {provider}",
+  "@pushStatusActive": {
+    "type": "String",
+    "description": "Push status when active. {provider} = provider name.",
+    "placeholders": {
+      "provider": {
+        "type": "String"
+      }
+    }
+  },
+  "pushStatusInitializing": "Initialiseren...",
+  "@pushStatusInitializing": {
+    "type": "String",
+    "description": "Push status while initializing.",
+    "placeholders": {}
+  },
+  "pushStatusFailed": "Mislukt",
+  "@pushStatusFailed": {
+    "type": "String",
+    "description": "Push status when failed.",
+    "placeholders": {}
+  },
+  "pushStatusDisabled": "Uitgeschakeld",
+  "@pushStatusDisabled": {
+    "type": "String",
+    "description": "Push status when disabled.",
+    "placeholders": {}
+  },
+  "pushStatusInitial": "Nog niet gestart",
+  "@pushStatusInitial": {
+    "type": "String",
+    "description": "Push status before start.",
+    "placeholders": {}
+  },
+  "pushUnknownProvider": "onbekend",
+  "@pushUnknownProvider": {
+    "type": "String",
+    "description": "Fallback when provider name is unknown.",
+    "placeholders": {}
+  },
+  "pushUnknownError": "Onbekende fout",
+  "@pushUnknownError": {
+    "type": "String",
+    "description": "Fallback error message.",
+    "placeholders": {}
+  },
+  "unifiedPushPrivacy": "Privacy-vriendelijk, geen Google",
+  "@unifiedPushPrivacy": {
+    "type": "String",
+    "description": "Subtitle describing UnifiedPush privacy.",
+    "placeholders": {}
+  },
+  "notApplicable": "N.v.t.",
+  "@notApplicable": {
+    "type": "String",
+    "description": "Short 'not applicable' label.",
+    "placeholders": {}
+  },
+  "shareFor": "Delen voor:",
+  "@shareFor": {
+    "type": "String",
+    "description": "Label above the live-location duration picker.",
+    "placeholders": {}
   }
 }

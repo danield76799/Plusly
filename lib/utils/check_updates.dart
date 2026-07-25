@@ -432,7 +432,7 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
     if (context.mounted) {
       scaffold.showSnackBar(
         SnackBar(
-          content: Text('Download compleet! Installeren...'),
+          content: Text(l10n.downloadCompleteInstall),
           duration: const Duration(seconds: 3),
         ),
       );
@@ -514,7 +514,7 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
     if (context.mounted) {
       scaffold.showSnackBar(
         SnackBar(
-          content: Text('Download mislukt: $e'),
+          content: Text(l10n.downloadFailed(e.toString())),
           duration: const Duration(seconds: 5),
           action: SnackBarAction(
             label: 'Open Pagina',
@@ -756,7 +756,7 @@ Future<void> checkForUpdates(BuildContext context) async {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Kon download niet starten: $e'),
+                              content: Text(l10n.downloadStartFailed(e.toString())),
                               duration: const Duration(seconds: 5),
                               action: SnackBarAction(
                                 label: 'Open Pagina',
@@ -772,8 +772,8 @@ Future<void> checkForUpdates(BuildContext context) async {
                       // No APK available, show message
                       Navigator.of(ctx).pop();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Geen APK beschikbaar voor directe download. Gebruik de browser optie.'),
+                        SnackBar(
+                          content: Text(l10n.noApkAvailableBrowser),
                           duration: Duration(seconds: 5),
                         ),
                       );
@@ -782,8 +782,8 @@ Future<void> checkForUpdates(BuildContext context) async {
                 ),
               ListTile(
                 leading: const Icon(Icons.open_in_browser),
-                title: const Text('Open GitHub releasepagina'),
-                subtitle: const Text('Direct downloaden via browser'),
+                title: Text(l10n.openGitHubReleasePage),
+                subtitle: Text(l10n.downloadViaBrowser),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.of(ctx).pop();
@@ -795,7 +795,7 @@ Future<void> checkForUpdates(BuildContext context) async {
               if (safeRelease.browserDownloadUrl.isNotEmpty)
                 ListTile(
                   leading: const Icon(Icons.source),
-                  title: const Text('Download source code'),
+                  title: Text(l10n.downloadSourceCode),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     launchUrlString(safeRelease.browserDownloadUrl);
@@ -809,9 +809,10 @@ Future<void> checkForUpdates(BuildContext context) async {
   } catch (e) {
     Logs().e('Failed to check for updates', e);
     if (context.mounted) {
+      final l10n = L10n.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Updatecontrole mislukt: $e'),
+          content: Text(l10n.updateCheckFailed(e.toString())),
           duration: const Duration(seconds: 5),
         ),
       );

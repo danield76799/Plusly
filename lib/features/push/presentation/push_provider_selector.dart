@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import 'package:Pulsly/generated/l10n/l10n.dart';
 import '../domain/push_provider.dart';
 import '../domain/push_state.dart';
 import 'push_controller.dart';
@@ -17,6 +18,7 @@ class PushProviderSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = L10n.of(context);
     return AnimatedBuilder(
       animation: controller,
       builder: (context, child) {
@@ -24,24 +26,28 @@ class PushProviderSelector extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildStatusTile(context, state),
+            _buildStatusTile(context, state, l10n),
             if (state.isActive) ...[
               const Divider(),
               _buildProviderTile(
                 context,
+                l10n: l10n,
                 title: 'UnifiedPush',
-                subtitle: 'Privacy-vriendelijk, geen Google',
+                subtitle: l10n.unifiedPushPrivacy,
                 icon: Icons.security,
-                isSelected: state.activeProvider == PushProviderType.unifiedPush,
-                onTap: () => controller.switchProvider(PushProviderType.unifiedPush),
+                isSelected:
+                    state.activeProvider == PushProviderType.unifiedPush,
+                onTap: () =>
+                    controller.switchProvider(PushProviderType.unifiedPush),
                 isAvailable: Platform.isAndroid,
               ),
             ],
             if (state.isFailed)
               ListTile(
                 leading: const Icon(Icons.error, color: Colors.red),
-                title: const Text('Push fout'),
-                subtitle: Text(state.errorMessage ?? 'Onbekende fout'),
+                title: Text(l10n.pushError),
+                subtitle:
+                    Text(state.errorMessage ?? l10n.pushUnknownError),
               ),
           ],
         );
@@ -49,39 +55,45 @@ class PushProviderSelector extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusTile(BuildContext context, PushState state) {
+  Widget _buildStatusTile(
+    BuildContext context,
+    PushState state,
+    L10n l10n,
+  ) {
     final theme = Theme.of(context);
-    
+
     IconData icon;
     Color color;
     String status;
-    
+
     switch (state.status) {
       case PushStatus.active:
         icon = Icons.notifications_active;
         color = Colors.green;
-        status = 'Actief: ${state.activeProvider?.name ?? 'onbekend'}';
+        status = l10n.pushStatusActive(
+          state.activeProvider?.name ?? l10n.pushUnknownProvider,
+        );
       case PushStatus.initializing:
         icon = Icons.sync;
         color = Colors.orange;
-        status = 'Initialiseren...';
+        status = l10n.pushStatusInitializing;
       case PushStatus.failed:
         icon = Icons.error;
         color = Colors.red;
-        status = 'Mislukt';
+        status = l10n.pushStatusFailed;
       case PushStatus.disabled:
         icon = Icons.notifications_off;
         color = Colors.grey;
-        status = 'Uitgeschakeld';
+        status = l10n.pushStatusDisabled;
       case PushStatus.initial:
         icon = Icons.notifications;
         color = theme.colorScheme.primary;
-        status = 'Nog niet gestart';
+        status = l10n.pushStatusInitial;
     }
 
     return ListTile(
       leading: Icon(icon, color: color),
-      title: const Text('Push notificaties'),
+      title: Text(l10n.pushNotificationsLabel),
       subtitle: Text(status),
       trailing: state.isInitializing
           ? const SizedBox(
@@ -95,6 +107,7 @@ class PushProviderSelector extends StatelessWidget {
 
   Widget _buildProviderTile(
     BuildContext context, {
+    required L10n l10n,
     required String title,
     required String subtitle,
     required IconData icon,
@@ -111,7 +124,7 @@ class PushProviderSelector extends StatelessWidget {
           ? const Icon(Icons.check_circle, color: Colors.green)
           : isAvailable
               ? const Icon(Icons.circle_outlined)
-              : const Text('N/A'),
+              : Text(l10n.notApplicable),
       onTap: isAvailable ? onTap : null,
     );
   }

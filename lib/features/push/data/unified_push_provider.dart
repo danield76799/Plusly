@@ -9,6 +9,8 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unifiedpush/unifiedpush.dart' as up;
 
+import 'package:Pulsly/generated/l10n/l10n.dart';
+
 import '../domain/push_provider.dart' show PushProvider, PushProviderType, PushMessage;
 
 import '../../../config/app_config.dart';
@@ -272,8 +274,8 @@ class UnifiedPushProvider implements PushProvider {
 
       return await showDialog<String>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Kies push notificatie service'),
+        builder: (ctx) => AlertDialog(
+          title: Text(L10n.of(ctx).choosePushService),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: distributors.map((distributor) {
@@ -288,7 +290,7 @@ class UnifiedPushProvider implements PushProvider {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Annuleren'),
+              child: Text(L10n.of(ctx).cancel),
             ),
           ],
         ),
