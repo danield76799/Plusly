@@ -426,8 +426,18 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       notification.sender?.trim() ??
       _roomDisplayName(client, notification.roomId, l10n) ??
       '';
-  final body = (notification.content?['body'] as String?)?.trim();
-  if (senderName.isEmpty && (body == null || body.isEmpty)) {
+  // The push payload body is only readable for *unencrypted* rooms. For
+  // E2EE rooms the gateway cannot decrypt it and sends ciphertext (often a
+  // long base64/blob or a JSON object starting with '{'). Showing that to the
+  // user is useless, so detect it and fall back to a generic message.
+  final rawBody = (notification.content?['body'] as String?)?.trim();
+  final looksEncrypted = rawBody == null ||
+      rawBody.isEmpty ||
+      rawBody.startsWith('{') ||
+      // ciphertext has no spaces and is unusually long for a chat line
+      (!rawBody.contains(' ') && rawBody.length > 40);
+  final body = looksEncrypted ? l10n.newMessageInFluffyChat : rawBody;
+  if (senderName.isEmpty && looksEncrypted) {
     return;
   }
 
@@ -437,7 +447,7 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   await flutterLocalNotificationsPlugin.show(
     id: id,
     title: senderName.isNotEmpty ? senderName : roomName,
-    body: body ?? l10n.newMessageInFluffyChat,
+    body: body,
     notificationDetails: NotificationDetails(
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,

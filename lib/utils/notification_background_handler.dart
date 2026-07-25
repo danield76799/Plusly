@@ -194,7 +194,15 @@ Future<void> notificationTap(
       if (roomId == null) {
         throw Exception('Selected notification with action but no payload');
       }
-      await client.userDeviceKeysLoading;
+      // Wait for device keys so we can decrypt the room/events for the
+      // reply action. If this fails (e.g. no network), don't crash the
+      // whole handler — fall back to sending without the rich context.
+      try {
+        await client.userDeviceKeysLoading
+            ?.timeout(const Duration(seconds: 10));
+      } catch (e) {
+        Logs().w('Notification action: device keys not loaded', e);
+      }
       final room = client.getRoomById(roomId);
       if (room == null) {
         throw Exception(
