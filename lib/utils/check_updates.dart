@@ -209,11 +209,12 @@ bool isNewerVersion(String latest, String current) {
       final currentBuild = int.tryParse(currentBuildNumber) ?? 0;
       return latestBuild > currentBuild;
     }
-    // A tagged CI build (e.g. +2350) is newer than a local/package build that
-    // only reports the semver core (no build number).
-    if (latestBuildNumber.isNotEmpty && currentBuildNumber.isEmpty) {
-      return true;
-    }
+    // A tagged CI build (e.g. +2350) is NOT automatically "newer" than a
+    // local/package build that only reports the semver core (no build number).
+    // Treating it as always-newer caused false "update available" prompts
+    // when currentVersion lacked a build tag (e.g. PackageInfo not yet loaded).
+    // If both share the same semver core and current has no build number,
+    // treat them as equal (no update).
     return false;
   }
 
@@ -568,6 +569,7 @@ Future<void> checkForUpdates(BuildContext context) async {
 
   try {
     final currentVersion = await PlatformInfos.getVersion();
+    Logs().i('UpdateCheck: currentVersion="$currentVersion"');
 
     // Primary: the version file on the repo (no API rate-limit, always in
     // sync because the deploy workflow rewrites it on every release).
