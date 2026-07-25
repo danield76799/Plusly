@@ -3936,11 +3936,11 @@
   "deleteMissedMessageDescription": "Это сообщение не будет отправлено.",
   "undo": "Отменить",
   "deleteScheduled": "Удалить",
-  "pushSettingsTitle": "Check push settings",
-  "pushSettingsSubtitle": "Allow notifications and disable battery optimization for reliable push.",
-  "pushSetupDialogTitle": "Set up push notifications",
-  "pushSetupDialogBody": "For reliable background messages you need two things:\n\n1. Allow notifications\n2. Turn off battery optimization (so Plusly doesn't fall asleep)",
-  "pushNotificationsDenied": "Notifications denied. Enable them in the Android settings for Plusly.",
-  "pushBatteryOptimizationHint": "Turn off battery optimization for Plusly in the Android settings.",
-  "setup": "Set up"
+  "pushSettingsTitle": "Проверить настройки уведомлений",
+  "pushSettingsSubtitle": "Разрешите уведомления и отключите оптимизацию батареи для надёжных push-уведомлений.",
+  "pushSetupDialogTitle": "Настроить push-уведомления",
+  "pushSetupDialogBody": "Для надёжного получения сообщений в фоновом режиме нужно две вещи:\n\n1. Разрешить уведомления\n2. Отключить оптимизацию батареи (чтобы Plusly не засыпал)",
+  "pushNotificationsDenied": "Уведомления запрещены. Включите их в настройках Android для Plusly.",
+  "pushBatteryOptimizationHint": "Отключите оптимизацию бatterии для Plusly в настройках Android.",
+  "setup": "Настроить"
 }

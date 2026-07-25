@@ -3447,11 +3447,11 @@
   "deleteMissedMessageDescription": "Diese Nachricht wird nicht gesendet.",
   "undo": "Rückgängig",
   "deleteScheduled": "Löschen",
-  "pushSettingsTitle": "Check push settings",
-  "pushSettingsSubtitle": "Allow notifications and disable battery optimization for reliable push.",
-  "pushSetupDialogTitle": "Set up push notifications",
-  "pushSetupDialogBody": "For reliable background messages you need two things:\n\n1. Allow notifications\n2. Turn off battery optimization (so Plusly doesn't fall asleep)",
-  "pushNotificationsDenied": "Notifications denied. Enable them in the Android settings for Plusly.",
-  "pushBatteryOptimizationHint": "Turn off battery optimization for Plusly in the Android settings.",
-  "setup": "Set up"
+  "pushSettingsTitle": "Push-Einstellungen prüfen",
+  "pushSettingsSubtitle": "Benachrichtigungen erlauben und Batterieoptimierung für zuverlässige Push-Nachrichten deaktivieren.",
+  "pushSetupDialogTitle": "Push-Benachrichtigungen einrichten",
+  "pushSetupDialogBody": "Für zuverlässige Nachrichten im Hintergrund benötigst du zwei Dinge:\n\n1. Benachrichtigungen erlauben\n2. Batterieoptimierung deaktivieren (damit Plusly nicht eingeschläfert wird)",
+  "pushNotificationsDenied": "Benachrichtigungen abgelehnt. Aktiviere sie in den Android-Einstellungen für Plusly.",
+  "pushBatteryOptimizationHint": "Deaktiviere die Batterieoptimierung für Plusly in den Android-Einstellungen.",
+  "setup": "Einrichten"
 }
