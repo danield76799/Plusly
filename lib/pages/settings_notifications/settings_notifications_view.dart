@@ -138,10 +138,9 @@ class SettingsNotificationsView extends StatelessWidget {
                         ),
                         ListTile(
                           leading: const Icon(Icons.tune),
-                          title: const Text('Push-instellingen controleren'),
-                          subtitle: const Text(
-                            'Meldingen toestaan en batterijoptimalisatie '
-                            'uitschakelen voor betrouwbare push.',
+                          title: Text(L10n.of(context).pushSettingsTitle),
+                          subtitle: Text(
+                            L10n.of(context).pushSettingsSubtitle,
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => showFirstLaunchSetup(context),

@@ -3377,7 +3377,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },  "generatingReply": "Antwort wird generiert...",
+  },
+  "generatingReply": "Antwort wird generiert...",
   "errorGeneratingReply": "Antwort generieren fehlgeschlagen",
   "encryptedRoomWarning": "Verschlüsselter Raum",
   "encryptedRoomAIDescription": "Diese Nachricht befindet sich in einem verschlüsselten Raum. Die Nutzung von KI sendet den Inhalt an Cloud-Dienste (Groq/Cerebras). Fortfahren?",
@@ -3445,5 +3446,12 @@
   "deleteMissedMessage": "Verpasste Nachricht löschen?",
   "deleteMissedMessageDescription": "Diese Nachricht wird nicht gesendet.",
   "undo": "Rückgängig",
-  "deleteScheduled": "Löschen"
+  "deleteScheduled": "Löschen",
+  "pushSettingsTitle": "Check push settings",
+  "pushSettingsSubtitle": "Allow notifications and disable battery optimization for reliable push.",
+  "pushSetupDialogTitle": "Set up push notifications",
+  "pushSetupDialogBody": "For reliable background messages you need two things:\n\n1. Allow notifications\n2. Turn off battery optimization (so Plusly doesn't fall asleep)",
+  "pushNotificationsDenied": "Notifications denied. Enable them in the Android settings for Plusly.",
+  "pushBatteryOptimizationHint": "Turn off battery optimization for Plusly in the Android settings.",
+  "setup": "Set up"
 }

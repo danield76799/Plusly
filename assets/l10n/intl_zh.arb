@@ -3433,7 +3433,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },  "generatingReply": "正在生成回复...",
+  },
+  "generatingReply": "正在生成回复...",
   "errorGeneratingReply": "生成回复失败",
   "encryptedRoomWarning": "加密房间",
   "encryptedRoomAIDescription": "此消息位于加密房间中。使用AI会将消息内容发送到云服务（Groq/Cerebras）。继续吗？",
@@ -3501,5 +3502,12 @@
   "deleteMissedMessage": "删除未发送的消息？",
   "deleteMissedMessageDescription": "此消息将不会被发送。",
   "undo": "撤销",
-  "deleteScheduled": "删除"
+  "deleteScheduled": "删除",
+  "pushSettingsTitle": "Check push settings",
+  "pushSettingsSubtitle": "Allow notifications and disable battery optimization for reliable push.",
+  "pushSetupDialogTitle": "Set up push notifications",
+  "pushSetupDialogBody": "For reliable background messages you need two things:\n\n1. Allow notifications\n2. Turn off battery optimization (so Plusly doesn't fall asleep)",
+  "pushNotificationsDenied": "Notifications denied. Enable them in the Android settings for Plusly.",
+  "pushBatteryOptimizationHint": "Turn off battery optimization for Plusly in the Android settings.",
+  "setup": "Set up"
 }

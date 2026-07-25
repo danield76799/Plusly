@@ -3866,7 +3866,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },  "generatingReply": "Генерация ответа...",
+  },
+  "generatingReply": "Генерация ответа...",
   "errorGeneratingReply": "Ошибка генерации ответа",
   "encryptedRoomWarning": "Зашифрованная комната",
   "encryptedRoomAIDescription": "Это сообщение в зашифрованной комнате. Использование ИИ отправит содержимое в облачные сервисы (Groq/Cerebras). Продолжить?",
@@ -3934,5 +3935,12 @@
   "deleteMissedMessage": "Удалить пропущенное сообщение?",
   "deleteMissedMessageDescription": "Это сообщение не будет отправлено.",
   "undo": "Отменить",
-  "deleteScheduled": "Удалить"
+  "deleteScheduled": "Удалить",
+  "pushSettingsTitle": "Check push settings",
+  "pushSettingsSubtitle": "Allow notifications and disable battery optimization for reliable push.",
+  "pushSetupDialogTitle": "Set up push notifications",
+  "pushSetupDialogBody": "For reliable background messages you need two things:\n\n1. Allow notifications\n2. Turn off battery optimization (so Plusly doesn't fall asleep)",
+  "pushNotificationsDenied": "Notifications denied. Enable them in the Android settings for Plusly.",
+  "pushBatteryOptimizationHint": "Turn off battery optimization for Plusly in the Android settings.",
+  "setup": "Set up"
 }

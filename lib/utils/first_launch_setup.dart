@@ -6,6 +6,7 @@ import 'package:app_settings/app_settings.dart' as app_settings;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:matrix/matrix.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
 
 /// Key om te onthouden of het first-launch setup-scherm al getoond is.
 const String _firstLaunchSetupDoneKey = 'plusly_first_launch_setup_done';
@@ -45,27 +46,23 @@ Future<void> showFirstLaunchSetup(BuildContext context) async {
 
 /// De daadwerkelijke flow: dialog + permission requests.
 Future<void> _runSetupFlow(BuildContext context) async {
+  final l10n = L10n.of(context);
   final scaffoldMessenger = ScaffoldMessenger.of(context);
 
   await showAdaptiveDialog<bool>(
     context: context,
     barrierDismissible: false,
     builder: (ctx) => AlertDialog(
-      title: const Text('Pushberichten instellen'),
-      content: const Text(
-        'Voor betrouwbare berichten op de achtergrond heb je twee dingen '
-        'nodig:\n\n'
-        '1. Sta meldingen toe\n'
-        '2. Zet batterijoptimalisatie uit (zodat Plusly niet in slaap valt)',
-      ),
+      title: Text(l10n.pushSetupDialogTitle),
+      content: Text(l10n.pushSetupDialogBody),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: const Text('Overslaan'),
+          child: Text(l10n.skip),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(true),
-          child: const Text('Instellen'),
+          child: Text(l10n.setup),
         ),
       ],
     ),
@@ -81,12 +78,9 @@ Future<void> _runSetupFlow(BuildContext context) async {
       if (!result.isGranted && context.mounted) {
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: const Text(
-              'Meldingen geweigerd. Zet ze aan in de Android-instellingen '
-              'voor Plusly.',
-            ),
+            content: Text(l10n.pushNotificationsDenied),
             action: SnackBarAction(
-              label: 'Instellingen',
+              label: l10n.settings,
               onPressed: () => app_settings.AppSettings.openAppSettings(),
             ),
           ),
@@ -107,12 +101,9 @@ Future<void> _runSetupFlow(BuildContext context) async {
         // Leid de gebruiker dan naar de instellingen.
         scaffoldMessenger.showSnackBar(
           SnackBar(
-            content: const Text(
-              'Zet batterijoptimalisatie voor Plusly uit in de '
-              'Android-instellingen.',
-            ),
+            content: Text(l10n.pushBatteryOptimizationHint),
             action: SnackBarAction(
-              label: 'Instellingen',
+              label: l10n.settings,
               onPressed: () => app_settings.AppSettings.openAppSettings(
                 type: app_settings.AppSettingsType.batteryOptimization,
               ),

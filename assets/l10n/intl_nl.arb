@@ -3451,7 +3451,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },  "generatingReply": "Antwoord genereren...",
+  },
+  "generatingReply": "Antwoord genereren...",
   "errorGeneratingReply": "Antwoord genereren mislukt",
   "encryptedRoomWarning": "Versleutelde Kamer",
   "encryptedRoomAIDescription": "Dit bericht is in een versleutelde kamer. AI gebruiken stuurt de inhoud naar cloud services (Groq/Cerebras). Doorgaan?",
@@ -3488,5 +3489,47 @@
   "deleteMissedMessageDescription": "Dit bericht wordt niet verstuurd.",
   "undo": "Ongedaan maken",
   "deleteScheduled": "Verwijderen",
-  "aiAutoFallbackInfo": "Automatische fallback: Groq → Cerebras → Ollama. Als je gekozen provider faalt, wordt de volgende automatisch gebruikt."
+  "aiAutoFallbackInfo": "Automatische fallback: Groq → Cerebras → Ollama. Als je gekozen provider faalt, wordt de volgende automatisch gebruikt.",
+  "pushSettingsTitle": "Push-instellingen controleren",
+  "@pushSettingsTitle": {
+    "type": "String",
+    "description": "Title for the 'Check push settings' button in Settings > Notifications.",
+    "placeholders": {}
+  },
+  "pushSettingsSubtitle": "Meldingen toestaan en batterijoptimalisatie uitschakelen voor betrouwbare push.",
+  "@pushSettingsSubtitle": {
+    "type": "String",
+    "description": "Subtitle for the 'Check push settings' button.",
+    "placeholders": {}
+  },
+  "pushSetupDialogTitle": "Pushberichten instellen",
+  "@pushSetupDialogTitle": {
+    "type": "String",
+    "description": "Title of the first-launch push setup dialog.",
+    "placeholders": {}
+  },
+  "pushSetupDialogBody": "Voor betrouwbare berichten op de achtergrond heb je twee dingen nodig:\n\n1. Sta meldingen toe\n2. Zet batterijoptimalisatie uit (zodat Plusly niet in slaap valt)",
+  "@pushSetupDialogBody": {
+    "type": "String",
+    "description": "Body text of the first-launch push setup dialog.",
+    "placeholders": {}
+  },
+  "pushNotificationsDenied": "Meldingen geweigerd. Zet ze aan in de Android-instellingen voor Plusly.",
+  "@pushNotificationsDenied": {
+    "type": "String",
+    "description": "Snackbar shown when notification permission is denied.",
+    "placeholders": {}
+  },
+  "pushBatteryOptimizationHint": "Zet batterijoptimalisatie voor Plusly uit in de Android-instellingen.",
+  "@pushBatteryOptimizationHint": {
+    "type": "String",
+    "description": "Snackbar shown when battery optimization can't be auto-disabled.",
+    "placeholders": {}
+  },
+  "setup": "Instellen",
+  "@setup": {
+    "type": "String",
+    "description": "Button label to start the push setup flow.",
+    "placeholders": {}
+  }
 }

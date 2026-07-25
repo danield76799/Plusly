@@ -3795,7 +3795,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },  "generatingReply": "Generating reply...",
+  },
+  "generatingReply": "Generating reply...",
   "errorGeneratingReply": "Failed to generate reply",
   "encryptedRoomWarning": "Encrypted Room",
   "encryptedRoomAIDescription": "This message is in an encrypted room. Using AI will send the message content to cloud services (Groq/Cerebras). Continue?",
@@ -3864,5 +3865,47 @@
   "deleteMissedMessageDescription": "This message will not be sent.",
   "undo": "Undo",
   "deleteScheduled": "Delete",
-  "aiAutoFallbackInfo": "Auto-fallback: Groq → Cerebras → Ollama. If your chosen provider fails, the next one is used automatically."
+  "aiAutoFallbackInfo": "Auto-fallback: Groq → Cerebras → Ollama. If your chosen provider fails, the next one is used automatically.",
+  "pushSettingsTitle": "Check push settings",
+  "@pushSettingsTitle": {
+    "type": "String",
+    "description": "Title for the 'Check push settings' button in Settings > Notifications.",
+    "placeholders": {}
+  },
+  "pushSettingsSubtitle": "Allow notifications and disable battery optimization for reliable push.",
+  "@pushSettingsSubtitle": {
+    "type": "String",
+    "description": "Subtitle for the 'Check push settings' button.",
+    "placeholders": {}
+  },
+  "pushSetupDialogTitle": "Set up push notifications",
+  "@pushSetupDialogTitle": {
+    "type": "String",
+    "description": "Title of the first-launch push setup dialog.",
+    "placeholders": {}
+  },
+  "pushSetupDialogBody": "For reliable background messages you need two things:\n\n1. Allow notifications\n2. Turn off battery optimization (so Plusly doesn't fall asleep)",
+  "@pushSetupDialogBody": {
+    "type": "String",
+    "description": "Body text of the first-launch push setup dialog.",
+    "placeholders": {}
+  },
+  "pushNotificationsDenied": "Notifications denied. Enable them in the Android settings for Plusly.",
+  "@pushNotificationsDenied": {
+    "type": "String",
+    "description": "Snackbar shown when notification permission is denied.",
+    "placeholders": {}
+  },
+  "pushBatteryOptimizationHint": "Turn off battery optimization for Plusly in the Android settings.",
+  "@pushBatteryOptimizationHint": {
+    "type": "String",
+    "description": "Snackbar shown when battery optimization can't be auto-disabled.",
+    "placeholders": {}
+  },
+  "setup": "Set up",
+  "@setup": {
+    "type": "String",
+    "description": "Button label to start the push setup flow.",
+    "placeholders": {}
+  }
 }

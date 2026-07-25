@@ -2497,7 +2497,8 @@
   "@connectionFailed": {
     "type": "String",
     "placeholders": {}
-  },  "generatingReply": "返信を生成中...",
+  },
+  "generatingReply": "返信を生成中...",
   "errorGeneratingReply": "返信の生成に失敗しました",
   "encryptedRoomWarning": "暗号化されたルーム",
   "encryptedRoomAIDescription": "このメッセージは暗号化されたルームにあります。AIを使用すると、メッセージの内容がクラウドサービス（Groq/Cerebras）に送信されます。続行しますか？",
@@ -2565,5 +2566,12 @@
   "deleteMissedMessage": "未送信メッセージを削除しますか？",
   "deleteMissedMessageDescription": "このメッセージは送信されません。",
   "undo": "元に戻す",
-  "deleteScheduled": "削除"
+  "deleteScheduled": "削除",
+  "pushSettingsTitle": "Check push settings",
+  "pushSettingsSubtitle": "Allow notifications and disable battery optimization for reliable push.",
+  "pushSetupDialogTitle": "Set up push notifications",
+  "pushSetupDialogBody": "For reliable background messages you need two things:\n\n1. Allow notifications\n2. Turn off battery optimization (so Plusly doesn't fall asleep)",
+  "pushNotificationsDenied": "Notifications denied. Enable them in the Android settings for Plusly.",
+  "pushBatteryOptimizationHint": "Turn off battery optimization for Plusly in the Android settings.",
+  "setup": "Set up"
 }
