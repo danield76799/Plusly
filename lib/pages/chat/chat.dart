@@ -687,7 +687,7 @@ class ChatController extends State<ChatPageWithRoom>
     // ignore: unawaited_futures
     _setReadMarkerFuture = timeline
         .setReadMarker(
-          eventId: eventId,
+          eventId: markerEventId,
           public: shouldSendPublicReadReceipts(room.client, roomId),
         )
         .whenComplete(() {
