@@ -895,7 +895,7 @@ class ChatController extends State<ChatPageWithRoom>
         }
         final found = hasPending || hasRecentSentByMe;
 
-        Logs().i(
+        Logs().v(
           '[SendPoll] attempt=$attempts events=${events.length} isEdit=$isEdit pending=$hasPending recentByMe=$hasRecentSentByMe',
         );
 
@@ -922,7 +922,7 @@ class ChatController extends State<ChatPageWithRoom>
       }
       // Final rebuild in case the event landed just after the last poll
       // or the SDK is about to fire its callback.
-      Logs().i('[SendPoll] local echo NOT found after $attempts attempts, final updateView()');
+      Logs().v('[SendPoll] local echo NOT found after $attempts attempts, final updateView()');
       updateView();
     } else {
       Logs().i('[SendPoll] timeline is null after send');

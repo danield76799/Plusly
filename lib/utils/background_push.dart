@@ -609,7 +609,7 @@ class BackgroundPush {
   }
 
   Future<void> _onUpMessage(PushMessage pushMessage, String i) async {
-    Logs().wtf('Push Notification from UP received', pushMessage);
+    Logs().i('Push Notification from UP received', pushMessage);
     final message = pushMessage.content;
     upAction = true;
     final data = Map<String, dynamic>.from(
