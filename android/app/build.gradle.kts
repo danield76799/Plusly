@@ -67,11 +67,18 @@ android {
         applicationId = "com.danield.plusly.app"
         minSdk = 24  // Required for modern features
         targetSdk = flutter.targetSdkVersion
-        // flutter.versionCode consistently yields pubspec build number + 2001
-        // on the GHA runner. We accept that offset and compensate in the
-        // update-check (plusly-version.txt is written with the same offset).
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+
+        // The CI workflow writes the exact versionCode/versionName into
+        // local.properties after bumping pubspec. We use those values so the
+        // APK versionCode is always identical to the release tag and
+        // plusly-version.txt, no matter what flutter.versionCode returns on
+        // different runners.
+        versionCode =
+            localProperties["flutter.versionCode"]?.toString()?.toIntOrNull()
+                ?: flutter.versionCode
+        versionName =
+            localProperties["flutter.versionName"]?.toString()
+                ?: flutter.versionName
     }
 
     buildTypes {

@@ -128,6 +128,13 @@ jobs:
           # Make sure AGP/Flutter actually uses the installed NDK.
           # local.properties was cleaned above, so write it fresh here.
           echo "ndk.dir=${{ steps.setup_ndk.outputs.ndk-path }}" >> android/local.properties
+          # Write the exact versionCode/versionName so the APK matches the
+          # release tag and plusly-version.txt exactly. Without this,
+          # flutter.versionCode can differ per runner and cause mismatches
+          # where the app thinks it is on an older build than the release.
+          echo "flutter.versionCode=${{ steps.bump.outputs.android_build_number }}" >> android/local.properties
+          echo "flutter.versionName=${{ steps.bump.outputs.version_name }}" >> android/local.properties
+          cat android/local.properties
 
       - name: Commit version bump
         run: |
