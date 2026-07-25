@@ -6,6 +6,7 @@ import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/settings_notifications/push_rule_extensions.dart';
+import 'package:Pulsly/utils/first_launch_setup.dart';
 import 'package:Pulsly/widgets/layouts/max_width_body.dart';
 import 'package:Pulsly/widgets/list_divider.dart';
 import '../../utils/localized_exception_extension.dart';
@@ -135,6 +136,17 @@ class SettingsNotificationsView extends StatelessWidget {
                             ),
                           ),
                         ),
+                        ListTile(
+                          leading: const Icon(Icons.tune),
+                          title: const Text('Push-instellingen controleren'),
+                          subtitle: const Text(
+                            'Meldingen toestaan en batterijoptimalisatie '
+                            'uitschakelen voor betrouwbare push.',
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => showFirstLaunchSetup(context),
+                        ),
+                        const ListDivider(),
                         ListTile(
                           title: Text(L10n.of(context).registerPushNotifications),
                           subtitle: Text(L10n.of(context).registerPushSubtitle),

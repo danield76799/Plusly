@@ -31,7 +31,20 @@ Future<void> maybeShowFirstLaunchSetup(BuildContext context) async {
   await prefs.setBool(_firstLaunchSetupDoneKey, true);
 
   if (!context.mounted) return;
+  await _runSetupFlow(context);
+}
 
+/// Toont het push-instellingen scherm op aanvraag (bijv. vanuit
+/// Instellingen → Meldingen). In tegenstelling tot [maybeShowFirstLaunchSetup]
+/// wordt dit altijd getoond, ongeacht of het al eerder is gezien.
+Future<void> showFirstLaunchSetup(BuildContext context) async {
+  if (!Platform.isAndroid) return;
+  if (!context.mounted) return;
+  await _runSetupFlow(context);
+}
+
+/// De daadwerkelijke flow: dialog + permission requests.
+Future<void> _runSetupFlow(BuildContext context) async {
   final scaffoldMessenger = ScaffoldMessenger.of(context);
 
   await showAdaptiveDialog<bool>(
