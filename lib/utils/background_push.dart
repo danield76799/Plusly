@@ -626,7 +626,8 @@ class BackgroundPush {
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
       useNotificationActions:
-          false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
+          true, // mark-as-read works fine with UP; only reply-input is buggy (#34)
+      includeReplyAction: false, // UP connector bug with reply input (codeberg #34)
     );
 
     // NOTE: Do NOT trigger another sync here.

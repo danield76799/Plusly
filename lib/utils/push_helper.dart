@@ -33,6 +33,7 @@ Future<void> pushHelper(
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   String? instance,
   bool useNotificationActions = true,
+  bool includeReplyAction = true,
   void Function(Event event)? onEventLoaded,
 }) async {
   try {
@@ -45,6 +46,7 @@ Future<void> pushHelper(
       flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
       instance: instance,
       useNotificationActions: useNotificationActions,
+      includeReplyAction: includeReplyAction,
       onEventLoaded: onEventLoaded,
     );
   } catch (e, s) {
@@ -77,6 +79,7 @@ Future<void> _tryPushHelper(
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   String? instance,
   bool useNotificationActions = true,
+  bool includeReplyAction = true,
   void Function(Event event)? onEventLoaded,
 }) async {
   final isBackgroundMessage = clients == null;
@@ -344,16 +347,17 @@ Future<void> _tryPushHelper(
     actions: event.type == EventTypes.RoomMember || !useNotificationActions
         ? null
         : <AndroidNotificationAction>[
-            AndroidNotificationAction(
-              PluslyNotificationActions.reply.name,
-              l10n.reply,
-              inputs: [
-                AndroidNotificationActionInput(label: l10n.writeAMessage),
-              ],
-              cancelNotification: false,
-              allowGeneratedReplies: true,
-              semanticAction: SemanticAction.reply,
-            ),
+            if (includeReplyAction)
+              AndroidNotificationAction(
+                PluslyNotificationActions.reply.name,
+                l10n.reply,
+                inputs: [
+                  AndroidNotificationActionInput(label: l10n.writeAMessage),
+                ],
+                cancelNotification: false,
+                allowGeneratedReplies: true,
+                semanticAction: SemanticAction.reply,
+              ),
             AndroidNotificationAction(
               PluslyNotificationActions.markAsRead.name,
               l10n.markAsRead,
