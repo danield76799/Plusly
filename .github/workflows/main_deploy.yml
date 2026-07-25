@@ -115,13 +115,13 @@ jobs:
 
           sed -i "s/^version: .*/version: ${VERSION_NAME}+${NEW_BUILD_NUMBER}/" pubspec.yaml
 
-          ANDROID_BUILD_NUMBER=$((NEW_BUILD_NUMBER + 2000))
+          ANDROID_BUILD_NUMBER=$((NEW_BUILD_NUMBER + 2001))
 
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "build_number=$NEW_BUILD_NUMBER" >> $GITHUB_OUTPUT
           echo "android_build_number=$ANDROID_BUILD_NUMBER" >> $GITHUB_OUTPUT
           echo "full_version=${VERSION_NAME}+${NEW_BUILD_NUMBER}" >> $GITHUB_OUTPUT
-          echo "Bumped ${VERSION_NAME}+${BUILD_NUMBER} → ${VERSION_NAME}+${NEW_BUILD_NUMBER} (APK reports +2000 → ${VERSION_NAME}+${ANDROID_BUILD_NUMBER})"
+          echo "Bumped ${VERSION_NAME}+${BUILD_NUMBER} → ${VERSION_NAME}+${NEW_BUILD_NUMBER} (APK reports +2001 → ${VERSION_NAME}+${ANDROID_BUILD_NUMBER})"
 
       - name: Configure NDK
         run: |
@@ -279,6 +279,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main || git rebase --abort || true
           VERSION="${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.android_build_number }}"
           echo "$VERSION" > plusly-version.txt
           git add plusly-version.txt
