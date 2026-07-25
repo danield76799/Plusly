@@ -42,6 +42,7 @@ abstract class PlatformInfos {
     try {
       final info = await PackageInfo.fromPlatform();
       version = info.version;
+      Logs().i('VersionDebug: info.version="$version" info.buildNumber="${info.buildNumber}"');
       // Op Android bevatten tags zoals v1.4.17+2310 ook het buildnummer.
       // Zonder buildnummer ziet de updater een nieuwe release met hetzelfde
       // semver nummer niet als update.
