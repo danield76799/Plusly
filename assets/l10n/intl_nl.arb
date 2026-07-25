@@ -3556,10 +3556,11 @@
     "description": "Snackbar shown after APK download completes.",
     "placeholders": {}
   },
-  "downloadFailed": "Download mislukt: {error}",
-  "@downloadFailed": {
+  "downloadFailed": "Download mislukt",
+  "downloadFailedWithError": "Download mislukt: {error}",
+  "@downloadFailedWithError": {
     "type": "String",
-    "description": "Snackbar shown when APK download fails. {error} = exception message.",
+    "description": "Snackbar when APK download fails. {error} = exception message.",
     "placeholders": {
       "error": {
         "type": "Object"
@@ -3673,5 +3674,6 @@
     "type": "String",
     "description": "Label above the live-location duration picker.",
     "placeholders": {}
-  }
+  },
+  "downloadSuccess": "File successfully saved"
 }

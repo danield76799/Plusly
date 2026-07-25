@@ -577,11 +577,11 @@ class _MessageContextMenuState extends State<MessageContextMenu> {
                                         downloadSuccess
                                             ? L10n.of(context).downloadSuccess
                                             : downloadError
-                                            ? L10n.of(context).downloadFailed
-                                            : event.content.tryGet<String>(
-                                                    'filename',
-                                                  ) ??
-                                                  event.body,
+                                                ? L10n.of(context).downloadFailed
+                                                : event.content.tryGet<String>(
+                                                        'filename',
+                                                      ) ??
+                                                      (event.body.toString()),
                                       ),
                                     ),
                                   ],

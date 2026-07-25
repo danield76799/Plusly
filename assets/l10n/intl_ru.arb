@@ -3962,5 +3962,6 @@
   "pushUnknownError": "Unknown error",
   "unifiedPushPrivacy": "Privacy-friendly, no Google",
   "notApplicable": "N/A",
-  "shareFor": "Share for:"
+  "shareFor": "Share for:",
+  "downloadFailedWithError": "Download failed: {error}"
 }

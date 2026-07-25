@@ -3569,6 +3569,21 @@
   "searchOrEnterHomeserverAddress": "Search or enter homeserver address",
   "downloadFailed": "Download failed",
   "downloadSuccess": "File successfully saved",
+  "downloadFailedWithError": "Download failed: {error}",
+  "@downloadSuccess": {
+    "type": "String",
+    "description": "Shown when a file download completes successfully.",
+    "placeholders": {}
+  },
+  "@downloadFailedWithError": {
+    "type": "String",
+    "description": "Snackbar when APK download fails. {error} = exception message.",
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
   "audioMessage": "Audio message",
   "noCustomPrivacySettings": "No custom privacy settings",
   "noCustomPrivacySettingsDetails": "Rooms with custom privacy configurations will appear here. You can set per-room privacy options from a room's details page.",

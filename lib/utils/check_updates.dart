@@ -514,7 +514,7 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
     if (context.mounted) {
       scaffold.showSnackBar(
         SnackBar(
-          content: Text(l10n.downloadFailed(e.toString())),
+          content: Text(l10n.downloadFailedWithError(e.toString())),
           duration: const Duration(seconds: 5),
           action: SnackBarAction(
             label: 'Open Pagina',
