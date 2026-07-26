@@ -8,15 +8,6 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// CI writes exact versionCode/versionName to local.properties. Load it here
-// because it is not available as a ready-made variable in the app module.
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        load(FileInputStream(localPropertiesFile))
-    }
-}
-
 if (file("google-services.json").exists()) {
     apply(plugin = "com.google.gms.google-services")
 }
@@ -76,18 +67,10 @@ android {
         applicationId = "com.danield.plusly.app"
         minSdk = 24  // Required for modern features
         targetSdk = flutter.targetSdkVersion
-
-        // The CI workflow writes the exact versionCode/versionName into
-        // local.properties after bumping pubspec. We use those values so the
-        // APK versionCode is always identical to the release tag and
-        // plusly-version.txt, no matter what flutter.versionCode returns on
-        // different runners.
-        versionCode =
-            localProperties["flutter.versionCode"]?.toString()?.toIntOrNull()
-                ?: flutter.versionCode
-        versionName =
-            localProperties["flutter.versionName"]?.toString()
-                ?: flutter.versionName
+        // The CI passes --build-number / --build-name to `flutter build`, so
+        // flutter.versionCode is already the exact value (== release tag).
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     buildTypes {
