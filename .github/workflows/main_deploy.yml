@@ -115,7 +115,7 @@ jobs:
 
           sed -i "s/^version: .*/version: ${VERSION_NAME}+${NEW_BUILD_NUMBER}/" pubspec.yaml
 
-          ANDROID_BUILD_NUMBER=$((NEW_BUILD_NUMBER + 2001))
+          ANDROID_BUILD_NUMBER=$((NEW_BUILD_NUMBER + 2000))
 
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "build_number=$NEW_BUILD_NUMBER" >> $GITHUB_OUTPUT
