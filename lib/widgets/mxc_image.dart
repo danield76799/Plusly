@@ -206,22 +206,26 @@ class _MxcImageState extends State<MxcImage> {
           );
         }
 
-        // Try disk cache first (survives app restarts).
-        final diskCacheKey = Uri.parse(
-          _effectiveCacheKey ?? '${event.eventId}_${useThumbnail ? 'thumb' : 'full'}',
-        );
-        loadedBytes = await client.database.getFile(diskCacheKey);
-
-        if (loadedBytes == null) {
-          final data = await event.downloadAndDecryptAttachment(
-            getThumbnail: useThumbnail,
-          );
-          if (data.detectFileType is MatrixImageFile) {
-            loadedBytes = data.bytes;
-            // Persist decrypted bytes so next app start is instant.
-            unawaited(client.database.storeFile(diskCacheKey, loadedBytes, 0));
-          }
+        // Use downloadMxcCached so the SDK-generated cache key (which accounts
+        // for the `animated` flag) is used consistently for both read and
+        // write. The previous manual disk-cache key (Uri.parse of a
+        // "eventId_thumb_W" string) was not a valid mxc:// URI, so animated
+        // GIFs were never cached and re-downloaded on every render/scroll.
+        final mxcUri = useThumbnail
+            ? event.thumbnailMxcUri ?? event.attachmentMxcUri
+            : event.attachmentMxcUri;
+        if (mxcUri == null) {
+          throw Exception('Event has no mxc uri');
         }
+
+        loadedBytes = await client.downloadMxcCached(
+          mxcUri,
+          width: originalWidth,
+          height: originalHeight,
+          isThumbnail: useThumbnail,
+          animated: originalAnimated,
+          thumbnailMethod: widget.thumbnailMethod,
+        );
       }
 
       if (!mounted) return;

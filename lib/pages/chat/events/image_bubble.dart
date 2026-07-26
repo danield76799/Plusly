@@ -193,7 +193,10 @@ class ImageBubble extends StatelessWidget {
                                 width: _effectiveImageWidth,
                                 fit: fit,
                                 animated: animated,
-                                isThumbnail: thumbnailOnly,
+                                // Animated GIFs need the full (non-thumbnail)
+                                // variant to play; a thumbnail would be a
+                                // single static frame.
+                                isThumbnail: thumbnailOnly && !animated,
                                 // Stable per-event cache key so the shared in-memory
                                 // LRU survives widget rebuilds / off-screen disposal
                                 // while scrolling. Without it every re-render reloads

@@ -128,11 +128,17 @@ class MessageContent extends StatelessWidget {
           case MessageTypes.Image:
           case MessageTypes.Sticker:
             if (event.redacted) continue textmessage;
+            // Detect animated GIFs so we request the animated (full-size)
+            // variant and let Flutter play the animation instead of a single
+            // static frame.
+            final mimeType =
+                event.infoMap.tryGet<String>('mimetype')?.toLowerCase() ?? '';
+            final isAnimatedGif = mimeType.contains('gif');
             final maxSize = event.messageType == MessageTypes.Sticker
                 ? 128.0 * AppSettings.stickerScale.value
                 : event.messageType == MessageTypes.Image
-                ? 512.0
-                : 256.0;
+                    ? 512.0
+                    : 256.0;
             final w = event.content
                 .tryGetMap<String, Object?>('info')
                 ?.tryGet<int>('w');
@@ -167,6 +173,7 @@ class MessageContent extends StatelessWidget {
               timeline: timeline,
               textColor: textColor,
               linkColor: linkColor,
+              animated: isAnimatedGif,
               loadMedia: loadMedia,
               onLoadMedia: onLoadMedia,
             );
