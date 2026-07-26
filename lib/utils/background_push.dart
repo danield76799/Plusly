@@ -74,17 +74,6 @@ class BackgroundPush {
       final granted = await androidPlugin?.requestNotificationsPermission() ??
           false;
       Logs().i('[Diagnose] Notification permission granted: $granted');
-
-      // Android 8+ (API 26+) requires a notification channel before any
-      // notification can be shown. Without this, show() silently fails.
-      await androidPlugin?.createNotificationChannel(
-        const AndroidNotificationChannel(
-          AppConfig.pushNotificationsChannelId,
-          'Berichten',
-          description: 'Inkomende chatberichten',
-          importance: Importance.high,
-        ),
-      );
     }
 
     await _flutterLocalNotificationsPlugin.initialize(
