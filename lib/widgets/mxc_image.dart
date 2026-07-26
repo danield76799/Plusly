@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/utils/client_download_content_extension.dart';
-import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
 class MxcImage extends StatefulWidget {
@@ -212,8 +211,8 @@ class _MxcImageState extends State<MxcImage> {
         // "eventId_thumb_W" string) was not a valid mxc:// URI, so animated
         // GIFs were never cached and re-downloaded on every render/scroll.
         final mxcUri = useThumbnail
-            ? event.thumbnailMxcUri ?? event.attachmentMxcUri
-            : event.attachmentMxcUri;
+            ? event.thumbnailMxcUrl ?? event.attachmentMxcUrl
+            : event.attachmentMxcUrl;
         if (mxcUri == null) {
           throw Exception('Event has no mxc uri');
         }
@@ -312,14 +311,6 @@ class _MxcImageState extends State<MxcImage> {
         child: _buildPlaceholder(context),
       );
     }
-
-    final repaintKey = ValueKey<Object>([
-      _effectiveCacheKey ?? widget.uri,
-      widget.width,
-      widget.height,
-      widget.isThumbnail,
-      widget.fit,
-    ]);
 
     final imageWidget = Image.memory(
       data,
