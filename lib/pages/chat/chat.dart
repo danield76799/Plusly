@@ -888,9 +888,12 @@ class ChatController extends State<ChatPageWithRoom>
         } else {
           hasRecentSentByMe = events.any(
             (e) =>
-                e.body == text &&
                 e.senderId == myUserId &&
-                e.originServerTs.isAfter(sentAtThreshold),
+                e.status != EventStatus.error &&
+                e.originServerTs.isAfter(sentAtThreshold) &&
+                (e.body == text ||
+                    e.body.contains(text) ||
+                    e.status == EventStatus.sending),
           );
         }
         final found = hasPending || hasRecentSentByMe;
@@ -901,7 +904,7 @@ class ChatController extends State<ChatPageWithRoom>
 
         if (found) {
           // Force a rebuild so the key map is fresh for the new/updated event.
-          Logs().i('[SendPoll] local echo found, calling updateView()');
+          Logs().v('[SendPoll] local echo found, calling updateView()');
           updateView();
           // Jump to bottom so the user sees their message right away.
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -914,6 +917,12 @@ class ChatController extends State<ChatPageWithRoom>
           return;
         }
 
+        // Rebuild every iteration so the local-echo bubble appears as soon as
+        // the SDK inserts it, even if our match condition above doesn't fire
+        // (e.g. body slightly transformed, or originServerTs not yet set).
+        // Without this, updateView() only ran after the full timeout, leaving
+        // the bubble invisible for up to ~3.35s (~80% "updated" feeling).
+        updateView();
         await Future.delayed(delay);
         attempts++;
         if (delay < const Duration(milliseconds: 400)) {
