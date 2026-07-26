@@ -458,6 +458,12 @@ class ChatController extends State<ChatPageWithRoom>
           highlightEvent: false,
           position: AutoScrollPosition.end,
         );
+        // After scrolling, mark the room as read. Without this, the visible
+        // unread messages were never marked as read when the marker was
+        // already inside the loaded timeline.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setReadMarker();
+        });
         return;
       } else if (readMarkerEventId.isNotEmpty) {
         _showScrollUpMaterialBanner(readMarkerEventId);
