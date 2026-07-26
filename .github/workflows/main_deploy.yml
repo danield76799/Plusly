@@ -161,14 +161,13 @@ jobs:
           fi
 
       # === APK BUILD (split per architecture — 32-bit + 64-bit) ===
-      # --build-number / --build-name are passed explicitly so the APK
-      # versionCode is ALWAYS identical to the release tag (android_build_number)
-      # and plusly-version.txt. This avoids Flutter regenerating local.properties
-      # with its own (stale) versionCode, which caused the app to report a
-      # version one lower than the release (infinite update loop).
+      # --build-number gets the *pubspec* build number (build_number output).
+      # Flutter internally adds +2001 to produce the APK versionCode, which
+      # then matches android_build_number (the release tag). Passing
+      # android_build_number directly would double-count the +2001 offset.
       - name: Build Android APK (split ABIs)
         run: |
-          flutter build apk --flavor github --release --split-per-abi --no-tree-shake-icons --build-number=${{ steps.bump.outputs.android_build_number }} --build-name=${{ steps.bump.outputs.version_name }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
+          flutter build apk --flavor github --release --split-per-abi --no-tree-shake-icons --build-number=${{ steps.bump.outputs.build_number }} --build-name=${{ steps.bump.outputs.version_name }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           mkdir -p output
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-github-release.apk output/plusly-armeabi-v7a-release.apk || true
           cp build/app/outputs/flutter-apk/app-arm64-v8a-github-release.apk output/plusly-arm64-v8a-release.apk || true
@@ -176,7 +175,7 @@ jobs:
       # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
         run: |
-          flutter build appbundle --flavor playstore --release --no-tree-shake-icons --build-number=${{ steps.bump.outputs.android_build_number }} --build-name=${{ steps.bump.outputs.version_name }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
+          flutter build appbundle --flavor playstore --release --no-tree-shake-icons --build-number=${{ steps.bump.outputs.build_number }} --build-name=${{ steps.bump.outputs.version_name }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
           
       # === 16KB PAGE SIZE PATCH & RE-SIGN ===
       - name: Patch 16KB alignment and Re-sign AAB
