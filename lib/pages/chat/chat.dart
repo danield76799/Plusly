@@ -690,6 +690,9 @@ class ChatController extends State<ChatPageWithRoom>
           eventId: markerEventId,
           public: shouldSendPublicReadReceipts(room.client, roomId),
         )
+        .catchError((e, s) {
+          Logs().w('setReadMarker failed for $roomId', e, s);
+        })
         .whenComplete(() {
           _setReadMarkerFuture = null;
         });
