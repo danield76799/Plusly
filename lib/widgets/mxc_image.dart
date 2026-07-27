@@ -217,14 +217,28 @@ class _MxcImageState extends State<MxcImage> {
           throw Exception('Event has no mxc uri');
         }
 
-        loadedBytes = await client.downloadMxcCached(
-          mxcUri,
-          width: originalWidth,
-          height: originalHeight,
-          isThumbnail: useThumbnail,
-          animated: originalAnimated,
-          thumbnailMethod: widget.thumbnailMethod,
-        );
+        // Cache key must match what downloadMxcCached uses, so pre-cached
+        // files are found and so we don't create duplicate entries.
+        final cacheKey = useThumbnail
+            // ignore: deprecated_member_use
+            ? mxcUri.getThumbnail(
+                client,
+                width: originalWidth,
+                height: originalHeight,
+                animated: originalAnimated,
+                method: widget.thumbnailMethod,
+              )
+            : mxcUri;
+
+        loadedBytes = await client.database.getFile(cacheKey);
+
+        if (loadedBytes == null) {
+          final data = await event.downloadAndDecryptAttachment(
+            getThumbnail: useThumbnail,
+          );
+          loadedBytes = data.bytes;
+          unawaited(client.database.storeFile(cacheKey, loadedBytes, 0));
+        }
       }
 
       if (!mounted) return;
