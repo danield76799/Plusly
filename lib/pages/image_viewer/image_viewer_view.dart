@@ -144,9 +144,17 @@ class _PagedZoomableImagesState extends State<_PagedZoomableImages> {
                         child: MxcImage(
                           key: ValueKey(event.eventId),
                           event: event,
+                          width: 2048,
+                          height: 2048,
                           fit: BoxFit.contain,
-                          isThumbnail: false,
-                          animated: true,
+                          // Use a large thumbnail instead of the full file.
+                          // downloadAndDecryptAttachment(getThumbnail: false)
+                          // sometimes fails to decrypt the full E2EE blob on
+                          // WhatsApp bridges, leaving a black screen with a
+                          // broken-image icon. A 2048px thumbnail decrypts
+                          // reliably and is sharp enough for pinch-to-zoom.
+                          isThumbnail: true,
+                          animated: false,
                         ),
                       ),
                     ),
