@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/utils/client_download_content_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
 class MxcImage extends StatefulWidget {
@@ -200,45 +201,13 @@ class _MxcImageState extends State<MxcImage> {
               MessageTypes.Image,
               MessageTypes.Sticker,
             }.contains(event.messageType)) {
-          throw Exception(
-            'Event of type ${event.messageType} has no thumbnail!',
-          );
+          Logs().e('Event of type ${event.messageType} has no thumbnail!');
         }
-
-        // Use downloadMxcCached so the SDK-generated cache key (which accounts
-        // for the `animated` flag) is used consistently for both read and
-        // write. The previous manual disk-cache key (Uri.parse of a
-        // "eventId_thumb_W" string) was not a valid mxc:// URI, so animated
-        // GIFs were never cached and re-downloaded on every render/scroll.
-        final mxcUri = useThumbnail
-            ? event.thumbnailMxcUrl ?? event.attachmentMxcUrl
-            : event.attachmentMxcUrl;
-        if (mxcUri == null) {
-          throw Exception('Event has no mxc uri');
-        }
-
-        // Cache key must be stable per event/thumbnail/animated so the disk
-        // cache survives resizes and scroll re-renders. We deliberately do NOT
-        // include width/height in the key because the thumbnail endpoint
-        // returns a fixed default thumbnail and including dimensions created a
-        // separate cache entry for every bubble size, causing constant
-        // re-downloads / spinning circles.
-        final cacheKey = useThumbnail
-            // ignore: deprecated_member_use
-            ? mxcUri.getThumbnail(
-                client,
-                animated: originalAnimated,
-              )
-            : mxcUri;
-
-        loadedBytes = await client.database.getFile(cacheKey);
-
-        if (loadedBytes == null) {
-          final data = await event.downloadAndDecryptAttachment(
-            getThumbnail: useThumbnail,
-          );
+        final data = await event.downloadAndDecryptAttachment(
+          getThumbnail: useThumbnail,
+        );
+        if (data.detectFileType is MatrixImageFile) {
           loadedBytes = data.bytes;
-          unawaited(client.database.storeFile(cacheKey, loadedBytes, 0));
         }
       }
 
