@@ -856,18 +856,20 @@ class ChatController extends State<ChatPageWithRoom>
         const Duration(seconds: 30),
       );
 
-      var delay = const Duration(milliseconds: 50);
+      var delay = Duration.zero;
       var attempts = 0;
-      // 50 + 100 + 200 + 400*7 = max ~3.35s. E2EE/bridge rooms can be slow.
-      const maxAttempts = 10;
+      const maxAttempts = 20;
       final editEventId = editEvent?.eventId;
       final isEdit = editEventId != null;
       while (mounted && attempts < maxAttempts) {
         final events = tl.events;
-        // For new messages: status == sending or eventId == null.
-        // For edits: the SDK prefixes the body with "* " and uses
-        // relationshipType == edit. The original event gets the new content
-        // via getDisplayEvent once the edit is aggregated.
+
+        // Match criteria:
+        // 1. A classic local echo: status == sending and sent by us.
+        //    We intentionally do NOT require e.body == text because the SDK
+        //    may trim/format it or prefix it with reply fallback text.
+        // 2. A recently synced event from us with the same text.
+        // 3. For edits: the original event now has aggregated edit relations.
         final bool hasPending;
         if (isEdit) {
           hasPending = events.any(
@@ -878,12 +880,11 @@ class ChatController extends State<ChatPageWithRoom>
           );
         } else {
           hasPending = events.any(
-            (e) => e.status == EventStatus.sending && e.body == text,
+            (e) =>
+                e.senderId == myUserId &&
+                e.status == EventStatus.sending,
           );
         }
-        // For new messages, also catch SDK-promoted echoes.
-        // For edits, check if the original event now has aggregated edits
-        // (i.e. the edit landed and the display event has been replaced).
         final bool hasRecentSentByMe;
         if (isEdit) {
           hasRecentSentByMe = events.any(
@@ -912,10 +913,8 @@ class ChatController extends State<ChatPageWithRoom>
         );
 
         if (found) {
-          // Force a rebuild so the key map is fresh for the new/updated event.
           Logs().v('[SendPoll] local echo found, calling updateView()');
           updateView();
-          // Jump to bottom so the user sees their message right away.
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted &&
                 scrollController.hasClients &&
@@ -926,16 +925,13 @@ class ChatController extends State<ChatPageWithRoom>
           return;
         }
 
-        // Rebuild every iteration so the local-echo bubble appears as soon as
-        // the SDK inserts it, even if our match condition above doesn't fire
-        // (e.g. body slightly transformed, or originServerTs not yet set).
-        // Without this, updateView() only ran after the full timeout, leaving
-        // the bubble invisible for up to ~3.35s (~80% "updated" feeling).
         updateView();
         await Future.delayed(delay);
         attempts++;
         if (delay < const Duration(milliseconds: 400)) {
-          delay *= 2;
+          delay = delay == Duration.zero
+              ? const Duration(milliseconds: 50)
+              : delay * 2;
         }
       }
       // Final rebuild in case the event landed just after the last poll
