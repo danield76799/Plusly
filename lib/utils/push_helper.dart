@@ -210,7 +210,7 @@ Future<void> _tryPushHelper(
           .getActiveNotifications();
       // FIX #22: use the filtered list
       final clientNotifications = activeNotifications
-          .where((n) => n.groupKey == client.clientName)
+          .where((n) => n.id != client.clientName.hashCode)
           .toList();
       var needsUpdateForSummaryNotification = false;
       for (final activeNotification in clientNotifications) {
@@ -225,11 +225,7 @@ Future<void> _tryPushHelper(
         }
       }
       if (needsUpdateForSummaryNotification) {
-        await updateSummaryNotification(
-          clientName: client.clientName,
-          l10n: l10n,
-          flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-        );
+        await flutterLocalNotificationsPlugin.cancel(id: client.clientName.hashCode);
       }
     }
     return;
@@ -343,7 +339,6 @@ Future<void> _tryPushHelper(
     ),
     importance: Importance.high,
     priority: Priority.max,
-    groupKey: client.clientName,
     actions: event.type == EventTypes.RoomMember || !useNotificationActions
         ? null
         : <AndroidNotificationAction>[
@@ -397,31 +392,20 @@ Future<void> _tryPushHelper(
   );
 
   // ── Await sync so chat list updates before we finish ──
-  // FIX #4: await oneShotSync in normal path too, so room moves to top
+  // FIX #4: await oneShotSync in normal path too, so room moves to the top
   await syncFuture;
 
   // No need to restore backgroundSync here; whenComplete already handled it.
 
-  // ── Summary notification (FluffyChat pattern) ──
-  // Run summary update in background after sync so active notifications are
-  // accurate, but don't block the push helper completion.
-  if (PlatformInfos.isAndroid) {
-    unawaited(
-      updateSummaryNotification(
-        clientName: client.clientName,
-        l10n: l10n,
-        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-      ),
-    );
-  }
-
   Logs().v('Push helper has been completed!');
 }
 
+/// Fallback for when the rich notification could not be built. Displays what
+/// we can extract directly from the push payload.
 Future<void> _buildFallbackNotification(
-PushNotification notification, {
-required Client client,
-required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+  PushNotification notification, {
+  required Client client,
+  required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
 }) async {
   // Extract what we can directly from the Matrix push payload without
   // waiting for rooms/database to load.
@@ -453,7 +437,6 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,
         l10n.incomingMessages,
-        groupKey: client.clientName,
         importance: Importance.high,
         priority: Priority.max,
         category: AndroidNotificationCategory.message,
@@ -501,44 +484,6 @@ void updateAppBadge(int unreadCount) {
     }
     return;
   }
-}
-
-/// Shows a grouped summary notification at the top of the notification shade.
-Future<void> updateSummaryNotification({
-  required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
-  required String clientName,
-  required L10n l10n,
-}) async {
-  final activeNotifications =
-      (await flutterLocalNotificationsPlugin.getActiveNotifications())
-          .where((n) => n.groupKey == clientName)
-          .toList();
-
-  if (activeNotifications.length <= 1) {
-    await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
-    return;
-  }
-
-  // FIX #11: cancel stale summary and re-show with updated content
-  await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
-
-  await flutterLocalNotificationsPlugin.show(
-    id: clientName.hashCode,
-    title: l10n.incomingMessages,
-    body: l10n.incomingMessages,
-    notificationDetails: NotificationDetails(
-      android: AndroidNotificationDetails(
-        AppConfig.pushNotificationsChannelId,
-        l10n.incomingMessages,
-        groupKey: clientName,
-        setAsGroupSummary: true,
-        styleInformation: InboxStyleInformation(
-          activeNotifications.map((n) => n.body ?? '').toList(),
-        ),
-        autoCancel: false,
-      ),
-    ),
-  );
 }
 
 Future<void> _setShortcut(
