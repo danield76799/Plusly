@@ -217,16 +217,17 @@ class _MxcImageState extends State<MxcImage> {
           throw Exception('Event has no mxc uri');
         }
 
-        // Cache key must match what downloadMxcCached uses, so pre-cached
-        // files are found and so we don't create duplicate entries.
+        // Cache key must be stable per event/thumbnail/animated so the disk
+        // cache survives resizes and scroll re-renders. We deliberately do NOT
+        // include width/height in the key because the thumbnail endpoint
+        // returns a fixed default thumbnail and including dimensions created a
+        // separate cache entry for every bubble size, causing constant
+        // re-downloads / spinning circles.
         final cacheKey = useThumbnail
             // ignore: deprecated_member_use
             ? mxcUri.getThumbnail(
                 client,
-                width: originalWidth,
-                height: originalHeight,
                 animated: originalAnimated,
-                method: widget.thumbnailMethod,
               )
             : mxcUri;
 
