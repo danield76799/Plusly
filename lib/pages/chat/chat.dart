@@ -39,6 +39,7 @@ import 'package:Pulsly/utils/error_reporter.dart';
 import 'package:Pulsly/utils/file_selector.dart';
 import 'package:Pulsly/utils/loading_snackbar_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
+import 'package:Pulsly/utils/media_prefetch.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/synapse_admin_extension.dart';
@@ -143,6 +144,10 @@ class ChatController extends State<ChatPageWithRoom>
   /// Tracks the actual rendered height of the floating input bar so the
   /// message list can reserve the correct amount of bottom padding.
   final ValueNotifier<double> inputBarHeight = ValueNotifier<double>(80);
+
+  /// Debounces the chat-view media prefetch so the scroll listener does not
+  /// kick off 60 downloads per second while the user is flinging.
+  Timer? _prefetchDebounce;
 
   late final FocusNode inputFocus;
 
@@ -337,6 +342,32 @@ class ChatController extends State<ChatPageWithRoom>
       _scrolledUp.value = false;
       setReadMarker();
     }
+    _schedulePrefetchAdjacentMedia();
+  }
+
+  /// Schedules a chat-view thumbnail prefetch after a short debounce. The
+  /// scroll listener fires on every pixel; without this, the prefetcher would
+  /// be woken constantly while the user flings the list. 250 ms is short
+  /// enough to feel instant and long enough to coalesce flings.
+  void _schedulePrefetchAdjacentMedia() {
+    _prefetchDebounce?.cancel();
+    _prefetchDebounce = Timer(
+      const Duration(milliseconds: 250),
+      _prefetchAdjacentMedia,
+    );
+  }
+
+  Future<void> _prefetchAdjacentMedia() async {
+    final timeline = this.timeline;
+    if (timeline == null) return;
+    var events = timeline.events;
+    events = events.filterByVisibleInGui();
+    if (events.isEmpty) return;
+
+    // Reverse list (newest at the bottom of the screen, index 0 in the data
+    // because the CustomScrollView is reverse: true). Use the most recently
+    // rendered message as the anchor — that is index 0.
+    await MediaPrefetcher.prefetchAround(events, 0);
   }
 
   void _loadDraft() async {
@@ -717,6 +748,7 @@ class ChatController extends State<ChatPageWithRoom>
   void dispose() {
     typingCoolDown?.cancel();
     typingTimeout?.cancel();
+    _prefetchDebounce?.cancel();
     scrollController.removeListener(_updateScrollController);
     scrollController.dispose();
     _scrolledUp.dispose();
