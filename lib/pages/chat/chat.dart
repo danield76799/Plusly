@@ -149,11 +149,6 @@ class ChatController extends State<ChatPageWithRoom>
   /// kick off 60 downloads per second while the user is flinging.
   Timer? _prefetchDebounce;
 
-  /// Listens to the SDK's onTimelineEvent stream so the chat view rebuilds
-  /// the instant a new (local echo, sync, or history) event lands, without
-  /// relying on the racy onInsert/onUpdate callbacks or a polling loop.
-  StreamSubscription<Event>? _timelineEventSub;
-
   late final FocusNode inputFocus;
 
   Timer? typingCoolDown;
@@ -369,10 +364,19 @@ class ChatController extends State<ChatPageWithRoom>
     events = events.filterByVisibleInGui();
     if (events.isEmpty) return;
 
-    // Reverse list (newest at the bottom of the screen, index 0 in the data
-    // because the CustomScrollView is reverse: true). Use the most recently
-    // rendered message as the anchor — that is index 0.
-    await MediaPrefetcher.prefetchAround(events, 0);
+    // The CustomScrollView is reverse: true, so pixels=0 means the newest
+    // events are visible (index 0 in the data list). As the user scrolls up,
+    // pixels increase and older events come into view. Estimate the anchor
+    // index from the scroll offset using an average bubble height of ~80px.
+    // This is imprecise but sufficient for prefetch — the goal is to warm
+    // the cache for events that will likely be rendered soon, not to pin an
+    // exact pixel boundary.
+    final pixels = scrollController.hasClients
+        ? scrollController.position.pixels
+        : 0.0;
+    final anchorIndex = (pixels / 80).round().clamp(0, events.length - 1);
+
+    await MediaPrefetcher.prefetchAround(events, anchorIndex);
   }
 
   void _loadDraft() async {
@@ -458,18 +462,6 @@ class ChatController extends State<ChatPageWithRoom>
 
     sendingClient = Matrix.of(context).client;
     WidgetsBinding.instance.addObserver(this);
-
-    // Subscribe to the SDK's onTimelineEvent stream for this room. The SDK
-    // fires this for every event it inserts into a timeline (local echo,
-    // sync result, history backfill). This replaces the old poll loop in
-    // send() and is deterministic — the chat view rebuilds the moment the
-    // event lands instead of waiting up to ~7s for a polling loop to catch up.
-    _timelineEventSub = sendingClient.onTimelineEvent.stream
-        .where((event) => event.room.id == roomId)
-        .listen((_) {
-      if (!mounted) return;
-      updateView();
-    });
 
     loadTimelineFuture = _tryLoadTimeline();
   }
@@ -766,7 +758,6 @@ class ChatController extends State<ChatPageWithRoom>
     typingCoolDown?.cancel();
     typingTimeout?.cancel();
     _prefetchDebounce?.cancel();
-    _timelineEventSub?.cancel();
     scrollController.removeListener(_updateScrollController);
     scrollController.dispose();
     _scrolledUp.dispose();
@@ -880,117 +871,17 @@ class ChatController extends State<ChatPageWithRoom>
     // Force the chat list to refresh so the room jumps to the top.
     ChatListRefreshBus.refreshForRoom(room.id);
 
-    // Deterministic: the Matrix SDK appends the local echo asynchronously.
-    // The onUpdate/onInsert callbacks are racy (sometimes the bubble shows up
-    // only on the next server sync), so we poll until the sent event is
-    // actually in timeline.events and rebuild every frame. This guarantees
-    // the bubble appears immediately, every time — no reliance on the SDK
-    // firing its callback at the right moment.
-    final tl = timeline;
-    if (tl != null) {
-      // Deterministic: the Matrix SDK appends the local echo asynchronously.
-      // The onUpdate/onInsert callbacks are racy (sometimes the bubble shows up
-      // only on the next server sync), so we poll until the sent event is
-      // actually in timeline.events. We use an exponential backoff so the UI
-      // thread is not hammered with a rebuild every 16ms; instead we start at
-      // 50ms and double up to 400ms. The bubble still appears immediately in
-      // practice, but without jank.
-      //
-      // We match a local echo by:
-      //   1. status == sending or eventId == null (classic local echo), OR
-      //   2. a recent event with the same body sent by us. This catches the
-      //      case where the SDK already promoted the echo to sent/synced before
-      //      the loop sees it.
-      final myUserId = room.client.userID;
-      final sentAtThreshold = DateTime.now().toUtc().subtract(
-        const Duration(seconds: 30),
-      );
-
-      var delay = Duration.zero;
-      var attempts = 0;
-      const maxAttempts = 20;
-      final editEventId = editEvent?.eventId;
-      final isEdit = editEventId != null;
-      while (mounted && attempts < maxAttempts) {
-        final events = tl.events;
-
-        // Match criteria:
-        // 1. A classic local echo: status == sending and sent by us.
-        //    We intentionally do NOT require e.body == text because the SDK
-        //    may trim/format it or prefix it with reply fallback text.
-        // 2. A recently synced event from us with the same text.
-        // 3. For edits: the original event now has aggregated edit relations.
-        final bool hasPending;
-        if (isEdit) {
-          hasPending = events.any(
-            (e) =>
-                e.status == EventStatus.sending &&
-                e.relationshipType == RelationshipTypes.edit &&
-                e.relationshipEventId == editEventId,
-          );
-        } else {
-          hasPending = events.any(
-            (e) =>
-                e.senderId == myUserId &&
-                e.status == EventStatus.sending,
-          );
-        }
-        final bool hasRecentSentByMe;
-        if (isEdit) {
-          hasRecentSentByMe = events.any(
-            (e) =>
-                e.eventId == editEventId &&
-                e.hasAggregatedEvents(
-                  tl,
-                  RelationshipTypes.edit,
-                ),
-          );
-        } else {
-          hasRecentSentByMe = events.any(
-            (e) =>
-                e.senderId == myUserId &&
-                e.status != EventStatus.error &&
-                e.originServerTs.isAfter(sentAtThreshold) &&
-                (e.body == text ||
-                    e.body.contains(text) ||
-                    e.status == EventStatus.sending),
-          );
-        }
-        final found = hasPending || hasRecentSentByMe;
-
-        Logs().v(
-          '[SendPoll] attempt=$attempts events=${events.length} isEdit=$isEdit pending=$hasPending recentByMe=$hasRecentSentByMe',
-        );
-
-        if (found) {
-          Logs().v('[SendPoll] local echo found, calling updateView()');
-          updateView();
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted &&
-                scrollController.hasClients &&
-                scrollController.position.pixels <= 50) {
-              scrollController.jumpTo(0);
-            }
-          });
-          return;
-        }
-
-        updateView();
-        await Future.delayed(delay);
-        attempts++;
-        if (delay < const Duration(milliseconds: 400)) {
-          delay = delay == Duration.zero
-              ? const Duration(milliseconds: 50)
-              : delay * 2;
-        }
+    // The SDK's onUpdate callback (wired in _loadRoomTimeline) fires when the
+    // local echo is appended to timeline.events, which rebuilds the chat view
+    // via updateView(). No polling needed — Extera Next uses the same pattern.
+    updateView();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted &&
+          scrollController.hasClients &&
+          scrollController.position.pixels <= 50) {
+        scrollController.jumpTo(0);
       }
-      // Final rebuild in case the event landed just after the last poll
-      // or the SDK is about to fire its callback.
-      Logs().v('[SendPoll] local echo NOT found after $attempts attempts, final updateView()');
-      updateView();
-    } else {
-      Logs().i('[SendPoll] timeline is null after send');
-    }
+    });
   }
 
   void sendPollAction() async {
