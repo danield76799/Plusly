@@ -47,11 +47,15 @@ class MxcImage extends StatefulWidget {
   });
 
   /// LRU cache shared across all MxcImage instances (in-memory decoded bytes).
-  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 500);
+  /// Matches Extera Next's behaviour: capped at 100 entries, oldest-first
+  /// eviction, key based on event id + thumbnail marker (size independent so
+  /// that the same event is reused regardless of the requested thumbnail
+  /// width — the disk cache already handles different thumbnail sizes).
+  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 100);
 
   /// Preload a single image into the shared cache.
-  static Future<void> preload(Event event, {required double thumbnailSize}) async {
-    final cacheKey = '${event.eventId}_thumb_${thumbnailSize.toInt()}';
+  static Future<void> preload(Event event, {double thumbnailSize = 0}) async {
+    final cacheKey = '${event.eventId}_thumb';
     if (_imageDataCache.containsKey(cacheKey)) return;
 
     try {
