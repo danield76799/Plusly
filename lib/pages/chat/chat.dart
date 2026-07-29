@@ -873,7 +873,10 @@ class ChatController extends State<ChatPageWithRoom>
 
     // The SDK's onUpdate callback (wired in _loadRoomTimeline) fires when the
     // local echo is appended to timeline.events, which rebuilds the chat view
-    // via updateView(). No polling needed — Extera Next uses the same pattern.
+    // via updateView(). Extera Next relies on this alone, but in practice the
+    // callback is not 100% reliable (~30% miss rate). We add a lightweight
+    // fallback poll that only activates if the local echo has not appeared
+    // within 1 second — much gentler than the old 20-iteration loop.
     updateView();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted &&
@@ -882,6 +885,100 @@ class ChatController extends State<ChatPageWithRoom>
         scrollController.jumpTo(0);
       }
     });
+
+    _pollForLocalEcho(text, isEdit: editEvent?.eventId != null);
+  }
+
+  /// Lightweight fallback poll for the local echo after sendTextEvent.
+  /// Waits 1 second, then checks up to 5 times (50ms, 100ms, 200ms, 400ms, 800ms).
+  /// Only activates when the SDK's onUpdate callback missed the event.
+  Future<void> _pollForLocalEcho(String text, {required bool isEdit}) async {
+    final tl = timeline;
+    if (tl == null) return;
+    final myUserId = room.client.userID;
+    final editEventId = editEvent?.eventId;
+
+    // Wait 1 second for the SDK callback to fire naturally.
+    await Future.delayed(const Duration(seconds: 1));
+    if (!mounted) return;
+
+    // Check if the local echo already appeared (callback worked).
+    if (_localEchoFound(tl, myUserId, text, isEdit, editEventId)) {
+      return;
+    }
+
+    // Fallback poll: up to 5 attempts with exponential backoff.
+    var delay = const Duration(milliseconds: 50);
+    for (var i = 0; i < 5 && mounted; i++) {
+      await Future.delayed(delay);
+      if (!mounted) return;
+      if (_localEchoFound(tl, myUserId, text, isEdit, editEventId)) {
+        Logs().v('[SendPoll] fallback found local echo on attempt $i');
+        return;
+      }
+      delay = delay * 2;
+    }
+    // Final rebuild regardless.
+    if (mounted) updateView();
+  }
+
+  bool _localEchoFound(
+    Timeline tl,
+    String? myUserId,
+    String text,
+    bool isEdit,
+    String? editEventId,
+  ) {
+    final events = tl.events;
+    if (isEdit) {
+      final found = events.any(
+        (e) =>
+            e.status == EventStatus.sending &&
+            e.relationshipType == RelationshipTypes.edit &&
+            e.relationshipEventId == editEventId,
+      );
+      if (found) {
+        updateView();
+        return true;
+      }
+      // Also check if the edit was already applied.
+      if (editEventId != null) {
+        final applied = events.any(
+          (e) =>
+              e.eventId == editEventId &&
+              e.hasAggregatedEvents(tl, RelationshipTypes.edit),
+        );
+        if (applied) {
+          updateView();
+          return true;
+        }
+      }
+      return false;
+    }
+    // Normal send: look for a sending event from us.
+    final found = events.any(
+      (e) => e.senderId == myUserId && e.status == EventStatus.sending,
+    );
+    if (found) {
+      updateView();
+      return true;
+    }
+    // Also check if the event was already promoted to sent.
+    final sentAtThreshold = DateTime.now().toUtc().subtract(
+      const Duration(seconds: 30),
+    );
+    final promoted = events.any(
+      (e) =>
+          e.senderId == myUserId &&
+          e.status != EventStatus.error &&
+          e.originServerTs.isAfter(sentAtThreshold) &&
+          (e.body == text || e.body.contains(text)),
+    );
+    if (promoted) {
+      updateView();
+      return true;
+    }
+    return false;
   }
 
   void sendPollAction() async {
