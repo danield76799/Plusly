@@ -313,7 +313,12 @@ class _MxcImageState extends State<MxcImage> {
       },
     );
 
-    return ClipRRect(borderRadius: widget.borderRadius, child: imageWidget);
+    return ClipRRect(
+      borderRadius: widget.borderRadius,
+      child: RepaintBoundary(
+        child: imageWidget,
+      ),
+    );
   }
 }
 
