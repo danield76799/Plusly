@@ -149,6 +149,11 @@ class ChatController extends State<ChatPageWithRoom>
   /// kick off 60 downloads per second while the user is flinging.
   Timer? _prefetchDebounce;
 
+  /// Listens to the SDK's onTimelineEvent stream so the chat view rebuilds
+  /// the instant a new (local echo, sync, or history) event lands, without
+  /// relying on the racy onInsert/onUpdate callbacks or a polling loop.
+  StreamSubscription<Event>? _timelineEventSub;
+
   late final FocusNode inputFocus;
 
   Timer? typingCoolDown;
@@ -454,6 +459,18 @@ class ChatController extends State<ChatPageWithRoom>
     sendingClient = Matrix.of(context).client;
     WidgetsBinding.instance.addObserver(this);
 
+    // Subscribe to the SDK's onTimelineEvent stream for this room. The SDK
+    // fires this for every event it inserts into a timeline (local echo,
+    // sync result, history backfill). This replaces the old poll loop in
+    // send() and is deterministic — the chat view rebuilds the moment the
+    // event lands instead of waiting up to ~7s for a polling loop to catch up.
+    _timelineEventSub = sendingClient.onTimelineEvent.stream
+        .where((event) => event.room.id == roomId)
+        .listen((_) {
+      if (!mounted) return;
+      updateView();
+    });
+
     loadTimelineFuture = _tryLoadTimeline();
   }
 
@@ -749,6 +766,7 @@ class ChatController extends State<ChatPageWithRoom>
     typingCoolDown?.cancel();
     typingTimeout?.cancel();
     _prefetchDebounce?.cancel();
+    _timelineEventSub?.cancel();
     scrollController.removeListener(_updateScrollController);
     scrollController.dispose();
     _scrolledUp.dispose();
