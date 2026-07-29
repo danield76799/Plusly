@@ -325,6 +325,11 @@ class ChatListController extends State<ChatList>
 
     // Sort pinned rooms to the top in non-pinned tabs, then recently active
     // rooms (optimistic send bump), then by latest event time.
+    // The trailing roomId compareTo keeps the order stable when two rooms
+    // have an identical (or millisecond-close) latestEventReceivedTime — the
+    // SDK's WhatsApp bridge and our own client can land within ~100ms of each
+    // other, which without this tiebreaker causes Brian/GPFans to flicker
+    // back and forth in the chat list.
     if (activeFilter != ActiveFilter.pinned) {
       _cachedFilteredRooms.sort((a, b) {
         final aPinned = a.isFavourite ? 1 : 0;
@@ -333,11 +338,18 @@ class ChatListController extends State<ChatList>
         final aRecent = _recentlyActiveRoomIds.contains(a.id) ? 1 : 0;
         final bRecent = _recentlyActiveRoomIds.contains(b.id) ? 1 : 0;
         if (aRecent != bRecent) return bRecent - aRecent;
-        return b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime);
+        final byTs = b.latestEventReceivedTime
+            .compareTo(a.latestEventReceivedTime);
+        if (byTs != 0) return byTs;
+        return a.id.compareTo(b.id);
       });
     } else {
-      _cachedFilteredRooms.sort((a, b) =>
-          b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime));
+      _cachedFilteredRooms.sort((a, b) {
+        final byTs = b.latestEventReceivedTime
+            .compareTo(a.latestEventReceivedTime);
+        if (byTs != 0) return byTs;
+        return a.id.compareTo(b.id);
+      });
     }
 
     _lastActiveFilter = activeFilter;
