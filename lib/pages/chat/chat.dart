@@ -882,9 +882,7 @@ class ChatController extends State<ChatPageWithRoom>
     // within 1 second — much gentler than the old 20-iteration loop.
     updateView();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted &&
-          scrollController.hasClients &&
-          scrollController.position.pixels <= 50) {
+      if (mounted && scrollController.hasClients) {
         scrollController.jumpTo(0);
       }
     });
