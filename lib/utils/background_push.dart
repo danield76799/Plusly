@@ -39,6 +39,7 @@ import 'package:Pulsly/utils/push_helper.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
+import '../services/timeline_cache.dart';
 import '../widgets/matrix.dart';
 import 'platform_infos.dart';
 
@@ -432,33 +433,6 @@ class BackgroundPush {
         if (endpoint == null || endpoint.isEmpty || !registered) {
           needsReRegistration = true;
           Logs().i('[Push] Client ${client.clientName} needs re-registration');
-        } else {
-          // Endpoint exists in store — verify the pusher is still registered
-          // on the homeserver. The distributor may have revoked the endpoint
-          // (e.g. after OS update or SunUP reinstall) without telling us.
-          try {
-            final pushers = await client.getPushers().timeout(
-              const Duration(seconds: 5),
-            );
-            final hasPusher = pushers?.any(
-              (p) => p.pushkey == endpoint,
-            ) ?? false;
-            if (!hasPusher) {
-              Logs().i(
-                '[Push] Client ${client.clientName}: endpoint stored but pusher not found on homeserver — re-registering',
-              );
-              needsReRegistration = true;
-            } else {
-              Logs().i(
-                '[Push] Client ${client.clientName}: pusher verified on homeserver',
-              );
-            }
-          } catch (e) {
-            // Can't verify (offline, timeout) — assume it's still valid.
-            Logs().w(
-              '[Push] Client ${client.clientName}: could not verify pusher on homeserver ($e) — assuming valid',
-            );
-          }
         }
       }
     }
@@ -542,12 +516,14 @@ class BackgroundPush {
     await UnifiedPush.saveDistributor(selectedDistributor);
     
     // Check if we already have an endpoint for any client
+    var hasExistingEndpoint = false;
     for (final client in clients) {
       if (client.isLogged()) {
         final endpoint = matrix?.store.getString(
           client.clientName + AppSettings.unifiedPushEndpoint.key,
         );
         if (endpoint != null && endpoint.isNotEmpty) {
+          hasExistingEndpoint = true;
           // Re-register pusher with existing endpoint
           await setupPusher(
             gatewayUrl: 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify',
@@ -634,91 +610,25 @@ class BackgroundPush {
 
   Future<void> _onUpMessage(PushMessage pushMessage, String i) async {
     Logs().i('Push Notification from UP received', pushMessage);
-    try {
-      final message = pushMessage.content;
-      upAction = true;
-      final data = Map<String, dynamic>.from(
-        json.decode(utf8.decode(message))['notification'],
-      );
-      // UP may strip the devices list
-      data['devices'] ??= [];
-      final notification = PushNotification.fromJson(data);
-
-      // ── Fast fallback: show a notification IMMEDIATELY ──
-      // Android background handlers have a tight OS time budget (~10s).
-      // The rich notification path (event fetch, sync, avatar download) can
-      // exceed that budget, causing the handler to be killed before show().
-      // This fallback is SYNCHRONOUS — no awaits before show() — so it
-      // always reaches the notification manager, even if the OS kills the
-      // handler immediately after.
-      final client = clientFromInstance(i, clients);
-      if (client != null && notification.roomId != null) {
-        // Foreground check: don't show notification if chat is open
-        final isForeground = matrix?.activeRoomId == notification.roomId &&
-            client == matrix?.client &&
-            WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
-        if (!isForeground) {
-        try {
-          final id = '${client.clientName}_${notification.roomId}'.hashCode;
-          final senderName = notification.senderDisplayName?.trim() ??
-              notification.sender?.trim() ??
-              '';
-          final rawBody = (notification.content?['body'] as String?)?.trim();
-          final body = (rawBody?.isNotEmpty == true)
-              ? rawBody!
-              : 'Nieuw bericht';
-          final title = senderName.isNotEmpty ? senderName : 'Plusly';
-
-          await _flutterLocalNotificationsPlugin.show(
-            id: id,
-            title: title,
-            body: body,
-            notificationDetails: const NotificationDetails(
-              android: AndroidNotificationDetails(
-                AppConfig.pushNotificationsChannelId,
-                'Berichten',
-                importance: Importance.high,
-                priority: Priority.max,
-                category: AndroidNotificationCategory.message,
-              ),
-            ),
-            payload: NotificationPushPayload(
-              client.clientName,
-              notification.roomId,
-              notification.eventId,
-            ).toString(),
-          );
-          Logs().v('[Push] Fallback notification shown immediately');
-        } catch (e) {
-          Logs().w('[Push] Fallback notification failed', e);
-        }
-        } // end if (!isForeground)
-      }
-
-      // ── Rich notification (upgrade, best-effort) ──
-      // This runs in the background and may or may not complete before the
-      // OS kills the handler. If it succeeds, it replaces the fallback with
-      // a rich messaging-style notification (avatar, actions, etc.).
-      // If it fails, the fallback is already visible.
-      // Using unawaited so the handler returns immediately after the fallback.
-      unawaited(
-        pushHelper(
-          notification,
-          clients: clients,
-          l10n: l10n,
-          activeRoomId: matrix?.activeRoomId,
-          activeClient: client,
-          flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-          instance: i,
-          useNotificationActions: true,
-          includeReplyAction: false,
-        ).catchError((e, s) {
-          Logs().w('[Push] Rich notification upgrade failed — fallback is visible', e, s);
-        }),
-      );
-    } catch (e, s) {
-      Logs().e('[Push] _onUpMessage crashed — push notification lost', e, s);
-    }
+    final message = pushMessage.content;
+    upAction = true;
+    final data = Map<String, dynamic>.from(
+      json.decode(utf8.decode(message))['notification'],
+    );
+    // UP may strip the devices list
+    data['devices'] ??= [];
+    await pushHelper(
+      PushNotification.fromJson(data),
+      clients: clients,
+      l10n: l10n,
+      activeRoomId: matrix?.activeRoomId,
+      activeClient: clientFromInstance(i, clients),
+      flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+      instance: i,
+      useNotificationActions:
+          true, // mark-as-read works fine with UP; only reply-input is buggy (#34)
+      includeReplyAction: false, // UP connector bug with reply input (codeberg #34)
+    );
 
     // NOTE: Do NOT trigger another sync here.
     // `pushHelper` already handles abortSync + oneShotSync internally,
@@ -734,9 +644,5 @@ Client? clientFromInstance(String? instance, List<Client> clients) {
       return c;
     }
   }
-  // Fallback to first client — matches Extera behaviour.
-  // If the instance string doesn't match any client (e.g. after re-login
-  // or client name change), we still want to show the notification
-  // rather than silently dropping it.
-  return clients.isNotEmpty ? clients.first : null;
+  return null;
 }

@@ -56,7 +56,7 @@ Future<void> pushHelper(
     // user at least knows a message arrived and can open the app.
     if (clients != null) {
       unawaited(
-        buildFallbackNotification(
+        _buildFallbackNotification(
           notification,
           client: activeClient ?? clients.first,
           flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
@@ -112,14 +112,9 @@ Future<void> _tryPushHelper(
   // Fast background path: if we have a push payload, show a notification
   // immediately without waiting for rooms/database to load. This avoids losing
   // notifications when Android kills the background handler.
-  // We return immediately to stay under the OS time budget. The fallback is
-  // the only notification the user sees for background messages — the rich
-  // notification (with avatar, messaging style, actions) is not attempted in
-  // the background because the OS time budget is too tight and the handler
-  // would be killed before it completes.
   if (isBackgroundMessage && notification.roomId != null) {
     unawaited(
-      buildFallbackNotification(
+      _buildFallbackNotification(
         notification,
         client: client,
         flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
@@ -127,6 +122,8 @@ Future<void> _tryPushHelper(
         Logs().w('Fallback notification failed', e);
       }),
     );
+    // In background we don't need the rich notification; stop here to keep
+    // the handler fast and under the OS time budget.
     return;
   }
 
@@ -154,7 +151,7 @@ Future<void> _tryPushHelper(
   // which is more reliable for encrypted messages and room ordering.
   var event = await client.getEventByPushNotification(
     notification,
-    storeInDatabase: isBackgroundMessage,
+    storeInDatabase: false,
   );
 
   // Bij een koude start kan roomsLoading wel klaar zijn maar de sync nog niet
@@ -187,15 +184,13 @@ Future<void> _tryPushHelper(
   client.abortSync();
   final syncFuture = client.oneShotSync(timeout: Duration.zero);
   unawaited(
-    syncFuture.timeout(const Duration(seconds: 10)).whenComplete(() {
+    syncFuture.whenComplete(() {
       if (isBackgroundMessage) {
         client.backgroundSync = false;
       } else if (wasBackgroundSync) {
         // Restore the continuous sync loop that abortSync() stopped.
         client.backgroundSync = true;
       }
-    }).catchError((e) {
-      Logs().w('[Push] oneShotSync timed out or failed — backgroundSync restored anyway', e);
     }),
   );
 
@@ -312,17 +307,11 @@ Future<void> _tryPushHelper(
   final roomName = event.room.getLocalizedDisplayname(MatrixLocals(l10n));
 
   // ── Build notification details ──
-  // Single global channel (FluffyChat pattern) — no per-room channels.
-  // groupKey is per-account so different accounts are grouped separately in
-  // the notification shade (matching multi-account expectations). We do NOT
-  // setAsGroupSummary, so each room is a separate notification, matching
-  // pre-double-summary behaviour.
+  // Single global channel (FluffyChat pattern) — no per-room channels
   final androidPlatformChannelSpecifics = AndroidNotificationDetails(
     AppConfig.pushNotificationsChannelId,
     l10n.incomingMessages,
     number: notification.counts?.unread,
-    subText: client.clientName,
-    groupKey: client.clientName,
     category: AndroidNotificationCategory.message,
     shortcutId: event.room.id,
     styleInformation:
@@ -413,7 +402,7 @@ Future<void> _tryPushHelper(
 
 /// Fallback for when the rich notification could not be built. Displays what
 /// we can extract directly from the push payload.
-Future<void> buildFallbackNotification(
+Future<void> _buildFallbackNotification(
   PushNotification notification, {
   required Client client,
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
@@ -433,39 +422,12 @@ Future<void> buildFallbackNotification(
   // body; if so, that is what we display here.
   final rawBody = (notification.content?['body'] as String?)?.trim();
   final body = rawBody?.isNotEmpty == true ? rawBody! : l10n.newMessageInFluffyChat;
-  final roomName = _roomDisplayName(client, notification.roomId, l10n) ?? l10n.incomingMessages;
-  final id = '${client.clientName}_${notification.roomId}'.hashCode;
-  // Always show a notification, even without sender name.
-  // The old guard (senderName.isEmpty && body == fallback → return) caused
-  // silent drops for 40-50% of pushes — especially E2EE rooms where the
-  // push payload has no sender and the room isn't loaded yet.
-  final title = senderName.isNotEmpty ? senderName : roomName;
-  if (title.isEmpty && body == l10n.newMessageInFluffyChat) {
-    // Last resort: show something so the user knows a message arrived.
-    await flutterLocalNotificationsPlugin.show(
-      id: id,
-      title: l10n.incomingMessages,
-      body: l10n.newMessageInFluffyChat,
-      notificationDetails: NotificationDetails(
-        android: AndroidNotificationDetails(
-          AppConfig.pushNotificationsChannelId,
-          l10n.incomingMessages,
-          importance: Importance.high,
-          priority: Priority.max,
-          category: AndroidNotificationCategory.message,
-          shortcutId: notification.roomId,
-        ),
-        iOS: DarwinNotificationDetails(threadIdentifier: notification.roomId),
-      ),
-      payload: NotificationPushPayload(
-        client.clientName,
-        notification.roomId,
-        notification.eventId,
-      ).toString(),
-    );
-    updateAppBadge(notification.counts?.unread ?? 0);
+  if (senderName.isEmpty && body == l10n.newMessageInFluffyChat) {
     return;
   }
+
+  final roomName = _roomDisplayName(client, notification.roomId, l10n) ?? l10n.incomingMessages;
+  final id = '${client.clientName}_${notification.roomId}'.hashCode;
 
   await flutterLocalNotificationsPlugin.show(
     id: id,
@@ -509,10 +471,8 @@ String? _roomDisplayName(Client client, String? roomId, L10n l10n) {
 Client? _clientFromInstance(String? instance, List<Client> clients) {
   if (clients.isEmpty) return null;
   if (instance == null) return clients.first;
-  // Fallback to first client — matches Extera behaviour.
-  // Silently dropping the push when instance doesn't match causes 50%+ missed notifications.
-  return clients.firstWhereOrNull((client) => client.clientName == instance) ??
-      clients.first;
+  // FIX #16: don't fallback to first client — return null if no match
+  return clients.firstWhereOrNull((client) => client.clientName == instance);
 }
 
 void updateAppBadge(int unreadCount) {
