@@ -433,6 +433,33 @@ class BackgroundPush {
         if (endpoint == null || endpoint.isEmpty || !registered) {
           needsReRegistration = true;
           Logs().i('[Push] Client ${client.clientName} needs re-registration');
+        } else {
+          // Endpoint exists in store — verify the pusher is still registered
+          // on the homeserver. The distributor may have revoked the endpoint
+          // (e.g. after OS update or SunUP reinstall) without telling us.
+          try {
+            final pushers = await client.getPushers().timeout(
+              const Duration(seconds: 5),
+            );
+            final hasPusher = pushers?.any(
+              (p) => p.pushkey == endpoint,
+            ) ?? false;
+            if (!hasPusher) {
+              Logs().i(
+                '[Push] Client ${client.clientName}: endpoint stored but pusher not found on homeserver — re-registering',
+              );
+              needsReRegistration = true;
+            } else {
+              Logs().i(
+                '[Push] Client ${client.clientName}: pusher verified on homeserver',
+              );
+            }
+          } catch (e) {
+            // Can't verify (offline, timeout) — assume it's still valid.
+            Logs().w(
+              '[Push] Client ${client.clientName}: could not verify pusher on homeserver ($e) — assuming valid',
+            );
+          }
         }
       }
     }
@@ -610,25 +637,29 @@ class BackgroundPush {
 
   Future<void> _onUpMessage(PushMessage pushMessage, String i) async {
     Logs().i('Push Notification from UP received', pushMessage);
-    final message = pushMessage.content;
-    upAction = true;
-    final data = Map<String, dynamic>.from(
-      json.decode(utf8.decode(message))['notification'],
-    );
-    // UP may strip the devices list
-    data['devices'] ??= [];
-    await pushHelper(
-      PushNotification.fromJson(data),
-      clients: clients,
-      l10n: l10n,
-      activeRoomId: matrix?.activeRoomId,
-      activeClient: clientFromInstance(i, clients),
-      flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-      instance: i,
-      useNotificationActions:
-          true, // mark-as-read works fine with UP; only reply-input is buggy (#34)
-      includeReplyAction: false, // UP connector bug with reply input (codeberg #34)
-    );
+    try {
+      final message = pushMessage.content;
+      upAction = true;
+      final data = Map<String, dynamic>.from(
+        json.decode(utf8.decode(message))['notification'],
+      );
+      // UP may strip the devices list
+      data['devices'] ??= [];
+      await pushHelper(
+        PushNotification.fromJson(data),
+        clients: clients,
+        l10n: l10n,
+        activeRoomId: matrix?.activeRoomId,
+        activeClient: clientFromInstance(i, clients),
+        flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+        instance: i,
+        useNotificationActions:
+            true, // mark-as-read works fine with UP; only reply-input is buggy (#34)
+        includeReplyAction: false, // UP connector bug with reply input (codeberg #34)
+      );
+    } catch (e, s) {
+      Logs().e('[Push] _onUpMessage crashed — push notification lost', e, s);
+    }
 
     // NOTE: Do NOT trigger another sync here.
     // `pushHelper` already handles abortSync + oneShotSync internally,
