@@ -644,5 +644,7 @@ Client? clientFromInstance(String? instance, List<Client> clients) {
       return c;
     }
   }
-  return null;
+  // Fallback to first client — matches Extera behaviour.
+  // Without this, instance name mismatches silently drop 50%+ of pushes.
+  return clients.isNotEmpty ? clients.first : null;
 }
