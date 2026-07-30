@@ -844,9 +844,6 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     // Fire-and-forget the actual send. We only react to failures here.
-    // Capture the event count BEFORE sendTextEvent — the SDK may add the
-    // local echo synchronously, and the poll needs to detect the delta.
-    _eventCountAtSend = timeline?.events.length ?? 0;
     final sendFuture = room.sendTextEvent(
       text,
       inReplyTo: replyEvent,
@@ -859,7 +856,17 @@ class ChatController extends State<ChatPageWithRoom>
     );
     unawaited(
       sendFuture.then(
-        (_) {},
+        (_) {
+          // The SDK has processed the local echo and added it to
+          // timeline.events. Rebuild the chat view and scroll to bottom.
+          if (!mounted) return;
+          updateView();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && scrollController.hasClients) {
+              scrollController.jumpTo(0);
+            }
+          });
+        },
         onError: (e) {
           Logs().e('Failed to send message', e);
           if (mounted) {
@@ -874,81 +881,9 @@ class ChatController extends State<ChatPageWithRoom>
     // Force the chat list to refresh so the room jumps to the top.
     ChatListRefreshBus.refreshForRoom(room.id);
 
-    // The SDK's onUpdate callback (wired in _loadRoomTimeline) fires when the
-    // local echo is appended to timeline.events, which rebuilds the chat view
-    // via updateView(). Extera Next relies on this alone, but in practice the
-    // callback is not 100% reliable (~30% miss rate). We add a lightweight
-    // fallback poll that only activates if the local echo has not appeared
-    // within 1 second — much gentler than the old 20-iteration loop.
+    // Immediate rebuild so the input bar clears and the typing indicator
+    // shows. The actual message bubble appears when sendFuture completes.
     updateView();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && scrollController.hasClients) {
-        scrollController.jumpTo(0);
-      }
-    });
-
-    _pollForLocalEcho(text, isEdit: editEvent?.eventId != null);
-  }
-
-  /// Number of timeline events at the moment send() was called. Used by
-  /// [_pollForLocalEcho] to detect new events without matching on body/status.
-  int _eventCountAtSend = 0;
-
-  /// Lightweight fallback poll for the local echo after sendTextEvent.
-  /// Starts immediately (50ms first check) with up to 10 attempts and
-  /// exponential backoff up to 800ms. Only activates when the SDK's onUpdate
-  /// callback missed the event — which happens ~30% of the time in practice.
-  /// After 3 failed attempts, triggers a oneShotSync to force the SDK to
-  /// process the local echo and add it to timeline.events.
-  Future<void> _pollForLocalEcho(String text, {required bool isEdit}) async {
-    final tl = timeline;
-    if (tl == null) return;
-
-    var delay = const Duration(milliseconds: 50);
-    for (var i = 0; i < 10 && mounted; i++) {
-      await Future.delayed(delay);
-      if (!mounted) return;
-      if (_localEchoFound(tl, isEdit)) {
-        Logs().v('[SendPoll] fallback found local echo on attempt $i');
-        return;
-      }
-      // After 3 failed attempts (~350ms), force a sync to nudge the SDK.
-      if (i == 3) {
-        final wasBackgroundSync = room.client.syncPending;
-        room.client.abortSync();
-        unawaited(room.client.oneShotSync(timeout: Duration.zero).whenComplete(
-          () {
-            if (wasBackgroundSync) room.client.backgroundSync = true;
-          },
-        ));
-      }
-      delay = delay < const Duration(milliseconds: 800)
-          ? delay * 2
-          : const Duration(milliseconds: 800);
-    }
-    // Final rebuild regardless.
-    if (mounted) updateView();
-  }
-
-  bool _localEchoFound(Timeline tl, bool isEdit) {
-    // A new event appeared in the timeline since send() was called.
-    if (tl.events.length > _eventCountAtSend) {
-      updateView();
-      return true;
-    }
-    // For edits: check if the original event now has aggregated edit relations.
-    if (isEdit && editEvent?.eventId != null) {
-      final applied = tl.events.any(
-        (e) =>
-            e.eventId == editEvent!.eventId &&
-            e.hasAggregatedEvents(tl, RelationshipTypes.edit),
-      );
-      if (applied) {
-        updateView();
-        return true;
-      }
-    }
-    return false;
   }
 
   void sendPollAction() async {
