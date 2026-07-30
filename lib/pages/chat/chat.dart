@@ -565,6 +565,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await room.getTimeline(
         onUpdate: updateView,
+        onNewEvent: updateView,
         onInsert: _insert,
         eventContextId: eventContextId,
       );
@@ -573,6 +574,7 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await room.getTimeline(
         onUpdate: updateView,
+        onNewEvent: updateView,
         onInsert: _insert,
       );
       if (!mounted) return;
@@ -592,6 +594,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
+        onNewEvent: updateView,
         onInsert: _insert,
         eventContextId: eventContextId,
       );
@@ -605,6 +608,7 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
+        onNewEvent: updateView,
         onInsert: _insert,
       );
       if (!mounted) return;
@@ -883,22 +887,6 @@ class ChatController extends State<ChatPageWithRoom>
 
     // Immediate rebuild so the input bar clears.
     updateView();
-
-    // Fallback: in DM rooms the SDK sometimes does not add the local echo to
-    // timeline.events before sendFuture resolves. Check again after 100ms and
-    // 300ms to catch the echo when it eventually appears.
-    _scheduleDelayedRefresh(100);
-    _scheduleDelayedRefresh(300);
-  }
-
-  void _scheduleDelayedRefresh(int ms) {
-    Future.delayed(Duration(milliseconds: ms), () {
-      if (!mounted) return;
-      updateView();
-      if (scrollController.hasClients) {
-        scrollController.jumpTo(0);
-      }
-    });
   }
 
   void sendPollAction() async {
