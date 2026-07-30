@@ -509,8 +509,10 @@ String? _roomDisplayName(Client client, String? roomId, L10n l10n) {
 Client? _clientFromInstance(String? instance, List<Client> clients) {
   if (clients.isEmpty) return null;
   if (instance == null) return clients.first;
-  // FIX #16: don't fallback to first client — return null if no match
-  return clients.firstWhereOrNull((client) => client.clientName == instance);
+  // Fallback to first client — matches Extera behaviour.
+  // Silently dropping the push when instance doesn't match causes 50%+ missed notifications.
+  return clients.firstWhereOrNull((client) => client.clientName == instance) ??
+      clients.first;
 }
 
 void updateAppBadge(int unreadCount) {

@@ -734,5 +734,9 @@ Client? clientFromInstance(String? instance, List<Client> clients) {
       return c;
     }
   }
-  return null;
+  // Fallback to first client — matches Extera behaviour.
+  // If the instance string doesn't match any client (e.g. after re-login
+  // or client name change), we still want to show the notification
+  // rather than silently dropping it.
+  return clients.isNotEmpty ? clients.first : null;
 }
