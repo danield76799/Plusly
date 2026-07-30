@@ -39,7 +39,6 @@ import 'package:Pulsly/utils/push_helper.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
-import '../services/timeline_cache.dart';
 import '../widgets/matrix.dart';
 import 'platform_infos.dart';
 
@@ -543,14 +542,12 @@ class BackgroundPush {
     await UnifiedPush.saveDistributor(selectedDistributor);
     
     // Check if we already have an endpoint for any client
-    var hasExistingEndpoint = false;
     for (final client in clients) {
       if (client.isLogged()) {
         final endpoint = matrix?.store.getString(
           client.clientName + AppSettings.unifiedPushEndpoint.key,
         );
         if (endpoint != null && endpoint.isNotEmpty) {
-          hasExistingEndpoint = true;
           // Re-register pusher with existing endpoint
           await setupPusher(
             gatewayUrl: 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify',
@@ -645,12 +642,37 @@ class BackgroundPush {
       );
       // UP may strip the devices list
       data['devices'] ??= [];
+      final notification = PushNotification.fromJson(data);
+
+      // ── Fast fallback: show a notification IMMEDIATELY ──
+      // Android background handlers have a tight OS time budget (~10s).
+      // The rich notification path (event fetch, sync, avatar download) can
+      // exceed that budget, causing the handler to be killed before show().
+      // By showing a fallback first, the user always sees something.
+      final client = clientFromInstance(i, clients);
+      if (client != null && notification.roomId != null) {
+        unawaited(
+          buildFallbackNotification(
+            notification,
+            client: client,
+            flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+          ).catchError((e) {
+            Logs().w('[Push] Fallback notification failed', e);
+          }),
+        );
+      }
+
+      // ── Rich notification (upgrade) ──
+      // This runs in the background and may or may not complete before the
+      // OS kills the handler. If it succeeds, it replaces the fallback with
+      // a rich messaging-style notification (avatar, actions, etc.).
+      // If it fails, the fallback is already visible.
       await pushHelper(
-        PushNotification.fromJson(data),
+        notification,
         clients: clients,
         l10n: l10n,
         activeRoomId: matrix?.activeRoomId,
-        activeClient: clientFromInstance(i, clients),
+        activeClient: client,
         flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
         instance: i,
         useNotificationActions:

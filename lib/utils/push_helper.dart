@@ -56,7 +56,7 @@ Future<void> pushHelper(
     // user at least knows a message arrived and can open the app.
     if (clients != null) {
       unawaited(
-        _buildFallbackNotification(
+        buildFallbackNotification(
           notification,
           client: activeClient ?? clients.first,
           flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
@@ -119,7 +119,7 @@ Future<void> _tryPushHelper(
   // would be killed before it completes.
   if (isBackgroundMessage && notification.roomId != null) {
     unawaited(
-      _buildFallbackNotification(
+      buildFallbackNotification(
         notification,
         client: client,
         flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
@@ -154,7 +154,7 @@ Future<void> _tryPushHelper(
   // which is more reliable for encrypted messages and room ordering.
   var event = await client.getEventByPushNotification(
     notification,
-    storeInDatabase: false,
+    storeInDatabase: isBackgroundMessage,
   );
 
   // Bij een koude start kan roomsLoading wel klaar zijn maar de sync nog niet
@@ -413,7 +413,7 @@ Future<void> _tryPushHelper(
 
 /// Fallback for when the rich notification could not be built. Displays what
 /// we can extract directly from the push payload.
-Future<void> _buildFallbackNotification(
+Future<void> buildFallbackNotification(
   PushNotification notification, {
   required Client client,
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
@@ -433,12 +433,39 @@ Future<void> _buildFallbackNotification(
   // body; if so, that is what we display here.
   final rawBody = (notification.content?['body'] as String?)?.trim();
   final body = rawBody?.isNotEmpty == true ? rawBody! : l10n.newMessageInFluffyChat;
-  if (senderName.isEmpty && body == l10n.newMessageInFluffyChat) {
-    return;
-  }
-
   final roomName = _roomDisplayName(client, notification.roomId, l10n) ?? l10n.incomingMessages;
   final id = '${client.clientName}_${notification.roomId}'.hashCode;
+  // Always show a notification, even without sender name.
+  // The old guard (senderName.isEmpty && body == fallback → return) caused
+  // silent drops for 40-50% of pushes — especially E2EE rooms where the
+  // push payload has no sender and the room isn't loaded yet.
+  final title = senderName.isNotEmpty ? senderName : roomName;
+  if (title.isEmpty && body == l10n.newMessageInFluffyChat) {
+    // Last resort: show something so the user knows a message arrived.
+    await flutterLocalNotificationsPlugin.show(
+      id: id,
+      title: l10n.incomingMessages,
+      body: l10n.newMessageInFluffyChat,
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          AppConfig.pushNotificationsChannelId,
+          l10n.incomingMessages,
+          importance: Importance.high,
+          priority: Priority.max,
+          category: AndroidNotificationCategory.message,
+          shortcutId: notification.roomId,
+        ),
+        iOS: DarwinNotificationDetails(threadIdentifier: notification.roomId),
+      ),
+      payload: NotificationPushPayload(
+        client.clientName,
+        notification.roomId,
+        notification.eventId,
+      ).toString(),
+    );
+    updateAppBadge(notification.counts?.unread ?? 0);
+    return;
+  }
 
   await flutterLocalNotificationsPlugin.show(
     id: id,

@@ -881,9 +881,24 @@ class ChatController extends State<ChatPageWithRoom>
     // Force the chat list to refresh so the room jumps to the top.
     ChatListRefreshBus.refreshForRoom(room.id);
 
-    // Immediate rebuild so the input bar clears and the typing indicator
-    // shows. The actual message bubble appears when sendFuture completes.
+    // Immediate rebuild so the input bar clears.
     updateView();
+
+    // Fallback: in DM rooms the SDK sometimes does not add the local echo to
+    // timeline.events before sendFuture resolves. Check again after 100ms and
+    // 300ms to catch the echo when it eventually appears.
+    _scheduleDelayedRefresh(100);
+    _scheduleDelayedRefresh(300);
+  }
+
+  void _scheduleDelayedRefresh(int ms) {
+    Future.delayed(Duration(milliseconds: ms), () {
+      if (!mounted) return;
+      updateView();
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(0);
+      }
+    });
   }
 
   void sendPollAction() async {
