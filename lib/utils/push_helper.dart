@@ -112,8 +112,11 @@ Future<void> _tryPushHelper(
   // Fast background path: if we have a push payload, show a notification
   // immediately without waiting for rooms/database to load. This avoids losing
   // notifications when Android kills the background handler.
-  // We return immediately to stay under the OS time budget, but schedule a
-  // fire-and-forget task to upgrade the fallback to a rich notification later.
+  // We return immediately to stay under the OS time budget. The fallback is
+  // the only notification the user sees for background messages — the rich
+  // notification (with avatar, messaging style, actions) is not attempted in
+  // the background because the OS time budget is too tight and the handler
+  // would be killed before it completes.
   if (isBackgroundMessage && notification.roomId != null) {
     unawaited(
       _buildFallbackNotification(
@@ -122,26 +125,6 @@ Future<void> _tryPushHelper(
         flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
       ).catchError((e) {
         Logs().w('Fallback notification failed', e);
-      }),
-    );
-    // Schedule the rich notification as a fire-and-forget task. If the
-    // handler is still alive when it completes, the rich notification
-    // overwrites the fallback (same ID). If the handler is killed, the
-    // fallback is still visible.
-    unawaited(
-      Future.delayed(Duration.zero, () => _tryPushHelper(
-        notification,
-        clients: clients,
-        l10n: l10n,
-        activeRoomId: activeRoomId,
-        activeClient: activeClient,
-        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-        instance: instance,
-        useNotificationActions: useNotificationActions,
-        includeReplyAction: includeReplyAction,
-        onEventLoaded: onEventLoaded,
-      )).catchError((e) {
-        Logs().w('Rich notification upgrade failed (non-fatal)', e);
       }),
     );
     return;
