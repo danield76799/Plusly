@@ -66,8 +66,11 @@ class SettingsView extends StatelessWidget {
           android: AndroidNotificationDetails(
             'plusly_push',
             'Berichten',
-            importance: Importance.high,
+            importance: Importance.max,
             priority: Priority.max,
+            enableVibration: true,
+            enableLights: true,
+            ticker: 'Test push notificatie',
           ),
         ),
       );
