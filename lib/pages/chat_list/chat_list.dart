@@ -118,25 +118,6 @@ class ChatListController extends State<ChatList>
       ? ActiveFilter.messages
       : ActiveFilter.allChats;
 
-  // Optimistically bump rooms to the top immediately after sending a message,
-  // before the SDK updates latestEventReceivedTime.
-  final Set<String> _recentlyActiveRoomIds = {};
-  Timer? _recentlyActiveTimer;
-
-  void markRoomRecentlyActive(String roomId) {
-    if (!mounted) return;
-    setState(() {
-      _recentlyActiveRoomIds.add(roomId);
-    });
-    _recentlyActiveTimer?.cancel();
-    _recentlyActiveTimer = Timer(const Duration(seconds: 3), () {
-      if (!mounted) return;
-      setState(() {
-        _recentlyActiveRoomIds.clear();
-      });
-    });
-  }
-
   String? _activeSpaceId;
   String? get activeSpaceId => _activeSpaceId;
 
@@ -323,21 +304,17 @@ class ChatListController extends State<ChatList>
         .where(_isBridgeTypeVisible)
         .toList();
 
-    // Sort pinned rooms to the top in non-pinned tabs, then recently active
-    // rooms (optimistic send bump), then by latest event time.
+    // Sort pinned rooms to the top in non-pinned tabs, then by latest event time.
     // The trailing roomId compareTo keeps the order stable when two rooms
     // have an identical (or millisecond-close) latestEventReceivedTime — the
     // SDK's WhatsApp bridge and our own client can land within ~100ms of each
-    // other, which without this tiebreaker causes Brian/GPFans to flicker
+    // other, which without this tiebreaker causes rooms to flicker
     // back and forth in the chat list.
     if (activeFilter != ActiveFilter.pinned) {
       _cachedFilteredRooms.sort((a, b) {
         final aPinned = a.isFavourite ? 1 : 0;
         final bPinned = b.isFavourite ? 1 : 0;
         if (aPinned != bPinned) return bPinned - aPinned;
-        final aRecent = _recentlyActiveRoomIds.contains(a.id) ? 1 : 0;
-        final bRecent = _recentlyActiveRoomIds.contains(b.id) ? 1 : 0;
-        if (aRecent != bRecent) return bRecent - aRecent;
         final byTs = b.latestEventReceivedTime
             .compareTo(a.latestEventReceivedTime);
         if (byTs != 0) return byTs;
@@ -382,16 +359,6 @@ class ChatListController extends State<ChatList>
     _cachedFilteredRooms = []; // forceer her-berekening bij volgende get
     _lastMaxEventTime = 0;
     _lastRoomCount = 0;
-    if (roomId != null) {
-      // Don't call setState here: invalidateRoomCache is invoked from the
-      // StreamBuilder builder, and setState during build is illegal in Flutter.
-      // The StreamBuilder already triggers a rebuild, so just update the set.
-      _recentlyActiveRoomIds.add(roomId);
-      _recentlyActiveTimer?.cancel();
-      _recentlyActiveTimer = Timer(const Duration(seconds: 3), () {
-        if (mounted) setState(() => _recentlyActiveRoomIds.clear());
-      });
-    }
   }
   
   void loadMoreRooms() {
