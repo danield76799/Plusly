@@ -231,26 +231,13 @@ class BackgroundPush {
     }
     final thisAppId = useDeviceSpecificAppId ? deviceAppId : appId;
     if (gatewayUrl != null && token != null) {
-      final currentPushers = pushers.where((pusher) => pusher.pushkey == token);
-      if (currentPushers.length == 1 &&
-          currentPushers.first.kind == 'http' &&
-          currentPushers.first.appId == thisAppId &&
-          currentPushers.first.appDisplayName == clientName &&
-          currentPushers.first.deviceDisplayName == client.deviceName &&
-          currentPushers.first.lang == 'en' &&
-          currentPushers.first.data.url.toString() == gatewayUrl &&
-          currentPushers.first.data.format ==
-              AppSettings.pushNotificationsPusherFormat.value &&
-          mapEquals(currentPushers.single.data.additionalProperties, {
-            "data_message": pusherDataMessageFormat,
-          })) {
-        Logs().i('[Push] Pusher already set');
-      } else {
-        Logs().i('Need to set new pusher');
-        oldTokens.add(token);
-        if (client.isLogged()) {
-          setNewPusher = true;
-        }
+      // Always re-post the pusher on every app start. The homeserver can
+      // silently expire/deactivate pushers without changing their parameters,
+      // so checking for an exact match is not sufficient — we must force a
+      // fresh registration to guarantee pushes keep working.
+      oldTokens.add(token);
+      if (client.isLogged()) {
+        setNewPusher = true;
       }
     } else {
       Logs().w('[Push] Missing required push credentials');
@@ -430,6 +417,46 @@ class BackgroundPush {
       for (final client in clients) {
         if (client.isLogged()) {
           await UnifiedPush.register(instance: client.clientName);
+        }
+      }
+
+      // CRITICAL: UnifiedPush.register() may return the existing endpoint
+      // without triggering _newUpEndpoint if Ntfy still considers it valid.
+      // But the pusher on the Matrix homeserver can expire independently.
+      // Always re-register the pusher with the homeserver using the stored
+      // endpoint to prevent silent push failures.
+      for (final client in clients) {
+        if (!client.isLogged()) continue;
+        final storedEndpoint = matrix?.store.getString(
+          client.clientName + AppSettings.unifiedPushEndpoint.key,
+        );
+        if (storedEndpoint != null && storedEndpoint.isNotEmpty) {
+          // Use the same gateway detection logic as _newUpEndpoint
+          var gatewayUrl = 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify';
+          try {
+            final url = Uri.parse(storedEndpoint)
+                .replace(path: '/_matrix/push/v1/notify', query: '')
+                .toString()
+                .split('?')
+                .first;
+            final res = json.decode(
+              utf8.decode((await http.get(Uri.parse(url))).bodyBytes),
+            );
+            if (res['gateway'] == 'matrix' ||
+                (res['unifiedpush'] is Map &&
+                    res['unifiedpush']['gateway'] == 'matrix')) {
+              gatewayUrl = url;
+            }
+          } catch (_) {
+            // Fall back to default gateway
+          }
+          Logs().i('[Push] Re-registering pusher for ${client.clientName} via $gatewayUrl');
+          await setupPusher(
+            gatewayUrl: gatewayUrl,
+            token: storedEndpoint,
+            useDeviceSpecificAppId: true,
+            client: client,
+          );
         }
       }
       return;
