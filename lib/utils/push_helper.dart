@@ -343,7 +343,7 @@ Future<void> _tryPushHelper(
       hideEdit: true,
       removeMarkdown: true,
     ),
-    importance: Importance.high,
+    importance: Importance.max,
     priority: Priority.max,
     actions: event.type == EventTypes.RoomMember || !useNotificationActions
         ? null
@@ -443,7 +443,7 @@ Future<void> _buildFallbackNotification(
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,
         l10n.incomingMessages,
-        importance: Importance.high,
+        importance: Importance.max,
         priority: Priority.max,
         category: AndroidNotificationCategory.message,
         shortcutId: notification.roomId,

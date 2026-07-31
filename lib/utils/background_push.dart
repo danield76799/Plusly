@@ -81,12 +81,23 @@ class BackgroundPush {
 
       // Android 8+ (API 26+) requires a notification channel before any
       // notification can be shown. Without this, show() silently fails.
+      // Delete and recreate to pick up importance changes (Android caches
+      // channel settings after first creation).
+      try {
+        await androidPlugin?.deleteNotificationChannel(
+          channelId: AppConfig.pushNotificationsChannelId,
+        );
+      } catch (_) {
+        // Channel may not exist yet — that's fine.
+      }
       await androidPlugin?.createNotificationChannel(
         const AndroidNotificationChannel(
           AppConfig.pushNotificationsChannelId,
           'Berichten',
           description: 'Inkomende chatberichten',
-          importance: Importance.high,
+          importance: Importance.max,
+          enableVibration: true,
+          enableLights: true,
         ),
       );
     }
