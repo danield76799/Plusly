@@ -183,145 +183,44 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
   return null;
 }
 
-/// Compare two version strings (e.g. "1.2.3" vs "1.2.4").
-/// Returns true if latest is newer than current.
+/// Compare two version strings (e.g. "1.2.3" vs "1.2.4" or "1.4.17+21044" vs
+/// "1.4.17+21043"). Returns true if latest is newer than current.
 bool isNewerVersion(String latest, String current) {
   // Strip 'v' prefix if present
   latest = latest.startsWith('v') ? latest.substring(1) : latest;
   current = current.startsWith('v') ? current.substring(1) : current;
 
-  // Extract build metadata (+NNN) from both versions
-  final latestPlusIndex = latest.indexOf('+');
-  final latestBuildNumber = latestPlusIndex != -1 ? latest.substring(latestPlusIndex + 1) : '';
-  if (latestPlusIndex != -1) {
-    latest = latest.substring(0, latestPlusIndex);
-  }
-  final currentPlusIndex = current.indexOf('+');
-  final currentBuildNumber = currentPlusIndex != -1 ? current.substring(currentPlusIndex + 1) : '';
-  if (currentPlusIndex != -1) {
-    current = current.substring(0, currentPlusIndex);
+  // Split into semver core and optional build number.
+  (String, int) parse(String s) {
+    final plus = s.indexOf('+');
+    if (plus == -1) return (s, 0);
+    final core = s.substring(0, plus);
+    final build = int.tryParse(s.substring(plus + 1)) ?? 0;
+    return (core, build);
   }
 
-  // If both versions share the same semver core, compare build numbers if present.
-  if (latest == current) {
-    if (latestBuildNumber.isNotEmpty && currentBuildNumber.isNotEmpty) {
-      final latestBuild = int.tryParse(latestBuildNumber) ?? 0;
-      final currentBuild = int.tryParse(currentBuildNumber) ?? 0;
-      return latestBuild > currentBuild;
-    }
-    // A tagged CI build (e.g. +2350) is NOT automatically "newer" than a
-    // local/package build that only reports the semver core (no build number).
-    // Treating it as always-newer caused false "update available" prompts
-    // when currentVersion lacked a build tag (e.g. PackageInfo not yet loaded).
-    // If both share the same semver core and current has no build number,
-    // treat them as equal (no update).
-    return false;
-  }
+  final (latestCore, latestBuild) = parse(latest);
+  final (currentCore, currentBuild) = parse(current);
 
-  // Check if versions look like Plusly build tags (e.g., "0.9.9-build421", "1.1.3+863", "playstore-240")
-  final latestIsBuildTag = latestBuildNumber.isNotEmpty || latest.contains('build') || latest.startsWith('playstore-') || latest.startsWith('playstore-v');
-  final currentIsBuildTag = currentBuildNumber.isNotEmpty || current.contains('build');
-
-  // Special case: playstore- tags are only newer if current is also a playstore tag
-  // and the build number is higher. Otherwise, compare semver normally.
-  if (latest.startsWith('playstore-') || latest.startsWith('playstore-v')) {
-    // If current is also a playstore tag, compare build numbers
-    if (current.startsWith('playstore-') || current.startsWith('playstore-v')) {
-      final latestMatch = RegExp(r'playstore-v?(\d+)').firstMatch(latest);
-      final currentMatch = RegExp(r'playstore-v?(\d+)').firstMatch(current);
-      if (latestMatch != null && currentMatch != null) {
-        final latestBuild = int.tryParse(latestMatch.group(1) ?? '0') ?? 0;
-        final currentBuild = int.tryParse(currentMatch.group(1) ?? '0') ?? 0;
-        return latestBuild > currentBuild;
-      }
-    }
-    // If current is semver, playstore tag is NOT newer (we only use semver for updates)
-    return false;
-  }
-
-  // If BOTH are build tags, compare build numbers
-  if (latestIsBuildTag && currentIsBuildTag) {
-    // Extract build number: handles "playstore-240", "0.9.9-build421", "1.4.0+928"
-    int? latestBuild;
-    int? currentBuild;
-    
-    // Try playstore- format first (handles both playstore-240 and playstore-v240)
-    final playstoreMatch = RegExp(r'playstore-v?(\d+)');
-    final latestPlaystoreMatch = playstoreMatch.firstMatch(latest);
-    final currentPlaystoreMatch = playstoreMatch.firstMatch(current);
-    
-    if (latestPlaystoreMatch != null) {
-      latestBuild = int.tryParse(latestPlaystoreMatch.group(1) ?? '0');
-    } else if (latestBuildNumber.isNotEmpty) {
-      latestBuild = int.tryParse(latestBuildNumber);
-    } else {
-      final latestBuildMatch = RegExp(r'(\d+)$').firstMatch(latest);
-      latestBuild = latestBuildMatch != null ? int.tryParse(latestBuildMatch.group(1) ?? '0') : null;
-    }
-    
-    if (currentPlaystoreMatch != null) {
-      currentBuild = int.tryParse(currentPlaystoreMatch.group(1) ?? '0');
-    } else if (currentBuildNumber.isNotEmpty) {
-      currentBuild = int.tryParse(currentBuildNumber);
-    } else {
-      final currentBuildMatch = RegExp(r'(\d+)$').firstMatch(current);
-      currentBuild = currentBuildMatch != null ? int.tryParse(currentBuildMatch.group(1) ?? '0') : null;
-    }
-    
-    if (latestBuild != null && currentBuild != null) {
-      return latestBuild > currentBuild;
-    }
-  }
-
-  // If latest is NOT a build tag (i.e., proper semantic like "1.5.1"), always compare semantically
-  // This handles cases like current="1.4.0+928" vs latest="1.5.1"
-  if (!latestIsBuildTag) {
-    final latestParts = latest
-        .split('.')
-        .map((e) => int.tryParse(e) ?? 0)
-        .toList();
-    final currentParts = current
-        .split('.')
-        .map((e) => int.tryParse(e) ?? 0)
-        .toList();
-
-    // Pad with zeros
-    while (latestParts.length < currentParts.length) {
-      latestParts.add(0);
-    }
-    while (currentParts.length < latestParts.length) {
-      currentParts.add(0);
-    }
-
-    for (var i = 0; i < latestParts.length; i++) {
-      if (latestParts[i] > currentParts[i]) return true;
-      if (latestParts[i] < currentParts[i]) return false;
-    }
-    return false;
-  }
-
-  // Fallback: semantic version comparison for mixed cases
-  final latestParts = latest
-      .split('.')
-      .map((e) => int.tryParse(e) ?? 0)
-      .toList();
-  final currentParts = current
-      .split('.')
-      .map((e) => int.tryParse(e) ?? 0)
-      .toList();
-
+  // Compare semver core part by part.
+  final latestParts = latestCore.split('.').map(int.tryParse).toList();
+  final currentParts = currentCore.split('.').map(int.tryParse).toList();
   while (latestParts.length < currentParts.length) {
-    latestParts.add(0);
+    latestParts.add(null);
   }
   while (currentParts.length < latestParts.length) {
-    currentParts.add(0);
+    currentParts.add(null);
   }
 
   for (var i = 0; i < latestParts.length; i++) {
-    if (latestParts[i] > currentParts[i]) return true;
-    if (latestParts[i] < currentParts[i]) return false;
+    final a = latestParts[i] ?? 0;
+    final b = currentParts[i] ?? 0;
+    if (a > b) return true;
+    if (a < b) return false;
   }
-  return false;
+
+  // Same core: compare build number.
+  return latestBuild > currentBuild;
 }
 
 Future<void> downloadAndInstallApk(BuildContext context, String url) async {
