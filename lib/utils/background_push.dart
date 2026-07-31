@@ -613,7 +613,7 @@ class BackgroundPush {
   }
 
   Future<void> _onUpMessage(PushMessage pushMessage, String i) async {
-    Logs().i('Push Notification from UP received', pushMessage);
+    Logs().i('[Push] UP message received for instance: $i', pushMessage);
     final message = pushMessage.content;
     upAction = true;
     final data = Map<String, dynamic>.from(
@@ -621,12 +621,38 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
+    final notification = PushNotification.fromJson(data);
+    Logs().i('[Push] Parsed notification: roomId=${notification.roomId}, sender=${notification.sender}, eventId=${notification.eventId}');
+
+    // Check if we have a matching client
+    final client = clientFromInstance(i, clients);
+    if (client == null) {
+      Logs().e('[Push] No client found for instance $i — push will be dropped!');
+      return;
+    }
+    Logs().i('[Push] Using client: ${client.clientName} (logged in: ${client.isLogged()})');
+
+    // Check if pusher is still registered
+    try {
+      final pushers = await client.getPushers();
+      if (pushers == null) {
+        Logs().w('[Push] getPushers returned null');
+      } else {
+        Logs().i('[Push] Active pushers for ${client.clientName}: ${pushers.length}');
+        for (final p in pushers) {
+          Logs().i('[Push]   Pusher: appId=${p.appId}, pushkey=${p.pushkey.substring(0, 20)}..., kind=${p.kind}');
+        }
+      }
+    } catch (e) {
+      Logs().w('[Push] Could not check pushers: $e');
+    }
+
     await pushHelper(
-      PushNotification.fromJson(data),
+      notification,
       clients: clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
-      activeClient: clientFromInstance(i, clients),
+      activeClient: client,
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
       useNotificationActions:

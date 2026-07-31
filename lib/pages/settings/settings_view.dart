@@ -36,6 +36,23 @@ class SettingsView extends StatelessWidget {
       return;
     }
 
+    // Check pusher status
+    var pusherInfo = 'Onbekend';
+    try {
+      final client = matrix.client;
+      final pushers = await client.getPushers();
+      if (pushers == null || pushers.isEmpty) {
+        pusherInfo = 'Geen pusher geregistreerd';
+      } else {
+        pusherInfo = '${pushers.length} pusher(s):\n';
+        for (final p in pushers) {
+          pusherInfo += '  • ${p.appId} → ${p.pushkey.substring(0, 20)}...\n';
+        }
+      }
+    } catch (e) {
+      pusherInfo = 'Fout bij ophalen: $e';
+    }
+
     // Show a local test notification
     try {
       await push.localNotificationsPlugin.show(
@@ -53,7 +70,10 @@ class SettingsView extends StatelessWidget {
       );
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Test notificatie verzonden!')),
+        SnackBar(
+          content: Text('Test notificatie verzonden!\nPusher status: $pusherInfo'),
+          duration: const Duration(seconds: 5),
+        ),
       );
     } catch (e) {
       if (!context.mounted) return;
