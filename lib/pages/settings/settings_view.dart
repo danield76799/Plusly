@@ -11,6 +11,7 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/fluffy_share.dart';
 import 'package:Pulsly/utils/check_updates.dart' as check_updates;
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/push_log_buffer.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/list_divider.dart';
 import 'package:Pulsly/widgets/matrix.dart';
@@ -18,6 +19,7 @@ import 'package:Pulsly/widgets/mxc_image.dart';
 import 'package:Pulsly/widgets/navigation_rail.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../widgets/mxc_image_viewer.dart';
+import 'push_log_viewer_screen.dart';
 import 'settings.dart';
 
 class SettingsView extends StatelessWidget {
@@ -55,6 +57,7 @@ class SettingsView extends StatelessWidget {
 
     // Show a local test notification
     try {
+      PushLogBuffer.instance.i('Test push: showing local notification...');
       await push.localNotificationsPlugin.show(
         id: 999999, // unique test ID
         title: 'Test notificatie',
@@ -576,6 +579,24 @@ class SettingsView extends StatelessWidget {
                             title: const Text('Test push notificatie'),
                             subtitle: const Text('Stuur een lokale test notificatie'),
                             onTap: () => _testPushNotification(context),
+                          ),
+                          const ListDivider(),
+                          ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: theme.colorScheme.error,
+                              child: Icon(
+                                Icons.list_alt_outlined,
+                                color: theme.colorScheme.onError,
+                              ),
+                            ),
+                            title: const Text('Push logs'),
+                            subtitle: const Text('Bekijk push diagnostiek logs'),
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const PushLogViewerScreen(),
+                              ),
+                            ),
                           ),
                           const ListDivider(),
 
