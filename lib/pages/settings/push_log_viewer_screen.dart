@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/push_log_buffer.dart';
+import '../../widgets/matrix.dart';
 
 class PushLogViewerScreen extends StatefulWidget {
   const PushLogViewerScreen({super.key});
@@ -9,6 +10,59 @@ class PushLogViewerScreen extends StatefulWidget {
 }
 
 class _PushLogViewerScreenState extends State<PushLogViewerScreen> {
+  bool _reRegistering = false;
+
+  Future<void> _reRegisterPush() async {
+    setState(() => _reRegistering = true);
+    PushLogBuffer.instance.i('Manual re-registration requested');
+
+    try {
+      final matrix = Matrix.of(context);
+      final push = matrix.backgroundPush;
+      if (push == null) {
+        PushLogBuffer.instance.e('backgroundPush is null — cannot re-register');
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Push systeem niet beschikbaar')),
+        );
+        return;
+      }
+
+      // Clear saved distributor to force fresh picker
+      final store = matrix.store;
+      await store.setString('unifiedpush distributor', '');
+      PushLogBuffer.instance.i('Cleared saved distributor');
+
+      // Clear endpoint for each client
+      for (final client in matrix.widget.clients) {
+        final endpointKey = client.clientName + 'unifiedpush_endpoint';
+        final registeredKey = client.clientName + 'unifiedpush_registered';
+        await store.setString(endpointKey, '');
+        await store.setBool(registeredKey, false);
+        PushLogBuffer.instance.i('Cleared endpoint for ${client.clientName}');
+      }
+
+      // Reset UP action flag
+      push.upAction = false;
+
+      // Re-setup push — this will show distributor picker
+      await push.setupPush(matrix.widget.clients);
+      PushLogBuffer.instance.i('Push re-registration complete');
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Push opnieuw geregistreerd')),
+      );
+    } catch (e) {
+      PushLogBuffer.instance.e('Re-registration failed: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Herregistratie mislukt: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _reRegistering = false);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -18,6 +72,17 @@ class _PushLogViewerScreenState extends State<PushLogViewerScreen> {
       appBar: AppBar(
         title: const Text('Push logs'),
         actions: [
+          IconButton(
+            icon: _reRegistering
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.restart_alt),
+            tooltip: 'Herregistreer push',
+            onPressed: _reRegistering ? null : _reRegisterPush,
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             tooltip: 'Wis logs',
