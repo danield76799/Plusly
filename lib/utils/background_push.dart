@@ -420,43 +420,19 @@ class BackgroundPush {
       return;
     }
 
-    // Only clear saved distributor if we detect a problem (no valid endpoint)
-    // Don't clear on every app start to avoid unnecessary re-registration
-    Logs().i('[Push] Checking existing push registration...');
-    
-    var needsReRegistration = false;
-    for (final client in clients) {
-      if (client.isLogged()) {
-        final endpoint = matrix?.store.getString(
-          client.clientName + AppSettings.unifiedPushEndpoint.key,
-        );
-        final registered = matrix?.store.getBool(
-          client.clientName + AppSettings.unifiedPushRegistered.key,
-        ) ?? false;
-        
-        if (endpoint == null || endpoint.isEmpty || !registered) {
-          needsReRegistration = true;
-          Logs().i('[Push] Client ${client.clientName} needs re-registration');
-        }
-      }
-    }
-    
-    if (needsReRegistration) {
-      Logs().i('[Push] Clearing saved distributor to force re-registration');
-      await UnifiedPush.saveDistributor('');
-      
+    // Check if a distributor is already saved — Extera pattern.
+    // Always re-register with UnifiedPush on every app start, even if we
+    // already have an endpoint stored. The pusher on the homeserver can
+    // expire, and without re-registration pushes silently stop.
+    final savedDistributor = await UnifiedPush.getDistributor();
+    if (savedDistributor != null && savedDistributor.isNotEmpty) {
+      Logs().i('[Push] Using saved UnifiedPush distributor: $savedDistributor');
       for (final client in clients) {
         if (client.isLogged()) {
-          await matrix?.store.setString(
-            client.clientName + AppSettings.unifiedPushEndpoint.key,
-            '',
-          );
-          await matrix?.store.setBool(
-            client.clientName + AppSettings.unifiedPushRegistered.key,
-            false,
-          );
+          await UnifiedPush.register(instance: client.clientName);
         }
       }
+      return;
     }
     
     String selectedDistributor;
