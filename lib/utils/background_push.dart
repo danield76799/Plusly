@@ -47,6 +47,10 @@ class BackgroundPush {
   static BackgroundPush? _instance;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+
+  /// Public accessor for diagnostic test notifications.
+  FlutterLocalNotificationsPlugin get localNotificationsPlugin =>
+      _flutterLocalNotificationsPlugin;
   List<Client> clients;
   MatrixState? matrix;
   L10n? l10n;
