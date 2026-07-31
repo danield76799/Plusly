@@ -307,11 +307,17 @@ Future<void> _tryPushHelper(
   final roomName = event.room.getLocalizedDisplayname(MatrixLocals(l10n));
 
   // ── Build notification details ──
-  // Single global channel (FluffyChat pattern) — no per-room channels
+  // Single global channel (FluffyChat pattern) — no per-room channels.
+  // groupKey is per-account so different accounts are grouped separately in
+  // the notification shade (matching multi-account expectations). We do NOT
+  // setAsGroupSummary, so each room is a separate notification, matching
+  // pre-double-summary behaviour.
   final androidPlatformChannelSpecifics = AndroidNotificationDetails(
     AppConfig.pushNotificationsChannelId,
     l10n.incomingMessages,
     number: notification.counts?.unread,
+    subText: client.clientName,
+    groupKey: client.clientName,
     category: AndroidNotificationCategory.message,
     shortcutId: event.room.id,
     styleInformation:
@@ -472,7 +478,7 @@ Client? _clientFromInstance(String? instance, List<Client> clients) {
   if (clients.isEmpty) return null;
   if (instance == null) return clients.first;
   // Fallback to first client — matches Extera behaviour.
-  // Without this, instance name mismatches silently drop 50%+ of pushes.
+  // Without this, instance name mismatches silently drop pushes.
   return clients.firstWhereOrNull((client) => client.clientName == instance) ??
       clients.first;
 }

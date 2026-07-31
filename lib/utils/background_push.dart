@@ -36,7 +36,6 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/main.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/push_helper.dart';
-import 'package:Pulsly/utils/push_log_buffer.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
@@ -48,10 +47,6 @@ class BackgroundPush {
   static BackgroundPush? _instance;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-
-  /// Public accessor for diagnostic test notifications.
-  FlutterLocalNotificationsPlugin get localNotificationsPlugin =>
-      _flutterLocalNotificationsPlugin;
   List<Client> clients;
   MatrixState? matrix;
   L10n? l10n;
@@ -614,8 +609,7 @@ class BackgroundPush {
   }
 
   Future<void> _onUpMessage(PushMessage pushMessage, String i) async {
-    PushLogBuffer.instance.i('UP message received for instance: $i');
-    Logs().i('[Push] UP message received for instance: $i', pushMessage);
+    Logs().i('Push Notification from UP received', pushMessage);
     final message = pushMessage.content;
     upAction = true;
     final data = Map<String, dynamic>.from(
@@ -623,44 +617,12 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
-    final notification = PushNotification.fromJson(data);
-    PushLogBuffer.instance.i('Parsed notification: roomId=${notification.roomId}, sender=${notification.sender}');
-    Logs().i('[Push] Parsed notification: roomId=${notification.roomId}, sender=${notification.sender}, eventId=${notification.eventId}');
-
-    // Check if we have a matching client
-    final client = clientFromInstance(i, clients);
-    if (client == null) {
-      PushLogBuffer.instance.e('No client found for instance $i — push dropped!');
-      Logs().e('[Push] No client found for instance $i — push will be dropped!');
-      return;
-    }
-    PushLogBuffer.instance.i('Using client: ${client.clientName} (logged in: ${client.isLogged()})');
-    Logs().i('[Push] Using client: ${client.clientName} (logged in: ${client.isLogged()})');
-
-    // Check if pusher is still registered
-    try {
-      final pushers = await client.getPushers();
-      if (pushers == null) {
-        PushLogBuffer.instance.w('getPushers returned null');
-        Logs().w('[Push] getPushers returned null');
-      } else {
-        PushLogBuffer.instance.i('Active pushers: ${pushers.length}');
-        Logs().i('[Push] Active pushers for ${client.clientName}: ${pushers.length}');
-        for (final p in pushers) {
-          Logs().i('[Push]   Pusher: appId=${p.appId}, pushkey=${p.pushkey.substring(0, 20)}..., kind=${p.kind}');
-        }
-      }
-    } catch (e) {
-      PushLogBuffer.instance.w('Could not check pushers: $e');
-      Logs().w('[Push] Could not check pushers: $e');
-    }
-
     await pushHelper(
-      notification,
+      PushNotification.fromJson(data),
       clients: clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
-      activeClient: client,
+      activeClient: clientFromInstance(i, clients),
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
       useNotificationActions:
@@ -683,6 +645,6 @@ Client? clientFromInstance(String? instance, List<Client> clients) {
     }
   }
   // Fallback to first client — matches Extera behaviour.
-  // Without this, instance name mismatches silently drop 50%+ of pushes.
+  // Without this, instance name mismatches silently drop pushes.
   return clients.isNotEmpty ? clients.first : null;
 }
