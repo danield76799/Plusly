@@ -16,6 +16,7 @@ import 'package:Pulsly/widgets/list_divider.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 import 'package:Pulsly/widgets/navigation_rail.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../../widgets/mxc_image_viewer.dart';
 import 'settings.dart';
 
@@ -23,6 +24,44 @@ class SettingsView extends StatelessWidget {
   final SettingsController controller;
 
   const SettingsView(this.controller, {super.key});
+
+  static Future<void> _testPushNotification(BuildContext context) async {
+    final matrix = Matrix.of(context);
+    final push = matrix.backgroundPush;
+    if (push == null) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Push systeem niet geïnitialiseerd')),
+      );
+      return;
+    }
+
+    // Show a local test notification
+    try {
+      await push.localNotificationsPlugin.show(
+        id: 999999, // unique test ID
+        title: 'Test notificatie',
+        body: 'Als je dit ziet werkt het notificatie-systeem!',
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'plusly_push',
+            'Berichten',
+            importance: Importance.high,
+            priority: Priority.max,
+          ),
+        ),
+      );
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Test notificatie verzonden!')),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Test mislukt: $e')),
+      );
+    }
+  }
 
   Widget _buildBannerPlaceholder(BuildContext context) {
     return Container(
@@ -491,6 +530,32 @@ class SettingsView extends StatelessWidget {
                             ),
                             title: Text(L10n.of(context).privacy),
                             onTap: () => launchUrlString(AppConfig.privacyUrl),
+                          ),
+                          const ListDivider(),
+                          ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: theme.colorScheme.tertiary,
+                              child: Icon(
+                                Icons.info_outline,
+                                color: theme.colorScheme.onTertiary,
+                              ),
+                            ),
+                            title: Text(L10n.of(context).about),
+                            onTap: () => PlatformInfos.showDialog(context),
+                          ),
+                          // ── Diagnostic: test push notification ──
+                          const ListDivider(),
+                          ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: theme.colorScheme.error,
+                              child: Icon(
+                                Icons.bug_report_outlined,
+                                color: theme.colorScheme.onError,
+                              ),
+                            ),
+                            title: const Text('Test push notificatie'),
+                            subtitle: const Text('Stuur een lokale test notificatie'),
+                            onTap: () => _testPushNotification(context),
                           ),
                           const ListDivider(),
 
