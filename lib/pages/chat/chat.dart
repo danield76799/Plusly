@@ -665,7 +665,10 @@ class ChatController extends State<ChatPageWithRoom>
   String? animateInEventId;
 
   Future<void> _insert(int index) async {
-    updateView();
+    // Use microtask so the SDK has time to add the event to timeline.events
+    // before we rebuild. Without this, the first message in an empty DM
+    // doesn't appear because setState fires while events is still empty.
+    Future.microtask(updateView);
     if (index > 0) return;
     final firstEvent = timeline?.events.firstOrNull;
     final eventId = firstEvent?.transactionId ?? firstEvent?.eventId;
