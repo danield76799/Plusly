@@ -466,6 +466,13 @@ class BackgroundPush {
             useDeviceSpecificAppId: true,
             client: client,
           );
+        } else {
+          // Stored endpoint is empty (e.g. after clean reinstall).
+          // Ntfy may still have the endpoint, so _newUpEndpoint won't fire.
+          // Force unregister+register to guarantee a fresh endpoint and pusher.
+          Logs().i('[Push] No stored endpoint for ${client.clientName}, forcing re-registration');
+          await UnifiedPush.unregister(client.clientName);
+          await UnifiedPush.register(instance: client.clientName);
         }
       }
       return;
