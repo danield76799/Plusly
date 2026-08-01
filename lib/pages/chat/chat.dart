@@ -957,6 +957,7 @@ class ChatController extends State<ChatPageWithRoom>
   // behaviour of send() for text. Media uploads resolve after the dialog
   // closes, so the conversation would otherwise stay where it was.
   void scrollDownAfterSend() {
+    updateView();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final sc = scrollController;
