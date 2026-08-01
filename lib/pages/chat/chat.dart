@@ -862,6 +862,15 @@ class ChatController extends State<ChatPageWithRoom>
       threadLastEventId:
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
     );
+
+    // Optimistically clear the unread badge for this room before the server
+    // sync comes back: our own outgoing message must never count as unread.
+    if (room.notificationCount > 0) {
+      room.notificationCount = 0;
+      updateView();
+      ChatListRefreshBus.refreshForRoom(room.id);
+    }
+
     unawaited(
       sendFuture.then(
         (_) {

@@ -230,6 +230,9 @@ class SendFileDialogState extends State<SendFileDialog> {
           // freshly sent photo appears immediately, the same way text messages
           // do after send(). sendFileEvent adds the placeholder then the real
           // event after upload, which can cause onUpdate to miss the bubble.
+          // Also clear the unread badge: our own media must never count as
+          // unread.
+          widget.room.notificationCount = 0;
           ChatListRefreshBus.refreshForRoom(widget.room.id);
           widget.onSent?.call();
         } on MatrixException catch (e) {
