@@ -602,8 +602,6 @@ class SettingsView extends StatelessWidget {
                             ),
                           ),
                           const ListDivider(),
-
-                          const ListDivider(),
                           SwitchListTile.adaptive(
                             controlAffinity: ListTileControlAffinity.trailing,
                             value: controller.isRecoveryActive,
@@ -692,18 +690,6 @@ class SettingsView extends StatelessWidget {
                                 },
                               );
                             },
-                          ),
-
-                          ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: theme.colorScheme.tertiary,
-                              child: Icon(
-                                Icons.info_outline,
-                                color: theme.colorScheme.onTertiary,
-                              ),
-                            ),
-                            title: Text(L10n.of(context).about),
-                            onTap: () => PlatformInfos.showDialog(context),
                           ),
                         ],
                       ),

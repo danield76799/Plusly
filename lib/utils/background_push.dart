@@ -23,7 +23,6 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -35,13 +34,12 @@ import 'package:unifiedpush/unifiedpush.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/main.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_helper.dart';
+import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
-import '../services/timeline_cache.dart';
-import '../widgets/matrix.dart';
-import 'platform_infos.dart';
 
 class BackgroundPush {
   static BackgroundPush? _instance;
@@ -534,14 +532,12 @@ class BackgroundPush {
     await UnifiedPush.saveDistributor(selectedDistributor);
     
     // Check if we already have an endpoint for any client
-    var hasExistingEndpoint = false;
     for (final client in clients) {
       if (client.isLogged()) {
         final endpoint = matrix?.store.getString(
           client.clientName + AppSettings.unifiedPushEndpoint.key,
         );
         if (endpoint != null && endpoint.isNotEmpty) {
-          hasExistingEndpoint = true;
           // Re-register pusher with existing endpoint
           await setupPusher(
             gatewayUrl: 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify',
