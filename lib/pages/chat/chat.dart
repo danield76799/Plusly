@@ -665,6 +665,7 @@ class ChatController extends State<ChatPageWithRoom>
   String? animateInEventId;
 
   Future<void> _insert(int index) async {
+    updateView();
     if (index > 0) return;
     final firstEvent = timeline?.events.firstOrNull;
     final eventId = firstEvent?.transactionId ?? firstEvent?.eventId;
