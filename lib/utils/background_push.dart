@@ -486,6 +486,49 @@ class BackgroundPush {
           client.clientName + AppSettings.unifiedPushEndpoint.key,
         );
         if (storedEndpoint != null && storedEndpoint.isNotEmpty) {
+          // Validate that the stored endpoint is still accepted by the distributor.
+          // Ntfy can silently drop subscriptions; if we keep using a stale
+          // endpoint, pushes stop without any feedback. A POST with the
+          // Matrix gateway probe tells us whether the endpoint is still alive.
+          var endpointAlive = false;
+          try {
+            final probeUrl = Uri.parse(storedEndpoint)
+                .replace(path: '/_matrix/push/v1/notify', query: '')
+                .toString()
+                .split('?')
+                .first;
+            final probe = await http.post(
+              Uri.parse(probeUrl),
+              headers: {'Content-Type': 'application/json'},
+              body: json.encode({
+                'notification': {
+                  'event_id': '\$probe-${DateTime.now().millisecondsSinceEpoch}',
+                  'room_id': '!probe:example.com',
+                  'sender': '@probe:example.com',
+                  'prio': 'low',
+                  'counts': {},
+                },
+              }),
+            );
+            endpointAlive = probe.statusCode == 200;
+            PushLogBuffer.instance.i('Endpoint probe: HTTP ${probe.statusCode}');
+          } catch (e) {
+            PushLogBuffer.instance.w('Endpoint probe failed: $e');
+          }
+
+          if (!endpointAlive) {
+            PushLogBuffer.instance.w(
+              'Stored endpoint invalid/stale for ${client.clientName}, forcing unregister+register',
+            );
+            await matrix?.store.setString(
+              client.clientName + AppSettings.unifiedPushEndpoint.key,
+              '',
+            );
+            await UnifiedPush.unregister(client.clientName);
+            await UnifiedPush.register(instance: client.clientName);
+            continue;
+          }
+
           // Use the same gateway detection logic as _newUpEndpoint
           var gatewayUrl = 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify';
           try {
