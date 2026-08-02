@@ -308,6 +308,11 @@ class BackgroundPush {
           ),
           append: false,
         );
+        await matrix?.store.setBool(
+          client.clientName + AppSettings.unifiedPushRegistered.key,
+          true,
+        );
+        PushLogBuffer.instance.i('Pusher posted successfully for ${client.clientName}');
       } catch (e, s) {
         PushLogBuffer.instance.e('Failed to post pusher: $e');
         Logs().e('[Push] Unable to set pushers', e, s);
