@@ -199,35 +199,24 @@ Future<void> _tryPushHelper(
   updateAppBadge(notification.counts?.unread ?? 0);
 
   if (event == null) {
-    Logs().v('Notification is a clearing indicator.');
+    // A null event with unread==0 is a genuine clearing indicator from the
+    // server (all rooms read on another device). Only then do we cancel all.
     if (notification.counts?.unread == null ||
         notification.counts?.unread == 0) {
+      Logs().v('Notification is a clearing indicator.');
       await flutterLocalNotificationsPlugin.cancelAll();
-    } else {
-      await client.roomsLoading;
-      await syncFuture;
-      final activeNotifications = await flutterLocalNotificationsPlugin
-          .getActiveNotifications();
-      // FIX #22: use the filtered list
-      final clientNotifications = activeNotifications
-          .where((n) => n.id != client.clientName.hashCode)
-          .toList();
-      var needsUpdateForSummaryNotification = false;
-      for (final activeNotification in clientNotifications) {
-        final room = client.rooms.singleWhereOrNull(
-          (room) =>
-              '${client.clientName}_${room.id}'.hashCode ==
-              activeNotification.id,
-        );
-        if (room != null && !room.isUnreadOrInvited) {
-          await flutterLocalNotificationsPlugin.cancel(id: activeNotification.id!);  // FIX #12: await cancel
-          if (PlatformInfos.isAndroid) needsUpdateForSummaryNotification = true;
-        }
-      }
-      if (needsUpdateForSummaryNotification) {
-        await flutterLocalNotificationsPlugin.cancel(id: client.clientName.hashCode);
-      }
+      return;
     }
+    // Event is null but unread > 0 — the push arrived before the sync could
+    // deliver the event (common with encrypted rooms or slow homeserver).
+    // Show a fallback notification from the push payload instead of silently
+    // dropping it.
+    Logs().v('Event not resolved yet; showing fallback from push payload.');
+    await _buildFallbackNotification(
+      notification,
+      client: client,
+      flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+    );
     return;
   }
 
