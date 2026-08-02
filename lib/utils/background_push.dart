@@ -79,25 +79,26 @@ class BackgroundPush {
 
       // Android 8+ (API 26+) requires a notification channel before any
       // notification can be shown. Without this, show() silently fails.
-      // Delete and recreate to pick up importance changes (Android caches
-      // channel settings after first creation).
-      try {
-        await androidPlugin?.deleteNotificationChannel(
-          channelId: AppConfig.pushNotificationsChannelId,
+      // IMPORTANT: do NOT delete and recreate the channel on every app start.
+      // On many OEMs (Samsung, Xiaomi, Oppo) this resets the user's importance
+      // setting to "Silent" or "No popup", causing notifications to disappear.
+      // Only create the channel if it doesn't already exist.
+      final existingChannels = await androidPlugin?.getNotificationChannels();
+      final channelExists = existingChannels?.any(
+        (c) => c.id == AppConfig.pushNotificationsChannelId,
+      ) ?? false;
+      if (!channelExists) {
+        await androidPlugin?.createNotificationChannel(
+          const AndroidNotificationChannel(
+            AppConfig.pushNotificationsChannelId,
+            'Berichten',
+            description: 'Inkomende chatberichten',
+            importance: Importance.max,
+            enableVibration: true,
+            enableLights: true,
+          ),
         );
-      } catch (_) {
-        // Channel may not exist yet — that's fine.
       }
-      await androidPlugin?.createNotificationChannel(
-        const AndroidNotificationChannel(
-          AppConfig.pushNotificationsChannelId,
-          'Berichten',
-          description: 'Inkomende chatberichten',
-          importance: Importance.max,
-          enableVibration: true,
-          enableLights: true,
-        ),
-      );
     }
 
     await _flutterLocalNotificationsPlugin.initialize(
