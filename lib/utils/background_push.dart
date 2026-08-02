@@ -266,17 +266,26 @@ class BackgroundPush {
     } else {
       Logs().w('[Push] Missing required push credentials');
     }
+    // Remove stale pushers for this app/device. If the user switched
+    // distributors (e.g. SunUP → Ntfy) or the distributor changed endpoints,
+    // an old pusher can keep receiving pushes and silently dropping them.
     for (final pusher in pushers) {
-      if ((token != null &&
-              pusher.pushkey != token &&
-              deviceAppId == pusher.appId) ||
-          oldTokens.contains(pusher.pushkey)) {
-        try {
-          await client.deletePusher(pusher);
-          Logs().i('[Push] Removed legacy pusher for this device');
-        } catch (err) {
-          Logs().w('[Push] Failed to remove old pusher', err);
-        }
+      final isThisDevice = pusher.appId == thisAppId ||
+          pusher.appId == deviceAppId ||
+          pusher.appId == appId ||
+          pusher.appId == '$appId.data_message';
+      if (!isThisDevice) continue;
+      // Don't delete the pusher we are about to (re-)post.
+      if (token != null && pusher.pushkey == token) continue;
+      try {
+        PushLogBuffer.instance.i(
+          'Removing stale pusher: appId=${pusher.appId}, '
+          'pushkey=${pusher.pushkey.length > 20 ? '${pusher.pushkey.substring(0, 20)}...' : pusher.pushkey}',
+        );
+        await client.deletePusher(pusher);
+        Logs().i('[Push] Removed stale pusher for this device');
+      } catch (err) {
+        Logs().w('[Push] Failed to remove stale pusher', err);
       }
     }
     if (setNewPusher) {
