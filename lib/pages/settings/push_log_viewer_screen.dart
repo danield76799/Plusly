@@ -35,8 +35,8 @@ class _PushLogViewerScreenState extends State<PushLogViewerScreen> {
 
       // Clear endpoint for each client
       for (final client in matrix.widget.clients) {
-        final endpointKey = client.clientName + 'unifiedpush_endpoint';
-        final registeredKey = client.clientName + 'unifiedpush_registered';
+        final endpointKey = '${client.clientName}unifiedpush_endpoint';
+        final registeredKey = '${client.clientName}unifiedpush_registered';
         await store.setString(endpointKey, '');
         await store.setBool(registeredKey, false);
         PushLogBuffer.instance.i('Cleared endpoint for ${client.clientName}');

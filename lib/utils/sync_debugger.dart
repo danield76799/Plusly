@@ -1,13 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:matrix/matrix.dart';
-
-import 'package:Pulsly/config/app_config.dart';
 
 class SyncDebugger {
   static final SyncDebugger _instance = SyncDebugger._internal();
@@ -125,12 +121,10 @@ class SyncDebugScreen extends StatefulWidget {
 
 class _SyncDebugScreenState extends State<SyncDebugScreen> {
   final SyncDebugger _debugger = SyncDebugger();
-  bool _isMonitoring = false;
 
   @override
   void initState() {
     super.initState();
-    _isMonitoring = true;
     _debugger.startMonitoring(widget.client);
   }
 

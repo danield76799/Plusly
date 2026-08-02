@@ -69,9 +69,7 @@ class TimelineCache {
       eagerError: false,
     );
     for (final entry in priorityResults) {
-      if (entry != null) {
-        setTimeline(entry.key, entry.value);
-      }
+      setTimeline(entry.key, entry.value);
     }
 
     // Then load the rest in the background
@@ -89,9 +87,7 @@ class TimelineCache {
         eagerError: false,
       );
       for (final entry in results) {
-        if (entry != null) {
-          setTimeline(entry.key, entry.value);
-        }
+        setTimeline(entry.key, entry.value);
       }
     }
   }

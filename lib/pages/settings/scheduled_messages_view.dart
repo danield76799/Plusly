@@ -37,7 +37,6 @@ class _ScheduledMessagesViewState extends State<ScheduledMessagesView>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = L10n.of(context);
 
     return Scaffold(
@@ -95,7 +94,6 @@ class _PendingTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final l10n = L10n.of(context);
 
     if (messages.isEmpty) {

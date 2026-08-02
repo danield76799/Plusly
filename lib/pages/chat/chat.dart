@@ -642,15 +642,6 @@ class ChatController extends State<ChatPageWithRoom>
     return;
   }
 
-  Future<void> _getThreads() async {
-    try {
-      threads = await room.getThreads();
-      Logs().w('Thread amount: ${threads?.length}');
-    } catch (e, s) {
-      Logs().w('Unable to load threads in $roomId', e, s);
-    }
-  }
-
   Future<void> showPollResults(Event event) async {
     await showFutureLoadingSnackbar(
       context: context,
