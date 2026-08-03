@@ -167,8 +167,17 @@
 
         <receiver android:name="org.unifiedpush.flutter.connector.UnifiedPushReceiver"
             tools:replace="android:enabled"
-            android:enabled="true"
-            android:exported="true">
+            android:enabled="false">
+        </receiver>
+
+        <receiver android:exported="false" android:enabled="true"
+            android:name="com.danield.plusly.app.UnifiedPushReceiver">
+            <intent-filter>
+                <action android:name="org.unifiedpush.flutter.connector.MESSAGE" />
+                <action android:name="org.unifiedpush.flutter.connector.UNREGISTERED" />
+                <action android:name="org.unifiedpush.flutter.connector.NEW_ENDPOINT" />
+                <action android:name="org.unifiedpush.flutter.connector.REGISTRATION_FAILED" />
+            </intent-filter>
         </receiver>
 
         <receiver android:exported="false" android:enabled="true"
