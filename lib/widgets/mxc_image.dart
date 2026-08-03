@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/utils/client_download_content_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
 class MxcImage extends StatefulWidget {
@@ -46,11 +47,15 @@ class MxcImage extends StatefulWidget {
   });
 
   /// LRU cache shared across all MxcImage instances (in-memory decoded bytes).
-  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 500);
+  /// Matches Extera Next's behaviour: capped at 100 entries, oldest-first
+  /// eviction, key based on event id + thumbnail marker (size independent so
+  /// that the same event is reused regardless of the requested thumbnail
+  /// width — the disk cache already handles different thumbnail sizes).
+  static final _imageDataCache = _LruCache<String, Uint8List>(maxSize: 100);
 
   /// Preload a single image into the shared cache.
-  static Future<void> preload(Event event, {required double thumbnailSize}) async {
-    final cacheKey = '${event.eventId}_thumb_${thumbnailSize.toInt()}';
+  static Future<void> preload(Event event, {double thumbnailSize = 0}) async {
+    final cacheKey = '${event.eventId}_thumb';
     if (_imageDataCache.containsKey(cacheKey)) return;
 
     try {
@@ -200,31 +205,14 @@ class _MxcImageState extends State<MxcImage> {
               MessageTypes.Image,
               MessageTypes.Sticker,
             }.contains(event.messageType)) {
-          throw Exception(
-            'Event of type ${event.messageType} has no thumbnail!',
-          );
+          Logs().e('Event of type ${event.messageType} has no thumbnail!');
         }
-
-        // Use downloadMxcCached so the SDK-generated cache key (which accounts
-        // for the `animated` flag) is used consistently for both read and
-        // write. The previous manual disk-cache key (Uri.parse of a
-        // "eventId_thumb_W" string) was not a valid mxc:// URI, so animated
-        // GIFs were never cached and re-downloaded on every render/scroll.
-        final mxcUri = useThumbnail
-            ? event.thumbnailMxcUrl ?? event.attachmentMxcUrl
-            : event.attachmentMxcUrl;
-        if (mxcUri == null) {
-          throw Exception('Event has no mxc uri');
-        }
-
-        loadedBytes = await client.downloadMxcCached(
-          mxcUri,
-          width: originalWidth,
-          height: originalHeight,
-          isThumbnail: useThumbnail,
-          animated: originalAnimated,
-          thumbnailMethod: widget.thumbnailMethod,
+        final data = await event.downloadAndDecryptAttachment(
+          getThumbnail: useThumbnail,
         );
+        if (data.detectFileType is MatrixImageFile) {
+          loadedBytes = data.bytes;
+        }
       }
 
       if (!mounted) return;
@@ -329,7 +317,12 @@ class _MxcImageState extends State<MxcImage> {
       },
     );
 
-    return ClipRRect(borderRadius: widget.borderRadius, child: imageWidget);
+    return ClipRRect(
+      borderRadius: widget.borderRadius,
+      child: RepaintBoundary(
+        child: imageWidget,
+      ),
+    );
   }
 }
 
