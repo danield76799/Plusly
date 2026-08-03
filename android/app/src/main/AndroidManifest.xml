@@ -165,13 +165,6 @@
           </intent-filter>
         </service> -->
 
-        <service android:name="org.unifiedpush.flutter.connector.UnifiedPushService"
-            android:exported="false"
-            tools:node="replace" />
-
-        <service android:name="com.danield.plusly.app.PluslyUnifiedPushService"
-            android:exported="false" />
-
         <receiver android:exported="false"
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
 
