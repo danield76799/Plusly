@@ -916,10 +916,10 @@ class ChatController extends State<ChatPageWithRoom>
           Logs().v('[SendPoll] local echo found, calling updateView()');
           updateView();
           // Jump to bottom so the user sees their message right away.
+          // Always scroll down on a self-sent message, regardless of current
+          // scroll position — the user expects to see their own message.
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted &&
-                scrollController.hasClients &&
-                scrollController.position.pixels <= 50) {
+            if (mounted && scrollController.hasClients) {
               scrollController.jumpTo(0);
             }
           });
@@ -1015,8 +1015,8 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       final sc = scrollController;
       if (!sc.hasClients) return;
-      // Only auto-scroll if the user is already near the bottom.
-      if (sc.position.pixels <= 80) sc.jumpTo(0);
+      // Always scroll to bottom on a self-sent message so the user sees it.
+      sc.jumpTo(0);
     });
   }
 
@@ -1848,6 +1848,12 @@ class ChatController extends State<ChatPageWithRoom>
       _saveLocalRecentEmojis();
       room.client.addRecentEmoji(emoji);
     }
+    // Scroll to bottom so the user sees their reaction land immediately.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && scrollController.hasClients) {
+        scrollController.jumpTo(0);
+      }
+    });
   }
 
   void clearSelectedEvents() => setState(() {
