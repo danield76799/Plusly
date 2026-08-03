@@ -2,7 +2,11 @@ name: Pulsly
 description: Plusly - Chat with your friends.
 publish_to: none
 # Version schema: <YEAR>.<MAJOR UPDATE>.<MINOR><PATCH>
-version: 1.4.17+19057
+<<<<<<< HEAD
+version: 1.4.17+19063
+=======
+version: 1.4.17+19063
+>>>>>>> 2aa5d7b9f (fix(push): use custom UnifiedPushService (not Receiver) matching current unifiedpush package API — override getEngine for reliable background engine)
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
