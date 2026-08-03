@@ -252,13 +252,18 @@ class BackgroundPush {
       Logs().w('[Push] Missing required push credentials');
     }
     for (final pusher in pushers) {
-      if ((token != null &&
-              pusher.pushkey != token &&
-              deviceAppId == pusher.appId) ||
-          oldTokens.contains(pusher.pushkey)) {
+      // Remove any pusher belonging to this app that is NOT the current one.
+      // Old pushers from previous installs/re-registrations accumulate on the
+      // homeserver and break/stall delivery (e.g. 100+ dead endpoints). The
+      // previous check compared deviceAppId (com.danield.plusly.<deviceID>)
+      // against pusher.appId (com.danield.plusly.data_message), which never
+      // matched, so legacy pushers were never cleaned up.
+      final isOwnApp = pusher.appId.startsWith(AppConfig.pushNotificationsAppId);
+      final isCurrent = token != null && pusher.pushkey == token;
+      if ((isOwnApp && !isCurrent) || oldTokens.contains(pusher.pushkey)) {
         try {
           await client.deletePusher(pusher);
-          Logs().i('[Push] Removed legacy pusher for this device');
+          Logs().i('[Push] Removed legacy pusher for this device: ${pusher.pushkey}');
         } catch (err) {
           Logs().w('[Push] Failed to remove old pusher', err);
         }
