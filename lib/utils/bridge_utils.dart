@@ -202,8 +202,8 @@ bool isBridgeRoom(Room room) {
   }
 
   // Check room name and topic for bridge bot patterns
-  final roomName = room.name.toLowerCase();
-  final roomTopic = room.topic.toLowerCase();
+  final roomName = room.name?.toLowerCase() ?? '';
+  final roomTopic = room.topic?.toLowerCase() ?? '';
   final bridgeNamePatterns = [
     'whatsapp',
     'telegram',
@@ -222,7 +222,7 @@ bool isBridgeRoom(Room room) {
   // Check for phone numbers in room name (WhatsApp bridge indicator)
   // Phone number formats: +316..., +31 6..., 06..., etc.
   final name = room.name;
-  if (name.isNotEmpty) {
+  if (name != null && name.isNotEmpty) {
     // Simple phone number check: starts with + and has 10+ digits, or starts with 0 and has 10+ chars
     final cleaned = name.replaceAll(RegExp(r'\s'), '');
     if ((cleaned.startsWith('+') && cleaned.length >= 10 && cleaned.substring(1).split('').every((c) => RegExp(r'\d').hasMatch(c))) ||
@@ -232,7 +232,7 @@ bool isBridgeRoom(Room room) {
   }
 
   // Check canonical alias
-  final canonicalAlias = room.canonicalAlias.toLowerCase();
+  final canonicalAlias = room.canonicalAlias?.toLowerCase() ?? '';
   final aliasPatterns = [
     'telegram_',
     'discord_',
@@ -296,8 +296,8 @@ String? getBridgeType(Room room) {
 
   // 2. Check directChatMatrixID
   final userId = room.directChatMatrixID?.toLowerCase() ?? '';
-  final roomName = room.name.toLowerCase();
-  final roomTopic = room.topic.toLowerCase();
+  final roomName = room.name?.toLowerCase() ?? '';
+  final roomTopic = room.topic?.toLowerCase() ?? '';
 
   // WhatsApp patterns
   if (userId.contains('wa-bot') ||
@@ -348,7 +348,7 @@ String? getBridgeType(Room room) {
   
   // Check for phone numbers (WhatsApp bridge indicator)
   final name = room.name;
-  if (name.isNotEmpty) {
+  if (name != null && name.isNotEmpty) {
     final cleaned = name.replaceAll(RegExp(r'\s'), '');
     if ((cleaned.startsWith('+') && cleaned.length >= 10 && cleaned.substring(1).split('').every((c) => RegExp(r'\d').hasMatch(c))) ||
         (cleaned.startsWith('0') && cleaned.length >= 10 && cleaned.split('').every((c) => RegExp(r'\d').hasMatch(c)))) {
@@ -367,7 +367,7 @@ String? getBridgeType(Room room) {
   }
 
   // 4. Check canonical alias
-  final canonicalAlias = room.canonicalAlias.toLowerCase();
+  final canonicalAlias = room.canonicalAlias?.toLowerCase() ?? '';
   if (canonicalAlias.contains('whatsapp')) return 'whatsapp';
   if (canonicalAlias.contains('telegram')) return 'telegram';
   if (canonicalAlias.contains('signal')) return 'signal';

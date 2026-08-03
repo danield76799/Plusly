@@ -18,7 +18,6 @@ import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
-import 'package:Pulsly/utils/push_log_buffer.dart';
 
 const notificationAvatarDimension = 128;
 
@@ -84,7 +83,6 @@ Future<void> _tryPushHelper(
   void Function(Event event)? onEventLoaded,
 }) async {
   final isBackgroundMessage = clients == null;
-  PushLogBuffer.instance.i('pushHelper started (background=$isBackgroundMessage, roomId=${notification.roomId})');
   Logs().v(
     'Push helper has been started (background=$isBackgroundMessage).',
     notification.toJson(),
@@ -95,7 +93,6 @@ Future<void> _tryPushHelper(
       activeRoomId == notification.roomId &&
       activeClient != null &&
       WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
-    PushLogBuffer.instance.i('Room ${notification.roomId} is in foreground — skipping notification');
     Logs().v('Room is in foreground. Stop push helper here.');
     return;
   }
@@ -116,7 +113,6 @@ Future<void> _tryPushHelper(
   // immediately without waiting for rooms/database to load. This avoids losing
   // notifications when Android kills the background handler.
   if (isBackgroundMessage && notification.roomId != null) {
-    PushLogBuffer.instance.i('Background fast-path: showing fallback notification');
     unawaited(
       _buildFallbackNotification(
         notification,
@@ -203,25 +199,35 @@ Future<void> _tryPushHelper(
   updateAppBadge(notification.counts?.unread ?? 0);
 
   if (event == null) {
-    // A null event with unread==0 is a genuine clearing indicator from the
-    // server (all rooms read on another device). Only then do we cancel all.
+    Logs().v('Notification is a clearing indicator.');
     if (notification.counts?.unread == null ||
         notification.counts?.unread == 0) {
-      Logs().v('Notification is a clearing indicator.');
       await flutterLocalNotificationsPlugin.cancelAll();
-      return;
+    } else {
+      await client.roomsLoading;
+      await syncFuture;
+      final activeNotifications = await flutterLocalNotificationsPlugin
+          .getActiveNotifications();
+      // FIX #22: use the filtered list
+      final clientNotifications = activeNotifications
+          .where((n) => n.id != client.clientName.hashCode)
+          .toList();
+      var needsUpdateForSummaryNotification = false;
+      for (final activeNotification in clientNotifications) {
+        final room = client.rooms.singleWhereOrNull(
+          (room) =>
+              '${client.clientName}_${room.id}'.hashCode ==
+              activeNotification.id,
+        );
+        if (room != null && !room.isUnreadOrInvited) {
+          await flutterLocalNotificationsPlugin.cancel(id: activeNotification.id!);  // FIX #12: await cancel
+          if (PlatformInfos.isAndroid) needsUpdateForSummaryNotification = true;
+        }
+      }
+      if (needsUpdateForSummaryNotification) {
+        await flutterLocalNotificationsPlugin.cancel(id: client.clientName.hashCode);
+      }
     }
-    // Event is null but unread > 0 — the push arrived before the sync could
-    // deliver the event (common with encrypted rooms or slow homeserver).
-    // Show a fallback notification from the push payload instead of silently
-    // dropping it.
-    Logs().v('Event not resolved yet; showing fallback from push payload.');
-    PushLogBuffer.instance.i('Event not resolved (unread>0) — showing fallback notification');
-    await _buildFallbackNotification(
-      notification,
-      client: client,
-      flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-    );
     return;
   }
 
@@ -379,7 +385,6 @@ Future<void> _tryPushHelper(
   // AndroidNotificationDetails (messaging style) handles the rich rendering,
   // but leaving title/body null can cause some OEMs/Android versions to not
   // display the notification at all or fall back to a generic placeholder.
-  PushLogBuffer.instance.i('Showing notification: id=$id, title=$title, body=$body');
   await flutterLocalNotificationsPlugin.show(
     id: id,
     title: title,
@@ -408,7 +413,6 @@ Future<void> _buildFallbackNotification(
   required Client client,
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
 }) async {
-  PushLogBuffer.instance.i('_buildFallbackNotification: sender=${notification.senderDisplayName}, roomId=${notification.roomId}');
   // Extract what we can directly from the Matrix push payload without
   // waiting for rooms/database to load.
   final l10n = await L10n.delegate.load(PlatformDispatcher.instance.locale);

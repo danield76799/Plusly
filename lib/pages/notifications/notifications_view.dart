@@ -61,6 +61,7 @@ class NotificationsView extends StatelessWidget {
                     itemCount: controller.notifications!.length,
                     itemBuilder: (context, i) {
                       final notification = controller.notifications![i];
+                      if (notification == null) return const SizedBox.shrink();
                       final showRoomName =
                           i == 0 ||
                           controller.notifications![i - 1].roomId !=

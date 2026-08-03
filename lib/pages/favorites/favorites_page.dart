@@ -45,6 +45,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = L10n.of(context);
+
     return Scaffold(
       appBar: AppBar(
         leading: widget.onBack != null
@@ -131,6 +134,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
 
   Widget _buildFavoriteCard(BuildContext context, SavedMessage msg) {
     final theme = Theme.of(context);
+    final l10n = L10n.of(context);
 
     return Card(
       clipBehavior: Clip.antiAlias,

@@ -98,9 +98,13 @@ class LlmService {
     return config;
   }
 
+  static String get _baseUrl => _config.baseUrl;
+
   static bool get isEnabled => AppSettings.llmEnabled.value;
 
   static String get providerName => _config.name;
+
+  static String get _apiKey => _config.apiKey;
 
   // ── Chat ─────────────────────────────────────────────────────────────
 

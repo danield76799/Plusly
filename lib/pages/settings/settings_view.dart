@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
-import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -51,7 +48,7 @@ class SettingsView extends StatelessWidget {
       } else {
         pusherInfo = '${pushers.length} pusher(s):\n';
         for (final p in pushers) {
-          pusherInfo += '  • ${p.appId} → ${p.pushkey.length > 20 ? p.pushkey.substring(0, 20) : p.pushkey}...\n';
+          pusherInfo += '  • ${p.appId} → ${p.pushkey.substring(0, 20)}...\n';
         }
       }
     } catch (e) {
@@ -88,91 +85,6 @@ class SettingsView extends StatelessWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Test mislukt: $e')),
-      );
-    }
-  }
-
-  /// Sends a real UnifiedPush message to the currently stored endpoint.
-  /// This tests the chain from the gateway/distributor (Ntfy) to the app
-  /// without depending on the homeserver. If `_onUpMessage()` fires, the full
-  /// delivery path works.
-  static Future<void> _testEndToEndPush(BuildContext context) async {
-    final matrix = Matrix.of(context);
-    final client = matrix.client;
-    final push = matrix.backgroundPush;
-
-    if (push == null) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Push systeem niet geïnitialiseerd')),
-      );
-      return;
-    }
-
-    PushLogBuffer.instance.i('E2E push test: starting...');
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'E2E push test gestart. Sluit de app nu en wacht 10-15 seconden...',
-        ),
-      ),
-    );
-
-    try {
-      final store = await AppSettings.init();
-      final endpoint = store.getString(
-        client.clientName + AppSettings.unifiedPushEndpoint.key,
-      );
-      if (endpoint == null || endpoint.isEmpty) {
-        throw Exception('Geen UnifiedPush endpoint gevonden');
-      }
-
-      PushLogBuffer.instance.i('E2E push test: endpoint=$endpoint');
-
-      // Build a minimal Matrix push payload. The room/event IDs are fake — we
-      // only care whether _onUpMessage() fires and a notification is shown.
-      final payload = {
-        'notification': {
-          'event_id': '\$e2e-test-${DateTime.now().millisecondsSinceEpoch}',
-          'room_id': '!e2e-test:example.com',
-          'type': 'm.room.message',
-          'sender': '@push-test:example.com',
-          'sender_display_name': 'Push Test',
-          'content': {
-            'body': 'E2E push test',
-            'msgtype': 'm.text',
-          },
-          'prio': 'high',
-          'counts': {'unread': 1},
-        },
-      };
-
-      final response = await http.post(
-        Uri.parse(endpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode(payload),
-      );
-
-      PushLogBuffer.instance.i(
-        'E2E push test: HTTP ${response.statusCode} — ${response.body.length > 100 ? response.body.substring(0, 100) : response.body}',
-      );
-
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'E2E ping verstuurd (HTTP ${response.statusCode}). '
-            'Controleer Push logs voor 🔥 _onUpMessage().',
-          ),
-        ),
-      );
-    } catch (e, s) {
-      PushLogBuffer.instance.e('E2E push test failed: $e');
-      Logs().e('E2E push test failed', e, s);
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('E2E push test mislukt: $e')),
       );
     }
   }
@@ -670,18 +582,6 @@ class SettingsView extends StatelessWidget {
                             title: const Text('Test push notificatie'),
                             subtitle: const Text('Stuur een lokale test notificatie'),
                             onTap: () => _testPushNotification(context),
-                          ),
-                          ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: theme.colorScheme.primary,
-                              child: Icon(
-                                Icons.send_outlined,
-                                color: theme.colorScheme.onPrimary,
-                              ),
-                            ),
-                            title: const Text('End-to-end push test'),
-                            subtitle: const Text('Stuur een echte push via de homeserver'),
-                            onTap: () => _testEndToEndPush(context),
                           ),
                           const ListDivider(),
                           ListTile(

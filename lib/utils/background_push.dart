@@ -36,7 +36,6 @@ import 'package:Pulsly/main.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_helper.dart';
-import 'package:Pulsly/utils/push_log_buffer.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
@@ -68,7 +67,6 @@ class BackgroundPush {
   bool upAction = false;
 
   Future<void> initialiseLocalNotifications() async {
-    PushLogBuffer.instance.i('initialiseLocalNotifications() started');
     // Android 13+ requires a runtime notification permission. Ask early so
     // the diagnostic test (and later real pushes) can actually be displayed.
     if (PlatformInfos.isAndroid) {
@@ -77,7 +75,7 @@ class BackgroundPush {
               AndroidFlutterLocalNotificationsPlugin>();
       final granted = await androidPlugin?.requestNotificationsPermission() ??
           false;
-      PushLogBuffer.instance.i('Notification permission granted: $granted');
+      Logs().i('[Diagnose] Notification permission granted: $granted');
 
       // Android 8+ (API 26+) requires a notification channel before any
       // notification can be shown. Without this, show() silently fails.
@@ -89,10 +87,6 @@ class BackgroundPush {
       final channelExists = existingChannels?.any(
         (c) => c.id == AppConfig.pushNotificationsChannelId,
       ) ?? false;
-      PushLogBuffer.instance.i(
-        'Notification channel ${channelExists ? "exists" : "missing"} '
-        '(${existingChannels?.length ?? 0} channels total)',
-      );
       if (!channelExists) {
         await androidPlugin?.createNotificationChannel(
           const AndroidNotificationChannel(
@@ -160,20 +154,12 @@ class BackgroundPush {
       Logs().v('Flutter Local Notifications initialized');
 
       if (Platform.isAndroid) {
-        PushLogBuffer.instance.i('Initializing UnifiedPush...');
         await UnifiedPush.initialize(
           onNewEndpoint: _newUpEndpoint,
-          onRegistrationFailed: (_, i) {
-            PushLogBuffer.instance.e('UnifiedPush registration FAILED! instance=$i');
-            _upUnregistered(i);
-          },
-          onUnregistered: (i) {
-            PushLogBuffer.instance.w('UnifiedPush unregistered! instance=$i');
-            _upUnregistered(i);
-          },
+          onRegistrationFailed: (_, i) => _upUnregistered(i),
+          onUnregistered: _upUnregistered,
           onMessage: _onUpMessage,
         );
-        PushLogBuffer.instance.i('UnifiedPush initialized');
       }
     } catch (e, s) {
       Logs().e('Unable to initialize Flutter local notifications', e, s);
@@ -266,35 +252,24 @@ class BackgroundPush {
     } else {
       Logs().w('[Push] Missing required push credentials');
     }
-    // Remove stale pushers for this app/device. If the user switched
-    // distributors (e.g. SunUP → Ntfy) or the distributor changed endpoints,
-    // an old pusher can keep receiving pushes and silently dropping them.
     for (final pusher in pushers) {
-      final isThisDevice = pusher.appId == thisAppId ||
-          pusher.appId == deviceAppId ||
-          pusher.appId == appId ||
-          pusher.appId == '$appId.data_message';
-      if (!isThisDevice) continue;
-      // Don't delete the pusher we are about to (re-)post.
-      if (token != null && pusher.pushkey == token) continue;
-      try {
-        PushLogBuffer.instance.i(
-          'Removing stale pusher: appId=${pusher.appId}, '
-          'pushkey=${pusher.pushkey.length > 20 ? '${pusher.pushkey.substring(0, 20)}...' : pusher.pushkey}',
-        );
-        await client.deletePusher(pusher);
-        Logs().i('[Push] Removed stale pusher for this device');
-      } catch (err) {
-        Logs().w('[Push] Failed to remove stale pusher', err);
+      if ((token != null &&
+              pusher.pushkey != token &&
+              deviceAppId == pusher.appId) ||
+          oldTokens.contains(pusher.pushkey)) {
+        try {
+          await client.deletePusher(pusher);
+          Logs().i('[Push] Removed legacy pusher for this device');
+        } catch (err) {
+          Logs().w('[Push] Failed to remove old pusher', err);
+        }
       }
     }
     if (setNewPusher) {
       try {
-        final tk = token!;
-        PushLogBuffer.instance.i('Posting pusher: appId=$thisAppId, pushkey=${tk.length > 20 ? tk.substring(0, 20) : tk}...');
         await client.postPusher(
           Pusher(
-            pushkey: tk,
+            pushkey: token!,
             appId: thisAppId,
             appDisplayName: clientName,
             deviceDisplayName: client.deviceName!,
@@ -308,17 +283,9 @@ class BackgroundPush {
           ),
           append: false,
         );
-        await matrix?.store.setBool(
-          client.clientName + AppSettings.unifiedPushRegistered.key,
-          true,
-        );
-        PushLogBuffer.instance.i('Pusher posted successfully for ${client.clientName}');
       } catch (e, s) {
-        PushLogBuffer.instance.e('Failed to post pusher: $e');
         Logs().e('[Push] Unable to set pushers', e, s);
       }
-    } else {
-      PushLogBuffer.instance.w('setNewPusher=false — no pusher posted');
     }
   }
 
@@ -331,7 +298,6 @@ class BackgroundPush {
   static bool _wentToRoomOnStartup = false;
 
   Future<void> setupPush(List<Client> clients) async {
-    PushLogBuffer.instance.i('setupPush() called with ${clients.length} clients');
     Logs().d("SetupPush called with ${clients.length} clients");
     this.clients = clients;
 
@@ -364,11 +330,9 @@ class BackgroundPush {
     Logs().d("Matrix is null: ${matrix == null}");
     
     if (!anyLoggedIn || !PlatformInfos.isMobile || matrix == null) {
-      PushLogBuffer.instance.w('setupPush early return: loggedIn=$anyLoggedIn, mobile=${PlatformInfos.isMobile}, matrix=${matrix != null}');
       Logs().w("SetupPush early return - not logged in or not mobile");
       return;
     }
-    PushLogBuffer.instance.i('Setting up push notifications...');
     Logs().i("Setting up push notifications...");
     // DEBUG: print current UnifiedPush state so we can diagnose silent failures.
     await _logPushState();
@@ -428,8 +392,6 @@ class BackgroundPush {
     try {
       final distributors = await UnifiedPush.getDistributors();
       final savedDistributor = await UnifiedPush.getDistributor();
-      PushLogBuffer.instance.i('Distributors: $distributors');
-      PushLogBuffer.instance.i('Saved distributor: $savedDistributor');
       Logs().i('[Push] Distributors: $distributors');
       Logs().i('[Push] Saved distributor: $savedDistributor');
       for (final client in clients.where((c) => c.isLogged())) {
@@ -439,24 +401,18 @@ class BackgroundPush {
         final registered = matrix?.store.getBool(
           client.clientName + AppSettings.unifiedPushRegistered.key,
         );
-        PushLogBuffer.instance.i(
-          'Client ${client.clientName}: endpoint=${endpoint != null && endpoint.isNotEmpty ? "${endpoint.substring(0, (endpoint.length > 20 ? 20 : endpoint.length))}..." : "none"}, registered=$registered',
-        );
         Logs().i(
           '[Push] Client ${client.clientName}: endpoint=${endpoint ?? 'none'}, registered=$registered',
         );
       }
     } catch (e, s) {
-      PushLogBuffer.instance.e('Failed to log push state: $e');
       Logs().w('[Push] Failed to log push state', e, s);
     }
   }
 
   Future<void> setupUp() async {
     final distributors = await UnifiedPush.getDistributors();
-    PushLogBuffer.instance.i('setupUp() called. distributors=$distributors');
     if (distributors.isEmpty) {
-      PushLogBuffer.instance.w('setupUp() — no distributors found');
       Logs().i('[Push] No UnifiedPush distributors found');
       return;
     }
@@ -467,7 +423,6 @@ class BackgroundPush {
     // expire, and without re-registration pushes silently stop.
     final savedDistributor = await UnifiedPush.getDistributor();
     if (savedDistributor != null && savedDistributor.isNotEmpty) {
-      PushLogBuffer.instance.i('Saved distributor: $savedDistributor');
       Logs().i('[Push] Using saved UnifiedPush distributor: $savedDistributor');
       for (final client in clients) {
         if (client.isLogged()) {
@@ -486,49 +441,6 @@ class BackgroundPush {
           client.clientName + AppSettings.unifiedPushEndpoint.key,
         );
         if (storedEndpoint != null && storedEndpoint.isNotEmpty) {
-          // Validate that the stored endpoint is still accepted by the distributor.
-          // Ntfy can silently drop subscriptions; if we keep using a stale
-          // endpoint, pushes stop without any feedback. A POST with the
-          // Matrix gateway probe tells us whether the endpoint is still alive.
-          var endpointAlive = false;
-          try {
-            final probeUrl = Uri.parse(storedEndpoint)
-                .replace(path: '/_matrix/push/v1/notify', query: '')
-                .toString()
-                .split('?')
-                .first;
-            final probe = await http.post(
-              Uri.parse(probeUrl),
-              headers: {'Content-Type': 'application/json'},
-              body: json.encode({
-                'notification': {
-                  'event_id': '\$probe-${DateTime.now().millisecondsSinceEpoch}',
-                  'room_id': '!probe:example.com',
-                  'sender': '@probe:example.com',
-                  'prio': 'low',
-                  'counts': {},
-                },
-              }),
-            );
-            endpointAlive = probe.statusCode == 200;
-            PushLogBuffer.instance.i('Endpoint probe: HTTP ${probe.statusCode}');
-          } catch (e) {
-            PushLogBuffer.instance.w('Endpoint probe failed: $e');
-          }
-
-          if (!endpointAlive) {
-            PushLogBuffer.instance.w(
-              'Stored endpoint invalid/stale for ${client.clientName}, forcing unregister+register',
-            );
-            await matrix?.store.setString(
-              client.clientName + AppSettings.unifiedPushEndpoint.key,
-              '',
-            );
-            await UnifiedPush.unregister(client.clientName);
-            await UnifiedPush.register(instance: client.clientName);
-            continue;
-          }
-
           // Use the same gateway detection logic as _newUpEndpoint
           var gatewayUrl = 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify';
           try {
@@ -549,7 +461,6 @@ class BackgroundPush {
             // Fall back to default gateway
           }
           Logs().i('[Push] Re-registering pusher for ${client.clientName} via $gatewayUrl');
-          PushLogBuffer.instance.i('Re-registering pusher for ${client.clientName} via $gatewayUrl');
           await setupPusher(
             gatewayUrl: gatewayUrl,
             token: storedEndpoint,
@@ -558,7 +469,8 @@ class BackgroundPush {
           );
         } else {
           // Stored endpoint is empty (e.g. after clean reinstall).
-          PushLogBuffer.instance.w('No stored endpoint for ${client.clientName}, forcing unregister+register');
+          // Ntfy may still have the endpoint, so _newUpEndpoint won't fire.
+          // Force unregister+register to guarantee a fresh endpoint and pusher.
           Logs().i('[Push] No stored endpoint for ${client.clientName}, forcing re-registration');
           await UnifiedPush.unregister(client.clientName);
           await UnifiedPush.register(instance: client.clientName);
@@ -649,7 +561,6 @@ class BackgroundPush {
   }
 
   Future<void> _newUpEndpoint(PushEndpoint newPushEndpoint, String i) async {
-    PushLogBuffer.instance.i('📡 _newUpEndpoint() called! url=${newPushEndpoint.url}');
     final newEndpoint = newPushEndpoint.url;
     upAction = true;
     if (newEndpoint.isEmpty) {
@@ -720,7 +631,6 @@ class BackgroundPush {
   }
 
   Future<void> _onUpMessage(PushMessage pushMessage, String i) async {
-    PushLogBuffer.instance.i('🔥 _onUpMessage() called! instance=$i');
     Logs().i('Push Notification from UP received', pushMessage);
     final message = pushMessage.content;
     upAction = true;
