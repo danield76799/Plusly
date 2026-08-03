@@ -2,7 +2,7 @@ name: Pulsly
 description: Plusly - Chat with your friends.
 publish_to: none
 # Version schema: <YEAR>.<MAJOR UPDATE>.<MINOR><PATCH>
-version: 1.4.17+19063
+version: 1.4.17+19064
 
 environment:
   sdk: ">=3.10.0 <4.0.0"
@@ -22,8 +22,6 @@ dependencies:
   connectivity_plus: ^6.1.0
   country_picker: ^2.0.26
   cupertino_icons: ^1.0.8
-  dart_code_metrics: null
-  dart_code_metrics_presets: null
   dart_style: ^2.3.6
   debounce_throttle: ^2.0.0
   device_info_plus: ^10.1.2
@@ -74,7 +72,6 @@ dependencies:
   intl: ^0.19.0
   just_audio: ^0.9.39
   keyboard_visibility_pro: ^0.0.1
-  langchain_lib: null
   latlong2: ^0.9.1
   linkify: ^5.0.0
   lottie: ^3.1.2
@@ -83,7 +80,6 @@ dependencies:
   matrix_encrypt_room: ^0.2.0
   mime: ^1.0.5
   native_dio_adapter: ^1.3.0
-  nextcloud_spreed: null
   nsd: ^2.4.0
   package_info_plus: ^8.0.2
   pasteboard: ^0.2.0
@@ -116,7 +112,6 @@ dependencies:
   vector_graphics: ^1.1.11+1
   video_compress: ^2.3.0
   video_player: ^2.9.1
-  vjot: null
   wakelock_plus: ^1.2.8
   web_browser: ^0.7.0
   webcrypto: ^0.5.7
