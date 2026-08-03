@@ -574,6 +574,17 @@ class BackgroundPush {
     Logs().i('[Push] UnifiedPush using endpoint $endpoint');
     // Register a pusher for every logged-in client using this endpoint.
     for (final client in clients.where((c) => c.isLogged())) {
+      // Unregister the previous Ntfy topic for this instance BEFORE setting the
+      // new pusher. Without this, each app start creates a new Ntfy
+      // subscription that is never removed, and the list of subscribed topics
+      // grows unbounded (one per launch). UnifiedPush.unregister() tells the
+      // distributor to drop the old topic for this instance.
+      try {
+        await UnifiedPush.unregister(client.clientName);
+        Logs().i('[Push] Unregistered old UnifiedPush topic for ${client.clientName}');
+      } catch (e) {
+        Logs().w('[Push] Failed to unregister old UnifiedPush topic', e);
+      }
       await setupPusher(
         gatewayUrl: endpoint,
         token: newEndpoint,
