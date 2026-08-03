@@ -165,22 +165,14 @@
           </intent-filter>
         </service> -->
 
-        <receiver android:name="org.unifiedpush.flutter.connector.UnifiedPushReceiver"
-            tools:replace="android:enabled"
-            android:enabled="false">
-        </receiver>
+        <service android:name="org.unifiedpush.flutter.connector.UnifiedPushService"
+            android:exported="false"
+            tools:node="replace" />
 
-        <receiver android:exported="false" android:enabled="true"
-            android:name="com.danield.plusly.app.UnifiedPushReceiver">
-            <intent-filter>
-                <action android:name="org.unifiedpush.flutter.connector.MESSAGE" />
-                <action android:name="org.unifiedpush.flutter.connector.UNREGISTERED" />
-                <action android:name="org.unifiedpush.flutter.connector.NEW_ENDPOINT" />
-                <action android:name="org.unifiedpush.flutter.connector.REGISTRATION_FAILED" />
-            </intent-filter>
-        </receiver>
+        <service android:name="com.danield.plusly.app.PluslyUnifiedPushService"
+            android:exported="false" />
 
-        <receiver android:exported="false" android:enabled="true"
+        <receiver android:exported="false"
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
 
         <!-- Chat Widget Provider (Legacy) -->

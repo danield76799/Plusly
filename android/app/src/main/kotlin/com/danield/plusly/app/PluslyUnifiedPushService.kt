@@ -1,11 +1,11 @@
 package com.danield.plusly.app
 
+import android.content.Context
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.dart.DartExecutor
-import org.unifiedpush.flutter.connector.UnifiedPushReceiver
-import android.content.Context
+import org.unifiedpush.flutter.connector.UnifiedPushService
 
-class UnifiedPushReceiver : UnifiedPushReceiver() {
+class PluslyUnifiedPushService : UnifiedPushService() {
     override fun getEngine(context: Context): FlutterEngine {
         var engine = MainActivity.engine
         if (engine == null) {
