@@ -82,7 +82,7 @@ class BackgroundPush {
           AppConfig.pushNotificationsChannelId,
           'Berichten',
           description: 'Inkomende chatberichten',
-          importance: Importance.high,
+          importance: Importance.max,
         ),
       );
     }
