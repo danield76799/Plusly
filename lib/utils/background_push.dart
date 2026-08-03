@@ -30,6 +30,7 @@ import 'package:flutter_new_badger/flutter_new_badger.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
+import 'package:unifiedpush_ui/unifiedpush_ui.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/main.dart';
@@ -321,47 +322,18 @@ class BackgroundPush {
       matrix!.store.remove(AppSettings.unifiedPushRegistered.key);
     }
 
-    // Check if any client is logged in
-    final anyLoggedIn = clients.any(
-          (c) => c.onLoginStateChanged.value == LoginState.loggedIn,
-        );
-    Logs().d("Any client logged in: $anyLoggedIn");
-    Logs().d("Is mobile: ${PlatformInfos.isMobile}");
-    Logs().d("Matrix is null: ${matrix == null}");
-    
-    if (!anyLoggedIn || !PlatformInfos.isMobile || matrix == null) {
-      Logs().w("SetupPush early return - not logged in or not mobile");
-      return;
-    }
-    Logs().i("Setting up push notifications...");
-    // DEBUG: print current UnifiedPush state so we can diagnose silent failures.
-    await _logPushState();
-    if (!PlatformInfos.isIOS &&
-        (await UnifiedPush.getDistributors()).isNotEmpty) {
-      // Check if saved distributor exists but endpoint is invalid (post-reset scenario)
-      // This forces the distributor picker to show again if push stopped working
-      final savedDistributor = await UnifiedPush.getDistributor();
-      
-      // Check if we have an endpoint for any logged-in client
-      var hasValidEndpoint = false;
-      for (final client in clients) {
-        if (client.isLogged()) {
-          final storedEndpoint = matrix?.store.getString(
-            client.clientName + AppSettings.unifiedPushEndpoint.key,
-          );
-          if (storedEndpoint != null && storedEndpoint.isNotEmpty) {
-            hasValidEndpoint = true;
-            break;
-          }
-        }
-      }
-      
-      // If no valid endpoint found, or no saved distributor, force re-setup
-      if (!hasValidEndpoint || savedDistributor == null || savedDistributor.isEmpty) {
-        Logs().i('[Push] Post-reset or missing registration detected, clearing to force re-setup');
-        await UnifiedPush.saveDistributor('');  // Clear to force picker
-      }
-      await setupUp();
+    final context = matrix?.context;
+    if (PlatformInfos.isAndroid &&
+        (await UnifiedPush.getDistributors()).isNotEmpty &&
+        context != null &&
+        context.mounted) {
+      await UnifiedPushUi(
+        context: context,
+        instances: ['default'],
+        unifiedPushFunctions: UPFunctions(),
+        showNoDistribDialog: false,
+        onNoDistribDialogDismissed: () {},
+      ).registerAppWithDialog();
     } else {
       Logs().i('[Push] No UnifiedPush distributors available on this device');
     }
@@ -386,178 +358,6 @@ class BackgroundPush {
         );
       }
     });
-  }
-
-  Future<void> _logPushState() async {
-    try {
-      final distributors = await UnifiedPush.getDistributors();
-      final savedDistributor = await UnifiedPush.getDistributor();
-      Logs().i('[Push] Distributors: $distributors');
-      Logs().i('[Push] Saved distributor: $savedDistributor');
-      for (final client in clients.where((c) => c.isLogged())) {
-        final endpoint = matrix?.store.getString(
-          client.clientName + AppSettings.unifiedPushEndpoint.key,
-        );
-        final registered = matrix?.store.getBool(
-          client.clientName + AppSettings.unifiedPushRegistered.key,
-        );
-        Logs().i(
-          '[Push] Client ${client.clientName}: endpoint=${endpoint ?? 'none'}, registered=$registered',
-        );
-      }
-    } catch (e, s) {
-      Logs().w('[Push] Failed to log push state', e, s);
-    }
-  }
-
-  Future<void> setupUp() async {
-    final distributors = await UnifiedPush.getDistributors();
-    if (distributors.isEmpty) {
-      Logs().i('[Push] No UnifiedPush distributors found');
-      return;
-    }
-
-    // Check if a distributor is already saved — Extera pattern.
-    // Always re-register with UnifiedPush on every app start, even if we
-    // already have an endpoint stored. The pusher on the homeserver can
-    // expire, and without re-registration pushes silently stop.
-    final savedDistributor = await UnifiedPush.getDistributor();
-    if (savedDistributor != null && savedDistributor.isNotEmpty) {
-      Logs().i('[Push] Using saved UnifiedPush distributor: $savedDistributor');
-      for (final client in clients) {
-        if (client.isLogged()) {
-          await UnifiedPush.register(instance: client.clientName);
-        }
-      }
-
-      // CRITICAL: UnifiedPush.register() may return the existing endpoint
-      // without triggering _newUpEndpoint if Ntfy still considers it valid.
-      // But the pusher on the Matrix homeserver can expire independently.
-      // Always re-register the pusher with the homeserver using the stored
-      // endpoint to prevent silent push failures.
-      for (final client in clients) {
-        if (!client.isLogged()) continue;
-        final storedEndpoint = matrix?.store.getString(
-          client.clientName + AppSettings.unifiedPushEndpoint.key,
-        );
-        if (storedEndpoint != null && storedEndpoint.isNotEmpty) {
-          // Use the same gateway detection logic as _newUpEndpoint
-          var gatewayUrl = 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify';
-          try {
-            final url = Uri.parse(storedEndpoint)
-                .replace(path: '/_matrix/push/v1/notify', query: '')
-                .toString()
-                .split('?')
-                .first;
-            final res = json.decode(
-              utf8.decode((await http.get(Uri.parse(url))).bodyBytes),
-            );
-            if (res['gateway'] == 'matrix' ||
-                (res['unifiedpush'] is Map &&
-                    res['unifiedpush']['gateway'] == 'matrix')) {
-              gatewayUrl = url;
-            }
-          } catch (_) {
-            // Fall back to default gateway
-          }
-          Logs().i('[Push] Re-registering pusher for ${client.clientName} via $gatewayUrl');
-          await setupPusher(
-            gatewayUrl: gatewayUrl,
-            token: storedEndpoint,
-            useDeviceSpecificAppId: true,
-            client: client,
-          );
-        } else {
-          // Stored endpoint is empty (e.g. after clean reinstall).
-          // Ntfy may still have the endpoint, so _newUpEndpoint won't fire.
-          // Force unregister+register to guarantee a fresh endpoint and pusher.
-          Logs().i('[Push] No stored endpoint for ${client.clientName}, forcing re-registration');
-          await UnifiedPush.unregister(client.clientName);
-          await UnifiedPush.register(instance: client.clientName);
-        }
-      }
-      return;
-    }
-    
-    String selectedDistributor;
-    if (distributors.length == 1) {
-      selectedDistributor = distributors.first;
-    } else {
-      // Multiple distributors: show a picker dialog
-      final dialogContext =
-          PluslyApp.router.routerDelegate.navigatorKey.currentContext ??
-          matrix!.context;
-
-      if (!dialogContext.mounted) {
-        Logs().w('[Push] Context not mounted, cannot show distributor picker');
-        // Fallback: use the first distributor
-        selectedDistributor = distributors.first;
-      } else {
-        await loadLocale();
-        final picked = await showDialog<String>(
-          context: dialogContext,
-          builder: (context) => AlertDialog(
-            title: Text(
-              l10n?.selectPushDistributor ?? 'Select push distributor',
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: distributors
-                  .map(
-                    (d) => ListTile(
-                      title: Text(
-                        d.split('.').last[0].toUpperCase() +
-                            d.split('.').last.substring(1),
-                      ),
-                      subtitle: Text(d),
-                      onTap: () => Navigator.of(context).pop(d),
-                    ),
-                  )
-                  .toList(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n?.cancel ?? 'Cancel'),
-              ),
-            ],
-          ),
-        );
-
-        if (picked != null) {
-          selectedDistributor = picked;
-        } else {
-          // User dismissed the dialog - use the first distributor as fallback
-          Logs().i(
-            '[Push] User dismissed distributor picker, using first available',
-          );
-          selectedDistributor = distributors.first;
-        }
-      }
-    }
-
-    Logs().i('[Push] Saving UnifiedPush distributor: $selectedDistributor');
-    await UnifiedPush.saveDistributor(selectedDistributor);
-    
-    // Check if we already have an endpoint for any client
-    for (final client in clients) {
-      if (client.isLogged()) {
-        final endpoint = matrix?.store.getString(
-          client.clientName + AppSettings.unifiedPushEndpoint.key,
-        );
-        if (endpoint != null && endpoint.isNotEmpty) {
-          // Re-register pusher with existing endpoint
-          await setupPusher(
-            gatewayUrl: 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify',
-            token: endpoint,
-            useDeviceSpecificAppId: true,
-            client: client,
-          );
-        } else {
-          await UnifiedPush.register(instance: client.clientName);
-        }
-      }
-    }
   }
 
   Future<void> _newUpEndpoint(PushEndpoint newPushEndpoint, String i) async {
@@ -657,6 +457,30 @@ class BackgroundPush {
     // including restoring backgroundSync when needed.
     // A second abortSync here can race with the first and corrupt
     // room/event state, causing wrong notification content.
+  }
+}
+
+class UPFunctions extends UnifiedPushFunctions {
+  final List<String> features = [];
+
+  @override
+  Future<String?> getDistributor() async {
+    return await UnifiedPush.getDistributor();
+  }
+
+  @override
+  Future<List<String>> getDistributors() async {
+    return await UnifiedPush.getDistributors(features);
+  }
+
+  @override
+  Future<void> registerApp(String instance) async {
+    await UnifiedPush.register(instance: instance, features: features);
+  }
+
+  @override
+  Future<void> saveDistributor(String distributor) async {
+    await UnifiedPush.saveDistributor(distributor);
   }
 }
 
