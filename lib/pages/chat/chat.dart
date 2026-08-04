@@ -526,6 +526,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline = await room.getTimeline(
         onUpdate: updateView,
         onInsert: _insert,
+        onNewEvent: updateView,
         eventContextId: eventContextId,
       );
     } catch (e, s) {
@@ -534,6 +535,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline = await room.getTimeline(
         onUpdate: updateView,
         onInsert: _insert,
+        onNewEvent: updateView,
       );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
@@ -553,6 +555,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
         onInsert: _insert,
+        onNewEvent: updateView,
         eventContextId: eventContextId,
       );
       Logs().v("Thread timeline loaded");
@@ -566,6 +569,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
         onInsert: _insert,
+        onNewEvent: updateView,
       );
       if (!mounted) return;
       if (e is TimeoutException || e is IOException) {
