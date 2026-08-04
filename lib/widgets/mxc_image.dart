@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/utils/client_download_content_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
 class MxcImage extends StatefulWidget {
@@ -211,27 +211,12 @@ class _MxcImageState extends State<MxcImage> {
             'Event of type ${event.messageType} has no thumbnail!',
           );
         }
-
-        // Use downloadMxcCached so the SDK-generated cache key (which accounts
-        // for the `animated` flag) is used consistently for both read and
-        // write. The previous manual disk-cache key (Uri.parse of a
-        // "eventId_thumb_W" string) was not a valid mxc:// URI, so animated
-        // GIFs were never cached and re-downloaded on every render/scroll.
-        final mxcUri = useThumbnail
-            ? event.thumbnailMxcUrl ?? event.attachmentMxcUrl
-            : event.attachmentMxcUrl;
-        if (mxcUri == null) {
-          throw Exception('Event has no mxc uri');
-        }
-
-        loadedBytes = await client.downloadMxcCached(
-          mxcUri,
-          width: originalWidth,
-          height: originalHeight,
-          isThumbnail: useThumbnail,
-          animated: originalAnimated,
-          thumbnailMethod: widget.thumbnailMethod,
+        final data = await event.downloadAndDecryptAttachment(
+          getThumbnail: useThumbnail,
         );
+        if (data.detectFileType is MatrixImageFile) {
+          loadedBytes = data.bytes;
+        }
       }
 
       if (!mounted) return;
@@ -319,6 +304,14 @@ class _MxcImageState extends State<MxcImage> {
       );
     }
 
+    final repaintKey = ValueKey<Object>([
+      _effectiveCacheKey ?? widget.uri,
+      widget.width,
+      widget.height,
+      widget.isThumbnail,
+      widget.fit,
+    ]);
+
     final imageWidget = Image.memory(
       data,
       width: widget.width,
@@ -336,7 +329,10 @@ class _MxcImageState extends State<MxcImage> {
       },
     );
 
-    return ClipRRect(borderRadius: widget.borderRadius, child: imageWidget);
+    return RepaintBoundary(
+      key: repaintKey,
+      child: ClipRRect(borderRadius: widget.borderRadius, child: imageWidget),
+    );
   }
 }
 
