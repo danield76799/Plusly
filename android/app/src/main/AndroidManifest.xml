@@ -150,6 +150,10 @@
         </provider>
 
         <!-- Push notifications worden door UnifiedPush afgehandeld -->
+        <!-- The unifiedpush_android library (3.4.1) registers its own       -->
+        <!-- UnifiedPushService via Gradle manifest merging. Do NOT declare a  -->
+        <!-- custom receiver/service here — the old UnifiedPushReceiver class  -->
+        <!-- no longer exists in the package and breaks Ntfy detection.        -->
 
         <service android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
             android:foregroundServiceType="camera|microphone|mediaProjection">
@@ -164,12 +168,6 @@
               <action android:name="android.telecom.ConnectionService" />
           </intent-filter>
         </service> -->
-
-        <receiver android:name="org.unifiedpush.flutter.connector.UnifiedPushReceiver"
-            tools:replace="android:enabled"
-            android:enabled="true"
-            android:exported="true">
-        </receiver>
 
         <receiver android:exported="false" android:enabled="true"
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
