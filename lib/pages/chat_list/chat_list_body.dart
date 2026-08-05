@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:async/async.dart';
 import 'package:Pulsly/pages/favorites/favorites_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,6 +28,42 @@ import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'chat_list_header.dart';
 import '../../services/chat_list_refresh_bus.dart';
+
+/// Coalesces a stream of refresh signals so a burst (e.g. two messages within
+/// a minute firing several onSync emissions) triggers at most one emit per
+/// [delay]. Without this the chat list rebuilds + re-sorts on every event,
+/// making the two most-recent rooms swap positions and flicker.
+Stream<T> _debouncedStream<T>(Stream<T> source,
+    [Duration delay = const Duration(milliseconds: 200)]) {
+  late StreamController<T> controller;
+  Timer? timer;
+  T? lastValue;
+  bool hasValue = false;
+
+  controller = StreamController<T>.broadcast(
+    onListen: () {
+      source.listen(
+        (value) {
+          lastValue = value;
+          hasValue = true;
+          timer?.cancel();
+          timer = Timer(delay, () {
+            if (hasValue && !controller.isClosed) controller.add(lastValue as T);
+          });
+        },
+        onError: controller.addError,
+        onDone: () {
+          if (hasValue && !controller.isClosed) controller.add(lastValue as T);
+          controller.close();
+        },
+      );
+    },
+    onCancel: () {
+      timer?.cancel();
+    },
+  );
+  return controller.stream;
+}
 
 class ChatListViewBody extends StatelessWidget {
   final ChatListController controller;
@@ -88,15 +126,22 @@ class ChatListViewBody extends StatelessWidget {
       //     zichtbaar in de lijst.
       //  3. onSyncStatus.finished — vangt SDK-versies die hasRoomUpdate niet
       //     betrouwbaar zetten.
-      stream: StreamGroup.merge<String?>([
-        ChatListRefreshBus.stream,
-        client.onSync.stream
-            .where((s) => s.hasRoomUpdate)
-            .map((_) => null),
-        client.onSyncStatus.stream
-            .where((s) => s.status == SyncStatus.finished)
-            .map((_) => null),
-      ]),
+      // Debounce the merged refresh signal: a burst of sync events (two
+      // messages arriving within a minute fires several onSync emissions)
+      // would otherwise rebuild + re-sort the list on every event, making the
+      // two most-recent rooms thrash positions. Coalesce to one rebuild per
+      // 200ms so the list settles instead of flickering.
+      stream: _debouncedStream(
+        StreamGroup.merge<String?>([
+          ChatListRefreshBus.stream,
+          client.onSync.stream
+              .where((s) => s.hasRoomUpdate)
+              .map<String?>((_) => null),
+          client.onSyncStatus.stream
+              .where((s) => s.status == SyncStatus.finished)
+              .map<String?>((_) => null),
+        ]),
+      ),
       builder: (context, snapshot) {
         final roomId = snapshot.data;
         if (snapshot.connectionState == ConnectionState.active) {

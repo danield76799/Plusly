@@ -624,9 +624,16 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
+    // In detached/background-fetch mode there are no live clients with a
+    // synced database, so pass clients: null to trigger pushHelper's fast
+    // path (isBackgroundMessage). Passing the live client list here made the
+    // helper run the full abortSync + oneShotSync + getRoomById route, which
+    // crashes/hangs in headless mode and produced no popup for a closed app.
+    final isDetached = Platform.isAndroid &&
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached;
     await pushHelper(
       PushNotification.fromJson(data),
-      clients: clients,
+      clients: isDetached ? null : clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
       activeClient: clientFromInstance(i, clients),

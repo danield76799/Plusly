@@ -323,21 +323,27 @@ class ChatListController extends State<ChatList>
         .where(_isBridgeTypeVisible)
         .toList();
 
-    // Sort pinned rooms to the top in non-pinned tabs, then recently active
-    // rooms (optimistic send bump), then by latest event time.
+    // Stable comparator: pinned first, then recently-active bump, then by
+    // latest event time. The trailing roomId tiebreaker is required — without
+    // it, two rooms with near-equal latestEventReceivedTime (e.g. two messages
+    // arriving within a minute) swap order on every recompute, causing the
+    // chat list to flicker at ~100ms during a burst.
+    int compareRooms(Room a, Room b) {
+      final aPinned = a.isFavourite ? 1 : 0;
+      final bPinned = b.isFavourite ? 1 : 0;
+      if (aPinned != bPinned) return bPinned - aPinned;
+      final aRecent = _recentlyActiveRoomIds.contains(a.id) ? 1 : 0;
+      final bRecent = _recentlyActiveRoomIds.contains(b.id) ? 1 : 0;
+      if (aRecent != bRecent) return bRecent - aRecent;
+      final byTime = b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime);
+      if (byTime != 0) return byTime;
+      return a.id.compareTo(b.id);
+    }
+
     if (activeFilter != ActiveFilter.pinned) {
-      _cachedFilteredRooms.sort((a, b) {
-        final aPinned = a.isFavourite ? 1 : 0;
-        final bPinned = b.isFavourite ? 1 : 0;
-        if (aPinned != bPinned) return bPinned - aPinned;
-        final aRecent = _recentlyActiveRoomIds.contains(a.id) ? 1 : 0;
-        final bRecent = _recentlyActiveRoomIds.contains(b.id) ? 1 : 0;
-        if (aRecent != bRecent) return bRecent - aRecent;
-        return b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime);
-      });
+      _cachedFilteredRooms.sort(compareRooms);
     } else {
-      _cachedFilteredRooms.sort((a, b) =>
-          b.latestEventReceivedTime.compareTo(a.latestEventReceivedTime));
+      _cachedFilteredRooms.sort(compareRooms);
     }
 
     _lastActiveFilter = activeFilter;
