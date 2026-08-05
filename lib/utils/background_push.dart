@@ -281,6 +281,9 @@ class BackgroundPush {
             data: PusherData(
               url: Uri.parse(gatewayUrl!),
               format: AppSettings.pushNotificationsPusherFormat.value,
+              additionalProperties: {
+                "data_message": pusherDataMessageFormat,
+              },
             ),
             kind: 'http',
           ),
