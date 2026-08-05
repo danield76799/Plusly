@@ -515,15 +515,13 @@ class BackgroundPush {
     Logs().i('[Push] Saving UnifiedPush distributor: $selectedDistributor');
     await UnifiedPush.saveDistributor(selectedDistributor);
     
-    // Check if we already have an endpoint for any client
-    var hasExistingEndpoint = false;
+    // Check if we already have an endpoint for any client — reuse it instead of registering anew
     for (final client in clients) {
       if (client.isLogged()) {
         final endpoint = matrix?.store.getString(
           client.clientName + AppSettings.unifiedPushEndpoint.key,
         );
         if (endpoint != null && endpoint.isNotEmpty) {
-          hasExistingEndpoint = true;
           // Re-register pusher with existing endpoint
           await setupPusher(
             gatewayUrl: 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify',
@@ -532,7 +530,17 @@ class BackgroundPush {
             client: client,
           );
         } else {
-          await UnifiedPush.register(instance: client.clientName);
+          // FIX: if UnifiedPush already has a distributor stored, the endpoint
+          // is already known to ntfy — calling register() would create a NEW topic.
+          // Only register when no distributor is saved yet (fresh setup).
+          final distributor = await UnifiedPush.getDistributor();
+          if (distributor != null && distributor.isNotEmpty) {
+            Logs().i(
+              '[Push] Distributor already registered ($distributor), skipping register() for ${client.clientName} to avoid new ntfy topic',
+            );
+          } else {
+            await UnifiedPush.register(instance: client.clientName);
+          }
         }
       }
     }
