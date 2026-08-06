@@ -445,7 +445,9 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
     return;
   }
 
-  final roomName = _roomDisplayName(client, notification.roomId, l10n) ?? l10n.incomingMessages;
+  final roomName = notification.roomName?.trim() ??
+      _roomDisplayName(client, notification.roomId, l10n) ??
+      l10n.incomingMessages;
   final id = '${client.clientName}_${notification.roomId}'.hashCode;
 
   await flutterLocalNotificationsPlugin.show(
