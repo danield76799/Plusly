@@ -78,6 +78,7 @@ class MxcImage extends StatefulWidget {
 class _MxcImageState extends State<MxcImage> {
   Uint8List? _currentData;
   bool _isLoading = false;
+  bool _hasAttemptedLoad = false;
   int _retryCount = 0;
   static const int _maxRetries = 3;
 
@@ -103,7 +104,12 @@ class _MxcImageState extends State<MxcImage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_currentData == null && !_isLoading) {
+    // Only start loading on the first dependency change (after initState).
+    // Without this guard, every rebuild (e.g. from StreamBuilder in chat-list)
+    // triggers a new _load() that resets the retry cycle, causing an infinite
+    // spinner for images that fail to load.
+    if (_currentData == null && !_isLoading && !_hasAttemptedLoad) {
+      _hasAttemptedLoad = true;
       _load();
     }
   }
@@ -115,6 +121,7 @@ class _MxcImageState extends State<MxcImage> {
         oldWidget.event != widget.event ||
         oldWidget.cacheKey != widget.cacheKey) {
       _retryCount = 0;
+      _hasAttemptedLoad = false;
       final cached = _getFromCache();
       if (cached != null) {
         setState(() {
