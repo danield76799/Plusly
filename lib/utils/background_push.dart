@@ -416,11 +416,38 @@ class BackgroundPush {
       return;
     }
 
-    // Only clear saved distributor if we detect a problem (no valid endpoint)
-    // Don't clear on every app start to avoid unnecessary re-registration
+    // Only clear saved distributor if the saved one is no longer installed
+    // (e.g. user uninstalled ntfy). If the saved distributor is still present,
+    // trust it — clearing it would force a re-registration that creates a
+    // NEW ntfy topic on every launch.
     Logs().i('[Push] Checking existing push registration...');
-    
-    var needsReRegistration = false;
+
+    final savedDistributor = await UnifiedPush.getDistributor();
+    final distributorStillInstalled =
+        savedDistributor != null && distributors.contains(savedDistributor);
+
+    var needsReRegistration = !distributorStillInstalled;
+    if (needsReRegistration) {
+      Logs().i(
+        '[Push] Saved distributor "${savedDistributor ?? '(none)'}" is no longer installed — clearing to force re-registration',
+      );
+    } else {
+      Logs().i(
+        '[Push] Saved distributor "$savedDistributor" still installed — will reuse existing registration',
+      );
+      // Mark all logged-in clients as registered so the legacy "needs
+      // re-registration" check below doesn't trigger a clear+re-register loop.
+      for (final client in clients) {
+        if (client.isLogged()) {
+          await matrix?.store.setBool(
+            client.clientName + AppSettings.unifiedPushRegistered.key,
+            true,
+          );
+        }
+      }
+      return;
+    }
+
     for (final client in clients) {
       if (client.isLogged()) {
         final endpoint = matrix?.store.getString(
@@ -429,18 +456,17 @@ class BackgroundPush {
         final registered = matrix?.store.getBool(
           client.clientName + AppSettings.unifiedPushRegistered.key,
         ) ?? false;
-        
+
         if (endpoint == null || endpoint.isEmpty || !registered) {
           needsReRegistration = true;
           Logs().i('[Push] Client ${client.clientName} needs re-registration');
         }
       }
     }
-    
+
     if (needsReRegistration) {
-      Logs().i('[Push] Clearing saved distributor to force re-registration');
       await UnifiedPush.saveDistributor('');
-      
+
       for (final client in clients) {
         if (client.isLogged()) {
           await matrix?.store.setString(
