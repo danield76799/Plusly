@@ -392,7 +392,12 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     _pushController?.dispose();
     _pushController = PushController(widget.store, widget.clients);
     await _pushController!.initializeLocalNotifications();
-    await _pushController!.initialize();
+    // Only initialize the new push system when it's explicitly enabled.
+    // Otherwise the legacy background_push.dart handles registration, and
+    // initializing both would create duplicate ntfy topics on every launch.
+    if (FeatureFlags.useNewPushSystem) {
+      await _pushController!.initialize();
+    }
   }
   
   /// 🆕 Initialiseer legacy push systeem (voor runtime switch)
