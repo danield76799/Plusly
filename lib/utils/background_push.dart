@@ -300,6 +300,13 @@ class BackgroundPush {
     Logs().d("SetupPush called with ${clients.length} clients");
     this.clients = clients;
 
+    // A previous push action (e.g. app launched from a notification) may have
+    // left this flag set. Reset it here so a normal app launch always runs the
+    // registration flow. If we are currently handling a push action, _init()
+    // already registered onNewEndpoint; setupUp() below will re-use the stored
+    // endpoint without creating duplicate ntfy topics.
+    upAction = false;
+
     {
       // migrate single client push settings to multiclient settings
       final endpoint = AppSettings.unifiedPushEndpoint.value;
