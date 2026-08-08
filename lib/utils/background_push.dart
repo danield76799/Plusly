@@ -23,6 +23,8 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -82,7 +84,7 @@ class BackgroundPush {
           AppConfig.pushNotificationsChannelId,
           'Berichten',
           description: 'Inkomende chatberichten',
-          importance: Importance.high,
+          importance: Importance.max,
         ),
       );
     }
@@ -416,74 +418,16 @@ class BackgroundPush {
       return;
     }
 
-    // Only clear saved distributor if the saved one is no longer installed
-    // (e.g. user uninstalled ntfy). If the saved distributor is still present,
-    // trust it — clearing it would force a re-registration that creates a
-    // NEW ntfy topic on every launch.
-    Logs().i('[Push] Checking existing push registration...');
-
-    final savedDistributor = await UnifiedPush.getDistributor();
-    final distributorStillInstalled =
-        savedDistributor != null && distributors.contains(savedDistributor);
-
-    var needsReRegistration = !distributorStillInstalled;
-    if (needsReRegistration) {
-      Logs().i(
-        '[Push] Saved distributor "${savedDistributor ?? '(none)'}" is no longer installed — clearing to force re-registration',
-      );
-    } else {
-      Logs().i(
-        '[Push] Saved distributor "$savedDistributor" still installed — will reuse existing registration',
-      );
-      // Mark all logged-in clients as registered so the legacy "needs
-      // re-registration" check below doesn't trigger a clear+re-register loop.
-      for (final client in clients) {
-        if (client.isLogged()) {
-          await matrix?.store.setBool(
-            client.clientName + AppSettings.unifiedPushRegistered.key,
-            true,
-          );
-        }
-      }
-      return;
-    }
-
-    for (final client in clients) {
-      if (client.isLogged()) {
-        final endpoint = matrix?.store.getString(
-          client.clientName + AppSettings.unifiedPushEndpoint.key,
-        );
-        final registered = matrix?.store.getBool(
-          client.clientName + AppSettings.unifiedPushRegistered.key,
-        ) ?? false;
-
-        if (endpoint == null || endpoint.isEmpty || !registered) {
-          needsReRegistration = true;
-          Logs().i('[Push] Client ${client.clientName} needs re-registration');
-        }
-      }
-    }
-
-    if (needsReRegistration) {
-      await UnifiedPush.saveDistributor('');
-
-      for (final client in clients) {
-        if (client.isLogged()) {
-          await matrix?.store.setString(
-            client.clientName + AppSettings.unifiedPushEndpoint.key,
-            '',
-          );
-          await matrix?.store.setBool(
-            client.clientName + AppSettings.unifiedPushRegistered.key,
-            false,
-          );
-        }
-      }
-    }
-    
+    // Use the previously selected distributor if it is still installed.
+    // Otherwise pick the only available one, or ask the user when multiple.
     String selectedDistributor;
-    if (distributors.length == 1) {
+    final savedDistributor = await UnifiedPush.getDistributor();
+    if (savedDistributor != null && distributors.contains(savedDistributor)) {
+      selectedDistributor = savedDistributor;
+      Logs().i('[Push] Reusing saved UnifiedPush distributor: $selectedDistributor');
+    } else if (distributors.length == 1) {
       selectedDistributor = distributors.first;
+      Logs().i('[Push] Using the only available UnifiedPush distributor: $selectedDistributor');
     } else {
       // Multiple distributors: show a picker dialog
       final dialogContext =
@@ -492,7 +436,6 @@ class BackgroundPush {
 
       if (!dialogContext.mounted) {
         Logs().w('[Push] Context not mounted, cannot show distributor picker');
-        // Fallback: use the first distributor
         selectedDistributor = distributors.first;
       } else {
         await loadLocale();
@@ -529,7 +472,6 @@ class BackgroundPush {
         if (picked != null) {
           selectedDistributor = picked;
         } else {
-          // User dismissed the dialog - use the first distributor as fallback
           Logs().i(
             '[Push] User dismissed distributor picker, using first available',
           );
@@ -540,34 +482,15 @@ class BackgroundPush {
 
     Logs().i('[Push] Saving UnifiedPush distributor: $selectedDistributor');
     await UnifiedPush.saveDistributor(selectedDistributor);
-    
-    // Check if we already have an endpoint for any client — reuse it instead of registering anew
+
+    // Always call register() so ntfy returns the existing endpoint for this
+    // instance, and the onNewEndpoint callback reaches _newUpEndpoint().
+    // _newUpEndpoint() then calls setupPusher(), which only posts a new pusher
+    // to the homeserver if the old one is missing or mismatched. ntfy reuses
+    // the same topic per instance, so this does not create duplicate topics.
     for (final client in clients) {
       if (client.isLogged()) {
-        final endpoint = matrix?.store.getString(
-          client.clientName + AppSettings.unifiedPushEndpoint.key,
-        );
-        if (endpoint != null && endpoint.isNotEmpty) {
-          // Re-register pusher with existing endpoint
-          await setupPusher(
-            gatewayUrl: 'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify',
-            token: endpoint,
-            useDeviceSpecificAppId: true,
-            client: client,
-          );
-        } else {
-          // FIX: if UnifiedPush already has a distributor stored, the endpoint
-          // is already known to ntfy — calling register() would create a NEW topic.
-          // Only register when no distributor is saved yet (fresh setup).
-          final distributor = await UnifiedPush.getDistributor();
-          if (distributor != null && distributor.isNotEmpty) {
-            Logs().i(
-              '[Push] Distributor already registered ($distributor), skipping register() for ${client.clientName} to avoid new ntfy topic',
-            );
-          } else {
-            await UnifiedPush.register(instance: client.clientName);
-          }
-        }
+        await UnifiedPush.register(instance: client.clientName);
       }
     }
   }
@@ -601,23 +524,34 @@ class BackgroundPush {
       );
     }
     Logs().i('[Push] UnifiedPush using endpoint $endpoint');
-    // Register a pusher for every logged-in client using this endpoint.
-    for (final client in clients.where((c) => c.isLogged())) {
-      await setupPusher(
-        gatewayUrl: endpoint,
-        token: newEndpoint,
-        useDeviceSpecificAppId: true,
-        client: client,
-      );
-      await matrix?.store.setString(
-        client.clientName + AppSettings.unifiedPushEndpoint.key,
-        newEndpoint,
-      );
-      await matrix?.store.setBool(
-        client.clientName + AppSettings.unifiedPushRegistered.key,
-        true,
-      );
+    // Register a pusher only for the client matching this UnifiedPush instance.
+    final client = clientFromInstance(i, clients) ?? clients.firstWhereOrNull(
+      (c) => c.isLogged(),
+    );
+    if (client == null) {
+      Logs().w('[Push] No logged-in client for instance $i');
+      return;
     }
+    final oldTokens = <String?>{};
+    try {
+      //<GOOGLE_SERVICES>final fcmToken = await firebase.getToken();
+      //<GOOGLE_SERVICES>oldTokens.add(fcmToken);
+    } catch (_) {}
+    await setupPusher(
+      gatewayUrl: endpoint,
+      token: newEndpoint,
+      oldTokens: oldTokens,
+      useDeviceSpecificAppId: true,
+      client: client,
+    );
+    await matrix?.store.setString(
+      client.clientName + AppSettings.unifiedPushEndpoint.key,
+      newEndpoint,
+    );
+    await matrix?.store.setBool(
+      client.clientName + AppSettings.unifiedPushRegistered.key,
+      true,
+    );
   }
 
   Future<void> _upUnregistered(String i) async {
@@ -651,9 +585,17 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
+
+    // If the app is not running (detached state), use the fast background path
+    // in pushHelper by passing clients: null. The handler has a very limited
+    // time budget on a cold start; loading the Matrix client and syncing can
+    // hang or get killed before a notification is ever shown.
+    final isDetached = Platform.isAndroid &&
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached;
+
     await pushHelper(
       PushNotification.fromJson(data),
-      clients: clients,
+      clients: isDetached ? null : clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
       activeClient: clientFromInstance(i, clients),

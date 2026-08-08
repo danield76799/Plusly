@@ -148,20 +148,22 @@ Future<void> notificationTap(
       }
       Logs().v('Open room from notification tap', roomId);
 
-      // Zorg dat de kamer beschikbaar is voor we navigeren. Bij een koude
-      // start duurt het even voordat sync de kamer heeft geladen; pas dan
-      // openen we de chat om een leeg scherm te voorkomen.
+      // Make sure the room is available before navigating. On a cold start
+      // it takes a moment until sync has loaded the room, so wait for it first.
+      await client.roomsLoading;
+      await client.accountDataLoading;
       if (client.getRoomById(roomId) == null) {
         try {
           await client
               .waitForRoomInSync(roomId)
-              .timeout(const Duration(seconds: 5));
+              .timeout(const Duration(seconds: 30));
         } catch (e) {
-          Logs().w('Room not available after timeout, navigating anyway', e);
+          Logs().w('Room not available after timeout, not navigating', e);
+          return;
         }
       }
 
-      router?.go(
+      router.go(
         client.getRoomById(roomId)?.membership == Membership.invite
             ? '/rooms'
             : '/rooms/$roomId',

@@ -426,9 +426,11 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   // Extract what we can directly from the Matrix push payload without
   // waiting for rooms/database to load.
   final l10n = await L10n.delegate.load(PlatformDispatcher.instance.locale);
+  final roomName = notification.roomName?.trim() ??
+      _roomDisplayName(client, notification.roomId, l10n);
   final senderName = notification.senderDisplayName?.trim() ??
       notification.sender?.trim() ??
-      _roomDisplayName(client, notification.roomId, l10n) ??
+      roomName ??
       '';
   // The push payload body is only readable for *unencrypted* rooms. For
   // E2EE rooms the gateway cannot decrypt it and sends ciphertext (often a
@@ -440,26 +442,28 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       rawBody.startsWith('{') ||
       // ciphertext has no spaces and is unusually long for a chat line
       (!rawBody.contains(' ') && rawBody.length > 40);
-  final body = looksEncrypted ? l10n.newMessageInFluffyChat : rawBody;
-  if (senderName.isEmpty && looksEncrypted) {
-    return;
-  }
+  final body = looksEncrypted
+      ? (roomName != null && roomName != l10n.incomingMessages
+          ? l10n.newMessageInFluffyChat
+          : l10n.incomingMessages)
+      : rawBody;
+  // Always show something, even when the encrypted payload gives us no sender.
+  // A silent E2EE push is worse than a generic "new message" notification.
 
-  final roomName = notification.roomName?.trim() ??
-      _roomDisplayName(client, notification.roomId, l10n) ??
-      l10n.incomingMessages;
+  final fallbackRoomName = roomName ?? l10n.incomingMessages;
+  final title = senderName.isNotEmpty ? senderName : fallbackRoomName;
   final id = '${client.clientName}_${notification.roomId}'.hashCode;
 
   await flutterLocalNotificationsPlugin.show(
     id: id,
-    title: senderName.isNotEmpty ? senderName : roomName,
-    body: body,
+    title: title.isNotEmpty ? title : l10n.incomingMessages,
+    body: body.isNotEmpty ? body : null,
     notificationDetails: NotificationDetails(
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,
         l10n.incomingMessages,
         groupKey: client.clientName,
-        importance: Importance.high,
+        importance: Importance.max,
         priority: Priority.max,
         category: AndroidNotificationCategory.message,
         shortcutId: notification.roomId,
@@ -493,8 +497,13 @@ String? _roomDisplayName(Client client, String? roomId, L10n l10n) {
 Client? _clientFromInstance(String? instance, List<Client> clients) {
   if (clients.isEmpty) return null;
   if (instance == null) return clients.first;
-  // FIX #16: don't fallback to first client — return null if no match
-  return clients.firstWhereOrNull((client) => client.clientName == instance);
+  // UnifiedPush instances are client names. If the specific client isn't found
+  // (e.g. after a multi-account change), fall back to the first client rather
+  // than dropping the push silently.
+  return clients.firstWhereOrNull(
+        (client) => client.clientName == instance,
+      ) ??
+      clients.first;
 }
 
 void updateAppBadge(int unreadCount) {
