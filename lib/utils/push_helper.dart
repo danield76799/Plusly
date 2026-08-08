@@ -518,6 +518,9 @@ void updateAppBadge(int unreadCount) {
 }
 
 /// Shows a grouped summary notification at the top of the notification shade.
+/// The summary title/body are derived from the most recent individual
+/// notification so the header shows a real sender/room instead of the generic
+/// "Inkomende Berichten" placeholder.
 Future<void> updateSummaryNotification({
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   required String clientName,
@@ -528,18 +531,48 @@ Future<void> updateSummaryNotification({
           .where((n) => n.groupKey == clientName)
           .toList();
 
-  if (activeNotifications.length <= 1) {
+  if (activeNotifications.isEmpty) {
     await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
     return;
   }
+
+  // Use the most recent notification for the summary preview; the OS keeps
+  // the list ordered by post time, with the newest last.
+  final latest = activeNotifications.last;
+  final hasRealContent = (latest.title?.isNotEmpty ?? false) &&
+      latest.title != l10n.incomingMessages;
+
+  // Build inbox lines from individual notification bodies (message previews).
+  final lines = activeNotifications
+      .map((n) {
+        final title = n.title?.trim();
+        final body = n.body?.trim();
+        if (title != null &&
+            title.isNotEmpty &&
+            body != null &&
+            body.isNotEmpty &&
+            title != body) {
+          return '$title: $body';
+        }
+        return body ?? title ?? '';
+      })
+      .where((line) => line.isNotEmpty)
+      .toList();
+
+  final summaryTitle = hasRealContent
+      ? latest.title!
+      : l10n.incomingMessages;
+  final summaryBody = hasRealContent && (latest.body?.isNotEmpty ?? false)
+      ? latest.body!
+      : (lines.isNotEmpty ? lines.first : l10n.incomingMessages);
 
   // FIX #11: cancel stale summary and re-show with updated content
   await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
 
   await flutterLocalNotificationsPlugin.show(
     id: clientName.hashCode,
-    title: l10n.incomingMessages,
-    body: l10n.incomingMessages,
+    title: summaryTitle,
+    body: summaryBody,
     notificationDetails: NotificationDetails(
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,
@@ -547,7 +580,7 @@ Future<void> updateSummaryNotification({
         groupKey: clientName,
         setAsGroupSummary: true,
         styleInformation: InboxStyleInformation(
-          activeNotifications.map((n) => n.body ?? '').toList(),
+          lines.isNotEmpty ? lines : [l10n.incomingMessages],
         ),
         autoCancel: false,
       ),
