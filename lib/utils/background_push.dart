@@ -36,6 +36,7 @@ import 'package:unifiedpush/unifiedpush.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/main.dart';
+import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/push_helper.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
@@ -606,11 +607,82 @@ class BackgroundPush {
       includeReplyAction: false, // UP connector bug with reply input (codeberg #34)
     );
 
-    // NOTE: Do NOT trigger another sync here.
+    // Detached/closed-app pushes only show a fast fallback. Try to enrich the
+    // notification with the real sender/content asynchronously, without blocking
+    // the handler. If the OS kills us first, the fallback remains visible.
+    if (isDetached) {
+      unawaited(
+        _enrichDetachedNotification(
+          PushNotification.fromJson(data),
+          i,
+        ).catchError((e, s) {
+          Logs().w('[Push] Detached notification enrichment failed', e, s);
+        }),
+      );
+    }
+
+    // NOTE: Do NOT trigger another sync here for the non-detached path.
     // `pushHelper` already handles abortSync + oneShotSync internally,
     // including restoring backgroundSync when needed.
     // A second abortSync here can race with the first and corrupt
     // room/event state, causing wrong notification content.
+  }
+
+  Future<void> _enrichDetachedNotification(
+    PushNotification notification,
+    String instance,
+  ) async {
+    Logs().v('[Push] Starting detached notification enrichment');
+    try {
+      final loadedClients = await ClientManager.getClients(
+        initialize: false,
+        store: await AppSettings.init(),
+      );
+      if (loadedClients.isEmpty) {
+        Logs().w('[Push] No clients available for enrichment');
+        return;
+      }
+      final client = clientFromInstance(instance, loadedClients) ??
+          loadedClients.firstWhereOrNull((c) => c.isLogged()) ??
+          loadedClients.first;
+
+      // Give the SDK a few seconds to load the room list from store.
+      await client.roomsLoading?.timeout(const Duration(seconds: 5));
+
+      // Try to resolve the event directly; if the room is not yet known,
+      // force a one-shot sync first.
+      var event = await client.getEventByPushNotification(
+        notification,
+        storeInDatabase: false,
+      );
+      if (event == null && notification.roomId != null) {
+        client.abortSync();
+        await client.oneShotSync(timeout: Duration.zero);
+        event = await client.getEventByPushNotification(
+          notification,
+          storeInDatabase: false,
+        );
+      }
+      if (event == null) {
+        Logs().v('[Push] Could not resolve event for enrichment');
+        return;
+      }
+
+      // Re-run pushHelper with loaded clients; it will rebuild the same
+      // notification id with the rich sender/body content.
+      await pushHelper(
+        notification,
+        clients: loadedClients,
+        activeClient: client,
+        flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+        instance: instance,
+        useNotificationActions: true,
+        includeReplyAction: false,
+      );
+      Logs().v('[Push] Detached notification enriched successfully');
+    } catch (e, s) {
+      Logs().w('[Push] Detached notification enrichment failed', e, s);
+    }
   }
 }
 
