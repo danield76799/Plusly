@@ -581,9 +581,15 @@ class BackgroundPush {
     Logs().i('Push Notification from UP received', pushMessage);
     final message = pushMessage.content;
     upAction = true;
-    final data = Map<String, dynamic>.from(
-      json.decode(utf8.decode(message))['notification'],
-    );
+    final Map<String, dynamic> decoded;
+    try {
+      decoded = json.decode(utf8.decode(message)) as Map<String, dynamic>;
+    } catch (e, s) {
+      Logs().e('[Push] Failed to decode UP message', e, s);
+      return;
+    }
+    final data = Map<String, dynamic>.from(decoded['notification'] ?? <String, dynamic>{});
+    Logs().i('[Push] Decoded notification data: $data');
     // UP may strip the devices list
     data['devices'] ??= [];
 
@@ -591,12 +597,14 @@ class BackgroundPush {
     // in pushHelper by passing clients: null. The handler has a very limited
     // time budget on a cold start; loading the Matrix client and syncing can
     // hang or get killed before a notification is ever shown.
-    final isDetached = Platform.isAndroid &&
-        WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached;
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    final isBackground = lifecycle != AppLifecycleState.resumed;
+    final isDetached = Platform.isAndroid && lifecycle == AppLifecycleState.detached;
+    Logs().i('[Push] lifecycle=$lifecycle, isDetached=$isDetached, instance=$i');
 
     await pushHelper(
       PushNotification.fromJson(data),
-      clients: isDetached ? null : clients,
+      clients: isBackground ? null : clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
       activeClient: clientFromInstance(i, clients),

@@ -90,6 +90,7 @@ Future<void> _tryPushHelper(
 
   // ── Foreground check ──
   if (notification.roomId != null &&
+      notification.roomId!.isNotEmpty &&
       activeRoomId == notification.roomId &&
       activeClient != null &&
       WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
@@ -112,7 +113,7 @@ Future<void> _tryPushHelper(
   // Fast background path: if we have a push payload, show a notification
   // immediately without waiting for rooms/database to load. This avoids losing
   // notifications when Android kills the background handler.
-  if (isBackgroundMessage && notification.roomId != null) {
+  if (isBackgroundMessage) {
     unawaited(
       _buildFallbackNotification(
         notification,
@@ -285,7 +286,9 @@ Future<void> _tryPushHelper(
   final senderName = event.senderFromMemoryOrFallback.calcDisplayname();
 
   // ── Notification ID: unique per client+room (FluffyChat pattern) ──
-  final id = '${client.clientName}_${notification.roomId}'.hashCode;
+  final id = notification.roomId != null && notification.roomId!.isNotEmpty
+      ? '${client.clientName}_${notification.roomId}'.hashCode
+      : client.clientName.hashCode;
 
   // ── Messaging style (append to existing conversation) ──
   final newMessage = Message(
@@ -452,11 +455,15 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
 
   final fallbackRoomName = roomName ?? l10n.incomingMessages;
   final title = senderName.isNotEmpty ? senderName : fallbackRoomName;
-  final id = '${client.clientName}_${notification.roomId}'.hashCode;
+  final unread = notification.counts?.unread ?? 0;
+  final titleWithCount = unread > 1 ? '$title ($unread)' : title;
+  final id = notification.roomId != null && notification.roomId!.isNotEmpty
+      ? '${client.clientName}_${notification.roomId}'.hashCode
+      : client.clientName.hashCode;
 
   await flutterLocalNotificationsPlugin.show(
     id: id,
-    title: title.isNotEmpty ? title : l10n.incomingMessages,
+    title: titleWithCount.isNotEmpty ? titleWithCount : l10n.incomingMessages,
     body: body.isNotEmpty ? body : null,
     notificationDetails: NotificationDetails(
       android: AndroidNotificationDetails(
@@ -482,7 +489,7 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
 }
 
 String? _roomDisplayName(Client client, String? roomId, L10n l10n) {
-  if (roomId == null) return null;
+  if (roomId == null || roomId.isEmpty) return null;
   try {
     final room = client.getRoomById(roomId);
     if (room == null) return null;
