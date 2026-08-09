@@ -777,6 +777,7 @@ class ChatController extends State<ChatPageWithRoom>
     // surface an error.
     _isSending = true;
     _clearComposer();
+    final editEventId = editEvent?.eventId;
     setState(() {
       _isSending = false;
       replyEvent = null;
@@ -810,7 +811,7 @@ class ChatController extends State<ChatPageWithRoom>
       text,
       inReplyTo: replyEvent,
       replyMention: replyMention,
-      editEventId: editEvent?.eventId,
+      editEventId: editEventId,
       parseCommands: parseCommands,
       threadRootEventId: thread?.rootEvent.eventId,
       threadLastEventId:
