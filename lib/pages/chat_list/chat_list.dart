@@ -609,25 +609,38 @@ class ChatListController extends State<ChatList>
 
   String? get activeChat => widget.activeChat;
 
+  final _processedSharedPaths = <String>{};
+
   void _processIncomingSharedMedia(List<SharedMediaFile> files) {
     if (files.isEmpty) return;
 
-    files.removeWhere(
+    // Deduplicate: some Android devices deliver the same file via both
+    // getInitialMedia() and getMediaStream().
+    final uniqueFiles = files.where((file) {
+      final normalized = file.path.replaceFirst('file://', '');
+      if (_processedSharedPaths.contains(normalized)) return false;
+      _processedSharedPaths.add(normalized);
+      return true;
+    }).toList();
+
+    if (uniqueFiles.isEmpty) return;
+
+    uniqueFiles.removeWhere(
       (file) =>
           file.path.startsWith(AppConfig.deepLinkPrefix) ||
           file.path.startsWith(AppConfig.appSsoUrlScheme),
     );
 
-    if (files.isEmpty) return;
+    if (uniqueFiles.isEmpty) return;
 
     // Validate files are readable (skip content URIs that may crash)
-    files.removeWhere((file) {
+    uniqueFiles.removeWhere((file) {
       final path = file.path;
       return path.isEmpty ||
           (path.startsWith('content://') && PlatformInfos.isAndroid);
     });
 
-    if (files.isEmpty) {
+    if (uniqueFiles.isEmpty) {
       Logs().w('All shared files were content URIs or invalid');
       return;
     }
@@ -637,7 +650,7 @@ class ChatListController extends State<ChatList>
     showScaffoldDialog(
       context: context,
       builder: (context) => ShareScaffoldDialog(
-        items: files.map((file) {
+        items: uniqueFiles.map((file) {
           if ({SharedMediaType.text, SharedMediaType.url}.contains(file.type)) {
             return TextShareItem(file.path);
           }

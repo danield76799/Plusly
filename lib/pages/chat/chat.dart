@@ -150,6 +150,7 @@ class ChatController extends State<ChatPageWithRoom>
   Timer? typingTimeout;
   bool currentlyTyping = false;
   bool dragging = false;
+  bool _shareItemsProcessed = false;
 
   void onDragEntered(_) => setState(() => dragging = true);
 
@@ -349,7 +350,9 @@ class ChatController extends State<ChatPageWithRoom>
   void _shareItems([_]) {
     if (!mounted) return;
     final shareItems = widget.shareItems;
-    if (shareItems == null || shareItems.isEmpty) return;
+    if (shareItems == null || shareItems.isEmpty || _shareItemsProcessed) return;
+    _shareItemsProcessed = true;
+
     if (!room.otherPartyCanReceiveMessages) {
       final theme = Theme.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
