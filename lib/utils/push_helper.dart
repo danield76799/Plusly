@@ -552,12 +552,31 @@ Future<void> updateSummaryNotification({
 
   // Use the most recent notification for the summary preview; the OS keeps
   // the list ordered by post time, with the newest last.
-  final latest = activeNotifications.last;
-  final hasRealContent = (latest.title?.isNotEmpty ?? false) &&
+  final latest = activeNotifications.lastWhereOrNull(
+    (n) =>
+        n.title != null &&
+        n.title!.isNotEmpty &&
+        n.title != l10n.incomingMessages &&
+        n.title != AppConfig.applicationName,
+  ) ??
+      activeNotifications.lastOrNull;
+  if (latest == null) {
+    await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
+    return;
+  }
+  final hasRealContent = latest.title != null &&
+      latest.title!.isNotEmpty &&
       latest.title != l10n.incomingMessages;
 
   // Build inbox lines from individual notification bodies (message previews).
   final lines = activeNotifications
+      .where(
+        (n) =>
+            n.title != null &&
+            n.title!.isNotEmpty &&
+            n.title != l10n.incomingMessages &&
+            n.title != AppConfig.applicationName,
+      )
       .map((n) {
         final title = n.title?.trim();
         final body = n.body?.trim();
