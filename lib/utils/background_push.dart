@@ -42,7 +42,6 @@ import 'package:Pulsly/utils/push_helper.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
-import '../services/timeline_cache.dart';
 import '../widgets/matrix.dart';
 import 'platform_infos.dart';
 
@@ -602,9 +601,34 @@ class BackgroundPush {
     final isDetached = Platform.isAndroid && lifecycle == AppLifecycleState.detached;
     Logs().i('[Push] lifecycle=$lifecycle, isDetached=$isDetached, instance=$i');
 
+    if (isBackground) {
+      Logs().i('[Push] Background state: showing fast fallback now');
+      unawaited(
+        pushHelper(
+          PushNotification.fromJson(data),
+          clients: null,
+          l10n: l10n,
+          activeRoomId: matrix?.activeRoomId,
+          activeClient: clientFromInstance(i, clients),
+          flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+          instance: i,
+          useNotificationActions: true,
+          includeReplyAction: false,
+        ).catchError((e, s) {
+          Logs().w('[Push] Fast fallback via pushHelper failed', e, s);
+        }),
+      );
+      if (isDetached) {
+        Logs().i('[Push] Detached state: returning after fast fallback');
+        return;
+      }
+    } else {
+      Logs().i('[Push] Foreground state: calling pushHelper with clients');
+    }
+
     await pushHelper(
       PushNotification.fromJson(data),
-      clients: isBackground ? null : clients,
+      clients: clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
       activeClient: clientFromInstance(i, clients),

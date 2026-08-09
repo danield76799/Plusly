@@ -114,13 +114,14 @@ Future<void> _tryPushHelper(
   // immediately without waiting for rooms/database to load. This avoids losing
   // notifications when Android kills the background handler.
   if (isBackgroundMessage) {
+    Logs().i('[Push Helper] Background path: showing fast fallback now');
     unawaited(
       _buildFallbackNotification(
         notification,
         client: client,
         flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
       ).catchError((e) {
-        Logs().w('Fallback notification failed', e);
+        Logs().w('[Push Helper] Fallback notification failed', e);
       }),
     );
     // In background we don't need the rich notification; stop here to keep
@@ -533,10 +534,16 @@ Future<void> updateSummaryNotification({
   required String clientName,
   required L10n l10n,
 }) async {
-  final activeNotifications =
-      (await flutterLocalNotificationsPlugin.getActiveNotifications())
-          .where((n) => n.groupKey == clientName)
-          .toList();
+  List<ActiveNotification> activeNotifications;
+  try {
+    activeNotifications =
+        (await flutterLocalNotificationsPlugin.getActiveNotifications())
+            .where((n) => n.groupKey == clientName)
+            .toList();
+  } catch (e, s) {
+    Logs().w('[Push Helper] getActiveNotifications failed', e, s);
+    return;
+  }
 
   if (activeNotifications.isEmpty) {
     await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
