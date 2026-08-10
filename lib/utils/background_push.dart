@@ -600,6 +600,16 @@ class BackgroundPush {
     final isDetached = Platform.isAndroid && lifecycle == AppLifecycleState.detached;
     Logs().i('[Push] lifecycle=$lifecycle, isDetached=$isDetached, instance=$i');
 
+    // When the homeserver sends an event_id_only payload with empty fields,
+    // there is nothing to sync — getEventByPushNotification will return null
+    // and the rich path will cancel the fallback notification. Skip the rich
+    // path entirely in that case; the fallback is the best we can do.
+    final hasPayload = data['event_id'] is String &&
+        (data['event_id'] as String).isNotEmpty &&
+        data['room_id'] is String &&
+        (data['room_id'] as String).isNotEmpty;
+    Logs().i('[Push] hasPayload=$hasPayload, event_id=${data['event_id']}, room_id=${data['room_id']}');
+
     if (isBackground) {
       Logs().i('[Push] Background state: showing fast fallback now');
       unawaited(
@@ -617,18 +627,20 @@ class BackgroundPush {
           Logs().w('[Push] Fast fallback via pushHelper failed', e, s);
         }),
       );
-      if (isDetached) {
-        // Cold start: the OS may kill us before a rich sync finishes.
-        // Try to enrich asynchronously, but the fallback is already visible.
-        Logs().i('[Push] Detached: trying async enrichment');
-        unawaited(
-          _enrichDetachedNotification(
-            PushNotification.fromJson(data),
-            i,
-          ).catchError((e, s) {
-            Logs().w('[Push] Detached notification enrichment failed', e, s);
-          }),
-        );
+      if (isDetached || !hasPayload) {
+        if (isDetached) {
+          Logs().i('[Push] Detached: trying async enrichment');
+          unawaited(
+            _enrichDetachedNotification(
+              PushNotification.fromJson(data),
+              i,
+            ).catchError((e, s) {
+              Logs().w('[Push] Detached notification enrichment failed', e, s);
+            }),
+          );
+        } else {
+          Logs().i('[Push] Empty payload: skipping rich path to preserve fallback');
+        }
         return;
       }
     } else {
