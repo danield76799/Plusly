@@ -98,34 +98,31 @@ Future<void> _tryPushHelper(
     return;
   }
 
-  // ── Resolve client ──
-  clients ??= await ClientManager.getClients(
-    initialize: false,
-    store: await AppSettings.init(),
-  );
-
-  final client = _clientFromInstance(instance, clients);
-  if (client == null) {
-    Logs().e('No client could be found for instance $instance');
-    return;
-  }
-
-  // Fast background path: if we have a push payload, show a notification
-  // immediately without waiting for rooms/database to load. This avoids losing
-  // notifications when Android kills the background handler.
+  // ── Fast background path: show fallback BEFORE any heavy work ──
+  // ClientManager.getClients() can take seconds on a cold start and the OS
+  // may kill us before we ever show a notification. Show the fallback first,
+  // then load clients only if we need the rich path.
   if (isBackgroundMessage) {
     Logs().i('[Push Helper] Background path: showing fast fallback now');
+    // We need a client for the notification channel groupKey. Load one
+    // asynchronously but don't block the fallback on it.
     unawaited(
-      _buildFallbackNotification(
+      _showBackgroundFallback(
         notification,
-        client: client,
+        instance: instance,
         flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
       ).catchError((e) {
         Logs().w('[Push Helper] Fallback notification failed', e);
       }),
     );
-    // In background we don't need the rich notification; stop here to keep
-    // the handler fast and under the OS time budget.
+    return;
+  }
+
+  // ── Foreground rich path: resolve client ──
+  // clients is guaranteed non-null here (isBackgroundMessage already returned).
+  final client = _clientFromInstance(instance, clients);
+  if (client == null) {
+    Logs().e('No client could be found for instance $instance');
     return;
   }
 
@@ -201,38 +198,18 @@ Future<void> _tryPushHelper(
   updateAppBadge(notification.counts?.unread ?? 0);
 
   if (event == null) {
-    Logs().v('Notification is a clearing indicator.');
-    if (notification.counts?.unread == null ||
-        notification.counts?.unread == 0) {
+    // Only cancel notifications for genuine clearing indicators (unread=0).
+    // When the homeserver sends an event_id_only payload with empty fields,
+    // getEventByPushNotification returns null but counts.unread is non-zero.
+    // Cancelling in that case would destroy the fallback notification.
+    if (notification.counts?.unread == 0) {
+      Logs().v('Notification is a clearing indicator.');
       await flutterLocalNotificationsPlugin.cancelAll();
     } else {
-      await client.roomsLoading;
-      await syncFuture;
-      final activeNotifications = await flutterLocalNotificationsPlugin
-          .getActiveNotifications();
-      // FIX #22: use the filtered list
-      final clientNotifications = activeNotifications
-          .where((n) => n.groupKey == client.clientName)
-          .toList();
-      var needsUpdateForSummaryNotification = false;
-      for (final activeNotification in clientNotifications) {
-        final room = client.rooms.singleWhereOrNull(
-          (room) =>
-              '${client.clientName}_${room.id}'.hashCode ==
-              activeNotification.id,
-        );
-        if (room != null && !room.isUnreadOrInvited) {
-          await flutterLocalNotificationsPlugin.cancel(id: activeNotification.id!);  // FIX #12: await cancel
-          if (PlatformInfos.isAndroid) needsUpdateForSummaryNotification = true;
-        }
-      }
-      if (needsUpdateForSummaryNotification) {
-        await updateSummaryNotification(
-          clientName: client.clientName,
-          l10n: l10n,
-          flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-        );
-      }
+      Logs().v(
+        'Push event not resolved (empty payload or sync not yet complete). '
+        'Keeping existing notifications.',
+      );
     }
     return;
   }
@@ -420,6 +397,86 @@ Future<void> _tryPushHelper(
   }
 
   Logs().v('Push helper has been completed!');
+}
+
+/// Shows a fallback notification for background pushes without blocking on
+/// client loading. Uses a lightweight approach: load clients asynchronously
+/// but show the notification with a best-effort client name immediately.
+Future<void> _showBackgroundFallback(
+  PushNotification notification, {
+  String? instance,
+  required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
+}) async {
+  final l10n = await L10n.delegate.load(PlatformDispatcher.instance.locale);
+
+  // Try to get a client name for the notification groupKey. If loading
+  // clients fails, use a fallback name so the notification still shows.
+  String clientName;
+  try {
+    final clients = await ClientManager.getClients(
+      initialize: false,
+      store: await AppSettings.init(),
+    ).timeout(const Duration(seconds: 3));
+    final client = _clientFromInstance(instance, clients) ??
+        clients.firstWhereOrNull((c) => c.isLogged()) ??
+        clients.firstOrNull;
+    clientName = client?.clientName ?? 'Plusly';
+  } catch (_) {
+    clientName = 'Plusly';
+  }
+
+  final roomName = notification.roomName?.trim() ??
+      notification.senderDisplayName?.trim() ??
+      notification.sender?.trim();
+  final senderName = notification.senderDisplayName?.trim() ??
+      notification.sender?.trim() ??
+      roomName ??
+      '';
+  final rawBody = (notification.content?['body'] as String?)?.trim();
+  final looksEncrypted = rawBody == null ||
+      rawBody.isEmpty ||
+      rawBody.startsWith('{') ||
+      (!rawBody.contains(' ') && rawBody.length > 40);
+  final body = looksEncrypted ? l10n.newMessageInFluffyChat : rawBody;
+
+  final title = senderName.isNotEmpty ? senderName : (roomName ?? l10n.newMessageInFluffyChat);
+  final unread = notification.counts?.unread ?? 0;
+  final titleWithCount = unread > 1 ? '$title ($unread)' : title;
+  final displayTitle = titleWithCount.isNotEmpty &&
+          titleWithCount != l10n.incomingMessages
+      ? titleWithCount
+      : l10n.newMessageInFluffyChat;
+
+  final id = notification.roomId != null && notification.roomId!.isNotEmpty
+      ? '${clientName}_${notification.roomId}'.hashCode
+      : clientName.hashCode;
+
+  await flutterLocalNotificationsPlugin.show(
+    id: id,
+    title: displayTitle,
+    body: body.isNotEmpty && body != l10n.incomingMessages
+        ? body
+        : l10n.newMessageInFluffyChat,
+    notificationDetails: NotificationDetails(
+      android: AndroidNotificationDetails(
+        AppConfig.pushNotificationsChannelId,
+        l10n.incomingMessages,
+        groupKey: clientName,
+        importance: Importance.max,
+        priority: Priority.max,
+        category: AndroidNotificationCategory.message,
+        shortcutId: notification.roomId,
+      ),
+      iOS: DarwinNotificationDetails(threadIdentifier: notification.roomId),
+    ),
+    payload: NotificationPushPayload(
+      clientName,
+      notification.roomId,
+      notification.eventId,
+    ).toString(),
+  );
+
+  updateAppBadge(notification.counts?.unread ?? 0);
 }
 
 Future<void> _buildFallbackNotification(
