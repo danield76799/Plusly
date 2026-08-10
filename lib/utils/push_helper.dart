@@ -464,8 +464,14 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
 
   await flutterLocalNotificationsPlugin.show(
     id: id,
-    title: titleWithCount.isNotEmpty ? titleWithCount : l10n.incomingMessages,
-    body: body.isNotEmpty ? body : null,
+    title: titleWithCount.isNotEmpty && titleWithCount != l10n.incomingMessages
+        ? titleWithCount
+        : (roomName != null && roomName != l10n.incomingMessages
+            ? roomName
+            : l10n.incomingMessages),
+    body: body.isNotEmpty && body != l10n.incomingMessages
+        ? body
+        : l10n.newMessageInFluffyChat,
     notificationDetails: NotificationDetails(
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,
@@ -580,14 +586,16 @@ Future<void> updateSummaryNotification({
       .map((n) {
         final title = n.title?.trim();
         final body = n.body?.trim();
+        final realBody = body != null && body.isNotEmpty && body != l10n.incomingMessages
+            ? body
+            : l10n.newMessageInFluffyChat;
         if (title != null &&
             title.isNotEmpty &&
-            body != null &&
-            body.isNotEmpty &&
-            title != body) {
-          return '$title: $body';
+            realBody.isNotEmpty &&
+            title != realBody) {
+          return '$title: $realBody';
         }
-        return body ?? title ?? '';
+        return title ?? realBody;
       })
       .where((line) => line.isNotEmpty)
       .toList();
