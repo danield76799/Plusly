@@ -597,12 +597,13 @@ class BackgroundPush {
     // time budget on a cold start; loading the Matrix client and syncing can
     // hang or get killed before a notification is ever shown.
     final lifecycle = WidgetsBinding.instance.lifecycleState;
-    final isBackground = lifecycle != AppLifecycleState.resumed;
     final isDetached = Platform.isAndroid && lifecycle == AppLifecycleState.detached;
     Logs().i('[Push] lifecycle=$lifecycle, isDetached=$isDetached, instance=$i');
 
-    if (isBackground) {
-      Logs().i('[Push] Background state: showing fast fallback now');
+    if (isDetached) {
+      // Cold start: show a fast fallback immediately so the user sees
+      // *something*, then try to enrich it with the real event async.
+      Logs().i('[Push] Detached state: showing fast fallback, then enriching');
       unawaited(
         pushHelper(
           PushNotification.fromJson(data),
@@ -618,14 +619,19 @@ class BackgroundPush {
           Logs().w('[Push] Fast fallback via pushHelper failed', e, s);
         }),
       );
-      if (isDetached) {
-        Logs().i('[Push] Detached state: returning after fast fallback');
-        return;
-      }
-    } else {
-      Logs().i('[Push] Foreground state: calling pushHelper with clients');
+      unawaited(
+        _enrichDetachedNotification(
+          PushNotification.fromJson(data),
+          i,
+        ).catchError((e, s) {
+          Logs().w('[Push] Detached notification enrichment failed', e, s);
+        }),
+      );
+      return;
     }
 
+    // App is running (foreground, paused, or inactive). Pass real clients
+    // so pushHelper can sync and fetch the actual event to show sender + body.
     await pushHelper(
       PushNotification.fromJson(data),
       clients: clients,
@@ -638,20 +644,6 @@ class BackgroundPush {
           true, // mark-as-read works fine with UP; only reply-input is buggy (#34)
       includeReplyAction: false, // UP connector bug with reply input (codeberg #34)
     );
-
-    // Detached/closed-app pushes only show a fast fallback. Try to enrich the
-    // notification with the real sender/content asynchronously, without blocking
-    // the handler. If the OS kills us first, the fallback remains visible.
-    if (isDetached) {
-      unawaited(
-        _enrichDetachedNotification(
-          PushNotification.fromJson(data),
-          i,
-        ).catchError((e, s) {
-          Logs().w('[Push] Detached notification enrichment failed', e, s);
-        }),
-      );
-    }
 
     // NOTE: Do NOT trigger another sync here for the non-detached path.
     // `pushHelper` already handles abortSync + oneShotSync internally,
