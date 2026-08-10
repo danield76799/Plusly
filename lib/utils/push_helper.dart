@@ -447,9 +447,7 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       // ciphertext has no spaces and is unusually long for a chat line
       (!rawBody.contains(' ') && rawBody.length > 40);
   final body = looksEncrypted
-      ? (roomName != null && roomName != l10n.incomingMessages
-          ? l10n.newMessageInFluffyChat
-          : l10n.incomingMessages)
+      ? l10n.newMessageInFluffyChat
       : rawBody;
   // Always show something, even when the encrypted payload gives us no sender.
   // A silent E2EE push is worse than a generic "new message" notification.
@@ -462,13 +460,18 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       ? '${client.clientName}_${notification.roomId}'.hashCode
       : client.clientName.hashCode;
 
+  // Never show the generic "Incoming Messages" as the notification title.
+  // When the homeserver sends an empty payload (no room_id, no sender), we
+  // have nothing to identify the room. Use "New message" instead so the
+  // notification shade and grouped summary show something meaningful.
+  final displayTitle = titleWithCount.isNotEmpty &&
+          titleWithCount != l10n.incomingMessages
+      ? titleWithCount
+      : l10n.newMessageInFluffyChat;
+
   await flutterLocalNotificationsPlugin.show(
     id: id,
-    title: titleWithCount.isNotEmpty && titleWithCount != l10n.incomingMessages
-        ? titleWithCount
-        : (roomName != null && roomName != l10n.incomingMessages
-            ? roomName
-            : l10n.incomingMessages),
+    title: displayTitle,
     body: body.isNotEmpty && body != l10n.incomingMessages
         ? body
         : l10n.newMessageInFluffyChat,
@@ -602,10 +605,10 @@ Future<void> updateSummaryNotification({
 
   final summaryTitle = hasRealContent
       ? latest.title!
-      : l10n.incomingMessages;
+      : l10n.newMessageInFluffyChat;
   final summaryBody = hasRealContent && (latest.body?.isNotEmpty ?? false)
       ? latest.body!
-      : (lines.isNotEmpty ? lines.first : l10n.incomingMessages);
+      : (lines.isNotEmpty ? lines.first : l10n.newMessageInFluffyChat);
 
   // FIX #11: cancel stale summary and re-show with updated content
   await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
