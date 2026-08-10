@@ -232,7 +232,7 @@ class _MessageState extends State<Message> {
     final isOneOnOne =
         event.room.isDirectChat || event.room.getParticipants().length <= 4;
 
-    var color = theme.colorScheme.surfaceContainerHigh;
+    var color = theme.incomingBubbleColor;
     final displayTime =
         event.type == EventTypes.RoomCreate ||
         widget.nextEvent == null ||
@@ -282,24 +282,45 @@ class _MessageState extends State<Message> {
     final displayEvent = event.getDisplayEvent(timeline);
     const hardCorner = Radius.circular(4);
     const roundedCorner = Radius.circular(AppConfig.borderRadius);
-    final borderRadius = BorderRadius.only(
-      // Modern grouping: the "tail" (hard corner) sits on the LAST message
-      // of a consecutive block, on the sender's outer-lower corner. Earlier
-      // messages in the block use a continuous (fully rounded) style.
-      // Because the list is reversed, the message visually below this one
-      // is previousEvent. The "tail" (hard corner) should sit on the LAST
-      // message of a consecutive block, i.e. when there is no previous
-      // message from the same sender.
-      //   outgoing -> sharp bottom-right, incoming -> sharp top-left.
-      topLeft: (!ownMessage && !previousEventSameSender)
-          ? hardCorner
-          : roundedCorner,
-      topRight: (ownMessage && !previousEventSameSender)
-          ? hardCorner
-          : roundedCorner,
-      bottomLeft: roundedCorner,
-      bottomRight: roundedCorner,
-    );
+
+    // Group position in visual order (top→bottom, newest→oldest).
+    // Because the list is reversed, nextEvent is visually ABOVE and
+    // previousEvent is visually BELOW this message.
+    final isFirstInGroup = !nextEventSameSender && previousEventSameSender;
+    final isMiddleInGroup = nextEventSameSender && previousEventSameSender;
+    final isLastInGroup = nextEventSameSender && !previousEventSameSender;
+
+    // Modern grouping: the "tail" (hard corner) sits on the LAST message
+    // of a consecutive block. Middle messages get tight corners on both
+    // connecting sides so the block reads as one continuous surface.
+    final borderRadius = () {
+      if (isMiddleInGroup) {
+        return BorderRadius.only(
+          topLeft: ownMessage ? hardCorner : roundedCorner,
+          topRight: ownMessage ? roundedCorner : hardCorner,
+          bottomLeft: ownMessage ? roundedCorner : hardCorner,
+          bottomRight: ownMessage ? hardCorner : roundedCorner,
+        );
+      }
+      if (isFirstInGroup) {
+        return BorderRadius.only(
+          topLeft: roundedCorner,
+          topRight: roundedCorner,
+          bottomLeft: ownMessage ? roundedCorner : hardCorner,
+          bottomRight: ownMessage ? hardCorner : roundedCorner,
+        );
+      }
+      if (isLastInGroup) {
+        return BorderRadius.only(
+          topLeft: ownMessage ? hardCorner : roundedCorner,
+          topRight: ownMessage ? roundedCorner : hardCorner,
+          bottomLeft: ownMessage ? roundedCorner : hardCorner,
+          bottomRight: ownMessage ? hardCorner : roundedCorner,
+        );
+      }
+      // Solo message: fully rounded
+      return BorderRadius.circular(AppConfig.borderRadius);
+    }();
     final noBubble =
         ({
               MessageTypes.Video,
@@ -425,9 +446,9 @@ class _MessageState extends State<Message> {
                       onChanged: (_) => widget.onSelect(event, null),
                     ),
                   )
-                else if (!ownMessage && nextEventSameSender)
+                else if (!ownMessage && previousEventSameSender)
                   // Grouped incoming message: keep the avatar-column width for
-                  // alignment, but show no avatar here — it lives on the final
+                  // alignment, but show no avatar here — it lives on the first
                   // message of the block.
                   SizedBox(width: Avatar.defaultSize)
                 else if (!ownMessage)
@@ -450,36 +471,32 @@ class _MessageState extends State<Message> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (!nextEventSameSender)
+                      if (!previousEventSameSender && !ownMessage && !isOneOnOne)
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0, bottom: 4),
-                          child: ownMessage
-                              ? const SizedBox(height: 12)
-                              : isOneOnOne
-                                  ? const SizedBox.shrink()
-                                  : Text(
-                                      displayname,
-                                      style: TextStyle(
-                                        fontSize: 12.5 *
-                                            AppSettings.fontSizeFactor.value,
-                                        fontWeight: FontWeight.w600,
-                                        letterSpacing: 0.1,
-                                        color: (theme.brightness == Brightness.light
-                                            ? displayname.color
-                                            : displayname.lightColorText),
-                                        shadows: !widget.wallpaperMode
-                                            ? null
-                                            : [
-                                                const Shadow(
-                                                  offset: Offset(0.0, 0.0),
-                                                  blurRadius: 3,
-                                                  color: Colors.black,
-                                                ),
-                                              ],
+                          child: Text(
+                            displayname,
+                            style: TextStyle(
+                              fontSize: 12.5 *
+                                  AppSettings.fontSizeFactor.value,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.1,
+                              color: (theme.brightness == Brightness.light
+                                  ? displayname.color
+                                  : displayname.lightColorText),
+                              shadows: !widget.wallpaperMode
+                                  ? null
+                                  : [
+                                      const Shadow(
+                                        offset: Offset(0.0, 0.0),
+                                        blurRadius: 3,
+                                        color: Colors.black,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
+                                    ],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       Container(
                         alignment: alignment,

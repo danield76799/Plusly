@@ -170,13 +170,36 @@ extension on Brightness {
 }
 
 extension BubbleColorTheme on ThemeData {
+  /// Outgoing bubble: primary softened with 8% surface blend (light) or
+  /// primaryContainer at 85% opacity (dark) so it doesn't glow on AMOLED.
   Color get bubbleColor => brightness == Brightness.light
-      ? colorScheme.primary
-      : colorScheme.primaryContainer;
+      ? Color.lerp(colorScheme.primary, colorScheme.surface, 0.08)!
+      : colorScheme.primaryContainer.withValues(alpha: 0.85);
 
   Color get onBubbleColor => brightness == Brightness.light
       ? colorScheme.onPrimary
       : colorScheme.onPrimaryContainer;
+
+  /// Incoming bubble: one step above surface for clear hierarchy.
+  Color get incomingBubbleColor => brightness == Brightness.light
+      ? colorScheme.surfaceContainerHighest
+      : colorScheme.surfaceContainerHigh;
+
+  /// Subtle border for incoming bubbles in light mode so they don't
+  /// blend into the background. Dark mode surfaces already have enough
+  /// contrast without a border.
+  Border? get incomingBubbleBorder => brightness == Brightness.light
+      ? Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+          width: 0.5,
+        )
+      : null;
+
+  /// Reply indicator bar color: opacity-based so it blends with any
+  /// bubble background.
+  Color replyBarColor(bool ownMessage) => ownMessage
+      ? onBubbleColor.withValues(alpha: 0.35)
+      : colorScheme.primary.withValues(alpha: 0.3);
 
   Color get secondaryBubbleColor => HSLColor.fromColor(
     brightness == Brightness.light
