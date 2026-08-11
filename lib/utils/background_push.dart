@@ -671,8 +671,10 @@ class BackgroundPush {
     PushNotification notification,
     String instance,
   ) async {
-    Logs().v('[Push] Starting detached notification enrichment');
+    Logs().v('[Push] Starting background notification enrichment');
     try {
+      await loadLocale();
+      final l10n = this.l10n;
       final loadedClients = await ClientManager.getClients(
         initialize: false,
         store: await AppSettings.init(),
@@ -718,9 +720,20 @@ class BackgroundPush {
         useNotificationActions: true,
         includeReplyAction: false,
       );
-      Logs().v('[Push] Detached notification enriched successfully');
+      Logs().v('[Push] Background notification enriched successfully');
+
+      // Rebuild the group summary so the top-of-shade notification
+      // reflects the real sender/body instead of the fallback "New message".
+      if (Platform.isAndroid && l10n != null) {
+        await updateSummaryNotification(
+          clientName: client.clientName,
+          l10n: l10n,
+          flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
+        );
+        Logs().v('[Push] Summary refreshed after enrichment');
+      }
     } catch (e, s) {
-      Logs().w('[Push] Detached notification enrichment failed', e, s);
+      Logs().w('[Push] Background notification enrichment failed', e, s);
     }
   }
 }
