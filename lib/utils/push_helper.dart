@@ -439,7 +439,12 @@ Future<void> _showBackgroundFallback(
       (!rawBody.contains(' ') && rawBody.length > 40);
   final body = looksEncrypted ? l10n.newMessageInFluffyChat : rawBody;
 
-  final title = senderName.isNotEmpty ? senderName : (roomName ?? l10n.newMessageInFluffyChat);
+  // Title = room name (e.g. "Kat (WA)"), not sender. The sender is already
+  // visible in the messaging-style conversation view. Showing both makes
+  // bridge-chat notifications noisy: "Kat (WA): Daan (WA)".
+  final title = roomName?.isNotEmpty == true
+      ? roomName!
+      : (senderName.isNotEmpty ? senderName : l10n.newMessageInFluffyChat);
   final unread = notification.counts?.unread ?? 0;
   final titleWithCount = unread > 1 ? '$title ($unread)' : title;
   final displayTitle = titleWithCount.isNotEmpty &&
@@ -510,7 +515,12 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   // A silent E2EE push is worse than a generic "new message" notification.
 
   final fallbackRoomName = roomName ?? l10n.incomingMessages;
-  final title = senderName.isNotEmpty ? senderName : fallbackRoomName;
+  // Title = room name, not sender. The sender is already in the
+  // messaging-style body. Showing both makes bridge-chat notifications
+  // noisy: "Kat (WA): Daan (WA)".
+  final title = roomName?.isNotEmpty == true
+      ? roomName!
+      : (senderName.isNotEmpty ? senderName : fallbackRoomName);
   final unread = notification.counts?.unread ?? 0;
   final titleWithCount = unread > 1 ? '$title ($unread)' : title;
   final id = notification.roomId != null && notification.roomId!.isNotEmpty
