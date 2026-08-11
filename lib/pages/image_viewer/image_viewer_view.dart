@@ -82,80 +82,60 @@ class _PagedZoomableImages extends StatefulWidget {
 }
 
 class _PagedZoomableImagesState extends State<_PagedZoomableImages> {
-  final ValueNotifier<bool> _scrollLocked = ValueNotifier<bool>(false);
-  int _activePointers = 0;
-
-  void _onPointerDown(PointerDownEvent _) {
-    _activePointers++;
-    if (_activePointers >= 2) {
-      _scrollLocked.value = true;
-    }
-  }
-
-  void _onPointerUp(PointerUpEvent _) {
-    _activePointers = (_activePointers - 1).clamp(0, 999);
-    if (_activePointers < 2) {
-      _scrollLocked.value = false;
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollLocked.dispose();
-    super.dispose();
-  }
+  bool _isZooming = false;
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: _onPointerDown,
-      onPointerUp: _onPointerUp,
-      onPointerCancel: (_) => _onPointerUp,
-      child: ValueListenableBuilder<bool>(
-        valueListenable: _scrollLocked,
-        builder: (context, locked, _) => PageView.builder(
-          scrollDirection: Axis.horizontal,
-          physics: locked
-              ? const NeverScrollableScrollPhysics()
-              : const BouncingScrollPhysics(),
-          controller: widget.controller.pageController,
-          itemCount: widget.controller.allEvents.length,
-          itemBuilder: (context, i) {
-            final event = widget.controller.allEvents[i];
-            switch (event.messageType) {
-              case MessageTypes.Video:
-                return Padding(
-                  padding: const EdgeInsets.only(top: 52.0),
-                  child: Center(
-                    child: EventVideoPlayer(event, widget.controller),
-                  ),
-                );
-              case MessageTypes.Image:
-              case MessageTypes.Sticker:
-              default:
-                return InteractiveViewer(
-                  minScale: 1.0,
-                  maxScale: 10.0,
-                  child: Center(
-                    child: Hero(
-                      tag: event.eventId,
-                      child: GestureDetector(
-                        onTap: () {},
-                        child: MxcImage(
-                          key: ValueKey(event.eventId),
-                          event: event,
-                          fit: BoxFit.contain,
-                          isThumbnail: false,
-                          animated: true,
-                        ),
-                      ),
+    return PageView.builder(
+      scrollDirection: Axis.horizontal,
+      physics: _isZooming
+          ? const NeverScrollableScrollPhysics()
+          : const BouncingScrollPhysics(),
+      controller: widget.controller.pageController,
+      itemCount: widget.controller.allEvents.length,
+      itemBuilder: (context, i) {
+        final event = widget.controller.allEvents[i];
+        switch (event.messageType) {
+          case MessageTypes.Video:
+            return Padding(
+              padding: const EdgeInsets.only(top: 52.0),
+              child: Center(
+                child: EventVideoPlayer(event, widget.controller),
+              ),
+            );
+          case MessageTypes.Image:
+          case MessageTypes.Sticker:
+          default:
+            return InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 5.0,
+              boundaryMargin: const EdgeInsets.all(80),
+              panEnabled: true,
+              scaleEnabled: true,
+              onInteractionStart: (_) {
+                setState(() => _isZooming = true);
+              },
+              onInteractionEnd: (_) {
+                setState(() => _isZooming = false);
+              },
+              child: Center(
+                child: Hero(
+                  tag: event.eventId,
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: MxcImage(
+                      key: ValueKey(event.eventId),
+                      event: event,
+                      fit: BoxFit.contain,
+                      isThumbnail: false,
+                      animated: true,
                     ),
                   ),
-                );
-            }
-          },
-        ),
-      ),
+                ),
+              ),
+            );
+        }
+      },
     );
   }
 }

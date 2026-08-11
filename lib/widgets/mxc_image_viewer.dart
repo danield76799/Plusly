@@ -31,8 +31,11 @@ class MxcImageViewer extends StatelessWidget {
           backgroundColor: Colors.transparent,
         ),
         body: InteractiveViewer(
-          minScale: 1.0,
-          maxScale: 10.0,
+          minScale: 0.5,
+          maxScale: 5.0,
+          boundaryMargin: const EdgeInsets.all(80),
+          panEnabled: true,
+          scaleEnabled: true,
           onInteractionEnd: (endDetails) {
             if (endDetails.velocity.pixelsPerSecond.dy >
                 MediaQuery.sizeOf(context).height * 1.5) {
