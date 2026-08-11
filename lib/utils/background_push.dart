@@ -627,22 +627,20 @@ class BackgroundPush {
           Logs().w('[Push] Fast fallback via pushHelper failed', e, s);
         }),
       );
-      if (isDetached || !hasPayload) {
-        if (isDetached) {
-          Logs().i('[Push] Detached: trying async enrichment');
-          unawaited(
-            _enrichDetachedNotification(
-              PushNotification.fromJson(data),
-              i,
-            ).catchError((e, s) {
-              Logs().w('[Push] Detached notification enrichment failed', e, s);
-            }),
-          );
-        } else {
-          Logs().i('[Push] Empty payload: skipping rich path to preserve fallback');
-        }
-        return;
-      }
+      // Always try to enrich the fallback with real event data.
+      // mtux.nl sends event_id_only payloads with empty fields, so the
+      // fallback shows "New message". Enrichment loads the real event
+      // and replaces the fallback with sender + body.
+      Logs().i('[Push] Background: trying async enrichment');
+      unawaited(
+        _enrichBackgroundNotification(
+          PushNotification.fromJson(data),
+          i,
+        ).catchError((e, s) {
+          Logs().w('[Push] Background notification enrichment failed', e, s);
+        }),
+      );
+      return;
     } else {
       Logs().i('[Push] Foreground state: calling pushHelper with clients');
     }
@@ -669,7 +667,7 @@ class BackgroundPush {
     // room/event state, causing wrong notification content.
   }
 
-  Future<void> _enrichDetachedNotification(
+  Future<void> _enrichBackgroundNotification(
     PushNotification notification,
     String instance,
   ) async {
