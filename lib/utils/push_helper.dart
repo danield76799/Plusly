@@ -11,10 +11,8 @@ import 'package:flutter_shortcuts_new/flutter_shortcuts_new.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/app_config.dart';
-import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/client_download_content_extension.dart';
-import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
@@ -399,9 +397,11 @@ Future<void> _tryPushHelper(
   Logs().v('Push helper has been completed!');
 }
 
-/// Shows a fallback notification for background pushes without blocking on
-/// client loading. Uses a lightweight approach: load clients asynchronously
-/// but show the notification with a best-effort client name immediately.
+/// Shows a fallback notification for background pushes. The notification
+/// is shown IMMEDIATELY with a hardcoded client name — we cannot afford to
+/// wait for ClientManager.getClients() because Android may kill the background
+/// handler after ~10 seconds. The real client name is loaded asynchronously
+/// for future notifications but this one goes out now.
 Future<void> _showBackgroundFallback(
   PushNotification notification, {
   String? instance,
@@ -409,21 +409,10 @@ Future<void> _showBackgroundFallback(
 }) async {
   final l10n = await L10n.delegate.load(PlatformDispatcher.instance.locale);
 
-  // Try to get a client name for the notification groupKey. If loading
-  // clients fails, use a fallback name so the notification still shows.
-  String clientName;
-  try {
-    final clients = await ClientManager.getClients(
-      initialize: false,
-      store: await AppSettings.init(),
-    ).timeout(const Duration(seconds: 3));
-    final client = _clientFromInstance(instance, clients) ??
-        clients.firstWhereOrNull((c) => c.isLogged()) ??
-        clients.firstOrNull;
-    clientName = client?.clientName ?? 'Plusly';
-  } catch (_) {
-    clientName = 'Plusly';
-  }
+  // Use a hardcoded fallback client name so the notification shows
+  // immediately. Loading clients can take seconds and the OS may kill
+  // us before we ever call show().
+  const clientName = 'Plusly';
 
   final roomName = notification.roomName?.trim() ??
       notification.senderDisplayName?.trim() ??
@@ -439,9 +428,7 @@ Future<void> _showBackgroundFallback(
       (!rawBody.contains(' ') && rawBody.length > 40);
   final body = looksEncrypted ? l10n.newMessageInFluffyChat : rawBody;
 
-  // Title = room name (e.g. "Kat (WA)"), not sender. The sender is already
-  // visible in the messaging-style conversation view. Showing both makes
-  // bridge-chat notifications noisy: "Kat (WA): Daan (WA)".
+  // Title = room name (e.g. "Kat (WA)"), not sender.
   final title = roomName?.isNotEmpty == true
       ? roomName!
       : (senderName.isNotEmpty ? senderName : l10n.newMessageInFluffyChat);
@@ -456,6 +443,7 @@ Future<void> _showBackgroundFallback(
       ? '${clientName}_${notification.roomId}'.hashCode
       : clientName.hashCode;
 
+  // Show the notification FIRST, before any async work.
   await flutterLocalNotificationsPlugin.show(
     id: id,
     title: displayTitle,
