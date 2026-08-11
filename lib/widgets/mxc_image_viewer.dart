@@ -31,7 +31,7 @@ class MxcImageViewer extends StatelessWidget {
           backgroundColor: Colors.transparent,
         ),
         body: InteractiveViewer(
-          minScale: 0.5,
+          minScale: 1.0,
           maxScale: 5.0,
           boundaryMargin: const EdgeInsets.all(80),
           panEnabled: true,
