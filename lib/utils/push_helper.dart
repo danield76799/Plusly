@@ -404,10 +404,14 @@ Future<void> _tryPushHelper(
 }
 
 /// Shows a fallback notification for background pushes. The notification
-/// is shown IMMEDIATELY with a hardcoded client name — we cannot afford to
-/// wait for ClientManager.getClients() because Android may kill the background
-/// handler after ~10 seconds. The real client name is loaded asynchronously
-/// for future notifications but this one goes out now.
+/// is shown IMMEDIATELY — we cannot afford to wait for
+/// ClientManager.getClients() because Android may kill the background
+/// handler after ~10 seconds.
+///
+/// The `instance` parameter is the client name (UnifiedPush uses it as
+/// the instance identifier). We use it for the notification ID and groupKey
+/// so the rich path (which uses client.clientName) replaces this fallback
+/// instead of creating a duplicate.
 Future<void> _showBackgroundFallback(
   PushNotification notification, {
   String? instance,
@@ -415,10 +419,10 @@ Future<void> _showBackgroundFallback(
 }) async {
   final l10n = await L10n.delegate.load(PlatformDispatcher.instance.locale);
 
-  // Use a hardcoded fallback client name so the notification shows
-  // immediately. Loading clients can take seconds and the OS may kill
-  // us before we ever call show().
-  const clientName = 'Plusly';
+  // Use the instance (client name) so the notification ID matches the
+  // rich path's ID, which uses client.clientName. This ensures the rich
+  // path replaces this fallback instead of creating a duplicate.
+  final clientName = instance ?? 'Plusly';
 
   final roomName = notification.roomName?.trim() ??
       notification.senderDisplayName?.trim() ??
