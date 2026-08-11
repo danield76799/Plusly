@@ -192,15 +192,27 @@ bool isNewerVersion(String latest, String current) {
 
   // Extract build metadata (+NNN) from both versions
   final latestPlusIndex = latest.indexOf('+');
-  final latestBuildNumber = latestPlusIndex != -1 ? latest.substring(latestPlusIndex + 1) : '';
+  var latestBuildNumber = latestPlusIndex != -1 ? latest.substring(latestPlusIndex + 1) : '';
   if (latestPlusIndex != -1) {
     latest = latest.substring(0, latestPlusIndex);
   }
   final currentPlusIndex = current.indexOf('+');
-  final currentBuildNumber = currentPlusIndex != -1 ? current.substring(currentPlusIndex + 1) : '';
+  var currentBuildNumber = currentPlusIndex != -1 ? current.substring(currentPlusIndex + 1) : '';
   if (currentPlusIndex != -1) {
     current = current.substring(0, currentPlusIndex);
   }
+
+  // Plusly CI adds +2000 to the pubspec build number for the Android
+  // versionCode. GitHub releases use the +2000 form (e.g. +23150) while
+  // PackageInfo reports the raw pubspec build number (e.g. +21150). Normalize
+  // both to the pubspec build number so a build that already matches the
+  // release is not reported as outdated.
+  int normalizeBuildNumber(String build) {
+    final value = int.tryParse(build) ?? 0;
+    return value > 2000 ? value - 2000 : value;
+  }
+  latestBuildNumber = normalizeBuildNumber(latestBuildNumber).toString();
+  currentBuildNumber = normalizeBuildNumber(currentBuildNumber).toString();
 
   // If both versions share the same semver core, compare build numbers if present.
   if (latest == current) {
