@@ -36,7 +36,7 @@ import 'package:unifiedpush/unifiedpush.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/main.dart';
-import 'package:Pulsly/utils/client_manager.dart';
+
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/push_helper.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
@@ -592,150 +592,23 @@ class BackgroundPush {
     // UP may strip the devices list
     data['devices'] ??= [];
 
-    // If the app is not in the foreground, show a fast fallback immediately
-    // so the user sees *something* even when the homeserver sends empty payloads.
-    // For non-detached states we then follow up with a rich sync to replace it.
-    final lifecycle = WidgetsBinding.instance.lifecycleState;
-    final isBackground = lifecycle != AppLifecycleState.resumed;
-    final isDetached = Platform.isAndroid && lifecycle == AppLifecycleState.detached;
-    Logs().i('[Push] lifecycle=$lifecycle, isDetached=$isDetached, instance=$i');
-
-    // When the homeserver sends an event_id_only payload with empty fields,
-    // there is nothing to sync — getEventByPushNotification will return null
-    // and the rich path will cancel the fallback notification. Skip the rich
-    // path entirely in that case; the fallback is the best we can do.
-    final hasPayload = data['event_id'] is String &&
-        (data['event_id'] as String).isNotEmpty &&
-        data['room_id'] is String &&
-        (data['room_id'] as String).isNotEmpty;
-    Logs().i('[Push] hasPayload=$hasPayload, event_id=${data['event_id']}, room_id=${data['room_id']}');
-
-    if (isBackground) {
-      Logs().i('[Push] Background state: showing fast fallback now');
-      unawaited(
-        pushHelper(
-          PushNotification.fromJson(data),
-          clients: null,
-          l10n: l10n,
-          activeRoomId: matrix?.activeRoomId,
-          activeClient: clientFromInstance(i, clients),
-          flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-          instance: i,
-          useNotificationActions: true,
-          includeReplyAction: false,
-        ).catchError((e, s) {
-          Logs().w('[Push] Fast fallback via pushHelper failed', e, s);
-        }),
-      );
-      // Always try to enrich the fallback with real event data.
-      // mtux.nl sends event_id_only payloads with empty fields, so the
-      // fallback shows "New message". Enrichment loads the real event
-      // and replaces the fallback with sender + body.
-      Logs().i('[Push] Background: trying async enrichment');
-      unawaited(
-        _enrichBackgroundNotification(
-          PushNotification.fromJson(data),
-          i,
-        ).catchError((e, s) {
-          Logs().w('[Push] Background notification enrichment failed', e, s);
-        }),
-      );
-      return;
-    } else {
-      Logs().i('[Push] Foreground state: calling pushHelper with clients');
-    }
-
-    // Rich path: sync and show real sender + message body.
-    // The fast fallback above already showed a notification; this replaces it.
+    // FluffyChat pattern: always pass clients to pushHelper.
+    // pushHelper handles the fast fallback internally (shows a notification
+    // before loading anything), then loads the real event and replaces it.
+    // This is simpler and more reliable than splitting fallback/enrichment
+    // across multiple unawaited calls that Android may kill mid-flight.
     await pushHelper(
       PushNotification.fromJson(data),
       clients: clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
-      activeClient: clientFromInstance(i, clients),
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
-      useNotificationActions:
-          true, // mark-as-read works fine with UP; only reply-input is buggy (#34)
-      includeReplyAction: false, // UP connector bug with reply input (codeberg #34)
+      useNotificationActions: true,
+      includeReplyAction: false,
     );
-
-    // NOTE: Do NOT trigger another sync here for the non-detached path.
-    // `pushHelper` already handles abortSync + oneShotSync internally,
-    // including restoring backgroundSync when needed.
-    // A second abortSync here can race with the first and corrupt
-    // room/event state, causing wrong notification content.
   }
 
-  Future<void> _enrichBackgroundNotification(
-    PushNotification notification,
-    String instance,
-  ) async {
-    Logs().v('[Push] Starting background notification enrichment');
-    try {
-      await loadLocale();
-      final l10n = this.l10n;
-      final loadedClients = await ClientManager.getClients(
-        initialize: false,
-        store: await AppSettings.init(),
-      );
-      if (loadedClients.isEmpty) {
-        Logs().w('[Push] No clients available for enrichment');
-        return;
-      }
-      final client = clientFromInstance(instance, loadedClients) ??
-          loadedClients.firstWhereOrNull((c) => c.isLogged()) ??
-          loadedClients.first;
-
-      // Give the SDK a few seconds to load the room list from store.
-      await client.roomsLoading?.timeout(const Duration(seconds: 5));
-
-      // Try to resolve the event directly; if the room is not yet known,
-      // force a one-shot sync first.
-      var event = await client.getEventByPushNotification(
-        notification,
-        storeInDatabase: false,
-      );
-      if (event == null && notification.roomId != null) {
-        client.abortSync();
-        await client.oneShotSync(timeout: Duration.zero);
-        event = await client.getEventByPushNotification(
-          notification,
-          storeInDatabase: false,
-        );
-      }
-      if (event == null) {
-        Logs().v('[Push] Could not resolve event for enrichment');
-        return;
-      }
-
-      // Re-run pushHelper with loaded clients; it will rebuild the same
-      // notification id with the rich sender/body content.
-      await pushHelper(
-        notification,
-        clients: loadedClients,
-        activeClient: client,
-        flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-        instance: instance,
-        useNotificationActions: true,
-        includeReplyAction: false,
-      );
-      Logs().v('[Push] Background notification enriched successfully');
-
-      // Rebuild the group summary so the top-of-shade notification
-      // reflects the real sender/body instead of the fallback "New message".
-      if (Platform.isAndroid && l10n != null) {
-        await updateSummaryNotification(
-          clientName: client.clientName,
-          l10n: l10n,
-          flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
-        );
-        Logs().v('[Push] Summary refreshed after enrichment');
-      }
-    } catch (e, s) {
-      Logs().w('[Push] Background notification enrichment failed', e, s);
-    }
-  }
 }
 
 Client? clientFromInstance(String? instance, List<Client> clients) {

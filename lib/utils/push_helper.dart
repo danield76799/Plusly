@@ -81,8 +81,10 @@ Future<void> _tryPushHelper(
   void Function(Event event)? onEventLoaded,
 }) async {
   final isBackgroundMessage = clients == null;
+  final isAppBackground =
+      WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed;
   Logs().v(
-    'Push helper has been started (background=$isBackgroundMessage).',
+    'Push helper has been started (background=$isBackgroundMessage, appBackground=$isAppBackground).',
     notification.toJson(),
   );
 
@@ -96,14 +98,14 @@ Future<void> _tryPushHelper(
     return;
   }
 
-  // ── Fast background path: show fallback BEFORE any heavy work ──
-  // ClientManager.getClients() can take seconds on a cold start and the OS
-  // may kill us before we ever show a notification. Show the fallback first,
-  // then load clients only if we need the rich path.
-  if (isBackgroundMessage) {
-    Logs().i('[Push Helper] Background path: showing fast fallback now');
-    // We need a client for the notification channel groupKey. Load one
-    // asynchronously but don't block the fallback on it.
+  // ── Fast fallback: show a notification BEFORE any heavy work ──
+  // When the app is in the background (paused/inactive/detached), Android
+  // may kill the background handler after ~10 seconds. Show a fallback
+  // notification immediately, then continue to the rich path which will
+  // replace it with the real sender/body. This matches the FluffyChat
+  // approach but adds an explicit safety net for background pushes.
+  if (isBackgroundMessage || isAppBackground) {
+    Logs().i('[Push Helper] Showing fast fallback before rich path');
     unawaited(
       _showBackgroundFallback(
         notification,
@@ -113,6 +115,10 @@ Future<void> _tryPushHelper(
         Logs().w('[Push Helper] Fallback notification failed', e);
       }),
     );
+  }
+
+  // If we have no clients at all, the fallback above is all we can do.
+  if (isBackgroundMessage) {
     return;
   }
 
@@ -182,7 +188,7 @@ Future<void> _tryPushHelper(
   final syncFuture = client.oneShotSync(timeout: Duration.zero);
   unawaited(
     syncFuture.whenComplete(() {
-      if (isBackgroundMessage) {
+      if (isAppBackground) {
         client.backgroundSync = false;
       } else if (wasBackgroundSync) {
         // Restore the continuous sync loop that abortSync() stopped.
