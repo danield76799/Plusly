@@ -117,8 +117,26 @@ Future<void> _tryPushHelper(
     return;
   }
 
+  // ── Fast fallback for background pushes ──
+  // Show a payload-based notification IMMEDIATELY (before roomsLoading or
+  // event fetch) so the user sees something within the ~10s Android allows.
+  // The rich path later calls show() with the SAME ID, which *replaces* this
+  // fallback on Android (same ID = update, not duplicate). This is safe because
+  // both paths use identical ID formula: '${client.clientName}_${roomId}'.hashCode.
+  if (isAppBackground) {
+    try {
+      await _buildFallbackNotification(
+        notification,
+        client: client,
+        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+      );
+      Logs().v('[Push Helper] Fast fallback shown for background push');
+    } catch (e, s) {
+      Logs().w('[Push Helper] Fast fallback failed, continuing to rich path', e, s);
+    }
+  }
+
   // Zorg dat rooms geladen zijn voordat we het push-event ophalen.
-  // Bij een koude start kan dit even duren; de fallback above already notified.
   await client.roomsLoading;
 
   // ── Deduplicate across multi-account ──
@@ -199,16 +217,27 @@ Future<void> _tryPushHelper(
 
   if (event == null) {
     // Only cancel notifications for genuine clearing indicators (unread=0).
-    // When the homeserver sends an event_id_only payload with empty fields,
-    // getEventByPushNotification returns null but counts.unread is non-zero.
-    // Cancelling in that case would destroy the fallback notification.
     if (notification.counts?.unread == 0) {
       Logs().v('Notification is a clearing indicator.');
       await flutterLocalNotificationsPlugin.cancelAll();
-    } else {
-      Logs().v(
-        'Push event not resolved (empty payload or sync not yet complete). '
-        'Keeping existing notifications.',
+      return;
+    }
+    // Event could not be resolved (empty payload, encrypted, or sync not
+    // yet complete). Show a payload-based notification with the SAME ID the
+    // rich path would use — exactly one show() per push, no duplicate.
+    Logs().v('Push event not resolved. Showing payload-based notification.');
+    await _buildFallbackNotification(
+      notification,
+      client: client,
+      flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+    );
+    if (PlatformInfos.isAndroid) {
+      unawaited(
+        updateSummaryNotification(
+          clientName: client.clientName,
+          l10n: l10n,
+          flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+        ),
       );
     }
     return;
@@ -449,17 +478,39 @@ Future<void> _showBackgroundFallback(
       ? titleWithCount
       : l10n.newMessageInFluffyChat;
 
+  final displayBody = body.isNotEmpty && body != l10n.incomingMessages
+      ? body
+      : l10n.newMessageInFluffyChat;
+
   final id = notification.roomId != null && notification.roomId!.isNotEmpty
       ? '${clientName}_${notification.roomId}'.hashCode
       : clientName.hashCode;
+
+  // Use MessagingStyle for consistency with _buildFallbackNotification and
+  // the rich path — same ID + same style = Android update, not duplicate.
+  final messagingStyle = MessagingStyleInformation(
+    Person(
+      name: senderName.isNotEmpty ? senderName : displayTitle,
+      key: notification.sender ?? notification.roomId,
+    ),
+    conversationTitle: roomName?.isNotEmpty == true ? roomName : null,
+    messages: [
+      Message(
+        displayBody,
+        DateTime.now(),
+        Person(
+          name: senderName.isNotEmpty ? senderName : displayTitle,
+          key: notification.sender ?? notification.roomId,
+        ),
+      ),
+    ],
+  );
 
   // Show the notification FIRST, before any async work.
   await flutterLocalNotificationsPlugin.show(
     id: id,
     title: displayTitle,
-    body: body.isNotEmpty && body != l10n.incomingMessages
-        ? body
-        : l10n.newMessageInFluffyChat,
+    body: displayBody,
     notificationDetails: NotificationDetails(
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,
@@ -469,6 +520,7 @@ Future<void> _showBackgroundFallback(
         priority: Priority.max,
         category: AndroidNotificationCategory.message,
         shortcutId: notification.roomId,
+        styleInformation: messagingStyle,
       ),
       iOS: DarwinNotificationDetails(threadIdentifier: notification.roomId),
     ),
@@ -509,13 +561,8 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   final body = looksEncrypted
       ? l10n.newMessageInFluffyChat
       : rawBody;
-  // Always show something, even when the encrypted payload gives us no sender.
-  // A silent E2EE push is worse than a generic "new message" notification.
 
   final fallbackRoomName = roomName ?? l10n.incomingMessages;
-  // Title = room name, not sender. The sender is already in the
-  // messaging-style body. Showing both makes bridge-chat notifications
-  // noisy: "Kat (WA): Daan (WA)".
   final title = roomName?.isNotEmpty == true
       ? roomName!
       : (senderName.isNotEmpty ? senderName : fallbackRoomName);
@@ -525,21 +572,41 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
       ? '${client.clientName}_${notification.roomId}'.hashCode
       : client.clientName.hashCode;
 
-  // Never show the generic "Incoming Messages" as the notification title.
-  // When the homeserver sends an empty payload (no room_id, no sender), we
-  // have nothing to identify the room. Use "New message" instead so the
-  // notification shade and grouped summary show something meaningful.
   final displayTitle = titleWithCount.isNotEmpty &&
           titleWithCount != l10n.incomingMessages
       ? titleWithCount
       : l10n.newMessageInFluffyChat;
+  final displayBody = body.isNotEmpty && body != l10n.incomingMessages
+      ? body
+      : l10n.newMessageInFluffyChat;
+
+  // Use MessagingStyle — same style as the rich path — so that when the
+  // rich path calls show() with the same ID, Android treats it as an UPDATE
+  // of this notification, not a new one. Mixing plain style (fallback) with
+  // MessagingStyle (rich) on the same ID caused duplicate notifications on
+  // some OEMs (Samsung, Xiaomi).
+  final messagingStyle = MessagingStyleInformation(
+    Person(
+      name: senderName.isNotEmpty ? senderName : displayTitle,
+      key: notification.sender ?? notification.roomId,
+    ),
+    conversationTitle: roomName?.isNotEmpty == true ? roomName : null,
+    messages: [
+      Message(
+        displayBody,
+        DateTime.now(),
+        Person(
+          name: senderName.isNotEmpty ? senderName : displayTitle,
+          key: notification.sender ?? notification.roomId,
+        ),
+      ),
+    ],
+  );
 
   await flutterLocalNotificationsPlugin.show(
     id: id,
     title: displayTitle,
-    body: body.isNotEmpty && body != l10n.incomingMessages
-        ? body
-        : l10n.newMessageInFluffyChat,
+    body: displayBody,
     notificationDetails: NotificationDetails(
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,
@@ -549,6 +616,7 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
         priority: Priority.max,
         category: AndroidNotificationCategory.message,
         shortcutId: notification.roomId,
+        styleInformation: messagingStyle,
       ),
       iOS: DarwinNotificationDetails(threadIdentifier: notification.roomId),
     ),
@@ -560,7 +628,6 @@ required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   );
 
   updateAppBadge(notification.counts?.unread ?? 0);
-  return;
 }
 
 String? _roomDisplayName(Client client, String? roomId, L10n l10n) {
