@@ -98,30 +98,18 @@ Future<void> _tryPushHelper(
     return;
   }
 
-  // ── Fast fallback: show a notification BEFORE any heavy work ──
-  // When the app is in the background (paused/inactive/detached), Android
-  // may kill the background handler after ~10 seconds. Show a fallback
-  // notification FIRST (awaited, not unawaited), then continue to the
-  // rich path which will replace it with the real sender/body.
-  if (isBackgroundMessage || isAppBackground) {
-    Logs().i('[Push Helper] Showing fast fallback before rich path');
-    try {
-      await _showBackgroundFallback(
-        notification,
-        instance: instance,
-        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-      );
-    } catch (e) {
-      Logs().w('[Push Helper] Fallback notification failed', e);
-    }
-  }
-
-  // If we have no clients at all, the fallback above is all we can do.
+  // If we have no clients at all, all we can do is a minimal fallback.
   if (isBackgroundMessage) {
+    Logs().i('[Push Helper] No clients available, showing minimal fallback');
+    await _showBackgroundFallback(
+      notification,
+      instance: instance,
+      flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+    );
     return;
   }
 
-  // ── Foreground rich path: resolve client ──
+  // ── Resolve client ──
   // clients is guaranteed non-null here (isBackgroundMessage already returned).
   final client = _clientFromInstance(instance, clients);
   if (client == null) {
