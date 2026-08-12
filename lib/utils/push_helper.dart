@@ -180,9 +180,15 @@ Future<void> _tryPushHelper(
   // The Matrix SDK's oneShotSync() reuses the in-flight long-poll sync (which
   // has a 30s timeout). If we just call oneShotSync(), we'd wait up to 30s for
   // the current sync cycle to finish before the new message appears in the list.
-  // Abort the in-flight long-poll first, then do an immediate sync (timeout 0 =
-  // no long-poll wait) so the new message is fetched right away.
-  client.abortSync();
+  //
+  // Only abort the in-flight sync when the app is in the background. In the
+  // foreground the UI may be interacting with an active sync; aborting it can
+  // corrupt timeline/chat-list state. When backgroundSync is off or no sync is
+  // running, oneShotSync(timeout: 0) starts/finishes immediately without a long
+  // wait.
+  if (isAppBackground) {
+    client.abortSync();
+  }
   final syncFuture = client.oneShotSync(timeout: Duration.zero);
   unawaited(
     syncFuture.whenComplete(() {
@@ -390,14 +396,18 @@ Future<void> _tryPushHelper(
   // No need to restore backgroundSync here; whenComplete already handled it.
 
   // ── Summary notification (FluffyChat pattern) ──
-  // Run summary update in background after sync so active notifications are
-  // accurate, but don't block the push helper completion.
+  // Build the summary directly from the rich notification data we just showed.
+  // Calling getActiveNotifications() immediately after show() is unreliable on
+  // some Android versions: the OS may not have updated the active list yet,
+  // so the summary would miss the latest notification and show stale content.
   if (PlatformInfos.isAndroid) {
     unawaited(
       updateSummaryNotification(
         clientName: client.clientName,
         l10n: l10n,
         flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+        latestTitle: title,
+        latestBody: body,
       ),
     );
   }
@@ -605,10 +615,18 @@ void updateAppBadge(int unreadCount) {
 /// The summary title/body are derived from the most recent individual
 /// notification so the header shows a real sender/room instead of the generic
 /// "Inkomende Berichten" placeholder.
+///
+/// [latestTitle] and [latestBody] are the values of the rich notification that
+/// was just shown. We use them directly because reading
+/// getActiveNotifications() immediately after show() can return stale data on
+/// some Android versions. The inbox lines are still built from active
+/// notifications plus the latest one, so the grouped list stays accurate.
 Future<void> updateSummaryNotification({
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   required String clientName,
   required L10n l10n,
+  String? latestTitle,
+  String? latestBody,
 }) async {
   List<ActiveNotification> activeNotifications;
   try {
@@ -621,30 +639,7 @@ Future<void> updateSummaryNotification({
     return;
   }
 
-  if (activeNotifications.isEmpty) {
-    await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
-    return;
-  }
-
-  // Use the most recent notification for the summary preview; the OS keeps
-  // the list ordered by post time, with the newest last.
-  final latest = activeNotifications.lastWhereOrNull(
-    (n) =>
-        n.title != null &&
-        n.title!.isNotEmpty &&
-        n.title != l10n.incomingMessages &&
-        n.title != AppConfig.applicationName,
-  ) ??
-      activeNotifications.lastOrNull;
-  if (latest == null) {
-    await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
-    return;
-  }
-  final hasRealContent = latest.title != null &&
-      latest.title!.isNotEmpty &&
-      latest.title != l10n.incomingMessages;
-
-  // Build inbox lines from individual notification bodies (message previews).
+  // Build inbox lines from the active notifications we got back.
   final lines = activeNotifications
       .where(
         (n) =>
@@ -670,12 +665,22 @@ Future<void> updateSummaryNotification({
       .where((line) => line.isNotEmpty)
       .toList();
 
-  final summaryTitle = hasRealContent
-      ? latest.title!
-      : l10n.newMessageInFluffyChat;
-  final summaryBody = hasRealContent && (latest.body?.isNotEmpty ?? false)
-      ? latest.body!
-      : (lines.isNotEmpty ? lines.first : l10n.newMessageInFluffyChat);
+  // Use the explicit latest title/body (from the notification we just showed)
+  // for the summary preview, falling back to the active notifications list if
+  // none were provided.
+  final summaryTitle = latestTitle?.isNotEmpty == true &&
+          latestTitle != l10n.incomingMessages &&
+          latestTitle != AppConfig.applicationName
+      ? latestTitle!
+      : (lines.isNotEmpty
+          ? lines.last
+          : l10n.newMessageInFluffyChat);
+  final summaryBody = latestBody?.isNotEmpty == true &&
+          latestBody != l10n.incomingMessages
+      ? latestBody!
+      : (lines.isNotEmpty
+          ? lines.last
+          : l10n.newMessageInFluffyChat);
 
   // FIX #11: cancel stale summary and re-show with updated content
   await flutterLocalNotificationsPlugin.cancel(id: clientName.hashCode);
