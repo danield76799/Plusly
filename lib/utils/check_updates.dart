@@ -202,14 +202,18 @@ bool isNewerVersion(String latest, String current) {
     current = current.substring(0, currentPlusIndex);
   }
 
-  // Plusly CI adds +2000 to the pubspec build number for the Android
-  // versionCode. GitHub releases use the +2000 form (e.g. +23150) while
-  // PackageInfo reports the raw pubspec build number (e.g. +21150). Normalize
-  // both to the pubspec build number so a build that already matches the
-  // release is not reported as outdated.
+  // Plusly CI tags use the Android versionCode, which is the pubspec build
+  // number plus 2000 (e.g. pubspec +21166 → release tag +23166). PackageInfo
+  // reports whatever Flutter wrote as versionCode; with the current CI that is
+  // the pubspec build number (+21166), but manual/APK installs from the release
+  // page can also report the CI tag number (+23166).
+  //
+  // To compare apples to apples, normalize both numbers to the pubspec build
+  // number by subtracting 2000 from any value that looks like the CI/Android
+  // versionCode (>= 23000). Values below that are already pubspec build numbers.
   int normalizeBuildNumber(String build) {
     final value = int.tryParse(build) ?? 0;
-    return value > 2000 ? value - 2000 : value;
+    return value >= 23000 ? value - 2000 : value;
   }
   latestBuildNumber = normalizeBuildNumber(latestBuildNumber).toString();
   currentBuildNumber = normalizeBuildNumber(currentBuildNumber).toString();
