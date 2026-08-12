@@ -182,15 +182,18 @@ Future<void> _tryPushHelper(
   // the current sync cycle to finish before the new message appears in the list.
   // Abort the in-flight long-poll first, then do an immediate sync (timeout 0 =
   // no long-poll wait) so the new message is fetched right away.
-  final wasBackgroundSync = client.syncPending;
   client.abortSync();
   final syncFuture = client.oneShotSync(timeout: Duration.zero);
   unawaited(
     syncFuture.whenComplete(() {
-      if (isAppBackground) {
+      // Check the CURRENT lifecycle, not the snapshot from when the push
+      // arrived. The user may have opened the app while the sync was running.
+      final stillBackground =
+          WidgetsBinding.instance.lifecycleState != AppLifecycleState.resumed;
+      if (stillBackground) {
         client.backgroundSync = false;
-      } else if (wasBackgroundSync) {
-        // Restore the continuous sync loop that abortSync() stopped.
+      } else {
+        // App is in foreground — make sure sync stays on.
         client.backgroundSync = true;
       }
     }),
