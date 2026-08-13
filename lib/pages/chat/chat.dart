@@ -528,6 +528,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await room.getTimeline(
         onUpdate: updateView,
+        onNewEvent: updateView,
         onInsert: _insert,
         onChange: (_) => updateView(),
         eventContextId: eventContextId,
@@ -537,6 +538,7 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await room.getTimeline(
         onUpdate: updateView,
+        onNewEvent: updateView,
         onInsert: _insert,
         onChange: (_) => updateView(),
       );
@@ -557,6 +559,7 @@ class ChatController extends State<ChatPageWithRoom>
       timeline?.cancelSubscriptions();
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
+        onNewEvent: updateView,
         onInsert: _insert,
         onChange: (_) => updateView(),
         eventContextId: eventContextId,
@@ -571,6 +574,7 @@ class ChatController extends State<ChatPageWithRoom>
       if (!mounted) return;
       timeline = await thread!.getTimeline(
         onUpdate: updateView,
+        onNewEvent: updateView,
         onInsert: _insert,
         onChange: (_) => updateView(),
       );
