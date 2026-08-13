@@ -123,7 +123,13 @@ Future<void> _tryPushHelper(
   // The rich path later calls show() with the SAME ID, which *replaces* this
   // fallback on Android (same ID = update, not duplicate). This is safe because
   // both paths use identical ID formula: '${client.clientName}_${roomId}'.hashCode.
-  if (isAppBackground) {
+  //
+  // Skip the fallback for empty/count-sync pushes (no event_id and no room_id)
+  // — there is no message to show, only a unread count update.
+  final isEmptyPayload = (notification.eventId == null ||
+          notification.eventId!.isEmpty) &&
+      (notification.roomId == null || notification.roomId!.isEmpty);
+  if (isAppBackground && !isEmptyPayload) {
     try {
       await _buildFallbackNotification(
         notification,
@@ -216,15 +222,41 @@ Future<void> _tryPushHelper(
   updateAppBadge(notification.counts?.unread ?? 0);
 
   if (event == null) {
-    // Only cancel notifications for genuine clearing indicators (unread=0).
+    // ── Handle empty/count-sync pushes (no event_id, no room_id) ──
+    // The HS sends these to update unread counts. They have id="", sender="",
+    // type=null. We must NOT show a notification for these — there is no
+    // message to show. Only act on the unread count.
+    final isEmptyCountSync = (notification.eventId == null ||
+            notification.eventId!.isEmpty) &&
+        (notification.roomId == null || notification.roomId!.isEmpty);
+
+    if (isEmptyCountSync) {
+      if (notification.counts?.unread == 0) {
+        // Clearing indicator: all messages read. Cancel all notifications.
+        Logs().v('Empty payload with unread=0. Clearing all notifications.');
+        await flutterLocalNotificationsPlugin.cancelAll();
+        updateAppBadge(0);
+      } else {
+        // Count sync with unread>0 but no event — just update the badge,
+        // do NOT show a notification (there is no message to display).
+        Logs().v(
+          'Empty payload with unread=${notification.counts?.unread}. '
+          'Updating badge only, no notification.',
+        );
+        updateAppBadge(notification.counts?.unread ?? 0);
+      }
+      return;
+    }
+
+    // ── Event push that could not be resolved ──
+    // We have a room_id and possibly event_id, but getEventByPushNotification
+    // returned null (e.g. encrypted event, sync not yet complete, or HS issue).
     if (notification.counts?.unread == 0) {
-      Logs().v('Notification is a clearing indicator.');
+      Logs().v('Event not resolved and unread=0. Clearing notifications.');
       await flutterLocalNotificationsPlugin.cancelAll();
       return;
     }
-    // Event could not be resolved (empty payload, encrypted, or sync not
-    // yet complete). Show a payload-based notification with the SAME ID the
-    // rich path would use — exactly one show() per push, no duplicate.
+    // Show a payload-based fallback notification.
     Logs().v('Push event not resolved. Showing payload-based notification.');
     await _buildFallbackNotification(
       notification,
