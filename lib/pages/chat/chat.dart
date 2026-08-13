@@ -636,6 +636,8 @@ class ChatController extends State<ChatPageWithRoom>
     final firstEvent = timeline?.events.firstOrNull;
     final eventId = firstEvent?.transactionId ?? firstEvent?.eventId;
     animateInEventId = eventId;
+    // Rebuild immediately so the new event (including local echo) is visible.
+    updateView();
     await Future.delayed(FluffyThemes.animationDuration);
     if (animateInEventId == eventId) animateInEventId = null;
   }
@@ -827,7 +829,11 @@ class ChatController extends State<ChatPageWithRoom>
     );
     unawaited(
       sendFuture.then(
-        (_) {},
+        (_) {
+          // Rebuild after send completes so the local echo is promoted
+          // to sent status (status changes from sending -> sent/synced).
+          if (mounted) updateView();
+        },
         onError: (e) {
           Logs().e('Failed to send message', e);
           if (mounted) {
