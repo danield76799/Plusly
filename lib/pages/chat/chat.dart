@@ -839,8 +839,13 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     // Fire-and-forget the actual send. We only react to failures here.
+    // Generate our own txid so we can reliably identify the local echo in the
+    // poll loop below, even if the SDK transforms the body (mentions, markdown,
+    // edits) or delays originServerTs.
+    final txid = room.client.generateUniqueTransactionId();
     final sendFuture = room.sendTextEvent(
       text,
+      txid: txid,
       inReplyTo: replyEvent,
       replyMention: replyMention,
       editEventId: editEventId,
@@ -849,6 +854,7 @@ class ChatController extends State<ChatPageWithRoom>
       threadLastEventId:
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
     );
+    Logs().v('[SendEcho] txid=$txid');
     unawaited(
       sendFuture.then(
         (_) {
@@ -917,8 +923,13 @@ class ChatController extends State<ChatPageWithRoom>
                 e.relationshipEventId == editEventId,
           );
         } else {
+          // Match the local echo by our own txid. This is far more reliable
+          // than body comparison, because the SDK may rewrite the body for
+          // markdown/mentions.
           hasPending = events.any(
-            (e) => e.status == EventStatus.sending && e.body == text,
+            (e) =>
+                (e.transactionId == txid || e.eventId == txid) &&
+                e.status == EventStatus.sending,
           );
         }
         // For new messages, also catch SDK-promoted echoes.
@@ -940,7 +951,8 @@ class ChatController extends State<ChatPageWithRoom>
                 e.senderId == myUserId &&
                 e.status != EventStatus.error &&
                 e.originServerTs.isAfter(sentAtThreshold) &&
-                (e.body == text ||
+                (e.transactionId == txid ||
+                    e.body == text ||
                     e.body.contains(text) ||
                     e.status == EventStatus.sending),
           );
