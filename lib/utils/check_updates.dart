@@ -93,7 +93,7 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
   const url = 'https://api.github.com/repos/$repo/releases';
   const cacheKey = 'cached_github_release';
   const cacheTimeKey = 'cached_github_release_time';
-  const cacheDuration = Duration(hours: 24);
+  const cacheDuration = Duration(minutes: 1);
 
   // Try to get from cache first (if not forcing refresh)
   if (!forceRefresh) {
