@@ -9,33 +9,28 @@ import 'package:matrix/matrix.dart';
 /// room op dit moment actief is.
 class VisibleRoom {
   static String? _current;
-  static DateTime? _since;
 
   static String? get current => _current;
 
   static void set(String? roomId) {
     _current = roomId;
-    _since = roomId != null ? DateTime.now() : null;
     Logs().v('[VisibleRoom] set to $roomId');
   }
 
   static void clear() {
     _current = null;
-    _since = null;
     Logs().v('[VisibleRoom] cleared');
   }
 
   /// True als de gegeven roomId op dit moment zichtbaar is.
-  /// Vergeet na 60 seconden geen update — dan gaan we ervan uit dat de
-  /// ChatPage niet meer actief is (bijv. app gecrasht zonder dispose).
+  ///
+  /// Geldig zolang [set] niet opnieuw wordt aangeroepen of [clear] wordt
+  /// aangeroepen door [ChatPage.dispose]. De statische waarde verdwijnt
+  /// automatisch bij een app-crash/herstart. De lifecycle-check in
+  /// [pushHelper] zorgt er apart voor dat berichten in de achtergrond wél
+  /// worden getoond.
   static bool isVisible(String? roomId) {
     if (roomId == null || _current == null) return false;
-    if (_current != roomId) return false;
-    final since = _since;
-    if (since == null) return false;
-    if (DateTime.now().difference(since) > const Duration(seconds: 60)) {
-      return false;
-    }
-    return true;
+    return _current == roomId;
   }
 }

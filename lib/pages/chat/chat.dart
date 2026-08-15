@@ -671,7 +671,12 @@ class ChatController extends State<ChatPageWithRoom>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state != AppLifecycleState.resumed) return;
+    // If the app goes to background/paused/inactive, the visible chat is no
+    // longer actually visible, so stop suppressing notifications for it.
+    if (state != AppLifecycleState.resumed) {
+      VisibleRoom.clear();
+      return;
+    }
     setReadMarker();
   }
 

@@ -90,9 +90,13 @@ Future<void> _tryPushHelper(
   );
 
   // ── Foreground check ──
+  // ChatPage sets VisibleRoom.current in initState and clears it in dispose
+  // or when the app leaves resumed. This is more reliable than
+  // WidgetsBinding.instance.lifecycleState inside background push handlers,
+  // where the lifecycle snapshot is often stale/paused even though the user
+  // is actively viewing the chat.
   if (notification.roomId != null &&
-      notification.roomId!.isNotEmpty &&
-      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+      notification.roomId!.isNotEmpty) {
     final sameRoomByRouter =
         activeRoomId == notification.roomId && activeClient != null;
     final sameRoomByVisiblePage = VisibleRoom.isVisible(notification.roomId);
