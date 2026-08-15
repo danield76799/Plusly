@@ -820,6 +820,7 @@ class ChatController extends State<ChatPageWithRoom>
     _isSending = true;
     _clearComposer();
     final editEventId = editEvent?.eventId;
+    final replyToEvent = replyEvent; // capture before clearing
     setState(() {
       _isSending = false;
       replyEvent = null;
@@ -856,7 +857,7 @@ class ChatController extends State<ChatPageWithRoom>
     final sendFuture = room.sendTextEvent(
       text,
       txid: txid,
-      inReplyTo: replyEvent,
+      inReplyTo: replyToEvent,
       replyMention: replyMention,
       editEventId: editEventId,
       parseCommands: parseCommands,
