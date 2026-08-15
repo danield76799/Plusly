@@ -48,6 +48,7 @@ import 'package:Pulsly/utils/privacy_options.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
 import 'package:Pulsly/utils/show_scaffold_dialog.dart';
 import 'package:Pulsly/utils/translator.dart';
+import 'package:Pulsly/utils/visible_room.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -428,6 +429,11 @@ class ChatController extends State<ChatPageWithRoom>
     sendingClient = Matrix.of(context).client;
     WidgetsBinding.instance.addObserver(this);
 
+    // Track the room currently visible in the foreground. This is more
+    // reliable than router-derived activeRoomId for suppressing push
+    // notifications while the user is actively viewing this chat.
+    VisibleRoom.set(roomId);
+
     // Betrouwbare refresh voor DMs: de getTimeline-callbacks (onInsert/
     // onNewEvent/onUpdate) firen soms niet in deze SDK-versie, vooral bij
     // 1-op-1 rooms. room.onUpdate is deprecated; client.onSync firet bij elke
@@ -763,6 +769,10 @@ class ChatController extends State<ChatPageWithRoom>
     sendController.dispose();
     _displayChatDetailsColumn.dispose();
     WidgetsBinding.instance.removeObserver(this);
+    // Clear the visible-room tracking when leaving this chat so push
+    // notifications for this room are shown again.
+    VisibleRoom.clear();
+
     if (currentlyTyping) room.setTyping(false);
     super.dispose();
   }

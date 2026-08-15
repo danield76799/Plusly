@@ -16,6 +16,7 @@ import 'package:Pulsly/utils/client_download_content_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/visible_room.dart';
 
 const notificationAvatarDimension = 128;
 
@@ -91,11 +92,18 @@ Future<void> _tryPushHelper(
   // ── Foreground check ──
   if (notification.roomId != null &&
       notification.roomId!.isNotEmpty &&
-      activeRoomId == notification.roomId &&
-      activeClient != null &&
       WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
-    Logs().v('Room is in foreground. Stop push helper here.');
-    return;
+    final sameRoomByRouter =
+        activeRoomId == notification.roomId && activeClient != null;
+    final sameRoomByVisiblePage = VisibleRoom.isVisible(notification.roomId);
+    if (sameRoomByRouter || sameRoomByVisiblePage) {
+      Logs().v(
+        'Room is in foreground. Stopping push helper here. '
+        '(router=$sameRoomByRouter, visible=$sameRoomByVisiblePage, '
+        'activeRoomId=$activeRoomId, visibleRoom=${VisibleRoom.current})',
+      );
+      return;
+    }
   }
 
   // If we have no clients at all, all we can do is a minimal fallback.
