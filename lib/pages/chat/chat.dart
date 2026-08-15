@@ -818,13 +818,12 @@ class ChatController extends State<ChatPageWithRoom>
     // bubble shows up instantly. Only if sendTextEvent throws do we
     // surface an error.
     _isSending = true;
-    _clearComposer();
+    // Capture these BEFORE _clearComposer() wipes the composer state.
     final editEventId = editEvent?.eventId;
-    final replyToEvent = replyEvent; // capture before clearing
+    final replyToEvent = replyEvent;
+    _clearComposer();
     setState(() {
       _isSending = false;
-      replyEvent = null;
-      editEvent = null;
     });
 
     if (inputFocus.hasFocus) {
