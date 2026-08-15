@@ -223,11 +223,23 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       : null;
   final Map<String, int> linuxNotificationIds = {};
 
+  // Listener handle for router-based active-room updates (foreground detection).
+  VoidCallback? _routerListener;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     initMatrix();
+    // Keep the push controller's active room in sync with the current route so
+    // that messages arriving while the user is already viewing that chat are
+    // NOT shown as a duplicate push notification. The lifecycle callback alone
+    // is not enough — navigating between chats inside a resumed app never
+    // triggers didChangeAppLifecycleState.
+    _routerListener = () => _updatePushActiveRoom();
+    PluslyApp.router.routeInformationProvider.addListener(_routerListener!);
+    // Initialise with the current route (in case we deep-link straight in).
+    _updatePushActiveRoom();
     // if (PlatformInfos.isWeb) {
     //   initConfig().then((_) => initSettings());
     // } else {
@@ -491,7 +503,11 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-
+    if (_routerListener != null) {
+      PluslyApp.router.routeInformationProvider
+          .removeListener(_routerListener!);
+      _routerListener = null;
+    }
     // FIX #9: .map() returns lazy Iterable — must iterate to actually cancel
     for (final s in onRoomKeyRequestSub.values) {
       s.cancel();
