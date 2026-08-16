@@ -112,7 +112,12 @@ class PushHelper {
       }
 
       if (_isInForeground(notification, activeRoomId, activeClient, client)) {
-        Logs().v('Room is in foreground. Stop push helper here.');
+        Logs().v(
+          'Push foreground: suppress notification '
+          'room=${notification.roomId} activeRoom=$activeRoomId '
+          'activeClient=$activeClient notified=${client.clientName} '
+          'lifecycle=${WidgetsBinding.instance.lifecycleState}',
+        );
         return null;
       }
 
@@ -122,7 +127,10 @@ class PushHelper {
       );
 
       if (event == null) {
-        Logs().v('Notification is a clearing indicator.');
+        Logs().v(
+          'Push event is null: clearing indicator '
+          'room=${notification.roomId}',
+        );
         if (notification.counts?.unread == null ||
             notification.counts?.unread == 0) {
           await flutterLocalNotificationsPlugin.cancelAll();
@@ -147,9 +155,12 @@ class PushHelper {
       }
       helper.event = event;
 
-      Logs().v('Push helper got notification event of type ${event.type}.');
+      Logs().v(
+        'Push helper got notification event of type ${event.type}.',
+      );
       return helper;
     } catch (e, s) {
+      Logs().e('Push helper error', e, s);
       await helper._crashHandler(e, s);
       rethrow;
     }
@@ -194,6 +205,11 @@ class PushHelper {
 
   Future<void> _showNotification() async {
     try {
+      Logs().v(
+        'Push showNotification start '
+        'room=${notification.roomId} type=${event.type} '
+        'lifecycle=${WidgetsBinding.instance.lifecycleState}',
+      );
       if (event.type.startsWith('m.call')) {
         // make sure bg sync is on (needed to update hold, unhold events)
         // prevent over write from app life cycle change
