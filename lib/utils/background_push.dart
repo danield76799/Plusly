@@ -39,6 +39,7 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/main.dart';
 
 import 'package:Pulsly/utils/notification_background_handler.dart';
+import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/push_helper.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
@@ -608,9 +609,11 @@ class BackgroundPush {
       instance: i,
       useNotificationActions: true,
     );
+    final now = DateTime.now().toIso8601String();
+    PushEventLog().add('push', {'instance': i ?? '', 'room': data['room_id']?.toString() ?? '', 'ts': now});
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('plusly_push_last_received_ts', DateTime.now().toIso8601String());
+      await prefs.setString('plusly_push_last_received_ts', now);
     } catch (_) {}
   }
 

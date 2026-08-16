@@ -21,6 +21,7 @@ import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/init_with_restore.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/uia_request_manager.dart';
 import 'package:Pulsly/utils/voip_plugin.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -450,6 +451,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     Logs().v('AppLifecycleState = $state');
+    PushEventLog().add('lifecycle', {'state': state.name});
     final foreground =
         state != AppLifecycleState.inactive &&
         state != AppLifecycleState.paused;
