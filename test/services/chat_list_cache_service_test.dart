@@ -128,7 +128,7 @@ class _MockRoom implements Room {
 
   _MockRoom({
     required this.id,
-    required this.name,
+    this.name = '',
     this.isDirect = false,
     bool isSpace = false,
     this.unread = false,
@@ -139,6 +139,9 @@ class _MockRoom implements Room {
 
   @override
   String get displayname => name;
+
+  @override
+  String getLocalizedDisplayname([dynamic localization]) => name;
 
   @override
   bool get isDirectChat => isDirect;
@@ -158,12 +161,12 @@ class _MockRoom implements Room {
   @override
   PushRuleState get pushRuleState => isMuted ? PushRuleState.dontNotify : PushRuleState.notify;
 
-  // lastEvent / avatar mock — null is OK voor de test
-  @override
-  Event? get lastEvent => null;
-
   @override
   Uri? get avatar => null;
+
+  // lastEvent mock — null is OK voor de test
+  @override
+  Event? get lastEvent => null;
 
   // Delegate everything else to noSuchMethod
   @override

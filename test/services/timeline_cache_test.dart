@@ -8,6 +8,9 @@ class FakeTimeline implements Timeline {
   FakeTimeline(this.roomId);
 
   @override
+  void cancelSubscriptions() {}
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
