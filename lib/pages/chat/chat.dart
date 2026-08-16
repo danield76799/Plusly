@@ -677,6 +677,9 @@ class ChatController extends State<ChatPageWithRoom>
       VisibleRoom.clear();
       return;
     }
+    // Re-assert the visible room when the app returns to the foreground, so
+    // suppression resumes for the chat the user is still viewing.
+    VisibleRoom.set(roomId);
     setReadMarker();
   }
 

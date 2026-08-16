@@ -91,12 +91,13 @@ Future<void> _tryPushHelper(
 
   // ── Foreground check ──
   // ChatPage sets VisibleRoom.current in initState and clears it in dispose
-  // or when the app leaves resumed. This is more reliable than
-  // WidgetsBinding.instance.lifecycleState inside background push handlers,
-  // where the lifecycle snapshot is often stale/paused even though the user
-  // is actively viewing the chat.
+  // or when the app leaves resumed. VisibleRoom has NO timeout: the user may
+  // sit in a DM for minutes, and we must keep suppressing notifications the
+  // whole time. The lifecycle check below ensures we only suppress while the
+  // app is actually in the foreground.
   if (notification.roomId != null &&
-      notification.roomId!.isNotEmpty) {
+      notification.roomId!.isNotEmpty &&
+      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
     final sameRoomByRouter =
         activeRoomId == notification.roomId && activeClient != null;
     final sameRoomByVisiblePage = VisibleRoom.isVisible(notification.roomId);
