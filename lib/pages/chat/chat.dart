@@ -879,6 +879,11 @@ class ChatController extends State<ChatPageWithRoom>
           // Rebuild after send completes so the local echo is promoted
           // to sent status (status changes from sending -> sent/synced).
           if (mounted) updateView();
+          // Refresh the chat list AFTER the send completes. The SDK updates
+          // room.lastEvent (preview + sort order) inside sendTextEvent's fake
+          // sync, which is async. Emitting here guarantees lastEvent is
+          // current, so the room jumps to the top and the preview updates.
+          ChatListRefreshBus.refreshForRoom(room.id);
         },
         onError: (e) {
           Logs().e('Failed to send message', e);
@@ -890,9 +895,6 @@ class ChatController extends State<ChatPageWithRoom>
         },
       ),
     );
-
-    // Force the chat list to refresh so the room jumps to the top.
-    ChatListRefreshBus.refreshForRoom(room.id);
 
     // Deterministic: the Matrix SDK appends the local echo asynchronously.
     // The onUpdate/onInsert callbacks are racy (sometimes the bubble shows up
