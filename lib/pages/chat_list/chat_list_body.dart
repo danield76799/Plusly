@@ -18,7 +18,6 @@ import 'package:Pulsly/pages/dialer/back_to_call_button.dart';
 import 'package:Pulsly/shortcuts/chat_list/chat_list_shortcuts.dart';
 import 'package:Pulsly/services/chat_list_cache_service.dart';
 import 'package:Pulsly/utils/show_profile.dart';
-import 'package:Pulsly/utils/stream_extension.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/mini_audio_player.dart';
@@ -81,9 +80,7 @@ class ChatListViewBody extends StatelessWidget {
       // FluffyChat-style: rebuild on every sync that touches a room. The SDK
       // sorts client.rooms in place and updates room.lastEvent itself, so
       // filtering the already-sorted list gives the correct order and preview.
-      stream: client.onSync.stream
-          .where((s) => s.hasRoomUpdate)
-          .rateLimit(const Duration(seconds: 1)),
+      stream: client.onSync.stream.where((s) => s.hasRoomUpdate),
       builder: (context, _) {
         controller.syncBridgeTypes();
         // Bewaar de chat list cache (gedebouncet) zodat de volgorde altijd
