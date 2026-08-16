@@ -9,6 +9,8 @@ import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
+import 'package:Pulsly/config/setting_keys.dart';
+
 class PushDebugScreen extends StatefulWidget {
   const PushDebugScreen({super.key});
 
@@ -49,8 +51,8 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
     final store = matrix.store;
     for (final client in Matrix.of(context).widget.clients.where((c) => c.isLogged())) {
       final prefix = client.clientName;
-      final endpoint = store.getString(prefix + 'unifiedPushEndpoint');
-      final registered = store.getBool(prefix + 'unifiedPushRegistered');
+      final endpoint = store.getString(prefix + AppSettings.unifiedPushEndpoint.key);
+      final registered = store.getBool(prefix + AppSettings.unifiedPushRegistered.key);
       final saved = endpoint != null && endpoint.isNotEmpty;
       logs.add('Client=$prefix endpoint=${saved ? "saved" : "missing"} registered=$registered');
       if (saved && _endpoint == null) {
