@@ -160,7 +160,7 @@ class PushController extends ChangeNotifier {
           });
 
     // FIX: achtergrond = clients null om fast path te triggeren in pushHelper
-    await pushHelper(
+    await PushHelper.pushHelper(
       notification,
       clients: isBackground ? null : _clients,
       activeRoomId: _activeRoomId,

@@ -597,7 +597,7 @@ class BackgroundPush {
     // before loading anything), then loads the real event and replaces it.
     // This is simpler and more reliable than splitting fallback/enrichment
     // across multiple unawaited calls that Android may kill mid-flight.
-    await pushHelper(
+    await PushHelper.pushHelper(
       PushNotification.fromJson(data),
       clients: clients,
       l10n: l10n,
@@ -606,7 +606,6 @@ class BackgroundPush {
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
       useNotificationActions: true,
-      includeReplyAction: false,
     );
   }
 
