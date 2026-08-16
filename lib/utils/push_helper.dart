@@ -16,7 +16,6 @@ import 'package:Pulsly/utils/client_download_content_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
-import 'package:Pulsly/utils/visible_room.dart';
 
 const notificationAvatarDimension = 128;
 
@@ -89,28 +88,6 @@ Future<void> _tryPushHelper(
     notification.toJson(),
   );
 
-  // ── Foreground check ──
-  // ChatPage sets VisibleRoom.current in initState and clears it in dispose
-  // or when the app leaves resumed. VisibleRoom has NO timeout: the user may
-  // sit in a DM for minutes, and we must keep suppressing notifications the
-  // whole time. The lifecycle check below ensures we only suppress while the
-  // app is actually in the foreground.
-  if (notification.roomId != null &&
-      notification.roomId!.isNotEmpty &&
-      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
-    final sameRoomByRouter =
-        activeRoomId == notification.roomId && activeClient != null;
-    final sameRoomByVisiblePage = VisibleRoom.isVisible(notification.roomId);
-    if (sameRoomByRouter || sameRoomByVisiblePage) {
-      Logs().v(
-        'Room is in foreground. Stopping push helper here. '
-        '(router=$sameRoomByRouter, visible=$sameRoomByVisiblePage, '
-        'activeRoomId=$activeRoomId, visibleRoom=${VisibleRoom.current})',
-      );
-      return;
-    }
-  }
-
   // If we have no clients at all, all we can do is a minimal fallback.
   if (isBackgroundMessage) {
     Logs().i('[Push Helper] No clients available, showing minimal fallback');
@@ -127,6 +104,18 @@ Future<void> _tryPushHelper(
   final client = _clientFromInstance(instance, clients);
   if (client == null) {
     Logs().e('No client could be found for instance $instance');
+    return;
+  }
+
+  // ── Foreground check (FluffyChat pattern) ──
+  // Suppress the notification only when the user is actively viewing this
+  // exact room in the foreground. activeClient must match the resolved client
+  // so multi-account setups don't suppress the wrong account's notifications.
+  if (notification.roomId != null &&
+      activeRoomId == notification.roomId &&
+      activeClient == client &&
+      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+    Logs().v('Room is in foreground. Stopping push helper here.');
     return;
   }
 

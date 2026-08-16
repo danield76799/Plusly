@@ -602,6 +602,7 @@ class BackgroundPush {
       clients: clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
+      activeClient: clientFromInstance(i, clients),
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
       useNotificationActions: true,
