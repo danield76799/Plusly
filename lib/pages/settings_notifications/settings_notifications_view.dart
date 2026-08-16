@@ -212,6 +212,13 @@ class SettingsNotificationsView extends StatelessWidget {
                             );
                           },
                         ),
+                        ListTile(
+                          leading: const Icon(Icons.bug_report_outlined),
+                          title: Text('Push diagnose'),
+                          subtitle: const Text('UP-distributor, endpoint, geregistreerd?'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => context.push('/rooms/settings/push-debug'),
+                        ),
                       ],
                     ),
                   ),

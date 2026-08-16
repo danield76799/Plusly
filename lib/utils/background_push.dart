@@ -32,6 +32,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_new_badger/flutter_new_badger.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
@@ -607,6 +608,10 @@ class BackgroundPush {
       instance: i,
       useNotificationActions: true,
     );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('plusly_push_last_received_ts', DateTime.now().toIso8601String());
+    } catch (_) {}
   }
 
 }

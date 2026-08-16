@@ -329,6 +329,15 @@ abstract class AppRoutes {
                       redirect: loggedOutRedirect,
                     ),
                     GoRoute(
+                      path: 'push-debug',
+                      pageBuilder: (context, state) => defaultPageBuilder(
+                        context,
+                        state,
+                        const PushDebugScreen(),
+                      ),
+                      redirect: loggedOutRedirect,
+                    ),
+                    GoRoute(
                       path: 'style',
                       pageBuilder: (context, state) => defaultPageBuilder(
                         context,
