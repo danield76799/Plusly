@@ -1,4 +1,3 @@
-import 'package:async/async.dart';
 import 'package:Pulsly/pages/favorites/favorites_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,13 +18,13 @@ import 'package:Pulsly/pages/dialer/back_to_call_button.dart';
 import 'package:Pulsly/shortcuts/chat_list/chat_list_shortcuts.dart';
 import 'package:Pulsly/services/chat_list_cache_service.dart';
 import 'package:Pulsly/utils/show_profile.dart';
+import 'package:Pulsly/utils/stream_extension.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/public_room_dialog.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/mini_audio_player.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'chat_list_header.dart';
-import '../../services/chat_list_refresh_bus.dart';
 
 class ChatListViewBody extends StatelessWidget {
   final ChatListController controller;
@@ -79,29 +78,13 @@ class ChatListViewBody extends StatelessWidget {
 
     return StreamBuilder(
       key: ValueKey(client.userID.toString()),
-      // Rebuild zodra er iets in een kamer verandert. We luisteren naar
-      // drie signalen:
-      //  1. ChatListRefreshBus — direct na verzenden/ontvangen actie.
-      //  2. onSync (per sync-response) op hasRoomUpdate — sneller dan wachten
-      //     op onSyncStatus.finished, wat pas komt na een volledige (soms
-      //     seconden durende) sync. Binnenkomende berichten zijn zo meteen
-      //     zichtbaar in de lijst.
-      //  3. onSyncStatus.finished — vangt SDK-versies die hasRoomUpdate niet
-      //     betrouwbaar zetten.
-      stream: StreamGroup.merge<String?>([
-        ChatListRefreshBus.stream,
-        client.onSync.stream
-            .where((s) => s.hasRoomUpdate)
-            .map((_) => null),
-        client.onSyncStatus.stream
-            .where((s) => s.status == SyncStatus.finished)
-            .map((_) => null),
-      ]),
-      builder: (context, snapshot) {
-        final roomId = snapshot.data;
-        if (snapshot.connectionState == ConnectionState.active) {
-          controller.invalidateRoomCache(roomId: roomId);
-        }
+      // FluffyChat-style: rebuild on every sync that touches a room. The SDK
+      // sorts client.rooms in place and updates room.lastEvent itself, so
+      // filtering the already-sorted list gives the correct order and preview.
+      stream: client.onSync.stream
+          .where((s) => s.hasRoomUpdate)
+          .rateLimit(const Duration(seconds: 1)),
+      builder: (context, _) {
         controller.syncBridgeTypes();
         // Bewaar de chat list cache (gedebouncet) zodat de volgorde altijd
         // up-to-date is bij koude start, zonder per-sync main-thread writes.

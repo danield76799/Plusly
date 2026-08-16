@@ -30,7 +30,6 @@ import 'package:Pulsly/pages/chat/send_poll_dialog.dart';
 import 'package:Pulsly/pages/chat/send_later_dialog.dart';
 import 'package:Pulsly/pages/chat/translated_event_dialog.dart';
 import 'package:Pulsly/services/timeline_cache.dart';
-import 'package:Pulsly/services/chat_list_refresh_bus.dart';
 import 'package:Pulsly/pages/chat/vote_results_dialog.dart';
 import 'package:Pulsly/pages/chat_details/chat_details.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
@@ -864,11 +863,6 @@ class ChatController extends State<ChatPageWithRoom>
           // Rebuild after send completes so the local echo is promoted
           // to sent status (status changes from sending -> sent/synced).
           if (mounted) updateView();
-          // Refresh the chat list AFTER the send completes. The SDK updates
-          // room.lastEvent (preview + sort order) inside sendTextEvent's fake
-          // sync, which is async. Emitting here guarantees lastEvent is
-          // current, so the room jumps to the top and the preview updates.
-          ChatListRefreshBus.refreshForRoom(room.id);
         },
         onError: (e) {
           Logs().e('Failed to send message', e);

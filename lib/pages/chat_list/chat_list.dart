@@ -110,9 +110,6 @@ class ChatListController extends State<ChatList>
   DateTime _lastBridgeSync = DateTime(2000);
   Map<String, int> _cachedUnreadCounts = {};
   DateTime _lastUnreadCalc = DateTime(2000);
-  List<Room> _cachedFilteredRooms = [];
-  ActiveFilter _lastActiveFilter = ActiveFilter.allChats;
-  Set<String> _lastVisibleBridgeTypes = {};
 
   ActiveFilter activeFilter = AppSettings.separateChatTypes.value
       ? ActiveFilter.messages
@@ -172,11 +169,9 @@ class ChatListController extends State<ChatList>
     }
 
     // Reset caches so the chat list refreshes immediately on return.
-    _cachedFilteredRooms = [];
     _cachedUnreadCounts = {};
     _lastUnreadCalc = DateTime(2000);
     _lastBridgeSync = DateTime(2000);
-    _lastMaxEventTime = 0;
 
     // Drop TimelineCache for this room so we get a fresh timeline
     // on next open. This ensures newly sent messages appear promptly
@@ -279,27 +274,14 @@ class ChatListController extends State<ChatList>
     return true;
   }
 
-  // Cached filteredRooms - invalidated immediately when ChatListRefreshBus
-  // fires, so push notifications and outgoing replies jump to the top right away.
+  // FluffyChat-style: no cache. The SDK sorts client.rooms in place after
+  // every sync (including the fake sync from sendTextEvent) and updates
+  // room.lastEvent itself, so filtering the already-sorted list gives the
+  // correct order and preview for free. A cache here was the root cause of
+  // the chat list not updating after sending/receiving in a DM.
   List<Room> get filteredRooms {
     final client = Matrix.of(context).client;
-    final currentRoomCount = client.rooms.length;
-    // Use the latest event timestamp across all rooms as a cache invalidation
-    // signal. This catches ordering changes even when the sync status stays idle.
-    final currentMaxEventTime = client.rooms.isEmpty
-        ? 0
-        : client.rooms
-            .map((r) => r.latestEventReceivedTime.millisecondsSinceEpoch)
-            .reduce((a, b) => a > b ? a : b);
-
-    if (_lastActiveFilter == activeFilter &&
-        _lastVisibleBridgeTypes == visibleBridgeTypes &&
-        _lastRoomCount == currentRoomCount &&
-        _lastMaxEventTime == currentMaxEventTime) {
-      return _cachedFilteredRooms;
-    }
-
-    _cachedFilteredRooms = client.rooms
+    final rooms = client.rooms
         .where(getRoomFilterByActiveFilter(activeFilter))
         .where(_isBridgeTypeVisible)
         .toList();
@@ -311,7 +293,7 @@ class ChatListController extends State<ChatList>
     // other, which without this tiebreaker causes rooms to flicker
     // back and forth in the chat list.
     if (activeFilter != ActiveFilter.pinned) {
-      _cachedFilteredRooms.sort((a, b) {
+      rooms.sort((a, b) {
         final aPinned = a.isFavourite ? 1 : 0;
         final bPinned = b.isFavourite ? 1 : 0;
         if (aPinned != bPinned) return bPinned - aPinned;
@@ -321,23 +303,15 @@ class ChatListController extends State<ChatList>
         return a.id.compareTo(b.id);
       });
     } else {
-      _cachedFilteredRooms.sort((a, b) {
+      rooms.sort((a, b) {
         final byTs = b.latestEventReceivedTime
             .compareTo(a.latestEventReceivedTime);
         if (byTs != 0) return byTs;
         return a.id.compareTo(b.id);
       });
     }
-
-    _lastActiveFilter = activeFilter;
-    _lastVisibleBridgeTypes = Set<String>.from(visibleBridgeTypes);
-    _lastRoomCount = currentRoomCount;
-    _lastMaxEventTime = currentMaxEventTime;
-    return _cachedFilteredRooms;
+    return rooms;
   }
-
-  int _lastRoomCount = 0;
-  int _lastMaxEventTime = 0;
 
   // Lazy loading pagination
   static const int _pageSize = 40;
@@ -355,12 +329,6 @@ class ChatListController extends State<ChatList>
     setState(() {}); // State gebruikt setState, geen notifyListeners
   }
 
-  void invalidateRoomCache({String? roomId}) {
-    _cachedFilteredRooms = []; // forceer her-berekening bij volgende get
-    _lastMaxEventTime = 0;
-    _lastRoomCount = 0;
-  }
-  
   void loadMoreRooms() {
     _visibleCount += _pageSize;
     setState(() {}); // State gebruikt setState, geen notifyListeners
@@ -813,7 +781,6 @@ class ChatListController extends State<ChatList>
   void _invalidateRoomCache() {
     _lastBridgeSync = DateTime(2000);
     _lastUnreadCalc = DateTime(2000);
-    _lastMaxEventTime = 0;
   }
 
   @override
