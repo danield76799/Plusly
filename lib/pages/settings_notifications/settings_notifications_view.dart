@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:permission_handler/permission_handler.dart';
 
+import 'package:app_settings/app_settings.dart' as app_settings;
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
@@ -223,25 +223,15 @@ class SettingsNotificationsView extends StatelessWidget {
                         ListTile(
                           leading: const Icon(Icons.battery_std_outlined),
                           title: const Text('Batterijoptimalisatie'),
-                          subtitle: const Text('Vraag Android om Plusly niet te beperken'),
+                          subtitle: const Text('Ga naar de Android-instellingen voor Plusly'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () async {
-                            final status = await Permission.ignoreBatteryOptimizations.status;
-                            if (!status.isGranted) {
-                              final result = await Permission.ignoreBatteryOptimizations.request();
-                              if (!result.isGranted && context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(L10n.of(context).pushBatteryOptimizationHint),
-                                  ),
-                                );
-                              }
-                            } else if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(L10n.of(context).pushBatteryOptimizationHint),
-                                ),
+                            try {
+                              await app_settings.AppSettings.openAppSettings(
+                                type: app_settings.AppSettingsType.batteryOptimization,
                               );
+                            } catch (_) {
+                              await app_settings.AppSettings.openAppSettings();
                             }
                           },
                         ),
