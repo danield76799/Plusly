@@ -67,7 +67,8 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
       logs.add('Last push timestamp: ${_lastPushTime ?? 'none'}');
     } catch (_) {}
 
-    final eventLog = PushEventLog()..load();
+    final eventLog = PushEventLog();
+    await eventLog.load();
     final events = eventLog.events;
 
     setState(() {
