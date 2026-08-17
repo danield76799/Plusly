@@ -232,14 +232,14 @@ class SettingsNotificationsView extends StatelessWidget {
                               if (!result.isGranted && context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(L10n.of(context).pushBatteryOptimizationHint ?? 'Schakel batterijoptimalisatie uit in de systeeminstellingen.'),
+                                    content: Text(L10n.of(context).pushBatteryOptimizationHint),
                                   ),
                                 );
                               }
                             } else if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(L10n.of(context).pushBatteryOptimizationHint ?? 'Batterijoptimalisatie is al uitgeschakeld.'),
+                                  content: Text(L10n.of(context).pushBatteryOptimizationHint),
                                 ),
                               );
                             }
