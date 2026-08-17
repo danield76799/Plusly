@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/themes.dart';
@@ -218,6 +219,31 @@ class SettingsNotificationsView extends StatelessWidget {
                           subtitle: const Text('UP-distributor, endpoint, geregistreerd?'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => context.push('/rooms/settings/push-debug'),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.battery_std_outlined),
+                          title: const Text('Batterijoptimalisatie'),
+                          subtitle: const Text('Vraag Android om Plusly niet te beperken'),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () async {
+                            final status = await Permission.ignoreBatteryOptimizations.status;
+                            if (!status.isGranted) {
+                              final result = await Permission.ignoreBatteryOptimizations.request();
+                              if (!result.isGranted && context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(L10n.of(context).pushBatteryOptimizationHint ?? 'Schakel batterijoptimalisatie uit in de systeeminstellingen.'),
+                                  ),
+                                );
+                              }
+                            } else if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(L10n.of(context).pushBatteryOptimizationHint ?? 'Batterijoptimalisatie is al uitgeschakeld.'),
+                                ),
+                              );
+                            }
+                          },
                         ),
                       ],
                     ),
