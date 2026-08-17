@@ -18,6 +18,7 @@ import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/push_event_log.dart';
 
 const notificationAvatarDimension = 128;
 
@@ -118,6 +119,11 @@ class PushHelper {
           'activeClient=$activeClient notified=${client.clientName} '
           'lifecycle=${WidgetsBinding.instance.lifecycleState}',
         );
+        PushEventLog().add('push_suppressed', {
+          'room': notification.roomId ?? '',
+          'activeRoom': activeRoomId ?? '',
+          'lifecycle': WidgetsBinding.instance.lifecycleState.toString(),
+        });
         return null;
       }
 
@@ -131,6 +137,10 @@ class PushHelper {
           'Push event is null: clearing indicator '
           'room=${notification.roomId}',
         );
+        PushEventLog().add('push_clearing', {
+          'room': notification.roomId ?? '',
+          'unread': '${notification.counts?.unread ?? 0}',
+        });
         if (notification.counts?.unread == null ||
             notification.counts?.unread == 0) {
           await flutterLocalNotificationsPlugin.cancelAll();
@@ -158,9 +168,17 @@ class PushHelper {
       Logs().v(
         'Push helper got notification event of type ${event.type}.',
       );
+      PushEventLog().add('push_event', {
+        'room': notification.roomId ?? '',
+        'type': event.type,
+      });
       return helper;
     } catch (e, s) {
       Logs().e('Push helper error', e, s);
+      PushEventLog().add('push_error', {
+        'room': notification.roomId ?? '',
+        'error': '$e',
+      });
       await helper._crashHandler(e, s);
       rethrow;
     }
@@ -298,6 +316,10 @@ class PushHelper {
         ).toString(),
       );
       Logs().v('Push helper has been completed!');
+      PushEventLog().add('push_shown', {
+        'room': notification.roomId ?? '',
+        'id': '${notification.roomId?.hashCode ?? 0}',
+      });
     } catch (e, s) {
       await _crashHandler(e, s);
       rethrow;
