@@ -594,6 +594,17 @@ class BackgroundPush {
     // UP may strip the devices list
     data['devices'] ??= [];
 
+    // Log the raw push receipt IMMEDIATELY, before any processing, so we can
+    // tell whether the headless engine even reaches this handler in a cold
+    // start. The [push] event at the end of this method only fires if
+    // pushHelper completes — if it hangs/crashes we'd see nothing.
+    final now = DateTime.now().toIso8601String();
+    PushEventLog().add('push_received', {
+      'instance': i ?? '',
+      'room': data['room_id']?.toString() ?? '',
+      'ts': now,
+    });
+
     // FluffyChat pattern: always pass clients to pushHelper.
     // pushHelper handles the fast fallback internally (shows a notification
     // before loading anything), then loads the real event and replaces it.
@@ -618,11 +629,11 @@ class BackgroundPush {
       instance: i,
       useNotificationActions: true,
     );
-    final now = DateTime.now().toIso8601String();
-    PushEventLog().add('push', {'instance': i ?? '', 'room': data['room_id']?.toString() ?? '', 'ts': now});
+    final now2 = DateTime.now().toIso8601String();
+    PushEventLog().add('push', {'instance': i ?? '', 'room': data['room_id']?.toString() ?? '', 'ts': now2});
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('plusly_push_last_received_ts', now);
+      await prefs.setString('plusly_push_last_received_ts', now2);
     } catch (_) {}
   }
 
