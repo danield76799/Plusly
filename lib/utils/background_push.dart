@@ -599,9 +599,18 @@ class BackgroundPush {
     // before loading anything), then loads the real event and replaces it.
     // This is simpler and more reliable than splitting fallback/enrichment
     // across multiple unawaited calls that Android may kill mid-flight.
+    //
+    // BUT: when the app is fully closed (detached/headless engine), passing
+    // clients makes pushHelper run the full sync route (getEventByPushNotification
+    // with storeInDatabase:false), which needs a synced DB + live UI context a
+    // headless engine lacks → it hangs/crashes → no notification. In detached
+    // mode pass clients:null so pushHelper takes its fast path (renders from
+    // the raw payload, no sync).
+    final isDetached = Platform.isAndroid &&
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached;
     await PushHelper.pushHelper(
       PushNotification.fromJson(data),
-      clients: clients,
+      clients: isDetached ? null : clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
       activeClient: clientFromInstance(i, clients),
