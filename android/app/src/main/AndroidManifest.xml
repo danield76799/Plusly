@@ -165,12 +165,6 @@
           </intent-filter>
         </service> -->
 
-        <receiver android:name="org.unifiedpush.flutter.connector.UnifiedPushReceiver"
-            tools:replace="android:enabled"
-            android:enabled="true"
-            android:exported="true">
-        </receiver>
-
         <receiver android:exported="false" android:enabled="true"
             android:name="com.dexterous.flutterlocalnotifications.ActionBroadcastReceiver" />
 
