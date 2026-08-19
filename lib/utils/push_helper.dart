@@ -213,7 +213,7 @@ class PushHelper {
             AppConfig.applicationName,
             (notification.counts?.unread ?? 0).toString(),
           ),
-          importance: Importance.high,
+          importance: Importance.max,
           priority: Priority.max,
           shortcutId: notification.roomId,
         ),
@@ -401,7 +401,7 @@ class PushHelper {
         hideEdit: true,
         removeMarkdown: true,
       ),
-      importance: Importance.high,
+      importance: Importance.max,
       priority: Priority.max,
       groupKey: event.room.spaceParents.firstOrNull?.roomId ?? 'rooms',
       actions: event.type == EventTypes.RoomMember || !useNotificationActions
