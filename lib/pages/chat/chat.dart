@@ -132,8 +132,6 @@ class ChatController extends State<ChatPageWithRoom>
 
   Timeline? timeline;
 
-  StreamSubscription? _roomUpdateSub;
-
   String get readMarkerEventId => room.hasNewMessages ? room.fullyRead : '';
 
   String get roomId => widget.room.id;
@@ -426,25 +424,6 @@ class ChatController extends State<ChatPageWithRoom>
 
     sendingClient = Matrix.of(context).client;
     WidgetsBinding.instance.addObserver(this);
-
-    // Betrouwbare refresh voor DMs: de getTimeline-callbacks (onInsert/
-    // onNewEvent/onUpdate) firen soms niet in deze SDK-versie, vooral bij
-    // 1-op-1 rooms. room.onUpdate is deprecated; client.onSync firet bij elke
-    // sync. We filteren op deze room ID en herbouwen dan de chat-view zodra er
-    // een event écht in de timeline staat.
-    _roomUpdateSub = Matrix.of(context)
-        .client
-        .onSync
-        .stream
-        .where(
-          (sync) =>
-              sync.rooms?.join?.containsKey(roomId) == true ||
-              sync.rooms?.leave?.containsKey(roomId) == true ||
-              sync.rooms?.invite?.containsKey(roomId) == true,
-        )
-        .listen((_) {
-          if (mounted) updateView();
-        });
 
     loadTimelineFuture = _tryLoadTimeline();
   }
@@ -752,7 +731,6 @@ class ChatController extends State<ChatPageWithRoom>
   void dispose() {
     typingCoolDown?.cancel();
     typingTimeout?.cancel();
-    _roomUpdateSub?.cancel();
     scrollController.removeListener(_updateScrollController);
     scrollController.dispose();
     _scrolledUp.dispose();
