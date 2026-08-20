@@ -132,6 +132,11 @@ class ChatController extends State<ChatPageWithRoom>
 
   Timeline? timeline;
 
+  /// Guard against timeline callbacks going silent because another getTimeline()
+  /// call (TimelineCache, notification handler, etc.) cancelled our subscriptions.
+  StreamSubscription? _roomSyncSubscription;
+  String? _lastSyncedEventId;
+
   String get readMarkerEventId => room.hasNewMessages ? room.fullyRead : '';
 
   String get roomId => widget.room.id;
@@ -424,6 +429,10 @@ class ChatController extends State<ChatPageWithRoom>
 
     sendingClient = Matrix.of(context).client;
     WidgetsBinding.instance.addObserver(this);
+
+    _roomSyncSubscription = room.client.onSync.stream
+        .where((s) => s.hasRoomUpdate && s.rooms?.join?.containsKey(roomId) == true)
+        .listen(_onRoomSync);
 
     loadTimelineFuture = _tryLoadTimeline();
   }
@@ -727,6 +736,43 @@ class ChatController extends State<ChatPageWithRoom>
     }
   }
 
+
+
+  /// Fallback when SDK timeline callbacks fail to fire. Runs on every sync
+  /// that touches this room. If a newer event arrived than the timeline shows,
+  /// refresh the timeline (or at least the view).
+  void _onRoomSync(SyncUpdate sync) async {
+    if (!mounted) return;
+    final latestEventId = room.lastEvent?.eventId;
+    if (latestEventId == null) return;
+    if (_lastSyncedEventId == latestEventId) return;
+    _lastSyncedEventId = latestEventId;
+
+    final lastTimelineEvent = timeline?.events.firstOrNull;
+    final timelineHasEvent = lastTimelineEvent != null &&
+        (lastTimelineEvent.eventId == latestEventId ||
+         lastTimelineEvent.transactionId == latestEventId);
+
+    if (timelineHasEvent) {
+      updateView();
+      return;
+    }
+
+    Logs().v('[Chat] room sync has newer event than timeline; refreshing');
+    if (timeline?.events.isEmpty ?? true) {
+      loadTimelineFuture = _getTimeline().onError(
+        ErrorReporter(
+          context,
+          'Unable to reload timeline after sync fallback',
+        ).onErrorCallback,
+      );
+    } else {
+      // Timeline object exists but may be stale; request future and update.
+      unawaited(timeline?.requestFuture(historyCount: 20));
+      updateView();
+    }
+  }
+
   @override
   void dispose() {
     typingCoolDown?.cancel();
@@ -736,6 +782,8 @@ class ChatController extends State<ChatPageWithRoom>
     _scrolledUp.dispose();
     timeline?.cancelSubscriptions();
     timeline = null;
+    _roomSyncSubscription?.cancel();
+    _roomSyncSubscription = null;
     inputFocus.removeListener(_inputFocusListener);
     inputFocus.dispose();
     inputBarHeight.dispose();
