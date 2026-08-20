@@ -883,6 +883,22 @@ class ChatController extends State<ChatPageWithRoom>
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
     );
     Logs().v('[SendEcho] txid=$txid');
+
+    // Give the SDK a nudge to fetch/promote local echoes immediately, then
+    // rebuild so the bubble shows up. The timeline callbacks (onUpdate/onInsert)
+    // handle the rest.
+    final tl = timeline;
+    if (tl != null) {
+      unawaited(
+        tl.requestFuture(historyCount: 1).then((_) {
+          if (mounted) {
+            updateView();
+            scrollDownAfterSend();
+          }
+        }, onError: (_) {/* ignore */}),
+      );
+    }
+
     unawaited(
       sendFuture.then(
         (_) {
@@ -901,126 +917,31 @@ class ChatController extends State<ChatPageWithRoom>
       ),
     );
 
-    // Deterministic: the Matrix SDK appends the local echo asynchronously.
-    // The onUpdate/onInsert callbacks are racy (sometimes the bubble shows up
-    // only on the next server sync), so we poll until the sent event is
-    // actually in timeline.events and rebuild every frame. This guarantees
-    // the bubble appears immediately, every time — no reliance on the SDK
-    // firing its callback at the right moment.
-    final tl = timeline;
+    // Fallback: if the SDK didn't fire any callback after a short delay,
+    // poll a few times. This catches races where the local echo is appended
+    // asynchronously but onInsert is not delivered.
     if (tl != null) {
-      // Deterministic: the Matrix SDK appends the local echo asynchronously.
-      // The onUpdate/onInsert callbacks are racy (sometimes the bubble shows up
-      // only on the next server sync), so we poll until the sent event is
-      // actually in timeline.events. We use an exponential backoff so the UI
-      // thread is not hammered with a rebuild every 16ms; instead we start at
-      // 50ms and double up to 400ms. The bubble still appears immediately in
-      // practice, but without jank.
-      //
-      // We match a local echo by:
-      //   1. status == sending or eventId == null (classic local echo), OR
-      //   2. a recent event with the same body sent by us. This catches the
-      //      case where the SDK already promoted the echo to sent/synced before
-      //      the loop sees it.
-      final myUserId = room.client.userID;
-      final sentAtThreshold = DateTime.now().toUtc().subtract(
-        const Duration(seconds: 30),
-      );
-
-      var delay = const Duration(milliseconds: 50);
-      var attempts = 0;
-      // 50 + 100 + 200 + 400*7 = max ~3.35s. E2EE/bridge rooms can be slow.
-      const maxAttempts = 10;
-      final editEventId = editEvent?.eventId;
-      final isEdit = editEventId != null;
-      while (mounted && attempts < maxAttempts) {
-        final events = tl.events;
-        // For new messages: status == sending or eventId == null.
-        // For edits: the SDK prefixes the body with "* " and uses
-        // relationshipType == edit. The original event gets the new content
-        // via getDisplayEvent once the edit is aggregated.
-        final bool hasPending;
-        if (isEdit) {
-          hasPending = events.any(
+      Future.delayed(const Duration(milliseconds: 50), () async {
+        var attempts = 0;
+        const maxAttempts = 8;
+        while (mounted && attempts < maxAttempts) {
+          final events = tl.events;
+          final found = events.any(
             (e) =>
-                e.status == EventStatus.sending &&
-                e.relationshipType == RelationshipTypes.edit &&
-                e.relationshipEventId == editEventId,
-          );
-        } else {
-          // Match the local echo by our own txid. This is far more reliable
-          // than body comparison, because the SDK may rewrite the body for
-          // markdown/mentions.
-          hasPending = events.any(
-            (e) =>
-                (e.transactionId == txid || e.eventId == txid) &&
-                e.status == EventStatus.sending,
-          );
-        }
-        // For new messages, also catch SDK-promoted echoes.
-        // For edits, check if the original event now has aggregated edits
-        // (i.e. the edit landed and the display event has been replaced).
-        final bool hasRecentSentByMe;
-        if (isEdit) {
-          hasRecentSentByMe = events.any(
-            (e) =>
-                e.eventId == editEventId &&
-                e.hasAggregatedEvents(
-                  tl,
-                  RelationshipTypes.edit,
-                ),
-          );
-        } else {
-          hasRecentSentByMe = events.any(
-            (e) =>
-                e.senderId == myUserId &&
+                e.senderId == room.client.userID &&
                 e.status != EventStatus.error &&
-                e.originServerTs.isAfter(sentAtThreshold) &&
-                (e.transactionId == txid ||
-                    e.body == text ||
-                    e.body.contains(text) ||
-                    e.status == EventStatus.sending),
+                (e.transactionId == txid || e.body == text || e.body.contains(text)),
           );
+          if (found) {
+            updateView();
+            scrollDownAfterSend();
+            return;
+          }
+          await Future.delayed(const Duration(milliseconds: 100));
+          attempts++;
         }
-        final found = hasPending || hasRecentSentByMe;
-
-        Logs().v(
-          '[SendPoll] attempt=$attempts events=${events.length} isEdit=$isEdit pending=$hasPending recentByMe=$hasRecentSentByMe',
-        );
-
-        if (found) {
-          // Force a rebuild so the key map is fresh for the new/updated event.
-          Logs().v('[SendPoll] local echo found, calling updateView()');
-          updateView();
-          // Jump to bottom so the user sees their message right away.
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted &&
-                scrollController.hasClients &&
-                scrollController.position.pixels <= 50) {
-              scrollController.jumpTo(0);
-            }
-          });
-          return;
-        }
-
-        // Rebuild every iteration so the local-echo bubble appears as soon as
-        // the SDK inserts it, even if our match condition above doesn't fire
-        // (e.g. body slightly transformed, or originServerTs not yet set).
-        // Without this, updateView() only ran after the full timeout, leaving
-        // the bubble invisible for up to ~3.35s (~80% "updated" feeling).
         updateView();
-        await Future.delayed(delay);
-        attempts++;
-        if (delay < const Duration(milliseconds: 400)) {
-          delay *= 2;
-        }
-      }
-      // Final rebuild in case the event landed just after the last poll
-      // or the SDK is about to fire its callback.
-      Logs().v('[SendPoll] local echo NOT found after $attempts attempts, final updateView()');
-      updateView();
-    } else {
-      Logs().i('[SendPoll] timeline is null after send');
+      });
     }
   }
 
