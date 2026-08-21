@@ -127,6 +127,7 @@ class ChatListItem extends StatelessWidget {
                         bottom: 0,
                         child: Container(
                           decoration: BoxDecoration(
+                            color: theme.colorScheme.surface,
                             shape: BoxShape.circle,
                             border: Border.all(color: theme.colorScheme.surface, width: 1.5),
                           ),
@@ -138,47 +139,53 @@ class ChatListItem extends StatelessWidget {
                 ),
               ),
               title: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Expanded(
-                    child: Text(
-                      cleanDisplayname,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: compactMode ? 13 : 14,
-                        color: theme.colorScheme.onSurface,
-                      ),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Text(
+                            cleanDisplayname,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: false,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: compactMode ? 13 : 14,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ),
+                        if (room.isFavourite)
+                          const Padding(
+                            padding: EdgeInsets.only(left: 4.0),
+                            child: Icon(
+                              Icons.push_pin,
+                              size: 14,
+                              color: Colors.orangeAccent,
+                            ),
+                          ),
+                        if (isMuted)
+                          const Padding(
+                            padding: EdgeInsets.only(left: 4.0),
+                            child: Icon(
+                              Icons.notifications_off_outlined,
+                              size: 14,
+                            ),
+                          ),
+                        if (room.isLowPriority)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4.0),
+                            child: Icon(
+                              Icons.low_priority,
+                              size: 14,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                  if (isMuted)
-                    const Padding(
-                      padding: EdgeInsets.only(left: 4.0),
-                      child: Icon(Icons.notifications_off_outlined, size: 16),
-                    ),
-                  if (room.isLowPriority)
-                    Padding(
-                      padding: EdgeInsets.only(
-                        right: hasNotifications ? 4.0 : 0.0,
-                      ),
-                      child: Icon(
-                        Icons.low_priority,
-                        size: 16,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                  if (room.isFavourite)
-                    Padding(
-                      padding: EdgeInsets.only(
-                        right: hasNotifications ? 4.0 : 0.0,
-                      ),
-                      child: Icon(
-                        Icons.push_pin,
-                        size: 16,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
                   if (!room.isSpace && room.membership != Membership.invite)
                     Padding(
                       padding: const EdgeInsets.only(left: 4.0),

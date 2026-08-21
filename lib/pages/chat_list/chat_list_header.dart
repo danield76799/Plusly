@@ -375,11 +375,23 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
         },
         child: LayoutBuilder(
           builder: (context, constraints) {
-            return SingleChildScrollView(
-              controller: _tabScrollController,
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: filters.map((filter) {
+            return ShaderMask(
+              shaderCallback: (bounds) => LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  const Color(0xFFFFFFFF),
+                  const Color(0xFFFFFFFF),
+                  const Color(0x00FFFFFF),
+                ],
+                stops: const [0.0, 0.85, 1.0],
+              ).createShader(bounds),
+              blendMode: BlendMode.dstIn,
+              child: SingleChildScrollView(
+                controller: _tabScrollController,
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: filters.map((filter) {
                     final isActive = controller.activeFilter == filter;
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
@@ -428,7 +440,8 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                     );
                   }).toList(),
                 ),
-              );
+              ),
+            );
           },
         ),
       ),

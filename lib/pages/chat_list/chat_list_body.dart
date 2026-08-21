@@ -30,7 +30,6 @@ class ChatListViewBody extends StatelessWidget {
 
   const ChatListViewBody(this.controller, {super.key});
 
-  static const double _fabBottomPadding = 96.0; // 56 FAB + 40 marge
 
   @override
   Widget build(BuildContext context) {
@@ -339,7 +338,9 @@ class ChatListViewBody extends StatelessWidget {
                     },
                   ),
                 SliverToBoxAdapter(
-                  child: const SizedBox(height: _fabBottomPadding),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).padding.bottom + 80.0,
+                  ),
                 ), // FAB/GestureDetector bottom spacing
               ],
             ),
