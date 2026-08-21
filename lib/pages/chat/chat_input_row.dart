@@ -6,10 +6,8 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/recording_input_row.dart';
 import 'package:Pulsly/pages/chat/recording_view_model.dart';
-import 'package:Pulsly/pages/chat/video_note_recording_dialog.dart';
 import 'package:Pulsly/shortcuts/chat/paste_shortcut.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
-import '../../config/themes.dart';
 import 'chat.dart';
 import 'input_bar.dart';
 
@@ -266,37 +264,26 @@ class ChatInputRow extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            // Emoji knop IN de input bar (rechts)
-                            AnimatedContainer(
-                              duration: MediaQuery.of(context).disableAnimations
-                                  ? Duration.zero
-                                  : FluffyThemes.animationDuration,
-                              curve: FluffyThemes.animationCurve,
-                              width: controller.sendController.text.isNotEmpty
-                                  ? 0
-                                  : height,
-                              child: controller.sendController.text.isNotEmpty
-                                  ? const SizedBox.shrink()
-                                  : Semantics(
-                                      label: 'Open emoji picker',
-                                      button: true,
-                                      child: Container(
-                                        height: height,
-                                        width: height,
-                                        alignment: Alignment.center,
-                                        child: IconButton(
-                                          tooltip: L10n.of(context).emojis,
-                                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                                          icon: Icon(
-                                            controller.showEmojiPicker
-                                                ? Icons.emoji_emotions
-                                                : Icons.emoji_emotions_outlined,
-                                            key: ValueKey(controller.showEmojiPicker),
-                                          ),
-                                          onPressed: controller.emojiPickerAction,
-                                        ),
-                                      ),
-                                    ),
+                            // Emoji knop IN de input bar (rechts) — altijd zichtbaar
+                            Semantics(
+                              label: 'Open emoji picker',
+                              button: true,
+                              child: Container(
+                                height: height,
+                                width: height,
+                                alignment: Alignment.center,
+                                child: IconButton(
+                                  tooltip: L10n.of(context).emojis,
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                  icon: Icon(
+                                    controller.showEmojiPicker
+                                        ? Icons.emoji_emotions
+                                        : Icons.emoji_emotions_outlined,
+                                    key: ValueKey(controller.showEmojiPicker),
+                                  ),
+                                  onPressed: controller.emojiPickerAction,
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -308,183 +295,76 @@ class ChatInputRow extends StatelessWidget {
                     height: height,
                     width: height,
                     alignment: Alignment.center,
-                    child:
-                        PlatformInfos.platformCanRecord &&
-                            controller.sendController.text.isEmpty
-                        ? Semantics(
-                            label: recordingViewModel.recordingMode == RecordingMode.video
-                                ? 'Record video note'
-                                : 'Record voice message',
-                            button: true,
-                            child: IconButton(
-                              tooltip:
-                                  recordingViewModel.recordingMode ==
-                                      RecordingMode.video
-                                  ? L10n.of(context).videoNote
-                                  : L10n.of(context).voiceMessage,
-                              onPressed: () {
-                                // On tap: show tip and toggle mode if video notes enabled
-                                final videoNotesEnabled =
-                                    AppSettings.enableVideoNotes.value &&
-                                    PlatformInfos.isMobile;
-                                if (videoNotesEnabled) {
-                                  final newMode =
-                                      recordingViewModel.recordingMode ==
-                                          RecordingMode.audio
-                                      ? RecordingMode.video
-                                      : RecordingMode.audio;
-                                  recordingViewModel.setRecordingMode(newMode);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      margin: const EdgeInsets.only(
-                                        bottom: height + 16,
-                                        left: 16,
-                                        right: 16,
-                                        top: 16,
-                                      ),
-                                      showCloseIcon: true,
-                                      content: Text(
-                                        newMode == RecordingMode.video
-                                            ? L10n.of(
-                                                context,
-                                              ).longPressToRecordVideoNote
-                                            : L10n.of(
-                                                context,
-                                              ).longPressToRecordVoiceMessage,
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      margin: const EdgeInsets.only(
-                                        bottom: height + 16,
-                                        left: 16,
-                                        right: 16,
-                                        top: 16,
-                                      ),
-                                      showCloseIcon: true,
-                                      content: Text(
-                                        L10n.of(
-                                          context,
-                                        ).longPressToRecordVoiceMessage,
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                              onLongPress: () {
-                                // On long press: start recording
-                                if (recordingViewModel.recordingMode ==
-                                    RecordingMode.video) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) =>
-                                        VideoNoteRecordingDialog(
-                                          room: controller.room,
-                                          onVideoSend: controller.onVideoNoteSend,
-                                        ),
-                                  );
-                                } else {
-                                  recordingViewModel.startRecording(controller.room);
-                                }
-                              },
-                              icon: AnimatedSwitcher(
-                                duration: MediaQuery.of(context).disableAnimations
-                                    ? Duration.zero
-                                    : const Duration(milliseconds: 200),
-                                child: Container(
-                                  // Subtle filled circle gives the mic button
-                                  // contrast against the deep-black background
-                                  // and ties it to the outgoing-bubble accent.
-                                  padding: const EdgeInsets.all(8.0),
-                                  decoration: BoxDecoration(
-                                    color: theme.colorScheme.primary
-                                        .withValues(alpha: 0.15),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    recordingViewModel.recordingMode ==
-                                            RecordingMode.video
-                                        ? Icons.videocam_outlined
-                                        : Icons.mic_none_outlined,
-                                    key: ValueKey(
-                                      recordingViewModel.recordingMode,
-                                    ),
-                                    color: theme.colorScheme.primary,
-                                  ),
-                                ),
+                    decoration: BoxDecoration(
+                      color: controller.sendController.text.isNotEmpty
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.surface,
+                      shape: BoxShape.circle,
+                      boxShadow: controller.sendController.text.isNotEmpty
+                          ? [
+                              BoxShadow(
+                                color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
                               ),
-                            ),
-                          )
-                        : Semantics(
-                            label: 'Send message',
-                            button: true,
-                            child: Container(
-                              height: 56,
-                              width: 56,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                gradient: controller.sendController.text.isNotEmpty
-                                    ? const LinearGradient(
-                                        colors: [Color(0xFF49AFC2), Color(0xFF6FC5D8)],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      )
-                                    : null,
-                                color: controller.sendController.text.isEmpty
-                                    ? theme.bubbleColor
-                                    : null,
-                                borderRadius: BorderRadius.circular(28.0),
-                                boxShadow: controller.sendController.text.isNotEmpty
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(0xFF49AFC2).withValues(alpha: 0.3),
-                                          blurRadius: 8.0,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ]
-                                    : null,
-                              ),
-                              child: Material(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(28.0),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(28.0),
-                                  onTap: controller.sendController.text.isNotEmpty
-                                      ? controller.send
-                                      : null,
-                                  onLongPress: controller.sendController.text.isNotEmpty
-                                      ? () => controller.sendScheduleAction()
-                                      : null,
-                                  child: Container(
-                                    height: 48,
-                                    width: 48,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: controller.sendController.text.isNotEmpty
-                                          ? const Color(0xFF00A884)  // WhatsApp green
-                                          : Colors.transparent,
-                                      shape: BoxShape.circle,
+                            ]
+                          : null,
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.15),
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: PlatformInfos.platformCanRecord &&
+                                controller.sendController.text.isEmpty
+                            ? () {
+                                // Show recording hint (mirrors old tap behaviour)
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    margin: const EdgeInsets.only(
+                                      bottom: height + 16,
+                                      left: 16,
+                                      right: 16,
+                                      top: 16,
                                     ),
-                                    child: AnimatedSwitcher(
-                                      duration: MediaQuery.of(context).disableAnimations
-                                          ? Duration.zero
-                                          : const Duration(milliseconds: 200),
-                                      child: Icon(
-                                        Icons.send_outlined,
-                                        key: ValueKey(controller.sendController.text.isNotEmpty),
-                                        color: controller.sendController.text.isNotEmpty
-                                            ? Colors.white
-                                            : theme.onBubbleColor,
-                                        size: 20,
-                                      ),
+                                    showCloseIcon: true,
+                                    content: Text(
+                                      L10n.of(context).longPressToRecordVoiceMessage,
                                     ),
                                   ),
-                                ),
-                              ),
-                            ),
+                                );
+                              }
+                            : controller.sendController.text.isNotEmpty
+                                ? controller.send
+                                : null,
+                        onLongPress: PlatformInfos.platformCanRecord &&
+                                controller.sendController.text.isEmpty
+                            ? () => recordingViewModel.startRecording(controller.room)
+                            : controller.sendController.text.isNotEmpty
+                                ? () => controller.sendScheduleAction()
+                                : null,
+                        child: AnimatedSwitcher(
+                          duration: MediaQuery.of(context).disableAnimations
+                              ? Duration.zero
+                              : const Duration(milliseconds: 200),
+                          child: Icon(
+                            controller.sendController.text.isNotEmpty
+                                ? Icons.send
+                                : recordingViewModel.recordingMode == RecordingMode.video
+                                    ? Icons.videocam_outlined
+                                    : Icons.mic_none_outlined,
+                            key: ValueKey(controller.sendController.text.isNotEmpty),
+                            color: controller.sendController.text.isNotEmpty
+                                ? theme.colorScheme.onPrimary
+                                : theme.colorScheme.primary,
+                            size: 22,
                           ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
         );

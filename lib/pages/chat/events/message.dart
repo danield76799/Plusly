@@ -365,32 +365,29 @@ class _MessageState extends State<Message> {
       RelationshipTypes.reaction,
     );
 
-    final messageStatusRow = Row(
-      mainAxisSize: MainAxisSize.min,
+    final messageStatusRow = Wrap(
+      alignment: WrapAlignment.end,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 4,
+      runSpacing: 2,
       children: [
         Text(
           event.originServerTs.localizedTimeOfDay(context),
           style: TextStyle(color: statusColor, fontSize: 12),
         ),
         if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit))
-          Padding(
-            padding: const EdgeInsets.only(left: 4.0),
-            child: Icon(Icons.edit_outlined, color: statusColor, size: 14),
-          ),
+          Icon(Icons.edit_outlined, color: statusColor, size: 14),
         if (ownMessage)
-          Padding(
-            padding: const EdgeInsets.only(left: 4.0),
-            child: Icon(
-              event.status == EventStatus.sending
-                  ? Icons.watch_later_outlined
-                  : event.status == EventStatus.error
-                  ? Icons.error_outline
-                  : hasBeenRead
-                  ? Icons.done_all
-                  : Icons.check,
-              color: statusColor,
-              size: 14,
-            ),
+          Icon(
+            event.status == EventStatus.sending
+                ? Icons.watch_later_outlined
+                : event.status == EventStatus.error
+                ? Icons.error_outline
+                : hasBeenRead
+                ? Icons.done_all
+                : Icons.check,
+            color: statusColor,
+            size: 14,
           ),
       ],
     );
@@ -589,14 +586,11 @@ class _MessageState extends State<Message> {
                                       ),
                                     ),
                                     if (showTimestamp)
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 4.0,
-                                          ),
-                                          child: messageStatusRow,
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 4.0,
                                         ),
+                                        child: messageStatusRow,
                                       ),
                                   ],
                                 ),
