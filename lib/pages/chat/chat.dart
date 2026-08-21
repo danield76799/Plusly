@@ -901,10 +901,17 @@ class ChatController extends State<ChatPageWithRoom>
 
     unawaited(
       sendFuture.then(
-        (_) {
-          // Rebuild after send completes so the local echo is promoted
-          // to sent status (status changes from sending -> sent/synced).
-          if (mounted) updateView();
+        (_) async {
+          // After send completes, force a timeline fetch so the local echo
+          // is promoted to sent/synced status and becomes visible.
+          if (mounted) {
+            final tl = timeline;
+            if (tl != null) {
+              await tl.requestFuture(historyCount: 1).catchError((_) {});
+            }
+            updateView();
+            scrollDownAfterSend();
+          }
         },
         onError: (e) {
           Logs().e('Failed to send message', e);
