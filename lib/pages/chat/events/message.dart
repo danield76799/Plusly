@@ -633,7 +633,12 @@ class _MessageState extends State<Message> {
                                       ? Colors.transparent
                                       : bubbleColor,
                                   borderRadius: borderRadius,
-                                  clipBehavior: Clip.antiAlias,
+                                  // Don't let Material clip with borderRadius —
+                                  // the outer ClipPath (with _BubbleTailClipper)
+                                  // already draws the rounded rect plus the
+                                  // directional tail, and Material would clip
+                                  // the tail away.
+                                  clipBehavior: Clip.none,
                                   child: BubbleBackground(
                                   colors: widget.colors,
                                   ignore: noBubble ||
