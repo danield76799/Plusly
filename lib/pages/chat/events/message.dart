@@ -618,27 +618,22 @@ class _MessageState extends State<Message> {
                             : color;
                               // Directional speech tail on the bottom-most
                               // message of a consecutive cluster.
-                              // Note: with reverse: true, isLastInGroup is the
-                              // visually LOWEST (oldest) message of the run,
-                              // so we draw the tail on the OPPOSITE side.
-                              final showTail = !isLastInGroup && !noBubble;
-                              final bubble = ClipPath(
-                                clipper: _BubbleTailClipper(
-                                  own: ownMessage,
-                                  radius: borderRadius,
-                                  showTail: showTail,
-                                ),
+                              // Modern messaging style: a sharp corner on the OWNER-side and full
+                              // rounding on the other side gives a clean
+                              // "speech-pointer" silhouette without the
+                              // visible triangle flap that a custom clipper
+                              // produced. The asymmetric borderRadius (built
+                              // above with hardCorner vs roundedCorner) is
+                              // the actual "tail" — a `ClipRRect` here is
+                              // enough to render it correctly.
+                              final bubble = ClipRRect(
+                                borderRadius: borderRadius,
                                 child: Material(
                                   color: noBubble
                                       ? Colors.transparent
                                       : bubbleColor,
                                   borderRadius: borderRadius,
-                                  // Don't let Material clip with borderRadius —
-                                  // the outer ClipPath (with _BubbleTailClipper)
-                                  // already draws the rounded rect plus the
-                                  // directional tail, and Material would clip
-                                  // the tail away.
-                                  clipBehavior: Clip.none,
+                                  clipBehavior: Clip.antiAlias,
                                   child: BubbleBackground(
                                   colors: widget.colors,
                                   ignore: noBubble ||
@@ -982,57 +977,3 @@ class __AnimateInState extends State<_AnimateIn> {
   }
 }
 
-/// Adds a subtle directional speech tail to the bottom corner of a message
-/// bubble (bottom-right for outgoing, bottom-left for incoming). Only drawn
-/// on the final message of a consecutive cluster.
-class _BubbleTailClipper extends CustomClipper<Path> {
-  _BubbleTailClipper({
-    required this.own,
-    required this.radius,
-    required this.showTail,
-  });
-
-  final bool own;
-  final BorderRadius radius;
-  final bool showTail;
-
-  static const double _tailSize = 10.0;
-
-  @override
-  Path getClip(Size size) {
-    final path = Path()
-      ..addRRect(RRect.fromRectAndCorners(
-        Offset.zero & size,
-        topLeft: radius.topLeft,
-        topRight: radius.topRight,
-        bottomLeft: radius.bottomLeft,
-        bottomRight: radius.bottomRight,
-      ));
-    if (!showTail) return path;
-
-    final s = _tailSize;
-    // Point into the bubble, aligned with the hard corner side.
-    if (own) {
-      // Outgoing: tail on bottom-right, pointing left-down.
-      path
-        ..moveTo(size.width - s, size.height)
-        ..lineTo(size.width, size.height - s)
-        ..lineTo(size.width, size.height)
-        ..close();
-    } else {
-      // Incoming: tail on bottom-left, pointing left.
-      path
-        ..moveTo(s, size.height)
-        ..lineTo(0, size.height - s)
-        ..lineTo(0, size.height)
-        ..close();
-    }
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant _BubbleTailClipper oldClipper) =>
-      oldClipper.own != own ||
-      oldClipper.showTail != showTail ||
-      oldClipper.radius != radius;
-}
