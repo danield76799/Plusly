@@ -175,7 +175,14 @@ extension BubbleColorTheme on ThemeData {
   /// primaryContainer at 85% opacity (dark) so it doesn't glow on AMOLED.
   Color get bubbleColor => brightness == Brightness.light
       ? Color.lerp(colorScheme.primary, colorScheme.surface, 0.20)!
-      : colorScheme.primaryContainer.withValues(alpha: 0.85);
+      // Dark: blend primaryContainer with surface so the bubble is a softer,
+      // lower-strain petrol instead of an opaque block against the dark
+      // scaffold background.
+      : Color.lerp(
+          colorScheme.primaryContainer,
+          colorScheme.surface,
+          0.18,
+        )!;
 
   Color get onBubbleColor => brightness == Brightness.light
       ? colorScheme.onPrimary

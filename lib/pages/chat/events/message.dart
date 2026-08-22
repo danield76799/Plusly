@@ -289,9 +289,14 @@ class _MessageState extends State<Message> {
     // Group position in visual order (top→bottom, newest→oldest).
     // Because the list is reversed, nextEvent is visually ABOVE and
     // previousEvent is visually BELOW this message.
-    final isFirstInGroup = !nextEventSameSender && previousEventSameSender;
+    // - "last in group" = the message that visually CLOSES the cluster, i.e.
+    //   the most recent one (visually at the TOP with reverse: true).
+    //   That's where nextEvent is a DIFFERENT sender (or absent).
+    // - "first in group" = the visually lowest (oldest) of the run; that's
+    //   where previousEvent is a different sender (or absent).
+    final isLastInGroup = !nextEventSameSender;
+    final isFirstInGroup = !previousEventSameSender;
     final isMiddleInGroup = nextEventSameSender && previousEventSameSender;
-    final isLastInGroup = nextEventSameSender && !previousEventSameSender;
 
     // Modern grouping: the "tail" (hard corner) sits on the LAST message
     // of a consecutive block. Middle messages get tight corners on both
@@ -588,17 +593,30 @@ class _MessageState extends State<Message> {
                                             : true,
                                       ),
                                     ),
-                                    if (showTimestamp)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          top: 4.0,
-                                        ),
-                                        child: messageStatusRow,
-                                      ),
                                   ],
                                 ),
                               ),
                             );
+                            // In-bubble metadata: timestamp + status icon
+                            // rendered as a right-aligned footer INSIDE the
+                            // bubble, so it doesn't visually sit below the
+                            // bubble edge and clip with the directional tail.
+                            final inBubbleFooter = showTimestamp
+                                ? Align(
+                                    alignment: ownMessage
+                                        ? Alignment.bottomRight
+                                        : Alignment.bottomLeft,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                        left: ownMessage ? 0 : 10,
+                                        right: ownMessage ? 10 : 0,
+                                        bottom: 6,
+                                        top: 4,
+                                      ),
+                                      child: messageStatusRow,
+                                    ),
+                                  )
+                                : const SizedBox.shrink();
                               final bubbleColor = AppSettings
                                       .enableChatFrostedGlass.value &&
                                   AppSettings.wallpaperPath.value.isNotEmpty
@@ -627,11 +645,21 @@ class _MessageState extends State<Message> {
                                       MediaQuery.highContrastOf(context),
                                   scrollController: widget.scrollController,
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 6.0,
-                                      horizontal: 10.0,
+                                    padding: EdgeInsets.only(
+                                      top: 6.0,
+                                      bottom: showTimestamp ? 18.0 : 6.0,
+                                      left: 10.0,
+                                      right: 10.0,
                                     ),
-                                    child: bubbleInner,
+                                    child: Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        bubbleInner,
+                                        Positioned.fill(
+                                          child: inBubbleFooter,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
