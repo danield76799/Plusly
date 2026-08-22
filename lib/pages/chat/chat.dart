@@ -135,7 +135,6 @@ class ChatController extends State<ChatPageWithRoom>
   /// Guard against timeline callbacks going silent because another getTimeline()
   /// call (TimelineCache, notification handler, etc.) cancelled our subscriptions.
   StreamSubscription? _roomSyncSubscription;
-  String? _lastSyncedEventId;
 
   String get readMarkerEventId => room.hasNewMessages ? room.fullyRead : '';
 
@@ -745,32 +744,30 @@ class ChatController extends State<ChatPageWithRoom>
     if (!mounted) return;
     final latestEventId = room.lastEvent?.eventId;
     if (latestEventId == null) return;
-    if (_lastSyncedEventId == latestEventId) return;
-    _lastSyncedEventId = latestEventId;
 
     final lastTimelineEvent = timeline?.events.firstOrNull;
     final timelineHasEvent = lastTimelineEvent != null &&
         (lastTimelineEvent.eventId == latestEventId ||
          lastTimelineEvent.transactionId == latestEventId);
 
-    if (timelineHasEvent) {
+    // If the newest room event is already in our timeline, just rebuild.
+    // Do NOT trigger a destructive reload/requestFuture here: that can move
+    // a pending local echo into a different timeline object than the UI
+    // renders. The SDK's own callbacks (onNewEvent/onInsert) already fire
+    // for both incoming and outgoing events, so this fallback only needs to
+    // catch the rare case where our own updateView didn't run.
+    if (timelineHasEvent || timeline?.events.isNotEmpty != false) {
       updateView();
       return;
     }
 
-    Logs().v('[Chat] room sync has newer event than timeline; refreshing');
-    if (timeline?.events.isEmpty ?? true) {
-      loadTimelineFuture = _getTimeline().onError(
-        ErrorReporter(
-          context,
-          'Unable to reload timeline after sync fallback',
-        ).onErrorCallback,
-      );
-    } else {
-      // Timeline object exists but may be stale; request future and update.
-      unawaited(timeline?.requestFuture(historyCount: 20));
-      updateView();
-    }
+    Logs().v('[Chat] room sync has newer event than empty timeline; refreshing');
+    loadTimelineFuture = _getTimeline().onError(
+      ErrorReporter(
+        context,
+        'Unable to reload timeline after sync fallback',
+      ).onErrorCallback,
+    );
   }
 
   @override
@@ -867,9 +864,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
 
     // Fire-and-forget the actual send. We only react to failures here.
-    // Generate our own txid so we can reliably identify the local echo in the
-    // poll loop below, even if the SDK transforms the body (mentions, markdown,
-    // edits) or delays originServerTs.
+    // Generate our own txid so we can reliably identify the local echo.
     final txid = room.client.generateUniqueTransactionId();
     final sendFuture = room.sendTextEvent(
       text,
@@ -884,31 +879,18 @@ class ChatController extends State<ChatPageWithRoom>
     );
     Logs().v('[SendEcho] txid=$txid');
 
-    // Give the SDK a nudge to fetch/promote local echoes immediately, then
-    // rebuild so the bubble shows up. The timeline callbacks (onUpdate/onInsert)
-    // handle the rest.
-    final tl = timeline;
-    if (tl != null) {
-      unawaited(
-        tl.requestFuture(historyCount: 1).then((_) {
-          if (mounted) {
-            updateView();
-            scrollDownAfterSend();
-          }
-        }, onError: (_) {/* ignore */}),
-      );
-    }
-
+    // FluffyChat-style: do NOT call requestFuture/requestHistory or clear
+    // the timeline here. Those mutate timeline.events mid-send and can move
+    // the local echo into a different timeline object than the one the UI
+    // renders, or displace it relative to incoming sync events. The SDK fires
+    // onNewEvent (via the fake sync in sendEvent) and onInsert/onUpdate as
+    // the echo is appended and promoted, so updateView() rebuilds for free.
+    // We only add a single, lazy scroll+rebuild after the send completes so
+    // the just-sent bubble is in view even if callbacks raced.
     unawaited(
       sendFuture.then(
-        (_) async {
-          // After send completes, force a timeline fetch so the local echo
-          // is promoted to sent/synced status and becomes visible.
+        (_) {
           if (mounted) {
-            final tl = timeline;
-            if (tl != null) {
-              await tl.requestFuture(historyCount: 1).catchError((_) {});
-            }
             updateView();
             scrollDownAfterSend();
           }
@@ -923,33 +905,6 @@ class ChatController extends State<ChatPageWithRoom>
         },
       ),
     );
-
-    // Fallback: if the SDK didn't fire any callback after a short delay,
-    // poll a few times. This catches races where the local echo is appended
-    // asynchronously but onInsert is not delivered.
-    if (tl != null) {
-      Future.delayed(const Duration(milliseconds: 50), () async {
-        var attempts = 0;
-        const maxAttempts = 8;
-        while (mounted && attempts < maxAttempts) {
-          final events = tl.events;
-          final found = events.any(
-            (e) =>
-                e.senderId == room.client.userID &&
-                e.status != EventStatus.error &&
-                (e.transactionId == txid || e.body == text || e.body.contains(text)),
-          );
-          if (found) {
-            updateView();
-            scrollDownAfterSend();
-            return;
-          }
-          await Future.delayed(const Duration(milliseconds: 100));
-          attempts++;
-        }
-        updateView();
-      });
-    }
   }
 
   void sendPollAction() async {
