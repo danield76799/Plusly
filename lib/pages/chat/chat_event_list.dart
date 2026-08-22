@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
@@ -49,8 +50,7 @@ class ChatEventList extends StatelessWidget {
 
     events = events.filterByVisibleInGui();
 
-    // ignore: avoid_print
-    print('[EchoDiag-UI] ChatEventList.build — filtered events.length=${events.length}, raw=${timeline.events.length}, firstId=${events.firstOrNull?.eventId ?? events.firstOrNull?.transactionId ?? "null"}, lastId=${events.lastOrNull?.eventId ?? events.lastOrNull?.transactionId ?? "null"}');
+    Logs().v('[EchoDiag-UI] ChatEventList.build — filtered events.length=${events.length}, raw=${timeline.events.length}, firstId=${events.firstOrNull?.eventId ?? events.firstOrNull?.transactionId ?? "null"}, lastId=${events.lastOrNull?.eventId ?? events.lastOrNull?.transactionId ?? "null"}');
 
     final threads = controller.room.threads;
 
