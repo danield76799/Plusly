@@ -503,6 +503,7 @@ class ChatController extends State<ChatPageWithRoom>
   // echo after send), so the list rebuilds without a manual tick counter.
   void updateView() {
     if (!mounted) return;
+    Logs().v('[EchoDiag] updateView() — setState fires; timeline.events.length = ${timeline?.events.length ?? "null"}');
     setState(() {});
   }
 
@@ -639,6 +640,7 @@ class ChatController extends State<ChatPageWithRoom>
   String? animateInEventId;
 
   Future<void> _insert(int index) async {
+    Logs().v('[EchoDiag] _insert(index=$index) — timeline.events.length=${timeline?.events.length ?? "null"}');
     if (index > 0) return;
     final firstEvent = timeline?.events.firstOrNull;
     final eventId = firstEvent?.transactionId ?? firstEvent?.eventId;
@@ -866,6 +868,7 @@ class ChatController extends State<ChatPageWithRoom>
     // Fire-and-forget the actual send. We only react to failures here.
     // Generate our own txid so we can reliably identify the local echo.
     final txid = room.client.generateUniqueTransactionId();
+    Logs().v('[EchoDiag] send() pre-send — timeline.events.length=${timeline?.events.length ?? "null"}, txid=$txid');
     final sendFuture = room.sendTextEvent(
       text,
       txid: txid,
@@ -877,6 +880,12 @@ class ChatController extends State<ChatPageWithRoom>
       threadLastEventId:
           thread?.lastEvent?.eventId ?? thread?.rootEvent.eventId,
     );
+
+    sendFuture.then((_) {
+      Logs().v('[EchoDiag] sendFuture resolved — timeline.events.length=${timeline?.events.length ?? "null"}, txid=$txid');
+    }, onError: (e) {
+      Logs().e('[EchoDiag] sendFuture ERROR — txid=$txid, error=$e');
+    });
     Logs().v('[SendEcho] txid=$txid');
 
     // FluffyChat-style: do NOT call requestFuture/requestHistory or clear
