@@ -350,9 +350,12 @@ class _MessageState extends State<Message> {
         ? (noBubble ? theme.colorScheme.onSurface : theme.onBubbleColor)
         : theme.colorScheme.onSurface;
 
-    // Timestamp/status color: muted version of the bubble text so it sits
-    // unobtrusively inside every bubble, regardless of bubble color.
-    final statusColor = textColor.withValues(alpha: 0.55);
+    // Timestamp/status color: for outgoing bubbles use a semi-transparent
+    // white that reads clearly on the softened petrol; for incoming use a
+    // muted version of the text color.
+    final statusColor = ownMessage && !noBubble
+        ? Colors.white.withValues(alpha: 0.75)
+        : textColor.withValues(alpha: 0.55);
 
     final linkColor = ownMessage
         ? theme.brightness == Brightness.light
@@ -601,13 +604,22 @@ class _MessageState extends State<Message> {
                                   AppSettings.wallpaperPath.value.isNotEmpty
                               ? color.withValues(alpha: 0.7)
                               : color;
-                              final bubble = Material(
-                                color: noBubble
-                                    ? Colors.transparent
-                                    : bubbleColor,
-                                borderRadius: borderRadius,
-                                clipBehavior: Clip.antiAlias,
-                                child: BubbleBackground(
+                              // Directional speech tail on the bottom-most
+                              // message of a consecutive cluster.
+                              final showTail = isLastInGroup && !noBubble;
+                              final bubble = ClipPath(
+                                clipper: _BubbleTailClipper(
+                                  own: ownMessage,
+                                  radius: borderRadius,
+                                  showTail: showTail,
+                                ),
+                                child: Material(
+                                  color: noBubble
+                                      ? Colors.transparent
+                                      : bubbleColor,
+                                  borderRadius: borderRadius,
+                                  clipBehavior: Clip.antiAlias,
+                                  child: BubbleBackground(
                                   colors: widget.colors,
                                   ignore: noBubble ||
                                       !ownMessage ||
@@ -622,7 +634,8 @@ class _MessageState extends State<Message> {
                                     child: bubbleInner,
                                   ),
                                 ),
-                              );
+                              ),
+                            );
                               return bubble;
                             }(),
                         ),
@@ -947,4 +960,59 @@ class __AnimateInState extends State<_AnimateIn> {
       ),
     );
   }
+}
+
+/// Adds a subtle directional speech tail to the bottom corner of a message
+/// bubble (bottom-right for outgoing, bottom-left for incoming). Only drawn
+/// on the final message of a consecutive cluster.
+class _BubbleTailClipper extends CustomClipper<Path> {
+  _BubbleTailClipper({
+    required this.own,
+    required this.radius,
+    required this.showTail,
+  });
+
+  final bool own;
+  final BorderRadius radius;
+  final bool showTail;
+
+  static const double _tailSize = 10.0;
+
+  @override
+  Path getClip(Size size) {
+    final path = Path()
+      ..addRRect(RRect.fromRectAndCorners(
+        Offset.zero & size,
+        topLeft: radius.topLeft,
+        topRight: radius.topRight,
+        bottomLeft: radius.bottomLeft,
+        bottomRight: radius.bottomRight,
+      ));
+    if (!showTail) return path;
+
+    final s = _tailSize;
+    // Point into the bubble, aligned with the hard corner side.
+    if (own) {
+      // Outgoing: tail on bottom-right, pointing left-down.
+      path
+        ..moveTo(size.width - s, size.height)
+        ..lineTo(size.width, size.height - s)
+        ..lineTo(size.width, size.height)
+        ..close();
+    } else {
+      // Incoming: tail on bottom-left, pointing left.
+      path
+        ..moveTo(s, size.height)
+        ..lineTo(0, size.height - s)
+        ..lineTo(0, size.height)
+        ..close();
+    }
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant _BubbleTailClipper oldClipper) =>
+      oldClipper.own != own ||
+      oldClipper.showTail != showTail ||
+      oldClipper.radius != radius;
 }

@@ -170,10 +170,11 @@ extension on Brightness {
 }
 
 extension BubbleColorTheme on ThemeData {
-  /// Outgoing bubble: primary softened with 8% surface blend (light) or
+  /// Outgoing bubble: primary softened with 20% surface blend (light) so it
+  /// is a lighter, lower-strain petrol instead of a solid dark block, or
   /// primaryContainer at 85% opacity (dark) so it doesn't glow on AMOLED.
   Color get bubbleColor => brightness == Brightness.light
-      ? Color.lerp(colorScheme.primary, colorScheme.surface, 0.08)!
+      ? Color.lerp(colorScheme.primary, colorScheme.surface, 0.20)!
       : colorScheme.primaryContainer.withValues(alpha: 0.85);
 
   Color get onBubbleColor => brightness == Brightness.light

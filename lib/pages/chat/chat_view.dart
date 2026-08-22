@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:badges/badges.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -198,6 +199,12 @@ class ChatView extends StatelessWidget {
           ),
         ),
         ChatSettingsPopupMenu(controller.room, true),
+        IconButton(
+          tooltip: L10n.of(context).search,
+          icon: const Icon(Icons.search_outlined),
+          onPressed: () =>
+              context.go('/rooms/${controller.room.id}/search'),
+        ),
       ];
     }
     return [];
