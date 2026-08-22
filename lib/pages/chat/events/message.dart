@@ -286,46 +286,31 @@ class _MessageState extends State<Message> {
     const hardCorner = Radius.circular(4);
     const roundedCorner = Radius.circular(AppConfig.borderRadius);
 
-    // Group position in visual order (top→bottom, newest→oldest).
-    // Because the list is reversed, nextEvent is visually ABOVE and
-    // previousEvent is visually BELOW this message. The original
-    // FluffyChat-derived definitions remain valid for avatar/clustering
-    // logic; only the tail clipper uses a flipped "showTail" flag.
-    final isFirstInGroup = !nextEventSameSender && previousEventSameSender;
-    final isMiddleInGroup = nextEventSameSender && previousEventSameSender;
-    final isLastInGroup = nextEventSameSender && !previousEventSameSender;
-
-    // Modern grouping: the "tail" (hard corner) sits on the LAST message
-    // of a consecutive block. Middle messages get tight corners on both
-    // connecting sides so the block reads as one continuous surface.
-    final borderRadius = () {
-      if (isMiddleInGroup) {
-        return BorderRadius.only(
-          topLeft: ownMessage ? hardCorner : roundedCorner,
-          topRight: ownMessage ? roundedCorner : hardCorner,
-          bottomLeft: ownMessage ? roundedCorner : hardCorner,
-          bottomRight: ownMessage ? hardCorner : roundedCorner,
-        );
-      }
-      if (isFirstInGroup) {
-        return BorderRadius.only(
-          topLeft: roundedCorner,
-          topRight: roundedCorner,
-          bottomLeft: ownMessage ? roundedCorner : hardCorner,
-          bottomRight: ownMessage ? hardCorner : roundedCorner,
-        );
-      }
-      if (isLastInGroup) {
-        return BorderRadius.only(
-          topLeft: ownMessage ? hardCorner : roundedCorner,
-          topRight: ownMessage ? roundedCorner : hardCorner,
-          bottomLeft: ownMessage ? roundedCorner : hardCorner,
-          bottomRight: ownMessage ? hardCorner : roundedCorner,
-        );
-      }
-      // Solo message: fully rounded
-      return BorderRadius.circular(AppConfig.borderRadius);
-    }();
+    // Modern grouping: the "tail" (hard corner) sits on the OWNER side of the
+    // bubble (bottom-right for outgoing, bottom-left for incoming). Inner
+    // cluster bubbles get tight corners on their connecting side so the
+    // block reads as one continuous surface.
+    //
+    // In reverse:true the list is newest→oldest, so `nextEvent` is visually
+    // ABOVE this message and `previousEvent` is visually BELOW. A bubble is
+    // POSSIBLY clustered above when `nextEventSameSender` is true, and
+    // POSSIBLY clustered below when `previousEventSameSender` is true.
+    //
+    // Mirror FluffyChat's chat/events/message.dart borderRadius:
+    //   - topLeft     : hard iff INCOMING (incoming bubbles put the pointer
+    //                   corner on the top-left)
+    //   - topRight    : hard iff OWN && there's a newer same-sender above
+    //                   (cluster-connection on top)
+    //   - bottomLeft  : hard iff INCOMING && there's an older same-sender
+    //                   below (cluster-connection on bottom)
+    //   - bottomRight : hard iff OWN (outgoing tail corner)
+    final borderRadius = BorderRadius.only(
+      topLeft: !ownMessage ? hardCorner : roundedCorner,
+      topRight: (ownMessage && nextEventSameSender) ? hardCorner : roundedCorner,
+      bottomLeft:
+          (!ownMessage && previousEventSameSender) ? hardCorner : roundedCorner,
+      bottomRight: ownMessage ? hardCorner : roundedCorner,
+    );
     final noBubble =
         ({
               MessageTypes.Video,
