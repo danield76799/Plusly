@@ -50,7 +50,7 @@ class ChatEventList extends StatelessWidget {
 
     events = events.filterByVisibleInGui();
 
-    Logs().v('[EchoDiag-UI] ChatEventList.build — filtered events.length=${events.length}, raw=${timeline.events.length}, firstId=${events.firstOrNull?.eventId ?? events.firstOrNull?.transactionId ?? "null"}, lastId=${events.lastOrNull?.eventId ?? events.lastOrNull?.transactionId ?? "null"}');
+    Logs().d('[EchoDiag-UI] ChatEventList.build — filtered events.length=${events.length}, raw=${timeline.events.length}, firstId=${events.firstOrNull?.eventId ?? events.firstOrNull?.transactionId ?? "null"}, lastId=${events.lastOrNull?.eventId ?? events.lastOrNull?.transactionId ?? "null"}');
 
     final threads = controller.room.threads;
 
@@ -98,6 +98,17 @@ class ChatEventList extends StatelessWidget {
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int i) {
+                // [EchoDiag-Render] Trace which events the SliverList actually
+                // builds. First item (i=1 after the typing/loadmore row) and
+                // last item (i=events.length) are the boundary cases that
+                // matter for "user can see their own message".
+                if (i == 1 || i == events.length) {
+                  final eventIdx = i - 1; // events[0]..events[events.length-1]
+                  if (eventIdx >= 0 && eventIdx < events.length) {
+                    final ev = events[eventIdx];
+                    Logs().d('[EchoDiag-Render] SliverList builds i=$i → events[$eventIdx] id=${ev.eventId} txid=${ev.transactionId} type=${ev.type} sender=${ev.senderId}');
+                  }
+                }
                 if (i == 0) {
                   if (timeline.canRequestFuture) {
                     return Center(
