@@ -640,9 +640,9 @@ class ChatController extends State<ChatPageWithRoom>
   String? animateInEventId;
 
   Future<void> _insert(int index) async {
-    Logs().d('[EchoDiag] _insert(index=$index) — timeline.events.length=${timeline?.events.length ?? "null"}');
-    if (index > 0) return;
     final firstEvent = timeline?.events.firstOrNull;
+    Logs().d('[EchoDiag] _insert(index=$index) — timeline.events.length=${timeline?.events.length ?? "null"}, firstEventId=${firstEvent?.eventId}, firstTxid=${firstEvent?.transactionId}, firstType=${firstEvent?.type}');
+    if (index > 0) return;
     final eventId = firstEvent?.transactionId ?? firstEvent?.eventId;
     animateInEventId = eventId;
     // Rebuild immediately so the new event (including local echo) is visible.

@@ -190,6 +190,20 @@ class _MessageState extends State<Message> {
     final timeline = widget.timeline;
     final theme = Theme.of(context);
 
+    // Once this frame is painted, log how big the Message actually became.
+    // If size is zero/empty the widget rendered but is invisible (off-clip,
+    // overlay, or a constraint that pushed it to nothing).
+    final capturedEventId = event.eventId;
+    final capturedTxid = event.transactionId;
+    final capturedType = event.type;
+    final capturedStatus = event.status;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final ro = context.findRenderObject();
+      final size = ro is RenderBox ? ro.size : null;
+      Logs().d('[EchoDiag-Message] post-frame — eventId=$capturedEventId txid=$capturedTxid type=$capturedType status=$capturedStatus size=$size hasSize=${size != null && size.width > 0 && size.height > 0}');
+    });
+
     if (!{
       EventTypes.Message,
       EventTypes.Sticker,
@@ -197,6 +211,7 @@ class _MessageState extends State<Message> {
       EventTypes.CallInvite,
       PollEvents.pollStart,
     }.contains(event.type)) {
+      Logs().d('[EchoDiag-Message] filtered by type — type=${event.type}');
       if (event.type.startsWith('m.call.')) {
         return const SizedBox.shrink();
       }
