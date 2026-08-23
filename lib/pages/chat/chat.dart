@@ -741,35 +741,39 @@ class ChatController extends State<ChatPageWithRoom>
 
   /// Fallback when SDK timeline callbacks fail to fire. Runs on every sync
   /// that touches this room. If a newer event arrived than the timeline shows,
-  /// refresh the timeline (or at least the view).
+  /// refresh the view (and flush again after a microtask to catch late SDK
+  /// updates).
   void _onRoomSync(SyncUpdate sync) async {
     if (!mounted) return;
     final latestEventId = room.lastEvent?.eventId;
     if (latestEventId == null) return;
 
-    final lastTimelineEvent = timeline?.events.firstOrNull;
-    final timelineHasEvent = lastTimelineEvent != null &&
-        (lastTimelineEvent.eventId == latestEventId ||
-         lastTimelineEvent.transactionId == latestEventId);
+    // Scan the full events list instead of only the first one — a sync can
+    // bring in multiple events at once and the newest might not be the one
+    // the SDK already mutated into our timeline.
+    final events = timeline?.events ?? const [];
+    final timelineHasEvent = events.any(
+      (e) => e.eventId == latestEventId || e.transactionId == latestEventId,
+    );
 
-    // If the newest room event is already in our timeline, just rebuild.
-    // Do NOT trigger a destructive reload/requestFuture here: that can move
-    // a pending local echo into a different timeline object than the UI
-    // renders. The SDK's own callbacks (onNewEvent/onInsert) already fire
-    // for both incoming and outgoing events, so this fallback only needs to
-    // catch the rare case where our own updateView didn't run.
-    if (timelineHasEvent || timeline?.events.isNotEmpty != false) {
+    if (timelineHasEvent) {
+      Logs().d('[EchoDiag-Sync] _onRoomSync: latest $latestEventId already in timeline (${events.length} events) — just rebuild');
       updateView();
       return;
     }
 
-    Logs().v('[Chat] room sync has newer event than empty timeline; refreshing');
-    loadTimelineFuture = _getTimeline().onError(
-      ErrorReporter(
-        context,
-        'Unable to reload timeline after sync fallback',
-      ).onErrorCallback,
-    );
+    // Newest room event isn't in our timeline yet. Rebuild now, then flush
+    // another rebuild after a microtask so any pending SDK callback (onInsert
+    // / onNewEvent) lands in the same frame. Without this second flush,
+    // incoming events that arrive between sync and timeline-mutation are
+    // invisible until the user navigates away and back.
+    Logs().d('[EchoDiag-Sync] _onRoomSync: latest $latestEventId NOT in timeline (${events.length} events) — rebuild + flush');
+    updateView();
+    Future.microtask(() {
+      if (!mounted) return;
+      updateView();
+    });
+    return;
   }
 
   @override
