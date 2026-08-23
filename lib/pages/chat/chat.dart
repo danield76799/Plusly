@@ -741,8 +741,10 @@ class ChatController extends State<ChatPageWithRoom>
 
   /// Fallback when SDK timeline callbacks fail to fire. Runs on every sync
   /// that touches this room. If a newer event arrived than the timeline shows,
-  /// refresh the view (and flush again after a microtask to catch late SDK
-  /// updates).
+  /// refresh the view. Without an explicit reload we use staggered flushes
+  /// (50ms, 200ms, 500ms) so the SDK has time to mutate the timeline into the
+  /// same render frame, even when the SDK callback fires after this sync
+  /// listener.
   void _onRoomSync(SyncUpdate sync) async {
     if (!mounted) return;
     final latestEventId = room.lastEvent?.eventId;
@@ -762,17 +764,33 @@ class ChatController extends State<ChatPageWithRoom>
       return;
     }
 
-    // Newest room event isn't in our timeline yet. Rebuild now, then flush
-    // another rebuild after a microtask so any pending SDK callback (onInsert
-    // / onNewEvent) lands in the same frame. Without this second flush,
-    // incoming events that arrive between sync and timeline-mutation are
-    // invisible until the user navigates away and back.
-    Logs().d('[EchoDiag-Sync] _onRoomSync: latest $latestEventId NOT in timeline (${events.length} events) — rebuild + flush');
+    // Newest room event isn't in our timeline yet. The SDK's onInsert /
+    // onNewEvent callback may fire slightly after this sync listener. Flush
+    // multiple times with growing delays so we land in the same render frame
+    // as the SDK mutation, even when the SDK is slow. The flush is cheap
+    // (just setState) and bails out early once the event lands.
+    Logs().d('[EchoDiag-Sync] _onRoomSync: latest $latestEventId NOT in timeline (${events.length} events) — staggered flush');
+    void flushIfStillMissing(int attempt, Duration delay) {
+      Future.delayed(delay, () {
+        if (!mounted) return;
+        final current = timeline?.events ?? const [];
+        final found = current.any(
+          (e) => e.eventId == latestEventId || e.transactionId == latestEventId,
+        );
+        Logs().d('[EchoDiag-Sync] flush+$delay (attempt $attempt): timeline.length=${current.length}, found=$found');
+        updateView();
+        if (!found) {
+          if (attempt == 1) {
+            flushIfStillMissing(2, const Duration(milliseconds: 200));
+          } else if (attempt == 2) {
+            flushIfStillMissing(3, const Duration(milliseconds: 500));
+          }
+        }
+      });
+    }
+
     updateView();
-    Future.microtask(() {
-      if (!mounted) return;
-      updateView();
-    });
+    flushIfStillMissing(1, const Duration(milliseconds: 50));
     return;
   }
 
