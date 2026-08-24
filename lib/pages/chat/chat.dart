@@ -741,10 +741,11 @@ class ChatController extends State<ChatPageWithRoom>
 
   /// Fallback when SDK timeline callbacks fail to fire. Runs on every sync
   /// that touches this room. If a newer event arrived than the timeline shows,
-  /// refresh the view. Without an explicit reload we use staggered flushes
-  /// (50ms, 200ms, 500ms) so the SDK has time to mutate the timeline into the
-  /// same render frame, even when the SDK callback fires after this sync
-  /// listener.
+  /// refresh the view. The staggered flushes (50/200/500ms) handle the
+  /// common case where the SDK callback is just slightly delayed. If they
+  /// don't catch it, fall back to an explicit `requestHistory` on the
+  /// **existing** timeline — this reloads from the server without replacing
+  /// the timeline object, so the UI keeps rendering the same RoomTimeline.
   void _onRoomSync(SyncUpdate sync) async {
     if (!mounted) return;
     final latestEventId = room.lastEvent?.eventId;
@@ -759,17 +760,12 @@ class ChatController extends State<ChatPageWithRoom>
     );
 
     if (timelineHasEvent) {
-      Logs().d('[EchoDiag-Sync] _onRoomSync: latest $latestEventId already in timeline (${events.length} events) — just rebuild');
       updateView();
       return;
     }
 
-    // Newest room event isn't in our timeline yet. The SDK's onInsert /
-    // onNewEvent callback may fire slightly after this sync listener. Flush
-    // multiple times with growing delays so we land in the same render frame
-    // as the SDK mutation, even when the SDK is slow. The flush is cheap
-    // (just setState) and bails out early once the event lands.
-    Logs().d('[EchoDiag-Sync] _onRoomSync: latest $latestEventId NOT in timeline (${events.length} events) — staggered flush');
+    Logs().d('[EchoDiag-Sync] _onRoomSync: latest $latestEventId NOT in timeline (${events.length} events) — staggered flush + requestHistory fallback');
+
     void flushIfStillMissing(int attempt, Duration delay) {
       Future.delayed(delay, () {
         if (!mounted) return;
@@ -779,19 +775,50 @@ class ChatController extends State<ChatPageWithRoom>
         );
         Logs().d('[EchoDiag-Sync] flush+$delay (attempt $attempt): timeline.length=${current.length}, found=$found');
         updateView();
-        if (!found) {
-          if (attempt == 1) {
-            flushIfStillMissing(2, const Duration(milliseconds: 200));
-          } else if (attempt == 2) {
-            flushIfStillMissing(3, const Duration(milliseconds: 500));
-          }
+        if (found) return;
+        if (attempt == 1) {
+          flushIfStillMissing(2, const Duration(milliseconds: 200));
+        } else if (attempt == 2) {
+          flushIfStillMissing(3, const Duration(milliseconds: 500));
+        } else if (attempt == 3) {
+          // All three flush attempts missed. The SDK callback never fired.
+          // Fall back to requestHistory on the EXISTING timeline so we keep
+          // the same RoomTimeline reference (no UI re-attach needed). If
+          // requestHistory brings in the event, the SDK should fire its
+          // normal onInsert callback for us.
+          _requestHistoryFallback(latestEventId);
         }
       });
     }
 
     updateView();
     flushIfStillMissing(1, const Duration(milliseconds: 50));
-    return;
+  }
+
+  Future<void> _requestHistoryFallback(String latestEventId) async {
+    if (!mounted || timeline == null) return;
+    Logs().d('[EchoDiag-Sync] requestHistory fallback — reloading timeline to fetch $latestEventId');
+    try {
+      // requestHistory prepends older events. We want NEWER events from the
+      // server, so use requestFuture which appends newer events to the
+      // timeline (it only fetches if canRequestFuture is true).
+      if (timeline!.canRequestFuture) {
+        await timeline!.requestFuture(historyCount: _loadHistoryCount);
+      } else {
+        // Fallback: try requestHistory — newer events should still be
+        // returned if the server has them beyond our current window.
+        await timeline!.requestHistory(historyCount: _loadHistoryCount);
+      }
+      if (!mounted) return;
+      final current = timeline?.events ?? const [];
+      final found = current.any(
+        (e) => e.eventId == latestEventId || e.transactionId == latestEventId,
+      );
+      Logs().d('[EchoDiag-Sync] requestHistory fallback done — timeline.length=${current.length}, found=$found');
+      updateView();
+    } catch (e, s) {
+      Logs().w('[EchoDiag-Sync] requestHistory fallback failed', e, s);
+    }
   }
 
   @override
