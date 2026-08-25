@@ -17,7 +17,6 @@ import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/privacy_options.dart';
 import 'package:Pulsly/utils/push_helper.dart';
 import '../config/app_config.dart';
-import '../services/timeline_cache.dart';
 
 bool _vodInitialized = false;
 
@@ -168,22 +167,6 @@ Future<void> notificationTap(
             ? '/rooms'
             : '/rooms/$roomId',
       );
-
-      // Preload timeline in the background after navigation
-      Future.delayed(Duration.zero, () async {
-        try {
-          final loadedRoom = client.getRoomById(roomId);
-          if (loadedRoom != null) {
-            final timeline = await loadedRoom.getTimeline().timeout(
-              const Duration(seconds: 5),
-              onTimeout: () => loadedRoom.getTimeline(),
-            );
-            TimelineCache.setTimeline(roomId, timeline);
-          }
-        } catch (e) {
-          Logs().w('Background preload failed for $roomId', e);
-        }
-      });
       break;
     case NotificationResponseType.selectedNotificationAction:
       final actionType = PluslyNotificationActions.values.singleWhereOrNull(
