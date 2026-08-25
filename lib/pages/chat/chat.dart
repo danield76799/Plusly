@@ -869,6 +869,13 @@ class ChatController extends State<ChatPageWithRoom>
           if (mounted) {
             updateView();
             scrollDownAfterSend();
+            // Mark the room as read after sending. scrollDownAfterSend only
+            // jumps to the bottom; it does NOT clear the unread badge unless
+            // the user was scrolled up (the _updateScrollController listener
+            // only fires setReadMarker on a true->false _scrolledUp flip).
+            // Without this, sending a reply leaves the room showing as unread
+            // in the chat list until the next sync or manual scroll.
+            setReadMarker();
           }
         },
         onError: (e) {
