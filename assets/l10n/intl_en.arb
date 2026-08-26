@@ -3560,7 +3560,7 @@
   "featureSwitches": "Feature switches",
   "useLegacyAppBar": "Legacy search bar",
   "useLegacyNavBar": "Legacy navigation bar",
-  "appIntro": "Welcome to Plusly - a Matrix client enhanced for a smoother messaging experience. A decentralised chat app for [matrix]. Learn more at https://matrix.org/",
+  "appIntro": "Welcome to Plusly - a fork of FluffyChat and ExteraNext, enhanced for a smoother Matrix experience. A decentralised chat app for [matrix]. Learn more at https://matrix.org/",
   "signIn": "Sign in",
   "createNewAccount": "Sign up",
   "signUpGreeting": "Plusly is decentralised. Pick a server to begin.",
