@@ -1050,7 +1050,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Extera",
+  "fluffychat": "Plusly",
   "@fluffychat": {
     "type": "String",
     "placeholders": {}
@@ -1238,7 +1238,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "inviteText": "{username} nodigt je uit voor Extera. \n1. Ga naar https://extera.xyz/?utm_medium=invite en installeer de app \n2. Registreer of log in \n3. Open de uitnodigingslink: \n {link}",
+  "inviteText": "{username} nodigt je uit voor Plusly. \n1. Ga naar https://github.com/danield76799/Plusly/releases en installeer de app \n2. Registreer of log in \n3. Open de uitnodigingslink: \n {link}",
   "@inviteText": {
     "type": "String",
     "placeholders": {
@@ -1426,7 +1426,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "newMessageInFluffyChat": "💬 Nieuw bericht in Extera",
+  "newMessageInFluffyChat": "💬 Nieuw bericht in Plusly",
   "@newMessageInFluffyChat": {
     "type": "String",
     "placeholders": {}
@@ -2589,7 +2589,7 @@
   "@emailOrUsername": {},
   "indexedDbErrorTitle": "Problemen met de privémodus",
   "@indexedDbErrorTitle": {},
-  "indexedDbErrorLong": "Helaas is berichtopslag standaard niet ingeschakeld in de privémodus.\nGa naar\n- about:config\n- zet dom.indexedDB.privateBrowsing.enabled op true\nAnders kan Extera niet worden gestart.",
+  "indexedDbErrorLong": "Helaas is berichtopslag standaard niet ingeschakeld in de privémodus.\nGa naar\n- about:config\n- zet dom.indexedDB.privateBrowsing.enabled op true\nAnders kan Plusly niet worden gestart.",
   "@indexedDbErrorLong": {},
   "switchToAccount": "Overschakelen naar account {number}",
   "@switchToAccount": {
@@ -2766,13 +2766,13 @@
   "@callingPermissions": {},
   "callingAccount": "Belaccount",
   "@callingAccount": {},
-  "callingAccountDetails": "Hiermee kan Extera de systeem-bel-app gebruiken.",
+  "callingAccountDetails": "Hiermee kan Plusly de systeem-bel-app gebruiken.",
   "@callingAccountDetails": {},
   "appearOnTop": "Bovenop verschijnen",
   "@appearOnTop": {},
-  "appearOnTopDetails": "Hiermee kan de app bovenop andere apps worden weergegeven (niet vereist als je Extera al hebt ingesteld als belaccount)",
+  "appearOnTopDetails": "Hiermee kan de app bovenop andere apps worden weergegeven (niet vereist als je Plusly al hebt ingesteld als belaccount)",
   "@appearOnTopDetails": {},
-  "otherCallingPermissions": "Microfoon, camera en andere Extera-machtigingen",
+  "otherCallingPermissions": "Microfoon, camera en andere Plusly-machtigingen",
   "@otherCallingPermissions": {},
   "whyIsThisMessageEncrypted": "Waarom is dit bericht onleesbaar?",
   "@whyIsThisMessageEncrypted": {},
@@ -3294,7 +3294,7 @@
   "oneOfYourDevicesIsNotVerified": "Een van je apparaten is niet geverifieerd",
   "noticeChatBackupDeviceVerification": "Opmerking: Als je al je apparaten verbindt met sleutelback-up, worden ze automatisch geverifieerd.",
   "continueText": "Doorgaan",
-  "welcomeText": "Welkom bij Extera - de app voor Matrix, een enorm gedecentraliseerd netwerk voor berichtenverkeer!",
+  "welcomeText": "Welkom bij Plusly - de app voor Matrix, een enorm gedecentraliseerd netwerk voor berichtenverkeer!",
   "blur": "Vervaging:",
   "opacity": "Transparantie:",
   "setWallpaper": "Achtergrond instellen",
@@ -3331,7 +3331,7 @@
   "waitingForServer": "Wachten op server...",
   "welcome": "Welkom!",
   "logInToYourAccount": "Log in op je Matrix-account om te beginnen met chatten.",
-  "appIntroduction": "Extera is een client voor het Matrix-chatnetwerk. Leer meer op https://matrix.org of tik op *Doorgaan*.",
+  "appIntroduction": "Plusly is een client voor het Matrix-chatnetwerk. Leer meer op https://matrix.org of tik op *Doorgaan*.",
   "newChatRequest": "📩 Nieuw chatverzoek",
   "contentNotificationSettings": "Instellingen voor inhoudsmeldingen",
   "generalNotificationSettings": "Algemene meldinginstellingen",
@@ -3496,7 +3496,7 @@
   "individualChatPrivacySettings": "Individuele chatinstellingen",
   "individualChatPrivacySettingsDescription": "Stel je eigen privacyinstellingen in voor verschillende chats.",
   "updateAvailableTitle": "Update beschikbaar",
-  "updateAvailable": "Je kunt Extera {version} downloaden! Updates bevatten meestal bugfixes en nieuwe functies.",
+  "updateAvailable": "Je kunt Plusly {version} downloaden! Updates bevatten meestal bugfixes en nieuwe functies.",
   "@updateAvailable": {
     "placeholders": {
       "version": {
@@ -3559,10 +3559,10 @@
   "featureSwitches": "Functies",
   "useLegacyAppBar": "Oude zoekbalk",
   "useLegacyNavBar": "Oude navigatiebalk",
-  "appIntro": "Hallo, dit is Extera. Dit is een gedecentraliseerde messenger op het [matrix]-protocol. Leer meer op https://matrix.org/",
+  "appIntro": "Hallo, dit is Plusly. Dit is een gedecentraliseerde messenger op het [matrix]-protocol. Leer meer op https://matrix.org/",
   "signIn": "Inloggen",
   "createNewAccount": "Account aanmaken",
-  "signUpGreeting": "Extera is gedecentraliseerd. Kies een server om te beginnen.",
+  "signUpGreeting": "Plusly is gedecentraliseerd. Kies een server om te beginnen.",
   "signInGreeting": "Heb je al een Matrix-account? Welkom terug!",
   "theProcessWasCanceled": "De bewerking is geannuleerd.",
   "searchOrEnterHomeserverAddress": "Zoek of voer serveradres in",
@@ -4053,6 +4053,5 @@
     "type": "String",
     "description": "Label above the live-location duration picker.",
     "placeholders": {}
-  },
-  "unifiedpushPrivacy": "Privacy-vriendelijk, geen Google"
+  }
 }
