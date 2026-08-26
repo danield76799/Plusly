@@ -291,80 +291,68 @@ class ChatInputRow extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Container(
-                    height: height,
-                    width: height,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: controller.sendController.text.isNotEmpty
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.surface,
-                      shape: BoxShape.circle,
-                      boxShadow: controller.sendController.text.isNotEmpty
-                          ? [
-                              BoxShadow(
-                                color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ]
-                          : null,
-                      border: Border.all(
-                        color: theme.colorScheme.outline.withValues(alpha: 0.15),
-                      ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      shape: const CircleBorder(),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: PlatformInfos.platformCanRecord &&
-                                controller.sendController.text.isEmpty
-                            ? () {
-                                // Show recording hint (mirrors old tap behaviour)
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    margin: const EdgeInsets.only(
-                                      bottom: height + 16,
-                                      left: 16,
-                                      right: 16,
-                                      top: 16,
+                  Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: SizedBox(
+                      height: height,
+                      width: height,
+                      child: Material(
+                        color: controller.sendController.text.isNotEmpty
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.surface,
+                        shape: const CircleBorder(),
+                        elevation: controller.sendController.text.isNotEmpty ? 2 : 0,
+                        shadowColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: PlatformInfos.platformCanRecord &&
+                                  controller.sendController.text.isEmpty
+                              ? () {
+                                  // Show recording hint (mirrors old tap behaviour)
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      margin: const EdgeInsets.only(
+                                        bottom: height + 20,
+                                        left: 16,
+                                        right: 16,
+                                        top: 16,
+                                      ),
+                                      showCloseIcon: true,
+                                      content: Text(
+                                        L10n.of(context).longPressToRecordVoiceMessage,
+                                      ),
                                     ),
-                                    showCloseIcon: true,
-                                    content: Text(
-                                      L10n.of(context).longPressToRecordVoiceMessage,
-                                    ),
-                                  ),
-                                );
-                              }
-                            : controller.sendController.text.isNotEmpty
-                                ? controller.send
-                                : null,
-                        onLongPress: PlatformInfos.platformCanRecord &&
-                                controller.sendController.text.isEmpty
-                            ? () => recordingViewModel.startRecording(controller.room)
-                            : controller.sendController.text.isNotEmpty
-                                ? () => controller.sendScheduleAction()
-                                : null,
-                        child: AnimatedSwitcher(
-                          duration: MediaQuery.of(context).disableAnimations
-                              ? Duration.zero
-                              : const Duration(milliseconds: 200),
-                          child: Icon(
-                            controller.sendController.text.isNotEmpty
-                                ? Icons.send
-                                : recordingViewModel.recordingMode == RecordingMode.video
-                                    ? Icons.videocam_outlined
-                                    : Icons.mic_none_outlined,
-                            key: ValueKey(controller.sendController.text.isNotEmpty),
-                            color: controller.sendController.text.isNotEmpty
-                                ? theme.colorScheme.onPrimary
-                                : theme.colorScheme.primary,
-                            size: 22,
-                          ),
+                                  );
+                                }
+                              : controller.sendController.text.isNotEmpty
+                                  ? controller.send
+                                  : null,
+                          onLongPress: PlatformInfos.platformCanRecord &&
+                                  controller.sendController.text.isEmpty
+                              ? () => recordingViewModel.startRecording(controller.room)
+                              : controller.sendController.text.isNotEmpty
+                                  ? () => controller.sendScheduleAction()
+                                  : null,
+                          child: AnimatedSwitcher(
+                            duration: MediaQuery.of(context).disableAnimations
+                                ? Duration.zero
+                                : const Duration(milliseconds: 200),
+                            child: Icon(
+                              controller.sendController.text.isNotEmpty
+                                  ? Icons.send
+                                  : recordingViewModel.recordingMode == RecordingMode.video
+                                      ? Icons.videocam_outlined
+                                      : Icons.mic_none_outlined,
+                              key: ValueKey(controller.sendController.text.isNotEmpty),
+                              color: controller.sendController.text.isNotEmpty
+                                  ? theme.colorScheme.onPrimary
+                                  : theme.colorScheme.primary,
+                              size: 22,
+                            ),
                         ),
                       ),
                     ),
+                  ),
                   ),
                 ],
         );
