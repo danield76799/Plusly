@@ -34,11 +34,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "fileName": "Failo vardas",
   "@fileName": {
     "type": "String",

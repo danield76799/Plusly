@@ -1050,11 +1050,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "fontSize": "Lettergrootte",
   "@fontSize": {
     "type": "String",

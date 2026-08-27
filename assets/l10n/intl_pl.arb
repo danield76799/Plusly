@@ -743,11 +743,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "forward": "Przekaż",
   "@forward": {
     "type": "String",

@@ -1774,11 +1774,6 @@
   },
   "unverified": "Neapliecināta",
   "@unverified": {},
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "howOffensiveIsThisContent": "Cik aizskarošs ir šis saturs?",
   "@howOffensiveIsThisContent": {
     "type": "String",

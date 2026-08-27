@@ -830,11 +830,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "fontSize": "Taille de la police",
   "@fontSize": {
     "type": "String",

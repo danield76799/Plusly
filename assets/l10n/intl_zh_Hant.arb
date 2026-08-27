@@ -691,11 +691,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "fontSize": "字體大小",
   "@fontSize": {
     "type": "String",

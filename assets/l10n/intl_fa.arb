@@ -1122,11 +1122,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "fontSize": "اندازه قلم",
   "@fontSize": {
     "type": "String",

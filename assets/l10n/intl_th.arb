@@ -158,11 +158,6 @@
       }
     }
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "googlyEyesContent": "{senderName} ส่งตากวนๆให้คุณ",
   "@googlyEyesContent": {
     "type": "String",

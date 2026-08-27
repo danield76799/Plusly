@@ -773,11 +773,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "fontSize": "Величина фонта",
   "@fontSize": {
     "type": "String",

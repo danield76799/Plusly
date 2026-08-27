@@ -1098,11 +1098,6 @@
   },
   "homeserver": "Hem-servitor",
   "@homeserver": {},
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "moderator": "Moderator",
   "@moderator": {
     "type": "String",

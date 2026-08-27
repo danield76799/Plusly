@@ -649,11 +649,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "forward": "Framåt",
   "@forward": {
     "type": "String",

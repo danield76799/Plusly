@@ -1239,11 +1239,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "iHaveClickedOnLink": "Olen klikannut linkkiä",
   "@iHaveClickedOnLink": {
     "type": "String",

@@ -826,11 +826,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "fontSize": "Fondi suurus",
   "@fontSize": {
     "type": "String",

@@ -1441,10 +1441,6 @@
     "placeholders": {}
   },
   "@unverified": {},
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "@howOffensiveIsThisContent": {
     "type": "String",
     "placeholders": {}

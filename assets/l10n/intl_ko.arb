@@ -143,11 +143,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "fileName": "파일 이름",
   "@fileName": {
     "type": "String",

@@ -500,11 +500,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "forward": "Preposlať",
   "@forward": {
     "type": "String",

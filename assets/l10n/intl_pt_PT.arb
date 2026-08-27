@@ -768,11 +768,6 @@
     "type": "String",
     "placeholders": {}
   },
-  "fluffychat": "Plusly",
-  "@fluffychat": {
-    "type": "String",
-    "placeholders": {}
-  },
   "fontSize": "Tamanho da letra",
   "@fontSize": {
     "type": "String",
