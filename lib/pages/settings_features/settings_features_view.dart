@@ -77,10 +77,10 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                       const ListDivider(),
                       ListTile(
                         leading: const Icon(Icons.translate_outlined),
-                        title: const Text('Translation language'),
+                        title: Text(L10n.of(context).translationLanguage),
                         subtitle: Text(
                           _selectedTranslationLang.isEmpty
-                              ? 'Device language'
+                              ? L10n.of(context).deviceLanguage
                               : _selectedTranslationLang.toUpperCase(),
                         ),
                         trailing: DropdownButton<String>(
@@ -99,19 +99,19 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                               }
                             }
                           },
-                          items: const [
-                            DropdownMenuItem(value: 'device', child: Text('Device')),
-                            DropdownMenuItem(value: 'en', child: Text('EN')),
-                            DropdownMenuItem(value: 'nl', child: Text('NL')),
-                            DropdownMenuItem(value: 'de', child: Text('DE')),
-                            DropdownMenuItem(value: 'fr', child: Text('FR')),
-                            DropdownMenuItem(value: 'es', child: Text('ES')),
-                            DropdownMenuItem(value: 'it', child: Text('IT')),
-                            DropdownMenuItem(value: 'pt', child: Text('PT')),
-                            DropdownMenuItem(value: 'ru', child: Text('RU')),
-                            DropdownMenuItem(value: 'zh', child: Text('ZH')),
-                            DropdownMenuItem(value: 'ja', child: Text('JA')),
-                            DropdownMenuItem(value: 'ko', child: Text('KO')),
+                          items: [
+                            DropdownMenuItem(value: 'device', child: Text(L10n.of(context).device)),
+                            const DropdownMenuItem(value: 'en', child: Text('EN')),
+                            const DropdownMenuItem(value: 'nl', child: Text('NL')),
+                            const DropdownMenuItem(value: 'de', child: Text('DE')),
+                            const DropdownMenuItem(value: 'fr', child: Text('FR')),
+                            const DropdownMenuItem(value: 'es', child: Text('ES')),
+                            const DropdownMenuItem(value: 'it', child: Text('IT')),
+                            const DropdownMenuItem(value: 'pt', child: Text('PT')),
+                            const DropdownMenuItem(value: 'ru', child: Text('RU')),
+                            const DropdownMenuItem(value: 'zh', child: Text('ZH')),
+                            const DropdownMenuItem(value: 'ja', child: Text('JA')),
+                            const DropdownMenuItem(value: 'ko', child: Text('KO')),
                           ],
                         ),
                       ),
@@ -158,8 +158,8 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                       ),
                       ListTile(
                         leading: const Icon(Icons.grid_view_outlined),
-                        title: const Text('Columns'),
-                        subtitle: Text('${AppSettings.galleryColumns.value} columns'),
+                        title: Text(L10n.of(context).columns),
+                        subtitle: Text(L10n.of(context).columnsSubtitle(AppSettings.galleryColumns.value)),
                         trailing: DropdownButton<int>(
                           value: AppSettings.galleryColumns.value,
                           underline: const SizedBox(),
@@ -181,7 +181,7 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                       const ListDivider(),
                       ListTile(
                         leading: const Icon(Icons.photo_size_select_large_outlined),
-                        title: const Text('Thumbnail size'),
+                        title: Text(L10n.of(context).thumbnailSize),
                         subtitle: Text('${AppSettings.galleryThumbnailSize.value}px'),
                         trailing: DropdownButton<int>(
                           value: AppSettings.galleryThumbnailSize.value,
@@ -228,7 +228,7 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                       ),
                       ListTile(
                         leading: const Icon(Icons.download_outlined),
-                        title: const Text('Export settings'),
+                        title: Text(L10n.of(context).exportSettings),
                         subtitle: const Text(
                           'Save to app folder and share to Downloads/Drive',
                         ),
@@ -237,7 +237,7 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                       const ListDivider(),
                       ListTile(
                         leading: const Icon(Icons.restore_outlined),
-                        title: const Text('Restore settings'),
+                        title: Text(L10n.of(context).restoreSettings),
                         subtitle: const Text(
                           'Load preferences from a JSON file',
                         ),

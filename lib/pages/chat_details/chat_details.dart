@@ -45,7 +45,7 @@ class ChatDetailsController extends State<ChatDetails> {
     final room = Matrix.of(context).client.getRoomById(roomId);
     if (room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Room not found')),
+        SnackBar(content: Text(L10n.of(context).roomNotFound)),
       );
       return;
     }
@@ -72,7 +72,7 @@ class ChatDetailsController extends State<ChatDetails> {
     final room = Matrix.of(context).client.getRoomById(widget.roomId);
     if (room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Room not found')),
+        SnackBar(content: Text(L10n.of(context).roomNotFound)),
       );
       return;
     }
@@ -117,7 +117,7 @@ class ChatDetailsController extends State<ChatDetails> {
     final room = Matrix.of(context).client.getRoomById(widget.roomId);
     if (room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Room not found')),
+        SnackBar(content: Text(L10n.of(context).roomNotFound)),
       );
       return;
     }

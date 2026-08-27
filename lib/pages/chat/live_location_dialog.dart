@@ -244,7 +244,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
         children: [
           const Icon(Icons.my_location, color: Colors.red),
           const SizedBox(width: 8),
-          Text('Share live location'),
+          Text(L10n.of(context).shareLiveLocation),
         ],
       ),
       content: contentWidget,
@@ -261,7 +261,7 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
             onPressed: _isStarting ? null : _startLiveLocation,
             child: _isStarting
                 ? const CupertinoActivityIndicator()
-                : const Text('Start live location'),
+                : Text(L10n.of(context).startLiveLocation),
           ),
       ],
     );

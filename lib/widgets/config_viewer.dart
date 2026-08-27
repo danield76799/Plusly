@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:Pulsly/generated/l10n/l10n.dart';
+
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,7 +50,7 @@ class ConfigViewer extends StatelessWidget {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Advanced configurations'),
+        title: Text(L10n.of(context).advancedConfigurations),
         leading: BackButton(onPressed: () => context.go('/')),
       ),
       body: Column(

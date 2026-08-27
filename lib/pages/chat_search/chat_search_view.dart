@@ -208,11 +208,11 @@ class ChatSearchView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Filter by sender', style: Theme.of(ctx).textTheme.titleLarge),
+            Text(L10n.of(context).filterBySender, style: Theme.of(ctx).textTheme.titleLarge),
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.people_outline),
-              title: const Text('All senders'),
+              title: Text(L10n.of(context).allSenders),
               onTap: () {
                 controller.filterSenderId = null;
                 controller.restartSearch();

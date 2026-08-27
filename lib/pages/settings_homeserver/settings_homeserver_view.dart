@@ -177,7 +177,7 @@ class SettingsHomeserverView extends StatelessWidget {
                             ),
                             const ListDivider(),
                             ListTile(
-                              title: const Text('Federation Base URL'),
+                              title: Text(L10n.of(context).federationBaseUrl),
                               subtitle: Linkify(
                                 text: data.federationBaseUrl.toString(),
                                 textScaleFactor: MediaQuery.textScalerOf(
@@ -244,7 +244,7 @@ class SettingsHomeserverView extends StatelessWidget {
                           ),
                         ),
                         ListTile(
-                          title: const Text('Base URL'),
+                          title: Text(L10n.of(context).baseUrl),
                           subtitle: Linkify(
                             text: wellKnown.mHomeserver.baseUrl.toString(),
                             textScaleFactor: MediaQuery.textScalerOf(
@@ -260,7 +260,7 @@ class SettingsHomeserverView extends StatelessWidget {
                         ),
                         if (identityServer != null)
                           ListTile(
-                            title: const Text('Identity Server:'),
+                            title: Text(L10n.of(context).identityServer),
                             subtitle: Linkify(
                               text: identityServer.baseUrl.toString(),
                               textScaleFactor: MediaQuery.textScalerOf(

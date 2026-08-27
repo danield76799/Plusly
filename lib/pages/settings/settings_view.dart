@@ -552,9 +552,9 @@ class SettingsView extends StatelessWidget {
                                 color: theme.colorScheme.onPrimaryContainer,
                               ),
                             ),
-                            title: const Text('Scheduled Messages'),
-                            subtitle: const Text(
-                              'View and cancel scheduled messages',
+                            title: Text(L10n.of(context).scheduledMessages),
+                            subtitle: Text(
+                              L10n.of(context).scheduledMessagesSubtitle,
                             ),
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () =>
@@ -573,9 +573,9 @@ class SettingsView extends StatelessWidget {
                                     color: theme.colorScheme.onSecondary,
                                   ),
                                 ),
-                                title: const Text('Compact Chat List'),
-                                subtitle: const Text(
-                                  'Smaller avatars and spacing',
+                                title: Text(L10n.of(context).compactChatList),
+                                subtitle: Text(
+                                  L10n.of(context).compactChatListSubtitle,
                                 ),
                                 onChanged: (value) {
                                   AppSettings.chatListCompactMode.setItem(value);

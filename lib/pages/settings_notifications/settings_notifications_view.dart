@@ -215,15 +215,15 @@ class SettingsNotificationsView extends StatelessWidget {
                         ),
                         ListTile(
                           leading: const Icon(Icons.bug_report_outlined),
-                          title: Text('Push diagnose'),
-                          subtitle: const Text('UP-distributor, endpoint, geregistreerd?'),
+                          title: Text(L10n.of(context).pushDiagnose),
+                          subtitle: Text(L10n.of(context).pushDebugSubtitle),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => context.push('/rooms/settings/push-debug'),
                         ),
                         ListTile(
                           leading: const Icon(Icons.battery_std_outlined),
-                          title: const Text('Batterijoptimalisatie'),
-                          subtitle: const Text('Ga naar de Android-instellingen voor Plusly'),
+                          title: Text(L10n.of(context).batteryOptimization),
+                          subtitle: Text(L10n.of(context).batteryOptimizationSubtitle),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () async {
                             try {

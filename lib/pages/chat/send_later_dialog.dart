@@ -80,13 +80,13 @@ class SendLaterDialogState extends State<SendLaterDialog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Send later')),
+      appBar: AppBar(title: Text(L10n.of(context).sendLater)),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Pick date and time to send the message'),
+            Text(L10n.of(context).pickDateTimeToSend),
             const SizedBox(height: 16),
             TextField(
               controller: _textController,
@@ -112,14 +112,14 @@ class SendLaterDialogState extends State<SendLaterDialog> {
                 Expanded(
                   child: TextButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
+                    child: Text(L10n.of(context).cancel),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: _scheduleMessage,
-                    child: const Text('Schedule'),
+                    child: Text(L10n.of(context).schedule),
                   ),
                 ),
               ],
@@ -133,7 +133,7 @@ class SendLaterDialogState extends State<SendLaterDialog> {
   Future<void> _scheduleMessage() async {
     if (_selected == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select date and time')),
+        SnackBar(content: Text(L10n.of(context).selectDateTime)),
       );
       return;
     }

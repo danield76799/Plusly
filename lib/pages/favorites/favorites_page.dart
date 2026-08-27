@@ -60,7 +60,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           children: [
             const Icon(Icons.star, color: Colors.amber),
             const SizedBox(width: 8),
-            const Text('Favorieten'),
+            Text(L10n.of(context).favorites),
           ],
         ),
       ),

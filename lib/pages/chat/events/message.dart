@@ -702,7 +702,7 @@ class _MessageState extends State<Message> {
                                               ? "${widget.thread!.lastEvent!.text.substring(0, 32)}..."
                                               : widget.thread!.lastEvent!.text,
                                         )
-                                      : const Text('Thread'),
+                                      : Text(L10n.of(context).thread),
                                 ],
                               ),
                               onTap: () => context.push(

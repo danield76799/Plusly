@@ -19,7 +19,7 @@ class SettingsFeaturesController extends State<SettingsFeatures> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Saved to: $path'),
+          content: Text(L10n.of(context).savedTo(path)),
           duration: const Duration(seconds: 5),
         ),
       );
@@ -27,7 +27,7 @@ class SettingsFeaturesController extends State<SettingsFeatures> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+      ).showSnackBar(SnackBar(content: Text(L10n.of(context).exportFailed(e))));
     }
   }
 
@@ -53,8 +53,8 @@ class SettingsFeaturesController extends State<SettingsFeatures> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Settings restored. Restart app to apply all changes.'),
+      SnackBar(
+        content: Text(L10n.of(context).settingsRestoredRestart),
       ),
     );
   }

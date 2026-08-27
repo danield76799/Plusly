@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/bridge_utils.dart';
 
 class BridgeFilterBar extends StatelessWidget {
@@ -54,7 +55,7 @@ class BridgeFilterBar extends StatelessWidget {
         itemBuilder: (context, i) {
           if (hasActiveFilters && i == sortedTypes.length) {
             return ActionChip(
-              label: const Text('Clear'),
+              label: Text(L10n.of(context).clear),
               avatar: const Icon(Icons.close, size: 18),
               onPressed: () => onChanged(Set<String>.from(allBridgeTypes)),
               backgroundColor: theme.colorScheme.errorContainer,
