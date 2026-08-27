@@ -795,20 +795,27 @@ class ChatController extends State<ChatPageWithRoom>
     final text = sendController.text;
     if (text.trim().isEmpty) return;
 
+    // --- Debounce ---
+    // The send-knop, the keyboard "Send" action (onSubmitted), and the
+    // hardware-keyboard Enter handler all route through this method. If the
+    // user accidentally triggers two of them in the same frame, both calls
+    // would otherwise read the composer text and send two duplicate bubbles.
+    // We capture the text, clear the composer, then gate further send() calls
+    // behind _isSending until the actual network send settles.
+    if (_isSending) return;
+    _isSending = true;
+
     // --- Optimistic UI (WhatsApp-style) ---
     // Clear the composer and focus FIRST, without awaiting the network/
     // encryption round-trip. The Matrix SDK appends a local-echo event
     // immediately and notifies us via onNewEvent -> updateView, so the
     // bubble shows up instantly. Only if sendTextEvent throws do we
     // surface an error.
-    _isSending = true;
     // Capture these BEFORE _clearComposer() wipes the composer state.
     final editEventId = editEvent?.eventId;
     final replyToEvent = replyEvent;
     _clearComposer();
-    setState(() {
-      _isSending = false;
-    });
+    setState(() {});
 
     if (inputFocus.hasFocus) {
       inputFocus.unfocus();
@@ -886,7 +893,11 @@ class ChatController extends State<ChatPageWithRoom>
             );
           }
         },
-      ),
+      ).whenComplete(() {
+        // Always release the send debounce, even on error, so the user
+        // can retry by pressing the send-knop again.
+        _isSending = false;
+      }),
     );
   }
 
