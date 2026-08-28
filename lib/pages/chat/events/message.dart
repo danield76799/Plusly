@@ -287,17 +287,18 @@ class _MessageState extends State<Message> {
 
     final displayEvent = event.getDisplayEvent(timeline);
 
-    // Sync lookup of the reply target — avoids an async FutureBuilder that
-    // reloads on every list rebuild and makes the reply quote bar pop in
-    // (shifting the bubble). Most replies reference an earlier event that
-    // is already in the loaded timeline, so this resolves instantly.
+    // Reply target lookup via FutureBuilder so the quote bar shows up
+    // even when the target isn't in the loaded timeline yet (e.g. DMs
+    // where the reply target hasn't been requested). When the target is
+    // missing we fall back to a placeholder event. This restores the
+    // FluffyChat flow removed in f1991eeaa; it can cause the quote bar
+    // to "pop in" once the target resolves, which may shift the bubble
+    // slightly on rebuild.
     final inReplyTo = event.inReplyToEventId(includingFallback: false);
-    final replyEvent = inReplyTo != null
-        ? timeline.events.firstWhereOrNull(
-            (e) => e.eventId == inReplyTo,
-          )
+    final hasReply = inReplyTo != null;
+    final replyEvent = hasReply
+        ? timeline.events.firstWhereOrNull((e) => e.eventId == inReplyTo)
         : null;
-    final hasReply = replyEvent != null;
     const hardCorner = Radius.circular(4);
     const roundedCorner = Radius.circular(AppConfig.borderRadius);
 
@@ -535,8 +536,27 @@ class _MessageState extends State<Message> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     if (hasReply)
-                                      Builder(
-                                        builder: (BuildContext context) {
+                                      FutureBuilder<Event?>(
+                                        future: replyEvent != null
+                                            ? Future.value(replyEvent)
+                                            : event.getReplyEvent(timeline),
+                                        builder:
+                                            (BuildContext context, snapshot) {
+                                          final displayReplyEvent =
+                                              snapshot.data ??
+                                              Event(
+                                                eventId: inReplyTo,
+                                                content: {
+                                                  'msgtype': 'm.text',
+                                                  'body': '...',
+                                                },
+                                                senderId: event.senderId,
+                                                type: 'm.room.message',
+                                                room: event.room,
+                                                status: EventStatus.sent,
+                                                originServerTs:
+                                                    DateTime.now(),
+                                              );
                                           return Padding(
                                             padding: const EdgeInsets.only(
                                               left: 16,
@@ -553,11 +573,11 @@ class _MessageState extends State<Message> {
                                                     ReplyContent.borderRadius,
                                                 onTap: () => widget
                                                     .scrollToEventId(
-                                                  replyEvent.eventId,
+                                                  displayReplyEvent.eventId,
                                                 ),
                                                 child: AbsorbPointer(
                                                   child: ReplyContent(
-                                                    replyEvent,
+                                                    displayReplyEvent,
                                                     noBubble: noBubble,
                                                     ownMessage: ownMessage,
                                                     timeline: timeline,
