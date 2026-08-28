@@ -321,6 +321,11 @@ class PushHelper {
         'id': '${notification.roomId?.hashCode ?? 0}',
       });
     } catch (e, s) {
+      Logs().e('Push showNotification crashed', e, s);
+      PushEventLog().add('push_error', {
+        'room': notification.roomId ?? '',
+        'error': '$e',
+      });
       await _crashHandler(e, s);
       rethrow;
     }
