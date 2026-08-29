@@ -136,6 +136,7 @@ Future<GitHubRelease?> getLatestRelease({bool forceRefresh = false}) async {
     if (response.statusCode == 200 && response.data is List) {
       final releases = (response.data as List)
           .whereType<Map<String, dynamic>>()
+          .where((json) => json['draft'] != true) // skip draft releases
           .map(GitHubRelease.fromJson)
           .where((r) {
         final tag = r.tagName;
@@ -642,18 +643,30 @@ Future<void> checkForUpdates(BuildContext context) async {
     } else {
       // We have a version from the txt file — try to upgrade it with a real
       // APK URL from the latest GitHub release so "Download & install" works.
+      // The GitHub API reflects a freshly-published release immediately,
+      // whereas plusly-version.txt is only synced AFTER the release is created
+      // (workflow order), so the API can be newer during that window. Pick the
+      // newer of the two so the update check never lags behind a real release.
       var gotApkUrls = false;
       try {
         final apiRelease = await getLatestRelease(forceRefresh: true);
         if (apiRelease != null && apiRelease.hasApk) {
+          final apiIsNewer =
+              isNewerVersion(apiRelease.tagName, release.tagName);
           release = GitHubRelease(
-            tagName: release.tagName,
+            tagName: apiIsNewer ? apiRelease.tagName : release.tagName,
             downloadUrl: apiRelease.downloadUrl,
             browserDownloadUrl: apiRelease.browserDownloadUrl,
             hasApk: true,
             apkUrlsByAbi: apiRelease.apkUrlsByAbi,
           );
           gotApkUrls = true;
+          if (apiIsNewer) {
+            Logs().v(
+              'GitHub API reports newer release ${apiRelease.tagName} '
+              'than version.txt (${release.tagName}) — using API version',
+            );
+          }
         }
       } catch (e) {
         Logs().w('GitHub APK URL fetch failed, falling back to predictable URLs', e);
