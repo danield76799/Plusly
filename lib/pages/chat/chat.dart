@@ -29,7 +29,6 @@ import 'package:Pulsly/pages/chat/seen_by_row.dart';
 import 'package:Pulsly/pages/chat/send_poll_dialog.dart';
 import 'package:Pulsly/pages/chat/send_later_dialog.dart';
 import 'package:Pulsly/pages/chat/translated_event_dialog.dart';
-import 'package:Pulsly/services/timeline_cache.dart';
 import 'package:Pulsly/pages/chat/vote_results_dialog.dart';
 import 'package:Pulsly/pages/chat_details/chat_details.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
@@ -614,7 +613,13 @@ class ChatController extends State<ChatPageWithRoom>
     }
     timeline!.requestKeys(onlineKeyBackupOnly: false);
     if (room.markedUnread) room.markUnread(false);
-    TimelineCache.setTimeline(roomId, timeline!);
+    // NEVER register the live ChatPage timeline in TimelineCache:
+    // TimelineCache.setTimeline() cancels the old cached entry's subscriptions
+    // (overwrite) and evicts/cancels entries at >20 — the preload job
+    // (chat_list, 40 rooms) then silently kills THIS page's live timeline.
+    // Result: sends/reactions stop appearing until app restart ("dead
+    // timeline"). ChatPage never reads the cache; it always builds a fresh
+    // timeline with its own callbacks. FluffyChat has no TimelineCache at all.
 
     return;
   }
