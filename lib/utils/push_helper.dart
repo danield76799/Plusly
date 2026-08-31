@@ -127,10 +127,45 @@ class PushHelper {
         return null;
       }
 
-      final event = await client.getEventByPushNotification(
+      var event = await client.getEventByPushNotification(
         notification,
         storeInDatabase: true,
       );
+
+      // PLUSLY-CHANGE (upstream FluffyChat/Extera hebben dit niet): als het
+      // event nog versleuteld is (megolm-sessie nog niet binnen), geef de
+      // sleutel-uitwisseling een korte kans en haal het event opnieuw op.
+      // Zo toont de notificatie de échte inhoud i.p.v. de generieke
+      // "New message"-val-back — iets later, maar compleet.
+      // Alleen bij live-app pushes (clients meegegeven): een detached/
+      // headless engine kan halverwege gedood worden en zou dan niets
+      // meer tonen; daar blijft het snelle val-back-pad staan.
+      if (event != null &&
+          event.type == EventTypes.Encrypted &&
+          !helper.isBackgroundMessage) {
+        const attempts = 3;
+        var decrypted = false;
+        for (var i = 0; i < attempts && !decrypted; i++) {
+          await Future<void>.delayed(const Duration(seconds: 4));
+          final retry = await client.getEventByPushNotification(
+            notification,
+            storeInDatabase: true,
+          );
+          if (retry != null && retry.type != EventTypes.Encrypted) {
+            event = retry;
+            decrypted = true;
+            PushEventLog().add('push_retry_ok', {
+              'attempt': '${i + 1}',
+              'room': notification.roomId ?? '',
+            });
+          }
+        }
+        if (!decrypted) {
+          PushEventLog().add('push_retry_fail', {
+            'room': notification.roomId ?? '',
+          });
+        }
+      }
 
       if (event == null) {
         Logs().v(
@@ -255,8 +290,10 @@ class PushHelper {
       final matrixLocals = MatrixLocals(l10n!);
 
       // Calculate the body
+      // PLUSLY-CHANGE: l10n-sleutel i.p.v. hardcoded Engels (upstream-getrouw;
+      // NL: "💬 Nieuw bericht in Plusly")
       final body = event.type == EventTypes.Encrypted
-          ? '💬 New message in ${AppConfig.applicationName}'
+          ? l10n!.newMessageInFluffyChat
           : await event.calcLocalizedBody(
               matrixLocals,
               plaintextBody: true,
