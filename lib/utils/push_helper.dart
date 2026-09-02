@@ -245,6 +245,19 @@ class PushHelper {
         return null;
       }
 
+      // PLUSLY-CHANGE: onderdruk notificaties voor eigen berichten.
+      // De homeserver stuurt een push voor elk event, ook eigen berichten.
+      if (event.senderId == client.userID) {
+        Logs().d(
+          '[Push] Eigen bericht in ${notification.roomId}, '
+          'notificatie onderdrukt',
+        );
+        PushEventLog().add('push_own_message', {
+          'room': notification.roomId ?? '',
+        });
+        return null;
+      }
+
       Logs().v(
         'Push helper got notification event of type ${event.type}.',
       );
