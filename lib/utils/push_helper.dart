@@ -182,6 +182,15 @@ class PushHelper {
           PushEventLog().add('push_retry_fail', {
             'room': notification.roomId ?? '',
           });
+          // PLUSLY-CHANGE: als het bericht na 3 retries nog steeds versleuteld
+          // is, toon dan GEEN notificatie. Het bericht komt via sync wel in
+          // de app aan; een "Nieuw bericht in Plusly"-placeholder zonder
+          // inhoud is een spooknotificatie die de gebruiker irriteert.
+          Logs().d(
+            '[Push] Bericht na retry nog versleuteld, notificatie onderdrukt '
+            'room=${notification.roomId}',
+          );
+          return null;
         }
       }
 
@@ -278,6 +287,22 @@ class PushHelper {
 
   Future<void> _showNotification() async {
     try {
+      // PLUSLY-CHANGE: als het event nog steeds versleuteld is (zowel na retry
+      // in live-app pad als direct in background pad), toon dan geen
+      // notificatie. Het bericht komt via sync wel in de app; een placeholder
+      // "Nieuw bericht in Plusly" zonder inhoud is een spooknotificatie.
+      if (event.type == EventTypes.Encrypted) {
+        Logs().d(
+          '[Push] Event versleuteld, notificatie onderdrukt '
+          'room=${notification.roomId}',
+        );
+        PushEventLog().add('push_encrypted_skip', {
+          'room': notification.roomId ?? '',
+          'background': '$isBackgroundMessage',
+        });
+        return;
+      }
+
       Logs().v(
         'Push showNotification start '
         'room=${notification.roomId} type=${event.type} '
