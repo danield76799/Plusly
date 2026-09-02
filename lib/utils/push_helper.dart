@@ -112,6 +112,24 @@ class PushHelper {
         }
       }
 
+      // PLUSLY-CHANGE: filter lege count-sync pushes (badge-updates zonder
+      // bericht). De homeserver stuurt periodiek pushes met eventId="" en
+      // type=null om alleen de unread-count te synchroniseren. Zonder deze
+      // check toont Plusly ten onrechte een "Nieuw bericht"-notificatie.
+      if (notification.eventId == null || notification.eventId!.isEmpty) {
+        Logs().d(
+          '[Push] Lege count-sync push genegeerd '
+          '(notification.eventId leeg) '
+          'room=${notification.roomId} '
+          'unread=${notification.counts?.unread ?? 0}',
+        );
+        if (notification.counts?.unread == null ||
+            notification.counts?.unread == 0) {
+          await flutterLocalNotificationsPlugin.cancelAll();
+        }
+        return null;
+      }
+
       if (_isInForeground(notification, activeRoomId, activeClient, client)) {
         Logs().v(
           'Push foreground: suppress notification '
@@ -234,9 +252,11 @@ class PushHelper {
     Logs().e('Push Helper has crashed!', e, s);
 
     l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
+    // PLUSLY-CHANGE: l10n-sleutel i.p.v. hardcoded Engels (upstream-getrouw;
+    // NL: "💬 Nieuw bericht in Plusly")
     flutterLocalNotificationsPlugin.show(
       id: notification.roomId?.hashCode ?? 0,
-      title: '💬 New message in ${AppConfig.applicationName}',
+      title: l10n!.newMessageInFluffyChat,
       body: l10n!.openAppToReadMessages,
       notificationDetails: NotificationDetails(
         iOS: const DarwinNotificationDetails(),
