@@ -200,22 +200,6 @@ class PushHelper {
       }
       helper.event = event;
 
-      // PLUSLY-CHANGE: onderdruk notificaties voor eigen berichten.
-      // De homeserver stuurt een push voor elk event, ook eigen berichten.
-      // FluffyChat/Extera hebben deze check niet, maar die draaien achter
-      // een push-gateway die eigen berichten filtert. Plusly via UnifiedPush
-      // krijgt alles direct.
-      if (event.senderId == client.userID) {
-        Logs().d(
-          '[Push] Eigen bericht in ${notification.roomId}, '
-          'notificatie onderdrukt',
-        );
-        PushEventLog().add('push_own_message', {
-          'room': notification.roomId ?? '',
-        });
-        return null;
-      }
-
       Logs().v(
         'Push helper got notification event of type ${event.type}.',
       );
