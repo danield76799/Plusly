@@ -112,24 +112,6 @@ class PushHelper {
         }
       }
 
-      // PLUSLY-CHANGE: filter lege count-sync pushes (badge-updates zonder
-      // bericht). De homeserver stuurt periodiek pushes met eventId="" en
-      // type=null om alleen de unread-count te synchroniseren. Zonder deze
-      // check toont Plusly ten onrechte een "Nieuw bericht"-notificatie.
-      if (notification.eventId == null || notification.eventId!.isEmpty) {
-        Logs().d(
-          '[Push] Lege count-sync push genegeerd '
-          '(notification.eventId leeg) '
-          'room=${notification.roomId} '
-          'unread=${notification.counts?.unread ?? 0}',
-        );
-        if (notification.counts?.unread == null ||
-            notification.counts?.unread == 0) {
-          await flutterLocalNotificationsPlugin.cancelAll();
-        }
-        return null;
-      }
-
       if (_isInForeground(notification, activeRoomId, activeClient, client)) {
         Logs().v(
           'Push foreground: suppress notification '
@@ -182,15 +164,6 @@ class PushHelper {
           PushEventLog().add('push_retry_fail', {
             'room': notification.roomId ?? '',
           });
-          // PLUSLY-CHANGE: als het bericht na 3 retries nog steeds versleuteld
-          // is, toon dan GEEN notificatie. Het bericht komt via sync wel in
-          // de app aan; een "Nieuw bericht in Plusly"-placeholder zonder
-          // inhoud is een spooknotificatie die de gebruiker irriteert.
-          Logs().d(
-            '[Push] Bericht na retry nog versleuteld, notificatie onderdrukt '
-            'room=${notification.roomId}',
-          );
-          return null;
         }
       }
 
@@ -227,37 +200,6 @@ class PushHelper {
       }
       helper.event = event;
 
-      // PLUSLY-CHANGE: onderdruk notificaties voor kamers die niet meer
-      // ongelezen zijn. ntfy's periodieke poll (elke ~15-30 min) levert
-      // oude pushes opnieuw af; als de gebruiker het bericht al gelezen
-      // heeft via sync, is dit een spooknotificatie.
-      final room = client.rooms.singleWhereOrNull(
-        (r) => r.id == notification.roomId,
-      );
-      if (room != null && !room.isUnreadOrInvited) {
-        Logs().d(
-          '[Push] Kamer ${notification.roomId} niet meer ongeleken, '
-          'spooknotificatie onderdrukt',
-        );
-        PushEventLog().add('push_already_read', {
-          'room': notification.roomId ?? '',
-        });
-        return null;
-      }
-
-      // PLUSLY-CHANGE: onderdruk notificaties voor eigen berichten.
-      // De homeserver stuurt een push voor elk event, ook eigen berichten.
-      if (event.senderId == client.userID) {
-        Logs().d(
-          '[Push] Eigen bericht in ${notification.roomId}, '
-          'notificatie onderdrukt',
-        );
-        PushEventLog().add('push_own_message', {
-          'room': notification.roomId ?? '',
-        });
-        return null;
-      }
-
       Logs().v(
         'Push helper got notification event of type ${event.type}.',
       );
@@ -292,11 +234,9 @@ class PushHelper {
     Logs().e('Push Helper has crashed!', e, s);
 
     l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
-    // PLUSLY-CHANGE: l10n-sleutel i.p.v. hardcoded Engels (upstream-getrouw;
-    // NL: "💬 Nieuw bericht in Plusly")
     flutterLocalNotificationsPlugin.show(
       id: notification.roomId?.hashCode ?? 0,
-      title: l10n!.newMessageInFluffyChat,
+      title: '💬 New message in ${AppConfig.applicationName}',
       body: l10n!.openAppToReadMessages,
       notificationDetails: NotificationDetails(
         iOS: const DarwinNotificationDetails(),
@@ -318,22 +258,6 @@ class PushHelper {
 
   Future<void> _showNotification() async {
     try {
-      // PLUSLY-CHANGE: als het event nog steeds versleuteld is (zowel na retry
-      // in live-app pad als direct in background pad), toon dan geen
-      // notificatie. Het bericht komt via sync wel in de app; een placeholder
-      // "Nieuw bericht in Plusly" zonder inhoud is een spooknotificatie.
-      if (event.type == EventTypes.Encrypted) {
-        Logs().d(
-          '[Push] Event versleuteld, notificatie onderdrukt '
-          'room=${notification.roomId}',
-        );
-        PushEventLog().add('push_encrypted_skip', {
-          'room': notification.roomId ?? '',
-          'background': '$isBackgroundMessage',
-        });
-        return;
-      }
-
       Logs().v(
         'Push showNotification start '
         'room=${notification.roomId} type=${event.type} '
