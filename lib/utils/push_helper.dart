@@ -227,6 +227,24 @@ class PushHelper {
       }
       helper.event = event;
 
+      // PLUSLY-CHANGE: onderdruk notificaties voor kamers die niet meer
+      // ongelezen zijn. ntfy's periodieke poll (elke ~15-30 min) levert
+      // oude pushes opnieuw af; als de gebruiker het bericht al gelezen
+      // heeft via sync, is dit een spooknotificatie.
+      final room = client.rooms.singleWhereOrNull(
+        (r) => r.id == notification.roomId,
+      );
+      if (room != null && !room.isUnreadOrInvited) {
+        Logs().d(
+          '[Push] Kamer ${notification.roomId} niet meer ongeleken, '
+          'spooknotificatie onderdrukt',
+        );
+        PushEventLog().add('push_already_read', {
+          'room': notification.roomId ?? '',
+        });
+        return null;
+      }
+
       Logs().v(
         'Push helper got notification event of type ${event.type}.',
       );
