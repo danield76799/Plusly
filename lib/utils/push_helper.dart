@@ -202,8 +202,14 @@ class PushHelper {
 
       // PLUSLY-CHANGE: onderdruk notificaties voor eigen berichten.
       // De homeserver stuurt een push voor elk event, ook eigen berichten.
-      // DIAGNOSTIEK: log de échte waarden zodat we zien waarom de check faalt.
-      final ownUserId = client.userID;
+      // client.userID is NULL in de background/detached context (de SDK vult
+      // bij getEventByPushNotification alleen accessToken, niet userID).
+      // Fallback: haal user_id uit de database.
+      var ownUserId = client.userID;
+      if (ownUserId == null) {
+        final clientInfo = await client.database.getClient(client.clientName);
+        ownUserId = clientInfo?.tryGet<String>('user_id');
+      }
       Logs().d(
         '[Push] own-check: userID=${ownUserId ?? 'NULL'} '
         'senderId=${event.senderId} type=${event.type} '
