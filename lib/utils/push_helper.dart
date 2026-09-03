@@ -242,41 +242,6 @@ class PushHelper {
         _shownEventIds.add(eventId);
       }
 
-      // PLUSLY-CHANGE: onderdruk notificaties voor eigen berichten.
-      // De homeserver stuurt een push voor elk event, ook eigen berichten.
-      // client.userID is NULL in de background/detached context (de SDK vult
-      // bij getEventByPushNotification alleen accessToken, niet userID).
-      // Fallback: haal user_id uit de database.
-      var ownUserId = client.userID;
-      if (ownUserId == null) {
-        final clientInfo = await client.database.getClient(client.clientName);
-        ownUserId = clientInfo?.tryGet<String>('user_id');
-      }
-      Logs().d(
-        '[Push] own-check: userID=${ownUserId ?? 'NULL'} '
-        'senderId=${event.senderId} type=${event.type} '
-        'background=${helper.isBackgroundMessage} '
-        'match=${ownUserId != null && event.senderId == ownUserId}',
-      );
-      PushEventLog().add('push_own_check', {
-        'room': notification.roomId ?? '',
-        'userID': ownUserId ?? 'NULL',
-        'senderId': event.senderId,
-        'type': event.type,
-        'background': '${helper.isBackgroundMessage}',
-        'match': '${ownUserId != null && event.senderId == ownUserId}',
-      });
-      if (ownUserId != null && event.senderId == ownUserId) {
-        Logs().d(
-          '[Push] Eigen bericht in ${notification.roomId}, '
-          'notificatie onderdrukt',
-        );
-        PushEventLog().add('push_own_message', {
-          'room': notification.roomId ?? '',
-        });
-        return null;
-      }
-
       Logs().v(
         'Push helper got notification event of type ${event.type}.',
       );
