@@ -206,6 +206,23 @@ class PushHelper {
       }
       helper.event = event;
 
+      // PLUSLY-CHANGE: filter op client-side push rules (FluffyChat upstream).
+      // Dit filtert eigen berichten, gemute kamers, en mentions-only volgens de
+      // Matrix push rules van de gebruiker. Zonder dit worden alle pushes
+      // getoond, ook als de gebruiker de kamer gemute heeft of alleen mentions
+      // wil zien.
+      if (!client.pushruleEvaluator.match(event).notify) {
+        Logs().d(
+          '[Push] Event gefilterd door client-side push rules '
+          'room=${notification.roomId} type=${event.type}',
+        );
+        PushEventLog().add('push_rule_filtered', {
+          'room': notification.roomId ?? '',
+          'type': event.type,
+        });
+        return null;
+      }
+
       // PLUSLY-CHANGE: deduplicatie op event_id. De homeserver pusht hetzelfde
       // bericht soms meerdere keren (meerdere pushers geregistreerd). Als dit
       // event_id al getoond is, skip de duplicaat-notificatie.
