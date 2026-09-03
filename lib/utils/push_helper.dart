@@ -31,6 +31,12 @@ class PushHelper {
   late bool isBackgroundMessage;
   L10n? l10n;
 
+  /// PLUSLY-CHANGE: deduplicatie op event_id. De homeserver pusht hetzelfde
+  /// bericht soms meerdere keren (meerdere pushers geregistreerd), wat dubbele
+  /// notificaties oplevert. Houd bij welke event_id's al getoond zijn en skip
+  /// duplicaten.
+  static final Set<String> _shownEventIds = {};
+
   PushHelper._(
     this.notification,
     this.flutterLocalNotificationsPlugin, {
@@ -199,6 +205,25 @@ class PushHelper {
         return null;
       }
       helper.event = event;
+
+      // PLUSLY-CHANGE: deduplicatie op event_id. De homeserver pusht hetzelfde
+      // bericht soms meerdere keren (meerdere pushers geregistreerd). Als dit
+      // event_id al getoond is, skip de duplicaat-notificatie.
+      final eventId = event.eventId;
+      if (eventId.isNotEmpty) {
+        if (_shownEventIds.contains(eventId)) {
+          Logs().d(
+            '[Push] Duplicaat event $eventId al getoond, notificatie overgeslagen '
+            'room=${notification.roomId}',
+          );
+          PushEventLog().add('push_duplicate', {
+            'room': notification.roomId ?? '',
+            'eventId': eventId,
+          });
+          return null;
+        }
+        _shownEventIds.add(eventId);
+      }
 
       // PLUSLY-CHANGE: onderdruk notificaties voor eigen berichten.
       // De homeserver stuurt een push voor elk event, ook eigen berichten.
