@@ -249,6 +249,17 @@ class PushHelper {
         'room': notification.roomId ?? '',
         'error': '$e',
       });
+      // PLUSLY-CHANGE: als het event niet gevonden kan worden (bijv. eigen
+      // bericht dat nog onder transactie-ID staat i.p.v. event_id), toon dan
+      // GEEN notificatie. Het bericht komt via sync toch wel in de app; de
+      // crash-handler zou anders een spook-"New message in Plusly" tonen.
+      if (e.toString().contains('Unable to find event')) {
+        Logs().d(
+          '[Push] Event niet gevonden, notificatie onderdrukt '
+          'room=${notification.roomId}',
+        );
+        return null;
+      }
       await helper._crashHandler(e, s);
       rethrow;
     }
