@@ -202,7 +202,17 @@ class PushHelper {
 
       // PLUSLY-CHANGE: onderdruk notificaties voor eigen berichten.
       // De homeserver stuurt een push voor elk event, ook eigen berichten.
-      if (event.senderId == client.userID) {
+      // DIAGNOSTIEK: log de échte waarden zodat we zien waarom de check faalt.
+      final ownUserId = client.userID;
+      PushEventLog().add('push_own_check', {
+        'room': notification.roomId ?? '',
+        'userID': ownUserId ?? 'NULL',
+        'senderId': event.senderId,
+        'type': event.type,
+        'background': '${helper.isBackgroundMessage}',
+        'match': '${ownUserId != null && event.senderId == ownUserId}',
+      });
+      if (ownUserId != null && event.senderId == ownUserId) {
         Logs().d(
           '[Push] Eigen bericht in ${notification.roomId}, '
           'notificatie onderdrukt',
