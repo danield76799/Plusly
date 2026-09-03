@@ -204,6 +204,12 @@ class PushHelper {
       // De homeserver stuurt een push voor elk event, ook eigen berichten.
       // DIAGNOSTIEK: log de échte waarden zodat we zien waarom de check faalt.
       final ownUserId = client.userID;
+      Logs().d(
+        '[Push] own-check: userID=${ownUserId ?? 'NULL'} '
+        'senderId=${event.senderId} type=${event.type} '
+        'background=${helper.isBackgroundMessage} '
+        'match=${ownUserId != null && event.senderId == ownUserId}',
+      );
       PushEventLog().add('push_own_check', {
         'room': notification.roomId ?? '',
         'userID': ownUserId ?? 'NULL',
