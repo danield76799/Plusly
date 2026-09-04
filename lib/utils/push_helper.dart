@@ -138,41 +138,6 @@ class PushHelper {
         storeInDatabase: true,
       );
 
-      // PLUSLY-CHANGE (upstream FluffyChat/Extera hebben dit niet): als het
-      // event nog versleuteld is (megolm-sessie nog niet binnen), geef de
-      // sleutel-uitwisseling een korte kans en haal het event opnieuw op.
-      // Zo toont de notificatie de échte inhoud i.p.v. de generieke
-      // "New message"-val-back — iets later, maar compleet.
-      // Alleen bij live-app pushes (clients meegegeven): een detached/
-      // headless engine kan halverwege gedood worden en zou dan niets
-      // meer tonen; daar blijft het snelle val-back-pad staan.
-      if (event != null &&
-          event.type == EventTypes.Encrypted &&
-          !helper.isBackgroundMessage) {
-        const attempts = 3;
-        var decrypted = false;
-        for (var i = 0; i < attempts && !decrypted; i++) {
-          await Future<void>.delayed(const Duration(seconds: 4));
-          final retry = await client.getEventByPushNotification(
-            notification,
-            storeInDatabase: true,
-          );
-          if (retry != null && retry.type != EventTypes.Encrypted) {
-            event = retry;
-            decrypted = true;
-            PushEventLog().add('push_retry_ok', {
-              'attempt': '${i + 1}',
-              'room': notification.roomId ?? '',
-            });
-          }
-        }
-        if (!decrypted) {
-          PushEventLog().add('push_retry_fail', {
-            'room': notification.roomId ?? '',
-          });
-        }
-      }
-
       if (event == null) {
         Logs().v(
           'Push event is null: clearing indicator '
@@ -207,10 +172,11 @@ class PushHelper {
       helper.event = event;
 
       // PLUSLY-CHANGE: filter op client-side push rules (FluffyChat upstream).
-      // Dit filtert eigen berichten, gemute kamers, en mentions-only volgens de
-      // Matrix push rules van de gebruiker. Zonder dit worden alle pushes
-      // getoond, ook als de gebruiker de kamer gemute heeft of alleen mentions
-      // wil zien.
+      // Dit filtert gemute kamers en mentions-only volgens de Matrix push
+      // rules van de gebruiker. De server gebruikte dezelfde ruleset om te
+      // besluiten deze push te sturen; bij een nog-versleuteld event
+      // evalueert dit dezelfde regels die de server zagen, en na
+      // ontsleuteling wordt hieronder nogmaals geëvalueerd.
       if (!client.pushruleEvaluator.match(event).notify) {
         Logs().d(
           '[Push] Event gefilterd door client-side push rules '
@@ -242,8 +208,71 @@ class PushHelper {
         _shownEventIds.add(eventId);
       }
 
+      // PLUSLY-CHANGE (DM-fix fase 1): als het event nog versleuteld is, toon
+      // dan DIRECT een placeholder-notificatie (kamernaam + "💬 Nieuw bericht
+      // in Plusly"), vóórdat de megolm-ontsleuteling hieronder begint.
+      // Extera/FluffyChat tonen direct deze generieke tekst en stoppen daar;
+      // Plusly vervangt hem daarna (fase 2) via hetzelfde notificatie-ID met
+      // de echte afzender + inhoud zodra de retry het event ontsleuteld heeft.
+      if (event.type == EventTypes.Encrypted && !helper.isBackgroundMessage) {
+        await helper._showEncryptedPlaceholder();
+      }
+
+      // PLUSLY-CHANGE (upstream FluffyChat/Extera hebben dit niet): als het
+      // event nog versleuteld is (megolm-sessie nog niet binnen), geef de
+      // sleutel-uitwisseling een korte kans en haal het event opnieuw op.
+      // Zo toont de notificatie de échte inhoud i.p.v. de generieke
+      // "New message"-val-back — iets later, maar compleet.
+      // Alleen bij live-app pushes (clients meegegeven): een detached/
+      // headless engine kan halverwege gedood worden en zou dan niets
+      // meer tonen; daar blijft het snelle val-back-pad staan.
+      if (event.type == EventTypes.Encrypted && !helper.isBackgroundMessage) {
+        const attempts = 3;
+        var decrypted = false;
+        for (var i = 0; i < attempts && !decrypted; i++) {
+          await Future<void>.delayed(const Duration(seconds: 4));
+          final retry = await client.getEventByPushNotification(
+            notification,
+            storeInDatabase: true,
+          );
+          if (retry != null && retry.type != EventTypes.Encrypted) {
+            event = retry;
+            helper.event = event;
+            decrypted = true;
+            PushEventLog().add('push_retry_ok', {
+              'attempt': '${i + 1}',
+              'room': notification.roomId ?? '',
+            });
+          }
+        }
+        if (!decrypted) {
+          PushEventLog().add('push_retry_fail', {
+            'room': notification.roomId ?? '',
+          });
+        } else {
+          // DM-fix: sommige push rules (bijv. suppress_edits) matchen pas op
+          // het ONTSLEUTELDE event. Evalueer opnieuw en verwijder de fase-1
+          // placeholder als het ontsleutelde event toch niet mag notificeren.
+          final decryptedEvent = event;
+          if (!client.pushruleEvaluator.match(decryptedEvent!).notify) {
+            await flutterLocalNotificationsPlugin.cancel(
+              id: notification.roomId?.hashCode ?? 0,
+            );
+            Logs().d(
+              '[Push] Ontsleuteld event alsnog gefilterd door push rules, '
+              'placeholder verwijderd room=${notification.roomId}',
+            );
+            PushEventLog().add('push_rule_filtered_decrypted', {
+              'room': notification.roomId ?? '',
+              'type': decryptedEvent.type,
+            });
+            return null;
+          }
+        }
+      }
+
       Logs().v(
-        'Push helper got notification event of type ${event.type}.',
+        'Push helper got notification event of type ${event!.type}.',
       );
       PushEventLog().add('push_event', {
         'room': notification.roomId ?? '',
@@ -307,6 +336,63 @@ class PushHelper {
         ),
       ),
     );
+  }
+
+  /// PLUSLY-CHANGE (DM-fix fase 1): directe placeholder-notificatie voor een
+  /// nog-versleuteld event, VÓÓR de ontsleutel-retry. Gebruikt exact het
+  ///zelfde notificatie-ID (roomId.hashCode), kanaal en MessagingStyle als de
+  /// echte notificatie in fase 2, zodat Android hem als UPDATE behandelt en
+  /// er geen duplicaat of nieuwe popup ontstaat.
+  Future<void> _showEncryptedPlaceholder() async {
+    try {
+      l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
+      final matrixLocals = MatrixLocals(l10n!);
+      final roomName = event.room.getLocalizedDisplayname(matrixLocals);
+
+      await flutterLocalNotificationsPlugin.show(
+        id: notification.roomId?.hashCode ?? 0,
+        title: roomName,
+        body: l10n!.newMessageInFluffyChat,
+        notificationDetails: NotificationDetails(
+          iOS: const DarwinNotificationDetails(),
+          android: AndroidNotificationDetails(
+            AppConfig.pushNotificationsChannelId,
+            l10n!.incomingMessages,
+            number: notification.counts?.unread,
+            ticker: l10n!.newMessageInFluffyChat,
+            importance: Importance.high,
+            priority: Priority.max,
+            shortcutId: notification.roomId,
+            styleInformation: MessagingStyleInformation(
+              Person(
+                name: roomName,
+                key: event.roomId,
+                important: event.room.isFavourite,
+              ),
+              conversationTitle: event.room.isDirectChat ? null : roomName,
+              groupConversation: !event.room.isDirectChat,
+              messages: [
+                Message(
+                  l10n!.newMessageInFluffyChat,
+                  event.originServerTs,
+                  Person(name: roomName, key: event.roomId),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+      Logs().d(
+        '[Push] Fase-1 placeholder getoond voor versleuteld bericht '
+        'room=${notification.roomId}',
+      );
+      PushEventLog().add('push_encrypted_placeholder', {
+        'room': notification.roomId ?? '',
+      });
+    } catch (e, s) {
+      // Placeholder is puur cosmetisch — bij falen gewoon door naar de retry.
+      Logs().d('[Push] Placeholder kon niet getoond worden: $e', s);
+    }
   }
 
   Future<void> _showNotification() async {
@@ -458,6 +544,12 @@ class PushHelper {
         ? await AndroidFlutterLocalNotificationsPlugin()
               .getActiveNotificationMessagingStyle(id: notificationId)
         : null;
+    // DM-fix: verwijder eerst de fase-1 placeholder-tekst (zelfde bericht-
+    // inhoud als de placeholder) uit de bestaande gesprekslijst, anders staat
+    // "💬 Nieuw bericht in Plusly" boven de echte inhoud wanneer fase 2 de
+    // notificatie vervangt.
+    messagingStyleInformation?.messages
+        ?.removeWhere((m) => m.text == l10n!.newMessageInFluffyChat);
     messagingStyleInformation?.messages?.add(newMessage);
 
     if (PlatformInfos.isAndroid && messagingStyleInformation == null) {
