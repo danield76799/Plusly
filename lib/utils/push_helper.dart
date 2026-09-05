@@ -177,7 +177,7 @@ class PushHelper {
       // besluiten deze push te sturen; bij een nog-versleuteld event
       // evalueert dit dezelfde regels die de server zagen, en na
       // ontsleuteling wordt hieronder nogmaals geëvalueerd.
-      if (!client.pushruleEvaluator.match(event).notify) {
+      if (!_shouldNotifyByPushRules(client, event)) {
         Logs().d(
           '[Push] Event gefilterd door client-side push rules '
           'room=${notification.roomId} type=${event.type}',
@@ -254,7 +254,7 @@ class PushHelper {
           // het ONTSLEUTELDE event. Evalueer opnieuw en verwijder de fase-1
           // placeholder als het ontsleutelde event toch niet mag notificeren.
           final decryptedEvent = event;
-          if (!client.pushruleEvaluator.match(decryptedEvent!).notify) {
+          if (!_shouldNotifyByPushRules(client, decryptedEvent!)) {
             await flutterLocalNotificationsPlugin.cancel(
               id: notification.roomId?.hashCode ?? 0,
             );
@@ -312,13 +312,44 @@ class PushHelper {
         clients.first;
   }
 
+  /// PLUSLY-CHANGE: client-side push-rule evaluatie, crash-veilig.
+  ///
+  /// De SDK-evaluator (pushrule_evaluator.dart:389) doet
+  /// `event.room.client.userID!` — in de background/detached context is
+  /// client.userID NULL (bewezen in deze sessie), waardoor de evaluator
+  /// crasht en de push-helper in de crash-handler belandt: een spook-
+  /// "New message in Plusly"-notificatie.
+  ///
+  /// De homeserver heeft de push rules AL toegepast toen hij besloot deze
+  /// push te sturen. De evaluatie hier is dus een extra verfijning; als zij
+  /// niet kan draaien (crash, userID null), laten we het event DÓÓR (true)
+  /// in plaats van de notificatie te verliezen of te crashen.
+  static bool _shouldNotifyByPushRules(Client client, Event event) {
+    try {
+      return client.pushruleEvaluator.match(event).notify;
+    } catch (e) {
+      Logs().d(
+        '[Push] Push-rule evaluatie crashte (userID null in background?), '
+        'event doorgelaten room=${event.roomId}: $e',
+      );
+      PushEventLog().add('push_rule_eval_error', {
+        'room': event.roomId ?? '',
+        'error': '$e',
+      });
+      return true;
+    }
+  }
+
   Future<void> _crashHandler(Object e, StackTrace s) async {
     Logs().e('Push Helper has crashed!', e, s);
 
     l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
     flutterLocalNotificationsPlugin.show(
       id: notification.roomId?.hashCode ?? 0,
-      title: '💬 New message in ${AppConfig.applicationName}',
+      // PLUSLY-CHANGE: l10n-sleutel i.p.v. hardcoded Engels (upstream
+      // FluffyChat gebruikt l10n.newMessageInFluffyChat; NL: "💬 Nieuw
+      // bericht in Plusly")
+      title: l10n!.newMessageInFluffyChat,
       body: l10n!.openAppToReadMessages,
       notificationDetails: NotificationDetails(
         iOS: const DarwinNotificationDetails(),
