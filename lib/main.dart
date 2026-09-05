@@ -198,6 +198,20 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
 
+  // PLUSLY-CHANGE (FluffyChat-pariteit): persisteer de effectieve UI-locale
+  // zodat de detached/headless push-engine dezelfde taal gebruikt voor
+  // notificaties. De headless engine krijgt de Android-locale NIET mee
+  // (valt terug op en_US) — zonder dit waren push-notificaties Engels
+  // op een Nederlands toestel. Zie loadPushL10n() in push_helper.dart.
+  try {
+    final uiLocale = PlatformDispatcher.instance.locale;
+    final languageCode = uiLocale.languageCode;
+    await store.setString('plusly_ui_locale', languageCode);
+    Logs().d('[Locale] UI-locale gepersisteerd: $languageCode');
+  } catch (e) {
+    Logs().d('[Locale] kon UI-locale niet persistenteren: $e');
+  }
+
   ErrorWidget.builder = (details) => PluslyErrorWidget(details);
   Logs().w("${clients.length} clients");
   runApp(PluslyApp(clients: clients, pincode: pin, store: store));

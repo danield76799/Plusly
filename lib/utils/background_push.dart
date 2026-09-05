@@ -585,28 +585,23 @@ class BackgroundPush {
     // pushHelper completes — if it hangs/crashes we'd see nothing.
     final now = DateTime.now().toIso8601String();
     PushEventLog().add('push_received', {
-      'instance': i ?? '',
+      'instance': i,
       'room': data['room_id']?.toString() ?? '',
       'ts': now,
     });
 
-    // FluffyChat pattern: always pass clients to pushHelper.
-    // pushHelper handles the fast fallback internally (shows a notification
-    // before loading anything), then loads the real event and replaces it.
-    // This is simpler and more reliable than splitting fallback/enrichment
-    // across multiple unawaited calls that Android may kill mid-flight.
-    //
-    // BUT: when the app is fully closed (detached/headless engine), passing
-    // clients makes pushHelper run the full sync route (getEventByPushNotification
-    // with storeInDatabase:false), which needs a synced DB + live UI context a
-    // headless engine lacks → it hangs/crashes → no notification. In detached
-    // mode pass clients:null so pushHelper takes its fast path (renders from
-    // the raw payload, no sync).
-    final isDetached = Platform.isAndroid &&
-        WidgetsBinding.instance.lifecycleState == AppLifecycleState.detached;
+    // FluffyChat pattern (upstream background_push.dart:422-437): ALWAYS pass
+    // the live clients to pushHelper. In detached/background-fetch mode the
+    // clients were created via ClientManager.getClients(store:) in main.dart,
+    // which fully initializes them (initWithRestore → userID loaded). The
+    // earlier `isDetached ? null : clients` workaround threw those away and
+    // made pushHelper build fresh uninitialized clients (initialize:false →
+    // userID null), which crashed the push-rule evaluator
+    // (pushrule_evaluator.dart:389 `userID!`) → crash-handler → English
+    // "New message in Plusly" fallback.
     await PushHelper.pushHelper(
       PushNotification.fromJson(data),
-      clients: isDetached ? null : clients,
+      clients: clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
       activeClient: clientFromInstance(i, clients),
@@ -615,7 +610,7 @@ class BackgroundPush {
       useNotificationActions: false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
     );
     final now2 = DateTime.now().toIso8601String();
-    PushEventLog().add('push', {'instance': i ?? '', 'room': data['room_id']?.toString() ?? '', 'ts': now2});
+    PushEventLog().add('push', {'instance': i, 'room': data['room_id']?.toString() ?? '', 'ts': now2});
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('plusly_push_last_received_ts', now2);

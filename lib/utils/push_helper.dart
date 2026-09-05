@@ -22,6 +22,26 @@ import 'package:Pulsly/utils/push_event_log.dart';
 
 const notificationAvatarDimension = 128;
 
+/// PLUSLY-CHANGE (FluffyChat-pariteit): resolveert de l10n voor push-
+/// notificaties. Een detached/headless push-engine krijgt de Android-
+/// locale-configuratie NIET mee (valt terug op en_US), waardoor
+/// notificatie-teksten Engels waren op een Nederlands toestel. De GUI
+/// persisteert zijn locale onder 'plusly_ui_locale' (main.dart startGui);
+/// deze loader prefereert die. Val-back: PlatformDispatcher-locale,
+/// zoals upstream FluffyChat.
+Future<L10n> loadPushL10n() async {
+  try {
+    final store = await AppSettings.init();
+    final code = store.getString('plusly_ui_locale');
+    if (code != null && code.isNotEmpty) {
+      return lookupL10n(Locale(code));
+    }
+  } catch (e) {
+    Logs().d('[Push] opgeslagen locale niet gelezen: $e');
+  }
+  return lookupL10n(PlatformDispatcher.instance.locale);
+}
+
 class PushHelper {
   final PushNotification notification;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
@@ -53,17 +73,60 @@ class PushHelper {
     String? instance,
     bool useNotificationActions = true,
   }) async {
-    final handler = await _newPushHandler(
-      notification,
-      clients: clients,
-      l10n: l10n,
-      activeRoomId: activeRoomId,
-      activeClient: activeClient,
-      flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-      instance: instance,
-      useNotificationActions: useNotificationActions,
-    );
-    await handler?._showNotification();
+    // PLUSLY-CHANGE (FluffyChat upstream 32-89): hele helper in een 30s
+    // timeout met ÉÉN localized fallback-notificatie. Upstream FluffyChat
+    // doet exact dit: tryPushHelper().timeout(30s) en in de catch één
+    // l10n.newMessageInFluffyChat-notificatie — geen versnipperde
+    // innerlijke crash-handlers.
+    l10n ??= await loadPushL10n();
+    try {
+      // _newPushHandler geeft FutureOr<PushHelper?> terug; om .timeout te
+      // kunnen gebruiken (FluffyChat upstream gebruikt dit ook op de pure
+      // Future _tryPushHelper) maken we hier expliciet een Future.
+      final handler = await Future<PushHelper?>.value(
+        _newPushHandler(
+          notification,
+          clients: clients,
+          l10n: l10n,
+          activeRoomId: activeRoomId,
+          activeClient: activeClient,
+          flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+          instance: instance,
+          useNotificationActions: useNotificationActions,
+        ),
+      ).timeout(const Duration(seconds: 30));
+      await handler?._showNotification();
+    } catch (e, s) {
+      Logs().e('Push Helper has crashed!', e, s);
+      PushEventLog().add('push_crash', {
+        'room': notification.roomId ?? '',
+        'error': '$e',
+      });
+      if (notification.roomId != null) {
+        await flutterLocalNotificationsPlugin.show(
+          id: notification.roomId?.hashCode ?? 0,
+          title: l10n.newMessageInFluffyChat,
+          body: l10n.openAppToReadMessages,
+          notificationDetails: NotificationDetails(
+            iOS: const DarwinNotificationDetails(),
+            android: AndroidNotificationDetails(
+              AppConfig.pushNotificationsChannelId,
+              l10n.incomingMessages,
+              number: notification.counts?.unread,
+              ticker: l10n.unreadChatsInApp(
+                AppConfig.applicationName,
+                (notification.counts?.unread ?? 0).toString(),
+              ),
+              importance: Importance.high,
+              priority: Priority.max,
+              shortcutId: notification.roomId,
+              category: AndroidNotificationCategory.message,
+            ),
+          ),
+        );
+      }
+      rethrow;
+    }
   }
 
   static FutureOr<PushHelper?> _newPushHandler(
@@ -296,7 +359,10 @@ class PushHelper {
         );
         return null;
       }
-      await helper._crashHandler(e, s);
+      // PLUSLY-CHANGE (FluffyChat upstream): rethrow direct — de BUITENste
+      // pushHelper-catch (30s-timeout wrapper) toont precies ÉÉN
+      // localized fallback-notificatie. Geen innerlijke crash-handler meer
+      // (die veroorzaakte dubbele spook-notificaties).
       rethrow;
     }
   }
@@ -340,35 +406,6 @@ class PushHelper {
     }
   }
 
-  Future<void> _crashHandler(Object e, StackTrace s) async {
-    Logs().e('Push Helper has crashed!', e, s);
-
-    l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
-    flutterLocalNotificationsPlugin.show(
-      id: notification.roomId?.hashCode ?? 0,
-      // PLUSLY-CHANGE: l10n-sleutel i.p.v. hardcoded Engels (upstream
-      // FluffyChat gebruikt l10n.newMessageInFluffyChat; NL: "💬 Nieuw
-      // bericht in Plusly")
-      title: l10n!.newMessageInFluffyChat,
-      body: l10n!.openAppToReadMessages,
-      notificationDetails: NotificationDetails(
-        iOS: const DarwinNotificationDetails(),
-        android: AndroidNotificationDetails(
-          AppConfig.pushNotificationsChannelId,
-          l10n!.incomingMessages,
-          number: notification.counts?.unread,
-          ticker: l10n!.unreadChatsInApp(
-            AppConfig.applicationName,
-            (notification.counts?.unread ?? 0).toString(),
-          ),
-          importance: Importance.high,
-          priority: Priority.max,
-          shortcutId: notification.roomId,
-        ),
-      ),
-    );
-  }
-
   /// PLUSLY-CHANGE (DM-fix fase 1): directe placeholder-notificatie voor een
   /// nog-versleuteld event, VÓÓR de ontsleutel-retry. Gebruikt exact het
   ///zelfde notificatie-ID (roomId.hashCode), kanaal en MessagingStyle als de
@@ -376,7 +413,7 @@ class PushHelper {
   /// er geen duplicaat of nieuwe popup ontstaat.
   Future<void> _showEncryptedPlaceholder() async {
     try {
-      l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
+      l10n ??= await loadPushL10n();
       final matrixLocals = MatrixLocals(l10n!);
       final roomName = event.room.getLocalizedDisplayname(matrixLocals);
 
@@ -456,7 +493,7 @@ class PushHelper {
         return;
       }
 
-      l10n ??= await L10n.delegate.load(PlatformDispatcher.instance.locale);
+      l10n ??= await loadPushL10n();
       final matrixLocals = MatrixLocals(l10n!);
 
       // Calculate the body
@@ -533,7 +570,8 @@ class PushHelper {
         'room': notification.roomId ?? '',
         'error': '$e',
       });
-      await _crashHandler(e, s);
+      // FluffyChat upstream: rethrow — de buitenste pushHelper-catch toont
+      // precies één localized fallback. Geen dubbele innerlijke handler.
       rethrow;
     }
   }
