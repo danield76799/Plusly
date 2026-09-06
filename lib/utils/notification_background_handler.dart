@@ -10,7 +10,6 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
-import 'package:Pulsly/utils/client_download_content_extension.dart';
 import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
@@ -220,26 +219,16 @@ Future<void> notificationTap(
           );
 
           if (PlatformInfos.isAndroid) {
-            final ownProfile = await room.client.fetchOwnProfile();
-            final avatar = ownProfile.avatarUrl;
-            final avatarFile = avatar == null
-                ? null
-                : await client
-                      .downloadMxcCached(
-                        avatar,
-                        thumbnailMethod: ThumbnailMethod.crop,
-                        width: notificationAvatarDimension,
-                        height: notificationAvatarDimension,
-                        animated: false,
-                        isThumbnail: true,
-                        rounded: true,
-                      )
-                      .timeout(const Duration(seconds: 3));
+            l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
+            // FLUFFYCHAT-PARITEIT + snelheid: de bericht-update (eigen reply
+            // toevoegen aan de notificatie) mag de spinner NIET blokkeren.
+            // fetchOwnProfile + avatar-download zijn 2 netwerk-roundtrips
+            // die de spinner ~2-10s vasthouden. Send is al gelukt — update
+            // de notificatie direct, haal avatar op in de achtergrond.
             final messagingStyleInformation =
                 await AndroidFlutterLocalNotificationsPlugin()
                     .getActiveNotificationMessagingStyle(id: '${room.client.clientName}_${room.id}'.hashCode);
             if (messagingStyleInformation == null) return;
-            l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
             messagingStyleInformation.messages?.add(
               Message(
                 input,
@@ -247,9 +236,6 @@ Future<void> notificationTap(
                 Person(
                   key: room.client.userID,
                   name: l10n.you,
-                  icon: avatarFile == null
-                      ? null
-                      : ByteArrayAndroidIcon(avatarFile),
                 ),
               ),
             );
