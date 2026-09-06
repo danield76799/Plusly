@@ -607,7 +607,11 @@ class BackgroundPush {
       activeClient: clientFromInstance(i, clients),
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
-      useNotificationActions: false, // Buggy with UP: https://codeberg.org/UnifiedPush/flutter-connector/issues/34
+      // OPTIE A: notificatie-acties (Antwoorden / Markeer als gelezen /
+      // Muten) aangezet. Blijkbaar buggy met UP, maar Daniel wil het
+      // proberen — ntfy is tegenwoordig stabiel. Als Antwoorden crasht:
+      // terug naar false.
+      useNotificationActions: true,
     );
     final now2 = DateTime.now().toIso8601String();
     PushEventLog().add('push', {'instance': i, 'room': data['room_id']?.toString() ?? '', 'ts': now2});

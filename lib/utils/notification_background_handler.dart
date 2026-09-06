@@ -201,6 +201,10 @@ Future<void> notificationTap(
             mRead: payload.eventId ?? room.lastEvent!.eventId,
             public: shouldSendPublicReadReceipts(client, roomId),
           );
+        case PluslyNotificationActions.mute:
+          // Demp de kamer (PushRuleState.dontNotify) zodat er geen
+          // notificaties meer komen voor deze room.
+          await room.setPushRuleState(PushRuleState.dontNotify);
         case PluslyNotificationActions.reply:
           final input = notificationResponse.input;
           if (input == null || input.isEmpty) {
@@ -296,4 +300,4 @@ Future<void> notificationTap(
   }
 }
 
-enum PluslyNotificationActions { markAsRead, reply }
+enum PluslyNotificationActions { markAsRead, reply, mute }

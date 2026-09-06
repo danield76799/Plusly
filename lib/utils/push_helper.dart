@@ -678,6 +678,10 @@ class PushHelper {
                 l10n!.markAsRead,
                 semanticAction: SemanticAction.markAsRead,
               ),
+              AndroidNotificationAction(
+                PluslyNotificationActions.mute.name,
+                l10n!.muteChat,
+              ),
             ],
     );
     const iOSPlatformChannelSpecifics = DarwinNotificationDetails();
