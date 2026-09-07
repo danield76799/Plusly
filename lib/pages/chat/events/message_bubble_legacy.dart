@@ -402,10 +402,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
         event.relationshipType == null &&
         event.onlyEmotes;
 
-    final useInlineStatus =
-        !noBubble &&
-        (isTextLike || event.fileDescription != null) &&
-        !event.redacted;
+    final useInlineStatus = false; // Plusly: inline status overlapt tekst in legacy stijl
 
     final useChipStatus = noBubble && !isBigEmote;
     final useBottomChipStatus = isBigEmote;
