@@ -180,7 +180,7 @@ class ChatEventList extends StatelessWidget {
                         controller.selectedEvents.length == 1 &&
                         controller.selectedEvents.first.eventId ==
                             event.eventId,
-                    onSwipe: () => controller.replyAction(replyTo: event),
+                    onSwipe: (Event e) => controller.replyAction(replyTo: e),
                     hasBeenRead:
                         latestReadEventIndex != -1 &&
                         latestReadEventIndex <= i,
@@ -208,6 +208,12 @@ class ChatEventList extends StatelessWidget {
                     wallpaperMode: hasWallpaper,
                     colors: colors,
                     gradient: AppSettings.enableGradient.value,
+                    chatController: controller,
+                    layout: switch (AppSettings.messageStyle.value) {
+                      'bubbles_legacy' => MessageLayout.bubblesLegacy,
+                      'modern' => MessageLayout.modern,
+                      _ => MessageLayout.bubbles,
+                    },
                   ),
                 );
               },
