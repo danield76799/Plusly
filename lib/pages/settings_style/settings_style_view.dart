@@ -216,31 +216,36 @@ class SettingsStyleView extends StatelessWidget {
                     // Klassieke bubbels / Modern
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: SegmentedButton<String>(
-                        selected: {
-                          switch (AppSettings.messageStyle.value) {
-                            'bubbles_legacy' => 'bubbles_legacy',
-                            'modern' => 'modern',
-                            _ => 'bubbles',
+                      child: StatefulBuilder(
+                        builder: (context, setButtonState) => SegmentedButton<String>(
+                          selected: {
+                            switch (AppSettings.messageStyle.value) {
+                              'bubbles_legacy' => 'bubbles_legacy',
+                              'modern' => 'modern',
+                              _ => 'bubbles',
+                            },
                           },
-                        },
-                        onSelectionChanged: (selection) {
-                          AppSettings.messageStyle.setItem(selection.first);
-                        },
-                        segments: const [
-                          ButtonSegment(
-                            value: 'bubbles',
-                            label: Text('Bubbles'),
-                          ),
-                          ButtonSegment(
-                            value: 'bubbles_legacy',
-                            label: Text('Klassiek'),
-                          ),
-                          ButtonSegment(
-                            value: 'modern',
-                            label: Text('Modern'),
-                          ),
-                        ],
+                          onSelectionChanged: (selection) async {
+                            await AppSettings.messageStyle.setItem(
+                              selection.first,
+                            );
+                            setButtonState(() {});
+                          },
+                          segments: const [
+                            ButtonSegment(
+                              value: 'bubbles',
+                              label: Text('Bubbles'),
+                            ),
+                            ButtonSegment(
+                              value: 'bubbles_legacy',
+                              label: Text('Klassiek'),
+                            ),
+                            ButtonSegment(
+                              value: 'modern',
+                              label: Text('Modern'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
