@@ -458,6 +458,11 @@ class SettingsStyleView extends StatelessWidget {
                         ),
                         const ListDivider(),
                         SettingsSwitchListTile.adaptive(
+                          title: L10n.of(context).showSeconds,
+                          setting: AppSettings.showSeconds,
+                        ),
+                        const ListDivider(),
+                        SettingsSwitchListTile.adaptive(
                           title: L10n.of(context).enableChatFrostedGlass,
                           setting: AppSettings.enableChatFrostedGlass,
                         ),

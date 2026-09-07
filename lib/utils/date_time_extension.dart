@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 
+import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 
 /// Provides extra functionality for formatting the time.
@@ -33,6 +34,18 @@ extension DateTimeExtension on DateTime {
           L10n.of(context).alwaysUse24HourFormat == 'true')
       ? DateFormat('HH:mm', L10n.of(context).localeName).format(this)
       : DateFormat('h:mm a', L10n.of(context).localeName).format(this);
+
+  /// Bericht-tijd met optionele seconden (Extera Next: showSeconds-setting).
+  String localizedMessageTime(BuildContext context) =>
+      AppSettings.showSeconds.value
+      ? localizedTimeOfDaySeconds(context)
+      : localizedTimeOfDay(context);
+
+  String localizedTimeOfDaySeconds(BuildContext context) =>
+      (MediaQuery.alwaysUse24HourFormatOf(context) ||
+          L10n.of(context).alwaysUse24HourFormat == 'true')
+      ? DateFormat('HH:mm:ss', L10n.of(context).localeName).format(this)
+      : DateFormat('h:mm:ss a', L10n.of(context).localeName).format(this);
 
   /// Returns [localizedTimeOfDay()] if the ChatTime is today, the name of the week
   /// day if the ChatTime is this week and a date string else.

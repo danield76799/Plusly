@@ -267,7 +267,7 @@ class _MessageModernState extends State<MessageModern> {
                   ),
           ),
         Text(
-          event.originServerTs.localizedTimeOfDay(context),
+          event.originServerTs.localizedMessageTime(context),
           style: TextStyle(color: color, fontSize: 11, height: 1.0),
         ),
       ],

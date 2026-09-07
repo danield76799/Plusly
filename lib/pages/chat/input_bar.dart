@@ -512,6 +512,9 @@ class _InputBarState extends State<InputBar> {
           keyboardType: widget.keyboardType!,
           textInputAction: widget.textInputAction,
           autofocus: widget.autofocus!,
+          // Native spellcheck (Extera 26.4.3): systeemcorrecties (onderstreep
+          // + suggesties) in de composer op mobiel.
+          spellCheckConfiguration: const SpellCheckConfiguration(),
           // Larger, readable input text that matches the chat bubble text
           // size so typing feels consistent with the conversation.
           style: TextStyle(

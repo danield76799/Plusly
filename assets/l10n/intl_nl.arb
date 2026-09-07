@@ -4112,5 +4112,10 @@
   "@couldNotBeSent": {
     "type": "String",
     "placeholders": {}
+  },
+  "showSeconds": "Seconden weergeven",
+  "@showSeconds": {
+    "type": "String",
+    "placeholders": {}
   }
 }

@@ -107,6 +107,7 @@ enum AppSettings<T> {
   enableSoftLogout<bool>('enableSoftLogout', false),
   enableGradient<bool>('enableGradient', true),
   messageStyle<String>('xyz.plusly.messageStyle', 'bubbles'),
+  showSeconds<bool>('xyz.plusly.showSeconds', false),
   pushNotificationsGatewayUrl<String>(
     'pushNotificationsGatewayUrl',
     'https://push.plusly.chat/_matrix/push/v1/notify',

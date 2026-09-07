@@ -389,7 +389,7 @@ class _MessageBubbleState extends State<MessageBubble> {
       runSpacing: 2,
       children: [
         Text(
-          event.originServerTs.localizedTimeOfDay(context),
+          event.originServerTs.localizedMessageTime(context),
           style: TextStyle(color: statusColor, fontSize: 12),
         ),
         if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit))

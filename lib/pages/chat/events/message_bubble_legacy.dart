@@ -336,7 +336,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          event.originServerTs.localizedTimeOfDay(context),
+          event.originServerTs.localizedMessageTime(context),
           style: TextStyle(color: color, fontSize: 11, height: 1.0),
         ),
         if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit))
