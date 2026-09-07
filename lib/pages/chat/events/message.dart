@@ -381,8 +381,12 @@ class _MessageState extends State<Message> {
           event.originServerTs.localizedTimeOfDay(context),
           style: TextStyle(color: statusColor, fontSize: 12),
         ),
-        if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit))
-          Icon(Icons.edit_outlined, color: statusColor, size: 14),
+        if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit)) ...[
+          Text(
+            L10n.of(context).edited,
+            style: TextStyle(color: statusColor, fontSize: 11),
+          ),
+        ],
         if (ownMessage)
           Icon(
             event.status == EventStatus.sending
@@ -395,6 +399,34 @@ class _MessageState extends State<Message> {
             color: statusColor,
             size: 14,
           ),
+        if (ownMessage && event.status == EventStatus.sending) ...[
+          Text(
+            switch (event.fileSendingStatus) {
+              FileSendingStatus.generatingThumbnail =>
+                L10n.of(context).generatingThumbnail,
+              FileSendingStatus.encrypting => L10n.of(context).encrypting,
+              FileSendingStatus.uploading => L10n.of(context).uploading,
+              _ => L10n.of(context).sending,
+            },
+            style: TextStyle(color: statusColor, fontSize: 11),
+          ),
+          SizedBox.square(
+            dimension: 11,
+            child: CircularProgressIndicator(
+              strokeWidth: 1,
+              color: statusColor,
+            ),
+          ),
+        ],
+        if (ownMessage && event.status == EventStatus.error) ...[
+          Text(
+            L10n.of(context).couldNotBeSent,
+            style: TextStyle(
+              fontSize: 11,
+              color: theme.colorScheme.error,
+            ),
+          ),
+        ],
       ],
     );
 

@@ -4083,5 +4083,35 @@
   "roomNotFound": "Room not found",
   "filterBySender": "Filter by sender",
   "shareLiveLocation": "Share live location",
-  "selectDateTime": "Please select date and time"
+  "selectDateTime": "Please select date and time",
+  "sending": "Sending",
+  "@sending": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "generatingThumbnail": "Generating thumbnail",
+  "@generatingThumbnail": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "encrypting": "Encrypting",
+  "@encrypting": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "uploading": "Uploading",
+  "@uploading": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "edited": "(edited)",
+  "@edited": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "couldNotBeSent": "Could not be sent",
+  "@couldNotBeSent": {
+    "type": "String",
+    "placeholders": {}
+  }
 }

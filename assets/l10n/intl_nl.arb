@@ -4082,5 +4082,35 @@
   "roomNotFound": "Chat niet gevonden",
   "filterBySender": "Filter op afzender",
   "shareLiveLocation": "Live locatie delen",
-  "selectDateTime": "Selecteer datum en tijd"
+  "selectDateTime": "Selecteer datum en tijd",
+  "sending": "Verzenden",
+  "@sending": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "generatingThumbnail": "Miniatuur genereren",
+  "@generatingThumbnail": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "encrypting": "Versleutelen",
+  "@encrypting": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "uploading": "Uploaden",
+  "@uploading": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "edited": "(bewerkt)",
+  "@edited": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "couldNotBeSent": "Kan niet worden verstuurd",
+  "@couldNotBeSent": {
+    "type": "String",
+    "placeholders": {}
+  }
 }
