@@ -442,10 +442,18 @@ class _MessageModernState extends State<MessageModern> {
                                         loadMedia = true;
                                       });
                                     },
-                                                                        borderRadius: BorderRadius.zero,
+                                    borderRadius: BorderRadius.zero,
                                     selectable: PlatformInfos.isMobile
                                         ? widget.longPressSelect
                                         : true,
+                                  ),
+                                  // Plusly: status row below content instead of overlay
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 4.0),
+                                      child: messageStatusRow,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -513,11 +521,7 @@ class _MessageModernState extends State<MessageModern> {
                               ),
                           ],
                         ),
-                        Positioned(
-                          right: 0,
-                          bottom: 0,
-                          child: messageStatusRow,
-                        ),
+
                       ],
                     ),
                   ),
