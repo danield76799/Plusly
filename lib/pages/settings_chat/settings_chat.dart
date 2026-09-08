@@ -10,6 +10,8 @@ class SettingsChat extends StatefulWidget {
 }
 
 class SettingsChatController extends State<SettingsChat> {
+  void updateState() => setState(() {});
+
   @override
   Widget build(BuildContext context) => SettingsChatView(this);
 }

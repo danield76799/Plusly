@@ -4118,5 +4118,20 @@
   "@showSeconds": {
     "type": "String",
     "placeholders": {}
+  },
+  "doubleTapToReact": "Double-tap to react",
+  "@doubleTapToReact": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "doubleTapToReactDescription": "Double-tap a message to react instead of selecting text",
+  "@doubleTapToReactDescription": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "doubleTapReaction": "Double-tap reaction",
+  "@doubleTapReaction": {
+    "type": "String",
+    "placeholders": {}
   }
 }

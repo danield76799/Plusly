@@ -108,6 +108,8 @@ enum AppSettings<T> {
   enableGradient<bool>('enableGradient', true),
   messageStyle<String>('xyz.plusly.messageStyle', 'bubbles'),
   showSeconds<bool>('xyz.plusly.showSeconds', false),
+  doubleTapToReact<bool>('chat.fluffy.double_tap_to_react', false),
+  doubleTapReaction<String>('chat.fluffy.double_tap_reaction', '❤️'),
   pushNotificationsGatewayUrl<String>(
     'pushNotificationsGatewayUrl',
     'https://push.plusly.chat/_matrix/push/v1/notify',
@@ -159,6 +161,12 @@ enum AppSettings<T> {
 
     if (store.getBool(AppSettings.sendOnEnter.key) == null) {
       await store.setBool(AppSettings.sendOnEnter.key, !PlatformInfos.isMobile);
+    }
+    if (store.getBool(AppSettings.doubleTapToReact.key) == null) {
+      await store.setBool(
+        AppSettings.doubleTapToReact.key,
+        PlatformInfos.isMobile,
+      );
     }
     if (kIsWeb && loadWebConfigFile) {
       try {

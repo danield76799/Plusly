@@ -51,6 +51,69 @@ class SettingsChatView extends StatelessWidget {
                         ),
                       ),
                       SettingsSwitchListTile.adaptive(
+                        title: L10n.of(context).doubleTapToReact,
+                        subtitle: L10n.of(context).doubleTapToReactDescription,
+                        setting: AppSettings.doubleTapToReact,
+                        onChanged: (_) => controller.updateState(),
+                      ),
+                      if (AppSettings.doubleTapToReact.value)
+                        ListTile(
+                          title: Text(L10n.of(context).doubleTapReaction),
+                          trailing: Text(
+                            AppSettings.doubleTapReaction.value,
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                          onTap: () async {
+                            final emoji = await showAdaptiveBottomSheet<String>(
+                              context: context,
+                              builder: (context) => Scaffold(
+                                appBar: AppBar(
+                                  title: Text(L10n.of(context).doubleTapReaction),
+                                  leading: CloseButton(
+                                    onPressed: () => Navigator.of(context).pop(null),
+                                  ),
+                                ),
+                                body: SizedBox(
+                                  height: double.infinity,
+                                  child: EmojiPicker(
+                                    onEmojiSelected: (_, emoji) =>
+                                        Navigator.of(context).pop(emoji.emoji),
+                                    config: Config(
+                                      locale: Localizations.localeOf(context),
+                                      emojiViewConfig: const EmojiViewConfig(
+                                        backgroundColor: Colors.transparent,
+                                      ),
+                                      bottomActionBarConfig:
+                                          const BottomActionBarConfig(enabled: false),
+                                      categoryViewConfig: CategoryViewConfig(
+                                        initCategory: Category.SMILEYS,
+                                        backspaceColor: theme.colorScheme.primary,
+                                        iconColor: theme.colorScheme.primary.withAlpha(128),
+                                        iconColorSelected: theme.colorScheme.primary,
+                                        indicatorColor: theme.colorScheme.primary,
+                                        backgroundColor: theme.colorScheme.surface,
+                                      ),
+                                      skinToneConfig: SkinToneConfig(
+                                        dialogBackgroundColor: Color.lerp(
+                                          theme.colorScheme.surface,
+                                          theme.colorScheme.primaryContainer,
+                                          0.75,
+                                        )!,
+                                        indicatorColor: theme.colorScheme.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                            if (emoji != null) {
+                              await AppSettings.doubleTapReaction.setItem(emoji);
+                              controller.updateState();
+                            }
+                          },
+                        ),
+                      const ListDivider(),
+                      SettingsSwitchListTile.adaptive(
                         title: L10n.of(context).formattedMessages,
                         subtitle: L10n.of(context).formattedMessagesDescription,
                         setting: AppSettings.renderHtml,

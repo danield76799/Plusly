@@ -4117,5 +4117,20 @@
   "@showSeconds": {
     "type": "String",
     "placeholders": {}
+  },
+  "doubleTapToReact": "Dubbeltik om te reageren",
+  "@doubleTapToReact": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "doubleTapToReactDescription": "Dubbeltik op een bericht om te reageren in plaats van tekst te selecteren",
+  "@doubleTapToReactDescription": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "doubleTapReaction": "Dubbeltik-reactie",
+  "@doubleTapReaction": {
+    "type": "String",
+    "placeholders": {}
   }
 }
