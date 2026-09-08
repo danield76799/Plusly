@@ -385,20 +385,18 @@ class _MessageModernState extends State<MessageModern> {
                                             timeline,
                                             RelationshipTypes.reaction,
                                           )
-                                          .firstWhere(
-                                            (e) =>
-                                                e.senderId ==
-                                                    event.room.client.userID &&
-                                                e.content
-                                                        .tryGetMap<
-                                                          String,
-                                                          Object?
-                                                        >('m.relates_to')
-                                                        ?.tryGet<String>('key') ==
-                                                    emoji,
-                                            orElse: () => null as dynamic,
-                                          );
-                                      if (existingReaction != null) {
+                                      .firstWhere(
+                                        (e) =>
+                                            e.senderId == event.room.client.userID &&
+                                            e.content
+                                                    .tryGetMap<String, Object?>(
+                                                      'm.relates_to',
+                                                    )
+                                                    ?.tryGet<String>('key') ==
+                                                emoji,
+                                        orElse: () => null as dynamic,
+                                      );
+                                  if (existingReaction != null) {
                                         existingReaction.redactEvent();
                                       } else {
                                         event.room.sendReaction(

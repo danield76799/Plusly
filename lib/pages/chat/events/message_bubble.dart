@@ -536,19 +536,17 @@ class _MessageBubbleState extends State<MessageBubble> {
                                         timeline,
                                         RelationshipTypes.reaction,
                                       )
-                                      .where(
+                                      .firstWhere(
                                         (e) =>
-                                            e.senderId ==
-                                                event.room.client.userID &&
+                                            e.senderId == event.room.client.userID &&
                                             e.content
-                                                    .tryGetMap<
-                                                      String,
-                                                      Object?
-                                                    >('m.relates_to')
+                                                    .tryGetMap<String, Object?>(
+                                                      'm.relates_to',
+                                                    )
                                                     ?.tryGet<String>('key') ==
-                                                emoji,,
-          orElse: () => null,
-        );
+                                                emoji,
+                                        orElse: () => null as dynamic,
+                                      );
                                   if (existingReaction != null) {
                                     existingReaction.redactEvent();
                                   } else {

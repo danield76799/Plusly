@@ -558,13 +558,11 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                       )
                                       .firstWhere(
                                         (e) =>
-                                            e.senderId ==
-                                                event.room.client.userID &&
+                                            e.senderId == event.room.client.userID &&
                                             e.content
-                                                    .tryGetMap<
-                                                      String,
-                                                      Object?
-                                                    >('m.relates_to')
+                                                    .tryGetMap<String, Object?>(
+                                                      'm.relates_to',
+                                                    )
                                                     ?.tryGet<String>('key') ==
                                                 emoji,
                                         orElse: () => null as dynamic,

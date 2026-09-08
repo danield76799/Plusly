@@ -1574,9 +1574,9 @@ class ChatController extends State<ChatPageWithRoom>
     final allEditEvents = event
         .aggregatedEvents(timeline!, RelationshipTypes.edit)
         .firstWhere(
-          (e) => e.status.isError,
-          orElse: () => null as dynamic,
-        );
+      (e) => e.status.isError,
+      orElse: () => null as dynamic,
+    );
     if (allEditEvents != null) {
       allEditEvents.sendAgain();
     }
@@ -1602,10 +1602,10 @@ class ChatController extends State<ChatPageWithRoom>
     bool highlightEvent = true,
     AutoScrollPosition position = AutoScrollPosition.middle,
   }) async {
-    final foundEvent = timeline!.events
-        .where((event) => event.eventId == eventId,
-          orElse: () => null,
-        );
+    final foundEvent = timeline!.events.firstWhere(
+      (event) => event.eventId == eventId,
+      orElse: () => null as dynamic,
+    );
 
     final eventIndex = foundEvent == null
         ? -1
