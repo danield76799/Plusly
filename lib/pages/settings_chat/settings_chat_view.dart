@@ -7,6 +7,8 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/widgets/adaptive_dialogs/adaptive_bottom_sheet.dart';
+import 'package:Pulsly/widgets/emoji_picker.dart';
 import 'package:Pulsly/widgets/layouts/max_width_body.dart';
 import 'package:Pulsly/widgets/list_divider.dart';
 import 'package:Pulsly/widgets/matrix.dart';
@@ -75,33 +77,12 @@ class SettingsChatView extends StatelessWidget {
                                 ),
                                 body: SizedBox(
                                   height: double.infinity,
-                                  child: EmojiPicker(
+                                  child: MatrixEmojiPicker(
                                     onEmojiSelected: (_, emoji) =>
-                                        Navigator.of(context).pop(emoji.emoji),
-                                    config: Config(
-                                      locale: Localizations.localeOf(context),
-                                      emojiViewConfig: const EmojiViewConfig(
-                                        backgroundColor: Colors.transparent,
-                                      ),
-                                      bottomActionBarConfig:
-                                          const BottomActionBarConfig(enabled: false),
-                                      categoryViewConfig: CategoryViewConfig(
-                                        initCategory: Category.SMILEYS,
-                                        backspaceColor: theme.colorScheme.primary,
-                                        iconColor: theme.colorScheme.primary.withAlpha(128),
-                                        iconColorSelected: theme.colorScheme.primary,
-                                        indicatorColor: theme.colorScheme.primary,
-                                        backgroundColor: theme.colorScheme.surface,
-                                      ),
-                                      skinToneConfig: SkinToneConfig(
-                                        dialogBackgroundColor: Color.lerp(
-                                          theme.colorScheme.surface,
-                                          theme.colorScheme.primaryContainer,
-                                          0.75,
-                                        )!,
-                                        indicatorColor: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
+                                        Navigator.of(context).pop(
+                                          emoji.customData ?? emoji.standardEmoji!.char,
+                                        ),
+                                    onBackspacePressed: () {},
                                   ),
                                 ),
                               ),
