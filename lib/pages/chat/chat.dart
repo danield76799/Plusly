@@ -1599,9 +1599,9 @@ class ChatController extends State<ChatPageWithRoom>
     bool highlightEvent = true,
     AutoScrollPosition position = AutoScrollPosition.middle,
   }) async {
-    final foundEvent = timeline!.events.firstWhereOrNull(
-      (event) => event.eventId == eventId,
-    );
+    final foundEvent = timeline!.events
+        .where((event) => event.eventId == eventId)
+        .firstOrNull;
 
     final eventIndex = foundEvent == null
         ? -1
