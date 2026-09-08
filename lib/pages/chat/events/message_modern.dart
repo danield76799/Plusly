@@ -385,9 +385,8 @@ class _MessageModernState extends State<MessageModern> {
                                             timeline,
                                             RelationshipTypes.reaction,
                                           )
-                                          .where(
-                                            (e) =>
-                                                e.senderId ==
+                                          .firstWhere(
+          (e) => e.senderId ==
                                                     event.room.client.userID &&
                                                 e.content
                                                         .tryGetMap<
@@ -395,9 +394,9 @@ class _MessageModernState extends State<MessageModern> {
                                                           Object?
                                                         >('m.relates_to')
                                                         ?.tryGet<String>('key') ==
-                                                    emoji,
-                                          )
-                                          .firstOrNull;
+                                                    emoji,,
+          orElse: () => null,
+        );
                                       if (existingReaction != null) {
                                         existingReaction.redactEvent();
                                       } else {

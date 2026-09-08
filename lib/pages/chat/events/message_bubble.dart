@@ -308,7 +308,8 @@ class _MessageBubbleState extends State<MessageBubble> {
     final inReplyTo = event.inReplyToEventId(includingFallback: false);
     final hasReply = inReplyTo != null;
     final replyEvent = hasReply
-        ? timeline.events.where((e) => e.eventId == inReplyTo).firstOrNull
+        ? timeline.events.firstWhere(
+          (e) => e.eventId == inReplyTo).firstOrNull
         : null;
     const hardCorner = Radius.circular(4);
     const roundedCorner = Radius.circular(AppConfig.borderRadius);
@@ -543,9 +544,9 @@ class _MessageBubbleState extends State<MessageBubble> {
                                                       Object?
                                                     >('m.relates_to')
                                                     ?.tryGet<String>('key') ==
-                                                emoji,
-                                      )
-                                      .firstOrNull;
+                                                emoji,,
+          orElse: () => null,
+        );
                                   if (existingReaction != null) {
                                     existingReaction.redactEvent();
                                   } else {

@@ -68,12 +68,11 @@ class MessageReactions extends StatelessWidget {
             onTap: () {
               if (r.reacted) {
                 final evt = allReactionEvents
-                    .where(
-                      (e) =>
-                          e.senderId == event.room.client.userID &&
-                          e.content.tryGetMap('m.relates_to')?['key'] == r.key,
-                    )
-                    .firstOrNull;
+                    .firstWhere(
+          (e) => e.senderId == event.room.client.userID &&
+                          e.content.tryGetMap('m.relates_to')?['key'] == r.key,,
+          orElse: () => null,
+        );
                 if (evt != null) {
                   showFutureLoadingDialog(
                     context: context,
