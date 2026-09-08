@@ -557,7 +557,8 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                         RelationshipTypes.reaction,
                                       )
                                       .firstWhere(
-          (e) => e.senderId ==
+                                        (e) =>
+                                            e.senderId ==
                                                 event.room.client.userID &&
                                             e.content
                                                     .tryGetMap<
@@ -565,9 +566,9 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                                       Object?
                                                     >('m.relates_to')
                                                     ?.tryGet<String>('key') ==
-                                                emoji,,
-          orElse: () => null,
-        );
+                                                emoji,
+                                        orElse: () => null as dynamic,
+                                      );
                                   if (existingReaction != null) {
                                     existingReaction.redactEvent();
                                   } else {

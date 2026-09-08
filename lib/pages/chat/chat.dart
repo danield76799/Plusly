@@ -1574,9 +1574,11 @@ class ChatController extends State<ChatPageWithRoom>
     final allEditEvents = event
         .aggregatedEvents(timeline!, RelationshipTypes.edit)
         .firstWhere(
-          (e) => e.status.isError);
-    for (final e in allEditEvents) {
-      e.sendAgain();
+          (e) => e.status.isError,
+          orElse: () => null as dynamic,
+        );
+    if (allEditEvents != null) {
+      allEditEvents.sendAgain();
     }
     setState(() => selectedEvents.clear());
   }
