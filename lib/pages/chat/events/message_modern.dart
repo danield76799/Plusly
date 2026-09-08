@@ -373,6 +373,40 @@ class _MessageModernState extends State<MessageModern> {
                             GestureDetector(
                               onTapDown: (details) =>
                                   _tapPosition = details.globalPosition,
+                              onDoubleTap: AppSettings.doubleTapToReact.value &&
+                                      event.room.canSendDefaultMessages &&
+                                      !widget.longPressSelect
+                                  ? () {
+                                      HapticFeedback.lightImpact();
+                                      final emoji =
+                                          AppSettings.doubleTapReaction.value;
+                                      final existingReaction = event
+                                          .aggregatedEvents(
+                                            timeline,
+                                            RelationshipTypes.reaction,
+                                          )
+                                          .firstWhereOrNull(
+                                            (e) =>
+                                                e.senderId ==
+                                                    event.room.client.userID &&
+                                                e.content
+                                                        .tryGetMap<
+                                                          String,
+                                                          Object?
+                                                        >('m.relates_to')
+                                                        ?.tryGet<String>('key') ==
+                                                    emoji,
+                                          );
+                                      if (existingReaction != null) {
+                                        existingReaction.redactEvent();
+                                      } else {
+                                        event.room.sendReaction(
+                                          event.eventId,
+                                          emoji,
+                                        );
+                                      }
+                                    }
+                                  : null,
                               onLongPress: widget.longPressSelect
                                   ? null
                                   : () {
