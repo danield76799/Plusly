@@ -572,8 +572,9 @@ class ChatView extends StatelessWidget {
                       ),
                     // Messages — full screen under AppBar and InputBar
                     Positioned.fill(
-                      child: GestureDetector(
-                        onTap: controller.clearSingleSelectedEvent,
+                      child: Listener(
+                        onPointerDown: (_) =>
+                            controller.clearSingleSelectedEvent(),
                         child: ChatEventList(
                           key: const ValueKey('chat-event-list'),
                           controller: controller,
