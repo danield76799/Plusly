@@ -178,15 +178,6 @@ Future<void> notificationTap(
       if (roomId == null) {
         throw Exception('Selected notification with action but no payload');
       }
-      // Wait for device keys so we can decrypt the room/events for the
-      // reply action. If this fails (e.g. no network), don't crash the
-      // whole handler — fall back to sending without the rich context.
-      try {
-        await client.userDeviceKeysLoading
-            ?.timeout(const Duration(seconds: 10));
-      } catch (e) {
-        Logs().w('Notification action: device keys not loaded', e);
-      }
       final room = client.getRoomById(roomId);
       if (room == null) {
         throw Exception(
@@ -201,7 +192,7 @@ Future<void> notificationTap(
             public: shouldSendPublicReadReceipts(client, roomId),
           );
         case PluslyNotificationActions.mute:
-          // Demp de kamer (PushRuleState.dontNotify) zodat er geen
+          // Demp de kamer (Push RuleState.dontNotify) zodat er geen
           // notificaties meer komen voor deze room.
           await room.setPushRuleState(PushRuleState.dontNotify);
         case PluslyNotificationActions.reply:
@@ -212,76 +203,92 @@ Future<void> notificationTap(
             );
           }
 
-          final eventId = await room.sendTextEvent(
+          if (PlatformInfos.isAndroid) {
+            l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
+            // SPINNER-FIX: de Android RemoteInput-spinner verdwijnt pas
+            // bij een notify() op hetzelfde notificatie-ID. Daarom voegen
+            // we het eigen antwoord OPTIMISTISCH toe aan de MessagingStyle
+            // en re-posten we de notificatie VÓÓR de (trage) keys-wacht +
+            // E2EE-verzending. Zo is de spinner in <1s weg in plaats van
+            // enkele seconden bij een koude start. Geen avatar-fetch:
+            // die was al verwijderd (2 netwerk-roundtrips).
+            final messagingStyleInformation =
+                await AndroidFlutterLocalNotificationsPlugin()
+                    .getActiveNotificationMessagingStyle(id: '${room.client.clientName}_${room.id}'.hashCode);
+            if (messagingStyleInformation != null) {
+              messagingStyleInformation.messages?.add(
+                Message(
+                  input,
+                  DateTime.now(),
+                  Person(
+                    key: room.client.userID,
+                    name: l10n.you,
+                  ),
+                ),
+              );
+
+              await FlutterLocalNotificationsPlugin().show(
+                id: '${room.client.clientName}_${room.id}'.hashCode,
+                title: room.getLocalizedDisplayname(MatrixLocals(l10n)),
+                body: input,
+                notificationDetails: NotificationDetails(
+                  android: AndroidNotificationDetails(
+                    AppConfig.pushNotificationsChannelId,
+                    l10n.incomingMessages,
+                    category: AndroidNotificationCategory.message,
+                    shortcutId: room.id,
+                    styleInformation: messagingStyleInformation,
+                    groupKey: room.client.clientName,
+                    playSound: false,
+                    enableVibration: false,
+                    actions: <AndroidNotificationAction>[
+                      AndroidNotificationAction(
+                        PluslyNotificationActions.reply.name,
+                        l10n.reply,
+                        inputs: [
+                          AndroidNotificationActionInput(
+                            label: l10n.writeAMessage,
+                          ),
+                        ],
+                        cancelNotification: false,
+                        allowGeneratedReplies: true,
+                        semanticAction: SemanticAction.reply,
+                      ),
+                      AndroidNotificationAction(
+                        PluslyNotificationActions.markAsRead.name,
+                        l10n.markAsRead,
+                        semanticAction: SemanticAction.markAsRead,
+                      ),
+                    ],
+                  ),
+                ),
+                // Originele payload hergebruiken: het eventId van de
+                // reply is nog niet bekend (de send draait pas ná deze
+                // update) en de tap-opener heeft alleen de roomId nodig.
+                payload: notificationResponse.payload,
+              );
+            }
+          }
+
+          // Device keys zijn pas nodig voor de E2EE-verzending — dus NA
+          // de optimistic notificatie-update, zodat de spinner daar niet
+          // op wacht. Bij falen (geen netwerk): niet crashen, de send
+          // valt dan terug zonder rich context.
+          try {
+            await client.userDeviceKeysLoading
+                ?.timeout(const Duration(seconds: 10));
+          } catch (e) {
+            Logs().w('Notification reply: device keys not loaded', e);
+          }
+
+          // Verzenden. Deze await moet blijven: in de koude path mag de
+          // temp-client pas worden gedisposed als de send is afgerond,
+          // anders breekt client.dispose() de in-flight verzending af.
+          await room.sendTextEvent(
             input,
             parseCommands: false,
             displayPendingEvent: false,
           );
-
-          if (PlatformInfos.isAndroid) {
-            l10n ??= await lookupL10n(PlatformDispatcher.instance.locale);
-            // FLUFFYCHAT-PARITEIT + snelheid: de bericht-update (eigen reply
-            // toevoegen aan de notificatie) mag de spinner NIET blokkeren.
-            // fetchOwnProfile + avatar-download zijn 2 netwerk-roundtrips
-            // die de spinner ~2-10s vasthouden. Send is al gelukt — update
-            // de notificatie direct, haal avatar op in de achtergrond.
-            final messagingStyleInformation =
-                await AndroidFlutterLocalNotificationsPlugin()
-                    .getActiveNotificationMessagingStyle(id: '${room.client.clientName}_${room.id}'.hashCode);
-            if (messagingStyleInformation == null) return;
-            messagingStyleInformation.messages?.add(
-              Message(
-                input,
-                DateTime.now(),
-                Person(
-                  key: room.client.userID,
-                  name: l10n.you,
-                ),
-              ),
-            );
-
-            await FlutterLocalNotificationsPlugin().show(
-              id: '${room.client.clientName}_${room.id}'.hashCode,
-              title: room.getLocalizedDisplayname(MatrixLocals(l10n)),
-              body: input,
-              notificationDetails: NotificationDetails(
-                android: AndroidNotificationDetails(
-                  AppConfig.pushNotificationsChannelId,
-                  l10n.incomingMessages,
-                  category: AndroidNotificationCategory.message,
-                  shortcutId: room.id,
-                  styleInformation: messagingStyleInformation,
-                  groupKey: room.client.clientName,
-                  playSound: false,
-                  enableVibration: false,
-                  actions: <AndroidNotificationAction>[
-                    AndroidNotificationAction(
-                      PluslyNotificationActions.reply.name,
-                      l10n.reply,
-                      inputs: [
-                        AndroidNotificationActionInput(
-                          label: l10n.writeAMessage,
-                        ),
-                      ],
-                      cancelNotification: false,
-                      allowGeneratedReplies: true,
-                      semanticAction: SemanticAction.reply,
-                    ),
-                    AndroidNotificationAction(
-                      PluslyNotificationActions.markAsRead.name,
-                      l10n.markAsRead,
-                      semanticAction: SemanticAction.markAsRead,
-                    ),
-                  ],
-                ),
-              ),
-              payload: NotificationPushPayload(
-                client.clientName,
-                room.id,
-                eventId,
-              ).toString(),
-            );
-          }
       }
   }
 }
