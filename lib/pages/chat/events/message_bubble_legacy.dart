@@ -87,40 +87,6 @@ class MessageBubbleLegacy extends StatefulWidget {
 class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
   Offset _tapPosition = Offset.zero;
 
-  /// Dubbeltik-reactie (FluffyChat upstream). Gedeeld door de buitenste
-  /// InkWell en de innerlijke GestureDetector.
-  void _handleDoubleTap() {
-    if (!AppSettings.doubleTapToReact.value ||
-        !widget.event.room.canSendDefaultMessages ||
-        widget.longPressSelect) {
-      return;
-    }
-    HapticFeedback.lightImpact();
-    final emoji = AppSettings.doubleTapReaction.value;
-    final existingReaction = widget.event
-        .aggregatedEvents(
-          widget.timeline,
-          RelationshipTypes.reaction,
-        )
-        .firstWhere(
-          (e) =>
-              e.senderId == widget.event.room.client.userID &&
-              e.content
-                      .tryGetMap<String, Object?>('m.relates_to')
-                      ?.tryGet<String>('key') ==
-                  emoji,
-          orElse: () => null as dynamic,
-        );
-    if (existingReaction != null) {
-      existingReaction.redactEvent();
-    } else {
-      widget.event.room.sendReaction(
-        widget.event.eventId,
-        emoji,
-      );
-    }
-  }
-
   // Cached futures to avoid re-creating them on every build
   late Future<User?> _senderUserFuture;
   Future<Event?>? _replyEventFuture;
@@ -473,7 +439,6 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                 onSecondaryTapDown: (details) =>
                     _tapPosition = details.globalPosition,
                 onTap: () => widget.onSelect(event, _tapPosition),
-                onDoubleTap: _handleDoubleTap,
                 onLongPress: () {
                   if (PlatformInfos.isMobile) {
                     widget.onSelect(event, _tapPosition);
@@ -579,6 +544,39 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                         child: GestureDetector(
                           onTapDown: (details) =>
                               _tapPosition = details.globalPosition,
+                          onDoubleTap: AppSettings.doubleTapToReact.value &&
+                                  event.room.canSendDefaultMessages &&
+                                  !widget.longPressSelect
+                              ? () {
+                                  HapticFeedback.lightImpact();
+                                  final emoji =
+                                      AppSettings.doubleTapReaction.value;
+                                  final existingReaction = event
+                                      .aggregatedEvents(
+                                        timeline,
+                                        RelationshipTypes.reaction,
+                                      )
+                                      .firstWhere(
+                                        (e) =>
+                                            e.senderId == event.room.client.userID &&
+                                            e.content
+                                                    .tryGetMap<String, Object?>(
+                                                      'm.relates_to',
+                                                    )
+                                                    ?.tryGet<String>('key') ==
+                                                emoji,
+                                        orElse: () => null as dynamic,
+                                      );
+                                  if (existingReaction != null) {
+                                    existingReaction.redactEvent();
+                                  } else {
+                                    event.room.sendReaction(
+                                      event.eventId,
+                                      emoji,
+                                    );
+                                  }
+                                }
+                              : null,
                           onLongPress: widget.longPressSelect
                               ? null
                               : () {
