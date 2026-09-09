@@ -27,6 +27,7 @@ import 'message_content.dart';
 import 'message_reactions.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
+import 'package:collection/collection.dart';
 
 class MessageBubbleLegacy extends StatefulWidget {
   final Event event;
@@ -556,7 +557,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                         timeline,
                                         RelationshipTypes.reaction,
                                       )
-                                      .firstWhere(
+                                      .firstWhereOrNull(
                                         (e) =>
                                             e.senderId == event.room.client.userID &&
                                             e.content
@@ -564,9 +565,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                                       'm.relates_to',
                                                     )
                                                     ?.tryGet<String>('key') ==
-                                                emoji,
-                                        orElse: () => null as dynamic,
-                                      );
+                                                emoji);
                                   if (existingReaction != null) {
                                     existingReaction.redactEvent();
                                   } else {

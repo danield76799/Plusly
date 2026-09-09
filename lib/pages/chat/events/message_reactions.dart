@@ -11,6 +11,7 @@ import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
+import 'package:collection/collection.dart';
 
 class MessageReactions extends StatelessWidget {
   final Event event;
@@ -67,12 +68,10 @@ class MessageReactions extends StatelessWidget {
             reacted: r.reacted,
             onTap: () {
               if (r.reacted) {
-                final evt = allReactionEvents.firstWhere(
+                final evt = allReactionEvents.firstWhereOrNull(
                   (e) =>
                       e.senderId == event.room.client.userID &&
-                      e.content.tryGetMap('m.relates_to')?['key'] == r.key,
-                  orElse: () => null as dynamic,
-                );
+                      e.content.tryGetMap('m.relates_to')?['key'] == r.key);
                 if (evt != null) {
                   showFutureLoadingDialog(
                     context: context,
