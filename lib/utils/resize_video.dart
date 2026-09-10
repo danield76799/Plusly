@@ -9,24 +9,58 @@ extension ResizeImage on XFile {
   static const int max = 1200;
   static const int quality = 40;
 
-  Future<MatrixVideoFile> resizeVideo() async {
+  /// Comprimeert de video zodanig dat deze onder [maxBytes] blijft.
+  /// Probeert progressief: DefaultQuality (720p) → MediumQuality → LowQuality.
+  /// Faalt alles, dan valt de caller terug op de originele bytes.
+  Future<MatrixVideoFile> resizeVideo({int? maxBytes}) async {
     MediaInfo? mediaInfo;
     var compressFailed = false;
     try {
       if (PlatformInfos.isMobile) {
         // will throw an error e.g. on Android SDK < 18
-        mediaInfo = await VideoCompress.compressVideo(path);
+        mediaInfo = await VideoCompress.compressVideo(
+          path,
+          quality: VideoQuality.DefaultQuality,
+        );
       }
     } catch (e, s) {
       Logs().w('Error while compressing video', e, s);
       compressFailed = true;
     }
-    
+
+    // Nog te groot na 720p-compressie? → zwaarder comprimeren vanaf het
+    // origineel. matrix.org heeft bv. een 50MB-limiet; een lange 720p-
+    // video komt daar makkelijk boven uit.
+    if (!compressFailed &&
+        maxBytes != null &&
+        mediaInfo?.file != null &&
+        await mediaInfo!.file!.length() > maxBytes) {
+      try {
+        final lower = await VideoCompress.compressVideo(
+          path,
+          quality: VideoQuality.MediumQuality,
+        );
+        if (lower?.file != null) {
+          mediaInfo = lower;
+          if (await mediaInfo!.file!.length() > maxBytes) {
+            final lowest = await VideoCompress.compressVideo(
+              path,
+              quality: VideoQuality.LowQuality,
+            );
+            if (lowest?.file != null) mediaInfo = lowest;
+          }
+        }
+      } catch (e, s) {
+        Logs().w('Error while re-compressing video', e, s);
+        // behoud de 720p-versie
+      }
+    }
+
     // Fallback naar originele bytes als compressie faalde
-    final bytes = (compressFailed || mediaInfo?.file == null) 
-        ? await readAsBytes() 
+    final bytes = (compressFailed || mediaInfo?.file == null)
+        ? await readAsBytes()
         : await mediaInfo!.file!.readAsBytes();
-    
+
     return MatrixVideoFile(
       bytes: bytes,
       name: name,

@@ -72,6 +72,37 @@ class SendFileDialogState extends State<SendFileDialog> {
       final clientConfig = await widget.room.client.getConfig();
       final maxUploadSize = clientConfig.mUploadSize ?? 100 * 1000 * 1000;
 
+      // Vroege duidelijke melding: oncomprimeerbare bestanden die sowieso
+      // te groot zijn, afvangen VÓÓR de upload. Voorheen leek het alsof
+      // "er niets gebeurde" — de dialoog sloot, de upload faalde stil.
+      // Video's krijgen hier nog een kans: die worden later progressief
+      // gecomprimeerd (resizeVideo(maxBytes:)) zodat ze alsnog passen.
+      for (final xfile in widget.files) {
+        final isVideo = (xfile.mimeType ?? lookupMimeType(xfile.path) ?? '')
+            .startsWith('video');
+        if (isVideo) continue; // video -> compressie-pad hieronder
+        final length = await xfile.length();
+        if (length > maxUploadSize) {
+          scaffoldMessenger.clearSnackBars();
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              backgroundColor: Theme.of(context).colorScheme.errorContainer,
+              content: Text(
+                l10n.fileIsTooBigForServer(
+                  formatFileSizeHuman(maxUploadSize),
+                ),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onErrorContainer,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              duration: const Duration(seconds: 6),
+            ),
+          );
+          return;
+        }
+      }
+
       if (mounted) {
         Navigator.of(context, rootNavigator: false).pop();
       }
@@ -92,7 +123,7 @@ class SendFileDialogState extends State<SendFileDialog> {
             length > minSizeToCompress &&
             compress) {
           scaffoldMessenger.showLoadingSnackBar(l10n.compressVideo);
-          file = await xfile.resizeVideo();
+          file = await xfile.resizeVideo(maxBytes: maxUploadSize);
         } else if (mimeType != null &&
             mimeType.startsWith('image') &&
             length > minSizeToCompress &&

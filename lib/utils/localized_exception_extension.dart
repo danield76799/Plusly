@@ -11,6 +11,20 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/other_party_can_receive.dart';
 import 'uia_request_manager.dart';
 
+/// Formatteert bytes als leesbare bestandsgrootte (bv. "50.00 MB").
+String formatFileSizeHuman(int size) {
+  if (size < 1000) return '$size B';
+  final i = (log(size) / log(1000)).floor();
+  final num = (size / pow(1000, i));
+  final round = num.round();
+  final numString = round < 10
+      ? num.toStringAsFixed(2)
+      : round < 100
+      ? num.toStringAsFixed(1)
+      : round.toString();
+  return '$numString ${'kMGTPEZY'[i - 1]}B';
+}
+
 extension LocalizedExceptionExtension on Object {
   static String _formatFileSize(int size) {
     if (size < 1000) return '$size B';
