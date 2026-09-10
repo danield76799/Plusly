@@ -62,20 +62,17 @@ extension DateTimeExtension on DateTime {
         now.millisecondsSinceEpoch - millisecondsSinceEpoch <
             1000 * 60 * 60 * 24 * 7;
 
+    // WhatsApp-stijl (Plusly-afwijking van upstream): recente dagen tonen
+    // de weekdag PLUS de echte datum ("wo 9 sep") i.p.v. alleen de weekdag ("wo").
+    final locale = Localizations.localeOf(context).languageCode;
     if (sameDay) {
       return localizedTimeOfDay(context);
     } else if (sameWeek) {
-      return DateFormat.E(
-        Localizations.localeOf(context).languageCode,
-      ).format(this);
+      return '${DateFormat.E(locale).format(this)} ${DateFormat.MMMd(locale).format(this)}';
     } else if (sameYear) {
-      return DateFormat.MMMd(
-        Localizations.localeOf(context).languageCode,
-      ).format(this);
+      return DateFormat.MMMd(locale).format(this);
     }
-    return DateFormat.yMMMd(
-      Localizations.localeOf(context).languageCode,
-    ).format(this);
+    return DateFormat.yMMMd(locale).format(this);
   }
 
   /// If the DateTime is today, this returns [localizedTimeOfDay()], if not it also
