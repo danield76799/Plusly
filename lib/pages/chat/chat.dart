@@ -151,7 +151,23 @@ class ChatController extends State<ChatPageWithRoom>
   Timer? typingTimeout;
   bool currentlyTyping = false;
   bool dragging = false;
-  bool _shareItemsProcessed = false;
+  /// Procesbrede idempotentie voor deel-acties ("doorsturen"/"delen").
+  ///
+  /// WAAROM STATIC EN NIET EEN GEWONE BOOL
+  /// Een instantie-veld werkt hier niet: GoRouter bouwt de ChatPage opnieuw op
+  /// na `context.go(...)` en maakt dan een NIEUWE State aan, met een verse
+  /// `_shareItemsProcessed = false`. De oude bool-guard liet daardoor elke
+  /// rebuild opnieuw verzenden.
+  ///
+  /// De sleutel is de identiteit van de lijst die ShareScaffoldDialog doorgeeft:
+  /// één doorstuur-actie = één lijstobject. Zo verstuurt elke actie exact één
+  /// keer, ook als de pagina tussentijds opnieuw wordt opgebouwd, en blijven
+  /// twee losse doorstuuracties gewoon twee keer werken.
+  static final Set<int> _verwerkteDeelActies = <int>{};
+
+  /// Alleen voor tests: vergeet wat er al verwerkt is.
+  @visibleForTesting
+  static void resetDeelActieGuard() => _verwerkteDeelActies.clear();
 
   void onDragEntered(_) => setState(() => dragging = true);
 
@@ -351,8 +367,13 @@ class ChatController extends State<ChatPageWithRoom>
   void _shareItems([_]) {
     if (!mounted) return;
     final shareItems = widget.shareItems;
-    if (shareItems == null || shareItems.isEmpty || _shareItemsProcessed) return;
-    _shareItemsProcessed = true;
+    if (shareItems == null || shareItems.isEmpty) return;
+
+    // Idempotent op de IDENTITEIT van de lijst, niet op deze State: GoRouter
+    // maakt na context.go() een nieuwe State aan, waardoor een instantie-vlag
+    // steeds weer op false begon en dezelfde inhoud opnieuw werd verzonden.
+    // Drie rebuilds gaven zo drie identieke bubbels uit één gedeeld bericht.
+    if (!_verwerkteDeelActies.add(identityHashCode(shareItems))) return;
 
     if (!room.otherPartyCanReceiveMessages) {
       final theme = Theme.of(context);

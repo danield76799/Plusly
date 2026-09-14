@@ -468,12 +468,36 @@ abstract class AppRoutes {
               path: ':roomid',
               pageBuilder: (context, state) {
                 final body = state.uri.queryParameters['body'];
-                var shareItems = state.extra is List<ShareItem>
-                    ? state.extra as List<ShareItem>
-                    : null;
+                // BELANGRIJK: neem een KOPIE van de lijst en muteer state.extra
+                // nooit. `state.extra as List<ShareItem>` is geen kopie maar een
+                // verwijzing naar de lijst die de router zelf vasthoudt. Elke
+                // keer dat deze route opnieuw wordt opgebouwd, werd er via
+                // shareItems.add(...) een item BIJ dezelfde lijst geplakt —
+                // waarna de (her)aangekomen lijst in zijn geheel opnieuw werd
+                // verzonden. Zo ontstonden 3 identieke bubbels uit 1 bericht.
+                final extra = state.extra;
+                final shareItems = <ShareItem>[
+                  if (extra is List<ShareItem>) ...extra,
+                ];
                 if (body != null && body.isNotEmpty) {
-                  shareItems ??= [];
-                  shareItems.add(TextShareItem(body));
+                  // Ook idempotent: dezelfde body mag maar één keer meetellen,
+                  // hoe vaak deze builder ook draait.
+                  final alAanwezig = shareItems
+                      .whereType<TextShareItem>()
+                      .any((item) => item.value == body);
+                  if (!alAanwezig) shareItems.add(TextShareItem(body));
+                }
+                if (shareItems.isEmpty) {
+                  // Niets te delen: geef null door zodat ChatController niet
+                  // voor niets een verzendronde start.
+                  return defaultPageBuilder(
+                    context,
+                    state,
+                    ChatPage(
+                      roomId: state.pathParameters['roomid']!,
+                      eventId: state.uri.queryParameters['event'],
+                    ),
+                  );
                 }
                 return defaultPageBuilder(
                   context,
