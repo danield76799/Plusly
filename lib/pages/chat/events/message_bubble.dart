@@ -404,7 +404,10 @@ class _MessageBubbleState extends State<MessageBubble> {
                 : hasBeenRead
                 ? Icons.done_all
                 : Icons.check,
-            color: statusColor,
+            // Gelezen = WhatsApp-blauw; de rest volgt de statuskleur.
+            color: hasBeenRead && event.status != EventStatus.sending && event.status != EventStatus.error
+                ? theme.readReceiptBlue
+                : statusColor,
             size: 14,
           ),
       ],

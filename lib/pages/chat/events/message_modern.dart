@@ -263,7 +263,12 @@ class _MessageModernState extends State<MessageModern> {
                         : hasBeenRead
                         ? Icons.done_all
                         : Icons.check,
-                    color: color,
+                    // Gelezen = WhatsApp-blauw; de rest volgt de statuskleur.
+                    color: hasBeenRead &&
+                            event.status != EventStatus.sending &&
+                            event.status != EventStatus.error
+                        ? Theme.of(context).readReceiptBlue
+                        : color,
                     size: 13,
                   ),
           ),

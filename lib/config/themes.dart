@@ -193,6 +193,16 @@ extension BubbleColorTheme on ThemeData {
       ? colorScheme.surfaceContainerHighest
       : colorScheme.surfaceContainerHigh;
 
+  /// WhatsApp-style read-receipt blue for the double tick on own messages.
+  ///
+  /// Helder blauw in dark mode (#53BDEB, zoals WhatsApp), ijsblauw in light
+  /// mode (#B9E7FA) — het petrol van de lichte bubbel slikt helder blauw
+  /// (contrast 2.0). Beide halen ≥3.0 op hun bubbel, bewaakt in
+  /// test/read_receipt_blue_test.dart met de echte themakleuren.
+  Color get readReceiptBlue => brightness == Brightness.light
+      ? const Color(0xFFB9E7FA)
+      : const Color(0xFF53BDEB);
+
   /// Subtle border for incoming bubbles in light mode so they don't
   /// blend into the background. Dark mode surfaces already have enough
   /// contrast without a border.
