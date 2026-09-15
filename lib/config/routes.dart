@@ -244,6 +244,11 @@ abstract class AppRoutes {
                     ChatPage(
                       roomId: state.pathParameters['roomid']!,
                       eventId: state.uri.queryParameters['event'],
+                      // Alleen uit het archief komt hier een Timeline mee;
+                      // de share-route stopt er een List<ShareItem> in.
+                      timeline: state.extra is Timeline
+                          ? state.extra as Timeline
+                          : null,
                     ),
                   ),
                   redirect: loggedOutRedirect,

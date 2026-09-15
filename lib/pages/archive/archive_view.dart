@@ -15,7 +15,7 @@ class ArchiveView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Room>>(
+    return FutureBuilder<List<ArchivedRoom>>(
       future: controller.getArchive(context),
       builder: (BuildContext context, snapshot) => Scaffold(
         appBar: AppBar(
@@ -58,10 +58,14 @@ class ArchiveView extends StatelessWidget {
                 return ListView.builder(
                   itemCount: controller.archive.length,
                   itemBuilder: (BuildContext context, int i) => ChatListItem(
-                    controller.archive[i],
+                    controller.archive[i].room,
                     onForget: () => controller.forgetRoomAction(i),
                     onTap: () => context.go(
-                      '/rooms/archive/${controller.archive[i].id}',
+                      '/rooms/archive/${controller.archive[i].room.id}',
+                      // Timeline gaat mee: de chat hergebruikt hem i.p.v.
+                      // opnieuw laden. Type-check (geen cast): extra draagt
+                      // elders shareItems.
+                      extra: controller.archive[i].timeline,
                     ),
                   ),
                 );

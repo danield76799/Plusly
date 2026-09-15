@@ -9,6 +9,7 @@ import 'package:slugify/slugify.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/utils/markdown_context_builder.dart';
+import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
 import '../../widgets/avatar.dart';
 import '../../widgets/matrix.dart';
@@ -504,7 +505,14 @@ class _InputBarState extends State<InputBar> {
                 bytes: data,
                 name: content.uri.split('/').last,
               );
-              room.sendFileEvent(file, shrinkImageMaxDimension: 1600);
+              // Plakken gebeurt fire-and-forget: service eromheen zodat de
+              // upload wegdrukken overleeft; stopt vanzelf als hij klaar is.
+              ForegroundServices.startService('send_files');
+              room
+                  .sendFileEvent(file, shrinkImageMaxDimension: 1600)
+                  .whenComplete(
+                    () => ForegroundServices.stopService('send_files'),
+                  );
             },
           ),
           minLines: widget.minLines,

@@ -26,6 +26,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SHORT_SERVICE" />
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE"
         android:maxSdkVersion="29" />
@@ -152,7 +153,7 @@
         <!-- Push notifications worden door UnifiedPush afgehandeld -->
 
         <service android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
-            android:foregroundServiceType="camera|microphone|mediaProjection">
+            android:foregroundServiceType="camera|microphone|mediaProjection|shortService">
         </service>
 
         <!-- <service android:name="io.wazo.callkeep.VoiceConnectionService"

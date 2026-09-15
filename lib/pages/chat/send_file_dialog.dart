@@ -13,6 +13,7 @@ import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/clean_exif.dart';
+import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/loading_snackbar_extension.dart';
 import 'package:Pulsly/utils/localized_exception_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
@@ -106,6 +107,10 @@ class SendFileDialogState extends State<SendFileDialog> {
       if (mounted) {
         Navigator.of(context, rootNavigator: false).pop();
       }
+
+      // Upload overleeft wegdrukken: foreground-service aan vóór compressie
+      // (video-compressie duurt lang) en uit in finally — ook bij falen.
+      await ForegroundServices.startService('send_files');
 
       for (final xfile in widget.files) {
         MatrixFile file;
@@ -310,6 +315,8 @@ class SendFileDialogState extends State<SendFileDialog> {
         ),
       );
       rethrow;
+    } finally {
+      await ForegroundServices.stopService('send_files');
     }
 
     return;

@@ -42,6 +42,7 @@ import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/synapse_admin_extension.dart';
 import 'package:Pulsly/utils/other_party_can_receive.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/privacy_options.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
 import 'package:Pulsly/utils/show_scaffold_dialog.dart';
@@ -65,6 +66,7 @@ class ChatPage extends StatelessWidget {
   final List<ShareItem>? shareItems;
   final String? eventId;
   final bool? showThreadRoots;
+  final Timeline? timeline;
 
   const ChatPage({
     super.key,
@@ -72,11 +74,18 @@ class ChatPage extends StatelessWidget {
     this.eventId,
     this.shareItems,
     this.showThreadRoots,
+    this.timeline,
   });
 
   @override
   Widget build(BuildContext context) {
-    final room = Matrix.of(context).client.getRoomById(roomId);
+    // Uit het archief komt de room via de meegegeven timeline: een verlaten
+    // kamer zit niet meer in client.rooms, dus getRoomById geeft null.
+    // (SDK 6.2.0: alleen RoomTimeline heeft .room, niet de abstracte Timeline.)
+    final archiveRoom =
+        timeline is RoomTimeline ? (timeline as RoomTimeline).room : null;
+    final room =
+        archiveRoom ?? Matrix.of(context).client.getRoomById(roomId);
     if (room == null) {
       return Scaffold(
         appBar: AppBar(title: Text(L10n.of(context).oopsSomethingWentWrong)),
@@ -95,6 +104,7 @@ class ChatPage extends StatelessWidget {
       shareItems: shareItems,
       eventId: eventId,
       showThreadRoots: showThreadRoots,
+      timeline: timeline,
     );
   }
 }
@@ -105,6 +115,7 @@ class ChatPageWithRoom extends StatefulWidget {
   final List<ShareItem>? shareItems;
   final String? eventId;
   final bool? showThreadRoots;
+  final Timeline? timeline;
 
   const ChatPageWithRoom({
     super.key,
@@ -113,6 +124,7 @@ class ChatPageWithRoom extends StatefulWidget {
     this.shareItems,
     this.eventId,
     this.showThreadRoots,
+    this.timeline,
   });
 
   @override
@@ -554,6 +566,15 @@ class ChatController extends State<ChatPageWithRoom>
   Map<String, Thread>? threads = {};
 
   Future<void> _loadRoomTimeline({String? eventContextId}) async {
+    // Uit het archief hergebruiken we de meegegeven timeline (upstream).
+    // Die heeft geen live callbacks (updateView/_insert) — maar de kamer is
+    // verlaten, dus er komen geen nieuwe events. NOOIT in TimelineCache
+    // registreren (dead-timeline-regel hieronder).
+    if (widget.timeline != null && eventContextId == null) {
+      timeline?.cancelSubscriptions();
+      timeline = widget.timeline;
+      return;
+    }
     try {
       timeline?.cancelSubscriptions();
       timeline = await room.getTimeline(
@@ -1143,6 +1164,7 @@ class ChatController extends State<ChatPageWithRoom>
 
     final file = MatrixAudioFile(bytes: bytes, name: fileName);
 
+    await ForegroundServices.startService('send_files');
     await room
         .sendFileEvent(
           file,
@@ -1163,7 +1185,8 @@ class ChatController extends State<ChatPageWithRoom>
             SnackBar(content: Text((e as Object).toLocalizedString(context))),
           );
           return null;
-        });
+        })
+        .whenComplete(() => ForegroundServices.stopService('send_files'));
     setState(() {
       replyEvent = null;
     });
@@ -1201,6 +1224,7 @@ class ChatController extends State<ChatPageWithRoom>
 
     file.info['duration'] = duration;
 
+    await ForegroundServices.startService('send_files');
     await room
         .sendFileEvent(
           file,
@@ -1215,7 +1239,8 @@ class ChatController extends State<ChatPageWithRoom>
             SnackBar(content: Text((e as Object).toLocalizedString(context))),
           );
           return null;
-        });
+        })
+        .whenComplete(() => ForegroundServices.stopService('send_files'));
     setState(() {
       replyEvent = null;
     });

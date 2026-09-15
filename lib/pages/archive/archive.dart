@@ -16,19 +16,21 @@ class Archive extends StatefulWidget {
 }
 
 class ArchiveController extends State<Archive> {
-  List<Room> archive = [];
+  // Met timeline per kamer (loadArchiveWithTimeline): openen uit het archief
+  // hergebruikt die timeline i.p.v. opnieuw laden (upstream FluffyChat).
+  List<ArchivedRoom> archive = [];
 
-  Future<List<Room>> getArchive(BuildContext context) async {
+  Future<List<ArchivedRoom>> getArchive(BuildContext context) async {
     if (archive.isNotEmpty) return archive;
-    return archive = await Matrix.of(context).client.loadArchive();
+    return archive = await Matrix.of(context).client.loadArchiveWithTimeline();
   }
 
   void forgetRoomAction(int i) async {
     await showFutureLoadingDialog(
       context: context,
       future: () async {
-        Logs().v('Forget room ${archive.last.getLocalizedDisplayname()}');
-        await archive[i].forget();
+        Logs().v('Forget room ${archive.last.room.getLocalizedDisplayname()}');
+        await archive[i].room.forget();
         archive.removeAt(i);
       },
     );
@@ -54,8 +56,10 @@ class ArchiveController extends State<Archive> {
       context: context,
       future: () async {
         while (archive.isNotEmpty) {
-          Logs().v('Forget room ${archive.last.getLocalizedDisplayname()}');
-          await archive.last.forget();
+          Logs().v(
+            'Forget room ${archive.last.room.getLocalizedDisplayname()}',
+          );
+          await archive.last.room.forget();
           archive.removeLast();
         }
       },
