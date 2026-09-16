@@ -153,6 +153,42 @@ class LlmService {
     throw lastError ?? Exception('All providers failed');
   }
 
+  // ── Smart replies ────────────────────────────────────────────────────
+
+  /// Generate up to 3 short suggested replies for the given incoming
+  /// message. Used by SmartReplyChips (CometChat-style composer chips).
+  static Future<List<String>> generateSmartReplies(String incomingText) async {
+    final truncated =
+        incomingText.length > 2000 ? incomingText.substring(0, 2000) : incomingText;
+    final messages = [
+      LlmMessage(
+        role: 'system',
+        content: 'You suggest short conversational replies to chat messages. '
+            'Return EXACTLY 3 suggestions on separate lines, no numbering, '
+            'no quotes, no explanation. Each suggestion: one short natural '
+            'sentence in the same language as the message. Vary the intent '
+            'across the three (e.g. answer / question / acknowledgment).',
+      ),
+      LlmMessage(role: 'user', content: truncated),
+    ];
+    final raw = await sendMessage(messages);
+    final lines = raw
+        .split('\n')
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty && l.length <= 120)
+        .map((l) => l.replaceFirst(RegExp(r'^[-*\d.)\s]+'), ''))
+        .map((l) => l.trim())
+        .where((l) => l.isNotEmpty)
+        .take(3)
+        .toList();
+    if (lines.length < 3) {
+      // Model gave fewer than 3 usable lines — fall back to what it gave,
+      // and if it gave nothing usable at all, treat as failure.
+      throw Exception('not enough smart reply lines');
+    }
+    return lines;
+  }
+
   static Future<String> _sendToProvider(
     LlmProviderConfig config,
     List<LlmMessage> history,

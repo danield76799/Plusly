@@ -4177,5 +4177,13 @@
   "textSize": "Text size",
   "@textSize": {
     "description": "Image editor label: textSize"
+  },
+  "smartReplies": "Smart replies",
+  "@smartReplies": {
+    "description": "Smart replies feature: smartReplies"
+  },
+  "smartRepliesDescription": "Shows 3 reply suggestions for the latest message (AI, Cerebras/Groq)",
+  "@smartRepliesDescription": {
+    "description": "Smart replies feature: smartRepliesDescription"
   }
 }

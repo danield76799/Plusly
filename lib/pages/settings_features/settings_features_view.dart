@@ -75,6 +75,12 @@ class _SettingsFeaturesViewState extends State<SettingsFeaturesView> {
                         setting: AppSettings.messageTranslation,
                       ),
                       const ListDivider(),
+                      SettingsSwitchListTile.adaptive(
+                        title: L10n.of(context).smartReplies,
+                        subtitle: L10n.of(context).smartRepliesDescription,
+                        setting: AppSettings.llmShowSmartReplies,
+                      ),
+                      const ListDivider(),
                       ListTile(
                         leading: const Icon(Icons.translate_outlined),
                         title: Text(L10n.of(context).translationLanguage),

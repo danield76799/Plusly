@@ -4176,5 +4176,13 @@
   "textSize": "Tekstgrootte",
   "@textSize": {
     "description": "Image editor label: textSize"
+  },
+  "smartReplies": "Slimme antwoorden",
+  "@smartReplies": {
+    "description": "Smart replies feature: smartReplies"
+  },
+  "smartRepliesDescription": "Toont 3 antwoord-suggesties bij het laatste bericht (AI, Cerebras/Groq)",
+  "@smartRepliesDescription": {
+    "description": "Smart replies feature: smartRepliesDescription"
   }
 }
