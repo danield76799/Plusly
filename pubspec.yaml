@@ -19,6 +19,7 @@ dependencies:
   chewie: ^1.13.0
   collection: ^1.18.0
   cross_file: ^0.3.5+2
+  crop_image: ^1.0.17
   cupertino_icons: ^1.0.8
   desktop_drop: ^0.7.0
   desktop_notifications: ^0.6.3
@@ -85,7 +86,7 @@ dependencies:
   path_provider: ^2.1.2
   permission_handler: ^12.0.1
   pretty_qr_code: ^3.6.0
-  pro_image_editor: ^12.1.0
+
   provider: ^6.0.2
   punycode: ^1.0.0
   qr_code_scanner_plus: ^2.1.1

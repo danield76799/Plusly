@@ -4133,5 +4133,49 @@
   "@doubleTapReaction": {
     "type": "String",
     "placeholders": {}
+  },
+  "editImage": "Edit image",
+  "@editImage": {
+    "description": "Image editor label: editImage"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Image editor label: save"
+  },
+  "crop": "Crop",
+  "@crop": {
+    "description": "Image editor label: crop"
+  },
+  "draw": "Draw",
+  "@draw": {
+    "description": "Image editor label: draw"
+  },
+  "rotateLeft": "Rotate left",
+  "@rotateLeft": {
+    "description": "Image editor label: rotateLeft"
+  },
+  "rotateRight": "Rotate right",
+  "@rotateRight": {
+    "description": "Image editor label: rotateRight"
+  },
+  "mirror": "Mirror",
+  "@mirror": {
+    "description": "Image editor label: mirror"
+  },
+  "eraser": "Eraser",
+  "@eraser": {
+    "description": "Image editor label: eraser"
+  },
+  "addText": "Add text",
+  "@addText": {
+    "description": "Image editor label: addText"
+  },
+  "enterText": "Enter text",
+  "@enterText": {
+    "description": "Image editor label: enterText"
+  },
+  "textSize": "Text size",
+  "@textSize": {
+    "description": "Image editor label: textSize"
   }
 }

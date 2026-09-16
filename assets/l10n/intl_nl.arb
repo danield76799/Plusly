@@ -4132,5 +4132,49 @@
   "@doubleTapReaction": {
     "type": "String",
     "placeholders": {}
+  },
+  "editImage": "Afbeelding bewerken",
+  "@editImage": {
+    "description": "Image editor label: editImage"
+  },
+  "save": "Opslaan",
+  "@save": {
+    "description": "Image editor label: save"
+  },
+  "crop": "Bijsnijden",
+  "@crop": {
+    "description": "Image editor label: crop"
+  },
+  "draw": "Tekenen",
+  "@draw": {
+    "description": "Image editor label: draw"
+  },
+  "rotateLeft": "Linksom draaien",
+  "@rotateLeft": {
+    "description": "Image editor label: rotateLeft"
+  },
+  "rotateRight": "Rechtsom draaien",
+  "@rotateRight": {
+    "description": "Image editor label: rotateRight"
+  },
+  "mirror": "Spiegelen",
+  "@mirror": {
+    "description": "Image editor label: mirror"
+  },
+  "eraser": "Gum",
+  "@eraser": {
+    "description": "Image editor label: eraser"
+  },
+  "addText": "Tekst toevoegen",
+  "@addText": {
+    "description": "Image editor label: addText"
+  },
+  "enterText": "Voer tekst in",
+  "@enterText": {
+    "description": "Image editor label: enterText"
+  },
+  "textSize": "Tekstgrootte",
+  "@textSize": {
+    "description": "Image editor label: textSize"
   }
 }
