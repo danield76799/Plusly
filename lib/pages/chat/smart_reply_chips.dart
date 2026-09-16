@@ -47,6 +47,11 @@ class _SmartReplyChipsState extends State<SmartReplyChips> {
     super.initState();
     controller.sendController.addListener(_onComposerChanged);
     _maybeGenerate();
+    // De timeline laadt async; na die load vuurt geen rebuild — dus hier
+    // zelf wachten en dan pas genereren. Zonder dit verschijnen de chips
+    // pas bij een NIEUW bericht terwijl de chat open staat.
+    (controller.loadTimelineFuture ?? Future.value())
+        .whenComplete(() => _maybeGenerate());
   }
 
   @override
@@ -169,6 +174,7 @@ class _SmartReplyChipsState extends State<SmartReplyChips> {
         }
       }
 
+      // Consent is rond (of was al gegeven) — genereer nu echt.
       final suggestions = await LlmService.generateSmartReplies(event.text);
       if (!mounted) return;
       setState(() {
