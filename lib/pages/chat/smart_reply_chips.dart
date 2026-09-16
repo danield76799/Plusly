@@ -183,6 +183,7 @@ class _SmartReplyChipsState extends State<SmartReplyChips> {
         _loading = false;
       });
     } catch (e) {
+      Logs().w('SmartReplies: generation failed: $e');
       if (!mounted) return;
       setState(() {
         _loading = false;

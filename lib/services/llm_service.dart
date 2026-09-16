@@ -172,19 +172,31 @@ class LlmService {
       LlmMessage(role: 'user', content: truncated),
     ];
     final raw = await sendMessage(messages);
-    final lines = raw
+    // De output kan genummerde/markdown-lijsten of code-fences bevatten.
+    // Alles strippen wat geen suggestietekst is, en accepteren wat er
+    // over blijft (1-3 regels).
+    var cleaned = raw;
+    final thinkBlock = RegExp(r'```.*?```', dotAll: true).firstMatch(cleaned);
+    if (cleaned.trimLeft().startsWith('```') && thinkBlock != null) {
+      cleaned = thinkBlock.group(0)!.replaceAll('```', '');
+    }
+    cleaned = cleaned
+        .replaceAll(RegExp(r'```'), '')
+        .replaceAll(RegExp(r'^\s*[*#>]+\s*', multiLine: true), '')
+        .replaceAll(RegExp(r'\s*[*#>]+\s*$'), '');
+    final lines = cleaned
         .split('\n')
         .map((l) => l.trim())
         .where((l) => l.isNotEmpty && l.length <= 120)
         .map((l) => l.replaceFirst(RegExp(r'^[-*\d.)\s]+'), ''))
         .map((l) => l.trim())
-        .where((l) => l.isNotEmpty)
+        .where((l) => l.isNotEmpty && l.toLowerCase() != 'null')
+        .toSet()
         .take(3)
         .toList();
-    if (lines.length < 3) {
-      // Model gave fewer than 3 usable lines — fall back to what it gave,
-      // and if it gave nothing usable at all, treat as failure.
-      throw Exception('not enough smart reply lines');
+    Logs().i('SmartReplies: model gave ${lines.length} usable lines');
+    if (lines.isEmpty) {
+      throw Exception('no usable smart reply lines');
     }
     return lines;
   }
