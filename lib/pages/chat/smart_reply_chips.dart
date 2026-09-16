@@ -205,35 +205,58 @@ class _SmartReplyChipsState extends State<SmartReplyChips> {
         controller.sendController.text.trim().isEmpty &&
         controller.editEvent == null &&
         controller.replyEvent == null;
-    if (!show) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 2),
-      child: Row(
-        children: [
-          for (var i = 0; i < _suggestions!.length; i++) ...[
-            if (i > 0) const SizedBox(width: 6),
-            Expanded(
-              child: ActionChip(
-                label: Text(
-                  _suggestions![i],
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+    if (show) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 2),
+        child: Row(
+          children: [
+            for (var i = 0; i < _suggestions!.length; i++) ...[
+              if (i > 0) const SizedBox(width: 6),
+              Expanded(
+                child: ActionChip(
+                  label: Text(
+                    _suggestions![i],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  labelStyle: TextStyle(
+                    fontSize: 13,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  backgroundColor: theme
+                      .colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.6),
+                  side: BorderSide(
+                    color:
+                        theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
+                  ),
+                  onPressed: () => _send(_suggestions![i]),
                 ),
-                labelStyle: TextStyle(
-                  fontSize: 13,
-                  color: theme.colorScheme.onSurface,
-                ),
-                backgroundColor:
-                    theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-                side: BorderSide(
-                  color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-                ),
-                onPressed: () => _send(_suggestions![i]),
               ),
-            ),
+            ],
           ],
-        ],
-      ),
-    );
+        ),
+      );
+    }
+    // Diagnose: als de flow draait maar faalt, laat dat ZIEN (andere
+    // fouten dan 'consent' worden als mini-bar getoond — zodat stille
+    // failures traceerbaar zijn bij testen).
+    if (_error != null && _error != 'consent') {
+      return Padding(
+        padding: const EdgeInsets.only(left: 12, right: 12, top: 2),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'AI-suggesties: $_error',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
+            ),
+          ),
+        ),
+      );
+    }
+    return const SizedBox.shrink();
   }
 }
