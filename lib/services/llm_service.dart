@@ -55,7 +55,7 @@ Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
   LlmProviderType.groq: LlmProviderConfig(
     name: 'Groq (Cloud)',
     baseUrl: 'https://api.groq.com/openai',
-    model: 'llama-3.1-8b-instant',
+    model: 'qwen/qwen3.8-27b',
     apiKey: _groqKey,
   ),
   LlmProviderType.cerebras: LlmProviderConfig(
