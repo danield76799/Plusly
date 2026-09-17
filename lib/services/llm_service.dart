@@ -67,7 +67,7 @@ Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
   LlmProviderType.ollama: LlmProviderConfig(
     name: 'Ollama Cloud',
     baseUrl: 'https://ollama.com',
-    model: 'deepseek-v4-flash:0731',
+    model: 'deepseek-v4.1-flash',
     apiKey: _ollamaKey,
   ),
 };
