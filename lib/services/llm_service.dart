@@ -106,10 +106,24 @@ class LlmService {
 
   static String get _apiKey => _config.apiKey;
 
+  /// Send a chat completion request to a SPECIFIC provider (bypasses currentProvider setting).
+  /// Used by Translator to force Ollama while keeping smart replies on Groq.
+  static Future<String> sendMessageToProvider(
+    LlmProviderType provider,
+    List<LlmMessage> history,
+  ) async {
+    lastFallbackMessage = null;
+    final config = providerConfigs[provider];
+    if (config == null || config.apiKey.isEmpty) {
+      throw Exception('Provider ${provider.name} not configured');
+    }
+    return _sendToProvider(config, history);
+  }
+
   // ── Chat ─────────────────────────────────────────────────────────────
 
   /// Send a chat completion request and return the assistant's reply.
-  /// Automatically falls back: Groq → Cerebras → Kimi.
+  /// Automatically falls back: Groq → Cerebras → Ollama.
   static Future<String> sendMessage(List<LlmMessage> history) async {
     lastFallbackMessage = null;
     final primary = currentProvider;

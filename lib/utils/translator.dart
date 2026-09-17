@@ -21,7 +21,7 @@ class Translator {
       LlmMessage(role: 'user', content: truncated),
     ];
 
-    return LlmService.sendMessage(messages);
+    return LlmService.sendMessageToProvider(LlmProviderType.ollama, messages);
   }
 
   static String _languageName(String code) {
