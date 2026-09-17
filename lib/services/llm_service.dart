@@ -67,7 +67,7 @@ Map<LlmProviderType, LlmProviderConfig> get providerConfigs => {
   LlmProviderType.ollama: LlmProviderConfig(
     name: 'Ollama Cloud',
     baseUrl: 'https://ollama.com',
-    model: 'kimi-k2.6',
+    model: 'deepseek-v4-flash:0731',
     apiKey: _ollamaKey,
   ),
 };
@@ -233,7 +233,14 @@ class LlmService {
     final data = jsonDecode(response.body) as Map<String, dynamic>;
     final choices = data['choices'] as List<dynamic>;
     if (choices.isEmpty) throw Exception('Empty response from LLM');
-    return choices[0]['message']['content'] as String;
+    final message = choices[0]['message'] as Map<String, dynamic>;
+    var content = message['content'] as String? ?? '';
+    // Reasoning/thinking models put answer in 'reasoning' instead of 'content'
+    if (content.isEmpty) {
+      final reasoning = message['reasoning'] as String?;
+      if (reasoning != null && reasoning.isNotEmpty) content = reasoning;
+    }
+    return content;
   }
 
   // ── Connectivity ─────────────────────────────────────────────────────
