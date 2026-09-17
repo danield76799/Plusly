@@ -216,11 +216,11 @@ class _SmartReplyChipsState extends State<SmartReplyChips> {
                 child: ActionChip(
                   label: Text(
                     _suggestions![i],
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   labelStyle: TextStyle(
-                    fontSize: 13,
+                    fontSize: 11,
                     color: theme.colorScheme.onSurface,
                   ),
                   backgroundColor: theme
