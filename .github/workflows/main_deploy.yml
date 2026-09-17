@@ -167,7 +167,7 @@ jobs:
       # android_build_number directly would double-count the +2001 offset.
       - name: Build Android APK (split ABIs)
         run: |
-          flutter build apk --flavor github --release --split-per-abi --no-tree-shake-icons --build-number=${{ steps.bump.outputs.build_number }} --build-name=${{ steps.bump.outputs.version_name }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
+          flutter build apk --flavor github --release --split-per-abi --no-tree-shake-icons --build-number=${{ steps.bump.outputs.build_number }} --build-name=${{ steps.bump.outputs.version_name }} --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }} --dart-define=OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY || '' }}
           mkdir -p output
           cp build/app/outputs/flutter-apk/app-armeabi-v7a-github-release.apk output/plusly-armeabi-v7a-release.apk || true
           cp build/app/outputs/flutter-apk/app-arm64-v8a-github-release.apk output/plusly-arm64-v8a-release.apk || true
@@ -175,7 +175,7 @@ jobs:
       # === AAB BUILD (Play Store) ===
       - name: Build Android App Bundle
         run: |
-          flutter build appbundle --flavor playstore --release --no-tree-shake-icons --build-number=${{ steps.bump.outputs.build_number }} --build-name=${{ steps.bump.outputs.version_name }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }}
+          flutter build appbundle --flavor playstore --release --no-tree-shake-icons --build-number=${{ steps.bump.outputs.build_number }} --build-name=${{ steps.bump.outputs.version_name }} --dart-define=GROQ_API_KEY=${{ secrets.GROQ_API_KEY || '' }} --dart-define=CEREBRAS_API_KEY=${{ secrets.CEREBRAS_API_KEY || '' }} --dart-define=OLLAMA_API_KEY=${{ secrets.OLLAMA_API_KEY || '' }}
           
       # === 16KB PAGE SIZE PATCH & RE-SIGN ===
       - name: Patch 16KB alignment and Re-sign AAB
