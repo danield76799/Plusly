@@ -120,7 +120,50 @@ class LlmService {
     return _sendToProvider(config, history);
   }
 
-  // ── Chat ─────────────────────────────────────────────────────────────
+  // ── Internal provider request ────────────────────────────────────────
+
+  static Future<String> _sendToProvider(
+    LlmProviderConfig config,
+    List<LlmMessage> history,
+  ) async {
+    final url = Uri.parse('${config.baseUrl}/v1/chat/completions');
+
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+    };
+    if (config.apiKey.isNotEmpty) {
+      headers['Authorization'] = 'Bearer ${config.apiKey}';
+    }
+
+    final body = jsonEncode({
+      'model': config.model,
+      'messages': history.map((m) => m.toApi()).toList(),
+      'stream': false,
+      ...config.extraBody,
+    });
+
+    final response = await http
+        .post(url, headers: headers, body: body)
+        .timeout(const Duration(seconds: 60));
+
+    if (response.statusCode != 200) {
+      throw Exception('LLM error ${response.statusCode}: ${response.body}');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final choices = data['choices'] as List<dynamic>;
+    if (choices.isEmpty) throw Exception('Empty response from LLM');
+    final message = choices[0]['message'] as Map<String, dynamic>;
+    var content = message['content'] as String? ?? '';
+    // Reasoning/thinking models put answer in 'reasoning' instead of 'content'
+    if (content.isEmpty) {
+      final reasoning = message['reasoning'] as String?;
+      if (reasoning != null && reasoning.isNotEmpty) content = reasoning;
+    }
+    return content;
+  }
+
+  // ── Connectivity ─────────────────────────────────────────────────────
 
   /// Send a chat completion request and return the assistant's reply.
   /// Automatically falls back: Groq → Cerebras → Ollama.
@@ -167,95 +210,6 @@ class LlmService {
     throw lastError ?? Exception('All providers failed');
   }
 
-
-  // ── Smart replies ────────────────────────────────────────────────────
-
-  /// Generate up to 3 short suggested replies for the given incoming
-  /// message. Used by SmartReplyChips (CometChat-style composer chips).
-  static Future<List<String>> generateSmartReplies(String incomingText) async {
-    final truncated =
-        incomingText.length > 2000 ? incomingText.substring(0, 2000) : incomingText;
-    final messages = [
-      LlmMessage(
-        role: 'system',
-        content: 'You suggest short conversational replies to chat messages. '
-            'Return EXACTLY 3 suggestions on separate lines, no numbering, '
-            'no quotes, no explanation. Each suggestion: one short natural '
-            'sentence in the same language as the message. Vary the intent '
-            'across the three (e.g. answer / question / acknowledgment).',
-      ),
-      LlmMessage(role: 'user', content: truncated),
-    ];
-    final raw = await sendMessage(messages);
-    // De output kan genummerde/markdown-lijsten of code-fences bevatten.
-    // Alles strippen wat geen suggestietekst is, en accepteren wat er
-    // over blijft (1-3 regels).
-    var cleaned = raw;
-    final thinkBlock = RegExp(r'```.*?```', dotAll: true).firstMatch(cleaned);
-    if (cleaned.trimLeft().startsWith('```') && thinkBlock != null) {
-      cleaned = thinkBlock.group(0)!.replaceAll('```', '');
-    }
-    cleaned = cleaned
-        .replaceAll(RegExp(r'```'), '')
-        .replaceAll(RegExp(r'^\s*[*#>]+\s*', multiLine: true), '')
-        .replaceAll(RegExp(r'\s*[*#>]+\s*$'), '');
-    final lines = cleaned
-        .split('\n')
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty && l.length <= 120)
-        .map((l) => l.replaceFirst(RegExp(r'^[-*\d.)\s]+'), ''))
-        .map((l) => l.trim())
-        .where((l) => l.isNotEmpty && l.toLowerCase() != 'null')
-        .toSet()
-        .take(3)
-        .toList();
-    Logs().i('SmartReplies: model gave ${lines.length} usable lines');
-    if (lines.isEmpty) {
-      throw Exception('no usable smart reply lines');
-    }
-    return lines;
-  }
-
-  static Future<String> _sendToProvider(
-    LlmProviderConfig config,
-    List<LlmMessage> history,
-  ) async {
-    final url = Uri.parse('${config.baseUrl}/v1/chat/completions');
-
-    final headers = <String, String>{
-      'Content-Type': 'application/json',
-    };
-    if (config.apiKey.isNotEmpty) {
-      headers['Authorization'] = 'Bearer ${config.apiKey}';
-    }
-
-    final body = jsonEncode({
-      'model': config.model,
-      'messages': history.map((m) => m.toApi()).toList(),
-      'stream': false,
-      ...config.extraBody,
-    });
-
-    final response = await http
-        .post(url, headers: headers, body: body)
-        .timeout(const Duration(seconds: 60));
-
-    if (response.statusCode != 200) {
-      throw Exception('LLM error ${response.statusCode}: ${response.body}');
-    }
-
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
-    final choices = data['choices'] as List<dynamic>;
-    if (choices.isEmpty) throw Exception('Empty response from LLM');
-    final message = choices[0]['message'] as Map<String, dynamic>;
-    var content = message['content'] as String? ?? '';
-    // Reasoning/thinking models put answer in 'reasoning' instead of 'content'
-    if (content.isEmpty) {
-      final reasoning = message['reasoning'] as String?;
-      if (reasoning != null && reasoning.isNotEmpty) content = reasoning;
-    }
-    return content;
-  }
 
   // ── Connectivity ─────────────────────────────────────────────────────
 

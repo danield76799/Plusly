@@ -32,7 +32,6 @@ import 'package:Pulsly/widgets/unread_rooms_badge.dart';
 import '../../utils/stream_extension.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
-import 'smart_reply_chips.dart';
 
 enum _EventContextAction {
   info,
@@ -725,7 +724,6 @@ class ChatView extends StatelessWidget {
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   ReplyDisplay(controller),
-                                                  SmartReplyChips(controller),
                                                   ChatInputRow(controller),
                                                   ChatEmojiPicker(controller),
                                                 ],
