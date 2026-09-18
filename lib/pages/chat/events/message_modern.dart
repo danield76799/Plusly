@@ -263,12 +263,12 @@ class _MessageModernState extends State<MessageModern> {
                         : hasBeenRead
                         ? Icons.done_all
                         : Icons.check,
-                    // Gelezen = WhatsApp-blauw; de rest volgt de statuskleur.
-                    color: hasBeenRead &&
-                            event.status != EventStatus.sending &&
-                            event.status != EventStatus.error
-                        ? Theme.of(context).readReceiptBlue
-                        : color,
+                    // Twee vinkjes = groen (gelezen), één vinkje = oranje (verzonden)
+                    color: event.status == EventStatus.sending || event.status == EventStatus.error
+                        ? color
+                        : hasBeenRead
+                            ? Colors.green
+                            : Colors.orange,
                     size: 13,
                   ),
           ),
@@ -674,7 +674,7 @@ class _MessageModernState extends State<MessageModern> {
         key: ValueKey(event.eventId),
         background: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Center(child: Icon(Icons.check_outlined)),
+          child: Center(child: Icon(Icons.reply_outlined)),
         ),
         direction: AppSettings.swipeRightToLeftToReply.value
             ? SwipeDirection.endToStart

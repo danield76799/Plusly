@@ -404,10 +404,12 @@ class _MessageBubbleState extends State<MessageBubble> {
                 : hasBeenRead
                 ? Icons.done_all
                 : Icons.check,
-            // Gelezen = WhatsApp-blauw; de rest volgt de statuskleur.
-            color: hasBeenRead && event.status != EventStatus.sending && event.status != EventStatus.error
-                ? theme.readReceiptBlue
-                : statusColor,
+            // Twee vinkjes = groen (gelezen), één vinkje = oranje (verzonden)
+            color: event.status == EventStatus.sending || event.status == EventStatus.error
+                ? statusColor
+                : hasBeenRead
+                    ? Colors.green
+                    : Colors.orange,
             size: 14,
           ),
       ],
@@ -893,7 +895,7 @@ class _MessageBubbleState extends State<MessageBubble> {
           key: ValueKey(event.eventId),
           background: const Padding(
             padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: Center(child: Icon(Icons.check_outlined)),
+            child: Center(child: Icon(Icons.reply_outlined)),
           ),
           direction: AppSettings.swipeRightToLeftToReply.value
               ? SwipeDirection.endToStart
