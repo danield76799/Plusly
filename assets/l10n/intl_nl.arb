@@ -1293,7 +1293,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "lastActiveAgo": "Laatst actief: {localizedTimeShort}",
+  "lastActiveAgo": "Laatst online: {localizedTimeShort}",
   "@lastActiveAgo": {
     "type": "String",
     "placeholders": {
