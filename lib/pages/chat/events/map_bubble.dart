@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/url_launcher.dart';
 
 class MapBubble extends StatelessWidget {
   final double latitude;
@@ -12,13 +13,15 @@ class MapBubble extends StatelessWidget {
   final double width;
   final double height;
   final double radius;
+  final Uri? geoUri;
   const MapBubble({
     required this.latitude,
     required this.longitude,
-    this.zoom = 14.0,
+    this.zoom = 15.0,
     this.width = 400,
-    this.height = 400,
+    this.height = 200,
     this.radius = 10.0,
+    this.geoUri,
     super.key,
   });
 
@@ -26,18 +29,24 @@ class MapBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: Container(
-        constraints: BoxConstraints.loose(Size(width, height)),
-        child: AspectRatio(
-          aspectRatio: width / height,
+    return GestureDetector(
+      onTap: geoUri != null
+          ? () => UrlLauncher(context, geoUri.toString()).launchUrl()
+          : null,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(radius),
+        child: Container(
+          constraints: BoxConstraints.loose(Size(width, height)),
           child: Stack(
+            fit: StackFit.expand,
             children: <Widget>[
               FlutterMap(
                 options: MapOptions(
                   initialCenter: LatLng(latitude, longitude),
                   initialZoom: zoom,
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.none,
+                  ),
                 ),
                 children: [
                   TileLayer(
@@ -56,10 +65,6 @@ class MapBubble extends StatelessWidget {
                         width: 30,
                         height: 30,
                         child: Transform.translate(
-                          // No idea why the offset has to be like this, instead of -15
-                          // It has been determined by trying out, though, that this yields
-                          // the tip of the location pin to be static when zooming.
-                          // Might have to do with psychological perception of where the tip exactly is
                           offset: const Offset(0, -12.5),
                           child: const Icon(
                             Icons.location_pin,
@@ -72,16 +77,72 @@ class MapBubble extends StatelessWidget {
                   ),
                 ],
               ),
-              Container(
-                alignment: Alignment.bottomRight,
-                child: Text(
-                  ' © OpenStreetMap contributors ',
-                  style: TextStyle(
-                    color: theme.brightness == Brightness.dark
-                        ? Colors.white
-                        : Colors.black,
-                    backgroundColor: theme.appBarTheme.backgroundColor,
+              // Gradient overlay voor betere leesbaarheid onderin
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withAlpha(179),
+                      ],
+                    ),
                   ),
+                ),
+              ),
+              // Coördinaten + "Open in Maps"
+              Positioned(
+                bottom: 8,
+                left: 12,
+                right: 12,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${latitude.toStringAsFixed(5)}, ${longitude.toStringAsFixed(5)}',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                    if (geoUri != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.open_in_new,
+                              size: 12,
+                              color: theme.colorScheme.onPrimary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Openen',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
