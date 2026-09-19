@@ -168,7 +168,13 @@ class ChatEventList extends StatelessWidget {
                     ? threads[event.eventId]
                     : null;
 
-                return AutoScrollTag(
+                // Unread separator — shown after the last read message
+                // Because list is reversed, the separator appears AFTER
+                // the last read event (i.e. just before newer messages)
+                final isLastReadEvent = latestReadEventIndex != -1 &&
+                    latestReadEventIndex == i;
+
+                final messageWidget = AutoScrollTag(
                   key: ValueKey(event.transactionId ?? event.eventId),
                   index: i,
                   controller: controller.scrollController,
@@ -216,6 +222,50 @@ class ChatEventList extends StatelessWidget {
                     },
                   ),
                 );
+
+                if (isLastReadEvent) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      messageWidget,
+                      const SizedBox(height: 4),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 1,
+                                color: theme.colorScheme.primary.withAlpha(128),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                              child: Text(
+                                L10n.of(context).newMessages,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.primary,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                height: 1,
+                                color: theme.colorScheme.primary.withAlpha(128),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  );
+                }
+
+                return messageWidget;
               },
               childCount: events.length + 2,
               findChildIndexCallback: (key) =>
