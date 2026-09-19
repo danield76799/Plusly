@@ -7,7 +7,7 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
-import 'package:Pulsly/utils/date_time_extension.dart';
+// import 'package:Pulsly/utils/date_time_extension.dart';  // unused na optie 3 (offline-only)
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/sync_status_localization.dart';
 import 'package:Pulsly/widgets/avatar.dart';
@@ -106,8 +106,6 @@ class ChatAppBarTitle extends StatelessWidget {
                           ? PresenceBuilder(
                               userId: room.directChatMatrixID,
                               builder: (context, presence) {
-                                final lastActiveTimestamp =
-                                    presence?.lastActiveTimestamp;
                                 final style = Theme.of(
                                   context,
                                 ).textTheme.bodySmall?.copyWith(fontSize: 11);
@@ -120,22 +118,16 @@ class ChatAppBarTitle extends StatelessWidget {
                                     height: (style.fontSize ?? 11) + 2,
                                   );
                                 }
-                                if (lastActiveTimestamp != null) {
-                                  return OverflowMarquee(
-                                    text:
-                                        L10n.of(context).lastActiveAgo(
-                                          lastActiveTimestamp
-                                              .localizedTimeShort(context),
-                                        ) +
-                                        (presence?.statusMsg != null
-                                            ? " | ${presence?.statusMsg}"
-                                            : ""),
-                                    style: style!,
-                                    velocity: 20.0,
-                                    height: (style.fontSize ?? 11) + 2,
-                                  );
-                                }
-                                return const SizedBox.shrink();
+                                // Alleen online/offline, geen timestamp (optie 3)
+                                return OverflowMarquee(
+                                  text: L10n.of(context).offline +
+                                      (presence?.statusMsg != null
+                                          ? " | ${presence?.statusMsg}"
+                                          : ""),
+                                  style: style!,
+                                  velocity: 20.0,
+                                  height: (style.fontSize ?? 11) + 2,
+                                );
                               },
                             )
                           : Row(
@@ -226,8 +218,6 @@ class ChatAppBarTitle extends StatelessWidget {
                                 ? PresenceBuilder(
                                     userId: room.directChatMatrixID,
                                     builder: (context, presence) {
-                                      final lastActiveTimestamp =
-                                          presence?.lastActiveTimestamp;
                                       final style = Theme.of(
                                         context,
                                       ).textTheme.bodySmall;
@@ -240,24 +230,17 @@ class ChatAppBarTitle extends StatelessWidget {
                                           height: (style.fontSize ?? 12) + 2,
                                         );
                                       }
-                                      if (lastActiveTimestamp != null) {
-                                        return OverflowMarquee(
-                                          text:
-                                              L10n.of(context).lastActiveAgo(
-                                                lastActiveTimestamp
-                                                    .localizedTimeShort(
-                                                      context,
-                                                    ),
-                                              ) +
-                                              (presence?.statusMsg != null
-                                                  ? " | ${presence?.statusMsg}"
-                                                  : ""),
-                                          style: style!,
-                                          velocity: 20.0,
-                                          height: (style.fontSize ?? 12) + 2,
-                                        );
-                                      }
-                                      return const SizedBox.shrink();
+                                      // Alleen online/offline, geen timestamp (optie 3)
+                                      return OverflowMarquee(
+                                        text:
+                                            L10n.of(context).offline +
+                                            (presence?.statusMsg != null
+                                                ? " | ${presence?.statusMsg}"
+                                                : ""),
+                                        style: style!,
+                                        velocity: 20.0,
+                                        height: (style.fontSize ?? 12) + 2,
+                                      );
                                     },
                                   )
                                 : Row(
