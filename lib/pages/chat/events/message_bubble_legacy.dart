@@ -25,6 +25,7 @@ import 'package:Pulsly/widgets/member_actions_popup_menu_button.dart';
 import '../../../config/app_config.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
+import '../quick_reactions_overlay.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
 import 'package:collection/collection.dart';
@@ -87,6 +88,7 @@ class MessageBubbleLegacy extends StatefulWidget {
 
 class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
   Offset _tapPosition = Offset.zero;
+  OverlayEntry? _quickReactionsOverlay;
 
   // Cached futures to avoid re-creating them on every build
   late Future<User?> _senderUserFuture;
@@ -447,7 +449,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                 onTap: () => widget.onSelect(event, _tapPosition),
                 onLongPress: () {
                   if (PlatformInfos.isMobile) {
-                    widget.onSelect(event, _tapPosition);
+                    _showQuickReactionsOverlay(event);
                   }
                 },
                 onSecondaryTap: () => widget.onSelect(event, _tapPosition),
@@ -967,6 +969,26 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
         ),
       ),
     );
+  }
+
+  void _showQuickReactionsOverlay(Event event) {
+    if (_quickReactionsOverlay != null) return;
+    _quickReactionsOverlay = OverlayEntry(
+      builder: (context) => QuickReactionsOverlay(
+        event: event,
+        onDismiss: () {
+          _quickReactionsOverlay?.remove();
+          _quickReactionsOverlay = null;
+        },
+      ),
+    );
+    Overlay.of(context).insert(_quickReactionsOverlay!);
+  }
+
+  @override
+  void dispose() {
+    _quickReactionsOverlay?.remove();
+    super.dispose();
   }
 }
 
