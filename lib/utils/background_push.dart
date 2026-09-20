@@ -17,8 +17,6 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:flutter/material.dart';
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -343,9 +341,12 @@ class BackgroundPush {
           showNoDistribDialog: false,
           onNoDistribDialogDismissed: () {},
         ).registerAppWithDialog();
-      } catch (e) {
-        Logs().e('[Push] UnifiedPush.register failed after retries', e);
-        rethrow;
+      } catch (e, s) {
+        // Niet rethrowen: call sites (matrix.dart, chat_list.dart) awaiten
+        // setupPush niet en vangen niets op — een throw zou als unhandled
+        // async error de UI laten crashen. De retry-pogingen zitten al in
+        // UPFunctions.registerApp(); hier loggen we alleen het eindresultaat.
+        Logs().e('[Push] UnifiedPush.register failed after retries', e, s);
       }
     } else {
       Logs().i('[Push] No UnifiedPush distributors available on this device');

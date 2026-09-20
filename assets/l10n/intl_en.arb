@@ -4133,17 +4133,5 @@
   "@doubleTapReaction": {
     "type": "String",
     "placeholders": {}
-  },
-  "pushRegistering": "Setting up push notifications...",
-  "@pushRegistering": {
-    "description": "String for pushRegistering"
-  },
-  "pushRegistered": "Push notifications are active ✅",
-  "@pushRegistered": {
-    "description": "String for pushRegistered"
-  },
-  "pushRegisterFailed": "Push setup failed. Retry?",
-  "@pushRegisterFailed": {
-    "description": "String for pushRegisterFailed"
   }
 }

@@ -4132,17 +4132,5 @@
   "@doubleTapReaction": {
     "type": "String",
     "placeholders": {}
-  },
-  "pushRegistering": "Pushmeldingen instellen...",
-  "@pushRegistering": {
-    "description": "String for pushRegistering"
-  },
-  "pushRegistered": "Pushmeldingen zijn actief ✅",
-  "@pushRegistered": {
-    "description": "String for pushRegistered"
-  },
-  "pushRegisterFailed": "Push instellen mislukt. Opnieuw proberen?",
-  "@pushRegisterFailed": {
-    "description": "String for pushRegisterFailed"
   }
 }

@@ -90,13 +90,23 @@ class _MessageBubbleState extends State<MessageBubble> {
   OverlayEntry? _quickReactionsOverlay;
 
   // Cached futures to avoid re-creating them on every build
-  Future<User?> _senderUserFuture = Future.value(null);
+  late Future<User?> _senderUserFuture;
   Future<User?>? _threadSenderFuture;
   
   // Cache the sender user to avoid rebuilding FutureBuilder
   User? _cachedSenderUser;
 
   bool loadMedia = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadMedia = shouldAutoLoadMedia(
+      widget.event.room.client,
+      widget.event.room.id,
+    );
+    _initFutures();
+  }
 
   String _formatReadTimestamp(int? ts) {
     if (ts == null) return '';
@@ -109,29 +119,12 @@ class _MessageBubbleState extends State<MessageBubble> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.event != widget.event) {
       _initFutures();
-      // Update loadMedia als het event verandert
-      loadMedia = shouldAutoLoadMedia(
-        widget.event.room.client,
-        widget.event.room.id,
-      );
     } else {
       // Only re-init thread future if thread changed
       if (oldWidget.thread?.lastEvent?.eventId !=
           widget.thread?.lastEvent?.eventId) {
         _initThreadFuture();
       }
-    }
-  }
-
-  Future<void> _updateLoadMedia() async {
-    final shouldLoad = shouldAutoLoadMedia(
-      widget.event.room.client,
-      widget.event.room.id,
-    );
-    if (shouldLoad != loadMedia) {
-      setState(() {
-        loadMedia = shouldLoad;
-      });
     }
   }
 
@@ -419,12 +412,12 @@ class _MessageBubbleState extends State<MessageBubble> {
                 : hasBeenRead
                 ? Icons.done_all
                 : Icons.check,
-            // Telegram-stijl: blauw = gelezen, grijs = verzonden
+            // Twee vinkjes = groen (gelezen), één vinkje = oranje (verzonden)
             color: event.status == EventStatus.sending || event.status == EventStatus.error
                 ? statusColor
                 : hasBeenRead
-                    ? Colors.blue
-                    : statusColor,
+                    ? Colors.green
+                    : Colors.orange,
             size: 14,
           ),
         // Toon tijdstempel als het bericht is gelezen
@@ -445,8 +438,6 @@ class _MessageBubbleState extends State<MessageBubble> {
         // Cache the user to avoid rebuilding
         if (snapshot.hasData && _cachedSenderUser == null) {
           _cachedSenderUser = snapshot.data;
-          // Update loadMedia na het laden van de sender
-          WidgetsBinding.instance.addPostFrameCallback((_) => _updateLoadMedia());
         }
         final user = _cachedSenderUser ?? event.senderFromMemoryOrFallback;
         final displayname =
