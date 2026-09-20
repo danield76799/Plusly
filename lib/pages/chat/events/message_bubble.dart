@@ -90,7 +90,7 @@ class _MessageBubbleState extends State<MessageBubble> {
   OverlayEntry? _quickReactionsOverlay;
 
   // Cached futures to avoid re-creating them on every build
-  late Future<User?> _senderUserFuture;
+  Future<User?> _senderUserFuture = Future.value(null);
   Future<User?>? _threadSenderFuture;
   
   // Cache the sender user to avoid rebuilding FutureBuilder
