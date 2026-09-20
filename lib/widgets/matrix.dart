@@ -28,10 +28,7 @@ import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart
 import 'package:Pulsly/widgets/plusly_app.dart';
 import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import '../config/app_config.dart';
-import '../config/feature_flags.dart';
 import '../config/setting_keys.dart';
-import '../features/push/push_module.dart';
-import '../features/push/presentation/notification_router.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
@@ -75,9 +72,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   bool? loginRegistrationSupported;
 
   BackgroundPush? backgroundPush;
-
-  /// 🆕 Nieuwe push controller (achter feature flag)
-  PushController? _pushController;
 
   Client get client {
     if (_activeClient < 0 || _activeClient >= widget.clients.length) {
@@ -210,42 +204,16 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     return route.split('/')[2];
   }
 
-  /// 🆕 Update push controller met huidige room (voor foreground detection)
-  void _updatePushActiveRoom() {
-    if (_pushController != null) {
-      final roomId = activeRoomId;
-      final activeClient = roomId != null ? client : null;
-      _pushController!.setActiveRoom(roomId, activeClient);
-    }
-  }
-
   final linuxNotifications = PlatformInfos.isLinux
       ? NotificationsClient()
       : null;
   final Map<String, int> linuxNotificationIds = {};
-
-  // Listener handle for router-based active-room updates (foreground detection).
-  VoidCallback? _routerListener;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     initMatrix();
-    // Keep the push controller's active room in sync with the current route so
-    // that messages arriving while the user is already viewing that chat are
-    // NOT shown as a duplicate push notification. The lifecycle callback alone
-    // is not enough — navigating between chats inside a resumed app never
-    // triggers didChangeAppLifecycleState.
-    _routerListener = () => _updatePushActiveRoom();
-    PluslyApp.router.routeInformationProvider.addListener(_routerListener!);
-    // Initialise with the current route (in case we deep-link straight in).
-    _updatePushActiveRoom();
-    // if (PlatformInfos.isWeb) {
-    //   initConfig().then((_) => initSettings());
-    // } else {
-    //   initSettings();
-    // }
   }
 
   Future<void> initConfig() async {
@@ -310,14 +278,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         // Wait for full initialization before setting up push
         Future.delayed(const Duration(seconds: 3), () {
           Logs().i('[Matrix] Login complete, setting up push notifications...');
-          if (FeatureFlags.useNewPushSystem) {
-            // Only use new push system — no legacy
-            _pushController?.reRegister();
-          } else {
-            // Legacy only
-            backgroundPush?.upAction = false;
-            backgroundPush?.setupPush(widget.clients);
-          }
+          // FluffyChat-pariteit: geen feature flag meer — background_push.dart
+          // regelt registratie.
+          backgroundPush?.upAction = false;
+          backgroundPush?.setupPush(widget.clients);
         });
       }
       final loggedInWithMultipleClients = widget.clients.length > 1;
@@ -386,58 +350,12 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     createVoipPlugin();
   }
 
-  /// 🆕 Initialiseer nieuw push systeem (voor runtime switch)
-  Future<void> initNewPushSystem() async {
-    if (!PlatformInfos.isMobile) return;
-    
-    // Cleanup legacy — reset the static singleton so its UnifiedPush callbacks
-    // and isolate port listeners don't interfere with the new system
-    BackgroundPush.resetInstance();
-    backgroundPush = null;
-    
-    // Initialiseer nieuwe
-    Logs().i('[Matrix] Runtime switch to NEW push system');
-    NotificationRouter.initialize(
-      router: PluslyApp.router,
-      clients: widget.clients,
-    );
-    
-    _pushController?.dispose();
-    _pushController = PushController(widget.store, widget.clients);
-    await _pushController!.initializeLocalNotifications();
-    // Only initialize the new push system when it's explicitly enabled.
-    // Otherwise the legacy background_push.dart handles registration, and
-    // initializing both would create duplicate ntfy topics on every launch.
-    if (FeatureFlags.useNewPushSystem) {
-      await _pushController!.initialize();
-    }
-  }
-  
-  /// 🆕 Initialiseer legacy push systeem (voor runtime switch)
-  Future<void> initLegacyPushSystem() async {
-    if (!PlatformInfos.isMobile) return;
-    
-    // Cleanup nieuwe
-    _pushController?.dispose();
-    _pushController = null;
-    
-    // Initialiseer legacy
-    Logs().i('[Matrix] Runtime switch to LEGACY push system');
-    backgroundPush = BackgroundPush(this);
-    backgroundPush?.setupPush(widget.clients);
-  }
-
+  /// FluffyChat-pariteit: initialiseer push via background_push.dart.
   Future<void> _initPush() async {
     if (!PlatformInfos.isMobile) return;
 
-    await FeatureFlags.init();
-
-    // Use new push system by default; legacy is fallback only
-    if (FeatureFlags.useNewPushSystem) {
-      await initNewPushSystem();
-    } else {
-      await initLegacyPushSystem();
-    }
+    backgroundPush = BackgroundPush(this);
+    backgroundPush?.setupPush(widget.clients);
   }
 
   void createVoipPlugin() async {
@@ -455,16 +373,7 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     final foreground =
         state != AppLifecycleState.inactive &&
         state != AppLifecycleState.paused;
-    
-    // 🆕 Update push controller met foreground status
-    if (_pushController != null) {
-      if (!foreground) {
-        _pushController!.setActiveRoom(null, null);
-      } else {
-        _updatePushActiveRoom();
-      }
-    }
-    
+
     final resumedLifecyclePresence = PresenceType.values.firstWhere(
       (x) => x.name == AppSettings.presenceStatus.value,
     );
@@ -505,11 +414,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    if (_routerListener != null) {
-      PluslyApp.router.routeInformationProvider
-          .removeListener(_routerListener!);
-      _routerListener = null;
-    }
     // FIX #9: .map() returns lazy Iterable — must iterate to actually cancel
     for (final s in onRoomKeyRequestSub.values) {
       s.cancel();
@@ -526,9 +430,6 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     client.httpClient.close();
 
     linuxNotifications?.close();
-
-    // 🆕 Cleanup nieuwe push controller
-    _pushController?.dispose();
 
     super.dispose();
   }

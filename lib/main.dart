@@ -11,9 +11,6 @@ import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
-import 'package:Pulsly/config/feature_flags.dart';
-import 'package:Pulsly/features/push/presentation/push_controller.dart';
-import 'package:Pulsly/features/push/presentation/notification_router.dart';
 import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
@@ -95,10 +92,6 @@ void main() async {
 }
 
 Future<void> _initializeApp() async {
-  // 🆕 Initialiseer feature flags vroeg in de startup
-  await FeatureFlags.init();
-  Logs().i('[FeatureFlags] Initialized. useNewPushSystem=${FeatureFlags.useNewPushSystem}');
-
   Logs().i('Welcome to ${AppConfig.applicationName}! Wonderhoy!!');
 
   if (PlatformInfos.isAndroid) {
@@ -135,25 +128,10 @@ Future<void> _initializeApp() async {
       client.syncPresence = PresenceType.offline;
     }
 
-    // FIX #1: Only use BackgroundPush in background fetch mode if the legacy
-    // push system is active. With the new push system, the PushController
-    // handles background messages via UnifiedPush directly.
-    await FeatureFlags.init();
-    if (FeatureFlags.useNewPushSystem) {
-      // Nieuwe push systeem: initialiseer PushController voor background fetch
-      Logs().i('[Main] Background-fetch mode with NEW push system');
-      NotificationRouter.initialize(
-        router: null, // geen router in background mode
-        clients: clients,
-      );
-      final pushController = PushController(store, clients);
-      await pushController.initializeLocalNotifications();
-      await pushController.initialize();
-    } else {
-      // Legacy push systeem
-      Logs().i('[Main] Background-fetch mode with LEGACY push system');
-      BackgroundPush.clientOnly(clients.first);
-    }
+    // FluffyChat-pariteit: in background-fetch mode initialiseert
+    // BackgroundPush.clientOnly() de lokale notificaties en UnifiedPush.
+    Logs().i('[Main] Background-fetch mode, legacy push system');
+    BackgroundPush.clientOnly(clients.first);
     // To start the flutter engine afterwards we add an custom observer.
     WidgetsBinding.instance.addObserver(AppStarter(clients, store));
     Logs().i(
