@@ -1906,22 +1906,8 @@
     "type": "String",
     "placeholders": {}
   },
-  "pushRegistering": "Setting up push notifications...",
-  "@pushRegistering": {
-    "description": "Shown while push registration is in progress (with retry attempts)"
-  },
-  "pushRegistered": "Push notifications are active ✅",
-  "@pushRegistered": {
-    "description": "Shown when push registration succeeds"
-  },
-  "pushRegisterFailed": "Push setup failed. Retry?",
-  "@pushRegisterFailed": {
-    "description": "Shown when push registration fails after retries"
-  },
   "retry": "Retry",
   "@retry": {
-    "description": "Button label to retry a failed action"
-  },
     "type": "String",
     "placeholders": {}
   },
@@ -4147,5 +4133,17 @@
   "@doubleTapReaction": {
     "type": "String",
     "placeholders": {}
+  },
+  "pushRegistering": "Setting up push notifications...",
+  "@pushRegistering": {
+    "description": "String for pushRegistering"
+  },
+  "pushRegistered": "Push notifications are active ✅",
+  "@pushRegistered": {
+    "description": "String for pushRegistered"
+  },
+  "pushRegisterFailed": "Push setup failed. Retry?",
+  "@pushRegisterFailed": {
+    "description": "String for pushRegisterFailed"
   }
 }
