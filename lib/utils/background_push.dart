@@ -17,6 +17,8 @@
  *   along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:flutter/material.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -330,14 +332,6 @@ class BackgroundPush {
         (await UnifiedPush.getDistributors()).isNotEmpty &&
         context != null &&
         context.mounted) {
-      // Toon feedback tijdens herstelpogingen
-      final snackBarController = ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(L10n.of(context).pushRegistering),
-          duration: const Duration(seconds: 10),
-        ),
-      );
-      
       try {
         await UnifiedPushUi(
           context: context,
@@ -349,29 +343,8 @@ class BackgroundPush {
           showNoDistribDialog: false,
           onNoDistribDialogDismissed: () {},
         ).registerAppWithDialog();
-        
-        // Succes: snackBar updaten
-        snackBarController.close();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(L10n.of(context).pushRegistered),
-            backgroundColor: Colors.green,
-            duration: const Duration(seconds: 2),
-          ),
-        );
       } catch (e) {
-        // Mislukt: snackBar updaten
-        snackBarController.close();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(L10n.of(context).pushRegisterFailed),
-            backgroundColor: Colors.red,
-            action: SnackBarAction(
-              label: L10n.of(context).retry,
-              onPressed: () => setupPush(clients),
-            ),
-          ),
-        );
+        Logs().e('[Push] UnifiedPush.register failed after retries', e);
         rethrow;
       }
     } else {
