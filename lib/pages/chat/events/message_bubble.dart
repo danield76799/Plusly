@@ -98,14 +98,10 @@ class _MessageBubbleState extends State<MessageBubble> {
 
   bool loadMedia = false;
 
-  @override
-  void initState() {
-    super.initState();
-    loadMedia = shouldAutoLoadMedia(
-      widget.event.room.client,
-      widget.event.room.id,
-    );
-    _initFutures();
+  String _formatReadTimestamp(int? ts) {
+    if (ts == null) return '';
+    final date = DateTime.fromMillisecondsSinceEpoch(ts);
+    return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -406,13 +402,22 @@ class _MessageBubbleState extends State<MessageBubble> {
                 : hasBeenRead
                 ? Icons.done_all
                 : Icons.check,
-            // Twee vinkjes = groen (gelezen), één vinkje = oranje (verzonden)
+            // Telegram-stijl: blauw = gelezen, grijs = verzonden
             color: event.status == EventStatus.sending || event.status == EventStatus.error
                 ? statusColor
                 : hasBeenRead
-                    ? Colors.green
-                    : Colors.orange,
+                    ? Colors.blue
+                    : statusColor,
             size: 14,
+          ),
+        // Toon tijdstempel als het bericht is gelezen
+        if (hasBeenRead && widget.readReceipts != null && widget.readReceipts!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 4.0),
+            child: Text(
+              _formatReadTimestamp(widget.readReceipts!.first.ts),
+              style: TextStyle(color: statusColor, fontSize: 10),
+            ),
           ),
       ],
     );

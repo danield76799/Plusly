@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
+import 'package:flutter/services.dart';
+
 /// Quick-reactions overlay — Instagram/CometChat-stijl.
 /// Wordt getoond boven een bericht-bubble bij tap-and-hold.
-/// 5 emoji's in een rij, tap = direct versturen.
+/// 6 emoji's in een rij, tap = direct versturen + haptic feedback.
 class QuickReactionsOverlay extends StatelessWidget {
   final Event event;
   final VoidCallback onDismiss;
@@ -14,7 +16,7 @@ class QuickReactionsOverlay extends StatelessWidget {
     super.key,
   });
 
-  static const _reactions = ['❤️', '👍', '😂', '🎉', '😮'];
+  static const _reactions = ['❤️', '👍', '😂', '🔥', '👏', '😮'];
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,7 @@ class QuickReactionsOverlay extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     onTap: () async {
+                      HapticFeedback.lightImpact();
                       await event.room.sendReaction(event.eventId, emoji);
                       onDismiss();
                     },
