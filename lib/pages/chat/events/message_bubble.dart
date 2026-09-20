@@ -109,12 +109,29 @@ class _MessageBubbleState extends State<MessageBubble> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.event != widget.event) {
       _initFutures();
+      // Update loadMedia als het event verandert
+      loadMedia = shouldAutoLoadMedia(
+        widget.event.room.client,
+        widget.event.room.id,
+      );
     } else {
       // Only re-init thread future if thread changed
       if (oldWidget.thread?.lastEvent?.eventId !=
           widget.thread?.lastEvent?.eventId) {
         _initThreadFuture();
       }
+    }
+  }
+
+  Future<void> _updateLoadMedia() async {
+    final shouldLoad = shouldAutoLoadMedia(
+      widget.event.room.client,
+      widget.event.room.id,
+    );
+    if (shouldLoad != loadMedia) {
+      setState(() {
+        loadMedia = shouldLoad;
+      });
     }
   }
 
@@ -428,6 +445,8 @@ class _MessageBubbleState extends State<MessageBubble> {
         // Cache the user to avoid rebuilding
         if (snapshot.hasData && _cachedSenderUser == null) {
           _cachedSenderUser = snapshot.data;
+          // Update loadMedia na het laden van de sender
+          WidgetsBinding.instance.addPostFrameCallback((_) => _updateLoadMedia());
         }
         final user = _cachedSenderUser ?? event.senderFromMemoryOrFallback;
         final displayname =
