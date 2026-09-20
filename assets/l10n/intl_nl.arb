@@ -1905,8 +1905,22 @@
     "type": "String",
     "placeholders": {}
   },
+  "pushRegistering": "Pushmeldingen instellen...",
+  "@pushRegistering": {
+    "description": "Wordt getoond tijdens het instellen van pushmeldingen (met herstelpogingen)"
+  },
+  "pushRegistered": "Pushmeldingen zijn actief ✅",
+  "@pushRegistered": {
+    "description": "Wordt getoond als pushmeldingen succesvol zijn ingesteld"
+  },
+  "pushRegisterFailed": "Push instellen mislukt. Opnieuw proberen?",
+  "@pushRegisterFailed": {
+    "description": "Wordt getoond als pushmeldingen instellen mislukt na herstelpogingen"
+  },
   "retry": "Opnieuw proberen",
   "@retry": {
+    "description": "Knoptekst om een mislukte actie opnieuw te proberen"
+  },
     "type": "String",
     "placeholders": {}
   },

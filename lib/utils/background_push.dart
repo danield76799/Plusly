@@ -330,21 +330,50 @@ class BackgroundPush {
         (await UnifiedPush.getDistributors()).isNotEmpty &&
         context != null &&
         context.mounted) {
-      // FluffyChat-pariteit: gebruik de moderne UnifiedPushUi-API in plaats
-      // van handmatig endpoint/registered-boekhouding. Deze aanpak laat het
-      // volledige endpoint-beheer over aan unifiedpush_ui en de onNewEndpoint
-      // callback, waardoor de `endpoint=saved / registered=false`-staat na een
-      // re-login geen stille push-failure meer kan veroorzaken.
-      await UnifiedPushUi(
-        context: context,
-        instances: clients
-            .where((c) => c.isLogged())
-            .map((c) => c.clientName)
-            .toList(),
-        unifiedPushFunctions: UPFunctions(),
-        showNoDistribDialog: false,
-        onNoDistribDialogDismissed: () {},
-      ).registerAppWithDialog();
+      // Toon feedback tijdens herstelpogingen
+      final snackBarController = ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(L10n.of(context).pushRegistering),
+          duration: const Duration(seconds: 10),
+        ),
+      );
+      
+      try {
+        await UnifiedPushUi(
+          context: context,
+          instances: clients
+              .where((c) => c.isLogged())
+              .map((c) => c.clientName)
+              .toList(),
+          unifiedPushFunctions: UPFunctions(),
+          showNoDistribDialog: false,
+          onNoDistribDialogDismissed: () {},
+        ).registerAppWithDialog();
+        
+        // Succes: snackBar updaten
+        snackBarController.close();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(L10n.of(context).pushRegistered),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } catch (e) {
+        // Mislukt: snackBar updaten
+        snackBarController.close();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(L10n.of(context).pushRegisterFailed),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: L10n.of(context).retry,
+              onPressed: () => setupPush(clients),
+            ),
+          ),
+        );
+        rethrow;
+      }
     } else {
       Logs().i('[Push] No UnifiedPush distributors available on this device');
     }
@@ -549,7 +578,26 @@ class UPFunctions extends UnifiedPushFunctions {
 
   @override
   Future<void> registerApp(String instance) async {
-    await UnifiedPush.register(instance: instance, features: features);
+    const maxRetries = 3;
+    const retryDelays = [1, 3, 10]; // Seconds
+    var attempt = 0;
+    
+    while (attempt < maxRetries) {
+      try {
+        await UnifiedPush.register(instance: instance, features: features);
+        Logs().i('[Push] UnifiedPush.register succeeded (attempt ${attempt + 1})');
+        return;
+      } catch (e, s) {
+        attempt++;
+        if (attempt >= maxRetries) {
+          Logs().e('[Push] UnifiedPush.register failed after $maxRetries attempts', e, s);
+          rethrow;
+        }
+        final delay = retryDelays[attempt - 1];
+        Logs().w('[Push] UnifiedPush.register failed (attempt $attempt/$maxRetries), retrying in $delay seconds...', e);
+        await Future.delayed(Duration(seconds: delay));
+      }
+    }
   }
 
   @override
