@@ -290,23 +290,41 @@ class BackgroundPush {
     this.clients = clients;
 
     {
-      // migrate single client push settings to multiclient settings
-      final endpoint = AppSettings.unifiedPushEndpoint.value;
-      if (endpoint.isNotEmpty) {
-        matrix!.store.setString(
-          clients.first.clientName + AppSettings.unifiedPushEndpoint.key,
-          endpoint,
+      // Eenmalige migratie: zet de oude globale endpoint/registered-instellingen
+      // om naar per-client sleutels, en verwijder daarna de globale sleutels.
+      //
+      // BELANGRIJK: dit mag ALLEEN draaien als de globale sleutels nog bestaan.
+      // setupPush() wordt bij elke app-start aangeroepen, en de globale
+      // registered-instelling heeft default `false`. Zonder deze guard schreef
+      // elke start registered=false over de per-client sleutel heen — terwijl
+      // de endpoint bewaard bleef. Resultaat: endpoint=saved/registered=false,
+      // waardoor hasValidEndpoint() (dat `registered` vereist) faalde en de
+      // pusher nooit meer werd geregistreerd.
+      final globalEndpointKey = AppSettings.unifiedPushEndpoint.key;
+      final globalRegisteredKey = AppSettings.unifiedPushRegistered.key;
+      final hasLegacySettings =
+          matrix!.store.containsKey(globalEndpointKey) ||
+          matrix!.store.containsKey(globalRegisteredKey);
+
+      if (hasLegacySettings) {
+        final endpoint = AppSettings.unifiedPushEndpoint.value;
+        if (endpoint.isNotEmpty) {
+          matrix!.store.setString(
+            clients.first.clientName + globalEndpointKey,
+            endpoint,
+          );
+        }
+
+        final registered = AppSettings.unifiedPushRegistered.value;
+        matrix!.store.setBool(
+          clients.first.clientName + globalRegisteredKey,
+          registered,
         );
-        matrix!.store.remove(AppSettings.unifiedPushEndpoint.key);
+
+        matrix!.store.remove(globalEndpointKey);
+        matrix!.store.remove(globalRegisteredKey);
+        Logs().i('[Push] Legacy push settings migrated to per-client keys');
       }
-
-      final registered = AppSettings.unifiedPushRegistered.value;
-
-      matrix!.store.setBool(
-        clients.first.clientName + AppSettings.unifiedPushRegistered.key,
-        registered,
-      );
-      matrix!.store.remove(AppSettings.unifiedPushRegistered.key);
     }
 
     // Check if any client is logged in
