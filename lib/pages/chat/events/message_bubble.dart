@@ -415,7 +415,7 @@ class _MessageBubbleState extends State<MessageBubble> {
           Padding(
             padding: const EdgeInsets.only(left: 4.0),
             child: Text(
-              _formatReadTimestamp(widget.readReceipts!.first.originServerTs?.millisecondsSinceEpoch),
+              _formatReadTimestamp(widget.readReceipts!.first.time.millisecondsSinceEpoch),
               style: TextStyle(color: statusColor, fontSize: 10),
             ),
           ),
