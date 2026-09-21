@@ -35,11 +35,13 @@ class MapBubble extends StatelessWidget {
           : null,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius),
-        child: Container(
-          constraints: BoxConstraints.loose(Size(width, height)),
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: width),
+          child: AspectRatio(
+            aspectRatio: width / height,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
               FlutterMap(
                 options: MapOptions(
                   initialCenter: LatLng(latitude, longitude),
@@ -146,6 +148,7 @@ class MapBubble extends StatelessWidget {
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),
