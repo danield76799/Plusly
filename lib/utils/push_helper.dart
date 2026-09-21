@@ -105,7 +105,7 @@ class PushHelper {
       });
       if (notification.roomId != null) {
         await flutterLocalNotificationsPlugin.show(
-          id: notification.roomId?.hashCode ?? 0,
+          id: notificationIdFor(instance, notification.roomId),
           title: l10n.newMessageInFluffyChat,
           body: l10n.openAppToReadMessages,
           notificationDetails: NotificationDetails(
@@ -228,7 +228,8 @@ class PushHelper {
               .getActiveNotifications();
           for (final activeNotification in activeNotifications) {
             final room = client.rooms.singleWhereOrNull(
-              (room) => room.id.hashCode == activeNotification.id,
+              (room) => '${client.clientName}_${room.id}'.hashCode ==
+                  activeNotification.id,
             );
             if (room == null || !room.isUnreadOrInvited) {
               flutterLocalNotificationsPlugin.cancel(
@@ -326,7 +327,7 @@ class PushHelper {
           final decryptedEvent = event;
           if (!_shouldNotifyByPushRules(client, decryptedEvent!)) {
             await flutterLocalNotificationsPlugin.cancel(
-              id: notification.roomId?.hashCode ?? 0,
+              id: notificationIdFor(client.clientName, notification.roomId),
             );
             Logs().d(
               '[Push] Ontsleuteld event alsnog gefilterd door push rules, '
@@ -413,9 +414,23 @@ class PushHelper {
     }
   }
 
+  /// Canonieke notificatie-ID, identiek aan FluffyChat's
+  /// `PushNotification.notificationId` (push_helper.dart:489-495) en aan
+  /// [BackgroundPush.cancelNotification] en [notificationTapBackground].
+  ///
+  /// Plusly gebruikte op alle show()-plekken `notification.roomId.hashCode`,
+  /// terwijl élk cancel-pad de client-gekwalificeerde vorm gebruikt
+  /// (`'${clientName}_$roomId'.hashCode`). Twee verschillende ID's voor
+  /// hetzelfde kanaal betekent dat Android een cancel nooit op de getoonde
+  /// notificatie toepast: de melding blijft staan. Bovendien overschrijft bij
+  /// meerdere accounts de notificatie van het ene account die van het andere
+  /// in dezelfde room, omdat de clientnaam niet in de ID zit. Eén formule
+  /// voor show én cancel.
+  int get _notificationId => notificationIdFor(client.clientName, notification.roomId);
+
   /// PLUSLY-CHANGE (DM-fix fase 1): directe placeholder-notificatie voor een
   /// nog-versleuteld event, VÓÓR de ontsleutel-retry. Gebruikt exact het
-  ///zelfde notificatie-ID (roomId.hashCode), kanaal en MessagingStyle als de
+  ///zelfde notificatie-ID, kanaal en MessagingStyle als de
   /// echte notificatie in fase 2, zodat Android hem als UPDATE behandelt en
   /// er geen duplicaat of nieuwe popup ontstaat.
   Future<void> _showEncryptedPlaceholder() async {
@@ -425,7 +440,7 @@ class PushHelper {
       final roomName = event.room.getLocalizedDisplayname(matrixLocals);
 
       await flutterLocalNotificationsPlugin.show(
-        id: notification.roomId?.hashCode ?? 0,
+        id: _notificationId,
         title: roomName,
         body: l10n!.newMessageInFluffyChat,
         notificationDetails: NotificationDetails(
@@ -549,14 +564,14 @@ class PushHelper {
           ?.createNotificationChannel(roomsChannel);
 
       final platformChannelSpecifics = await _getPlatformChannelSpecifics(
-        notification.roomId?.hashCode ?? 0,
+        _notificationId,
         body,
         title,
         roomName,
       );
 
       await flutterLocalNotificationsPlugin.show(
-        id: notification.roomId?.hashCode ?? 0,
+        id: _notificationId,
         title: title,
         body: body,
         notificationDetails: platformChannelSpecifics,
@@ -569,7 +584,7 @@ class PushHelper {
       Logs().v('Push helper has been completed!');
       PushEventLog().add('push_shown', {
         'room': notification.roomId ?? '',
-        'id': '${notification.roomId?.hashCode ?? 0}',
+        'id': '$_notificationId',
       });
     } catch (e, s) {
       Logs().e('Push showNotification crashed', e, s);
@@ -751,6 +766,19 @@ class PushHelper {
         activeClient == notifiedClient &&
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
   }
+}
+
+/// Canonieke notificatie-ID voor één (client, room)-paar.
+///
+/// Exact dezelfde formule als FluffyChat's `PushNotification.notificationId`
+/// (upstream push_helper.dart:489-495) en als Plusly's
+/// [BackgroundPush.cancelNotification] en [notificationTapBackground].
+/// Eén formule voor show én cancel, anders past Android een cancel nooit toe
+/// op de getoonde melding en blijft die staan.
+int notificationIdFor(String? clientName, String? roomId) {
+  if (roomId == null) return 0;
+  if (clientName == null) return roomId.hashCode;
+  return '${clientName}_$roomId'.hashCode;
 }
 
 class NotificationPushPayload {
