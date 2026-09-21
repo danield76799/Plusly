@@ -35,10 +35,23 @@ class MapBubble extends StatelessWidget {
           : null,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(radius),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: width),
-          child: AspectRatio(
-            aspectRatio: width / height,
+        // De message-bubbel meet zijn inhoud met IntrinsicWidth
+        // (message_bubble.dart:583). AspectRatio geeft een intrinsics-vraag
+        // met oneindige hoogte door aan zijn kind, en FlutterMap gebruikt
+        // intern een LayoutBuilder — die kan geen intrinsieke maten
+        // teruggeven. In debug een assert, in release stil 0, waardoor de
+        // kaart ineenklapt tot een smalle strook.
+        //
+        // De binnenste SizedBox(width, height) doorbreekt die vraag: een
+        // SizedBox met begrensde breedte rapporteert zijn eigen breedte
+        // zónder het kind te ondervragen. AspectRatio blijft de 2:1-klaring
+        // bewaken en de maxWidth van de bubbel krimpt de kaart op smalle
+        // schermen (hoogte schaalt mee).
+        child: AspectRatio(
+          aspectRatio: width / height,
+          child: SizedBox(
+            width: width,
+            height: height,
             child: Stack(
               fit: StackFit.expand,
               children: <Widget>[
