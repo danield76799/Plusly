@@ -210,8 +210,8 @@ class PushHelper {
           'room': notification.roomId ?? '',
           'unread': '${notification.counts?.unread ?? 0}',
         });
-        if (notification.counts?.unread == null ||
-            notification.counts?.unread == 0) {
+        if (clients.length == 1 &&
+            (notification.counts?.unread == 0)) {
           await flutterLocalNotificationsPlugin.cancelAll();
         } else {
           // Make sure client is fully loaded and synced before dismiss notifications:
