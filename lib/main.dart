@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/utils/client_manager.dart';
+import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/sync_debugger.dart';
@@ -127,6 +128,14 @@ Future<void> _initializeApp() async {
       client.backgroundSync = false;
       client.syncPresence = PresenceType.offline;
     }
+
+    // FluffyChat-pariteit (main.dart:86): start een korte foreground service
+    // zodat Android het headless push-proces NIET wegvangt terwijl
+    // pushHelper bezig is (event ophalen, ontsleutelen, sync). Zonder dit
+    // wordt het kale detached-proces gekild vóór de notificatie getoond is:
+    // ntfy levert de broadcast af, maar de app verwerkt niets meer
+    // ("niet elke push komt binnen"). Gestopt in push_helper.dart (finally).
+    await ForegroundServices.startService('background_push');
 
     // FluffyChat-pariteit: in background-fetch mode initialiseert
     // BackgroundPush.clientOnly() de lokale notificaties en UnifiedPush.

@@ -15,6 +15,7 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/client_download_content_extension.dart';
 import 'package:Pulsly/utils/client_manager.dart';
+import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
@@ -126,6 +127,12 @@ class PushHelper {
         );
       }
       rethrow;
+    } finally {
+      // FluffyChat-pariteit (push_helper.dart:94): de background_push-service
+      // weer stoppen nu pushHelper klaar is (of crashte). De refcount in
+      // ForegroundServices voorkomt dat een lopende service van een ander
+      // (bv. gesprek) per ongeluk gestopt wordt.
+      await ForegroundServices.stopService('background_push');
     }
   }
 
