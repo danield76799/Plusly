@@ -128,6 +128,12 @@ class BackgroundPush {
       await initialiseLocalNotifications();
       Logs().v('Flutter Local Notifications initialized');
 
+      // Laad de bewaarde diagnoselog VOOR er iets geschreven wordt. Zonder
+      // dit begint een verse sessie met een lege in-memory lijst en schrijft
+      // de eerste add() die lege lijst over de geschiedenis heen — elke
+      // app-start wiste dan het bewijs van de vorige sessie.
+      await PushEventLog().ensureLoaded();
+
       if (Platform.isAndroid) {
         await UnifiedPush.initialize(
           onNewEndpoint: _newUpEndpoint,

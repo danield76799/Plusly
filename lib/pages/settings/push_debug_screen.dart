@@ -107,6 +107,19 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
     b.write('getoond=$shown onderdrukt=$suppressed opgeruimd=$clearing ');
     b.write('push_event=$events afgerond=$afgerond');
     if (fouten > 0) b.write(' FOUTEN=$fouten');
+    // Welke isolates hebben geschreven? De UnifiedPush-plugin kan zijn eigen
+    // FlutterEngine starten, dus twee schrijvers op één prefs-sleutel is een
+    // reële mogelijkheid. Als hier meer dan één naam staat, is dat de
+    // verklaring voor een gat in de log — niet een gemiste push.
+    final isolate = <String, int>{};
+    for (final e in _pushEvents) {
+      final i = e['iso'] ?? 'onbekend';
+      isolate[i] = (isolate[i] ?? 0) + 1;
+    }
+    if (isolate.isNotEmpty) {
+      b.write(' | isolates: ');
+      b.write(isolate.entries.map((x) => '${x.key}=${x.value}').join(', '));
+    }
     b.write(' | totaal ${_pushEvents.length} events');
     return b.toString();
   }
