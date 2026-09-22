@@ -86,18 +86,29 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
     if (_pushEvents.isEmpty) return 'nog geen push-events';
     int count(String kind) =>
         _pushEvents.where((e) => e['kind'] == kind).length;
+
     final received = count('push_received');
     final shown = count('push_shown');
     final suppressed = count('push_suppressed');
     final clearing = count('push_clearing');
-    final others = _pushEvents.length -
-        received -
-        shown -
-        suppressed -
-        clearing;
-    return 'ontvangen=$received getoond=$shown '
-        'onderdrukt=$suppressed opgeruimd=$clearing overig=$others '
-        '(totaal ${_pushEvents.length})';
+    final events = count('push_event');
+    final afgerond = count('push');
+    final fouten = count('push_error');
+
+    // Alleen pushes MET een room_id kunnen ooit getoond worden. Een teller
+    // zonder room_id heeft niets te tonen en hoort in push_clearing.
+    final metRoom = _pushEvents
+        .where((e) => e['kind'] == 'push_received' && (e['room'] ?? '').isNotEmpty)
+        .length;
+    final zonderRoom = received - metRoom;
+
+    final b = StringBuffer();
+    b.write('ontvangen=$received (met room=$metRoom, tellers=$zonderRoom) ');
+    b.write('getoond=$shown onderdrukt=$suppressed opgeruimd=$clearing ');
+    b.write('push_event=$events afgerond=$afgerond');
+    if (fouten > 0) b.write(' FOUTEN=$fouten');
+    b.write(' | totaal ${_pushEvents.length} events');
+    return b.toString();
   }
 
   Future<void> _copyLogs() async {
