@@ -116,26 +116,33 @@ Future<void> _initializeApp() async {
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final store = await AppSettings.init();
-  final clients = await ClientManager.getClients(store: store);
 
   // If the app starts in detached mode, we assume that it is in
   // background fetch mode for processing push notifications. This is
   // currently only supported on Android.
-  if (PlatformInfos.isAndroid &&
-      AppLifecycleState.detached == WidgetsBinding.instance.lifecycleState) {
+  final isBackgroundFetch = PlatformInfos.isAndroid &&
+      AppLifecycleState.detached == WidgetsBinding.instance.lifecycleState;
+
+  if (isBackgroundFetch) {
+    // FluffyChat-pariteit (upstream main.dart:86): start de foreground service
+    // VÓÓR de client/Hive-initialisatie. Upstream doet dit direct na de
+    // detached-check en vóór ClientManager.getClients() (regel 88). Plusly
+    // startte hem pas ná getClients(), waardoor het kale headless proces juist
+    // tijdens die zware initialisatie gekild kon worden: ntfy levert de
+    // broadcast af, maar de app verwerkt niets meer ("niet elke push komt
+    // binnen"). De service beschermt nu het hele verwerkingsvenster.
+    // Gestopt in push_helper.dart (finally).
+    await ForegroundServices.startService('background_push');
+  }
+
+  final clients = await ClientManager.getClients(store: store);
+
+  if (isBackgroundFetch) {
     // Do not send online presences when app is in background fetch mode.
     for (final client in clients) {
       client.backgroundSync = false;
       client.syncPresence = PresenceType.offline;
     }
-
-    // FluffyChat-pariteit (main.dart:86): start een korte foreground service
-    // zodat Android het headless push-proces NIET wegvangt terwijl
-    // pushHelper bezig is (event ophalen, ontsleutelen, sync). Zonder dit
-    // wordt het kale detached-proces gekild vóór de notificatie getoond is:
-    // ntfy levert de broadcast af, maar de app verwerkt niets meer
-    // ("niet elke push komt binnen"). Gestopt in push_helper.dart (finally).
-    await ForegroundServices.startService('background_push');
 
     // FluffyChat-pariteit: in background-fetch mode initialiseert
     // BackgroundPush.clientOnly() de lokale notificaties en UnifiedPush.
