@@ -15,6 +15,7 @@
 import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 const _key = 'plusly_push_event_log';
 
@@ -139,6 +140,52 @@ void main() {
         reason: 'de regel van het andere isolate mag NIET verdwijnen',
       );
       expect(bewaard.length, 2, reason: 'beide regels moeten bewaard blijven');
+    });
+
+    test('een schrijver buiten de Dart-cache (zoals het tweede engine) '
+        'raakt niet kwijt', () async {
+      // Dit is de scherpste versie van het tweekeurs-probleem. De mock deelt
+      // normaal één cache, waardoor een test met twee PushEventLog-instanties
+      // het defect NIET zou vangen. Een echt tweede isolate heeft ook een
+      // eigen cache: het schrijft naar de STORE. Dus schrijven we hier
+      // rechtstreeks via SharedPreferencesStorePlatform — precies het pad dat
+      // het UnifiedPush-engine-isolate neemt — en eisen dat onze eigen
+      // _persist() die regel niet overschrijft met een stale cache.
+      const vanAndereEngine =
+          'p|2026-09-22T19:25:17.000000|push_received|room=!engine:server&iso=up-engine';
+      SharedPreferences.setMockInitialValues({});
+      await PushEventLog().clear();
+
+      // Onze eigen instantie leest prefs (en cachet die leeg).
+      final log = PushEventLog();
+      await log.ensureLoaded();
+
+      // Het andere engine schrijft naar de store, buiten onze cache om.
+      final platform = SharedPreferencesStorePlatform.instance;
+      await platform.setValue(
+          'StringList', 'flutter.$_key', <String>[vanAndereEngine]);
+
+      // Nu schrijft onze eigenaar een regel. Zonder reload() merget hij op
+      // zijn eigen stale (lege) cache en wist daarmee de engine-regel.
+      log.add('push_received', {'room': '!eigen:server'});
+      await _flush();
+      await _flush();
+
+      final bewaard = await platform
+          .getAll()
+          .then((m) => m['flutter.$_key']);
+
+      expect(
+        bewaard,
+        isNotNull,
+        reason: 'de sleutel moet nog bestaan',
+      );
+      expect(
+        (bewaard! as List).contains(vanAndereEngine),
+        isTrue,
+        reason: 'de regel van het andere engine mag NIET verdwijnen — '
+            'zonder prefs.reload() merget _persist() op een stale cache',
+      );
     });
 
     test('herhaald persisten levert geen duplicaten op', () async {

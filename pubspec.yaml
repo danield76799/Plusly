@@ -118,6 +118,10 @@ dev_dependencies:
   flutter_native_splash: ^2.4.7
   flutter_test:
     sdk: flutter
+  # Alleen voor de test die het tweede-schrijver-defect vangt: die schrijft
+  # buiten de Dart-cache om, direct naar de prefs-store, zoals het
+  # UnifiedPush-engine-isolate doet.
+  shared_preferences_platform_interface: ^2.4.1
   import_sorter: ^4.6.0
   license_checker: ^1.6.2
   msix: ^3.6.13

@@ -121,6 +121,12 @@ class PushEventLog {
   Future<void> _persist() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // EERST verversen: getStringList leest een PER-ISOLATE cache, niet de
+      // schijf. Het tweede isolate (de UnifiedPush-engine) schrijft naar
+      // dezelfde sleutel, dus zonder reload zouden we onze eigen, stale
+      // cache mergen en daarmee de regels van dat andere isolate alsnog
+      // wissen — precies het defect dat deze merge moet voorkomen.
+      await prefs.reload();
       final bestaand = prefs.getStringList(_key) ?? const <String>[];
 
       final gezien = <String>{};
@@ -218,6 +224,9 @@ class PushEventLog {
   Future<void> load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Zelfde reden als bij _persist: de cache is per-isolate. Een verse
+      // start moet de SCHIJF lezen, niet wat dit isolate ooit zag.
+      await prefs.reload();
       final raw = prefs.getStringList(_key);
       if (raw == null) return;
       _pushEvents.clear();
