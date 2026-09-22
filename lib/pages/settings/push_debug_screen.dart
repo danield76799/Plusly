@@ -24,6 +24,7 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
   String? _endpoint;
   List<String> _logs = const [];
   List<Map<String, String>> _events = const [];
+  List<Map<String, String>> _pushEvents = const [];
   String? _lastPushTime;
   bool _unifiedPushAvailable = false;
 
@@ -70,17 +71,40 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
     final eventLog = PushEventLog();
     await eventLog.load();
     final events = eventLog.events;
+    final pushEvents = eventLog.pushEvents;
 
     setState(() {
       _logs = logs;
       _events = events;
+      _pushEvents = pushEvents;
       _loading = false;
     });
+  }
+
+  /// Het getal dat de vraag "komt elke push ook aan?" in één blik beantwoordt.
+  String get _pushStats {
+    if (_pushEvents.isEmpty) return 'nog geen push-events';
+    int count(String kind) =>
+        _pushEvents.where((e) => e['kind'] == kind).length;
+    final received = count('push_received');
+    final shown = count('push_shown');
+    final suppressed = count('push_suppressed');
+    final clearing = count('push_clearing');
+    final others = _pushEvents.length -
+        received -
+        shown -
+        suppressed -
+        clearing;
+    return 'ontvangen=$received getoond=$shown '
+        'onderdrukt=$suppressed opgeruimd=$clearing overig=$others '
+        '(totaal ${_pushEvents.length})';
   }
 
   Future<void> _copyLogs() async {
     final buffer = StringBuffer();
     for (final l in _logs) buffer.writeln('[status] $l');
+    if (_pushEvents.isNotEmpty) buffer.writeln('[samenvatting] $_pushStats');
+    // Oplopend, zodat je bij het lezen ziet hoe een push zich ontwikkelt.
     for (final e in _events) {
       final ts = e['ts'] ?? '';
       final kind = e['kind'] ?? '';
@@ -134,6 +158,10 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
                   title: Text('Laatste push'),
                   subtitle: Text(_lastPushTime ?? 'nog geen push ontvangen in deze sessie'),
                 ),
+                ListTile(
+                  title: Text('Pushes in log'),
+                  subtitle: Text(_pushStats),
+                ),
                 const SizedBox(height: 12),
                 Text('Status:', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
@@ -143,17 +171,39 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
                     )),
                 const SizedBox(height: 16),
                 Text('Eventlog:', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 4),
+                if (_events.isNotEmpty)
+                  Text(
+                    'Nieuwste eerst. Lifecycle-regels zijn context bij een '
+                    'push; ze hebben een eigen kleine buffer en kunnen '
+                    'push-events niet meer verdringen.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                 const SizedBox(height: 8),
                 if (_events.isEmpty)
                   const Text('Nog geen events gelogd in deze sessie.')
                 else
-                  ..._events.take(40).map((e) {
-                    final ts = (e['ts'] ?? '').substring(11, 19);
+                  // Nieuwste eerst: je wilt zien wat er zojuist gebeurde, niet
+                  // het begin van de geschiedenis.
+                  ..._events.reversed.take(150).map((e) {
+                    final rawTs = e['ts'] ?? '';
+                    final ts = rawTs.length >= 19
+                        ? rawTs.substring(11, 19)
+                        : rawTs;
                     final kind = e['kind'] ?? '';
-                    final extra = e.entries.where((x) => x.key != 'ts' && x.key != 'kind').map((x) => '${x.key}=${x.value}').join(' ');
+                    final extra = e.entries
+                        .where((x) => x.key != 'ts' && x.key != 'kind')
+                        .map((x) => '${x.key}=${x.value}')
+                        .join(' ');
+                    final isPush = kind.startsWith('push');
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Text('[$kind] $ts $extra'),
+                      child: Text(
+                        '[$kind] $ts $extra',
+                        style: isPush
+                            ? const TextStyle(fontWeight: FontWeight.w600)
+                            : Theme.of(context).textTheme.bodySmall,
+                      ),
                     );
                   }),
                 const SizedBox(height: 16),
