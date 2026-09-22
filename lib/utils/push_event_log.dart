@@ -36,6 +36,18 @@ class PushEventLog {
     final target = isLifecycle ? _lifecycleEvents : _pushEvents;
     final cap = isLifecycle ? maxLifecycleEvents : maxPushEvents;
 
+    if (isLifecycle) {
+      // Opeenvolgende identieke toestanden zijn ruis: elke koude start
+      // schrijft inactive/hidden/paused/detached, en bij het openen van de
+      // app nog een keer. Alleen een ECHTE overgang is interessant als
+      // context bij een push. Dit houdt de lifecycle-ring informatief in
+      // plaats van gevuld met herhalingen.
+      final vorige = _lifecycleEvents.isEmpty
+          ? null
+          : _lifecycleEvents.last['state'];
+      if (vorige == extra['state']) return;
+    }
+
     target.add({
       'ts': DateTime.now().toIso8601String(),
       'kind': kind,

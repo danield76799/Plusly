@@ -45,8 +45,10 @@ void main() {
 
     test('lifecycle-buffer blijft begrensd', () async {
       final log = PushEventLog();
+      // Afwisselende toestanden: gelijke opeenvolgende toestanden worden
+      // samengevat, dus alleen echte overgangen tellen mee.
       for (var i = 0; i < PushEventLog.maxLifecycleEvents + 50; i++) {
-        log.add('lifecycle', {'state': 'resumed'});
+        log.add('lifecycle', {'state': i.isEven ? 'paused' : 'resumed'});
       }
       final lifecycle =
           log.events.where((e) => e['kind'] == 'lifecycle').length;
@@ -72,6 +74,26 @@ void main() {
       final timestamps = events.map((e) => e['ts'] ?? '').toList();
       final sorted = [...timestamps]..sort();
       expect(timestamps, sorted, reason: 'lifecycle moet tussen de pushes staan');
+    });
+
+    test('opeenvolgende identieke lifecycle-toestanden worden samengevat',
+        () async {
+      final log = PushEventLog();
+      // Een echte dump had 'resumed, inactive, resumed, paused, detached'
+      // door elkaar; alleen ECHTE overgangen zijn nuttige context.
+      log.add('lifecycle', {'state': 'paused'});
+      log.add('lifecycle', {'state': 'paused'});
+      log.add('lifecycle', {'state': 'paused'});
+      log.add('lifecycle', {'state': 'resumed'});
+      log.add('lifecycle', {'state': 'resumed'});
+      log.add('lifecycle', {'state': 'paused'});
+
+      final staten = log.events
+          .where((e) => e['kind'] == 'lifecycle')
+          .map((e) => e['state'])
+          .toList();
+      expect(staten, ['paused', 'resumed', 'paused'],
+          reason: 'alleen echte overgangen, geen herhalingen');
     });
   });
 
