@@ -105,6 +105,66 @@ void main() {
       );
     });
 
+    test('de delay-parameter draagt de MSC4140-prefix', () {
+      final ext = _code('lib/utils/matrix_sdk_extensions/msc4140_extension.dart');
+
+      // Dit is DE bug die het symptoom "stuurt weer meteen" veroorzaakte:
+      // Synapse leest letterlijk `parse_integer(request, "org.matrix.msc4140.delay")`.
+      // Een kale `delay` bestaat daar niet, wordt genegeerd, en de PUT valt
+      // door naar de gewone send. Bevestigd in element-hq/synapse
+      // (synapse/rest/client/room.py r529) en in matrix-js-sdk's
+      // getUnstableDelayQueryOpts().
+      expect(
+        ext.contains("'org.matrix.msc4140.delay': delay.toString()"),
+        isTrue,
+        reason: 'zonder de prefix negeert de server de parameter stil en '
+            'verzendt het bericht direct',
+      );
+      expect(
+        ext.contains("queryParameters: {'delay': delay.toString()}"),
+        isFalse,
+        reason: 'de kale variant is precies wat Synapse niet leest',
+      );
+    });
+
+    test('elke httpClient-call krijgt een absolute Uri', () {
+      final ext = _code('lib/utils/matrix_sdk_extensions/msc4140_extension.dart');
+
+      // client.httpClient is een kale http.Client zonder baseUrl. De SDK geeft
+      // hem overal een absolute Uri. Een relatieve Uri laat HttpClient.openUrl
+      // gooien ("No host specified"), waarna de catch `false` teruggeeft — de
+      // cancel-probe meldde daardoor op elke server "geen support", en dat is
+      // waarom een eerdere versie besloot de guard te laten varen.
+      final aantalCalls = RegExp(r'client\.httpClient\.(post|put|get)\(')
+          .allMatches(ext)
+          .length;
+      final aantalResolved =
+          RegExp(r'client\.baseUri!\.resolveUri\(').allMatches(ext).length;
+
+      expect(aantalCalls, greaterThan(0));
+      expect(
+        aantalResolved,
+        aantalCalls,
+        reason: 'elke aanroep moet resolveUri gebruiken, anders faalt hij op '
+            'een relatieve Uri',
+      );
+    });
+
+    test('een 404 op de cancel-probe wordt op errcode beoordeeld', () {
+      final ext = _code('lib/utils/matrix_sdk_extensions/msc4140_extension.dart');
+      expect(
+        ext.contains("errcode != 'M_UNRECOGNIZED'"),
+        isTrue,
+        reason: 'M_NOT_FOUND betekent "route bestaat, delay_id niet" en is dus '
+            'wél support; M_UNRECOGNIZED betekent "route bestaat niet"',
+      );
+      expect(
+        ext.contains('final supported = response.statusCode != 404;'),
+        isFalse,
+        reason: 'die toets zag beide 404-varianten als "geen support"',
+      );
+    });
+
     test('lokaal inplan-bericht liegt niet over annuleren', () {
       final dialoog = _code('lib/pages/chat/send_later_dialog.dart');
       expect(

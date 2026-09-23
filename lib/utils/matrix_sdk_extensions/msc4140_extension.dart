@@ -56,20 +56,53 @@ extension Msc4140Extension on matrix.Room {
     }
 
     try {
-      // Probe the cancel endpoint with a dummy ID
+      // Probe the cancel endpoint with a dummy ID.
+      //
+      // LET OP: resolveUri is verplicht. client.httpClient is een kale
+      // http.Client zonder baseUrl; de SDK geeft hem overal een ABSOLUTE Uri
+      // (Uri.https / baseUri!.resolveUri). Een relatieve Uri laat
+      // HttpClient.openUrl gooien ("No host specified"), waarna de catch
+      // hieronder `false` teruggeeft — de probe meldde dus altijd "geen
+      // cancel-support", op elke server. Dat is precies waarom een eerdere
+      // versie de guard hierop liet varen ("cancel is optional").
       final requestUri = Uri(
         path: '/_matrix/client/unstable/org.matrix.msc4140/delayed_events/_probe/cancel',
       );
       final response = await client.httpClient.post(
-        requestUri,
+        client.baseUri!.resolveUri(requestUri),
         body: jsonEncode({}),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${client.accessToken}',
         },
       );
-      // 404 = endpoint doesn't exist, anything else = it does
-      final supported = response.statusCode != 404;
+      // 404 betekent hier NIET automatisch "endpoint bestaat niet".
+      //
+      // Er zijn twee verschillende 404's (gemeten op matrix.org én mtux.nl,
+      // beide Synapse):
+      //   - M_NOT_FOUND     -> route BESTAAT, maar deze dummy delay_id niet
+      //   - M_UNRECOGNIZED  -> route bestaat niet
+      // De oude toets `statusCode != 404` zag de eerste als "geen support" en
+      // meldde dus op elke server dat annuleren niet kon — precies waarom een
+      // eerdere versie besloot de guard te laten varen ("cancel is optional").
+      //
+      // Alleen M_UNRECOGNIZED betekent echt niet-ondersteund. Elke andere
+      // uitkomst (400 M_MISSING_PARAM, 401, 403) betekent dat de route er is.
+      if (response.statusCode == 404) {
+        var errcode = '';
+        try {
+          errcode = (jsonDecode(response.body) as Map)['errcode'] as String? ?? '';
+        } catch (_) {
+          // Geen JSON-body: dan is het geen Synapse-achtige M_NOT_FOUND.
+        }
+        final supported = errcode != 'M_UNRECOGNIZED';
+        _cancelSupportCache[server] = supported;
+        Logs().i(
+          'MSC4140 cancel support for $server: $supported (errcode=$errcode)',
+        );
+        return supported;
+      }
+      final supported = true;
       _cancelSupportCache[server] = supported;
       Logs().i('MSC4140 cancel support for $server: $supported');
       return supported;
@@ -106,10 +139,22 @@ extension Msc4140Extension on matrix.Room {
       };
     }
 
-    // PUT /_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}?delay={ms}
+    // PUT /_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}
+    //     ?org.matrix.msc4140.delay={ms}
+    //
+    // De parameternaam MOET de MSC4140-prefix dragen. Synapse leest
+    // letterlijk `parse_integer(request, "org.matrix.msc4140.delay")`; een
+    // kale `delay` bestaat daar niet, wordt dus genegeerd, en de PUT valt
+    // door naar de GEWONE send — het bericht gaat direct de deur uit.
+    //
+    // Dat is precies het gemelde symptoom ("stuurt weer meteen") en het is
+    // stil: Synapse antwoordt 200 OK met een event_id, geen foutmelding.
+    // Bevestigd in element-hq/synapse: synapse/rest/client/room.py regel 529
+    // en in matrix-js-sdk: getUnstableDelayQueryOpts() plakt
+    // `${UNSTABLE_MSC4140_DELAYED_EVENTS}.${k}` vóór elke key.
     final requestUri = Uri(
       path: '/_matrix/client/v3/rooms/$id/send/$type/$txid',
-      queryParameters: {'delay': delay.toString()},
+      queryParameters: {'org.matrix.msc4140.delay': delay.toString()},
     );
     final body = jsonEncode(enrichedContent);
     final response = await client.httpClient.put(
@@ -150,11 +195,18 @@ extension Msc4140Extension on matrix.Room {
 
   Future<void> _manageDelayedEvent(String delayId, String action) async {
     // POST /_matrix/client/unstable/org.matrix.msc4140/delayed_events/{delay_id}/{action}
+    //
+    // Dit pad klopt wel: Synapse registreert de acties als losse routes
+    // (/delayed_events/{id}/cancel, /send, /restart). De nieuwere
+    // /_matrix/client/v1/delayed_events/... bestaat op deze servers nog niet
+    // (gemeten: 404 M_UNRECOGNIZED), dus de unstable-prefix is hier goed.
+    //
+    // Wel resolveUri toevoegen — zie de toelichting bij supportsDelayedEventCancel.
     final requestUri = Uri(
       path: '/_matrix/client/unstable/org.matrix.msc4140/delayed_events/$delayId/$action',
     );
     final response = await client.httpClient.post(
-      requestUri,
+      client.baseUri!.resolveUri(requestUri),
       body: jsonEncode({}),
       headers: {
         'Content-Type': 'application/json',
