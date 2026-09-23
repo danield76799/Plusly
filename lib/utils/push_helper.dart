@@ -177,7 +177,12 @@ Future<void> _tryPushHelper(
   Logs().v('Load event...');
   final event = await client.getEventByPushNotification(
     notification,
-    storeInDatabase: false,
+    // PLUSLY-CHANGE (commit 6e295baea): altijd in de DB opslaan. Bij
+    // storeInDatabase:false werd het event wel getoond maar niet gepersisteerd;
+    // het openen van de DM laadt de tijdlijn uit de DB (getEventList) en miste
+    // het bericht dan tot een latere sync. De SDK retourneert het event in
+    // beide gevallen — deze vlag gaat alleen over opslaan.
+    storeInDatabase: true,
   );
 
   updateAppBadge(notification.counts?.unread ?? 0);
