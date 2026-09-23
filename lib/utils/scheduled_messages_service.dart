@@ -175,10 +175,19 @@ class ScheduledMessagesService {
         continue;
       }
 
-      // Only send messages scheduled within the last 60 seconds
-      // This prevents all "missed" messages from being sent at once
+      // Alleen verzenden als het tijdstip IS GEPASSEERD.
+      //
+      // De oude toets was `diff.inSeconds.abs() <= 60`. Die `.abs()` maakt het
+      // venster tweezijdig: een bericht dat 45 seconden in de TOEKOMST is
+      // gepland valt er ook in (diff = -45) en werd dus direct verzonden — het
+      //zelfde symptoom als de MSC4140-bug, maar dan in het lokale pad. Met de
+      // 30s-timer en de check bij het opstarten kon elk bericht binnen een
+      // minuut vooruit te vroeg de deur uit gaan.
+      //
+      // Nu: diff >= 0 (due of verleden) én binnen het venster. Te vroeg
+      // verzenden is nooit goed; iets later wel.
       final diff = now.difference(message.scheduledAt);
-      if (diff.inSeconds.abs() <= 60) {
+      if (!diff.isNegative && diff.inSeconds <= 60) {
         // Message is due now - send it
         await _sendScheduledMessage(client, message);
       } else if (message.scheduledAt.isBefore(now.subtract(const Duration(minutes: 2)))) {
