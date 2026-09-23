@@ -130,12 +130,19 @@ jobs:
           echo "ndk.dir=${{ steps.setup_ndk.outputs.ndk-path }}" >> android/local.properties
 
       - name: Commit version bump
+        id: version_bump
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pubspec.yaml
           git diff --cached --quiet || git commit -m "Bump version to ${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.build_number }} [skip ci]"
           git push || echo "Push failed, continuing anyway"
+          # De commit waar de APK FEITELIJK van gebouwd wordt. De build draait
+          # verderop in deze working tree, dus dat is HEAD nu — inclusief de
+          # bump die hierboven is gecommit. Dit is de enige juiste waarde voor
+          # target_commitish; github.sha is de commit die de RUN startte en
+          # ligt daar één commit voor.
+          echo "release_sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -259,12 +266,26 @@ jobs:
         run: bundle exec fastlane deploy_internal_test
 
       # === GITHUB RELEASE ===
+      #
+      # target_commitish MOET de commit zijn waar de APK van gebouwd is: de
+      # bump-commit die CI zelf net heeft gemaakt. Zonder deze regel plakt
+      # GitHub de tag op de default branch zoals die op het PUBLICATIEmoment
+      # staat — en dat is een andere commit zodra er tijdens de build iets
+      # anders naar main is gepusht. Dat is precies misgegaan met
+      # v1.4.17+23429: de run bouwde cd0572f95, maar publiceerde nadat
+      # d043818e6 op main stond, dus de tag belandde op d043818e6 terwijl de
+      # APK die code niet bevatte. De tag loog over de inhoud.
+      #
+      # Bewust NIET github.sha: dat is de commit die de RUN startte, en de
+      # bump-commit ligt daar één op. De build draait ná de bump, dus de
+      # bump-commit is wat de binary werkelijk bevat.
       - name: Create Release
         id: release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.android_build_number }}
           name: Plusly v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.android_build_number }}
+          target_commitish: ${{ steps.version_bump.outputs.release_sha || github.sha }}
           files: |
             ${{ github.workspace }}/output/plusly-arm64-v8a-release.apk
             ${{ github.workspace }}/output/plusly-armeabi-v7a-release.apk
@@ -274,10 +295,46 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # === SYNC VERSION FILE (AFTER release exists) ===
+      # === VERIFY RELEASE TAG POINTS AT THE BUILT COMMIT ===
+      #
+      # Maakt deze foutklasse ZICHTBAAR, en MOET vóór de versie-sync staan: die
+      # sync schrijft plusly-version.txt, en de in-app updater vertrouwt dat
+      # bestand. Loopt de controle erna en faalt hij, dan staat het
+      # versiebestand al op een label waarvan we net hebben vastgesteld dat de
+      # tag er niet bij hoort. Controleer dus eerst, promoveer daarna.
+      #
+      # Faalt bewust hard: een misgelabelde release is erger dan een rode run,
+      # want een tag die naar andere code wijst dan de APK eronder merk je pas
+      # dagen later — of nooit.
+      - name: Verify release tag resolves to the built commit
+        if: success()
+        run: |
+          TAG="v${{ steps.bump.outputs.version_name }}+${{ steps.bump.outputs.android_build_number }}"
+          EXPECTED="${{ steps.version_bump.outputs.release_sha }}"
+          if [ -z "$EXPECTED" ]; then
+            # De bump-stap kon geen sha doorgeven (bijv. niets te committen).
+            # Dan valt de release terug op github.sha; controleer dat.
+            EXPECTED="${{ github.sha }}"
+          fi
+          TAG_SHA=$(git ls-remote --tags origin "refs/tags/$TAG^{}" | cut -f1)
+          if [ -z "$TAG_SHA" ]; then
+            # Lichtgewicht tag: geen ^{}-regel, val terug op de tag zelf.
+            TAG_SHA=$(git ls-remote --tags origin "refs/tags/$TAG" | cut -f1)
+          fi
+          echo "tag         : $TAG"
+          echo "tag ->      : $TAG_SHA"
+          echo "verwacht    : $EXPECTED"
+          if [ "$TAG_SHA" != "$EXPECTED" ]; then
+            echo "::error::Tag $TAG wijst naar $TAG_SHA, maar de build hoort bij $EXPECTED. De APK onder deze tag hoort bij andere code."
+            exit 1
+          fi
+          echo "OK — tag wijst naar de commit waar de APK van gebouwd is."
+
+      # === SYNC VERSION FILE (AFTER release exists AND is verified) ===
       # Write plusly-version.txt ONLY after the GitHub release has actually
-      # been created, so the in-app update check never promises a build number
-      # that doesn't exist yet. The value mirrors the release tag exactly.
+      # been created AND the tag has been proven to point at the built commit,
+      # so the in-app update check never promises a build number whose tag
+      # belongs to different code. The value mirrors the release tag exactly.
       - name: Sync version file to released build
         if: success()
         run: |
