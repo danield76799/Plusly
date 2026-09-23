@@ -70,7 +70,12 @@ abstract class ForegroundServices {
   static Future<void> stopService(String name) async {
     try {
       if (!platformSupported) return;
-      _runningServices.remove(name);
+      // Alleen stoppen wat WIJ in deze levensduur startten. Zonder deze toets
+      // valt een stopService('background_push') bij een voorgrond-push (waar
+      // die service nooit gestart is) door naar de aanroep hieronder en kan
+      // hij een service van een ander onderdeel — een gesprek — killen.
+      final wasOurs = _runningServices.remove(name);
+      if (!wasOurs) return;
       if (_runningServices.isNotEmpty) return;
       if (_externGestart) {
         // Niet van ons — laten draaien (gesprek blijft aan).

@@ -214,7 +214,9 @@ Future<void> notificationTap(
             // die was al verwijderd (2 netwerk-roundtrips).
             final messagingStyleInformation =
                 await AndroidFlutterLocalNotificationsPlugin()
-                    .getActiveNotificationMessagingStyle(id: '${room.client.clientName}_${room.id}'.hashCode);
+                    .getActiveNotificationMessagingStyle(
+                      id: notificationIdFor(room.client.clientName, room.id),
+                    );
             if (messagingStyleInformation != null) {
               messagingStyleInformation.messages?.add(
                 Message(
@@ -228,7 +230,7 @@ Future<void> notificationTap(
               );
 
               await FlutterLocalNotificationsPlugin().show(
-                id: '${room.client.clientName}_${room.id}'.hashCode,
+                id: notificationIdFor(room.client.clientName, room.id),
                 title: room.getLocalizedDisplayname(MatrixLocals(l10n)),
                 body: input,
                 notificationDetails: NotificationDetails(

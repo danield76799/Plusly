@@ -12,8 +12,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/utils/client_manager.dart';
+import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/error_widget.dart';
 import 'config/setting_keys.dart';
@@ -115,13 +117,48 @@ Future<void> _initializeApp() async {
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final store = await AppSettings.init();
-  final clients = await ClientManager.getClients(store: store);
 
-  // If the app starts in detached mode, we assume that it is in
-  // background fetch mode for processing push notifications. This is
-  // currently only supported on Android.
-  if (PlatformInfos.isAndroid &&
-      AppLifecycleState.detached == WidgetsBinding.instance.lifecycleState) {
+  // FluffyChat-pariteit (upstream main.dart r81-105): een engine die in
+  // background-fetch mode start, is er één zonder Activity. Detecteer dat
+  // vóór de zware initialisatie, zodat de foreground-service het HELE
+  // koude-start-venster beschermt en niet alleen de staart.
+  //
+  // Let op: een koud gestarte push-engine meldt NIET altijd `detached`.
+  // Flutter vult lifecycleState alleen bij een Activity
+  // (services/binding.dart:295 readInitialLifecycleStateFromNativeWindow
+  // stopt zolang initialLifecycleState leeg is), dus in de headless engine
+  // van UnifiedPushService.getEngine() blijft de state NULL. Upstream's
+  // `detached == lifecycleState` evalueert dan false en de hele tak wordt
+  // overgeslagen. Omdat upstream vrijwel altijd via FCM loopt, raakt zijn
+  // UnifiedPush-tak die situatie zelden; hier is het de normale koude start.
+  final lifecycleState = WidgetsBinding.instance.lifecycleState;
+  final isBackgroundFetch = PlatformInfos.isAndroid &&
+      (lifecycleState == null ||
+          lifecycleState == AppLifecycleState.detached);
+
+  // Instrument (geen gedragswijziging): elke start logt de effectieve
+  // lifecycle-state, zodat een volgende dump zelf bewijst welke tak een
+  // koude start nam in plaats van dat we dat moeten afleiden.
+  try {
+    await PushEventLog().ensureLoaded();
+    PushEventLog().add('init', {
+      'startup_state': '${lifecycleState ?? 'null'}',
+      'branch': isBackgroundFetch ? 'background' : 'foreground',
+    });
+  } catch (_) {}
+
+  if (isBackgroundFetch) {
+    // FluffyChat-pariteit (upstream main.dart r86): start de korte
+    // foreground-service VÓÓR ClientManager.getClients(). Upstream's volgorde
+    // is AppSettings.init() → startService → getClients; een service die pas
+    // ná de zware init start, laat het hele koude-start-venster (Hive +
+    // client-setup, seconden lang) onbeschermd, waarna Android het proces
+    // wegvaagt vóór de notificatie getoond is. Gestopt in push_helper.dart
+    // (finally), net als upstream push_helper.dart r93-94.
+    await ForegroundServices.startService('background_push');
+
+    final clients = await ClientManager.getClients(store: store);
+
     // Do not send online presences when app is in background fetch mode.
     for (final client in clients) {
       client.backgroundSync = false;
@@ -130,8 +167,8 @@ Future<void> _initializeApp() async {
 
     // FluffyChat-pariteit: in background-fetch mode initialiseert
     // BackgroundPush.clientOnly() de lokale notificaties en UnifiedPush.
-    Logs().i('[Main] Background-fetch mode, legacy push system');
-    BackgroundPush.clientOnly(clients.first);
+    Logs().i('[Main] Background-fetch mode, background push service');
+    BackgroundPush.clientOnly(clients);
     // To start the flutter engine afterwards we add an custom observer.
     WidgetsBinding.instance.addObserver(AppStarter(clients, store));
     Logs().i(
@@ -139,6 +176,8 @@ Future<void> _initializeApp() async {
     );
     return;
   }
+
+  final clients = await ClientManager.getClients(store: store);
 
   for (final client in clients) {
     client.syncPresence = PresenceType.values.firstWhere(

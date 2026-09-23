@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PushEventLog {
@@ -11,6 +9,16 @@ class PushEventLog {
   static const int _maxEvents = 80;
 
   final List<Map<String, String>> _events = [];
+  bool _loaded = false;
+
+  /// Idempotent laden. Zonder dit start een verse launch met een lege
+  /// in-memory lijst en wist de eerste add() de opgeslagen historie — dan
+  /// kan een dump het venster vóór de restart niet meer tonen.
+  Future<void> ensureLoaded() async {
+    if (_loaded) return;
+    _loaded = true;
+    await load();
+  }
 
   void add(String kind, Map<String, String> extra) {
     _events.add({

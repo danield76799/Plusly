@@ -145,26 +145,35 @@ class BackgroundPush {
     _init();
   }
 
-  factory BackgroundPush.clientOnly(Client client) {
-    return _instance ??= BackgroundPush._([client]);
+  /// FluffyChat-pariteit (upstream background_push.dart r142-144): de
+  /// clientOnly-factory neemt de HELE client-lijst. Plusly gaf hier eerder
+  /// alleen `clients.first` door, waardoor een push voor een tweede account
+  /// altijd de eerste client als "opgeloste" client kreeg.
+  factory BackgroundPush.clientOnly(List<Client> clients) {
+    return _instance ??= BackgroundPush._(clients);
   }
 
-  /// Reset the static singleton. Called when switching to the new push system
-  /// to prevent the old instance's UnifiedPush callbacks from interfering.
+  /// Reset de static singleton. Aangeroepen bij het wisselen van push-systeem
+  /// om te voorkomen dat callbacks van de oude instantie blijven hangen.
   static void resetInstance() {
     _instance = null;
   }
 
   factory BackgroundPush(MatrixState matrix) {
-    final instance = BackgroundPush.clientOnly(matrix.client);
+    final instance = BackgroundPush.clientOnly(matrix.widget.clients);
     instance.matrix = matrix;
     return instance;
   }
 
   Future<void> cancelNotification(Client client, String roomId) async {
     Logs().v('Cancel notification for room', roomId);
-    // Must use the SAME ID formula as push_helper where notifications are shown.
-    await _flutterLocalNotificationsPlugin.cancel(id: '${client.clientName}_$roomId'.hashCode);
+    // FluffyChat-pariteit: exact DEZELFDE ID-formule als push_helper's
+    // show(). Twee formules voor hetzelfde kanaal betekenen dat een cancel de
+    // getoonde melding nooit raakt (blijft staan), of juist de melding van een
+    // ánder account wist.
+    await _flutterLocalNotificationsPlugin.cancel(
+      id: notificationIdFor(client.clientName, roomId),
+    );
 
     // Workaround for app icon badge not updating
     if (Platform.isIOS) {
@@ -501,15 +510,14 @@ class BackgroundPush {
       'ts': now,
     });
 
-    // FluffyChat pattern (upstream background_push.dart:422-437): ALWAYS pass
-    // the live clients to pushHelper. In detached/background-fetch mode the
-    // clients were created via ClientManager.getClients(store:) in main.dart,
-    // which fully initializes them (initWithRestore → userID loaded). The
-    // earlier `isDetached ? null : clients` workaround threw those away and
-    // made pushHelper build fresh uninitialized clients (initialize:false →
-    // userID null), which crashed the push-rule evaluator
-    // (pushrule_evaluator.dart:389 `userID!`) → crash-handler → English
-    // "New message in Plusly" fallback.
+    // FluffyChat-pariteit (upstream _onUpMessage r422-437): ALTIJD de live
+    // client-lijst doorgeven aan pushHelper. In detached/background-fetch
+    // mode zijn die clients via ClientManager.getClients(store:) in main.dart
+    // aangemaakt en volledig geïnitialiseerd (initWithRestore → userID
+    // geladen). Een eerdere `isDetached ? null : clients`-workaround gooide
+    // die weg en liet pushHelper verse, ongeïnitialiseerde clients bouwen
+    // (initialize:false → userID null), wat de push-rule evaluator liet
+    // crashen (pushrule_evaluator.dart:389 `userID!`).
     await PushHelper.pushHelper(
       PushNotification.fromJson(data),
       clients: clients,
@@ -518,10 +526,8 @@ class BackgroundPush {
       activeClient: clientFromInstance(i, clients),
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
-      // OPTIE A: notificatie-acties (Antwoorden / Markeer als gelezen /
-      // Muten) aangezet. Blijkbaar buggy met UP, maar Daniel wil het
-      // proberen — ntfy is tegenwoordig stabiel. Als Antwoorden crasht:
-      // terug naar false.
+      // FluffyChat-pariteit: notificatie-acties (Antwoorden / Markeer als
+      // gelezen / Muten) aan, net als upstream.
       useNotificationActions: true,
     );
     final now2 = DateTime.now().toIso8601String();
