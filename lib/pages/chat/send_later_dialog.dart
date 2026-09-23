@@ -165,7 +165,27 @@ class SendLaterDialogState extends State<SendLaterDialog> {
     final txid =
         'sched_${DateTime.now().millisecondsSinceEpoch}_${_generateRandomId()}';
 
-    // Try MSC4140 server-side scheduling (always attempt — cancel is optional)
+    // Bepaal EERST of de server MSC4140 ondersteunt.
+    //
+    // Dit is de kern van de bug: zonder deze check sturen we `?delay=` naar
+    // een server die MSC4140 niet kent. Zo'n server negeert de onbekende
+    // queryparameter en antwoordt met 200 OK op de gewone send — het bericht
+    // gaat dan DIRECT de deur uit terwijl de app het als "ingepland" opslaat.
+    // (matrix.org adverteert `org.matrix.msc4140: false`; mtux.nl `true`.)
+    final supportsDelayedSend = await widget.room.supportsMsc4140();
+
+    if (!supportsDelayedSend) {
+      Logs().i(
+        '[Scheduler] Server ondersteunt MSC4140 niet — lokaal inplannen',
+      );
+      await _scheduleLocally(txid, messageContent);
+      return;
+    }
+
+    // Server ondersteunt uitgesteld verzenden. De cancel-capaciteit is een
+    // APARTE vraag en bepaalt alleen of de gebruiker het later kan annuleren.
+    final canCancel = await widget.room.supportsDelayedEventCancel();
+
     try {
       final delayId = await widget.room.scheduleDelayedEvent(
         messageContent,
@@ -193,7 +213,12 @@ class SendLaterDialogState extends State<SendLaterDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Message scheduled for ${_formatSelected()}'),
+            content: Text(
+              canCancel
+                  ? 'Message scheduled for ${_formatSelected()}'
+                  : 'Message scheduled for ${_formatSelected()} '
+                        '(cancelling not supported by this server)',
+            ),
             duration: const Duration(seconds: 3),
           ),
         );

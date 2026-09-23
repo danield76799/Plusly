@@ -4,10 +4,51 @@ import 'package:matrix/matrix.dart' as matrix;
 import 'package:matrix/matrix_api_lite/utils/logs.dart';
 
 extension Msc4140Extension on matrix.Room {
+  /// Aparte caches: dit zijn TWEE verschillende capabilities. Een server kan
+  /// uitgesteld verzenden ondersteunen zonder het cancel-endpoint (en andersom
+  /// is cancel zinloos). Ze in één map delen laat de een het antwoord van de
+  /// ander teruggeven.
+  static final Map<String, bool> _delayedSendSupportCache = {};
   static final Map<String, bool> _cancelSupportCache = {};
 
-  /// Check if the server supports delayed event cancellation.
-  /// Probes the cancel endpoint once per server and caches the result.
+  /// MSC4140-capaciteit van de homeserver, uit `GET /_matrix/client/versions`.
+  ///
+  /// Dit is de ENIGE betrouwbare manier om te weten of `?delay=` werkt. Het
+  /// endpoint proberen en naar de statuscode kijken is onbruikbaar: een server
+  /// zonder MSC4140 negeert de onbekende `delay`-queryparameter en antwoordt
+  /// met **200 OK** op de gewone send. Het bericht gaat dan DIRECT de deur uit
+  /// terwijl de app het als "ingepland" registreert. Alleen de
+  /// feature-vlag in /versions onderscheidt de twee gevallen.
+  ///
+  /// Zelfde patroon als msc2666_extension.dart (de bestaande
+  /// feature-detectie in dit project).
+  Future<bool> supportsMsc4140() async {
+    final server = client.baseUri?.host ?? '';
+    if (_delayedSendSupportCache.containsKey(server)) {
+      return _delayedSendSupportCache[server]!;
+    }
+    try {
+      // getVersions() is gecached door de SDK (3 dagen), dus dit is één
+      // netwerk-call per server en daarna gratis.
+      final versions = await client.getVersions();
+      final supported =
+          versions.unstableFeatures?['org.matrix.msc4140'] == true;
+      _delayedSendSupportCache[server] = supported;
+      Logs().i('MSC4140 support for $server: $supported');
+      return supported;
+    } catch (e) {
+      // Bij een fout NIET als ondersteund behandelen: dan zou een bericht
+      // direct verzonden worden. Liever lokaal inplannen (blijft in de app)
+      // dan stil een bericht de deur uit sturen.
+      _delayedSendSupportCache[server] = false;
+      Logs().w('MSC4140 support check failed for $server: $e');
+      return false;
+    }
+  }
+
+  /// Of het annuleer-endpoint werkt. Los van [supportsMsc4140]: een server kan
+  /// uitgesteld verzenden wél ondersteunen maar het cancel-endpoint nog niet.
+  /// De aanroeper gebruikt dit alleen om de gebruiker te waarschuwen.
   Future<bool> supportsDelayedEventCancel() async {
     final server = client.baseUri?.host ?? '';
     if (_cancelSupportCache.containsKey(server)) {
@@ -81,8 +122,22 @@ extension Msc4140Extension on matrix.Room {
     );
     if (response.statusCode == 200) {
       final responseBody = jsonDecode(response.body);
-      // Server may return delay_id (some implementations) or just event_id
-      return (responseBody['delay_id'] as String?) ?? txid ?? 'unknown';
+      // STRIKT: alleen een échte delay_id bewijst dat de server het bericht
+      // heeft uitgesteld. Een server zonder MSC4140 negeert `?delay=` en
+      // antwoordt 200 OK met alléén een event_id — het bericht is dan al
+      // verzonden. Die response als succes accepteren (de oude
+      // `?? txid`-fallback) liet de app "ingepland" tonen voor een bericht dat
+      // al de deur uit was. Liever een exception, zodat de aanroeper lokaal
+      // inplant en er niets stil verzonden wordt.
+      final delayId = responseBody['delay_id'] as String?;
+      if (delayId == null || delayId.isEmpty) {
+        throw Exception(
+          'Server accepted the send but returned no delay_id — MSC4140 is '
+          'not actually supported here (event_id: '
+          '${responseBody['event_id']}).',
+        );
+      }
+      return delayId;
     } else {
       final errorBody = jsonDecode(response.body);
       var text = "${errorBody['errcode']}: ${errorBody['error']}";
