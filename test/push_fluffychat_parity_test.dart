@@ -177,5 +177,114 @@ void main() {
       expect(helper.contains('push_duplicate'), isFalse,
           reason: 'de event_id-dedup was Plusly-eigen; upstream heeft hem niet');
     });
+
+    // --- Tweede controle-ronde (23-09, na de eerste port) ---
+
+    test('de check-volgorde is die van upstream', () {
+      final helper = _code('lib/utils/push_helper.dart');
+      final eventIdx = _codeLineIndex(
+        helper,
+        'client.getEventByPushNotification(',
+      );
+      final ruleIdx = _codeLineIndex(helper, '_shouldNotifyByPushRules(');
+      final fgIdx = _codeLineIndex(helper, '_isInForeground(');
+      final badgeIdx = _codeLineIndex(helper, 'updateAppBadge(');
+
+      expect(eventIdx, greaterThan(-1));
+      expect(ruleIdx, greaterThan(-1));
+      expect(fgIdx, greaterThan(-1));
+      expect(badgeIdx, greaterThan(-1));
+      expect(
+        eventIdx,
+        lessThan(badgeIdx),
+        reason: 'upstream: event laden vóór de badge (r129-135)',
+      );
+      expect(
+        ruleIdx,
+        lessThan(fgIdx),
+        reason: 'upstream toetst de push rules VÓÓR de foreground-onderdrukking '
+            '(r179-196). Staat de foreground eerder, dan slaat die tak de '
+            'push-rule filter over',
+      );
+    });
+
+    test('Android stuurt geen losse title/body naast de MessagingStyle', () {
+      final helper = _code('lib/utils/push_helper.dart');
+      expect(
+        helper.contains('final needsTitleAndBody = !PlatformInfos.isAndroid;'),
+        isTrue,
+        reason: 'upstream r368: op Android draagt de MessagingStyle titel en '
+            'inhoud; losse title/body overschrijven die en breken het stapelen',
+      );
+      expect(helper.contains('title: needsTitleAndBody ? title : null'), isTrue);
+      expect(helper.contains('body: needsTitleAndBody ? body : null'), isTrue);
+    });
+
+    test('de MessagingStyle-eigenaar is de lokale gebruiker', () {
+      final helper = _code('lib/utils/push_helper.dart');
+      expect(
+        helper.contains('unsafeGetUserFromMemoryOrFallback'),
+        isTrue,
+        reason: 'upstream r218: de gesprekseigenaar (niet de afzender) met '
+            'diens avatar; de afzender zit in het Message-object',
+      );
+      expect(helper.contains('ownUser.calcDisplayname()'), isTrue);
+      expect(helper.contains('key: event.room.client.userID'), isTrue);
+    });
+
+    test('acties alleen op berichten, via een switch op het type', () {
+      final helper = _code('lib/utils/push_helper.dart');
+      expect(
+        helper.contains('EventTypes.Message ||'),
+        isTrue,
+        reason: 'upstream r311-341: switch op message/encrypted/sticker',
+      );
+      expect(helper.contains('EventTypes.Sticker =>'), isTrue);
+      expect(
+        helper.contains('event.type == EventTypes.RoomMember ||'),
+        isFalse,
+        reason: 'een uitsluiting zette de acties op élk ander type, ook waar '
+            '"Antwoorden" geen betekenis heeft',
+      );
+      expect(helper.contains('semanticAction: SemanticAction.mute'), isTrue,
+          reason: 'upstream geeft de mute-actie een semantische actie');
+    });
+
+    test('client_name staat op de pusher, net als upstream', () {
+      final bgPush = _code('lib/utils/background_push.dart');
+      expect(
+        bgPush.contains('"client_name": client.clientName'),
+        isTrue,
+        reason: 'upstream background_push.dart r248-251 schrijft client_name '
+            'in additionalProperties; Plusly leidt het notificatie-ID van de '
+            'opgeloste client af, maar de pusher hoort de sleutel te dragen',
+      );
+      // Twee keer: in de VERGELIJKING én in de payload. Staat hij alleen in de
+      // payload, dan ziet de vergelijking hem niet en wordt de pusher bij elke
+      // start opnieuw gezet.
+      expect(
+        RegExp(r'"client_name": client\.clientName')
+            .allMatches(bgPush)
+            .length,
+        2,
+        reason: 'één keer in de pusher-vergelijking, één keer in de payload',
+      );
+    });
+
+    test('bewust NIET overgenomen: callkit en de crash-report-sleutel', () {
+      final helper = _code('lib/utils/push_helper.dart');
+      expect(
+        helper.contains('_showIncomingCall'),
+        isFalse,
+        reason: 'upstream gebruikt flutter_callkit_incoming; Plusly heeft die '
+            'dependency niet. Bellen is hier een aparte feature, geen push-pad',
+      );
+      expect(
+        helper.contains('pushHelperCrashReportKey'),
+        isFalse,
+        reason: 'upstream schrijft crashes naar SharedPreferences; Plusly naar '
+            'het push-log dat de debug-scherm al toont',
+      );
+    });
   });
 }

@@ -201,29 +201,12 @@ class PushHelper {
         }
       }
 
-      // FluffyChat-pariteit (upstream push_helper.dart r191-196): zit de
-      // gebruiker in die room én is de app op de voorgrond, dan geen
-      // notificatie. PLUSLY-CHANGE: de activeClient-toets erbij, zodat een
-      // account NIET de melding van een ander account onderdrukt.
-      if (_isInForeground(notification, activeRoomId, activeClient, client)) {
-        Logs().v(
-          'Push foreground: suppress notification '
-          'room=${notification.roomId} activeRoom=$activeRoomId '
-          'activeClient=$activeClient notified=${client.clientName} '
-          'lifecycle=${WidgetsBinding.instance.lifecycleState}',
-        );
-        PushEventLog().add('push_suppressed', {
-          'room': notification.roomId ?? '',
-          'activeRoom': activeRoomId ?? '',
-          'lifecycle': WidgetsBinding.instance.lifecycleState.toString(),
-        });
-        return null;
-      }
-
-      // FluffyChat-pariteit (upstream r130-133): de push draagt de voorkeur
-      // van de homeserver; meteen de badge bijwerken.
-      updateAppBadge(notification.counts?.unread ?? 0);
-
+      // FluffyChat-pariteit (upstream r129-137): het event wordt ALTIJD eerst
+      // opgehaald, vóór de badge, vóór de foreground-check en vóór de
+      // push-rule filter. Upstream's volgorde is: event laden → badge →
+      // clearing-tak → push-rule filter → foreground-onderdrukking. Plusly
+      // toetste de foreground eerder, waardoor die tak de push-rule filter
+      // oversloeg en de volgorde niet meer met upstream overeenkwam.
       final event = await client.getEventByPushNotification(
         notification,
         // PLUSLY-CHANGE (bewust, commit 6e295baea): upstream gebruikt hier
@@ -233,6 +216,11 @@ class PushHelper {
         // GEEN gemiste of getoonde notificatie.
         storeInDatabase: true,
       );
+
+      // FluffyChat-pariteit (upstream r135): badge bijwerken direct NA het
+      // laden van het event en vóór de null-check, zodat een clearing-push de
+      // badge ook bijwerkt.
+      updateAppBadge(notification.counts?.unread ?? 0);
 
       if (event == null) {
         // FluffyChat-pariteit (upstream r137-173): clearing-indicator.
@@ -293,6 +281,8 @@ class PushHelper {
       }
       helper.event = event;
 
+      Logs().v('Push helper got notification event of type ${event.type}.');
+
       // PLUSLY-CHANGE (bewust): client-side push-rule evaluatie, crash-veilig.
       //
       // De SDK-evaluator (pushrule_evaluator.dart:389) doet
@@ -310,6 +300,26 @@ class PushHelper {
         PushEventLog().add('push_rule_filtered', {
           'room': notification.roomId ?? '',
           'type': event.type,
+        });
+        return null;
+      }
+
+      // FluffyChat-pariteit (upstream r191-196): zit de gebruiker in die room
+      // én is de app op de voorgrond, dan geen notificatie. Staat NA de
+      // push-rule filter, net als upstream. PLUSLY-CHANGE: de
+      // activeClient-toets erbij, zodat een account NIET de melding van een
+      // ander account onderdrukt.
+      if (_isInForeground(notification, activeRoomId, activeClient, client)) {
+        Logs().v(
+          'Push foreground: suppress notification '
+          'room=${notification.roomId} activeRoom=$activeRoomId '
+          'activeClient=$activeClient notified=${client.clientName} '
+          'lifecycle=${WidgetsBinding.instance.lifecycleState}',
+        );
+        PushEventLog().add('push_suppressed', {
+          'room': notification.roomId ?? '',
+          'activeRoom': activeRoomId ?? '',
+          'lifecycle': WidgetsBinding.instance.lifecycleState.toString(),
         });
         return null;
       }
@@ -462,10 +472,18 @@ class PushHelper {
         roomName,
       );
 
+      // FluffyChat-pariteit (upstream r368-380): op Android draagt de
+      // MessagingStyle al titel én inhoud, dus daar sturen we title/body NIET
+      // mee — anders overschrijft de platte tekst de gespreksweergave en
+      // verdwijnt het stapelen van berichten in één notificatie. Buiten
+      // Android (iOS/desktop) is er geen MessagingStyle en zijn ze juist
+      // nodig.
+      final needsTitleAndBody = !PlatformInfos.isAndroid;
+
       await flutterLocalNotificationsPlugin.show(
         id: notificationId,
-        title: title,
-        body: body,
+        title: needsTitleAndBody ? title : null,
+        body: needsTitleAndBody ? body : null,
         notificationDetails: platformChannelSpecifics,
         payload: NotificationPushPayload(
           client.clientName,
@@ -513,6 +531,15 @@ class PushHelper {
         ? avatar
         : event.senderFromMemoryOrFallback.avatarUrl;
 
+    // FluffyChat-pariteit (upstream r218-226): de lokale gebruiker (ownUser)
+    // levert het echte afbeeldingsbestand voor de gespreks-MessagingStyle.
+    // Die Person is de EIGENAAR van het gesprek (de lokale gebruiker) en niet
+    // de afzender — zo werkt Android MessagingStyle; de afzender hoort in het
+    // Message-object hieronder.
+    final ownUser = event.room.unsafeGetUserFromMemoryOrFallback(
+      client.userID ?? '',
+    );
+    final userAvatarFile = await _getAvatarFile(client, ownUser.avatarUrl);
     final roomAvatarFile = await _getAvatarFile(client, avatar);
     final senderAvatarFile = event.room.isDirectChat
         ? roomAvatarFile
@@ -556,13 +583,14 @@ class PushHelper {
       styleInformation:
           messagingStyleInformation ??
           MessagingStyleInformation(
+            // FluffyChat-pariteit (upstream r288-295): de gesprekseigenaar is
+            // de lokale gebruiker, met diens avatar.
             Person(
-              name: senderName,
-              icon: roomAvatarFile == null
+              name: ownUser.calcDisplayname(),
+              icon: userAvatarFile == null
                   ? null
-                  : ByteArrayAndroidIcon(roomAvatarFile),
-              key: event.roomId,
-              important: event.room.isFavourite,
+                  : ByteArrayAndroidIcon(userAvatarFile),
+              key: event.room.client.userID,
             ),
             conversationTitle: event.room.isDirectChat ? null : roomName,
             groupConversation: !event.room.isDirectChat,
@@ -582,29 +610,41 @@ class PushHelper {
       // clearing-scan en de samenvattings-melding filteren op deze sleutel,
       // dus dit moet exact de clientName zijn.
       groupKey: client.clientName,
-      actions: event.type == EventTypes.RoomMember || !useNotificationActions
+      // FluffyChat-pariteit (upstream r311-341): acties ALLEEN op berichten
+      // (message/encrypted/sticker) — via een switch op het type, niet via een
+      // uitsluiting. Plusly toonde ze op élk type behalve room-member, dus ook
+      // op bijvoorbeeld een room-name of topic-wijziging, waar "Antwoorden"
+      // geen betekenis heeft.
+      // Plusly-extra: `useNotificationActions` blijft als schakelaar (default
+      // aan); upstream kent die parameter niet.
+      actions: !useNotificationActions
           ? null
-          : <AndroidNotificationAction>[
-              AndroidNotificationAction(
-                PluslyNotificationActions.reply.name,
-                l10n!.reply,
-                inputs: [
-                  AndroidNotificationActionInput(label: l10n!.writeAMessage),
-                ],
-                cancelNotification: false,
-                allowGeneratedReplies: true,
-                semanticAction: SemanticAction.reply,
-              ),
-              AndroidNotificationAction(
-                PluslyNotificationActions.markAsRead.name,
-                l10n!.markAsRead,
-                semanticAction: SemanticAction.markAsRead,
-              ),
-              AndroidNotificationAction(
-                PluslyNotificationActions.mute.name,
-                l10n!.muteChat,
-              ),
-            ],
+          : switch (event.type) {
+              EventTypes.Message ||
+              EventTypes.Encrypted ||
+              EventTypes.Sticker => <AndroidNotificationAction>[
+                AndroidNotificationAction(
+                  PluslyNotificationActions.reply.name,
+                  l10n!.reply,
+                  inputs: [
+                    AndroidNotificationActionInput(label: l10n!.writeAMessage),
+                  ],
+                  allowGeneratedReplies: true,
+                  semanticAction: SemanticAction.reply,
+                ),
+                AndroidNotificationAction(
+                  PluslyNotificationActions.markAsRead.name,
+                  l10n!.markAsRead,
+                  semanticAction: SemanticAction.markAsRead,
+                ),
+                AndroidNotificationAction(
+                  PluslyNotificationActions.mute.name,
+                  l10n!.muteChat,
+                  semanticAction: SemanticAction.mute,
+                ),
+              ],
+              _ => null,
+            },
     );
     const iOSPlatformChannelSpecifics = DarwinNotificationDetails();
     return NotificationDetails(

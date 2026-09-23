@@ -236,6 +236,7 @@ class BackgroundPush {
           currentPushers.first.data.format ==
               AppSettings.pushNotificationsPusherFormat.value &&
           mapEquals(currentPushers.single.data.additionalProperties, {
+            "client_name": client.clientName,
             "data_message": pusherDataMessageFormat,
           })) {
         Logs().i('[Push] Pusher already set');
@@ -274,7 +275,19 @@ class BackgroundPush {
             data: PusherData(
               url: Uri.parse(gatewayUrl!),
               format: AppSettings.pushNotificationsPusherFormat.value,
-              additionalProperties: {"data_message": pusherDataMessageFormat},
+              // FluffyChat-pariteit (upstream background_push.dart r248-251):
+              // `client_name` meeschrijven in de pusher. Upstream's
+              // notificatie-ID wordt hieruit afgeleid
+              // (PushNotification.clientName → devices[].data.client_name).
+              // Plusly leidt het ID van de opgeloste client af, maar de
+              // sleutel hoort desondanks op de pusher te staan: hij maakt de
+              // pusher-vergelijking hierboven volledig en houdt de payload
+              // gelijk aan upstream, zodat een later herstel van die route niet
+              // stil op de roomId-fallback terugvalt.
+              additionalProperties: {
+                "client_name": client.clientName,
+                "data_message": pusherDataMessageFormat,
+              },
             ),
             kind: 'http',
           ),
