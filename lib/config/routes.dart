@@ -41,7 +41,6 @@ import 'package:Pulsly/pages/settings_notifications/settings_notifications.dart'
 import 'package:Pulsly/pages/settings_password/settings_password.dart';
 import 'package:Pulsly/pages/settings_ringtone/settings_ringtone.dart';
 import 'package:Pulsly/pages/settings_security/settings_security.dart';
-import 'package:Pulsly/pages/settings/scheduled_messages_view.dart';
 import 'package:Pulsly/pages/settings/push_debug_screen.dart';
 
 import 'package:Pulsly/pages/settings_style/settings_style.dart';
@@ -397,15 +396,6 @@ abstract class AppRoutes {
                         context,
                         state,
                         const SettingsFeatures(),
-                      ),
-                      redirect: loggedOutRedirect,
-                    ),
-                    GoRoute(
-                      path: 'scheduled',
-                      pageBuilder: (context, state) => defaultPageBuilder(
-                        context,
-                        state,
-                        const ScheduledMessagesView(),
                       ),
                       redirect: loggedOutRedirect,
                     ),

@@ -330,9 +330,7 @@ class ChatInputRow extends StatelessWidget {
                           onLongPress: PlatformInfos.platformCanRecord &&
                                   controller.sendController.text.isEmpty
                               ? () => recordingViewModel.startRecording(controller.room)
-                              : controller.sendController.text.isNotEmpty
-                                  ? () => controller.sendScheduleAction()
-                                  : null,
+                              : null,
                           child: AnimatedSwitcher(
                             duration: MediaQuery.of(context).disableAnimations
                                 ? Duration.zero

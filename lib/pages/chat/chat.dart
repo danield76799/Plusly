@@ -27,7 +27,6 @@ import 'package:Pulsly/pages/chat/message_edits_dialog.dart';
 import 'package:Pulsly/pages/chat/recovered_event_dialog.dart';
 import 'package:Pulsly/pages/chat/seen_by_row.dart';
 import 'package:Pulsly/pages/chat/send_poll_dialog.dart';
-import 'package:Pulsly/pages/chat/send_later_dialog.dart';
 import 'package:Pulsly/pages/chat/translated_event_dialog.dart';
 import 'package:Pulsly/pages/chat/vote_results_dialog.dart';
 import 'package:Pulsly/pages/chat_details/chat_details.dart';
@@ -956,33 +955,6 @@ class ChatController extends State<ChatPageWithRoom>
           SendPollDialog(room: room, thread: thread, outerContext: context),
     );
     replyEvent = null;
-  }
-
-  void sendScheduleAction() async {
-    _storeInputTimeoutTimer?.cancel();
-    await showAdaptiveDialog(
-      context: context,
-      useRootNavigator: false,
-      builder: (c) => SendLaterDialog(
-        room: room,
-        thread: thread,
-        outerContext: context,
-        text: sendController.text,
-        replyEvent: replyEvent,
-      ),
-    );
-    // Clear the input after scheduling
-    _storeInputTimeoutTimer?.cancel();
-    sendController.clear();
-    // Force rebuild of InputBar by resetting the controller
-    sendController.value = TextEditingValue.empty;
-    // Clear the draft so it doesn't reappear when chat is reopened
-    await AppSettings.store.remove('draft_$roomId');
-    setState(() {
-      replyEvent = null;
-      editEvent = null;
-      _inputTextIsEmpty = true;
-    });
   }
 
   void sendFileAction({FileType type = .any}) async {
@@ -2039,9 +2011,6 @@ class ChatController extends State<ChatPageWithRoom>
     }
     if (choice == 'poll') {
       sendPollAction();
-    }
-    if (choice == 'schedule') {
-      sendScheduleAction();
     }
     if (choice == 'camera') {
       openCameraAction();

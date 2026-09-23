@@ -543,24 +543,6 @@ class SettingsView extends StatelessWidget {
                                 : (_) => controller.firstRunBootstrapAction(),
                           ),
 
-                          ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor:
-                                  theme.colorScheme.primaryContainer,
-                              child: Icon(
-                                Icons.schedule,
-                                color: theme.colorScheme.onPrimaryContainer,
-                              ),
-                            ),
-                            title: Text(L10n.of(context).scheduledMessages),
-                            subtitle: Text(
-                              L10n.of(context).scheduledMessagesSubtitle,
-                            ),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () =>
-                                context.push('/rooms/settings/scheduled'),
-                          ),
-
                           StatefulBuilder(
                             builder: (context, setInnerState) {
                               return SwitchListTile.adaptive(

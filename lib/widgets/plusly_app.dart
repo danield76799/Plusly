@@ -17,7 +17,6 @@ import 'package:Pulsly/widgets/background_audio_player.dart';
 import 'package:Pulsly/widgets/theme_builder.dart';
 import '../config/app_config.dart';
 import '../utils/custom_scroll_behaviour.dart';
-import '../utils/scheduler_service.dart';
 import '../utils/first_launch_setup.dart';
 import 'matrix.dart';
 
@@ -66,7 +65,6 @@ class _PluslyAppState extends State<PluslyApp> {
   void initState() {
     super.initState();
     initPlatformState();
-    _startScheduler();
     // First-launch setup: ask for notification + battery permissions.
     // Delay so the router/navigator context exists for showing dialogs.
     Future.delayed(const Duration(seconds: 3), () {
@@ -101,13 +99,6 @@ class _PluslyAppState extends State<PluslyApp> {
   void dispose() {
     _updateCheckTimer?.cancel();
     super.dispose();
-  }
-
-  void _startScheduler() {
-    final client = widget.clients.firstOrNull;
-    if (client != null) {
-      SchedulerService.start(client);
-    }
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
