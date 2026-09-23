@@ -518,7 +518,7 @@ class BackgroundPush {
     // userID null), which crashed the push-rule evaluator
     // (pushrule_evaluator.dart:389 `userID!`) → crash-handler → English
     // "New message in Plusly" fallback.
-    await PushHelper.pushHelper(
+    await pushHelper(
       PushNotification.fromJson(data),
       clients: clients,
       l10n: l10n,
@@ -526,10 +526,9 @@ class BackgroundPush {
       activeClient: clientFromInstance(i, clients),
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
-      // OPTIE A: notificatie-acties (Antwoorden / Markeer als gelezen /
-      // Muten) aangezet. Blijkbaar buggy met UP, maar Daniel wil het
-      // proberen — ntfy is tegenwoordig stabiel. Als Antwoorden crasht:
-      // terug naar false.
+      // FluffyChat-pariteit: notificatie-acties (Antwoorden / Markeer als
+      // gelezen / Muten) horen bij de notificatie zelf en worden via de
+      // payload naar notification_background_handler.dart teruggestuurd.
       useNotificationActions: true,
     );
     final now2 = DateTime.now().toIso8601String();
