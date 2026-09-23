@@ -19,6 +19,7 @@ import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/error_widget.dart';
 import 'config/setting_keys.dart';
 import 'utils/background_push.dart';
+import 'utils/push_event_log.dart';
 import 'widgets/plusly_app.dart';
 
 ReceivePort? mainIsolateReceivePort;
@@ -117,11 +118,27 @@ Future<void> _initializeApp() async {
   Logs().nativeColors = !PlatformInfos.isIOS;
   final store = await AppSettings.init();
 
-  // If the app starts in detached mode, we assume that it is in
-  // background fetch mode for processing push notifications. This is
-  // currently only supported on Android.
+  // PLUSLY-CHANGE (niet in upstream): een koud gestarte push-engine is
+  // NIET te herkennen aan AppLifecycleState.detached. Flutter vult
+  // lifecycleState alleen bij een Activity (services/binding.dart:
+  // readInitialLifecycleStateFromNativeWindow() stopt zolang
+  // initialLifecycleState leeg is), dus in de headless engine van
+  // UnifiedPushService.getEngine() blijft de state NULL en werd de hele
+  // background-tak overgeslagen: geen foreground-service, geen
+  // UnifiedPush.initialize(), geen collector. De distributor leverde wél
+  // af (Sending MESSAGE in het ntfy-log) maar de app verwerkte niets en
+  // stierf stil (nacht 23-09: 5/5 kamer-pushes verloren). Vangnet bij een
+  // Activity-start die toevallig nog null rapporteert: AppStarter start de
+  // GUI zodra de eerste echte lifecycle-wijziging binnenkomt.
+  final lifecycleState = WidgetsBinding.instance.lifecycleState;
+  await PushEventLog().ensureLoaded();
+  PushEventLog().add(
+    'init',
+    {'startup_state': '${lifecycleState ?? 'null'}'},
+  );
   final isBackgroundFetch = PlatformInfos.isAndroid &&
-      AppLifecycleState.detached == WidgetsBinding.instance.lifecycleState;
+      (lifecycleState == null ||
+          lifecycleState == AppLifecycleState.detached);
 
   if (isBackgroundFetch) {
     // FluffyChat-pariteit (upstream main.dart:86): start de foreground service
