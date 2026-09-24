@@ -71,6 +71,37 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
     await eventLog.load();
     final events = eventLog.events;
 
+    // Samenvattingsregel: maakt een dump zelf-verklarend. Zonder dit moet je
+    // elke kopie met de hand tellen om te zien of de buffer vol zat en of er
+    // een koude start in het venster viel. `met room=` scheidt de pushes die
+    // een notificatie KUNNEN tonen van de teller-pushes die per definitie
+    // alleen opruimen, en `branch=background` verraadt een koude start.
+    try {
+      final ontvangen = events.where((e) => e['kind'] == 'push_received').toList();
+      final metRoom = ontvangen.where((e) => (e['room'] ?? '').isNotEmpty).length;
+      final getoond = events.where((e) => e['kind'] == 'push_shown').length;
+      final onderdrukt = events.where((e) => e['kind'] == 'push_suppressed').length;
+      final opgeruimd = events.where((e) => e['kind'] == 'push_clearing').length;
+      final events2 = events.where((e) => e['kind'] == 'push_event').length;
+      final afgerond = events.where((e) => e['kind'] == 'push').length;
+      final isolaten = <String, int>{};
+      for (final e in events) {
+        final iso = e['iso'] ?? 'main';
+        isolaten[iso] = (isolaten[iso] ?? 0) + 1;
+      }
+      final achtergrond = events
+          .where((e) => e['kind'] == 'init' && e['branch'] == 'background')
+          .length;
+      logs.add(
+        '[samenvatting] ontvangen=${ontvangen.length} (met room=$metRoom, '
+        'tellers=${ontvangen.length - metRoom}) getoond=$getoond '
+        'onderdrukt=$onderdrukt opgeruimd=$opgeruimd push_event=$events2 '
+        'afgerond=$afgerond | koude starts=$achtergrond | '
+        'isolates: ${isolaten.entries.map((x) => '${x.key}=${x.value}').join(', ')} | '
+        'totaal ${events.length} events (cap: push=500, lifecycle=25)',
+      );
+    } catch (_) {}
+
     setState(() {
       _logs = logs;
       _events = events;
