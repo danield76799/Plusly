@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
 import 'package:Pulsly/pages/chat/events/message_reactions.dart';
@@ -71,7 +70,7 @@ class _StateMessageState extends State<StateMessage> {
                       maxLines: 2,
                       overflow: .ellipsis,
                       style: TextStyle(
-                        fontSize: 12 * AppSettings.fontSizeFactor.value,
+                        fontSize: 12,
                         decoration: event.redacted ? .lineThrough : null,
                       ),
                     ),

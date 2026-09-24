@@ -16,6 +16,7 @@ import 'package:Pulsly/widgets/app_lock.dart';
 import 'package:Pulsly/widgets/background_audio_player.dart';
 import 'package:Pulsly/widgets/theme_builder.dart';
 import '../config/app_config.dart';
+import '../utils/app_text_scale.dart';
 import '../utils/custom_scroll_behaviour.dart';
 import '../utils/first_launch_setup.dart';
 import 'matrix.dart';
@@ -143,17 +144,26 @@ class _PluslyAppState extends State<PluslyApp> {
             localizationsDelegates: L10n.localizationsDelegates,
             supportedLocales: L10n.supportedLocales,
             routerConfig: PluslyApp.router,
-            builder: (context, child) => AppLockWidget(
-              pincode: widget.pincode,
-              clients: widget.clients,
-              // Need a navigator above the Matrix widget for
-              // displaying dialogs
-              child: DownloadManager(
-                child: BackgroundAudioPlayer(
-                  child: Matrix(
-                    clients: widget.clients,
-                    store: widget.store,
-                    child: widget.testWidget ?? child,
+            builder: (context, child) => ValueListenableBuilder(
+              // De tekstschaal moet de HELE app dekken, dus boven de router —
+              // en opnieuw bouwen zodra de schuif in Instellingen → Stijl
+              // verschuift, zonder herstart.
+              valueListenable: appTextScale,
+              builder: (context, factor, _) => AppTextScale(
+                factor: factor,
+                child: AppLockWidget(
+                  pincode: widget.pincode,
+                  clients: widget.clients,
+                  // Need a navigator above the Matrix widget for
+                  // displaying dialogs
+                  child: DownloadManager(
+                    child: BackgroundAudioPlayer(
+                      child: Matrix(
+                        clients: widget.clients,
+                        store: widget.store,
+                        child: widget.testWidget ?? child,
+                      ),
+                    ),
                   ),
                 ),
               ),

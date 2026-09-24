@@ -184,7 +184,7 @@ class ChatInputRow extends StatelessWidget {
                                       hintText: L10n.of(context).writeAMessage,
                                       hintStyle: TextStyle(
                                         fontSize:
-                                            15 * AppSettings.fontSizeFactor.value,
+                                            15,
                                         color: theme.colorScheme.onSurface
                                             .withValues(alpha: 0.5),
                                       ),

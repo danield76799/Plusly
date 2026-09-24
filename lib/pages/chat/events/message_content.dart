@@ -106,8 +106,10 @@ class MessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSize =
-        AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value;
+    // De app-brede tekstschaal zit op de MediaQuery (lib/utils/app_text_scale.dart);
+    // hier alleen nog de BERICHtmaat. De factor hier ook vermenigvuldigen zou
+    // dubbel schalen.
+    final fontSize = AppSettings.messageFontSize.value;
     final buttonTextColor = textColor;
     switch (event.type) {
       case EventTypes.Message:
@@ -233,12 +235,10 @@ class MessageContent extends StatelessWidget {
                   room: event.room,
                   selectable: selectable,
                   fontSize:
-                      AppSettings.fontSizeFactor.value *
                       AppSettings.messageFontSize.value,
                   linkStyle: TextStyle(
                     color: linkColor,
                     fontSize:
-                        AppSettings.fontSizeFactor.value *
                         AppSettings.messageFontSize.value,
                     decoration: TextDecoration.underline,
                     decorationColor: linkColor,

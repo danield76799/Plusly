@@ -502,8 +502,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                           child: Text(
                             displayname,
                             style: TextStyle(
-                              fontSize: 12.5 *
-                                  AppSettings.fontSizeFactor.value,
+                              fontSize: 12.5,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 0.1,
                               color: (theme.brightness == Brightness.light
@@ -823,7 +822,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                       child: Text(
                         event.originServerTs.localizedTime(context),
                         style: TextStyle(
-                          fontSize: 12 * AppSettings.fontSizeFactor.value,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: theme.colorScheme.onSurface
                               .withValues(alpha: 0.6),
@@ -870,7 +869,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                   child: Text(
                     L10n.of(context).newMessages,
                     style: TextStyle(
-                      fontSize: 13 * AppSettings.fontSizeFactor.value,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.1,
                     ),

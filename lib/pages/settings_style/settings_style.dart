@@ -9,6 +9,7 @@ import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
+import 'package:Pulsly/utils/app_text_scale.dart';
 import 'package:Pulsly/utils/file_selector.dart';
 import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import 'package:Pulsly/widgets/theme_builder.dart';
@@ -203,6 +204,9 @@ class SettingsStyleController extends State<SettingsStyle> {
 
   void changeFontSizeFactor(double d) {
     AppSettings.fontSizeFactor.setItem(d);
+    // De notifier voedt de MediaQuery bovenaan de app; zonder deze regel zou de
+    // nieuwe maat pas na een herstart zichtbaar worden.
+    appTextScale.value = d;
     setState(() {});
   }
 

@@ -229,14 +229,12 @@ class ImageBubble extends StatelessWidget {
                 style: TextStyle(
                   color: textColor,
                   fontSize:
-                      AppSettings.fontSizeFactor.value *
                       AppSettings.messageFontSize.value,
                 ),
                 options: const LinkifyOptions(humanize: false),
                 linkStyle: TextStyle(
                   color: linkColor,
                   fontSize:
-                      AppSettings.fontSizeFactor.value *
                       AppSettings.messageFontSize.value,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,
@@ -257,12 +255,10 @@ class ImageBubble extends StatelessWidget {
                 textColor: textColor,
                 room: event.room,
                 fontSize:
-                    AppSettings.fontSizeFactor.value *
                     AppSettings.messageFontSize.value,
                 linkStyle: TextStyle(
                   color: linkColor,
                   fontSize:
-                      AppSettings.fontSizeFactor.value *
                       AppSettings.messageFontSize.value,
                   decoration: TextDecoration.underline,
                   decorationColor: linkColor,

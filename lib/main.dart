@@ -19,6 +19,7 @@ import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/error_widget.dart';
 import 'config/setting_keys.dart';
+import 'utils/app_text_scale.dart';
 import 'utils/background_push.dart';
 import 'widgets/plusly_app.dart';
 
@@ -117,6 +118,11 @@ Future<void> _initializeApp() async {
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final store = await AppSettings.init();
+
+  // De app-brede tekstschaal begint op de BEWAARDE waarde, zodat een
+  // herstart de gekozen maat meteen toont. De notifier is de brug naar de
+  // widget-tree; AppSettings blijft de bron van waarheid.
+  appTextScale.value = AppSettings.fontSizeFactor.value;
 
   // FluffyChat-pariteit (upstream main.dart r81-105): een engine die in
   // background-fetch mode start, is er één zonder Activity. Detecteer dat

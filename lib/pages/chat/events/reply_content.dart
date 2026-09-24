@@ -35,8 +35,9 @@ class ReplyContent extends StatelessWidget {
     final displayEvent = timeline != null
         ? replyEvent.getDisplayEvent(timeline)
         : replyEvent;
-    final fontSize =
-        AppSettings.fontSizeFactor.value * AppSettings.messageFontSize.value;
+    // Zelfde regel als message_content: de schaal komt van de MediaQuery, niet
+    // van een tweede vermenigvuldiging hier.
+    final fontSize = AppSettings.messageFontSize.value;
 
     // Subtle bar color: opacity-based so it blends with any bubble color.
     final barColor = (textColor ?? theme.colorScheme.onSurface)

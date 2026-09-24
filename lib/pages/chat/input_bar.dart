@@ -7,7 +7,6 @@ import 'package:matrix/matrix.dart';
 import 'package:slugify/slugify.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
-import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/utils/markdown_context_builder.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
@@ -526,7 +525,7 @@ class _InputBarState extends State<InputBar> {
           // Larger, readable input text that matches the chat bubble text
           // size so typing feels consistent with the conversation.
           style: TextStyle(
-            fontSize: 15 * AppSettings.fontSizeFactor.value,
+            fontSize: 15,
             height: 1.2,
           ),
           inputFormatters: [

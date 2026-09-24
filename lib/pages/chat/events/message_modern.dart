@@ -602,7 +602,7 @@ class _MessageModernState extends State<MessageModern> {
                       child: Text(
                         event.originServerTs.localizedTime(context),
                         style: TextStyle(
-                          fontSize: 12 * AppSettings.fontSizeFactor.value,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.secondary,
                         ),
@@ -652,7 +652,7 @@ class _MessageModernState extends State<MessageModern> {
                   child: Text(
                     L10n.of(context).newMessages,
                     style: TextStyle(
-                      fontSize: 12 * AppSettings.fontSizeFactor.value,
+                      fontSize: 12,
                     ),
                   ),
                 ),

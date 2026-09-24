@@ -184,14 +184,12 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
               style: TextStyle(
                 color: textColor,
                 fontSize:
-                    AppSettings.fontSizeFactor.value *
                     AppSettings.messageFontSize.value,
               ),
               options: const LinkifyOptions(humanize: false),
               linkStyle: TextStyle(
                 color: linkColor,
                 fontSize:
-                    AppSettings.fontSizeFactor.value *
                     AppSettings.messageFontSize.value,
                 decoration: TextDecoration.underline,
                 decorationColor: linkColor,
@@ -211,12 +209,10 @@ class MessageDownloadContentState extends State<MessageDownloadContent> {
               textColor: textColor,
               room: event.room,
               fontSize:
-                  AppSettings.fontSizeFactor.value *
                   AppSettings.messageFontSize.value,
               linkStyle: TextStyle(
                 color: linkColor,
                 fontSize:
-                    AppSettings.fontSizeFactor.value *
                     AppSettings.messageFontSize.value,
                 decoration: TextDecoration.underline,
                 decorationColor: linkColor,

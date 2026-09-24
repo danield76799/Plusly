@@ -408,12 +408,10 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                     textColor: textColor,
                                     room: widget.event.room,
                                     fontSize:
-                                        AppSettings.fontSizeFactor.value *
                                         AppSettings.messageFontSize.value,
                                     linkStyle: TextStyle(
                                       color: linkColor,
                                       fontSize:
-                                          AppSettings.fontSizeFactor.value *
                                           AppSettings.messageFontSize.value,
                                       decoration: TextDecoration.underline,
                                       decorationColor: linkColor,
