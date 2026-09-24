@@ -322,13 +322,33 @@ class BackgroundPush {
         matrix!.store.remove(AppSettings.unifiedPushEndpoint.key);
       }
 
-      final registered = AppSettings.unifiedPushRegistered.value;
-
-      matrix!.store.setBool(
-        clients.first.clientName + AppSettings.unifiedPushRegistered.key,
-        registered,
+      // De registered-flag mag ALLEEN gemigreerd worden als hij echt bestaat.
+      //
+      // BUG (dit was de `endpoint=saved registered=false` in de statusdump):
+      // AppSettings.unifiedPushRegistered.value geeft de DEFAULT (false)
+      // terug zodra de globale sleutel ontbreekt — en die default werd hier
+      // onvoorwaardelijk naar de per-client sleutel geschreven, waarna de
+      // globale sleutel werd verwijderd. setupPush wordt op vier plaatsen
+      // aangeroepen, waaronder ELKE login-state-overgang (matrix.dart r284),
+      // terwijl `true` alleen door _newUpEndpoint gezet wordt. Elke volgende
+      // aanroep overschreef de vlag dus met false en niets zette hem terug.
+      // De flag is puur diagnostisch — nergens een guard, alleen logging —
+      // dus push bleef werken, maar de statusdump loog, en dat is precies
+      // het instrument waarmee het koude-start-gat beoordeeld wordt.
+      //
+      // store.getBool geeft null als de sleutel ONTBREEKT, waardoor afwezig
+      // van false te onderscheiden is. Zelfde patroon als de bestaande
+      // migraties in setting_keys.dart r162.
+      final registered = matrix!.store.getBool(
+        AppSettings.unifiedPushRegistered.key,
       );
-      matrix!.store.remove(AppSettings.unifiedPushRegistered.key);
+      if (registered != null) {
+        matrix!.store.setBool(
+          clients.first.clientName + AppSettings.unifiedPushRegistered.key,
+          registered,
+        );
+        matrix!.store.remove(AppSettings.unifiedPushRegistered.key);
+      }
     }
 
     // Check if any client is logged in
