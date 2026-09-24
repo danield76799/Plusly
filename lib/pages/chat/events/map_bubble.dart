@@ -17,9 +17,9 @@ class MapBubble extends StatelessWidget {
   const MapBubble({
     required this.latitude,
     required this.longitude,
-    this.zoom = 15.0,
+    this.zoom = 14.0,
     this.width = 400,
-    this.height = 200,
+    this.height = 400,
     this.radius = 10.0,
     this.geoUri,
     super.key,
@@ -37,115 +37,124 @@ class MapBubble extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         child: Container(
           constraints: BoxConstraints.loose(Size(width, height)),
-          child: Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              FlutterMap(
-                options: MapOptions(
-                  initialCenter: LatLng(latitude, longitude),
-                  initialZoom: zoom,
-                  interactionOptions: const InteractionOptions(
-                    flags: InteractiveFlag.none,
+          // AspectRatio is wat de kaart vierkant houdt. Zonder deze wrapper
+          // rekt de kaart op tot de volledige dialoogbreedte terwijl de
+          // hoogte op `height` blijft staan — het resultaat is een platte
+          // strook in plaats van een kaart. Upstream (FluffyChat
+          // map_bubble.dart r39) heeft deze wrapper wel; commit d73690fcc
+          // haalde hem weg samen met height 400 -> 200.
+          child: AspectRatio(
+            aspectRatio: width / height,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                FlutterMap(
+                  options: MapOptions(
+                    initialCenter: LatLng(latitude, longitude),
+                    initialZoom: zoom,
+                    interactionOptions: const InteractionOptions(
+                      flags: InteractiveFlag.none,
+                    ),
+                  ),
+                  children: [
+                    TileLayer(
+                      maxZoom: 20,
+                      minZoom: 0,
+                      urlTemplate:
+                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName:
+                          '${PlatformInfos.clientName} (flutter_map)',
+                    ),
+                    MarkerLayer(
+                      rotate: true,
+                      markers: [
+                        Marker(
+                          point: LatLng(latitude, longitude),
+                          width: 30,
+                          height: 30,
+                          child: Transform.translate(
+                            offset: const Offset(0, -12.5),
+                            child: const Icon(
+                              Icons.location_pin,
+                              color: Colors.red,
+                              size: 30,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                // Gradient overlay voor betere leesbaarheid onderin
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withAlpha(179),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                children: [
-                  TileLayer(
-                    maxZoom: 20,
-                    minZoom: 0,
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName:
-                        '${PlatformInfos.clientName} (flutter_map)',
-                  ),
-                  MarkerLayer(
-                    rotate: true,
-                    markers: [
-                      Marker(
-                        point: LatLng(latitude, longitude),
-                        width: 30,
-                        height: 30,
-                        child: Transform.translate(
-                          offset: const Offset(0, -12.5),
-                          child: const Icon(
-                            Icons.location_pin,
-                            color: Colors.red,
-                            size: 30,
+                // Coördinaten + "Open in Maps"
+                Positioned(
+                  bottom: 8,
+                  left: 12,
+                  right: 12,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${latitude.toStringAsFixed(5)}, ${longitude.toStringAsFixed(5)}',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
-              ),
-              // Gradient overlay voor betere leesbaarheid onderin
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withAlpha(179),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Coördinaten + "Open in Maps"
-              Positioned(
-                bottom: 8,
-                left: 12,
-                right: 12,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${latitude.toStringAsFixed(5)}, ${longitude.toStringAsFixed(5)}',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                        ),
-                      ),
-                    ),
-                    if (geoUri != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.open_in_new,
-                              size: 12,
-                              color: theme.colorScheme.onPrimary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Openen',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
+                      if (geoUri != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.open_in_new,
+                                size: 12,
                                 color: theme.colorScheme.onPrimary,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                'Openen',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.onPrimary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
