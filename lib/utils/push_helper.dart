@@ -20,50 +20,30 @@ import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
-import 'package:Pulsly/utils/push_event_log.dart';
 
 const notificationAvatarDimension = 128;
 
-/// FluffyChat-pariteit (upstream `push_helper.dart` r486-496,
-/// `extension on PushNotification { int get notificationId }`):
-/// ÉÉN canonieke notificatie-ID voor show() én élk cancel()-pad.
-///
-/// Waarom dit één functie moet zijn: Android past een `cancel(id)` alleen toe
-/// op de melding met exact dat ID. Twee verschillende formules voor hetzelfde
-/// kanaal betekenen dat een cancel de getoonde melding nooit raakt (melding
-/// blijft staan) of juist een melding van een ánder account raakt. Afgeleid
-/// van de opgeloste client i.p.v. de pusher-devicedata (`client_name`), omdat
-/// Plusly's `setupPusher` die sleutel niet meestuurt — upstream's getter zou
-/// hier stil terugvallen op de roomId-only variant, precies de oude bug.
+/// Upstream FluffyChat r486-496: `extension on PushNotification`.
+/// De notificatie-ID is `'${clientName}_$roomId'.hashCode`; zonder
+/// clientName (UP stripte de devices-lijst) valt hij terug op
+/// `roomId.hashCode`.
 int notificationIdFor(String? clientName, String? roomId) {
   if (roomId == null || roomId.isEmpty) return 0;
   if (clientName == null || clientName.isEmpty) return roomId.hashCode;
   return '${clientName}_$roomId'.hashCode;
 }
 
-/// Resolveert de l10n voor push-notificaties. Een detached/headless
-/// push-engine krijgt de Android-locale-configuratie NIET mee (valt terug op
-/// en_US), waardoor notificatie-teksten Engels waren op een Nederlands
-/// toestel. De GUI persisteert zijn locale onder 'plusly_ui_locale'
-/// (main.dart startGui); deze loader prefereert die. Val-back:
-/// PlatformDispatcher-locale, zoals upstream FluffyChat.
+/// Upstream FluffyChat r487-488: `clientName` uit de pusher-devicedata.
+String? clientNameFromNotification(PushNotification notification) =>
+    notification.devices?.firstOrNull?.data?.tryGet<String>('client_name');
+
 Future<L10n> loadPushL10n() async {
-  try {
-    final store = await AppSettings.init();
-    final code = store.getString('plusly_ui_locale');
-    if (code != null && code.isNotEmpty) {
-      return lookupL10n(Locale(code));
-    }
-  } catch (e) {
-    Logs().d('[Push] opgeslagen locale niet gelezen: $e');
-  }
   return lookupL10n(PlatformDispatcher.instance.locale);
 }
 
 class PushHelper {
   final PushNotification notification;
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-  final bool useNotificationActions;
   late Client client;
   late Event event;
   late bool isBackgroundMessage;
@@ -71,46 +51,35 @@ class PushHelper {
 
   PushHelper._(
     this.notification,
-    this.flutterLocalNotificationsPlugin, {
-    this.useNotificationActions = true,
-  });
+    this.flutterLocalNotificationsPlugin,
+  );
 
+  /// Upstream FluffyChat r35-96: pushHelper — 30s-timeout rond de hele
+  /// helper, ÉÉN localized fallback-notificatie bij een crash, en de
+  /// foreground-service weer stoppen in de finally.
   static Future<void> pushHelper(
     PushNotification notification, {
     List<Client>? clients,
     L10n? l10n,
     String? activeRoomId,
-    Client? activeClient,
     required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
     String? instance,
-    bool useNotificationActions = true,
   }) async {
-    // FluffyChat-pariteit (upstream push_helper.dart r44-96): de hele helper
-    // in een 30s-timeout met ÉÉN localized fallback-notificatie, en de
-    // foreground-service wordt in de finally weer gestopt (r93-94).
     l10n ??= await loadPushL10n();
     try {
-      // _newPushHandler geeft FutureOr<PushHelper?> terug; om .timeout te
-      // kunnen gebruiken maken we hier expliciet een Future.
       final handler = await Future<PushHelper?>.value(
         _newPushHandler(
           notification,
           clients: clients,
           l10n: l10n,
           activeRoomId: activeRoomId,
-          activeClient: activeClient,
           flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
           instance: instance,
-          useNotificationActions: useNotificationActions,
         ),
       ).timeout(const Duration(seconds: 30));
       await handler?._showNotification();
     } catch (e, s) {
       Logs().e('Push Helper has crashed!', e, s);
-      PushEventLog().add('push_crash', {
-        'room': notification.roomId ?? '',
-        'error': '$e',
-      });
       if (notification.roomId != null) {
         await flutterLocalNotificationsPlugin.show(
           id: notificationIdFor(instance, notification.roomId),
@@ -139,386 +108,241 @@ class PushHelper {
       }
       rethrow;
     } finally {
-      // FluffyChat-pariteit (upstream push_helper.dart r93-94): de
-      // background_push-service weer stoppen nu de helper klaar is (of
-      // crashte). De refcount in ForegroundServices voorkomt dat een lopende
-      // service van iets anders (bestand sturen, gesprek) gestopt wordt.
       await ForegroundServices.stopService('background_push');
     }
   }
 
+  /// Upstream FluffyChat r98-391: _tryPushHelper.
   static FutureOr<PushHelper?> _newPushHandler(
     PushNotification notification, {
     List<Client>? clients,
     L10n? l10n,
     String? activeRoomId,
-    Client? activeClient,
     required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
     String? instance,
-    bool useNotificationActions = true,
   }) async {
     final helper = PushHelper._(
       notification,
       flutterLocalNotificationsPlugin,
-      useNotificationActions: useNotificationActions,
     );
     helper.l10n = l10n;
 
-    try {
-      helper.isBackgroundMessage = clients == null;
-      Logs().v(
-        'Push helper has been started (background=${helper.isBackgroundMessage}).',
-        notification.toJson(),
-      );
+    final isBackgroundMessage = clients == null;
+    Logs().v(
+      'Push helper has been started (background=$isBackgroundMessage).',
+      notification.toJson(),
+    );
 
-      clients ??= await ClientManager.getClients(
-        initialize: false,
-        store: await AppSettings.init(),
-      );
-      l10n ??= await loadPushL10n();
+    // Upstream r111-123: client-resolutie. Plusly resolveert via de
+    // UnifiedPush-instance-string (die gelijk is aan de clientName);
+    // ontbreekt de client in de lijst, dan aanmaken zoals upstream.
+    final store = await AppSettings.init();
+    final client = instance == null
+        ? (clients?.first ??
+              (await ClientManager.getClients(
+                initialize: false,
+                store: store,
+              )).first)
+        : (clients?.firstWhereOrNull(
+              (client) => client.clientName == instance,
+            ) ??
+              await ClientManager.createClient(instance, store));
+    helper.client = client;
 
-      final client = _clientFromInstance(instance, clients);
-      if (client == null) {
-        Logs().e('No client could be found for instance $instance');
-        return null;
-      }
-      helper.client = client;
+    // Upstream r127: l10n laden vóór het event (gebruikt in de
+    // clearing-tak en de samenvattingsmelding).
+    l10n ??= await loadPushL10n();
+    helper.l10n = l10n;
 
-      // PLUSLY-CHANGE (multi-account, bewust afwijkend van upstream): staan
-      // twee accounts in dezelfde room, dan tonen we één melding — de eerste
-      // client die de room kent. Upstream is single-account
-      // (`instances: ['default']`) en heeft dit vraagstuk niet.
-      if (notification.roomId != null && clients.isNotEmpty) {
-        final firstClientInRoom = clients.firstWhereOrNull(
-          (c) => c.rooms.any((r) => r.id == notification.roomId),
+    // Upstream r129-133: event laden (storeInDatabase: false, zoals upstream).
+    Logs().v('Load event...');
+    final event = await client.getEventByPushNotification(
+      notification,
+      storeInDatabase: false,
+    );
+
+    // Upstream r135: badge bijwerken.
+    updateAppBadge(notification.counts?.unread ?? 0);
+
+    if (event == null) {
+      // Upstream r137-174: clearing-indicator.
+      Logs().v('Notification is a clearing indicator.');
+      if (clients?.length == 1 && (notification.counts?.unread == 0)) {
+        await flutterLocalNotificationsPlugin.cancelAll();
+      } else {
+        // Make sure client is fully loaded and synced before dismiss
+        // notifications:
+        await client.roomsLoading;
+        await client
+            .oneShotSync()
+            .timeout(const Duration(seconds: 8))
+            .catchError((_) => null);
+
+        final activeNotifications = await flutterLocalNotificationsPlugin
+            .getActiveNotifications();
+        activeNotifications.removeWhere(
+          (notification) => notification.groupKey != client.clientName,
         );
-        if (firstClientInRoom != null && firstClientInRoom != client) {
-          Logs().v(
-            'Another client (${firstClientInRoom.clientName}) already handles '
-            'notifications for room ${notification.roomId}. Skipping for ${client.clientName}.',
+        var needsUpdateForSummaryNotification = false;
+        for (final activeNotification in activeNotifications) {
+          final room = client.rooms.singleWhereOrNull(
+            (room) =>
+                notificationIdFor(client.clientName, room.id) ==
+                activeNotification.id,
           );
-          return null;
-        }
-      }
-
-      // FluffyChat-pariteit (upstream r129-137): het event wordt ALTIJD eerst
-      // opgehaald, vóór de badge, vóór de foreground-check en vóór de
-      // push-rule filter. Upstream's volgorde is: event laden → badge →
-      // clearing-tak → push-rule filter → foreground-onderdrukking. Plusly
-      // toetste de foreground eerder, waardoor die tak de push-rule filter
-      // oversloeg en de volgorde niet meer met upstream overeenkwam.
-      final event = await client.getEventByPushNotification(
-        notification,
-        // PLUSLY-CHANGE (bewust, commit 6e295baea): upstream gebruikt hier
-        // `false`. Plusly zet het op `true` zodat een koud-gestart event wél
-        // in de database belandt en de room hem direct toont. De SDK-vlag
-        // raakt alléén de DB-opslag (client.dart:1932) — hij verklaart dus
-        // GEEN gemiste of getoonde notificatie.
-        storeInDatabase: true,
-      );
-
-      // FluffyChat-pariteit (upstream r135): badge bijwerken direct NA het
-      // laden van het event en vóór de null-check, zodat een clearing-push de
-      // badge ook bijwerkt.
-      updateAppBadge(notification.counts?.unread ?? 0);
-
-      if (event == null) {
-        // FluffyChat-pariteit (upstream r137-173): clearing-indicator.
-        Logs().v(
-          'Push event is null: clearing indicator '
-          'room=${notification.roomId}',
-        );
-        PushEventLog().add('push_clearing', {
-          'room': notification.roomId ?? '',
-          'unread': '${notification.counts?.unread ?? 0}',
-        });
-        if (clients.length == 1 && notification.counts?.unread == 0) {
-          // FluffyChat-pariteit (upstream r139-140): ALLEEN wissen bij één
-          // account én unread==0. Upstream deed `unread == null || unread ==
-          // 0` ongeacht het aantal accounts: een count-push waarvan UP het
-          // unread-veld stripte, wiste dan élke actieve notificatie — de
-          // melding was er even en verdween weer.
-          await flutterLocalNotificationsPlugin.cancelAll();
-        } else {
-          // Make sure client is fully loaded and synced before dismiss
-          // notifications:
-          await client.roomsLoading;
-          await client
-              .oneShotSync()
-              .timeout(const Duration(seconds: 8))
-              .catchError((_) => null);
-
-          final activeNotifications = await flutterLocalNotificationsPlugin
-              .getActiveNotifications();
-          activeNotifications.removeWhere(
-            (notification) => notification.groupKey != client.clientName,
-          );
-          var needsUpdateForSummaryNotification = false;
-          for (final activeNotification in activeNotifications) {
-            final room = client.rooms.singleWhereOrNull(
-              (room) =>
-                  notificationIdFor(client.clientName, room.id) ==
-                  activeNotification.id,
+          if (room != null && !room.isUnreadOrInvited) {
+            flutterLocalNotificationsPlugin.cancel(
+              id: activeNotification.id!,
             );
-            if (room != null && !room.isUnreadOrInvited) {
-              flutterLocalNotificationsPlugin.cancel(
-                id: activeNotification.id!,
-              );
-              if (PlatformInfos.isAndroid) {
-                needsUpdateForSummaryNotification = true;
-              }
+            if (PlatformInfos.isAndroid) {
+              needsUpdateForSummaryNotification = true;
             }
           }
-          if (needsUpdateForSummaryNotification) {
-            await updateSummaryNotification(
-              clientName: client.clientName,
-              l10n: l10n,
-              flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-            );
-          }
         }
-        return null;
+        if (needsUpdateForSummaryNotification) {
+          await updateSummaryNotification(
+            clientName: client.clientName,
+            l10n: l10n,
+            flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+          );
+        }
       }
-      helper.event = event;
-
-      Logs().v('Push helper got notification event of type ${event.type}.');
-
-      // PLUSLY-CHANGE (bewust): client-side push-rule evaluatie, crash-veilig.
-      //
-      // De SDK-evaluator (pushrule_evaluator.dart:389) doet
-      // `event.room.client.userID!` — is client.userID null in een
-      // background-context, dan crasht de evaluatie. Upstream laat de helper
-      // dan in de buitenste catch belanden (generieke fallback-melding);
-      // Plusly laat het event in dat geval DÓÓR, zodat de gebruiker de echte
-      // afzender en inhoud ziet. Richting: deze tak kan alleen méér tonen,
-      // nooit onderdrukken.
-      if (!_shouldNotifyByPushRules(client, event)) {
-        Logs().d(
-          '[Push] Event gefilterd door client-side push rules '
-          'room=${notification.roomId} type=${event.type}',
-        );
-        PushEventLog().add('push_rule_filtered', {
-          'room': notification.roomId ?? '',
-          'type': event.type,
-        });
-        return null;
-      }
-
-      // FluffyChat-pariteit (upstream r191-196): zit de gebruiker in die room
-      // én is de app op de voorgrond, dan geen notificatie. Staat NA de
-      // push-rule filter, net als upstream. PLUSLY-CHANGE: de
-      // activeClient-toets erbij, zodat een account NIET de melding van een
-      // ander account onderdrukt.
-      if (_isInForeground(notification, activeRoomId, activeClient, client)) {
-        Logs().v(
-          'Push foreground: suppress notification '
-          'room=${notification.roomId} activeRoom=$activeRoomId '
-          'activeClient=$activeClient notified=${client.clientName} '
-          'lifecycle=${WidgetsBinding.instance.lifecycleState}',
-        );
-        PushEventLog().add('push_suppressed', {
-          'room': notification.roomId ?? '',
-          'activeRoom': activeRoomId ?? '',
-          'lifecycle': WidgetsBinding.instance.lifecycleState.toString(),
-        });
-        return null;
-      }
-
-      Logs().v(
-        'Push helper got notification event of type ${event.type}.',
-      );
-      PushEventLog().add('push_event', {
-        'room': notification.roomId ?? '',
-        'type': event.type,
-      });
-      return helper;
-    } catch (e, s) {
-      Logs().e('Push helper error', e, s);
-      PushEventLog().add('push_error', {
-        'room': notification.roomId ?? '',
-        'error': '$e',
-      });
-      // PLUSLY-CHANGE: als het event niet gevonden kan worden (bijv. eigen
-      // bericht dat nog onder transactie-ID staat i.p.v. event_id), toon dan
-      // GEEN notificatie. Het bericht komt via sync toch wel in de app.
-      if (e.toString().contains('Unable to find event')) {
-        Logs().d(
-          '[Push] Event niet gevonden, notificatie onderdrukt '
-          'room=${notification.roomId}',
-        );
-        return null;
-      }
-      // FluffyChat upstream: rethrow — de buitenste pushHelper-catch toont
-      // precies ÉÉN localized fallback-notificatie.
-      rethrow;
+      return null;
     }
-  }
 
-  /// Selects the correct client from the list based on the instance string.
-  /// Falls back to the first client if no instance is provided.
-  static Client? _clientFromInstance(String? instance, List<Client> clients) {
-    if (clients.isEmpty) return null;
-    if (instance == null) return clients.first;
-    return clients.firstWhereOrNull(
-          (client) => client.clientName == instance,
-        ) ??
-        clients.first;
-  }
-
-  /// Client-side push-rule evaluatie, crash-veilig (zie de toelichting op de
-  /// aanroep in [_newPushHandler]).
-  static bool _shouldNotifyByPushRules(Client client, Event event) {
-    try {
-      return client.pushruleEvaluator.match(event).notify;
-    } catch (e) {
-      Logs().d(
-        '[Push] Push-rule evaluatie crashte (userID null in background?), '
-        'event doorgelaten room=${event.roomId}: $e',
-      );
-      PushEventLog().add('push_rule_eval_error', {
-        'room': event.roomId ?? '',
-        'error': '$e',
-      });
-      return true;
+    // Upstream r177-182: client-side push-rule evaluatie. Niet crash-veilig
+    // verpakt — een crash belandt in de buitenste catch met de localized
+    // fallback, precies zoals upstream.
+    if (!client.pushruleEvaluator.match(event).notify) {
+      Logs().i('Push helper: filtered by client-side push rules.');
+      return null;
     }
+
+    // Upstream r191-196: zit de gebruiker in die room én is de app op de
+    // voorgrond, dan geen notificatie.
+    if (notification.roomId != null &&
+        activeRoomId == notification.roomId &&
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
+      Logs().v('Room is in foreground. Stop push helper here.');
+      return null;
+    }
+
+    helper.event = event;
+    return helper;
   }
 
+  /// Upstream r362-390: _showNotification.
   Future<void> _showNotification() async {
-    try {
-      Logs().v(
-        'Push showNotification start '
-        'room=${notification.roomId} type=${event.type} '
-        'lifecycle=${WidgetsBinding.instance.lifecycleState}',
-      );
-      if (event.type.startsWith('m.call')) {
-        // make sure bg sync is on (needed to update hold, unhold events)
-        // prevent over write from app life cycle change
-        client.backgroundSync = true;
-      }
-
-      if (event.type == EventTypes.CallHangup) {
-        client.backgroundSync = false;
-      }
-
-      if (event.type.startsWith('m.call') &&
-          event.type != EventTypes.CallInvite) {
-        Logs().v('Push message is a m.call but not invite. Do not display.');
-        return;
-      }
-
-      if ((event.type.startsWith('m.call') &&
-              event.type != EventTypes.CallInvite) ||
-          event.type == 'org.matrix.call.sdp_stream_metadata_changed') {
-        Logs().v('Push message was for a call, but not call invite.');
-        return;
-      }
-
-      l10n ??= await loadPushL10n();
-      final matrixLocals = MatrixLocals(l10n!);
-
-      // Calculate the body
-      // FluffyChat-pariteit (upstream r201-210): een nog-versleuteld event
-      // toont direct de generieke tekst. Upstream probeert GEEN ontsleuteling
-      // na te jagen; Plusly deed dat (twee-fasen placeholder + retry) en is
-      // hier teruggebracht op upstream-gedrag.
-      final body = event.type == EventTypes.Encrypted
-          ? l10n!.newMessageInFluffyChat
-          : await event.calcLocalizedBody(
-              matrixLocals,
-              plaintextBody: true,
-              withSenderNamePrefix: false,
-              hideReply: true,
-              hideEdit: true,
-              removeMarkdown: true,
-            );
-
-      final title = event.room.getLocalizedDisplayname(matrixLocals);
-      final roomName = event.room.getLocalizedDisplayname(matrixLocals);
-
-      final notificationGroupId = event.room.isDirectChat
-          ? 'directChats'
-          : 'groupChats';
-      final groupName = event.room.isDirectChat
-          ? l10n!.directChats
-          : l10n!.groups;
-
-      final messageRooms = AndroidNotificationChannelGroup(
-        notificationGroupId,
-        groupName,
-      );
-      final roomsChannel = AndroidNotificationChannel(
-        event.room.id,
-        roomName,
-        groupId: notificationGroupId,
-      );
-
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >()
-          ?.createNotificationChannelGroup(messageRooms);
-      await flutterLocalNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >()
-          ?.createNotificationChannel(roomsChannel);
-
-      final notificationId = notificationIdFor(client.clientName, event.room.id);
-
-      final platformChannelSpecifics = await _getPlatformChannelSpecifics(
-        notificationId,
-        body,
-        title,
-        roomName,
-      );
-
-      // FluffyChat-pariteit (upstream r368-380): op Android draagt de
-      // MessagingStyle al titel én inhoud, dus daar sturen we title/body NIET
-      // mee — anders overschrijft de platte tekst de gespreksweergave en
-      // verdwijnt het stapelen van berichten in één notificatie. Buiten
-      // Android (iOS/desktop) is er geen MessagingStyle en zijn ze juist
-      // nodig.
-      final needsTitleAndBody = !PlatformInfos.isAndroid;
-
-      await flutterLocalNotificationsPlugin.show(
-        id: notificationId,
-        title: needsTitleAndBody ? title : null,
-        body: needsTitleAndBody ? body : null,
-        notificationDetails: platformChannelSpecifics,
-        payload: NotificationPushPayload(
-          client.clientName,
-          event.room.id,
-          event.eventId,
-        ).toString(),
-      );
-
-      // FluffyChat-pariteit (upstream r382-389): groeps-samenvatting op
-      // Android bij 2+ actieve meldingen.
-      if (PlatformInfos.isAndroid) {
-        await updateSummaryNotification(
-          clientName: client.clientName,
-          l10n: l10n!,
-          flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-        );
-      }
-
-      Logs().v('Push helper has been completed!');
-      PushEventLog().add('push_shown', {
-        'room': notification.roomId ?? '',
-        'id': '$notificationId',
-      });
-    } catch (e, s) {
-      Logs().e('Push showNotification crashed', e, s);
-      PushEventLog().add('push_error', {
-        'room': notification.roomId ?? '',
-        'error': '$e',
-      });
-      // FluffyChat upstream: rethrow — de buitenste pushHelper-catch toont
-      // precies één localized fallback. Geen dubbele innerlijke handler.
-      rethrow;
+    // Upstream r123-145: call-afhandeling.
+    if (event.type.startsWith('m.call')) {
+      // make sure bg sync is on (needed to update hold, unhold events)
+      // prevent over write from app life cycle change
+      client.backgroundSync = true;
     }
+
+    if (event.type == EventTypes.CallHangup) {
+      client.backgroundSync = false;
+    }
+
+    if (event.type.startsWith('m.call') &&
+        event.type != EventTypes.CallInvite) {
+      Logs().v('Push message is a m.call but not invite. Do not display.');
+      return;
+    }
+
+    if ((event.type.startsWith('m.call') &&
+            event.type != EventTypes.CallInvite) ||
+        event.type == 'org.matrix.call.sdp_stream_metadata_changed') {
+      Logs().v('Push message was for a call, but not call invite.');
+      return;
+    }
+
+    l10n ??= await loadPushL10n();
+    final matrixLocals = MatrixLocals(l10n!);
+
+    // Upstream r201-210: body-berekening — een nog-versleuteld event toont
+    // de generieke tekst; geen retry/ontsleutelings-jacht.
+    final body = event.type == EventTypes.Encrypted
+        ? l10n!.newMessageInFluffyChat
+        : await event.calcLocalizedBody(
+            matrixLocals,
+            plaintextBody: true,
+            withSenderNamePrefix: false,
+            hideReply: true,
+            hideEdit: true,
+            removeMarkdown: true,
+          );
+
+    final title = event.room.getLocalizedDisplayname(matrixLocals);
+    final roomName = event.room.getLocalizedDisplayname(matrixLocals);
+
+    final notificationGroupId = event.room.isDirectChat
+        ? 'directChats'
+        : 'groupChats';
+    final groupName = event.room.isDirectChat
+        ? l10n!.directChats
+        : l10n!.groups;
+
+    final messageRooms = AndroidNotificationChannelGroup(
+      notificationGroupId,
+      groupName,
+    );
+    final roomsChannel = AndroidNotificationChannel(
+      event.room.id,
+      roomName,
+      groupId: notificationGroupId,
+    );
+
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannelGroup(messageRooms);
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(roomsChannel);
+
+    final notificationId = notificationIdFor(client.clientName, event.room.id);
+
+    final platformChannelSpecifics = await _getPlatformChannelSpecifics(
+      notificationId,
+      body,
+      title,
+      roomName,
+    );
+
+    // Upstream r368-380: op Android draagt de MessagingStyle al titel én
+    // inhoud; title/body worden dan NIET meegestuurd.
+    final needsTitleAndBody = !PlatformInfos.isAndroid;
+
+    await flutterLocalNotificationsPlugin.show(
+      id: notificationId,
+      title: needsTitleAndBody ? title : null,
+      body: needsTitleAndBody ? body : null,
+      notificationDetails: platformChannelSpecifics,
+      payload: NotificationPushPayload(
+        client.clientName,
+        event.room.id,
+        event.eventId,
+      ).toString(),
+    );
+
+    // Upstream r382-389: groeps-samenvatting op Android bij 2+ actieve
+    // meldingen.
+    if (PlatformInfos.isAndroid) {
+      await updateSummaryNotification(
+        clientName: client.clientName,
+        l10n: l10n!,
+        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+      );
+    }
+
+    Logs().v('Push helper has been completed!');
   }
 
+  /// Upstream r212-360: platform-channel specifics.
   Future<NotificationDetails> _getPlatformChannelSpecifics(
     int notificationId,
     String notificationBody,
@@ -531,11 +355,8 @@ class PushHelper {
         ? avatar
         : event.senderFromMemoryOrFallback.avatarUrl;
 
-    // FluffyChat-pariteit (upstream r218-226): de lokale gebruiker (ownUser)
-    // levert het echte afbeeldingsbestand voor de gespreks-MessagingStyle.
-    // Die Person is de EIGENAAR van het gesprek (de lokale gebruiker) en niet
-    // de afzender — zo werkt Android MessagingStyle; de afzender hoort in het
-    // Message-object hieronder.
+    // Upstream r218-226: de gesprekseigenaar (ownUser) is de lokale
+    // gebruiker; diens avatar hoort op de MessagingStyle-Person.
     final ownUser = event.room.unsafeGetUserFromMemoryOrFallback(
       client.userID ?? '',
     );
@@ -583,8 +404,7 @@ class PushHelper {
       styleInformation:
           messagingStyleInformation ??
           MessagingStyleInformation(
-            // FluffyChat-pariteit (upstream r288-295): de gesprekseigenaar is
-            // de lokale gebruiker, met diens avatar.
+            // Upstream r288-295: de gesprekseigenaar is de lokale gebruiker.
             Person(
               name: ownUser.calcDisplayname(),
               icon: userAvatarFile == null
@@ -606,45 +426,35 @@ class PushHelper {
       ),
       importance: Importance.high,
       priority: Priority.max,
-      // FluffyChat-pariteit (upstream r310): groepeer per account. De
-      // clearing-scan en de samenvattings-melding filteren op deze sleutel,
-      // dus dit moet exact de clientName zijn.
+      // Upstream r310: groepeer per account.
       groupKey: client.clientName,
-      // FluffyChat-pariteit (upstream r311-341): acties ALLEEN op berichten
-      // (message/encrypted/sticker) — via een switch op het type, niet via een
-      // uitsluiting. Plusly toonde ze op élk type behalve room-member, dus ook
-      // op bijvoorbeeld een room-name of topic-wijziging, waar "Antwoorden"
-      // geen betekenis heeft.
-      // Plusly-extra: `useNotificationActions` blijft als schakelaar (default
-      // aan); upstream kent die parameter niet.
-      actions: !useNotificationActions
-          ? null
-          : switch (event.type) {
-              EventTypes.Message ||
-              EventTypes.Encrypted ||
-              EventTypes.Sticker => <AndroidNotificationAction>[
-                AndroidNotificationAction(
-                  PluslyNotificationActions.reply.name,
-                  l10n!.reply,
-                  inputs: [
-                    AndroidNotificationActionInput(label: l10n!.writeAMessage),
-                  ],
-                  allowGeneratedReplies: true,
-                  semanticAction: SemanticAction.reply,
-                ),
-                AndroidNotificationAction(
-                  PluslyNotificationActions.markAsRead.name,
-                  l10n!.markAsRead,
-                  semanticAction: SemanticAction.markAsRead,
-                ),
-                AndroidNotificationAction(
-                  PluslyNotificationActions.mute.name,
-                  l10n!.muteChat,
-                  semanticAction: SemanticAction.mute,
-                ),
-              ],
-              _ => null,
-            },
+      // Upstream r311-341: acties ALLEEN op bericht-types, via een switch.
+      actions: switch (event.type) {
+        EventTypes.Message ||
+        EventTypes.Encrypted ||
+        EventTypes.Sticker => <AndroidNotificationAction>[
+          AndroidNotificationAction(
+            PluslyNotificationActions.reply.name,
+            l10n!.reply,
+            inputs: [
+              AndroidNotificationActionInput(label: l10n!.writeAMessage),
+            ],
+            allowGeneratedReplies: true,
+            semanticAction: SemanticAction.reply,
+          ),
+          AndroidNotificationAction(
+            PluslyNotificationActions.markAsRead.name,
+            l10n!.markAsRead,
+            semanticAction: SemanticAction.markAsRead,
+          ),
+          AndroidNotificationAction(
+            PluslyNotificationActions.mute.name,
+            l10n!.muteChat,
+            semanticAction: SemanticAction.mute,
+          ),
+        ],
+        _ => null,
+      },
     );
     const iOSPlatformChannelSpecifics = DarwinNotificationDetails();
     return NotificationDetails(
@@ -694,41 +504,20 @@ class PushHelper {
       return null;
     }
   }
-
-  static bool _isInForeground(
-    PushNotification notification,
-    String? activeRoomId,
-    Client? activeClient,
-    Client notifiedClient,
-  ) {
-    return notification.roomId != null &&
-        activeRoomId == notification.roomId &&
-        activeClient == notifiedClient &&
-        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
-  }
 }
 
-/// FluffyChat-pariteit (upstream r393-402): app-badge bijwerken.
-/// Crash-veilig: een badge is cosmetisch, een throw hier zou de hele
-/// notificatie in de fallback-tak laten belanden.
+/// Upstream r393-402: app-badge bijwerken.
 void updateAppBadge(int unreadCount) {
-  try {
-    if (PlatformInfos.isAndroid || PlatformInfos.isMacOS || PlatformInfos.isIOS) {
-      if (unreadCount == 0) {
-        FlutterNewBadger.removeBadge();
-      } else {
-        FlutterNewBadger.setBadge(unreadCount);
-      }
+  if (PlatformInfos.isAndroid || PlatformInfos.isMacOS || PlatformInfos.isIOS) {
+    if (unreadCount == 0) {
+      FlutterNewBadger.removeBadge();
+    } else {
+      FlutterNewBadger.setBadge(unreadCount);
     }
-  } catch (e) {
-    Logs().d('[Push] badge kon niet bijgewerkt worden: $e');
   }
 }
 
-/// FluffyChat-pariteit (upstream r404-441): groeps-samenvattingsmelding op
-/// Android. Bij 0 of 1 actieve meldingen in deze groep wissen we de
-/// samenvatting; bij 2+ tonen we één Inbox-melding die als group summary
-/// dient.
+/// Upstream r404-441: groeps-samenvattingsmelding op Android.
 Future<void> updateSummaryNotification({
   required FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin,
   required String clientName,

@@ -41,7 +41,6 @@ import 'package:Pulsly/pages/settings_notifications/settings_notifications.dart'
 import 'package:Pulsly/pages/settings_password/settings_password.dart';
 import 'package:Pulsly/pages/settings_ringtone/settings_ringtone.dart';
 import 'package:Pulsly/pages/settings_security/settings_security.dart';
-import 'package:Pulsly/pages/settings/push_debug_screen.dart';
 
 import 'package:Pulsly/pages/settings_style/settings_style.dart';
 import 'package:Pulsly/pages/sign_in/sign_in_page.dart';
@@ -330,15 +329,6 @@ abstract class AppRoutes {
                         context,
                         state,
                         const SettingsNotifications(),
-                      ),
-                      redirect: loggedOutRedirect,
-                    ),
-                    GoRoute(
-                      path: 'push-debug',
-                      pageBuilder: (context, state) => defaultPageBuilder(
-                        context,
-                        state,
-                        const PushDebugScreen(),
                       ),
                       redirect: loggedOutRedirect,
                     ),

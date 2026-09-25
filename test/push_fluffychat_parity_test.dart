@@ -78,9 +78,11 @@ void main() {
 
     test('elke start logt de effectieve lifecycle-state', () {
       final main = _code('lib/main.dart');
-      expect(main.contains("'startup_state'"), isTrue,
-          reason: 'zonder deze regel bewijst een dump niet welke tak liep');
-      expect(main.contains("'branch'"), isTrue);
+      // Upstream heeft geen aparte startup-instrumentatie; de
+      // detached/null-tak ( koude start) is voldoende herkenbaar via
+      // de lifecycleState-toets zelf.
+      expect(main.contains('AppLifecycleState.detached'), isTrue,
+          reason: 'de originele detached-toets moet blijven bestaan');
     });
 
     test('de foreground-service wordt ook weer gestopt (finally)', () {
@@ -128,7 +130,7 @@ void main() {
     test('cancelAll alleen bij unread==0 én één account', () {
       final helper = _code('lib/utils/push_helper.dart');
       expect(
-        helper.contains('clients.length == 1'),
+        helper.contains('clients?.length == 1'),
         isTrue,
         reason: 'upstream (push_helper.dart:139-140) wist alleen bij één '
             'account; Plusly wiste ongeacht het aantal accounts',
@@ -157,12 +159,14 @@ void main() {
 
     test('de acties en de samenvattingsmelding zijn aangezet', () {
       final helper = _code('lib/utils/push_helper.dart');
-      expect(helper.contains('useNotificationActions = true'), isTrue);
       expect(helper.contains('Future<void> updateSummaryNotification('), isTrue,
           reason: 'upstream r404-441: groeps-samenvatting op Android');
       expect(helper.contains('setAsGroupSummary: true'), isTrue);
       expect(helper.contains('void updateAppBadge('), isTrue,
           reason: 'upstream r393-402');
+      // Upstream heeft geen schakelaar: de acties staan via een switch op
+      // het event-type aan (r311-341).
+      expect(helper.contains('actions: switch (event.type)'), isTrue);
     });
 
     test('de versleutelde-tak volgt upstream (geen placeholder/retry)', () {
@@ -186,8 +190,14 @@ void main() {
         helper,
         'client.getEventByPushNotification(',
       );
-      final ruleIdx = _codeLineIndex(helper, '_shouldNotifyByPushRules(');
-      final fgIdx = _codeLineIndex(helper, '_isInForeground(');
+      final ruleIdx = _codeLineIndex(
+        helper,
+        'client.pushruleEvaluator.match(event).notify',
+      );
+      final fgIdx = _codeLineIndex(
+        helper,
+        'WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed',
+      );
       final badgeIdx = _codeLineIndex(helper, 'updateAppBadge(');
 
       expect(eventIdx, greaterThan(-1));

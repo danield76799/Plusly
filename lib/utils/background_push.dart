@@ -31,7 +31,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_new_badger/flutter_new_badger.dart';
 import 'package:http/http.dart' as http;
 import 'package:matrix/matrix.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 import 'package:unifiedpush_ui/unifiedpush_ui.dart';
 
@@ -39,7 +38,6 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/main.dart';
 
 import 'package:Pulsly/utils/notification_background_handler.dart';
-import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/push_helper.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
@@ -363,10 +361,6 @@ class BackgroundPush {
       Logs().w("SetupPush early return - not logged in or not mobile");
       return;
     }
-    Logs().i("Setting up push notifications...");
-    // DEBUG: print current UnifiedPush state so we can diagnose silent failures.
-    await _logPushState();
-
     final context = matrix?.context;
     if (PlatformInfos.isAndroid &&
         (await UnifiedPush.getDistributors()).isNotEmpty &&
@@ -411,28 +405,6 @@ class BackgroundPush {
         );
       }
     });
-  }
-
-  Future<void> _logPushState() async {
-    try {
-      final distributors = await UnifiedPush.getDistributors();
-      final savedDistributor = await UnifiedPush.getDistributor();
-      Logs().i('[Push] Distributors: $distributors');
-      Logs().i('[Push] Saved distributor: $savedDistributor');
-      for (final client in clients.where((c) => c.isLogged())) {
-        final endpoint = matrix?.store.getString(
-          client.clientName + AppSettings.unifiedPushEndpoint.key,
-        );
-        final registered = matrix?.store.getBool(
-          client.clientName + AppSettings.unifiedPushRegistered.key,
-        );
-        Logs().i(
-          '[Push] Client ${client.clientName}: endpoint=${endpoint ?? 'none'}, registered=$registered',
-        );
-      }
-    } catch (e, s) {
-      Logs().w('[Push] Failed to log push state', e, s);
-    }
   }
 
   Future<void> _newUpEndpoint(PushEndpoint newPushEndpoint, String i) async {
@@ -517,60 +489,22 @@ class BackgroundPush {
   }
 
   Future<void> _onUpMessage(PushMessage pushMessage, String i) async {
-    Logs().i('Push Notification from UP received', pushMessage);
     final message = pushMessage.content;
     upAction = true;
-    final Map<String, dynamic> decoded;
-    try {
-      decoded = json.decode(utf8.decode(message)) as Map<String, dynamic>;
-    } catch (e, s) {
-      Logs().e('[Push] Failed to decode UP message', e, s);
-      return;
-    }
-    final data = Map<String, dynamic>.from(decoded['notification'] ?? <String, dynamic>{});
-    Logs().i('[Push] Decoded notification data: $data');
+    final data = Map<String, dynamic>.from(
+      json.decode(utf8.decode(message))['notification'],
+    );
     // UP may strip the devices list
     data['devices'] ??= [];
-
-    // Log the raw push receipt IMMEDIATELY, before any processing, so we can
-    // tell whether the headless engine even reaches this handler in a cold
-    // start. The [push] event at the end of this method only fires if
-    // pushHelper completes — if it hangs/crashes we'd see nothing.
-    final now = DateTime.now().toIso8601String();
-    PushEventLog().add('push_received', {
-      'instance': i,
-      'room': data['room_id']?.toString() ?? '',
-      'ts': now,
-    });
-
-    // FluffyChat-pariteit (upstream _onUpMessage r422-437): ALTIJD de live
-    // client-lijst doorgeven aan pushHelper. In detached/background-fetch
-    // mode zijn die clients via ClientManager.getClients(store:) in main.dart
-    // aangemaakt en volledig geïnitialiseerd (initWithRestore → userID
-    // geladen). Een eerdere `isDetached ? null : clients`-workaround gooide
-    // die weg en liet pushHelper verse, ongeïnitialiseerde clients bouwen
-    // (initialize:false → userID null), wat de push-rule evaluator liet
-    // crashen (pushrule_evaluator.dart:389 `userID!`).
     await PushHelper.pushHelper(
       PushNotification.fromJson(data),
       clients: clients,
       l10n: l10n,
       activeRoomId: matrix?.activeRoomId,
-      activeClient: clientFromInstance(i, clients),
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
-      // FluffyChat-pariteit: notificatie-acties (Antwoorden / Markeer als
-      // gelezen / Muten) aan, net als upstream.
-      useNotificationActions: true,
     );
-    final now2 = DateTime.now().toIso8601String();
-    PushEventLog().add('push', {'instance': i, 'room': data['room_id']?.toString() ?? '', 'ts': now2});
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('plusly_push_last_received_ts', now2);
-    } catch (_) {}
   }
-
 }
 
 class UPFunctions extends UnifiedPushFunctions {

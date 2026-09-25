@@ -15,7 +15,6 @@ import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
-import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/error_widget.dart';
 import 'config/setting_keys.dart';
@@ -145,14 +144,6 @@ Future<void> _initializeApp() async {
   // Instrument (geen gedragswijziging): elke start logt de effectieve
   // lifecycle-state, zodat een volgende dump zelf bewijst welke tak een
   // koude start nam in plaats van dat we dat moeten afleiden.
-  try {
-    await PushEventLog().ensureLoaded();
-    PushEventLog().add('init', {
-      'startup_state': '${lifecycleState ?? 'null'}',
-      'branch': isBackgroundFetch ? 'background' : 'foreground',
-    });
-  } catch (_) {}
-
   if (isBackgroundFetch) {
     // FluffyChat-pariteit (upstream main.dart r86): start de korte
     // foreground-service VÓÓR ClientManager.getClients(). Upstream's volgorde
@@ -220,20 +211,6 @@ Future<void> startGui(List<Client> clients, SharedPreferences store) async {
   final firstClient = clients.firstOrNull;
   await firstClient?.roomsLoading;
   await firstClient?.accountDataLoading;
-
-  // PLUSLY-CHANGE (FluffyChat-pariteit): persisteer de effectieve UI-locale
-  // zodat de detached/headless push-engine dezelfde taal gebruikt voor
-  // notificaties. De headless engine krijgt de Android-locale NIET mee
-  // (valt terug op en_US) — zonder dit waren push-notificaties Engels
-  // op een Nederlands toestel. Zie loadPushL10n() in push_helper.dart.
-  try {
-    final uiLocale = PlatformDispatcher.instance.locale;
-    final languageCode = uiLocale.languageCode;
-    await store.setString('plusly_ui_locale', languageCode);
-    Logs().d('[Locale] UI-locale gepersisteerd: $languageCode');
-  } catch (e) {
-    Logs().d('[Locale] kon UI-locale niet persistenteren: $e');
-  }
 
   ErrorWidget.builder = (details) => PluslyErrorWidget(details);
   Logs().w("${clients.length} clients");
