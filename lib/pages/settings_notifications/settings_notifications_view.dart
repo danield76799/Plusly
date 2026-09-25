@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:app_settings/app_settings.dart' as app_settings;
@@ -211,6 +212,13 @@ class SettingsNotificationsView extends StatelessWidget {
                               ),
                             );
                           },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.bug_report_outlined),
+                          title: Text(L10n.of(context).pushDiagnose),
+                          subtitle: Text(L10n.of(context).pushDebugSubtitle),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => context.push('/rooms/settings/push-debug'),
                         ),
                         ListTile(
                           leading: const Icon(Icons.battery_std_outlined),

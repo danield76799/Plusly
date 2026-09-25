@@ -3235,5 +3235,7 @@
   "youUnbannedUser": "आपने {user} का प्रतिबंध हटाया",
   "yourChatBackupHasBeenSetUp": "आपकी पुनर्प्राप्ति कुंजी सेट कर दी गई है।",
   "yourGlobalUserIdIs": "आपका वैश्विक उपयोगकर्ता-ID है: ",
-  "yourPublicKey": "आपकी सार्वजनिक कुंजी"
+  "yourPublicKey": "आपकी सार्वजनिक कुंजी",
+  "pushDiagnose": "Push diagnostics",
+  "pushDebugSubtitle": "UP distributor, endpoint, registered?"
 }

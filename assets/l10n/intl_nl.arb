@@ -4123,5 +4123,7 @@
   "@doubleTapReaction": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "pushDiagnose": "Push diagnose",
+  "pushDebugSubtitle": "UP-distributor, endpoint, geregistreerd?"
 }

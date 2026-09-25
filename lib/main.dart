@@ -15,6 +15,7 @@ import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/error_widget.dart';
 import 'config/setting_keys.dart';
@@ -144,6 +145,14 @@ Future<void> _initializeApp() async {
   // Instrument (geen gedragswijziging): elke start logt de effectieve
   // lifecycle-state, zodat een volgende dump zelf bewijst welke tak een
   // koude start nam in plaats van dat we dat moeten afleiden.
+  try {
+    await PushEventLog().ensureLoaded();
+    PushEventLog().add('init', {
+      'startup_state': '${lifecycleState ?? 'null'}',
+      'branch': isBackgroundFetch ? 'background' : 'foreground',
+    });
+  } catch (_) {}
+
   if (isBackgroundFetch) {
     // FluffyChat-pariteit (upstream main.dart r86): start de korte
     // foreground-service VÓÓR ClientManager.getClients(). Upstream's volgorde

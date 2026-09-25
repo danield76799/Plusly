@@ -3956,5 +3956,7 @@
   "unifiedPushPrivacy": "Privacy-friendly, no Google",
   "notApplicable": "N/A",
   "shareFor": "Share for:",
-  "downloadFailedWithError": "Download failed: {error}"
+  "downloadFailedWithError": "Download failed: {error}",
+  "pushDiagnose": "Push diagnostics",
+  "pushDebugSubtitle": "UP distributor, endpoint, registered?"
 }

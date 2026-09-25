@@ -38,12 +38,13 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/main.dart';
 
 import 'package:Pulsly/utils/notification_background_handler.dart';
+import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/push_helper.dart';
 import 'package:Pulsly/widgets/plusly_app.dart';
 import '../config/app_config.dart';
 import '../config/setting_keys.dart';
 import '../widgets/matrix.dart';
-import 'platform_infos.dart';
 
 class BackgroundPush {
   static BackgroundPush? _instance;
@@ -127,6 +128,10 @@ class BackgroundPush {
       Logs().v('Flutter Local Notifications initialized');
 
       if (Platform.isAndroid) {
+        // Zorg dat de log klaarstaat VÓÓR de eerste UP-callback binnen kan
+        // komen; anders wist een eerste add() vanuit een koude start de
+        // bewaarde geschiedenis.
+        await PushEventLog().ensureLoaded();
         await UnifiedPush.initialize(
           onNewEndpoint: _newUpEndpoint,
           onRegistrationFailed: (_, i) => _upUnregistered(i),
@@ -496,6 +501,13 @@ class BackgroundPush {
     );
     // UP may strip the devices list
     data['devices'] ??= [];
+    // Instrument (geen gedragswijziging): log dat we de raw push binnen hebben
+    // VÓÓR we naar pushHelper gaan. Als pushHelper hangt/crasht zien we
+    // in ieder geval 'push_received'.
+    PushEventLog().add('push_received', {
+      'instance': i,
+      'room': data['room_id']?.toString() ?? '',
+    });
     await PushHelper.pushHelper(
       PushNotification.fromJson(data),
       clients: clients,
@@ -504,6 +516,12 @@ class BackgroundPush {
       flutterLocalNotificationsPlugin: _flutterLocalNotificationsPlugin,
       instance: i,
     );
+    // Log dat pushHelper helemaal is afgerond (tonen of clearing).
+    PushEventLog().add('push', {
+      'instance': i,
+      'room': data['room_id']?.toString() ?? '',
+      'ts': DateTime.now().toIso8601String(),
+    });
   }
 }
 

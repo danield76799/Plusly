@@ -3525,5 +3525,7 @@
   "notApplicable": "N/A",
   "shareFor": "Share for:",
   "downloadSuccess": "File successfully saved",
-  "downloadFailedWithError": "Download failed: {error}"
+  "downloadFailedWithError": "Download failed: {error}",
+  "pushDiagnose": "Push diagnostics",
+  "pushDebugSubtitle": "UP distributor, endpoint, registered?"
 }

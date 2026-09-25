@@ -3796,5 +3796,7 @@
   "useAsEmoji": "Emoji",
   "useAsSticker": "Sticker",
   "widget": "Widget",
-  "widgets": "Widgets"
+  "widgets": "Widgets",
+  "pushDiagnose": "Push diagnostics",
+  "pushDebugSubtitle": "UP distributor, endpoint, registered?"
 }

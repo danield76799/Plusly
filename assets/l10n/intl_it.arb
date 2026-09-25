@@ -3787,5 +3787,7 @@
   "enterNewChat": "Entra in una nuova chat",
   "systemFont": "Usa font di sistema",
   "systemRingtone": "Suoneria di sistema",
-  "welcome": "Benvenuto!"
+  "welcome": "Benvenuto!",
+  "pushDiagnose": "Push diagnostics",
+  "pushDebugSubtitle": "UP distributor, endpoint, registered?"
 }
