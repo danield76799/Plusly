@@ -3780,8 +3780,6 @@
   "matrixId": "ID de Matrix",
   "palette_neutral": "Neutral",
   "pinned": "Fijado",
-  "pushDebugSubtitle": "¿Distribuidor UP, endpoint, registrado?",
-  "pushDiagnose": "Diagnóstico de push",
   "removeYourBanner": "Quitar tu banner",
   "restoreSettings": "Restaurar ajustes",
   "roomNotFound": "Sala no encontrada",
