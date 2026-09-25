@@ -24,22 +24,27 @@ import 'package:Pulsly/utils/platform_infos.dart';
 const notificationAvatarDimension = 128;
 
 /// Upstream FluffyChat r486-496: `extension on PushNotification`.
-/// De notificatie-ID is `'${clientName}_$roomId'.hashCode`; zonder
-/// clientName (UP stripte de devices-lijst) valt hij terug op
-/// `roomId.hashCode`.
+extension PushNotificationExtension on PushNotification {
+  /// Upstream r487-488: clientName uit de pusher-devicedata.
+  String? get clientName =>
+      devices?.firstOrNull?.data?.tryGet<String>('client_name');
+
+  /// Upstream r489-495: notificationId afgeleid van clientName + roomId.
+  int get notificationId {
+    final roomId = this.roomId;
+    if (roomId == null || roomId.isEmpty) return 0;
+    final name = clientName;
+    if (name == null || name.isEmpty) return roomId.hashCode;
+    return '${name}_$roomId'.hashCode;
+  }
+}
+
+/// Lokale helper voor call sites zonder PushNotification-object.
 int notificationIdFor(String? clientName, String? roomId) {
   if (roomId == null || roomId.isEmpty) return 0;
   if (clientName == null || clientName.isEmpty) return roomId.hashCode;
   return '${clientName}_$roomId'.hashCode;
 }
-
-/// Upstream FluffyChat r487-488: `clientName` uit de pusher-devicedata.
-/// (Voor toekomstig gebruik bij het herstel van de volledige
-/// devices-gebaseerde client-resolutie; Plusly resolveert nu via de
-/// UnifiedPush-instance-string, die gelijk is aan de clientName.)
-// ignore: unused_element
-String? clientNameFromNotification(PushNotification notification) =>
-    notification.devices?.firstOrNull?.data?.tryGet<String>('client_name');
 
 Future<L10n> loadPushL10n() async {
   return lookupL10n(PlatformDispatcher.instance.locale);
@@ -71,11 +76,8 @@ class PushHelper {
     l10n ??= await loadPushL10n();
     try {
       // Upstream r44-51: de timeout geldt voor de HÉLE pipeline —
-      // handler + tonen. In upstream zit _showNotification binnen de
-      // getimede _tryPushHelper-aanroep; hier zit de tonen-stap in
-      // handler._showNotification(), dus die moet binnen dezelfde
-      // timeout-bubbel blijven als de handler zelf.
-      final handler = await Future<PushHelper?>.value(
+      // handler bouwen + tonen zitten beide in de getimede future.
+      await (
         _newPushHandler(
           notification,
           clients: clients,
@@ -83,21 +85,18 @@ class PushHelper {
           activeRoomId: activeRoomId,
           flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
           instance: instance,
-        ),
+        ) as Future
       ).timeout(const Duration(seconds: 30));
-      await handler?._showNotification().timeout(
-            const Duration(seconds: 30),
-          );
     } catch (e, s) {
       Logs().e('Push Helper has crashed!', e, s);
       if (notification.roomId != null) {
         await flutterLocalNotificationsPlugin.show(
-          id: notificationIdFor(instance, notification.roomId),
+          id: notificationIdFor(notification.clientName, notification.roomId),
           title: l10n.newMessageInFluffyChat,
           body: l10n.openAppToReadMessages,
           notificationDetails: NotificationDetails(
             iOS: DarwinNotificationDetails(
-              threadIdentifier: '${instance}_${notification.roomId}',
+              threadIdentifier: '${notification.clientName}_${notification.roomId}',
             ),
             android: AndroidNotificationDetails(
               AppConfig.pushNotificationsChannelId,
@@ -111,7 +110,7 @@ class PushHelper {
               priority: Priority.max,
               shortcutId: notification.roomId,
               category: AndroidNotificationCategory.message,
-              groupKey: instance,
+              groupKey: notification.clientName,
             ),
           ),
         );
@@ -143,20 +142,21 @@ class PushHelper {
       notification.toJson(),
     );
 
-    // Upstream r111-123: client-resolutie. Plusly resolveert via de
-    // UnifiedPush-instance-string (die gelijk is aan de clientName);
-    // ontbreekt de client in de lijst, dan aanmaken zoals upstream.
+    // Upstream r111-123: client-resolutie op basis van de client_name in
+    // de pushpayload; alleen als die ontbreekt valt hij terug op de eerste
+    // bekende client. De UnifiedPush-instance-string wordt hier niet gebruikt.
     final store = await AppSettings.init();
-    final client = instance == null
+    final clientName = notification.clientName;
+    final client = clientName == null
         ? (clients?.first ??
               (await ClientManager.getClients(
                 initialize: false,
                 store: store,
               )).first)
         : (clients?.firstWhereOrNull(
-              (client) => client.clientName == instance,
+              (client) => client.clientName == clientName,
             ) ??
-              await ClientManager.createClient(instance, store));
+              await ClientManager.createClient(clientName, store));
     helper.client = client;
 
     // Upstream r127: l10n laden vóór het event (gebruikt in de
@@ -238,7 +238,12 @@ class PushHelper {
     }
 
     helper.event = event;
-    return helper;
+    // Upstream r362-390: toon de notificatie. In de class-based wrapper is dit
+    // een methode op de helper; in upstream zit dezelfde code inline na de
+    // return van _tryPushHelper. Roep hem hier aan zodat de 30s-timeout in
+    // pushHelper de hele pipeline afdekt.
+    await helper._showNotification();
+    return null;
   }
 
   /// Upstream r362-390: _showNotification.

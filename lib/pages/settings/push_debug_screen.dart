@@ -48,12 +48,11 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
     }
 
     final matrix = Matrix.of(context);
-    final store = matrix.store;
-    for (final client in Matrix.of(context).widget.clients.where((c) => c.isLogged())) {
+    for (final client in matrix.widget.clients.where((c) => c.isLogged())) {
       final prefix = client.clientName;
-      final endpoint = store.getString(prefix + AppSettings.unifiedPushEndpoint.key);
-      final registered = store.getBool(prefix + AppSettings.unifiedPushRegistered.key);
-      final saved = endpoint != null && endpoint.isNotEmpty;
+      final endpoint = AppSettings.unifiedPushEndpoint.value;
+      final registered = AppSettings.unifiedPushRegistered.value;
+      final saved = endpoint.isNotEmpty;
       logs.add('Client=$prefix endpoint=${saved ? "saved" : "missing"} registered=$registered');
       if (saved && _endpoint == null) {
         _endpoint = endpoint;

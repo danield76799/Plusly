@@ -269,15 +269,23 @@ void main() {
             'in additionalProperties; Plusly leidt het notificatie-ID van de '
             'opgeloste client af, maar de pusher hoort de sleutel te dragen',
       );
-      // Twee keer: in de VERGELIJKING én in de payload. Staat hij alleen in de
-      // payload, dan ziet de vergelijking hem niet en wordt de pusher bij elke
-      // start opnieuw gezet.
+      // Twee keer: in de VERGELIJKING én in de payload. De vergelijking doet
+      // een map-lookup (`['client_name'] == client.clientName`), de payload
+      // een toewijzing (`"client_name": client.clientName`). Beide vormen
+      // moeten aanwezig zijn, anders matched de pusher nooit en wordt hij
+      // bij elke start opnieuw gezet.
       expect(
-        RegExp(r'"client_name": client\.clientName')
+        RegExp(r'''['\"]client_name['\"]:\s*client\.clientName''')
             .allMatches(bgPush)
             .length,
-        2,
-        reason: 'één keer in de pusher-vergelijking, één keer in de payload',
+        1,
+        reason: 'de payload bevat precies één toewijzing',
+      );
+      expect(
+        bgPush.contains("additionalProperties['client_name'] ==") ||
+            bgPush.contains('additionalProperties["client_name"] =='),
+        isTrue,
+        reason: 'de pusher-vergelijking checkt client_name in additionalProperties',
       );
     });
 
