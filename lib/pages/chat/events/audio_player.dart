@@ -354,7 +354,6 @@ class AudioPlayerState extends State<AudioPlayerWidget> {
                                   ),
                                   child: Text(
                                     widget.event.plaintextBody,
-                                    textScaler: TextScaler.linear(1),
                                     style: TextStyle(
                                       color: widget.color,
                                       fontSize: widget.fontSize,

@@ -178,6 +178,47 @@ void main() {
           reason: 'zonder listenable herbouwt de tree niet bij een schuif');
     });
   });
+
+  group('geen enkele tekst ontsnapt aan de MediaQuery-schaal', () {
+    // AANLEIDING: bij het app-breed maken van de schaal is op één plek de
+    // vermenigvuldiging weggehaald, terwijl die tekst een EIGEN `textScaler`
+    // meegaf: `TextScaler.linear(1)` op de bestandsbeschrijving in de
+    // audiospeler. Flutter's keuzetabel pakt het EERSTE lid dat gevuld is —
+    // `(textScaler, _) => textScaler` — dus een eigen scaler wint altijd van de
+    // MediaQuery. Die regel was voorheen onschadelijk (de factor zat al in de
+    // fontSize) maar maakte de tekst na de wijziging volledig ongevoelig voor
+    // de schuif. Vandaar deze test.
+    test('een eigen TextScaler op een geschaalde tekst is verdacht', () {
+      final verdacht = <String>[];
+      for (final f in Directory('lib/pages/chat/')
+          .listSync(recursive: true)
+          .whereType<File>()) {
+        if (!f.path.endsWith('.dart')) continue;
+        final regels = f.readAsLinesSync();
+        for (var i = 0; i < regels.length; i++) {
+          final r = regels[i];
+          if (!r.contains('TextScaler.linear(')) continue;
+          if (r.contains('MediaQuery')) continue;
+          // Alleen een scaler die op 1 staat is verdacht: dat BLOKKEERT de
+          // schaal. Een bewuste 1.2 of 1.67 is een ontwerpkeuze voor één label.
+          if (!RegExp(r'linear\(\s*1(\.0)?\s*\)').hasMatch(r)) continue;
+          verdacht.add('${f.path}:${i + 1}  ${r.trim()}');
+        }
+      }
+      expect(verdacht, isEmpty,
+          reason: 'deze tekst geeft een eigen scaler van 1 mee en negeert '
+              'daarmee de app-brede tekstschaal:\n${verdacht.join('\n')}');
+    });
+
+    test('de audiospeler-tekst heeft geen eigen scaler meer', () {
+      final bron = File('lib/pages/chat/events/audio_player.dart')
+          .readAsLinesSync()
+          .join('\n');
+      expect(bron.contains('textScaler: TextScaler.linear(1)'), isFalse,
+          reason: 'dit was de gemeten regressie: de bestandsbeschrijving in de '
+              'audiospeler schaalde nergens meer mee');
+    });
+  });
 }
 
 /// Leest alle .dart-bestanden onder [pad] als losse regels.
