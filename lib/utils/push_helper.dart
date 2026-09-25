@@ -34,6 +34,10 @@ int notificationIdFor(String? clientName, String? roomId) {
 }
 
 /// Upstream FluffyChat r487-488: `clientName` uit de pusher-devicedata.
+/// (Voor toekomstig gebruik bij het herstel van de volledige
+/// devices-gebaseerde client-resolutie; Plusly resolveert nu via de
+/// UnifiedPush-instance-string, die gelijk is aan de clientName.)
+// ignore: unused_element
 String? clientNameFromNotification(PushNotification notification) =>
     notification.devices?.firstOrNull?.data?.tryGet<String>('client_name');
 
@@ -46,7 +50,6 @@ class PushHelper {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   late Client client;
   late Event event;
-  late bool isBackgroundMessage;
   L10n? l10n;
 
   PushHelper._(
@@ -67,6 +70,11 @@ class PushHelper {
   }) async {
     l10n ??= await loadPushL10n();
     try {
+      // Upstream r44-51: de timeout geldt voor de HÉLE pipeline —
+      // handler + tonen. In upstream zit _showNotification binnen de
+      // getimede _tryPushHelper-aanroep; hier zit de tonen-stap in
+      // handler._showNotification(), dus die moet binnen dezelfde
+      // timeout-bubbel blijven als de handler zelf.
       final handler = await Future<PushHelper?>.value(
         _newPushHandler(
           notification,
@@ -77,7 +85,9 @@ class PushHelper {
           instance: instance,
         ),
       ).timeout(const Duration(seconds: 30));
-      await handler?._showNotification();
+      await handler?._showNotification().timeout(
+            const Duration(seconds: 30),
+          );
     } catch (e, s) {
       Logs().e('Push Helper has crashed!', e, s);
       if (notification.roomId != null) {
