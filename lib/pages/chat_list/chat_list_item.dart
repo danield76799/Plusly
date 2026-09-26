@@ -73,7 +73,6 @@ class ChatListItem extends StatelessWidget {
     final unread = room.isUnread;
     final directChatMatrixId = room.directChatMatrixID;
     final isDirectChat = directChatMatrixId != null;
-    final hasNotifications = room.notificationCount > 0;
     final backgroundColor = activeChat
         ? theme.colorScheme.secondaryContainer
         : Colors.transparent;
@@ -190,20 +189,28 @@ class ChatListItem extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(left: 4.0),
                       child: SizedBox(
-                        width: 70, // Fixed width to ensure a straight right edge
+                        // Breedte hangt af van het aantal cijfers in de badge,
+                        // met een minimum zodat de tijd niet volledig verdwijnt.
+                        width: 64 +
+                            (room.notificationCount.toString().length.clamp(1, 4) -
+                                1) *
+                                8,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
-                              room.latestEventReceivedTime.localizedTimeShort(
-                                context,
-                              ),
-                              style: TextStyle(
-                                fontSize: compactMode ? 11 : 13,
-                                fontWeight: FontWeight.w500,
-                                color: theme.colorScheme.onSurface
-                                    .withValues(alpha: 0.6),
+                            Flexible(
+                              child: Text(
+                                room.latestEventReceivedTime.localizedTimeShort(
+                                  context,
+                                ),
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  fontSize: compactMode ? 11 : 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: theme.colorScheme.onSurface
+                                      .withValues(alpha: 0.6),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 6),
