@@ -20,6 +20,7 @@ import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/push_event_log.dart';
 
 const notificationAvatarDimension = 128;
 
@@ -177,6 +178,10 @@ class PushHelper {
     if (event == null) {
       // Upstream r137-174: clearing-indicator.
       Logs().v('Notification is a clearing indicator.');
+      PushEventLog().add('push_clearing', {
+        'room': notification.roomId ?? '',
+        'unread': '${notification.counts?.unread ?? 0}',
+      });
       if (clients?.length == 1 && (notification.counts?.unread == 0)) {
         await flutterLocalNotificationsPlugin.cancelAll();
       } else {
@@ -225,6 +230,10 @@ class PushHelper {
     // fallback, precies zoals upstream.
     if (!client.pushruleEvaluator.match(event).notify) {
       Logs().i('Push helper: filtered by client-side push rules.');
+      PushEventLog().add('push_rule_filtered', {
+        'room': notification.roomId ?? '',
+        'type': event.type,
+      });
       return null;
     }
 
@@ -234,10 +243,19 @@ class PushHelper {
         activeRoomId == notification.roomId &&
         WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed) {
       Logs().v('Room is in foreground. Stop push helper here.');
+      PushEventLog().add('push_suppressed', {
+        'room': notification.roomId ?? '',
+        'activeRoom': activeRoomId ?? '',
+        'lifecycle': WidgetsBinding.instance.lifecycleState.toString(),
+      });
       return null;
     }
 
     helper.event = event;
+    PushEventLog().add('push_event', {
+      'room': notification.roomId ?? '',
+      'type': event.type,
+    });
     // Upstream r362-390: toon de notificatie. In de class-based wrapper is dit
     // een methode op de helper; in upstream zit dezelfde code inline na de
     // return van _tryPushHelper. Roep hem hier aan zodat de 30s-timeout in
@@ -355,6 +373,10 @@ class PushHelper {
     }
 
     Logs().v('Push helper has been completed!');
+    PushEventLog().add('push_shown', {
+      'room': notification.roomId ?? '',
+      'id': '$notificationId',
+    });
   }
 
   /// Upstream r212-360: platform-channel specifics.
