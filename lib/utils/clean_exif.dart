@@ -17,12 +17,19 @@ class ExifCleaner {
       }
     }
 
-    // Encode back to bytes without EXIF based on detected format
+    // Encode back to bytes without EXIF based on detected format.
+    // WebP en HEIC screenshots komen vaak van de standaard Android Foto's-app;
+    // de `image` package decodeert ze soms wel maar kan ze niet rechtstreeks
+    // encoden. Voor die gevallen converteren we naar JPEG, net als bij HEIC.
     List<int> cleanedBytes;
 
     image.exif.clear();
 
-    if (_isJpeg(imageBytes)) {
+    if (_isWebP(imageBytes)) {
+      cleanedBytes = encodeJpg(image);
+    } else if (_isHeic(imageBytes)) {
+      cleanedBytes = encodeJpg(image);
+    } else if (_isJpeg(imageBytes)) {
       cleanedBytes = encodeJpg(image);
     } else if (_isPng(imageBytes)) {
       cleanedBytes = encodePng(image);
@@ -33,9 +40,6 @@ class ExifCleaner {
     } else if (_isTiff(imageBytes)) {
       // TIFF doesn't have a direct encoder in image package, convert to PNG
       cleanedBytes = encodeTiff(image);
-    } else if (_isHeic(imageBytes)) {
-      // HEIC format - convert to JPEG since image package doesn't have HEIC encoder
-      cleanedBytes = encodeJpg(image);
     } else {
       // Default fallback - try to encode as PNG, then JPEG
       try {
@@ -89,8 +93,10 @@ class ExifCleaner {
   }
 
   static bool _isWebP(List<int> bytes) {
-    return bytes.length >= 12 &&
-        bytes[0] == 0x52 && // R
+    if (bytes.length < 12) return false;
+
+    // WebP is verpakt in een RIFF-container: 'RIFF' + 4 bytes size + 'WEBP'.
+    return bytes[0] == 0x52 && // R
         bytes[1] == 0x49 && // I
         bytes[2] == 0x46 && // F
         bytes[3] == 0x46 && // F
@@ -101,10 +107,10 @@ class ExifCleaner {
   }
 
   static bool _isHeic(List<int> bytes) {
-    // HEIC files start with 'ftyp' at position 4
     if (bytes.length < 12) return false;
 
-    // Check for 'ftyp' at position 4
+    // HEIC/HEIF container: box size (4 bytes) + 'ftyp' at offset 4,
+    // daarna de brand op offset 8. We checken HEIC/HEIF varianten.
     final hasFtyp =
         bytes[4] == 0x66 && // f
         bytes[5] == 0x74 && // t
@@ -113,12 +119,15 @@ class ExifCleaner {
 
     if (!hasFtyp) return false;
 
-    // Check for HEIC brand variants
     final heicBrands = <List<int>>[
       [0x68, 0x65, 0x69, 0x63], // heic
       [0x68, 0x65, 0x69, 0x78], // heix
       [0x68, 0x65, 0x76, 0x63], // hevc
       [0x68, 0x65, 0x76, 0x78], // hevx
+      [0x68, 0x65, 0x69, 0x73], // heis (Samsung HEIC)
+      [0x68, 0x65, 0x69, 0x66], // heif
+      [0x68, 0x65, 0x69, 0x6D], // heim
+      [0x68, 0x65, 0x69, 0x71], // heiq
       [0x6D, 0x69, 0x66, 0x31], // mif1
       [0x6D, 0x73, 0x66, 0x31], // msf1
     ];

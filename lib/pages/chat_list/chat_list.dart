@@ -601,15 +601,14 @@ class ChatListController extends State<ChatList>
 
     if (uniqueFiles.isEmpty) return;
 
-    // Validate files are readable (skip content URIs that may crash)
-    uniqueFiles.removeWhere((file) {
-      final path = file.path;
-      return path.isEmpty ||
-          (path.startsWith('content://') && PlatformInfos.isAndroid);
-    });
+    // Validate files are readable (skip empty paths only).
+    // content:// URIs moeten WEL doorgaan: Standaard Foto's/Google Foto's
+    // deelt screenshots op Android 10+ bijna altijd als content://. Die
+    // filterden we eerder weg, waardoor delen vanuit de foto-app stil doodliep.
+    uniqueFiles.removeWhere((file) => file.path.isEmpty);
 
     if (uniqueFiles.isEmpty) {
-      Logs().w('All shared files were content URIs or invalid');
+      Logs().w('All shared files had empty paths');
       return;
     }
 
