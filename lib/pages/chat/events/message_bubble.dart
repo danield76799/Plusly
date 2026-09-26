@@ -637,6 +637,38 @@ class _MessageBubbleState extends State<MessageBubble> {
                                           );
                                         },
                                       ),
+                                    // Forward-label bovenaan de bubble
+                                    if (event.content
+                                        .tryGetMap<String, Object?>('m.forwarded')
+                                        ?.tryGet<String>('user_id') !=
+                                        null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 16,
+                                          right: 16,
+                                          top: 8,
+                                          bottom: 4,
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.forward_outlined,
+                                              size: 14,
+                                              color: textColor.withValues(alpha: 0.7),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              L10n.of(context).forward,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: textColor.withValues(alpha: 0.7),
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     Padding(
                                       padding: const EdgeInsets.only(
                                         top: 0,

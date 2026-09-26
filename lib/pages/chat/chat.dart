@@ -404,7 +404,12 @@ class ChatController extends State<ChatPageWithRoom>
     for (final item in shareItems) {
       if (item is FileShareItem) continue;
       if (item is TextShareItem) room.sendTextEvent(item.value);
-      if (item is ContentShareItem) room.sendEvent(item.value);
+      if (item is ContentShareItem) {
+        final content = Map<String, Object?>.from(item.value);
+        content.remove('m.forwarded');
+        content.remove('m.relates_to');
+        room.sendEvent(content);
+      }
     }
     final files = shareItems
         .whereType<FileShareItem>()
@@ -665,6 +670,7 @@ class ChatController extends State<ChatPageWithRoom>
     return;
   }
 
+  // ignore: unused_element
   Future<void> _getThreads() async {
     try {
       threads = await room.getThreads();
@@ -673,6 +679,9 @@ class ChatController extends State<ChatPageWithRoom>
       Logs().w('Unable to load threads in $roomId', e, s);
     }
   }
+
+  // ignore: unused_element
+  void _forwardAction() => forwardEventsAction();
 
   Future<void> showPollResults(Event event) async {
     await showFutureLoadingSnackbar(
@@ -1570,14 +1579,17 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   void forwardEventsAction({Event? event}) async {
+    final timeline = this.timeline;
+    final forwardEvents = selectedEvents.isEmpty
+        ? [event!]
+        : selectedEvents.map((e) => e.getDisplayEvent(timeline!)).toList();
+
     await showScaffoldDialog(
       context: context,
       builder: (context) => ShareScaffoldDialog(
-        items: selectedEvents.isEmpty
-            ? [ContentShareItem(event!.content)]
-            : selectedEvents
-                  .map((event) => ContentShareItem(event.content))
-                  .toList(),
+        items: forwardEvents
+            .map((e) => ContentShareItem(e.content.copy()))
+            .toList(),
       ),
     );
     if (!mounted) return;
