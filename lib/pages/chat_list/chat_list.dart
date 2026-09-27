@@ -614,22 +614,33 @@ class ChatListController extends State<ChatList>
 
     if (!mounted) return;
 
-    showScaffoldDialog(
-      context: context,
-      builder: (context) => ShareScaffoldDialog(
-        items: uniqueFiles.map((file) {
-          if ({SharedMediaType.text, SharedMediaType.url}.contains(file.type)) {
-            return TextShareItem(file.path);
-          }
-          return FileShareItem(
-            XFile(
-              file.path.replaceFirst('file://', ''),
-              mimeType: file.mimeType,
-            ),
-          );
-        }).toList(),
-      ),
-    );
+    // Dialog pas in het VOLGENDE frame tonen.
+    //
+    // De share-intent en de GoRouter-herbouw (thema, lifecycle, route-restore)
+    // kunnen in hetzelfde frame binnenkomen. showScaffoldDialog in datzelfde
+    // frame duwt een route terwijl de navigator nog midden in
+    // _flushHistoryUpdates zit — een route die al afgesloten wordt krijgt dan
+    // opnieuw didComplete en de app crasht met "Bad state: Future already
+    // completed" (gezien bij delen vanuit Google Foto's).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showScaffoldDialog(
+        context: context,
+        builder: (context) => ShareScaffoldDialog(
+          items: uniqueFiles.map((file) {
+            if ({SharedMediaType.text, SharedMediaType.url}.contains(file.type)) {
+              return TextShareItem(file.path);
+            }
+            return FileShareItem(
+              XFile(
+                file.path.replaceFirst('file://', ''),
+                mimeType: file.mimeType,
+              ),
+            );
+          }).toList(),
+        ),
+      );
+    });
   }
 
   void _processIncomingUris(Uri? uri) async {

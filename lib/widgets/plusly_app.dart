@@ -42,11 +42,28 @@ class PluslyApp extends StatefulWidget {
 
   // Router must be outside of build method so that hot reload does not reset
   // the current path.
+  //
+  // De content://-redirect geldt alleen bij de INITIËLE route-resolutie.
+  //
+  // Eerder stond hij als onvoorwaardelijke regel: élke navigatie waarvan de
+  // target-URI op content:// begon werd teruggezet naar '/'. Dat is nodig om
+  // een share-intent niet als GoRouter-route te laten mislukken, MAAR hij
+  // vuurde ook midden in een sessie (share-handler + redirect vlogen in het
+  //zelfde frame): de routestapel werd herbouwd terwijl de share-dialog route
+  // al aan het openen was, en routes die al aan het afsluiten waren werden
+  // opnieuw "compleet" gezet → crash "Bad state: Future already completed"
+  // in Route.didComplete (gezien bij foto delen vanuit Google Foto's).
+  //
+  // Nu: alleen de eerste keer (initialLocation-resolutie), daarna neemt de
+  // share-handler in chat_list het intent volledig over.
+  static bool _initialRouteResolved = false;
   static final GoRouter router = GoRouter(
     initialLocation: '/',
     routes: AppRoutes.routes,
     debugLogDiagnostics: true,
     redirect: (context, state) {
+      if (_initialRouteResolved) return null;
+      _initialRouteResolved = true;
       // Ignore content:// URIs from shared media intents,
       // let receive_sharing_intent handle them instead.
       if (state.uri.scheme == 'content') return '/';
