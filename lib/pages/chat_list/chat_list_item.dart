@@ -191,20 +191,28 @@ class ChatListItem extends StatelessWidget {
                       child: SizedBox(
                         // Breedte hangt af van het aantal cijfers in de badge,
                         // met een minimum zodat de tijd niet volledig verdwijnt.
-                        width: 64 +
+                        // Basis is ruim genoeg voor "HH:mm" bij grotere fonts;
+                        // per extra badgecijfer komt er ruimte bij.
+                        width: 72 +
                             (room.notificationCount.toString().length.clamp(1, 4) -
                                 1) *
-                                8,
+                                10,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
+                            // Tijd mag nooit afbreken (bijv. "16:1/5"): alleen
+                            // de badge krimpt, de tekst houdt de ruimte aan.
                             Flexible(
+                              fit: FlexFit.loose,
                               child: Text(
                                 room.latestEventReceivedTime.localizedTimeShort(
                                   context,
                                 ),
                                 textAlign: TextAlign.right,
+                                maxLines: 1,
+                                overflow: TextOverflow.clip,
+                                textWidthBasis: TextWidthBasis.parent,
                                 style: TextStyle(
                                   fontSize: compactMode ? 11 : 13,
                                   fontWeight: FontWeight.w500,
