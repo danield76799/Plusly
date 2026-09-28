@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/widgets/matrix.dart';
@@ -61,9 +62,31 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
 
     try {
       final prefs = await SharedPreferences.getInstance();
+      // FC-pariteit: per-client laatst-ontvangen-tijdstempel (geschreven door
+      // PushHelperInstrumentation.markeerLaatstePush). De oude
+      // 'plusly_push_last_received_ts'-key blijft gelezen voor historie.
       final t = prefs.getString('plusly_push_last_received_ts');
       if (t != null) _lastPushTime = t;
+      final matrix = Matrix.of(context);
+      for (final client in matrix.widget.clients.where((c) => c.isLogged())) {
+        final ms = prefs.getInt('push_last_received_ts_${client.clientName}');
+        if (ms != null) {
+          final dt = DateTime.fromMillisecondsSinceEpoch(ms);
+          _lastPushTime ??= dt.toIso8601String();
+          logs.add('Last push [${client.clientName}]: ${dt.toIso8601String()}');
+        }
+      }
       logs.add('Last push timestamp: ${_lastPushTime ?? 'none'}');
+      // FC-pariteit: push-helper crash-rapport tonen indien aanwezig.
+      final crash = prefs.getStringList(AppConfig.pushHelperCrashReportKey);
+      if (crash != null && crash.isNotEmpty) {
+        logs.add('⚠ Push-helper crash-rapport:');
+        for (final regel in crash.take(8)) {
+          for (var i = 0; i < regel.length; i += 160) {
+            logs.add('  ${regel.substring(i, (i + 160).clamp(0, regel.length))}');
+          }
+        }
+      }
     } catch (_) {}
 
     final eventLog = PushEventLog();

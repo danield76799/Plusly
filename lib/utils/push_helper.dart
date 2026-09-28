@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show IOException;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -21,6 +22,7 @@ import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_event_log.dart';
+import 'package:Pulsly/utils/push_helper_instrumentation.dart';
 
 const notificationAvatarDimension = 128;
 
@@ -90,6 +92,12 @@ class PushHelper {
       ).timeout(const Duration(seconds: 30));
     } catch (e, s) {
       Logs().e('Push Helper has crashed!', e, s);
+      // FC-pariteit (r55-63): crash-rapport weggeschreven zodat de
+      // Meldingen-instellingen het kunnen tonen. Timeout/IO/ClientException
+      // zijn verwachtbaar (netwerk), geen code-bugs — die niet rapporteren.
+      if (e is! TimeoutException && e is! IOException) {
+        await PushHelperInstrumentation.schrijfCrashRapport(e, s);
+      }
       if (notification.roomId != null) {
         await flutterLocalNotificationsPlugin.show(
           id: notificationIdFor(notification.clientName, notification.roomId),
@@ -159,6 +167,8 @@ class PushHelper {
             ) ??
               await ClientManager.createClient(clientName, store));
     helper.client = client;
+    // FC-pariteit (r125): tijdstempel van de laatst ontvangen push bewaren.
+    await PushHelperInstrumentation.markeerLaatstePush(client.clientName);
 
     // Upstream r127: l10n laden vóór het event (gebruikt in de
     // clearing-tak en de samenvattingsmelding).

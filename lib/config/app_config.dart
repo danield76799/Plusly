@@ -64,6 +64,9 @@ abstract class AppConfig {
   static const String schemePrefix = 'matrix:';
   static const String pushNotificationsChannelId = 'plusly_push';
   static const String pushNotificationsAppId = 'com.danield.plusly';
+  /// FluffyChat-pariteit: push-helper crashes hier naartoe geschreven, zodat
+  /// Instellingen → Meldingen ze kan tonen (FC app_config.dart:65).
+  static const String pushHelperCrashReportKey = 'push_helper_crash_report';
   static const String recentEmojisAccountDataKey = 'io.element.recent_emoji';
   static const double borderRadius = 18.0;
   static const double columnWidth = 360.0;
