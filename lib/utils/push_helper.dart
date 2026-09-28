@@ -360,17 +360,93 @@ class PushHelper {
     // inhoud; title/body worden dan NIET meegestuurd.
     final needsTitleAndBody = !PlatformInfos.isAndroid;
 
-    await flutterLocalNotificationsPlugin.show(
-      id: notificationId,
-      title: needsTitleAndBody ? title : null,
-      body: needsTitleAndBody ? body : null,
-      notificationDetails: platformChannelSpecifics,
-      payload: NotificationPushPayload(
-        client.clientName,
-        event.room.id,
-        event.eventId,
-      ).toString(),
-    );
+    if (PlatformInfos.isAndroid) {
+      // Android 13+: een channel dat alleen door show() zonder eerdere
+      // createNotificationChannel() wordt aangemaakt krijgt default
+      // Importance.default — geen heads-up, geen geluid, niet zichtbaar in
+      // de OS-balk. We reconstrueren 'm hier met Importance.max +
+      // bypassDnd + visibility public, in de zekerheid dat het kanaal
+      // bestaat met de juiste zichtbaarheid. Idempotent: bestaande
+      // channel-instellingen worden overschreven door deze aanroep.
+      final androidPlugin = flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      try {
+        await androidPlugin?.createNotificationChannel(
+          AndroidNotificationChannel(
+            AppConfig.pushNotificationsChannelId,
+            l10n!.incomingMessages,
+            importance: Importance.max,
+            enableVibration: true,
+            playSound: true,
+            showBadge: true,
+            enableLights: true,
+          ),
+        );
+      } catch (e, s) {
+        // Mag hier nooit crashen; channel-hercreatie is best-effort.
+        Logs().e('Push helper: channel recreate failed', e, s);
+      }
+    }
+
+    final payload = NotificationPushPayload(
+      client.clientName,
+      event.room.id,
+      event.eventId,
+    ).toString();
+
+    // We vangen alleen eventuele excepties op zodat we in de log kunnen zien
+    // OF Android de notificatie weigerde (PlatformException). Een `void`-return
+    // uit `show()` kunnen we niet inspecteren; de fallback hieronder dekt dat.
+    Object? shownError;
+    try {
+      await flutterLocalNotificationsPlugin.show(
+        id: notificationId,
+        title: needsTitleAndBody ? title : null,
+        body: needsTitleAndBody ? body : null,
+        notificationDetails: platformChannelSpecifics,
+        payload: payload,
+      );
+    } catch (e, s) {
+      shownError = e;
+      Logs().e('Push helper: show() threw', e, s);
+    }
+
+    // Fallback: als show() een exceptie gooide (Android weigerde de notificatie),
+    // probeer nog een keer zonder MessagingStyle. Sommige Android-13-builds
+    // weigeren notificaties met een zware style-info (bijv. Person met grote
+    // avatar-bitmap); een kale variant passeren isoleert dat.
+    final fallbackTried = shownError != null && PlatformInfos.isAndroid;
+    if (fallbackTried) {
+      try {
+        await flutterLocalNotificationsPlugin.show(
+          id: notificationId,
+          notificationDetails: NotificationDetails(
+            android: AndroidNotificationDetails(
+              AppConfig.pushNotificationsChannelId,
+              l10n!.incomingMessages,
+              importance: Importance.max,
+              priority: Priority.max,
+              category: AndroidNotificationCategory.message,
+              groupKey: client.clientName,
+              number: notification.counts?.unread,
+              subText: client.clientName,
+            ),
+          ),
+          payload: payload,
+        );
+      } catch (e, s) {
+        Logs().e('Push helper: fallback show() threw', e, s);
+      }
+    }
+
+    PushEventLog().add('push_show_result', {
+      'room': notification.roomId ?? '',
+      'id': '$notificationId',
+      'result': shownError == null ? 'ok' : 'threw',
+      'fallback': fallbackTried ? 'tried' : 'no',
+    });
 
     // Upstream r382-389: groeps-samenvatting op Android bij 2+ actieve
     // meldingen.
