@@ -9,6 +9,7 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_event_log.dart';
+import 'package:Pulsly/utils/share_event_log.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
@@ -126,6 +127,24 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
     final eventLog = PushEventLog();
     await eventLog.load();
     final events = eventLog.events;
+
+    // Share-diagnose: losse log, want delen is een ander onderwerp dan push.
+    // Zonder deze regels is een mislukte share volledig spoorloos.
+    try {
+      final shareLog = ShareEventLog();
+      await shareLog.ensureLoaded();
+      final regels = shareLog.regels;
+      if (regels.isNotEmpty) {
+        logs.add('── Share-flow (nieuwste eerst) ──');
+        for (final r in regels.take(15)) {
+          logs.add(r);
+        }
+      } else {
+        logs.add('Share-flow: nog geen share geprobeerd in deze sessie');
+      }
+    } catch (e) {
+      logs.add('Share-flow uitlezen mislukt: $e');
+    }
 
     // Samenvattingsregel: maakt een dump zelf-verklarend. Zonder dit moet je
     // elke kopie met de hand tellen om te zien of de buffer vol zat en of er

@@ -24,6 +24,7 @@ import 'package:Pulsly/widgets/adaptive_dialogs/image_editor_dialog.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import '../../utils/resize_video.dart';
 import '../../utils/resize_image.dart';
+import '../../utils/share_event_log.dart';
 
 // ignore: implementation_imports
 // ignore: depend_on_referenced_packages
@@ -296,6 +297,12 @@ class SendFileDialogState extends State<SendFileDialog> {
       }
       scaffoldMessenger.clearSnackBars();
     } catch (e) {
+      // Leg vast wat er misging: bij een share-fout is dit het enige spoor.
+      // De snackbar hieronder is vluchtig; deze regel blijft staan.
+      ShareEventLog().add('share_verzend-fout', {
+        'fout': '$e',
+        'type': e.runtimeType.toString(),
+      });
       Logs().e('error on send', e);
       setState(() {
         isSending = false;

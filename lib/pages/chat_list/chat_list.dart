@@ -33,6 +33,7 @@ import 'package:Pulsly/widgets/share_scaffold_dialog.dart';
 import '../../../utils/account_bundles.dart';
 import '../../config/setting_keys.dart';
 import '../../utils/bridge_utils.dart';
+import '../../utils/share_event_log.dart';
 import '../../utils/url_launcher.dart';
 import '../../widgets/matrix.dart';
 
@@ -580,7 +581,20 @@ class ChatListController extends State<ChatList>
   final _processedSharedPaths = <String>{};
 
   void _processIncomingSharedMedia(List<SharedMediaFile> files) {
-    if (files.isEmpty) return;
+    // Meet elke stap: bij een mislukte share is er geen foutmelding, dus
+    // zonder deze regels is niet te zien waar het misging.
+    ShareEventLog().add('share_ontvangen', {
+      'aantal': files.length,
+      'paden': files
+          .map((f) => f.path.isEmpty ? '(leeg)' : f.path.substring(0, f.path.length.clamp(0, 60)))
+          .join(' | '),
+      'types': files.map((f) => f.type.name).join(','),
+    });
+
+    if (files.isEmpty) {
+      ShareEventLog().add('share_afgebroken', {'reden': 'geen-bestanden'});
+      return;
+    }
 
     // Deduplicate: some Android devices deliver the same file via both
     // getInitialMedia() and getMediaStream().
@@ -591,7 +605,10 @@ class ChatListController extends State<ChatList>
       return true;
     }).toList();
 
-    if (uniqueFiles.isEmpty) return;
+    if (uniqueFiles.isEmpty) {
+      ShareEventLog().add('share_afgebroken', {'reden': 'alles-al-gezien'});
+      return;
+    }
 
     uniqueFiles.removeWhere(
       (file) =>
@@ -599,20 +616,31 @@ class ChatListController extends State<ChatList>
           file.path.startsWith(AppConfig.appSsoUrlScheme),
     );
 
-    if (uniqueFiles.isEmpty) return;
+    if (uniqueFiles.isEmpty) {
+      ShareEventLog().add('share_afgebroken', {'reden': 'alleen-deeplink'});
+      return;
+    }
 
     // Validate files are readable (skip empty paths only).
     // content:// URIs moeten WEL doorgaan: Standaard Foto's/Google Foto's
     // deelt screenshots op Android 10+ bijna altijd als content://. Die
     // filterden we eerder weg, waardoor delen vanuit de foto-app stil doodliep.
+    final leeg = uniqueFiles.where((file) => file.path.isEmpty).toList();
+    if (leeg.isNotEmpty) {
+      ShareEventLog().add('share_leeg-pad', {'aantal': leeg.length});
+    }
     uniqueFiles.removeWhere((file) => file.path.isEmpty);
 
     if (uniqueFiles.isEmpty) {
       Logs().w('All shared files had empty paths');
+      ShareEventLog().add('share_afgebroken', {'reden': 'leeg-pad'});
       return;
     }
 
-    if (!mounted) return;
+    if (!mounted) {
+      ShareEventLog().add('share_afgebroken', {'reden': 'niet-gemonteerd'});
+      return;
+    }
 
     // Dialog pas in het VOLGENDE frame tonen.
     //
@@ -623,7 +651,11 @@ class ChatListController extends State<ChatList>
     // opnieuw didComplete en de app crasht met "Bad state: Future already
     // completed" (gezien bij delen vanuit Google Foto's).
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted) {
+        ShareEventLog().add('share_afgebroken', {'reden': 'niet-gemonteerd-na-frame'});
+        return;
+      }
+      ShareEventLog().add('share_dialoog', {'aantal': uniqueFiles.length});
       showScaffoldDialog(
         context: context,
         builder: (context) => ShareScaffoldDialog(
@@ -659,11 +691,25 @@ class ChatListController extends State<ChatList>
     // For sharing images coming from outside the app while the app is in the memory
     _intentFileStreamSubscription = ReceiveSharingIntent.instance
         .getMediaStream()
-        .listen(_processIncomingSharedMedia, onError: (e, s) => Logs().e('Intent stream error', e, s));
+        .listen(
+          _processIncomingSharedMedia,
+          onError: (e, s) {
+            // Een fout in de plugin (bv. een content-URI die niet te lezen is)
+            // kwam hier eerder alleen in de console. Nu in de diagnoselog.
+            ShareEventLog().add('share_stream-fout', {'fout': '$e'});
+            Logs().e('Intent stream error', e, s);
+          },
+        );
 
     // For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.instance.getInitialMedia().then(
-      _processIncomingSharedMedia,
+      (files) {
+        ShareEventLog().add('share_initialmedia', {'aantal': files.length});
+        _processIncomingSharedMedia(files);
+      },
+      onError: (e) {
+        ShareEventLog().add('share_initialmedia-fout', {'fout': '$e'});
+      },
     );
 
     // For receiving shared Uris
