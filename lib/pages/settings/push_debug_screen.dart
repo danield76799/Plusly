@@ -175,6 +175,28 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
         'isolates: ${isolaten.entries.map((x) => '${x.key}=${x.value}').join(', ')} | '
         'totaal ${events.length} events (cap: push=500, lifecycle=25)',
       );
+
+      // Na-meting: bleef de melding staan, of ruimde de app hem zelf op?
+      //
+      // Dit is de enige regel die "Android toont hem niet" scheidt van "wij
+      // hebben hem weggehaald". Een push_active_later met actief=nee terwijl
+      // de directe check actief=ja was, betekent dat de melding na show()
+      // is opgeruimd — dan zit de oorzaak in de app, niet in de weergave.
+      final later = events.where((e) => e['kind'] == 'push_active_later').toList();
+      if (later.isNotEmpty) {
+        final nogJa = later.where((e) => e['actief'] == 'ja').length;
+        final weg = later.length - nogJa;
+        logs.add(
+          '[na-meting] ${later.length} gecontroleerd na 3s: '
+          'nog-aanwezig=$nogJa zelf-opgeruimd=$weg',
+        );
+        for (final e in later.reversed.take(5)) {
+          logs.add('[push_active_later] ${e['ts']} id=${e['id']} '
+              'actief=${e['actief']} totaal=${e['totaal']}');
+        }
+      } else {
+        logs.add('[na-meting] nog geen na-metingen (verschijnt 3s na een push)');
+      }
     } catch (_) {}
 
     setState(() {

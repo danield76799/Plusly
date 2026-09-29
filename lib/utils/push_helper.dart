@@ -476,6 +476,36 @@ class PushHelper {
           'actief': 'fout',
         });
       }
+
+      // NA-METING, 3 SECONDEN LATER.
+      //
+      // `actief=ja` direct na show() bewijst alleen dat Android de melding
+      // heeft aangenomen. Het sluit niet uit dat iets hem kort daarna
+      // opruimt: de clearing-tak hierboven draait bij ELKE push die geen
+      // event oplevert, en die kan een net getoonde melding meenemen
+      // (unread==0 in de telling volstaat al). Wat de gebruiker dan ervaart
+      // is "de melding is er even en dan weg" — en in de log staat alleen
+      // dat hij getoond is.
+      //
+      // Daarom meten we opnieuw, ruim na de push-afhandeling. Valt actief
+      // dan terug naar 'nee', dan heeft de app zelf opgeruimd en is er niets
+      // mis met de weergavelaag van Android. Blijft het 'ja', dan houdt
+      // Android hem vast en zit het probleem in de weergave/het kanaal.
+      // Zonder deze tweede meting is dat onderscheid niet te maken.
+      unawaited(
+        Future<void>.delayed(const Duration(seconds: 3), () async {
+          try {
+            final later = await flutterLocalNotificationsPlugin
+                .getActiveNotifications();
+            final nogActief = later.any((n) => n.id == notificationId);
+            PushEventLog().add('push_active_later', {
+              'id': '$notificationId',
+              'actief': nogActief ? 'ja' : 'nee',
+              'totaal': '${later.length}',
+            });
+          } catch (_) {}
+        }),
+      );
     }
 
     // Upstream r382-389: groeps-samenvatting op Android bij 2+ actieve
