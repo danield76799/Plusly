@@ -321,12 +321,30 @@ class BackgroundPush {
       // volledige endpoint-beheer over aan unifiedpush_ui en de onNewEndpoint
       // callback, waardoor de `endpoint=saved / registered=false`-staat na een
       // re-login geen stille push-failure meer kan veroorzaken.
+      //
+      // ÉÉN VASTE INSTANTIE, GEEN CLIENTNAAM.
+      //
+      // Hier stond `instances: clients.map((c) => c.clientName)`. Dat is fout
+      // op twee manieren, en beide zijn in de praktijk gemeten:
+      //
+      // 1. clientName is 'Plusly-<millisecondsSinceEpoch>' en wordt bij ELKE
+      //    login opnieuw gegenereerd. Elke login is voor de distributeur dus
+      //    een NIEUWE instantie met een NIEUW topic. Op het toestel stonden
+      //    daardoor vier losse UnifiedPush-topics naast elkaar
+      //    (upNmYpWHrFCZ6D, upFU6GBOizOvmt, upfR9OXqdZ2KSO, upXWn3MBVngb0T),
+      //    alle vier voor Plusly. De oude blijven eeuwig op de server staan en
+      //    worden ook eeuwig door ntfy onderhouden.
+      // 2. Deze waarde is óók de `instance` waarmee UnifiedPush de app
+      //    terugroept. Een wisselende naam betekent dat een push die op het
+      //    oude topic binnenkomt bij geen enkele bestaande registratie hoort.
+      //
+      // FluffyChat gebruikt hier `['default']`: één vaste naam, één topic,
+      // ongeacht hoeveel accounts er ingelogd zijn. De koppeling naar het
+      // juiste account loopt via de pusher op de homeserver (die draagt
+      // client_name per account), niet via de instantienaam.
       await UnifiedPushUi(
         context: context,
-        instances: clients
-            .where((c) => c.isLogged())
-            .map((c) => c.clientName)
-            .toList(),
+        instances: const ['default'],
         unifiedPushFunctions: UPFunctions(),
         showNoDistribDialog: false,
         onNoDistribDialogDismissed: () {},
