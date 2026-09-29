@@ -708,30 +708,8 @@ Future<void> updateSummaryNotification({
     return;
   }
 
-  // 23460: DE SAMENVATTING WAS LEEG, EN ANDROID TOONT JUIST DE SAMENVATTING.
-  //
-  // Op Android klapt een groep notificaties met dezelfde groupKey in elkaar
-  // zodra er een notificatie met setAsGroupSummary:true bij zit. Wat de
-  // gebruiker dan in de balk ziet is niet de individuele melding maar de
-  // SAMENVATTING. Die werd hier zonder titel en zonder tekst aangemaakt —
-  // InboxStyleInformation kreeg alleen `n.body`, en op Android is `body`
-  // bewust null gelaten (needsTitleAndBody = !PlatformInfos.isAndroid; de
-  // MessagingStyle draagt de inhoud al). Het gevolg: bij twee of meer
-  // meldingen in dezelfde groep verving Android de leesbare melding door een
-  // lege, en leek het of er niets binnenkwam. Bij één melding ging het goed —
-  // precies het gemelde "even goed, daarna opeens niets meer".
-  //
-  // De samenvatting krijgt daarom een echte titel en een regel per kamer,
-  // zodat een ingeklapte groep nog steeds leesbaar is.
-  final samenvattingTitel = l10n.unreadChatsInApp(
-    AppConfig.applicationName,
-    '${activeNotifications.length}',
-  );
-
   await flutterLocalNotificationsPlugin.show(
     id: clientName.hashCode,
-    title: samenvattingTitel,
-    body: activeNotifications.map((n) => n.title ?? '').join(', '),
     notificationDetails: NotificationDetails(
       android: AndroidNotificationDetails(
         AppConfig.pushNotificationsChannelId,
@@ -739,7 +717,7 @@ Future<void> updateSummaryNotification({
         groupKey: clientName,
         setAsGroupSummary: true,
         styleInformation: InboxStyleInformation(
-          activeNotifications.map((n) => n.title ?? n.body ?? '').toList(),
+          activeNotifications.map((n) => n.body ?? '').toList(),
         ),
         autoCancel: false,
         silent: true,

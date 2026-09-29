@@ -1,20 +1,22 @@
-// Copyright (C) 2025 Daan – Samenvattingsmelding moet leesbaar zijn.
+// Copyright (C) 2025 Daan – Samenvattingsmelding: pariteit met FluffyChat.
 //
-// ANDROID TOONT DE SAMENVATTING, NIET DE LOSSE MELDINGEN.
+// WAAROM PARITEIT EN NIET EEN EIGEN IDEE.
 //
-// Zodra twee of meer notificaties dezelfde groupKey delen en er een
-// notificatie met setAsGroupSummary:true tussen zit, klapt Android de groep
-// in en toont het de SAMENVATTING. Was die samenvatting leeg, dan verving
-// Android leesbare meldingen door een onzichtbaar vak — de melding leek niet
-// aangekomen terwijl getActiveNotifications() hem wel teruggaf.
+// Bij het zoeken naar "melding komt aan maar is niet zichtbaar" is de
+// samenvatting een verdachte: Android klapt een groep in zodra er een
+// notificatie met setAsGroupSummary:true in zit, en toont dan de SAMENVATTING.
+// Wie daar een eigen titel/tekst aan toevoegt, wijkt af van upstream zonder
+// dat bewezen is dat die afwijking het probleem oplost — en verliest het
+// ijkpunt: zolang Plusly identiek is aan FluffyChat kan een waargenomen
+// gedragsverschil niet aan onze code liggen.
 //
-// Deze test legt vast dat de samenvatting (a) een titel krijgt, (b) per
-// actieve melding een regel met inhoud meestuurt, en (c) stil is, zodat hij
-// de individuele meldingen niet opnieuw laat klinken.
-//
-// Daarnaast: de samenvatting mag zichzelf niet meetellen in de actieve lijst.
-// Zonder die uitsluiting blijft de lengte >= 2 zolang de samenvatting bestaat,
-// waardoor de opruimtak (length <= 1 → cancel) nooit meer draait.
+// Deze test legt daarom de pariteit vast, niet een theorie. Vier ankerpunten:
+//   * geen title/body meegegeven aan show() — upstream doet dat ook niet;
+//   * InboxStyleInformation gevuld uit `n.body`, dezelfde bron als upstream;
+//   * de samenvatting sluit zichzelf uit van de actieve lijst, anders blijft
+//     length >= 2 en draait de opruimtak (length <= 1 -> cancel) nooit meer;
+//   * `silent: true`, zoals upstream: de samenvatting is ordening, niet een
+//     tweede geluidssignaal bovenop de losse melding.
 
 import 'dart:io';
 
@@ -52,57 +54,43 @@ void main() {
     return bron.substring(naSignatuur, einde);
   }
 
-  group('samenvattingsmelding is leesbaar (23460)', () {
-    test('de samenvatting krijgt een titel mee', () {
+  group('samenvatting: pariteit met FluffyChat', () {
+    test('de samenvatting geeft geen eigen titel of tekst mee', () {
       final body = samenvattingBody();
-      // De show()-aanroep van de samenvatting moet een titel-argument hebben.
       final showIdx = body.lastIndexOf('flutterLocalNotificationsPlugin.show(');
       expect(showIdx, isNonNegative, reason: 'de summary-show moet bestaan');
       final aanroep = body.substring(showIdx);
+      // Alleen `id:` en `notificationDetails:` — net als upstream. Een extra
+      // title/body is een afwijking die bewezen moet worden, niet aangenomen.
       expect(
         aanroep.contains('title:'),
-        isTrue,
+        isFalse,
         reason:
-            '23460: zonder titel toont Android een lege samenvatting zodra '
-            'de groep inklapt — dat is precies het gemelde "opeens geen '
-            'notificatie meer"',
+            'upstream geeft geen title mee aan de samenvatting; een eigen '
+            'titel is een onbewezen afwijking van FluffyChat',
+      );
+      expect(
+        aanroep.contains('body:'),
+        isFalse,
+        reason:
+            'upstream geeft geen body mee aan de samenvatting; de inhoud '
+            'komt uit de InboxStyle-regels',
       );
     });
 
-    test('de samenvatting vult de regels uit de actieve meldingen', () {
+    test('de InboxStyle-regels komen uit n.body, zoals upstream', () {
       final body = samenvattingBody();
       expect(
         body.contains('InboxStyleInformation'),
         isTrue,
         reason: 'de samenvatting hoort de losse meldingen als regels te tonen',
       );
-      // De regelinhoud moet uit de actieve meldingen komen, niet een lege
-      // lijst of een constante string.
       expect(
-        body.contains('activeNotifications.map'),
+        body.contains('activeNotifications.map((n) => n.body ?? '),
         isTrue,
         reason:
-            'de regels moeten per actieve melding gevuld worden, anders is '
-            'de samenvatting inhoudelijk leeg',
-      );
-      // En niet uitsluitend op `body` leunen: op Android is body null.
-      expect(
-        body.contains('n.title'),
-        isTrue,
-        reason:
-            'op Android is `body` bewust null (MessagingStyle draagt de '
-            'inhoud); de samenvatting moet dus `title` als bron nemen',
-      );
-    });
-
-    test('de samenvatting is stil', () {
-      final body = samenvattingBody();
-      expect(
-        body.contains('silent: true'),
-        isTrue,
-        reason:
-            'de samenvatting is een ordeningslaag; hij hoort niet nog eens '
-            'geluid of trilling te geven bovenop de individuele melding',
+            'upstream vult de regels uit n.body; een andere bron (n.title) '
+            'is een afwijking zonder bewijs',
       );
     });
 
@@ -114,6 +102,17 @@ void main() {
         reason:
             'zonder deze uitsluiting blijft de actieve lijst >= 2 zolang de '
             'samenvatting bestaat, en draait de opruimtak (length <= 1) nooit',
+      );
+    });
+
+    test('de samenvatting is stil, zoals upstream', () {
+      final body = samenvattingBody();
+      expect(
+        body.contains('silent: true'),
+        isTrue,
+        reason:
+            'de samenvatting is een ordeningslaag; hij hoort niet nog eens '
+            'geluid of trilling te geven bovenop de individuele melding',
       );
     });
   });
