@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
+import 'package:unifiedpush/unifiedpush.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
@@ -102,10 +103,19 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
         // Reset all flags to force fresh registration
         backgroundPush.upAction = false;
         
-        // Clear saved distributor to force picker
-        final store = Matrix.of(context).store;
-        await store.setString('unifiedpush distributor', '');
-        
+        // Ontkoppel de huidige registratie echt. De oude aanpak schreef
+        // 'unifiedpush distributor' in de Matrix-store, maar de
+        // UnifiedPush-plugin bewaart de gekozen distributeur in zijn eigen
+        // opslag (via de connector). Die sleutel deed dus niets, waardoor
+        // getDistributor() de oude distributeur bleef teruggeven en het
+        // keuzemenu nooit verscheen (een net geïnstalleerde tweede
+        // distributeur zoals Sunup werd genegeerd).
+        //
+        // unregister() verwijdert de registratie én — bij de laatste
+        // instantie — de opgeslagen distributeur, zodat getDistributor()
+        // weer null geeft en registerAppWithDialog() de picker toont.
+        await UnifiedPush.unregister('default');
+
         // Now setup push - this will show distributor picker
         await backgroundPush.setupPush(
           Matrix.of(context).widget.clients,
