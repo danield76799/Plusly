@@ -448,6 +448,36 @@ class PushHelper {
       'fallback': fallbackTried ? 'tried' : 'no',
     });
 
+    // BESLISSENDE METING. `show()` geeft op Android geen terugkoppeling: de
+    // plugin roept NotificationManager.notify() aan en zegt niets over wat
+    // Android daarmee doet. Door direct daarna getActiveNotifications() te
+    // lezen weten we of Android de melding heeft OVERGENOMEN. Twee uitkomsten:
+    //   actief=ja  → Android houdt 'm vast; staat hij dan toch niet in de
+    //                balk, dan blokkeert een systeemlaag (DND-bucket, badge,
+    //                of een kanaal dat buiten de app om is uitgezet).
+    //   actief=nee → Android heeft de melding direct verworpen. Dan zit het in
+    //                de notificatie zelf (stijl, groep, of een id-conflict).
+    // Zonder deze meting blijft dat onderscheid giswerk.
+    if (PlatformInfos.isAndroid) {
+      try {
+        final na = await flutterLocalNotificationsPlugin
+            .getActiveNotifications();
+        final actief = na.any((n) => n.id == notificationId);
+        PushEventLog().add('push_active_check', {
+          'room': notification.roomId ?? '',
+          'id': '$notificationId',
+          'actief': actief ? 'ja' : 'nee',
+          'totaal': '${na.length}',
+        });
+      } catch (e) {
+        PushEventLog().add('push_active_check', {
+          'room': notification.roomId ?? '',
+          'id': '$notificationId',
+          'actief': 'fout',
+        });
+      }
+    }
+
     // Upstream r382-389: groeps-samenvatting op Android bij 2+ actieve
     // meldingen.
     //
