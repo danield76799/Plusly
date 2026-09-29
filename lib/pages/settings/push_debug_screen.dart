@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unifiedpush/unifiedpush.dart';
 
@@ -49,6 +50,7 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
     }
 
     final matrix = Matrix.of(context);
+
     for (final client in matrix.widget.clients.where((c) => c.isLogged())) {
       final prefix = client.clientName;
       final endpoint = AppSettings.unifiedPushEndpoint.value;
@@ -60,6 +62,39 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
       }
     }
 
+    // KANAALMETING. Android staat niet toe dat een app de importance van een
+    // bestaand notificatiekanaal wijzigt; createNotificationChannel() stuurt
+    // altijd 'createIfNotExists' en is dus een no-op voor een kanaal dat al
+    // bestaat. Zonder deze uitlezing is niet te zien of een melding stil
+    // blijft omdat het kanaal laag staat, of omdat iets anders speelt.
+    if (PlatformInfos.isAndroid) {
+      try {
+        final android = FlutterLocalNotificationsPlugin()
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+        final enabled = await android?.areNotificationsEnabled();
+        logs.add('Meldingen toegestaan: ${enabled ?? "?"}');
+
+        final channels = await android?.getNotificationChannels();
+        if (channels == null || channels.isEmpty) {
+          logs.add('Kanalen: geen');
+        } else {
+          for (final c in channels) {
+            if (c.id == AppConfig.pushNotificationsChannelId) {
+              logs.add(
+                'Kanaal ${c.id}: importance=${c.importance.name} '
+                'geluid=${c.playSound} trillen=${c.enableVibration} '
+                'bypassDnd=${c.bypassDnd} badge=${c.showBadge}',
+              );
+            }
+          }
+        }
+      } catch (e) {
+        logs.add('Kanaalmeting mislukt: $e');
+      }
+    }
+
     try {
       final prefs = await SharedPreferences.getInstance();
       // FC-pariteit: per-client laatst-ontvangen-tijdstempel (geschreven door
@@ -67,7 +102,6 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
       // 'plusly_push_last_received_ts'-key blijft gelezen voor historie.
       final t = prefs.getString('plusly_push_last_received_ts');
       if (t != null) _lastPushTime = t;
-      final matrix = Matrix.of(context);
       for (final client in matrix.widget.clients.where((c) => c.isLogged())) {
         final ms = prefs.getInt('push_last_received_ts_${client.clientName}');
         if (ms != null) {
