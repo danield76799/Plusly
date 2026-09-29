@@ -450,12 +450,27 @@ class PushHelper {
 
     // Upstream r382-389: groeps-samenvatting op Android bij 2+ actieve
     // meldingen.
+    //
+    // 23454: op Android 17 verving de summary-notification de individuele
+    // meldingen in de OS-balk zodra er binnen enkele seconden meerdere
+    // pushes in dezelfde kamer vielen — de gebruiker zag dan alleen de
+    // samenvatting, niet de individuele meldingen. We roepen de summary
+    // nu alleen aan wanneer er al een actieve notificatie bestaat met
+    // dezelfde notificationId (zelfde clientName+room). Een eerste push
+    // laat de individuele melding dus ongemoeid in de balk verschijnen.
     if (PlatformInfos.isAndroid) {
-      await updateSummaryNotification(
-        clientName: client.clientName,
-        l10n: l10n!,
-        flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+      final alreadyActive = await flutterLocalNotificationsPlugin
+          .getActiveNotifications();
+      final hasSameRoomActive = alreadyActive.any(
+        (n) => n.id == notificationId,
       );
+      if (hasSameRoomActive) {
+        await updateSummaryNotification(
+          clientName: client.clientName,
+          l10n: l10n!,
+          flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+        );
+      }
     }
 
     Logs().v('Push helper has been completed!');
