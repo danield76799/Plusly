@@ -335,6 +335,30 @@ class BackgroundPush {
       Logs().i('[Push] No UnifiedPush distributors available on this device');
     }
 
+    // Het endpoint van de distributeur verandert zelden — ntfy geeft bij een
+    // her-registratie hetzelfde adres terug. De `onNewEndpoint`-callback gaat
+    // dan dus NIET af, en zonder deze stap wordt er nooit een pusher bij de
+    // homeserver gezet. Gevolg: een nieuwe login (nieuwe clientnaam) of een
+    // accountwissel levert een toestel op dat berichten via sync ontvangt
+    // maar nooit een push krijgt. Daarom bij elke start zelf de pusher
+    // (laten) controleren; `setupPusher` doet niets als er al een kloppende
+    // pusher staat.
+    final savedEndpoint = AppSettings.unifiedPushEndpoint.value;
+    if (PlatformInfos.isAndroid && savedEndpoint.isNotEmpty) {
+      try {
+        final gatewayUrl = await _resolveGatewayUrl(savedEndpoint);
+        for (final client in clients.where((c) => c.isLogged())) {
+          await setupPusher(
+            client: client,
+            gatewayUrl: gatewayUrl,
+            token: savedEndpoint,
+          );
+        }
+      } catch (e, s) {
+        Logs().w('[Push] Ensuring pusher at startup failed', e, s);
+      }
+    }
+
     // ignore: unawaited_futures
     _flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails().then((
       details,
@@ -357,17 +381,18 @@ class BackgroundPush {
     });
   }
 
-  Future<void> _newUpEndpoint(PushEndpoint newPushEndpoint, String i) async {
-    final newEndpoint = newPushEndpoint.url;
-    upAction = true;
-    if (newEndpoint.isEmpty) {
-      await _upUnregistered(i);
-      return;
-    }
+  /// Bepaalt de Matrix-gateway-URL die bij een UnifiedPush-endpoint hoort.
+  ///
+  /// De distributeur levert een endpoint als `https://ntfy.sh/upXXXX`; daar
+  /// hoort de notificatie-URL `<host>/_matrix/push/v1/notify` bij. Zelf
+  /// gehoste gateways melden via hun discovery-pagina dat ze 'm zelf
+  /// aanbieden (`gateway: matrix`). Lukt dat niet, dan blijft de publieke
+  /// UP-gateway staan.
+  Future<String> _resolveGatewayUrl(String upEndpoint) async {
     var endpoint =
         'https://matrix.gateway.unifiedpush.org/_matrix/push/v1/notify';
     try {
-      final url = Uri.parse(newEndpoint)
+      final url = Uri.parse(upEndpoint)
           .replace(path: '/_matrix/push/v1/notify', query: '')
           .toString()
           .split('?')
@@ -382,9 +407,20 @@ class BackgroundPush {
       }
     } catch (e) {
       Logs().i(
-        '[Push] No self-hosted unified push gateway present: $newEndpoint',
+        '[Push] No self-hosted unified push gateway present: $upEndpoint',
       );
     }
+    return endpoint;
+  }
+
+  Future<void> _newUpEndpoint(PushEndpoint newPushEndpoint, String i) async {
+    final newEndpoint = newPushEndpoint.url;
+    upAction = true;
+    if (newEndpoint.isEmpty) {
+      await _upUnregistered(i);
+      return;
+    }
+    final endpoint = await _resolveGatewayUrl(newEndpoint);
     Logs().i('[Push] UnifiedPush using endpoint $endpoint');
     // Upstream r402-408: registreer een pusher voor ELKE client, niet alleen
     // voor de client die matched met de UnifiedPush-instance-string. In
