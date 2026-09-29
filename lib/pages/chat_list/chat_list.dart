@@ -831,6 +831,31 @@ class ChatListController extends State<ChatList>
           return null;
         }),
       );
+
+      // Share-intent opnieuw ophalen bij terugkeer naar de voorgrond.
+      //
+      // WAAROM DIT NODIG IS. De plugin levert een share op twee manieren:
+      // via getInitialMedia() (eenmalig, bij het opzetten) en via de
+      // media-stream (doorlopend). In de praktijkmeting kwam een share vanuit
+      // Google Foto's alleen binnen als `share_initialmedia aantal=0`,
+      // gevolgd door `share_afgebroken reden=geen-bestanden` — en de stream
+      // zweeg volledig. Het intent had de app dus wél bereikt (de app werd op
+      // dat moment gestart) maar de eenmalige uitlezing leverde niets op.
+      //
+      // Door het bij elke resume opnieuw te vragen vangen we precies dat
+      // geval: het intent staat dan alsnog op de activity. De dedupe hierna
+      // (op genormaliseerd pad) zorgt dat een bestand nooit twee keer
+      // verstuurd wordt, ook niet als beide routes hetzelfde bestand leveren.
+      ReceiveSharingIntent.instance.getInitialMedia().then(
+        (files) {
+          if (files.isEmpty) return;
+          ShareEventLog().add('share_herlezen', {'aantal': files.length});
+          _processIncomingSharedMedia(files);
+        },
+        onError: (e) {
+          ShareEventLog().add('share_herlezen-fout', {'fout': '$e'});
+        },
+      );
     }
   }
 
