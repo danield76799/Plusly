@@ -28,6 +28,9 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
   List<String> _logs = const [];
   List<Map<String, String>> _events = const [];
   String? _lastPushTime;
+  DateTime? _lastPushDateTime;
+  String _lastPushAge = '—';
+  bool _pushStale = false;
   bool _unifiedPushAvailable = false;
 
   @override
@@ -108,10 +111,37 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
         if (ms != null) {
           final dt = DateTime.fromMillisecondsSinceEpoch(ms);
           _lastPushTime ??= dt.toIso8601String();
+          _lastPushDateTime ??= dt;
           logs.add('Last push [${client.clientName}]: ${dt.toIso8601String()}');
         }
       }
       logs.add('Last push timestamp: ${_lastPushTime ?? 'none'}');
+
+      // Endpoint-frisheid: toont hoe lang geleden de laatste push was. Een
+      // stil kanaal (Sunup/ntfy op Android 17 bèta dooft na verloop van tijd
+      // uit) is hieraan te herkennen: de laatste push is dan opeens oud,
+      // terwijl er wél nieuwe berichten verwacht werden. Dit is een HEURISTIEK
+      // (stilte is geen hard bewijs), dus de tekst vraagt om bevestiging via
+      // een testbericht in plaats van met zekerheid te claimen dat het kapot is.
+      final lastPush = _lastPushDateTime;
+      if (lastPush == null) {
+        _lastPushAge = 'nog geen push gezien';
+        _pushStale = false;
+      } else {
+        final age = DateTime.now().difference(lastPush);
+        _lastPushAge = _humanAge(age);
+        // Drempel ruim boven de normale chatfrequentie; pas dan noemen we
+        // het "verdacht stil" en raden we een test + eventuele herregistratie aan.
+        _pushStale = age > const Duration(minutes: 30);
+        if (_pushStale) {
+          logs.add(
+            '⚠ Push-kanaal lijkt stil: laatste push $_lastPushAge geleden. '
+            'Stuur een testbericht; komt er niets, tik dan op '
+            '"Registreer push notifications".',
+          );
+        }
+      }
+
       // FC-pariteit: push-helper crash-rapport tonen indien aanwezig.
       final crash = prefs.getStringList(AppConfig.pushHelperCrashReportKey);
       if (crash != null && crash.isNotEmpty) {
@@ -206,6 +236,14 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
     });
   }
 
+  /// Korte, menselijke weergave van een tijdsverschil.
+  String _humanAge(Duration d) {
+    if (d.inSeconds < 60) return '${d.inSeconds}s';
+    if (d.inMinutes < 60) return '${d.inMinutes}m';
+    if (d.inHours < 24) return '${d.inHours}u';
+    return '${d.inDays}d';
+  }
+
   Future<void> _copyLogs() async {
     final buffer = StringBuffer();
     for (final l in _logs) {
@@ -266,6 +304,16 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
                 ListTile(
                   title: Text('Laatste push'),
                   subtitle: Text(_lastPushTime ?? 'nog geen push ontvangen in deze sessie'),
+                ),
+                ListTile(
+                  title: Text('Push-kanaal'),
+                  subtitle: Text(_pushStale
+                      ? '⚠ $_lastPushAge geleden — mogelijk stil'
+                      : 'actief ($_lastPushAge geleden)'),
+                  leading: Icon(
+                    _pushStale ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+                    color: _pushStale ? Colors.orange : Colors.green,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Text('Status:', style: Theme.of(context).textTheme.titleMedium),
