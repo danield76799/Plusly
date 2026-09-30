@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:matrix/matrix.dart';
 import 'package:unifiedpush/unifiedpush.dart';
@@ -108,13 +109,23 @@ class SettingsNotificationsController extends State<SettingsNotifications> {
         // UnifiedPush-plugin bewaart de gekozen distributeur in zijn eigen
         // opslag (via de connector). Die sleutel deed dus niets, waardoor
         // getDistributor() de oude distributeur bleef teruggeven en het
-        // keuzemenu nooit verscheen (een net geïnstalleerde tweede
-        // distributeur zoals Sunup werd genegeerd).
+        // keuzemenu nooit verscheen.
         //
-        // unregister() verwijdert de registratie én — bij de laatste
-        // instantie — de opgeslagen distributeur, zodat getDistributor()
-        // weer null geeft en registerAppWithDialog() de picker toont.
-        await UnifiedPush.unregister('default');
+        // unregister(instance) alleen is óók niet genoeg: zolang er oude
+        // wees-instanties in de connector-opslag staan (de clientName-
+        // instanties van vóór de `default`-fix), wist het de distributeur
+        // niet. Daarom via een native brug removeDistributor() aanroepen,
+        // die álle instanties én de opgeslagen distributeur verwijdert.
+        const channel = MethodChannel('com.danield.plusly.app/unifiedpush');
+        final removed = await channel
+            .invokeMethod<bool>('removeDistributor')
+            .then((v) => v ?? false)
+            .catchError((_) => false);
+        if (!removed) {
+          // Fallback als de native brug er (nog) niet is: verwijder op z'n
+          // minst de default-instantie.
+          await UnifiedPush.unregister('default');
+        }
 
         // Now setup push - this will show distributor picker
         await backgroundPush.setupPush(

@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 
+import org.unifiedpush.android.connector.UnifiedPush as UpConnector
+
 class MainActivity : FlutterActivity() {
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
@@ -39,6 +41,26 @@ class MainActivity : FlutterActivity() {
                 "getWidgetDataPath" -> {
                     val path = filesDir.resolve("chat_widget_data.json").absolutePath
                     result.success(path)
+                }
+                else -> result.notImplemented()
+            }
+        }
+        // Brug naar de UnifiedPush-connector voor een echte "alles wissen"-reset.
+        // De Flutter-plugin (unifiedpush_android) stelt alleen `unregister(instance)`
+        // bloot, maar dat verwijdert de distributeur NIET zolang er oude
+        // wees-instanties in de opslag staan (bijv. de clientName-instanties van
+        // vóór de `default`-fix). removeDistributor() wist álle instanties én de
+        // opgeslagen distributeur, zodat getDistributor() weer null geeft en het
+        // keuzemenu (ntfy / Sunup / ...) opnieuw verschijnt.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "com.danield.plusly.app/unifiedpush").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "removeDistributor" -> {
+                    try {
+                        UpConnector.removeDistributor(this)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("remove_distributor_failed", e.message, null)
+                    }
                 }
                 else -> result.notImplemented()
             }
