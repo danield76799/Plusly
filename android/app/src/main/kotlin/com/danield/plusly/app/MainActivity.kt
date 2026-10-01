@@ -65,6 +65,9 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+        // Plan de eerste keepalive-alarm bij elke app-start. Elk volgende
+        // alarm plant zichzelf opnieuw (zie PushKeepAliveReceiver).
+        com.danield.plusly.app.PushKeepAliveReceiver.planVolgende(this)
     }
     companion object {
         var engine: FlutterEngine? = null

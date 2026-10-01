@@ -189,6 +189,17 @@
             </intent-filter>
         </receiver>
 
+        <!-- Houdt de UnifiedPush-registratie levend op de Android-17-bèta:
+             elke ~6h een verse register() die een doodgevallen koppeling
+             herstelt (gemeten: kanaal dooft na enkele uren stil). -->
+        <receiver
+            android:name="com.danield.plusly.app.PushKeepAliveReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.danield.plusly.app.PUSH_KEEPALIVE" />
+            </intent-filter>
+        </receiver>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
