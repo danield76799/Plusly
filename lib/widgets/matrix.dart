@@ -282,6 +282,12 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
           // regelt registratie.
           backgroundPush?.upAction = false;
           backgroundPush?.setupPush(widget.clients);
+          // LOGIN-TIJDENS-REGISTRATIE-FIX: vernieuw óók de distributeur-kant.
+          // Zonder dit hield de distributeur (gemeten 2026-10-01) de koppeling
+          // naar de oude sessie vast: registered=true, endpoint=saved, en
+          // tóch geen enkele push meer na een re-login. registerApp() forceert
+          // een verse NEW_ENDPOINT.
+          backgroundPush?.herkopelNaLogin();
         });
       }
       final loggedInWithMultipleClients = widget.clients.length > 1;

@@ -64,20 +64,37 @@ void main() {
   group('pusher-registratie bij app-start', () {
     final bestand = 'lib/utils/background_push.dart';
 
+    // 2026-10-01: de pusher-ensure is een GEDEELDE helper (_herstelPushers)
+    // geworden, opgeroepen uit setupPush én herkopelNaLogin. De ankers
+    // controleren daarom de helper zelf plus de aanroep in setupPush — niet
+    // meer de inline-code in de setupPush-body.
+    String herstelBody(String bron) =>
+        bodyOf(bron, 'Future<void> _herstelPushers(');
+
     test('setupPush zet zelf een pusher, niet alleen via onNewEndpoint', () {
-      final body = bodyOf(code(bestand), 'Future<void> setupPush(');
-      expect(body, isNotEmpty, reason: 'setupPush moet bestaan');
+      final bron = code(bestand);
+      final body = herstelBody(bron);
+      expect(body, isNotEmpty, reason: '_herstelPushers moet bestaan');
       expect(
         body.contains('setupPusher('),
         isTrue,
         reason:
-            'zonder directe aanroep in setupPush blijft de pusher ontbreken '
+            'zonder directe aanroep blijft de pusher ontbreken '
             'wanneer het UnifiedPush-endpoint niet verandert',
+      );
+      // En setupPush moet de helper aanroepen.
+      final setupPush = bodyOf(bron, 'Future<void> setupPush(');
+      expect(
+        setupPush.contains('_herstelPushers('),
+        isTrue,
+        reason:
+            'setupPush moet de gedeelde helper aanroepen; zonder aanroep '
+            'gebeurt er bij de start niets meer',
       );
     });
 
     test('setupPush gebruikt het opgeslagen endpoint als token', () {
-      final body = bodyOf(code(bestand), 'Future<void> setupPush(');
+      final body = herstelBody(code(bestand));
       expect(
         body.contains('AppSettings.unifiedPushEndpoint.value'),
         isTrue,
@@ -91,7 +108,7 @@ void main() {
     });
 
     test('lege endpoint wordt overgeslagen, niet als leeg token verstuurd', () {
-      final body = bodyOf(code(bestand), 'Future<void> setupPush(');
+      final body = herstelBody(code(bestand));
       expect(
         body.contains('savedEndpoint.isNotEmpty'),
         isTrue,
@@ -102,7 +119,7 @@ void main() {
     });
 
     test('alleen voor ingelogde clients registreren', () {
-      final body = bodyOf(code(bestand), 'Future<void> setupPush(');
+      final body = herstelBody(code(bestand));
       expect(
         body.contains('isLogged()'),
         isTrue,
@@ -111,7 +128,7 @@ void main() {
     });
 
     test('fouten blokkeren het opstarten niet', () {
-      final body = bodyOf(code(bestand), 'Future<void> setupPush(');
+      final body = herstelBody(code(bestand));
       expect(
         body.contains('catch'),
         isTrue,

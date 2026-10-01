@@ -361,21 +361,7 @@ class BackgroundPush {
     // maar nooit een push krijgt. Daarom bij elke start zelf de pusher
     // (laten) controleren; `setupPusher` doet niets als er al een kloppende
     // pusher staat.
-    final savedEndpoint = AppSettings.unifiedPushEndpoint.value;
-    if (PlatformInfos.isAndroid && savedEndpoint.isNotEmpty) {
-      try {
-        final gatewayUrl = await _resolveGatewayUrl(savedEndpoint);
-        for (final client in clients.where((c) => c.isLogged())) {
-          await setupPusher(
-            client: client,
-            gatewayUrl: gatewayUrl,
-            token: savedEndpoint,
-          );
-        }
-      } catch (e, s) {
-        Logs().w('[Push] Ensuring pusher at startup failed', e, s);
-      }
-    }
+    await _herstelPushers(clients);
 
     // ignore: unawaited_futures
     _flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails().then((
@@ -399,8 +385,73 @@ class BackgroundPush {
     });
   }
 
-  /// Bepaalt de Matrix-gateway-URL die bij een UnifiedPush-endpoint hoort.
+  /// Zet de pushers op de homeserver opnieuw voor alle ingelogde clients.
   ///
+  /// Gedeelde stap van [setupPush] en [herkopelNaLogin]: het endpoint van de
+  /// distributeur verandert zelden, dus de `onNewEndpoint`-callback gaat bij
+  /// een start of re-login NIET af. Zonder deze stap krijgt een nieuwe client
+  /// (nieuwe clientnaam) nooit een pusher en blijven pushes uit.
+  Future<void> _herstelPushers(List<Client> clients) async {
+    final savedEndpoint = AppSettings.unifiedPushEndpoint.value;
+    if (PlatformInfos.isAndroid && savedEndpoint.isNotEmpty) {
+      try {
+        final gatewayUrl = await _resolveGatewayUrl(savedEndpoint);
+        for (final client in clients.where((c) => c.isLogged())) {
+          await setupPusher(
+            client: client,
+            gatewayUrl: gatewayUrl,
+            token: savedEndpoint,
+          );
+        }
+      } catch (e, s) {
+        Logs().w('[Push] Ensuring pusher at startup failed', e, s);
+      }
+    }
+  }
+
+  /// Herstelt de UnifiedPush-koppeling ná een nieuwe login.
+  ///
+  /// GEMETEN GEVAL (2026-10-01, dump ~10:00): bij een re-login of
+  /// herinstallatie ontstaat een nieuwe clientname
+  /// (Plusly-1790841511153 = timestamp). De pusher-ensure op de homeserver
+  /// liep wél, maar de distributeur (Sunup) hield de koppeling naar de OUDE
+  /// sessie vast: geregistreerd=true, endpoint=saved, en toch kwam er geen
+  /// ÉNIGE push meer (Last push: none) totdat de gebruiker handmatig
+  /// "Registreer push notifications" tikte.
+  ///
+  /// OORZAAK: het endpoint (topic-URL) bleef gelijk, dus `onNewEndpoint`
+  /// ging nooit af en er was geen signaal om óók de distributeur-kant te
+  /// vernieuwen. De distributeur zelf weet niks van de nieuwe client.
+  ///
+  /// FIX: na een login de registratie bij de distributeur opnieuw afdwingen.
+  /// registerApp() op de bestaande default-instantie vraagt de distributeur
+  /// om een verse NEW_ENDPOINT — die vernieuwt zn kant van de koppeling én
+  /// triggert (via onNewEndpoint) de pushers. Geen unregister/removeDistri-
+  /// butor nodig: het menu hoeft hier niet, alleen een verse registratie.
+  ///
+  /// Wordt aangeroepen door MatrixState wanneer een client overgaat naar
+  /// LoginState.loggedIn (zie widgets/matrix.dart).
+  Future<void> herkopelNaLogin() async {
+    if (!PlatformInfos.isAndroid) return;
+    try {
+      final distributor = await UnifiedPush.getDistributor();
+      if (distributor == null) {
+        Logs().i(
+          '[Push] herkopelNaLogin: geen distributeur bewaard; niets te herkoppelen',
+        );
+        return;
+      }
+      Logs().i(
+        '[Push] herkopelNaLogin: her-registreer bij $distributor na nieuwe login',
+      );
+      await UnifiedPush.register(instance: 'default');
+      Logs().i('[Push] herkopelNaLogin: registratie verstuurd');
+    } catch (e, s) {
+      Logs().w('[Push] herkopelNaLogin mislukt', e, s);
+    }
+  }
+
+  /// Bepaalt de Matrix-gateway-URL die bij een UnifiedPush-endpoint hoort.
   /// De distributeur levert een endpoint als `https://ntfy.sh/upXXXX`; daar
   /// hoort de notificatie-URL `<host>/_matrix/push/v1/notify` bij. Zelf
   /// gehoste gateways melden via hun discovery-pagina dat ze 'm zelf
