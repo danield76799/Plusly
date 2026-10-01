@@ -125,8 +125,22 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
       // een testbericht in plaats van met zekerheid te claimen dat het kapot is.
       final lastPush = _lastPushDateTime;
       if (lastPush == null) {
-        _lastPushAge = 'nog geen push gezien';
-        _pushStale = false;
+        _lastPushAge = 'nog nooit een push ontvangen';
+        // Geregistreerd maar nóg nooit een push: op de Android-17-bèta dooft
+        // het kanaal soms al vóór de eerste push. Zonder waarschuwing leek
+        // dit scherm gezond terwijl er niets binnenkwam — precies de valkuil
+        // van de dump van 2026-10-01 (registered=true, Last push: none, en
+        // desondanks geen enkele push sinds de (her)login).
+        if (AppSettings.unifiedPushRegistered.value) {
+          _pushStale = true;
+          logs.add(
+            '⚠ Geregistreerd, maar nóg nooit een push ontvangen. Stuur één '
+            'testbericht; komt er niets, tik dan op '
+            '"Registreer push notifications".',
+          );
+        } else {
+          _pushStale = false;
+        }
       } else {
         final age = DateTime.now().difference(lastPush);
         _lastPushAge = _humanAge(age);
