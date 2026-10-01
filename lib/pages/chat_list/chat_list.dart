@@ -578,7 +578,22 @@ class ChatListController extends State<ChatList>
 
   String? get activeChat => widget.activeChat;
 
-  final _processedSharedPaths = <String>{};
+  /// Tijdsvenster voor de dedupe.
+  ///
+  /// WAAROM EEN VENSTER EN NIET SESSIELANG. De dedupe bestaat tegen een
+  /// plugin-race: hetzelfde bestand kan binnen milliseconden via både
+  /// getInitialMedia() en getMediaStream() binnenkomen. Dat venster is
+  /// tienden van seconden breed. Maar gemeten (2026-10-01, vijf maal
+  /// achtereen `share_afgebroken reden=alles-al-gezien`) houdt het oude
+  /// intent zich ook ná minuten vast op de activity: elke heropening van de
+  /// app bood dezelfde foto opnieuw aan en de sessie-dedupe blokkeerde hem
+  /// — delen deed toen NIETS meer, zichtbaar als niets-gebeurt.
+  ///
+  /// Daarom: paden ouder dan [shareDedupeVenster] verlopen uit de set.
+  /// Echte dubbele levering (binnen seconden) blijft gedempt; opnieuw delen
+  /// van hetzelfde bestand minuten later gaat gewoon door.
+  static const shareDedupeVenster = Duration(seconds: 10);
+  final _processedSharedPathsTijd = <String, DateTime>{};
 
   void _processIncomingSharedMedia(List<SharedMediaFile> files) {
     // Meet elke stap: bij een mislukte share is er geen foutmelding, dus
@@ -597,11 +612,16 @@ class ChatListController extends State<ChatList>
     }
 
     // Deduplicate: some Android devices deliver the same file via both
-    // getInitialMedia() and getMediaStream().
+    // getInitialMedia() and getMediaStream(). Met tijdsvenster: alleen
+    // paden binnen het venster gelden als duplicaat (zie commentaar boven).
+    final nu = DateTime.now();
+    _processedSharedPathsTijd.removeWhere(
+      (_, gezien) => nu.difference(gezien) > shareDedupeVenster,
+    );
     final uniqueFiles = files.where((file) {
       final normalized = file.path.replaceFirst('file://', '');
-      if (_processedSharedPaths.contains(normalized)) return false;
-      _processedSharedPaths.add(normalized);
+      if (_processedSharedPathsTijd.containsKey(normalized)) return false;
+      _processedSharedPathsTijd[normalized] = nu;
       return true;
     }).toList();
 

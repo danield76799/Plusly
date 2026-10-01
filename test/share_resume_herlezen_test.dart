@@ -91,14 +91,52 @@ void main() {
       );
     });
 
-    test('de dedupe op genormaliseerd pad blijft bestaan', () {
+    test('de dedupe is een TIJDVENSTER, niet sessielang', () {
       final bron = code('lib/pages/chat_list/chat_list.dart');
       expect(
-        bron.contains('_processedSharedPaths'),
+        bron.contains('_processedSharedPathsTijd'),
         isTrue,
         reason:
             'de herlezing kan hetzelfde bestand leveren als de stream; zonder '
             'dedupe zou dat bestand twee keer verstuurd worden',
+      );
+      // GEMETEN GEVAL 2026-10-01: vijf keer `share_afgebroken
+      // reden=alles-al-gezien` achtereen. Het oude intent bleef op de
+      // activity staan; de sessie-dedupe blokkeerde dezelfde foto bij elke
+      // heropening — delen deed minutenlang NIETS meer.
+      expect(
+        bron.contains('shareDedupeVenster'),
+        isTrue,
+        reason:
+            'de dedupe moet een tijdsvenster hebben. Een sessielange set '
+            'blokkeert hetzelfde bestand bij latere shares: het oude intent '
+            'blijft op de activity staan en elke heropening leverde '
+            'alles-al-gezien (gemeten 5x achtereen)',
+      );
+      // Het venster moet expliciet een Duration zijn — geen magisch getal.
+      expect(
+        bron.contains('Duration(seconds:'),
+        isTrue,
+        reason: 'het venster moet leesbaar en aanpasbaar zijn als constante',
+      );
+      // De verloog-logica moet de set écht afsnijden: removeWhere op de
+      // tijd-map, met het venster als drempel. Alleen een constante
+      // declareren is niet genoeg.
+      expect(
+        bron.contains('removeWhere') &&
+            bron.contains('nu.difference(gezien) > shareDedupeVenster'),
+        isTrue,
+        reason:
+            'de verlooplogica moet aanwezig zijn; zonder removeWhere blijft '
+            'de set sessielang en keert de blokkade terug',
+      );
+      // De oude, sessielange set mag niet meer bestaan.
+      expect(
+        bron.contains('_processedSharedPaths ='),
+        isFalse,
+        reason:
+            'oude sessielange set moet weg zijn; anders blijft de blokkade '
+            'bestaan naast het nieuwe venster',
       );
     });
   });
