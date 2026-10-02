@@ -662,6 +662,23 @@ class ChatListController extends State<ChatList>
       return;
     }
 
+    // INTENT OPSCHONEN vóór de dialog. Gemeten 2026-10-01: het share-intent
+    // bleef óp de activity staan en werd bij ELKE heropening van de app
+    // opnieuw aangeboden — de gebruiker wilde de app gewoon openen en kreeg
+    // telkens de deeldialoog ("Deel/Delen met"). De plugin heeft hiervoor
+    // reset() (consumeert het opgeslagen intent); zodra we het intent
+    // verwerken ruimen we het op, zodat een gewone app-start vers begint.
+    // Vóór de dialog (niet na): een crash in de dialog-route mag het intent
+    // niet achterlaten; liever een gemiste share (opnieuw delen kan) dan een
+    // dialoog die nooit stopt.
+    unawaited(
+      ReceiveSharingIntent.instance.reset().then((_) {
+        ShareEventLog().add('share_reset', {});
+      }).catchError((e) {
+        ShareEventLog().add('share_reset-fout', {'fout': '$e'});
+      }),
+    );
+
     // Dialog pas in het VOLGENDE frame tonen.
     //
     // De share-intent en de GoRouter-herbouw (thema, lifecycle, route-restore)
