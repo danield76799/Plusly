@@ -190,7 +190,7 @@
         </receiver>
 
         <!-- Houdt de UnifiedPush-registratie levend op de Android-17-bèta:
-             elke ~2h een verse register() die een doodgevallen koppeling
+             elke ~30 min een verse register() die een doodgevallen koppeling
              herstelt (gemeten: kanaal dooft na enkele uren stil). -->
         <receiver
             android:name="com.danield.plusly.app.PushKeepAliveReceiver"

@@ -52,7 +52,7 @@ class PushKeepAliveReceiver : BroadcastReceiver() {
         const val TAG = "PushKeepAlive"
         const val ACTION_KEEPALIVE = "com.danield.plusly.app.PUSH_KEEPALIVE"
         const val INSTANCE_DEFAULT = "default"
-        private const val INTERVAL_MS = 2L * 60 * 60 * 1000 // 2 uur
+        private const val INTERVAL_MS = 30L * 60 * 1000 // 30 minuten
 
         fun planVolgende(context: Context) {
             val pm = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
