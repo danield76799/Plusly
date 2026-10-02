@@ -13,6 +13,7 @@ import 'package:Pulsly/utils/share_event_log.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
+import 'package:matrix/matrix.dart';
 
 class PushDebugScreen extends StatefulWidget {
   const PushDebugScreen({super.key});
@@ -171,6 +172,56 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
     final eventLog = PushEventLog();
     await eventLog.load();
     final events = eventLog.events;
+
+    // BADGE-AUDIT (2026-10-02): de klacht "gelezen chats worden weer
+    // ongelezen" kan drie oorzaken hebben: (1) server notification_count >
+    // 0 (leesmarker niet aangekomen), (2) m.marked_unread-vlag staat aan
+    // (openen wist de vlag, maar als een sync hem terugzet...), (3)
+    // hasNewMessages — timestamp-vergelijking: het laatste event is nieuwer
+    // dan de leesmarker. Deze tabel toont per ongelezen kamer welke bron
+    // de badge omhoog houdt, zodat één dump de oorzaak bewijst in plaats
+    // van giswerk.
+    try {
+      final ongelezen = <Room>[];
+      for (final c in matrix.widget.clients.where((cl) => cl.isLogged())) {
+        ongelezen.addAll(
+          c.rooms.where(
+            (r) => r.membership == Membership.join && r.isUnread,
+          ),
+        );
+      }
+      if (ongelezen.isEmpty) {
+        logs.add('[badges] geen ongelezen kamers');
+      } else {
+        logs.add('[badges] ${ongelezen.length} ongelezen kamers (bron):');
+        final nu = DateTime.now();
+        for (final room in ongelezen) {
+          final teller = room.notificationCount;
+          final vlag = room.markedUnread;
+          final nieuw = room.hasNewMessages;
+          final last = room.lastEvent;
+          final leeftijd = last == null
+              ? '?'
+              : _humanAge(nu.difference(last.originServerTs));
+          String bron;
+          if (teller > 0 && !vlag) {
+            bron = 'TELLER (server kent de leesmarker niet?)';
+          } else if (vlag && teller == 0) {
+            bron = 'MARKED_UNREAD-vlag';
+          } else if (nieuw) {
+            bron = 'HAS_NEW_MESSAGES (timestamp-verschil)';
+          } else {
+            bron = 'combinatie';
+          }
+          logs.add(
+            '[badges] "${room.getLocalizedDisplayname()}": teller=$teller vlag=$vlag '
+            'nieuw=$nieuw lastAge=$leeftijd → $bron',
+          );
+        }
+      }
+    } catch (e) {
+      logs.add('[badges] mislukt: $e');
+    }
 
     // Share-diagnose: losse log, want delen is een ander onderwerp dan push.
     // Zonder deze regels is een mislukte share volledig spoorloos.
