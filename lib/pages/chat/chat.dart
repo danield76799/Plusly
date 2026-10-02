@@ -41,6 +41,7 @@ import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/synapse_admin_extension.dart';
 import 'package:Pulsly/utils/other_party_can_receive.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/privacy_options.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
@@ -776,7 +777,7 @@ class ChatController extends State<ChatPageWithRoom>
         PushEventLog().add('read_marker', {
           'room': room.id,
           'result': 'overgeslagen-echo-zonder-server-event',
-          'echo': '${markerEventId ?? ''}',
+          'echo': markerEventId ?? '',
         });
         room.notificationCount = 0;
         updateView();
@@ -785,7 +786,7 @@ class ChatController extends State<ChatPageWithRoom>
       PushEventLog().add('read_marker', {
         'room': room.id,
         'result': 'echo-vervangen',
-        'echo': '${markerEventId ?? ''}',
+        'echo': markerEventId ?? '',
         'server_event': serverEvent,
       });
       markerEventId = serverEvent;
