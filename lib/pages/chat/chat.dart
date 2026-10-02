@@ -802,10 +802,18 @@ class ChatController extends State<ChatPageWithRoom>
           'm.fully_read',
           {'event_id': markerEventId},
         ).catchError((e) {
+          // GEMETEN (2026-10-02-log): de homeserver weigert m.fully_read via
+          // de account-data-API met "M_BAD_JSON: Cannot set m.fully_read
+          // through this API. Use /rooms/.../read_markers" — op ELKE kamer.
+          // Dat is geen storing maar beleid: m.fully_read hoort via
+          // /read_markers gezet te worden, en precies dát doet de retry-loop
+          // hieronder altijd (result=ok in de log). Deze lokale poging is dus
+          // per definitie fout — hij is alleen maar ruis — en logt daarom als
+          // 'lokaal-overslaan' i.p.v. een schijnbare fout.
           PushEventLog().add('read_marker', {
             'room': room.id,
-            'result': 'lokaal-schrijven-mislukt',
-            'fout': '$e',
+            'result': 'lokaal-overslaan',
+            'reden': 'server-weigert-accountdata-m.fully_read',
           });
         }),
       );
