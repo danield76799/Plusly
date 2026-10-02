@@ -64,10 +64,14 @@ class PushKeepAliveReceiver : BroadcastReceiver() {
             )
             // setExactAndAllowWhileIdle: op de bèta worden onexacte alarms
             // onbetrouwbaar gebatched; exacte mag i.v.m. SCHEDULE_EXACT_ALARM.
+            // Eerste parameter = alarmtype (ELAPSED_REALTIME_WAKEUP: ook in
+            // doze wekken).
+            val alarmType = android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !pm.canScheduleExactAlarms()) {
-                pm.setAndAllowWhileIdle(android.os.SystemClock.elapsedRealtime() + INTERVAL_MS, pi)
+                pm.setAndAllowWhileIdle(alarmType, android.os.SystemClock.elapsedRealtime() + INTERVAL_MS, pi)
             } else {
                 pm.setExactAndAllowWhileIdle(
+                    alarmType,
                     android.os.SystemClock.elapsedRealtime() + INTERVAL_MS,
                     pi,
                 )
