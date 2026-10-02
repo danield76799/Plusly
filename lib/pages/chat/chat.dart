@@ -718,6 +718,17 @@ class ChatController extends State<ChatPageWithRoom>
 
   Future<void>? _setReadMarkerFuture;
 
+  /// Is dit event-id nog een lokale echo (door de server onbekend)?
+  ///
+  /// Lokale echo's krijgen een `~`-prefix (matrix-dart-sdk: client.dart
+  /// generateUniqueTransactionId → sendEvent echo). Een `m.fully_read` op
+  /// zo'n id negeert de server stil: hij kent het event niet. Gevolg was
+  /// precies het gemeten gedrag (2026-10-01, unread=22 urenlang terug in de
+  /// push-teller): lokaal gelezen, server bleef op de oude telling staan,
+  /// en de volgende sync zette de kamers terug op ongelezen.
+  static bool _isLocalEcho(String? id) =>
+      id != null && id.startsWith('~');
+
   void setReadMarker({String? eventId}) {
     if (_setReadMarkerFuture != null) return;
     if (_scrolledUp.value) return;
@@ -748,7 +759,37 @@ class ChatController extends State<ChatPageWithRoom>
     // Runs regardless of the "scroll up" banner below, so opening a room
     // always clears the unread badge even if older messages sit above the
     // read marker.
-    final markerEventId = eventId ?? room.lastEvent?.eventId;
+    var markerEventId = eventId ?? room.lastEvent?.eventId;
+    // ECHO-GUARD: een lokale echo-ID kan niet naar de server. Is het laatste
+    // event nog een echo, dan valt er in deze kamer nu op zijn minst een
+    // eerder, wél-bekend event te vinden — gebruik dat. Bestaat dat niet
+    // (echo is het énige event), dan is er niets te markeren; de badge reset
+    // lokaal en de echte marker volgt na de send-bevestiging, die via
+    // sendFuture.then → setReadMarker() opnieuw aankomt.
+    if (_isLocalEcho(markerEventId)) {
+      final serverEvent = timeline.events
+          .where((e) => e.status.isSent || e.status.isSynced)
+          .map((e) => e.eventId)
+          .where((id) => !_isLocalEcho(id))
+          .firstOrNull;
+      if (serverEvent == null) {
+        PushEventLog().add('read_marker', {
+          'room': room.id,
+          'result': 'overgeslagen-echo-zonder-server-event',
+          'echo': '${markerEventId ?? ''}',
+        });
+        room.notificationCount = 0;
+        updateView();
+        return;
+      }
+      PushEventLog().add('read_marker', {
+        'room': room.id,
+        'result': 'echo-vervangen',
+        'echo': '${markerEventId ?? ''}',
+        'server_event': serverEvent,
+      });
+      markerEventId = serverEvent;
+    }
     if (markerEventId != null) {
       room.notificationCount = 0;
       // Also persist locally so the badge stays 0 across rebuilds until the
@@ -759,7 +800,13 @@ class ChatController extends State<ChatPageWithRoom>
           room.id,
           'm.fully_read',
           {'event_id': markerEventId},
-        ),
+        ).catchError((e) {
+          PushEventLog().add('read_marker', {
+            'room': room.id,
+            'result': 'lokaal-schrijven-mislukt',
+            'fout': '$e',
+          });
+        }),
       );
       updateView();
     }
@@ -772,17 +819,12 @@ class ChatController extends State<ChatPageWithRoom>
 
     Logs().d('Set read marker...', eventId);
     // ignore: unawaited_futures
-    _setReadMarkerFuture = timeline
-        .setReadMarker(
-          eventId: markerEventId,
-          public: shouldSendPublicReadReceipts(room.client, roomId),
-        )
-        .catchError((e, s) {
-          Logs().w('setReadMarker failed for $roomId', e, s);
-        })
-        .whenComplete(() {
-          _setReadMarkerFuture = null;
-        });
+    _setReadMarkerFuture = _verstuurMarkerMetRetry(
+      timeline,
+      markerEventId,
+    ).whenComplete(() {
+      _setReadMarkerFuture = null;
+    });
 
     if (timeline is RoomTimeline) {
       if (eventId == null || eventId == timeline.room.lastEvent?.eventId) {
@@ -790,6 +832,55 @@ class ChatController extends State<ChatPageWithRoom>
           context,
         ).backgroundPush?.cancelNotification(room.client, roomId);
         // This also cancels notifications for thread messages in this room.
+      }
+    }
+  }
+
+  /// Stuurt de server-marker met korte retry en zichtbare log.
+  ///
+  /// WAAROM. De vorige code stuurde de `/read_markers`-PUT fire-and-forget
+  /// met alleen een `.catchError`-log in Logs(). Een stil-falende PUT
+  /// (netwerkglitch op de bèta, bearer-wissel bij sync) bleef daardoor
+  /// onzichtbaar — de server bleef de kamers op ongelezen zetten terwijl de
+  /// app lokaal gelezen toonde. Nu: 3 pogingen met korte backoff, en elke
+  /// uitkomst in de eventlog zodat een dump het bewijs levert.
+  Future<void> _verstuurMarkerMetRetry(
+    Timeline timeline,
+    String? markerEventId,
+  ) async {
+    final pogingen = 3;
+    for (var i = 1; i <= pogingen; i++) {
+      try {
+        await timeline
+            .setReadMarker(
+              eventId: markerEventId,
+              public: shouldSendPublicReadReceipts(room.client, roomId),
+            )
+            .timeout(const Duration(seconds: 20));
+        PushEventLog().add('read_marker', {
+          'room': room.id,
+          'event': markerEventId ?? '',
+          'poging': '$i',
+          'result': 'ok',
+        });
+        return;
+      } catch (e, s) {
+        // Netwerk-errors zijn verwachtbaar; echte bugs (onverwachte types)
+        // mogen ook in de console-log, voor het geval er iets dieper zit.
+        if (i == pogingen) {
+          PushEventLog().add('read_marker', {
+            'room': room.id,
+            'event': markerEventId ?? '',
+            'pogingen': '$pogingen',
+            'result': 'mislukt',
+            'fout': '$e',
+          });
+          Logs().w('setReadMarker failed after $pogingen tries', e, s);
+          return;
+        }
+        Logs().w('setReadMarker attempt $i/$pogingen failed', e, s);
+        await Future.delayed(Duration(seconds: 2 * i));
+        if (!mounted) return;
       }
     }
   }
