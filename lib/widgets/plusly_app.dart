@@ -62,11 +62,16 @@ class PluslyApp extends StatefulWidget {
     routes: AppRoutes.routes,
     debugLogDiagnostics: true,
     redirect: (context, state) {
+      // Altijd content:// URIs afvangen (koudstart share-intent).
+      // Deze redirect mag elke keer draaien; hij veroorzaakt geen
+      // "Future already completed" crash omdat hij NIET in het share-dialog
+      // frame vuurt (die navigeert naar /rooms/..., niet content://).
+      if (state.uri.scheme == 'content') return '/';
+
+      // Overige redirects slechts één keer (voorkomt herbouw tijdens
+      // share-dialog in hetzelfde frame — crash "Bad state: Future already completed").
       if (_initialRouteResolved) return null;
       _initialRouteResolved = true;
-      // Ignore content:// URIs from shared media intents,
-      // let receive_sharing_intent handle them instead.
-      if (state.uri.scheme == 'content') return '/';
       return null;
     },
   );
