@@ -80,8 +80,10 @@ class SendFileDialogState extends State<SendFileDialog> {
       // Video's krijgen hier nog een kans: die worden later progressief
       // gecomprimeerd (resizeVideo(maxBytes:)) zodat ze alsnog passen.
       for (final xfile in widget.files) {
-        final isVideo = (xfile.mimeType ?? lookupMimeType(xfile.path) ?? '')
-            .startsWith('video');
+        final path = xfile.path;
+        final mimeType = xfile.mimeType ?? (path != null ? lookupMimeType(path) : null);
+        // ignore: unnecessary_null_comparison
+        final isVideo = (mimeType ?? '').startsWith('video');
         if (isVideo) continue; // video -> compressie-pad hieronder
         final length = await xfile.length();
         if (length > maxUploadSize) {
@@ -117,7 +119,9 @@ class SendFileDialogState extends State<SendFileDialog> {
         MatrixFile file;
         MatrixImageFile? thumbnail;
         final length = await xfile.length();
-        final mimeType = xfile.mimeType ?? lookupMimeType(xfile.path);
+        final path = xfile.path;
+        final mimeType = xfile.mimeType ?? (path != null ? lookupMimeType(path) : null);
+        // ignore: unnecessary_null_comparison
         final name = xfile.name.isNotEmpty
             ? xfile.name
             : "file.${mimeType?.split('/').last ?? 'bin'}";

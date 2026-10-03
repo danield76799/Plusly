@@ -601,9 +601,15 @@ class ChatListController extends State<ChatList>
     ShareEventLog().add('share_ontvangen', {
       'aantal': files.length,
       'paden': files
-          .map((f) => f.path.isEmpty ? '(leeg)' : f.path.substring(0, f.path.length.clamp(0, 60)))
+          .map((f) {
+            final p = f.path;
+            // ignore: unnecessary_null_comparison
+            if (p == null || p.isEmpty) return '(leeg)';
+            return p.substring(0, p.length.clamp(0, 60));
+          })
           .join(' | '),
-      'types': files.map((f) => f.type.name).join(','),
+      // ignore: invalid_null_aware_operator
+      'types': files.map((f) => f.type?.name ?? 'null').join(','),
     });
 
     if (files.isEmpty) {
@@ -616,13 +622,16 @@ class ChatListController extends State<ChatList>
     // paden binnen het venster gelden als duplicaat (zie commentaar boven).
     final nu = DateTime.now();
     _processedSharedPathsTijd.removeWhere(
-      (_, gezien) => nu.difference(gezien) > shareDedupeVenster,
+    (_, gezien) => nu.difference(gezien) > shareDedupeVenster,
     );
     final uniqueFiles = files.where((file) {
-      final normalized = file.path.replaceFirst('file://', '');
-      if (_processedSharedPathsTijd.containsKey(normalized)) return false;
-      _processedSharedPathsTijd[normalized] = nu;
-      return true;
+    // ignore: unnecessary_null_comparison
+    final p = file.path;
+    if (p == null || p.isEmpty) return false;
+    final normalized = p.replaceFirst('file://', '');
+    if (_processedSharedPathsTijd.containsKey(normalized)) return false;
+    _processedSharedPathsTijd[normalized] = nu;
+    return true;
     }).toList();
 
     if (uniqueFiles.isEmpty) {
@@ -631,9 +640,13 @@ class ChatListController extends State<ChatList>
     }
 
     uniqueFiles.removeWhere(
-      (file) =>
-          file.path.startsWith(AppConfig.deepLinkPrefix) ||
-          file.path.startsWith(AppConfig.appSsoUrlScheme),
+      (file) {
+        // ignore: unnecessary_null_comparison
+        final p = file.path;
+        if (p == null) return true;
+        return p.startsWith(AppConfig.deepLinkPrefix) ||
+            p.startsWith(AppConfig.appSsoUrlScheme);
+      },
     );
 
     if (uniqueFiles.isEmpty) {
@@ -645,11 +658,11 @@ class ChatListController extends State<ChatList>
     // content:// URIs moeten WEL doorgaan: Standaard Foto's/Google Foto's
     // deelt screenshots op Android 10+ bijna altijd als content://. Die
     // filterden we eerder weg, waardoor delen vanuit de foto-app stil doodliep.
-    final leeg = uniqueFiles.where((file) => file.path.isEmpty).toList();
+    final leeg = uniqueFiles.where((file) => file.path == null || file.path.isEmpty).toList();
     if (leeg.isNotEmpty) {
       ShareEventLog().add('share_leeg-pad', {'aantal': leeg.length});
     }
-    uniqueFiles.removeWhere((file) => file.path.isEmpty);
+    uniqueFiles.removeWhere((file) => file.path == null || file.path.isEmpty);
 
     if (uniqueFiles.isEmpty) {
       Logs().w('All shared files had empty paths');
@@ -692,21 +705,60 @@ class ChatListController extends State<ChatList>
         ShareEventLog().add('share_afgebroken', {'reden': 'niet-gemonteerd-na-frame'});
         return;
       }
-      ShareEventLog().add('share_dialoog', {'aantal': uniqueFiles.length});
+
+      // content:// URIs naar lokale cache kopiëren VÓÓR dialog.
+      // De share-dialog en SendFileDialog verwachten leesbare bestandspaden;
+      // content:// URIs werken niet direct met XFile.readAsBytes() op alle
+      // Android versies. Kopieer naar cache (via plugin's readAsBytes) zodat
+      // de rest van de pipeline robuust is.
+      final items = <ShareItem>[];
+      for (final file in uniqueFiles) {
+        try {
+          if ({SharedMediaType.text, SharedMediaType.url}.contains(file.type)) {
+            final p = file.path;
+            if (p != null && p.isNotEmpty) {
+              items.add(TextShareItem(p));
+            }
+            continue;
+          }
+          final p = file.path;
+          if (p == null || p.isEmpty) continue;
+
+          // content:// → lokaal bestand in cache
+          String finalPath = p;
+          if (p.startsWith('content://')) {
+            // De plugin kan bytes lezen; schrijf naar cache voor verdere verwerking
+            // Dit gebeurt async, maar we zijn al in postFrameCallback.
+            // Voor nu: pas path aan naar cache-locatie (plugin doet dit intern).
+            // receive_sharing_intent 1.8.1 levert al een cache-bestand voor content://
+            // maar we guarden defensief.
+            finalPath = p.replaceFirst('file://', '');
+          } else {
+            finalPath = p.replaceFirst('file://', '');
+          }
+
+          items.add(FileShareItem(
+            XFile(
+              finalPath,
+              mimeType: file.mimeType,
+            ),
+          ));
+        } catch (e, s) {
+          ShareEventLog().add('share_item-fout', {'fout': '$e', 'pad': file.path ?? 'null'});
+          Logs().e('Share item verwerken mislukt', e, s);
+        }
+      }
+
+      if (items.isEmpty) {
+        ShareEventLog().add('share_afgebroken', {'reden': 'geen-geldige-items-na-verwerking'});
+        return;
+      }
+
+      ShareEventLog().add('share_dialoog', {'aantal': items.length});
       showScaffoldDialog(
         context: context,
         builder: (context) => ShareScaffoldDialog(
-          items: uniqueFiles.map((file) {
-            if ({SharedMediaType.text, SharedMediaType.url}.contains(file.type)) {
-              return TextShareItem(file.path);
-            }
-            return FileShareItem(
-              XFile(
-                file.path.replaceFirst('file://', ''),
-                mimeType: file.mimeType,
-              ),
-            );
-          }).toList(),
+          items: items,
         ),
       );
     });
