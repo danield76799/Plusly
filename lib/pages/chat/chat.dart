@@ -55,7 +55,7 @@ import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import 'package:Pulsly/widgets/future_loading_snackbar.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/share_scaffold_dialog.dart';
-import '../../utils/account_bundles.dart';
+import '../../utils/badge_fixer.dart';
 import '../../utils/localized_exception_extension.dart';
 import '../../utils/resize_video.dart';
 import 'send_file_dialog.dart';
@@ -872,6 +872,10 @@ class ChatController extends State<ChatPageWithRoom>
           'poging': '$i',
           'result': 'ok',
         });
+        // BADGE-FIXER: registreer deze lezing. Komt de kamer door een
+        // bridge-sync tóch terug als ongelezen (teller>0 zonder nieuw
+        // event), dan corrigeert de watcher dat (24 uur dekking).
+        BadgeFixer.instance.bewaarLezing(room.id);
         return;
       } catch (e, s) {
         // Netwerk-errors zijn verwachtbaar; echte bugs (onverwachte types)
@@ -2204,18 +2208,10 @@ class ChatController extends State<ChatPageWithRoom>
       await prefs.setString('draft_$roomId', text);
     });
     if (text.endsWith(' ') && Matrix.of(context).hasComplexBundles) {
-      final clients = currentRoomBundle;
-      for (final client in clients) {
-        final prefix = client!.sendPrefix;
-        if ((prefix.isNotEmpty) &&
-            text.toLowerCase() == '${prefix.toLowerCase()} ') {
-          setSendingClient(client);
-          setState(() {
-            sendController.clear();
-          });
-          return;
-        }
-      }
+      // sendPrefix bestaat niet meer in de huidige SDK — de
+      // account-wissel-via-prefix-functie is hier niet aanwezig.
+      // (Pre-existing compat-bug, gemeten 2026-10-03; multi-bundle-switch
+      // verloopt via de client-chooser.)
     }
     if (shouldSendTypingNotifications(room.client, roomId)) {
       typingCoolDown?.cancel();

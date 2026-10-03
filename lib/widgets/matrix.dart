@@ -32,6 +32,7 @@ import '../config/setting_keys.dart';
 import '../pages/key_verification/key_verification_dialog.dart';
 import '../utils/account_bundles.dart';
 import '../utils/background_push.dart';
+import '../utils/badge_fixer.dart';
 import 'local_notifications_extension.dart';
 
 // import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -315,6 +316,9 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       }
     });
     onUiaRequest[name] ??= c.onUiaRequest.stream.listen(uiaRequestHandler);
+    // BADGE-FIXER: sync-watcher — gelezen-kamers die de bridge terugzet op
+    // ongelezen worden lokaal gecorrigeerd (zie lib/utils/badge_fixer.dart).
+    BadgeFixer.instance.observeClientNamed(name, c);
     if (PlatformInfos.isWeb || PlatformInfos.isLinux) {
       c.onSync.stream.first.then((s) {
         html.Notification.requestPermission();
@@ -334,6 +338,8 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     onLoginStateChanged.remove(name);
     onNotification[name]?.cancel();
     onNotification.remove(name);
+    // BadgeFixer-sub voor deze client ook stoppen (bestaat per client).
+    BadgeFixer.instance.stopAlles();
   }
 
   void initMatrix() {
