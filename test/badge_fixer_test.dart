@@ -1,18 +1,43 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/utils/badge_fixer.dart';
+import 'package:Pulsly/utils/room_unread_extension.dart';
 
 void main() {
-  // BadgeFixer is een singleton met SDK-afhankelijkheden (Client/Room);
-  // de unit-tests dekken de puur-logische stukken: bewaarLezing + TTL.
+  // BadgeFixer deelt zijn lees-momenten met de UI-override (RoomUnreadX) en
+  // raakt daardoor SharedPreferences aan; de binding moet dus bestaan.
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    RoomUnreadX.debugClearCache();
+  });
+
   group('BadgeFixer', () {
-    test('bewaarLezing registreert kamers (geen crash, interne state)', () {
+    test('bewaarLezing registreert kamers in de persistente opslag', () async {
       final f = BadgeFixer.instance;
       f.bewaarLezing('!test-room-a');
       f.bewaarLezing('!test-room-b');
-      // Geen assert op privé-state: het gedrag (geen crash, sync-loos) is
-      // het contract; de corrigerende werking wordt door apparaat-dumps
-      // verifieert ([badge_fixer]-events in de push-debug log).
+
+      // De schrijfactie loopt async (unawaited); geef de microtask-queue de
+      // kans om te drainen voordat we de opslag uitlezen.
+      await Future<void>.delayed(Duration.zero);
+
+      // Eén bron van waarheid: wat de fixer bewaart, ziet de UI-override ook.
+      expect(RoomUnreadX.leesTijdSync('!test-room-a'), isNotNull);
+      expect(RoomUnreadX.leesTijdSync('!test-room-b'), isNotNull);
+    });
+
+    test('bewaarLezing overleeft een herstart via hydrate()', () async {
+      BadgeFixer.instance.bewaarLezing('!test-room-c');
+      await Future<void>.delayed(Duration.zero);
+
+      // Herstart simuleren: geheugen leeg, SharedPreferences intact.
+      RoomUnreadX.debugClearCache();
+      await RoomUnreadX.hydrate();
+
+      expect(RoomUnreadX.leesTijdSync('!test-room-c'), isNotNull);
     });
 
     test('meerdere observeClientNamed-call zijn idempotent', () {

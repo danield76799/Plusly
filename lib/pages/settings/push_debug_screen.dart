@@ -9,6 +9,7 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_event_log.dart';
+import 'package:Pulsly/utils/room_unread_extension.dart';
 import 'package:Pulsly/utils/share_event_log.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
@@ -203,6 +204,13 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
           final leeftijd = last == null
               ? '?'
               : _humanAge(nu.difference(last.originServerTs));
+          // Lokaal lees-moment meesturen: zonder dit is niet te zien of de
+          // override gehydrateerd is (na een herstart) en of een kamer dus
+          // terecht of onterecht ongelezen staat.
+          final lokaal = RoomUnreadX.leesTijdSync(room.id);
+          final lokaalTxt = lokaal == null
+              ? 'geen'
+              : _humanAge(nu.difference(lokaal));
           String bron;
           if (teller > 0 && !vlag) {
             bron = 'TELLER (server kent de leesmarker niet?)';
@@ -215,7 +223,7 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
           }
           logs.add(
             '[badges] "${room.getLocalizedDisplayname()}": teller=$teller vlag=$vlag '
-            'nieuw=$nieuw lastAge=$leeftijd → $bron',
+            'nieuw=$nieuw lastAge=$leeftijd lokaalGelezen=$lokaalTxt → $bron',
           );
         }
       }

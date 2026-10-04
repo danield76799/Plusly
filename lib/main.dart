@@ -16,6 +16,7 @@ import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_event_log.dart';
+import 'package:Pulsly/utils/room_unread_extension.dart';
 import 'package:Pulsly/utils/sync_debugger.dart';
 import 'package:Pulsly/widgets/error_widget.dart';
 import 'config/setting_keys.dart';
@@ -118,6 +119,13 @@ Future<void> _initializeApp() async {
 
   Logs().nativeColors = !PlatformInfos.isIOS;
   final store = await AppSettings.init();
+
+  // Lees-override hydrateren VÓÓR er iets van UI bouwt. De chatlijst en de
+  // badge lezen `isEffectivelyUnreadSync`, en dat is puur in-memory. Zonder
+  // deze regel is de override na elke koude start leeg en valt de UI terug
+  // op de SDK-teller — precies waar de bridge hem terugzet. Zie
+  // lib/utils/room_unread_extension.dart.
+  await RoomUnreadX.hydrate();
 
   // De app-brede tekstschaal begint op de BEWAARDE waarde, zodat een
   // herstart de gekozen maat meteen toont. De notifier is de brug naar de

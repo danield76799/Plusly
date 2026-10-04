@@ -46,12 +46,55 @@ extension RoomUnreadX on Room {
   ///
   /// Moet worden aangeroepen zodra de gebruiker de kamer opent én nadat de
   /// server read-marker succesvol is verstuurd.
-  Future<void> markeerLokaalGelezen() async {
+  Future<void> markeerLokaalGelezen() => markeerLokaalGelezenVoor(id);
+
+  /// Zelfde als [markeerLokaalGelezen], maar op room-id.
+  ///
+  /// Nodig omdat [BadgeFixer] alleen een id heeft en geen `Room`-instantie.
+  /// Eén implementatie voor beide houdt de opslag en de cache consistent.
+  static Future<void> markeerLokaalGelezenVoor(String roomId) async {
     final now = DateTime.now();
-    _cache[id] = now;
+    _cache[roomId] = now;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key(id), now.toIso8601String());
+    await prefs.setString(_key(roomId), now.toIso8601String());
   }
+
+  /// Synchrone toegang tot het bewaarde lees-moment van een kamer.
+  ///
+  /// Leest de in-memory cache. Die moet gevuld zijn door [hydrate] (bij
+  /// app-start) of door [markeerLokaalGelezen] (bij openen van een kamer).
+  static DateTime? leesTijdSync(String roomId) => _cache[roomId];
+
+  /// Laadt ALLE bewaarde lees-momenten uit SharedPreferences in het geheugen.
+  ///
+  /// ZONDER DEZE STAP IS DE HELE OVERRIDE NUTTELOOS NA EEN HERSTART. De UI
+  /// gebruikt `isEffectivelyUnreadSync`, en die leest uitsluitend de
+  /// in-memory `_cache`. Die is leeg bij een koude start, dus viel de UI
+  /// terug op de SDK-status — en precies daar zet de bridge zijn teller
+  /// terug. Gevolg: alle kamers kwamen na elke herstart terug als ongelezen,
+  /// ook al stond het lees-moment wél correct in SharedPreferences. Er was
+  /// alleen nooit iets dat die waarden inlas: de async getters die
+  /// `_laadTijd` gebruiken hebben nul call sites in de UI.
+  ///
+  /// Moet één keer bij het opstarten worden aangeroepen, vóór de chatlijst
+  /// voor het eerst bouwt.
+  static Future<void> hydrate() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (final key in prefs.getKeys()) {
+      if (!key.startsWith(_prefsPrefix)) continue;
+      final iso = prefs.getString(key);
+      if (iso == null || iso.isEmpty) continue;
+      try {
+        _cache[key.substring(_prefsPrefix.length)] = DateTime.parse(iso);
+      } catch (_) {
+        // Corrupte waarde: negeren. Eén slechte regel mag de start niet
+        // blokkeren en mag de rest van de kamers niet meeslepen.
+      }
+    }
+  }
+
+  /// Leegt de in-memory cache. Alleen voor tests die een herstart simuleren.
+  static void debugClearCache() => _cache.clear();
 
   /// Verwijder het lokale lees-moment (bij uitzonderen / debug).
   Future<void> verwijderLokaalGelezen() async {

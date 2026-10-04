@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/utils/push_event_log.dart';
+import 'package:Pulsly/utils/room_unread_extension.dart';
 
 /// VOORTDURENDE-BADGE-FIX (2026-10-03):
 ///
@@ -37,23 +38,27 @@ class BadgeFixer {
   static final BadgeFixer instance = BadgeFixer._();
   BadgeFixer._();
 
-  final Map<String, DateTime> _gelezenOp = {};
   StreamSubscription? _sub;
-
-  /// Camerazone: hoe lang een "gelezen-observatie" geldig blijft.
-  static const _observatieTtl = Duration(hours: 24);
 
   /// Max aantal correcties per sync (tegen run-away loops).
   static const _maxFixPerSync = 50;
 
   int fixAantal = 0;
 
-  /// Start de watcher voor een client.
-  /// Timestamp van de laatste keer dat deze kamer als gelezen is geregistreerd.
-  DateTime? leesTijd(String roomId) => _gelezenOp[roomId];
+  /// Moment waarop deze kamer voor het laatst als gelezen is geregistreerd.
+  ///
+  /// Leest de PERSISTENTE bron (SharedPreferences, via [RoomUnreadX]) en niet
+  /// een eigen in-memory map. Een eigen map was dezelfde bug als in de UI-
+  /// override: hij was leeg na elke herstart, waardoor de fixer precies de
+  /// kamers niet corrigeerde die de gebruiker vóór de herstart had gelezen.
+  DateTime? leesTijd(String roomId) => RoomUnreadX.leesTijdSync(roomId);
 
+  /// Registreert dat de gebruiker deze kamer nu gelezen heeft.
+  ///
+  /// Schrijft naar dezelfde persistente opslag als de UI-override, zodat er
+  /// één bron van waarheid is in plaats van twee die uit elkaar kunnen lopen.
   void bewaarLezing(String roomId) {
-    _gelezenOp[roomId] = DateTime.now();
+    unawaited(RoomUnreadX.markeerLokaalGelezenVoor(roomId));
   }
 
   void observeClient(Client client) {
@@ -76,15 +81,10 @@ class BadgeFixer {
   }
 
   void _checkSync(Client client) {
-    final nu = DateTime.now();
     var fixes = 0;
     for (final room in client.rooms.where((r) => r.membership == Membership.join)) {
-      final gelezen = _gelezenOp[room.id];
+      final gelezen = leesTijd(room.id);
       if (gelezen == null) continue;
-      if (nu.difference(gelezen) > _observatieTtl) {
-        _gelezenOp.remove(room.id);
-        continue;
-      }
       // Ook rooms die helemaal geen echte nieuwe events hebben sinds de
       // lezing moeten voor altijd als gelezen blijven staan, ook als de
       // bridge later (na reconnects, federatie, nachtelijke syncs) de
@@ -96,6 +96,7 @@ class BadgeFixer {
         final geenNieuwEvent =
             laatsTs == null || !laatsTs.isAfter(gelezen);
         if (geenNieuwEvent && fixes < _maxFixPerSync) {
+          final tellerWas = room.notificationCount;
           room.notificationCount = 0;
           if (room.markedUnread) {
             unawaited(room.markUnread(false).catchError((_) {}));
@@ -103,11 +104,8 @@ class BadgeFixer {
           fixes++;
           PushEventLog().add('badge_fixer', {
             'room': room.id,
-            'teller_was': '${room.notificationCount}',
+            'teller_was': '$tellerWas',
             'has_new': '${room.hasNewMessages}',
-            'laatst_leeftijd_s': laatsTs == null
-                ? '?'
-                : (nu.difference(laatsTs).inSeconds).toString(),
           });
         }
       }
