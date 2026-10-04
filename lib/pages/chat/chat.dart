@@ -146,6 +146,15 @@ class ChatController extends State<ChatPageWithRoom>
   /// Guard against timeline callbacks going silent because another getTimeline()
   /// call (TimelineCache, notification handler, etc.) cancelled our subscriptions.
 
+  /// Is het laatste event in deze kamer ouder dan de laatste keer dat de
+  /// gebruiker de kamer opende/als gelezen markeerde?
+  bool get heeftGeenNieuwEventSindsLaatsteLezing {
+    final laatst = room.lastEvent?.originServerTs;
+    final gelezenOp = BadgeFixer.instance.leesTijd(room.id);
+    if (laatst == null || gelezenOp == null) return false;
+    return !laatst.isAfter(gelezenOp);
+  }
+
   String get readMarkerEventId => room.hasNewMessages ? room.fullyRead : '';
 
   String get roomId => widget.room.id;
@@ -793,6 +802,7 @@ class ChatController extends State<ChatPageWithRoom>
     }
     if (markerEventId != null) {
       room.notificationCount = 0;
+      BadgeFixer.instance.bewaarLezing(room.id);
       // Also persist locally so the badge stays 0 across rebuilds until the
       // server confirms with a sync.
       unawaited(
@@ -824,7 +834,13 @@ class ChatController extends State<ChatPageWithRoom>
     // shown (user hasn't seen messages above the marker yet). The optimistic
     // badge reset above already ran, so the chat list is cleared; the server
     // marker is simply deferred until the user scrolls up / taps the banner.
-    if (scrollUpBannerEventId != null) return;
+    if (scrollUpBannerEventId != null) {
+      // Ook bij uitgestelde marker vastleggen dat de gebruiker deze kamer
+      // geopend heeft, zodat de BadgeFixer terugzettingen corrigeert zolang
+      // de banner actief is.
+      BadgeFixer.instance.bewaarLezing(room.id);
+      return;
+    }
 
     Logs().d('Set read marker...', eventId);
     // ignore: unawaited_futures
@@ -872,10 +888,6 @@ class ChatController extends State<ChatPageWithRoom>
           'poging': '$i',
           'result': 'ok',
         });
-        // BADGE-FIXER: registreer deze lezing. Komt de kamer door een
-        // bridge-sync tóch terug als ongelezen (teller>0 zonder nieuw
-        // event), dan corrigeert de watcher dat (24 uur dekking).
-        BadgeFixer.instance.bewaarLezing(room.id);
         return;
       } catch (e, s) {
         // Netwerk-errors zijn verwachtbaar; echte bugs (onverwachte types)

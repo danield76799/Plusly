@@ -49,6 +49,9 @@ class BadgeFixer {
   int fixAantal = 0;
 
   /// Start de watcher voor een client.
+  /// Timestamp van de laatste keer dat deze kamer als gelezen is geregistreerd.
+  DateTime? leesTijd(String roomId) => _gelezenOp[roomId];
+
   void bewaarLezing(String roomId) {
     _gelezenOp[roomId] = DateTime.now();
   }
@@ -82,21 +85,27 @@ class BadgeFixer {
         _gelezenOp.remove(room.id);
         continue;
       }
-      // Kamer ongelezen zonder nieuw event sinds de lezing = bridge-overschrijving.
-      if (room.isUnread && room.notificationCount > 0) {
+      // Ook rooms die helemaal geen echte nieuwe events hebben sinds de
+      // lezing moeten voor altijd als gelezen blijven staan, ook als de
+      // bridge later (na reconnects, federatie, nachtelijke syncs) de
+      // notificationCount weer verhoogt. Deze correctie is puur lokaal.
+      if (room.isUnread &&
+          (room.notificationCount > 0 || room.hasNewMessages)) {
         final last = room.lastEvent;
-        final laatsTs = last?.originServerTs; // DateTime in deze SDK
-        // Nieuw event sinds lezing = echte nieuwe berichten (badge terecht);
-        // geen nieuw event = bridge heeft de teller teruggezet.
+        final laatsTs = last?.originServerTs;
         final geenNieuwEvent =
             laatsTs == null || !laatsTs.isAfter(gelezen);
         if (geenNieuwEvent && fixes < _maxFixPerSync) {
           room.notificationCount = 0;
+          if (room.markedUnread) {
+            unawaited(room.markUnread(false).catchError((_) {}));
+          }
           fixes++;
           PushEventLog().add('badge_fixer', {
             'room': room.id,
-            'teller_was': 'positief',
-            'laats_leeftijd_s': laatsTs == null
+            'teller_was': '${room.notificationCount}',
+            'has_new': '${room.hasNewMessages}',
+            'laatst_leeftijd_s': laatsTs == null
                 ? '?'
                 : (nu.difference(laatsTs).inSeconds).toString(),
           });
