@@ -177,10 +177,27 @@ class PushHelper {
 
     // Upstream r129-133: event laden (storeInDatabase: false, zoals upstream).
     Logs().v('Load event...');
-    final event = await client.getEventByPushNotification(
-      notification,
-      storeInDatabase: false,
-    );
+    Event? event;
+    try {
+      event = await client.getEventByPushNotification(
+        notification,
+        storeInDatabase: false,
+      );
+    } catch (e, s) {
+      // De Extera-fork van de SDK gooit hier een Exception als het event niet
+      // te vinden is; upstream returned null voor clearing-pushes. Behandel
+      // 'm als clearing-indicator zodat de hele helper niet crasht.
+      Logs().w(
+        'Push helper: event kon niet worden opgelost, behandel als clearing',
+        e,
+        s,
+      );
+      PushEventLog().add('push_event_unresolvable', {
+        'room': notification.roomId ?? '',
+        'error': e.toString().split('\n').first,
+      });
+      event = null;
+    }
 
     // Upstream r135: badge bijwerken.
     updateAppBadge(notification.counts?.unread ?? 0);
