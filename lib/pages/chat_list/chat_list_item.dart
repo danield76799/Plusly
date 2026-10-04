@@ -5,6 +5,7 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_list/unread_bubble.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
+import 'package:Pulsly/utils/room_unread_extension.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import 'package:Pulsly/widgets/hover_builder.dart';
@@ -70,7 +71,8 @@ class ChatListItem extends StatelessWidget {
     final typingText = room.getLocalizedTypingText(context);
     final lastEvent = room.lastEvent;
     final ownMessage = lastEvent?.senderId == room.client.userID;
-    final unread = room.isUnread;
+    final unread = room.isEffectivelyUnreadSync;
+    final effectiveCount = room.effectiveNotificationCountSync;
     final directChatMatrixId = room.directChatMatrixID;
     final isDirectChat = directChatMatrixId != null;
     final backgroundColor = activeChat
@@ -194,7 +196,7 @@ class ChatListItem extends StatelessWidget {
                         // Basis is ruim genoeg voor "HH:mm" bij grotere fonts;
                         // per extra badgecijfer komt er ruimte bij.
                         width: 72 +
-                            (room.notificationCount.toString().length.clamp(1, 4) -
+                            (effectiveCount.toString().length.clamp(1, 4) -
                                 1) *
                                 10,
                         child: Row(
@@ -222,7 +224,11 @@ class ChatListItem extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 6),
-                            UnreadBubble(room: room),
+                            UnreadBubble(
+                              room: room,
+                              unreadOverride: unread,
+                              countOverride: effectiveCount,
+                            ),
                           ],
                         ),
                       ),
@@ -336,7 +342,7 @@ class ChatListItem extends StatelessWidget {
                                         : snapshot.data?.sanitizePreview() ??
                                             L10n.of(context).noMessagesYet,
                                         softWrap: false,
-                                        maxLines: room.notificationCount >= 1
+                                        maxLines: effectiveCount >= 1
                                           ? 2
                                           : 1,
                                         overflow: TextOverflow.ellipsis,

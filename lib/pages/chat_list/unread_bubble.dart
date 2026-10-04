@@ -6,14 +6,16 @@ import 'package:Pulsly/config/themes.dart';
 
 class UnreadBubble extends StatelessWidget {
   final Room room;
-  const UnreadBubble({required this.room, super.key});
+  final bool? unreadOverride;
+  final int? countOverride;
+  const UnreadBubble({required this.room, this.unreadOverride, this.countOverride, super.key});
 
   @override
   Widget build(BuildContext context) {
-    final unread = room.isUnread;
-    final hasNotifications = room.notificationCount > 0;
+    final unread = unreadOverride ?? room.isUnread;
+    final hasNotifications = (countOverride ?? room.notificationCount) > 0;
     final unreadBubbleSize = unread || room.hasNewMessages
-        ? room.notificationCount > 0
+        ? (countOverride ?? room.notificationCount) > 0
               ? 20.0
               : 14.0
         : 0.0;
@@ -25,7 +27,7 @@ class UnreadBubble extends StatelessWidget {
       height: unreadBubbleSize,
       width: !hasNotifications && !unread && !room.hasNewMessages
           ? 0
-          : (unreadBubbleSize - 9) * room.notificationCount.toString().length +
+          : (unreadBubbleSize - 9) * (countOverride ?? room.notificationCount).toString().length +
                 9,
       decoration: BoxDecoration(
         color: room.highlightCount > 0
@@ -39,7 +41,7 @@ class UnreadBubble extends StatelessWidget {
       ),
       child: hasNotifications
           ? Text(
-              room.notificationCount.toString(),
+              (countOverride ?? room.notificationCount).toString(),
               style: TextStyle(
                 color: Colors.white, // Always white text on red badges
                 fontSize: 13,

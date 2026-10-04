@@ -33,6 +33,7 @@ import 'package:Pulsly/widgets/share_scaffold_dialog.dart';
 import '../../../utils/account_bundles.dart';
 import '../../config/setting_keys.dart';
 import '../../utils/bridge_utils.dart';
+import '../../utils/room_unread_extension.dart';
 import '../../utils/share_event_log.dart';
 import '../../utils/url_launcher.dart';
 import '../../widgets/matrix.dart';
@@ -195,7 +196,7 @@ class ChatListController extends State<ChatList>
     final client = Matrix.of(context).client;
     final counts = <String, int>{};
     for (final room in client.rooms) {
-      if (!room.isSpace && room.isUnreadOrInvited) {
+      if (!room.isSpace && room.isEffectivelyUnreadSync) {
         final bridgeType = isBridgeRoom(room)
             ? (getBridgeType(room) ?? 'other')
             : 'matrix';
@@ -252,7 +253,7 @@ class ChatListController extends State<ChatList>
         return (room) =>
             room.isSpace;
       case .unread:
-        return (room) => room.isUnreadOrInvited && _isBridgeTypeVisible(room);
+        return (room) => room.isEffectivelyUnreadSync && _isBridgeTypeVisible(room);
       case .favorites:
         return (room) => true; // Show all rooms for saved messages search
       case .pinned:
@@ -348,7 +349,7 @@ class ChatListController extends State<ChatList>
       case .groups:
         return room.isSpace;
       case .unread:
-        return room.isUnreadOrInvited;
+        return room.isEffectivelyUnreadSync;
       case .favorites:
         return true;
       case .pinned:
@@ -1253,10 +1254,14 @@ class ChatListController extends State<ChatList>
         );
         return;
       case ChatContextAction.markUnread:
+        final nieuwWaarde = !room.markedUnread;
         await showFutureLoadingSnackbar(
           context: context,
-          future: () => room.markUnread(!room.markedUnread),
+          future: () => room.markUnread(nieuwWaarde),
         );
+        if (!nieuwWaarde) {
+          unawaited(room.markeerLokaalGelezen());
+        }
         return;
       case ChatContextAction.mute:
         await showFutureLoadingSnackbar(

@@ -58,6 +58,7 @@ import 'package:Pulsly/widgets/share_scaffold_dialog.dart';
 import '../../utils/badge_fixer.dart';
 import '../../utils/localized_exception_extension.dart';
 import '../../utils/resize_video.dart';
+import '../../utils/room_unread_extension.dart';
 import 'send_file_dialog.dart';
 import 'send_location_dialog.dart';
 
@@ -803,6 +804,7 @@ class ChatController extends State<ChatPageWithRoom>
     if (markerEventId != null) {
       room.notificationCount = 0;
       BadgeFixer.instance.bewaarLezing(room.id);
+      unawaited(room.markeerLokaalGelezen());
       // Also persist locally so the badge stays 0 across rebuilds until the
       // server confirms with a sync.
       unawaited(
@@ -839,6 +841,7 @@ class ChatController extends State<ChatPageWithRoom>
       // geopend heeft, zodat de BadgeFixer terugzettingen corrigeert zolang
       // de banner actief is.
       BadgeFixer.instance.bewaarLezing(room.id);
+      unawaited(room.markeerLokaalGelezen());
       return;
     }
 
@@ -888,6 +891,8 @@ class ChatController extends State<ChatPageWithRoom>
           'poging': '$i',
           'result': 'ok',
         });
+        BadgeFixer.instance.bewaarLezing(room.id);
+        unawaited(room.markeerLokaalGelezen());
         return;
       } catch (e, s) {
         // Netwerk-errors zijn verwachtbaar; echte bugs (onverwachte types)

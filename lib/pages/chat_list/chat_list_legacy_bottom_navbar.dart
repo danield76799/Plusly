@@ -7,6 +7,7 @@ import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/pages/chat_list/chat_list.dart';
+import 'package:Pulsly/utils/room_unread_extension.dart';
 import 'package:Pulsly/widgets/unread_rooms_badge.dart';
 
 class ChatListLegacyBottomNavbar extends StatelessWidget {
@@ -32,7 +33,7 @@ class ChatListLegacyBottomNavbar extends StatelessWidget {
       ActiveFilter.allChats: (Room room) => true,
       ActiveFilter.messages: (Room room) => room.isDirectChat,
       ActiveFilter.groups: (Room room) => room.isSpace,
-      ActiveFilter.unread: (Room room) => room.isUnread,
+      ActiveFilter.unread: (Room room) => room.isEffectivelyUnreadSync,
       ActiveFilter.favorites: (Room room) => false,
     };
 

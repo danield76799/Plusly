@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as b;
 import 'package:matrix/matrix.dart';
 
+import 'package:Pulsly/utils/room_unread_extension.dart';
+
 import 'matrix.dart';
 
 class UnreadRoomsBadge extends StatelessWidget {
@@ -23,7 +25,8 @@ class UnreadRoomsBadge extends StatelessWidget {
 
     final unreadCount = Matrix.of(context).client.rooms
         .where(filter)
-        .where((r) => (r.isUnread || r.membership == Membership.invite))
+        .where((r) =>
+            (r.isEffectivelyUnreadSync || r.membership == Membership.invite))
         .length;
     return b.Badge(
       badgeStyle: b.BadgeStyle(
