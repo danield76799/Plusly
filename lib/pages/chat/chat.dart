@@ -1315,7 +1315,11 @@ class ChatController extends State<ChatPageWithRoom>
       fileName = 'video_note_${DateTime.now().millisecondsSinceEpoch}.$ext';
     }
 
-    final file = await videoFile.resizeVideo();
+    // maxBytes meegeven zodat de video onder de serverlimiet blijft.
+    // Zonder dit kan de video-note enorm groot worden en de server weigeren.
+    final clientConfig = await room.client.getConfig();
+    final maxUploadSize = clientConfig.mUploadSize ?? 100 * 1000 * 1000;
+    final file = await videoFile.resizeVideo(maxBytes: maxUploadSize);
 
     MatrixImageFile? thumbnail;
     try {

@@ -142,6 +142,10 @@ abstract class ClientManager {
       nativeImplementations: nativeImplementations,
       customImageResizer: PlatformInfos.isMobile ? customImageResizer : null,
       defaultNetworkRequestTimeout: const Duration(minutes: 5),
+      // Upload-timeout: de SDK-standaard is 1 minuut, wat te kort is voor
+      // grote video's (zelfs gecomprimeerd) bij trage verbindingen. 10 minuten
+      // geeft de upload voldoende ruimte om te voltooien of correct te falen.
+      sendTimelineEventTimeout: const Duration(minutes: 10),
       enableDehydratedDevices: true,
       shareKeysWith:
           ShareKeysWith.values.singleWhereOrNull(
