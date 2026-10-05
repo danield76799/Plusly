@@ -75,7 +75,16 @@ abstract class ForegroundServices {
       // die service nooit gestart is) door naar de aanroep hieronder en kan
       // hij een service van een ander onderdeel — een gesprek — killen.
       final wasOurs = _runningServices.remove(name);
-      if (!wasOurs) return;
+      if (!wasOurs) {
+        // De service is niet door ons gestart in deze app-levensduur, maar
+        // kan wel draaien vanuit een vorige app-levensduur (app werd
+        // gekilled en herstart). Controleer of de service daadwerkelijk
+        // draait en stop hem dan toch.
+        if (await FlutterForegroundTask.isRunningService) {
+          await FlutterForegroundTask.stopService();
+        }
+        return;
+      }
       if (_runningServices.isNotEmpty) return;
       if (_externGestart) {
         // Niet van ons — laten draaien (gesprek blijft aan).
