@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/room_unread_extension.dart';
 
 /// VOORTDURENDE-BADGE-FIX (2026-10-03):
@@ -40,9 +39,6 @@ class BadgeFixer {
 
   StreamSubscription? _sub;
 
-  /// Max aantal correcties per sync (tegen run-away loops).
-  static const _maxFixPerSync = 50;
-
   int fixAantal = 0;
 
   /// Moment waarop deze kamer voor het laatst als gelezen is geregistreerd.
@@ -70,7 +66,9 @@ class BadgeFixer {
   final Map<String, StreamSubscription> _subs = {};
 
   void observeClientNamed(String name, Client client) {
-    _subs[name] ??= client.onSync.stream.listen((_) => _checkSync(client));
+    // No-op sinds 2026-10-06: de sync-correctie is gestopt (zie _checkSync).
+    // Er wordt bewust geen onSync-listener meer geregistreerd — de UI-override
+    // doet het werk op de display-laag, zonder mutatie en zonder eventlog-ruis.
   }
 
   void stopAlles() {
@@ -81,42 +79,22 @@ class BadgeFixer {
   }
 
   void _checkSync(Client client) {
-    var fixes = 0;
-    for (final room in client.rooms.where((r) => r.membership == Membership.join)) {
-      final gelezen = leesTijd(room.id);
-      if (gelezen == null) continue;
-      // Ook rooms die helemaal geen echte nieuwe events hebben sinds de
-      // lezing moeten voor altijd als gelezen blijven staan, ook als de
-      // bridge later (na reconnects, federatie, nachtelijke syncs) de
-      // notificationCount weer verhoogt. Deze correctie is puur lokaal.
-      if (room.isUnread &&
-          (room.notificationCount > 0 || room.hasNewMessages)) {
-        final last = room.lastEvent;
-        final laatsTs = last?.originServerTs;
-        final geenNieuwEvent =
-            laatsTs == null || !laatsTs.isAfter(gelezen);
-        if (geenNieuwEvent && fixes < _maxFixPerSync) {
-          final tellerWas = room.notificationCount;
-          room.notificationCount = 0;
-          if (room.markedUnread) {
-            unawaited(room.markUnread(false).catchError((_) {}));
-          }
-          fixes++;
-          PushEventLog().add('badge_fixer', {
-            'room': room.id,
-            'teller_was': '$tellerWas',
-            'has_new': '${room.hasNewMessages}',
-          });
-        }
-      }
-    }
-    if (fixes > 0) {
-      fixAantal += fixes;
-      PushEventLog().add('badge_fixer', {
-        'sync-fixes': '$fixes',
-        'totaal': '$fixAantal',
-      });
-    }
+    // GESTOPT (2026-10-06): de mutatie hieronder is een regressie.
+    //
+    // Oorspronkelijk corrigeerde deze watcher de bridge-terugzettingen door
+    // `room.notificationCount = 0` te zetten. Maar dat is een eindeloos
+    // gevecht: de bridge zet de teller bij ELKE sync terug (gemeten: 28
+    // correcties in ~4 minuten op één kamer, teller_was=201 → 0 → 201 → 0),
+    // en de mutatie is bovendien schadelijk — `isUnread` wordt er vals false
+    // door, wat de push-clearing-logica verwart, en het eventlog raakt
+    // overspoeld waardoor echte push-historie uit de buffer wordt geduwd.
+    //
+    // De UI-override (RoomUnreadX.isEffectivelyUnreadSync) doet dit werk al
+    // correct en zonder te muteren: hij vergelijkt de event-tijdstempel met
+    // het lokale leesmoment en beslist puur op de display-laag of een kamer
+    // ongelezen is. De bridge mag zijn eigen teller houden; wij tonen wat de
+    // gebruiker zélf heeft gelezen. Deze sync-watcher is daarmee overbodig en
+    // wordt bewust niet meer aangeroepen (observeClientNamed is een no-op).
   }
 
   Future<void> dispose() async {
