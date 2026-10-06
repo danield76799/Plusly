@@ -119,6 +119,23 @@ class _PushDebugScreenState extends State<PushDebugScreen> {
       }
       logs.add('Last push timestamp: ${_lastPushTime ?? 'none'}');
 
+      // Keepalive-zichtbaarheid: toon of (en wanneer) de keepalive-receiver
+      // voor het laatst heeft gevuurd. De receiver schrijft dit tijdstempel
+      // rechtstreeks naar dezelfde SharedPreferences. Zonder deze regel is de
+      // keepalive alleen in logcat te zien en is onderscheidbaar noch meetbaar
+      // of het alarm vuurt (en Sunup niet reageert) of dat het alarm zelf
+      // nooit vuurt. "geen" betekent: alarm vuurt niet (doze slikt 'm in).
+      final keepaliveMs = prefs.getInt('push_keepalive_last_fired');
+      if (keepaliveMs == null) {
+        logs.add('⚠ Keepalive: nog nooit gevuurd (alarm komt niet af).');
+      } else {
+        final keepaliveDt = DateTime.fromMillisecondsSinceEpoch(keepaliveMs);
+        logs.add(
+          'Keepalive laatste vuur: ${keepaliveDt.toIso8601String()} '
+          '(${_humanAge(DateTime.now().difference(keepaliveDt))} geleden)',
+        );
+      }
+
       // Endpoint-frisheid: toont hoe lang geleden de laatste push was. Een
       // stil kanaal (Sunup/ntfy op Android 17 bèta dooft na verloop van tijd
       // uit) is hieraan te herkennen: de laatste push is dan opeens oud,

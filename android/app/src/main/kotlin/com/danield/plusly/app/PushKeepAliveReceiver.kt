@@ -32,6 +32,18 @@ import org.unifiedpush.android.connector.UnifiedPush as UpConnector
 class PushKeepAliveReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != ACTION_KEEPALIVE) return
+        // Zichtbaarheid: schrijf het vuur-tijdstempel naar dezelfde
+        // SharedPreferences die de Flutter-app leest (prefix 'flutter.'), zodat
+        // de push-dump kan bewijzen óf dit alarm überhaupt vuurt. Zonder deze
+        // regel was de keepalive alleen in logcat te zien en kon geen enkele
+        // dump (A) "alarm vuurt niet" van (B) "alarm vuurt maar Sunup reageert
+        // niet" onderscheiden.
+        try {
+            context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+                .edit().putLong(PREF_LAST_FIRED, System.currentTimeMillis()).commit()
+        } catch (e: Exception) {
+            Log.w(TAG, "keepalive: timestamp schrijven mislukt", e)
+        }
         try {
             val distributor = UpConnector.getAckDistributor(context)
             if (distributor == null) {
@@ -52,6 +64,9 @@ class PushKeepAliveReceiver : BroadcastReceiver() {
         const val TAG = "PushKeepAlive"
         const val ACTION_KEEPALIVE = "com.danield.plusly.app.PUSH_KEEPALIVE"
         const val INSTANCE_DEFAULT = "default"
+        // Full key inclusief de 'flutter.'-prefix die de Dart-kant er automatisch
+        // bij zet; de Dart-side leest dan prefs.getInt('push_keepalive_last_fired').
+        const val PREF_LAST_FIRED = "flutter.push_keepalive_last_fired"
         private const val INTERVAL_MS = 30L * 60 * 1000 // 30 minuten
 
         fun planVolgende(context: Context) {
