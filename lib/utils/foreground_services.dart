@@ -104,23 +104,23 @@ abstract class ForegroundServices {
   static Future<void> stopService(String name) async {
     try {
       if (!platformSupported) return;
-      // Alleen stoppen wat WIJ in deze levensduur startten. Zonder deze toets
-      // valt een stopService('background_push') bij een voorgrond-push (waar
-      // die service nooit gestart is) door naar de aanroep hieronder en kan
-      // hij een service van een ander onderdeel — een gesprek — killen.
+      // Verwijder de owner-markering ONAFHANKELIJK van de in-memory
+      // lijst. Bij een koude start is `_runningServices` leeg, maar
+      // de markering in SharedPreferences is wél aanwezig — dat is
+      // precies het signaal dat deze service door een vorige, gekilde
+      // levenscyclus is gestart en nu als wees beschouwd moet worden.
+      // Een externe service (voip/gesprek) heeft géén markering, dus
+      // wordt hier NIET geraakt.
+      final stopPrefs = await SharedPreferences.getInstance();
+      await stopPrefs.remove(_ownerKey);
       final wasOurs = _runningServices.remove(name);
       if (!wasOurs) return;
       if (_runningServices.isNotEmpty) return;
       if (_externGestart) {
-        // Niet van ons — laten draaien (gesprek blijft aan).
         _externGestart = false;
         return;
       }
       await FlutterForegroundTask.stopService();
-      // Verwijder de owner-markering; anders ziet een volgende processtart de
-      // zojuist gestopte service foutieflijk als een wees van ons.
-      final stopPrefs = await SharedPreferences.getInstance();
-      await stopPrefs.remove(_ownerKey);
     } catch (e) {
       Logs().e('[ForegroundServices] stop failed', e);
     }
