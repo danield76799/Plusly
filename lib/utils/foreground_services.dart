@@ -16,6 +16,7 @@ import 'dart:ui';
 
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:matrix/matrix.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
@@ -24,6 +25,21 @@ import 'package:Pulsly/utils/platform_infos.dart';
 abstract class ForegroundServices {
   static final List<String> _runningServices = [];
   static bool _externGestart = false;
+
+  /// Persistent merkteken van wie de service startte in deze LEEFCYCLUS.
+  ///
+  /// WAAROM DIT NODIG IS. `_runningServices` is een in-memory map: bij een
+  /// app-kill is die leeg terwijl de native service nog kan draaien. Bij een
+  /// koude processtart ziet `startService` dan `isRunningService == true`,
+  /// markeert hem als `_externGestart` ("niet van ons, laten draaien") — en
+  /// stopt hem daarna NOOIT meer. De `loadingMessages`-placeholder ("Plusly
+  /// Berichten laden") blijft dan eeuwig staan, precies het gemeten gedrag.
+  ///
+  /// De oplossing: onthouden WELKE component de service startte in
+  /// SharedPreferences (die beide processen delen — ook na een kill). Enkel
+  /// een service zónder die markering (bv. voip, die zijn eigen lifecycle
+  /// beheert) wordt als echt extern beschouwd.
+  static const _ownerKey = 'foreground_service_starter';
 
   static bool get platformSupported => PlatformInfos.isMobile;
 
@@ -50,10 +66,24 @@ abstract class ForegroundServices {
         ),
       );
       if (await FlutterForegroundTask.isRunningService) {
-        // Al aan (bv. gesprek): delen, maar straks niet stoppen.
-        _externGestart = true;
-        Logs().d('[ForegroundServices] service already running, sharing it');
-        return;
+        // Service draait al. Drie mogelijkheden:
+        // 1. In dezelfde levenscyclus gestart (bv. tweede send) → delen, later stoppen.
+        // 2. Echt extern (voip/gesprek) → delen, nooit stoppen.
+        // 3. Wees van een gekilde proces → opruimen en opnieuw starten.
+        final prefs = await SharedPreferences.getInstance();
+        final owner = prefs.getString(_ownerKey);
+        if (owner != null) {
+          // Wees-service: dit proces kende 'm niet, maar de markering staat er
+          // nog. Ruim op en start de nieuwe taak vers op.
+          Logs().d('[ForegroundServices] orphan from previous process: $owner, restarting');
+          await FlutterForegroundTask.stopService();
+          // Door naar start hieronder.
+        } else {
+          // Geen owner-markering → echt extern (voip) of al gedeeld in deze levenscyclus.
+          _externGestart = true;
+          Logs().d('[ForegroundServices] service already running, sharing it');
+          return;
+        }
       }
       _externGestart = false;
       final result = await FlutterForegroundTask.startService(
@@ -61,6 +91,10 @@ abstract class ForegroundServices {
         notificationTitle: AppConfig.applicationName,
         notificationText: l10n.loadingMessages,
       );
+      // Markeren wie 'm startte: een app-kill laat de native service draaien,
+      // en zonder dit staat de volgende processtart hem buiten onze scope.
+      final ownerPrefs = await SharedPreferences.getInstance();
+      await ownerPrefs.setString(_ownerKey, name);
       Logs().d('[ForegroundServices] start $name: $result');
     } catch (e) {
       Logs().e('[ForegroundServices] start failed', e);
@@ -75,16 +109,7 @@ abstract class ForegroundServices {
       // die service nooit gestart is) door naar de aanroep hieronder en kan
       // hij een service van een ander onderdeel — een gesprek — killen.
       final wasOurs = _runningServices.remove(name);
-      if (!wasOurs) {
-        // De service is niet door ons gestart in deze app-levensduur, maar
-        // kan wel draaien vanuit een vorige app-levensduur (app werd
-        // gekilled en herstart). Controleer of de service daadwerkelijk
-        // draait en stop hem dan toch.
-        if (await FlutterForegroundTask.isRunningService) {
-          await FlutterForegroundTask.stopService();
-        }
-        return;
-      }
+      if (!wasOurs) return;
       if (_runningServices.isNotEmpty) return;
       if (_externGestart) {
         // Niet van ons — laten draaien (gesprek blijft aan).
@@ -92,6 +117,10 @@ abstract class ForegroundServices {
         return;
       }
       await FlutterForegroundTask.stopService();
+      // Verwijder de owner-markering; anders ziet een volgende processtart de
+      // zojuist gestopte service foutieflijk als een wees van ons.
+      final stopPrefs = await SharedPreferences.getInstance();
+      await stopPrefs.remove(_ownerKey);
     } catch (e) {
       Logs().e('[ForegroundServices] stop failed', e);
     }
