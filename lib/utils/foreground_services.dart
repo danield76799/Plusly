@@ -53,8 +53,13 @@ abstract class ForegroundServices {
   /// draaien, dus dan blijft "Berichten laden" eeuwig staan — precies het
   /// gemeten gedrag. Deze watchdog is het vangnet: na [watchdogTimeout] gaat de
   /// service uit, wat er ook gebeurd is.
-  static const watchdogTimeout = Duration(seconds: 120);
+  ///
+  /// Voorheen 120s, maar in de praktijk blijft de melding zichtbaar zolang de
+  /// service draait. 30s is ruim genoeg voor de push-pipeline (pushHelper timeout
+  /// = 30s) en zorgt dat een achtergebleven melding snel verdwijnt.
+  static const watchdogTimeout = Duration(seconds: 30);
   static Timer? _watchdog;
+  static DateTime? _serviceStartedAt;
 
   static bool get platformSupported => PlatformInfos.isMobile;
 
@@ -72,25 +77,35 @@ abstract class ForegroundServices {
   /// kijkt naar de app, dus een laadmelding van een oude push is per definitie
   /// verouderd.
   ///
-  /// Alleen [backgroundPushService] wordt gestopt. Dat is bewust smal: een
-  /// `send_files`-service hoort bij een upload die nog kan lopen, en die mag
-  /// hier nooit worden afgebroken. De push-service daarentegen is puur
-  /// technisch (hij beschermt het koude-start-venster) en kan geen legitieme
-  /// langdurige taak zijn.
+  /// We stoppen de service als:
+  /// - hij van ons is ([backgroundPushService] owner), óf
+  /// - er helemaal geen owner bekend is (dode service zonder eigenaar), óf
+  /// - de service al langer dan [watchdogTimeout] draait.
+  ///
+  /// `send_files` wordt nooit gestopt door deze functie; die heeft een eigen
+  /// levenscyclus en de owner-markering staat op een andere naam.
   static Future<void> reconcileOnForegroundStart() async {
     try {
       if (!platformSupported) return;
       if (!await FlutterForegroundTask.isRunningService) return;
       final prefs = await SharedPreferences.getInstance();
       final owner = prefs.getString(_ownerKey);
-      if (owner != backgroundPushService) return;
+      final runningTooLong = _serviceStartedAt != null &&
+          DateTime.now().difference(_serviceStartedAt!) > watchdogTimeout;
+      final shouldStop = owner == backgroundPushService ||
+          (owner == null && runningTooLong) ||
+          (owner == null &&
+              _runningServices.isEmpty &&
+              await FlutterForegroundTask.isRunningService);
+      if (!shouldStop) return;
       Logs().w(
-        '[ForegroundServices] stale $owner service on foreground start, stopping',
+        '[ForegroundServices] reconcile: stale service (owner=$owner, runningTooLong=$runningTooLong), stopping',
       );
       await prefs.remove(_ownerKey);
       _runningServices.remove(owner);
       _watchdog?.cancel();
       _watchdog = null;
+      _serviceStartedAt = null;
       await FlutterForegroundTask.stopService();
     } catch (e) {
       Logs().e('[ForegroundServices] reconcile failed', e);
@@ -104,6 +119,7 @@ abstract class ForegroundServices {
         _runningServices.add(name);
       }
       final l10n = await L10n.delegate.load(PlatformDispatcher.instance.locale);
+      final prefs = await SharedPreferences.getInstance();
       FlutterForegroundTask.init(
         androidNotificationOptions: AndroidNotificationOptions(
           channelId: 'notification_channel_id',
@@ -119,12 +135,12 @@ abstract class ForegroundServices {
           allowWakeLock: true,
         ),
       );
-      if (await FlutterForegroundTask.isRunningService) {
+      final alreadyRunning = await FlutterForegroundTask.isRunningService;
+      if (alreadyRunning) {
         // Service draait al. Drie mogelijkheden:
         // 1. In dezelfde levenscyclus gestart (bv. tweede send) → delen, later stoppen.
         // 2. Echt extern (voip/gesprek) → delen, nooit stoppen.
         // 3. Wees van een gekilde proces → opruimen en opnieuw starten.
-        final prefs = await SharedPreferences.getInstance();
         final owner = prefs.getString(_ownerKey);
         if (owner != null) {
           // Wees-service: dit proces kende 'm niet, maar de markering staat er
@@ -135,11 +151,12 @@ abstract class ForegroundServices {
         } else {
           // Geen owner-markering → echt extern (voip) of al gedeeld in deze levenscyclus.
           _externGestart = true;
-          Logs().d('[ForegroundServices] service already running, sharing it');
+          Logs().d('[ForegroundServices] service already running without owner, sharing it');
           return;
         }
       }
       _externGestart = false;
+      _serviceStartedAt = DateTime.now();
       final result = await FlutterForegroundTask.startService(
         serviceTypes: [ForegroundServiceTypes.shortService],
         notificationTitle: AppConfig.applicationName,
@@ -147,8 +164,7 @@ abstract class ForegroundServices {
       );
       // Markeren wie 'm startte: een app-kill laat de native service draaien,
       // en zonder dit staat de volgende processtart hem buiten onze scope.
-      final ownerPrefs = await SharedPreferences.getInstance();
-      await ownerPrefs.setString(_ownerKey, name);
+      await prefs.setString(_ownerKey, name);
       // Vangnet: als de afronding (pushHelper finally / whenComplete) nooit
       // loopt, ruimt de watchdog de service alsnog op.
       _armWatchdog(name);
@@ -192,6 +208,7 @@ abstract class ForegroundServices {
       if (!isOurs) return;
       _watchdog?.cancel();
       _watchdog = null;
+      _serviceStartedAt = null;
       // Markeren verwijderen: een volgende start mag deze service
       // niet meer als 'ons' beschouwen als hij inmiddels is
       // opgeruimd door iets anders.

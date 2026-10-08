@@ -58,6 +58,16 @@ void main() {
       );
     });
 
+    test('watchdog timeout is hooguit 60 seconden', () {
+      // Meldingen moeten snel opruimen. PushHelper timeout = 30s; 60s is
+      // ruim genoeg en voorkomt dat de melding minuten blijft staan.
+      expect(
+        services.contains('Duration(seconds: 120)'),
+        isFalse,
+        reason: '120s laat de melding te lang zichtbaar bij een achtergebleven service',
+      );
+    });
+
     test('stoppen ontwapent de watchdog', () {
       // Een watchdog die na een nette stop alsnog vuren kan, stopt een
       // daaropvolgende upload van een ander doel.
@@ -82,20 +92,23 @@ void main() {
       // Alleen onze eigen service: een gesprek heeft geen owner-markering en
       // moet blijven draaien.
       expect(
-        services.contains('if (owner != backgroundPushService) return;'),
+        services.contains('owner == backgroundPushService'),
         isTrue,
         reason: 'een externe service (voip) mag niet worden gestopt, en een '
             'lopende upload evenmin',
       );
     });
 
-    test('main.dart roept het opruimen aan bij elke voorgrond-ingang', () {
+    test('main.dart roept het opruimen aan vóór zware initialisatie', () {
       final main = _code('lib/main.dart');
+      final initIdx = main.indexOf('isBackgroundFetch') + 'isBackgroundFetch'.length;
+      final getClientsIdx = main.indexOf('ClientManager.getClients');
+      final reconcileIdx = main.indexOf('reconcileOnForegroundStart()');
       expect(
-        main.contains('reconcileOnForegroundStart()'),
+        reconcileIdx != -1 && (getClientsIdx == -1 || reconcileIdx < getClientsIdx),
         isTrue,
-        reason: 'een koude start én de overgang vanuit background-fetch '
-            'moeten beide opruimen',
+        reason: 'reconcile moet vóór ClientManager.getClients lopen zodat de '
+            'melding onmiddellijk verdwijnt, niet pas na de zware init',
       );
     });
 

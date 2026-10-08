@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
@@ -161,6 +162,14 @@ Future<void> _initializeApp() async {
     });
   } catch (_) {}
 
+  // Opruimen zodra we weten dat dit een foreground-start is. We doen dit
+  // vóór ClientManager.getClients() zodat een eventuele achtergebleven
+  // "Berichten laden"-melding direct verdwijnt, zonder dat de gebruiker
+  // moet wachten tot de zware initialisatie klaar is.
+  if (!isBackgroundFetch) {
+    await ForegroundServices.reconcileOnForegroundStart();
+  }
+
   if (isBackgroundFetch) {
     // FluffyChat-pariteit (upstream main.dart r86): start de korte
     // foreground-service VÓÓR ClientManager.getClients(). Upstream's volgorde
@@ -212,6 +221,10 @@ Future<void> _initializeApp() async {
   // Een service die een vorige levenscyclus niet heeft kunnen afronden
   // ("Plusly / Berichten laden") ruimt hier op: de gebruiker kijkt nu naar
   // de app, dus die melding is verouderd. Zie reconcileOnForegroundStart.
+  //
+  // NB: reconcile is al een keer gelopen direct na het bepalen van
+  // isBackgroundFetch; deze herhaalde aanroep is een extra vangnet voor het
+  // geval de eerste omzeild werd of de service tussendoor is gestart.
   await ForegroundServices.reconcileOnForegroundStart();
   await startGui(clients, store);
 }
@@ -267,7 +280,7 @@ class AppStarter with WidgetsBindingObserver {
     // De background-fetch-service heeft zijn werk gedaan zodra er een GUI
     // komt. Zonder dit blijft de laadmelding staan als de push-afronding
     // nooit liep (zie reconcileOnForegroundStart).
-    ForegroundServices.reconcileOnForegroundStart();
+    unawaited(ForegroundServices.reconcileOnForegroundStart());
     startGui(clients, store);
     // We must make sure that the GUI is only started once.
     guiStarted = true;
