@@ -104,18 +104,22 @@ abstract class ForegroundServices {
   static Future<void> stopService(String name) async {
     try {
       if (!platformSupported) return;
-      // Verwijder de owner-markering ONAFHANKELIJK van de in-memory
-      // lijst. Bij een koude start is `_runningServices` leeg, maar
-      // de markering in SharedPreferences is wél aanwezig — dat is
-      // precies het signaal dat deze service door een vorige, gekilde
-      // levenscyclus is gestart en nu als wees beschouwd moet worden.
-      // Een externe service (voip/gesprek) heeft géén markering, dus
-      // wordt hier NIET geraakt.
+      // Op een koude start is _runningServices leeg, maar de
+      // owner-markering in SharedPreferences is wél aanwezig als
+      // deze service door ons in een eerdere levenscyclus is
+      // gestart. De markering is het betrouwbare signaal:
+      // staat hij er én komt hij van ons → stop hem.
+      // Een externe service (voip/gesprek) heeft géén markering →
+      // laten we lopen.
       final stopPrefs = await SharedPreferences.getInstance();
+      final owner = stopPrefs.getString(_ownerKey);
+      final isOurs = owner == name || _runningServices.contains(name);
+      if (!isOurs) return;
+      // Markeren verwijderen: een volgende start mag deze service
+      // niet meer als 'ons' beschouwen als hij inmiddels is
+      // opgeruimd door iets anders.
       await stopPrefs.remove(_ownerKey);
-      final wasOurs = _runningServices.remove(name);
-      if (!wasOurs) return;
-      if (_runningServices.isNotEmpty) return;
+      _runningServices.remove(name);
       if (_externGestart) {
         _externGestart = false;
         return;
