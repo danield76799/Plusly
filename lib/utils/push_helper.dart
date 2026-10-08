@@ -126,7 +126,9 @@ class PushHelper {
       }
       rethrow;
     } finally {
-      await ForegroundServices.stopService('background_push');
+      await ForegroundServices.stopService(
+        ForegroundServices.backgroundPushService,
+      );
     }
   }
 

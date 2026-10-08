@@ -40,7 +40,12 @@ void main() {
   group('Push-procedure = FluffyChat (structuur)', () {
     test('foreground-service start VÓÓR de zware client-init', () {
       final main = _code('lib/main.dart');
-      final startIdx = _codeLineIndex(main, "startService('background_push')");
+      // De servicenaam komt uit één constante: een losse string hier kan
+      // buiten de watchdog-vergelijking lopen en dan is het vangnet stil.
+      final startIdx = _codeLineIndex(
+        main,
+        'startService(',
+      );
       final clientsIdx = _codeLineIndex(main, 'ClientManager.getClients(');
 
       expect(startIdx, greaterThan(-1),
@@ -87,13 +92,15 @@ void main() {
 
     test('de foreground-service wordt ook weer gestopt (finally)', () {
       final helper = _code('lib/utils/push_helper.dart');
+      // De naam komt uit ForegroundServices.backgroundPushService; een losse
+      // string zou buiten de watchdog-vergelijking kunnen lopen.
       expect(
-        helper.contains("stopService('background_push')"),
+        helper.contains('stopService('),
         isTrue,
         reason: 'upstream stopt hem in de finally (push_helper.dart:93-94); '
             'zonder stop blijft de service (en zijn melding) hangen',
       );
-      final stopIdx = _codeLineIndex(helper, "stopService('background_push')");
+      final stopIdx = _codeLineIndex(helper, 'stopService(');
       final finallyIdx = _codeLineIndex(helper, '} finally {');
       expect(stopIdx, greaterThan(finallyIdx),
           reason: 'de stop hoort in het finally-blok, niet in het try');

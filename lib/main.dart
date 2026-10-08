@@ -169,7 +169,9 @@ Future<void> _initializeApp() async {
     // client-setup, seconden lang) onbeschermd, waarna Android het proces
     // wegvaagt vóór de notificatie getoond is. Gestopt in push_helper.dart
     // (finally), net als upstream push_helper.dart r93-94.
-    await ForegroundServices.startService('background_push');
+    await ForegroundServices.startService(
+      ForegroundServices.backgroundPushService,
+    );
 
     final clients = await ClientManager.getClients(store: store);
 
@@ -207,6 +209,10 @@ Future<void> _initializeApp() async {
   Logs().i(
     '${AppConfig.applicationName} started in foreground mode. Rendering GUI...',
   );
+  // Een service die een vorige levenscyclus niet heeft kunnen afronden
+  // ("Plusly / Berichten laden") ruimt hier op: de gebruiker kijkt nu naar
+  // de app, dus die melding is verouderd. Zie reconcileOnForegroundStart.
+  await ForegroundServices.reconcileOnForegroundStart();
   await startGui(clients, store);
 }
 
@@ -258,6 +264,10 @@ class AppStarter with WidgetsBindingObserver {
         (x) => x.name == AppSettings.presenceStatus.value,
       );
     }
+    // De background-fetch-service heeft zijn werk gedaan zodra er een GUI
+    // komt. Zonder dit blijft de laadmelding staan als de push-afronding
+    // nooit liep (zie reconcileOnForegroundStart).
+    ForegroundServices.reconcileOnForegroundStart();
     startGui(clients, store);
     // We must make sure that the GUI is only started once.
     guiStarted = true;

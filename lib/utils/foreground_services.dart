@@ -12,6 +12,7 @@
 // - Nooit een lopende service van een ander killen (bv. gesprek): stond de
 //   service al aan vóór onze start, dan laten we hem bij stop met rust.
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
@@ -41,7 +42,60 @@ abstract class ForegroundServices {
   /// beheert) wordt als echt extern beschouwd.
   static const _ownerKey = 'foreground_service_starter';
 
+  /// Naam waarmee main.dart de koude-start-service start.
+  static const backgroundPushService = 'background_push';
+
+  /// Bovengrens op hoe lang de koude-start-service mag blijven staan.
+  ///
+  /// Normaal stopt push_helper hem in zijn finally. Die tak wordt niet bereikt
+  /// als de client-initialisatie vóór pushHelper hangt of gooit (zwak netwerk bij
+  /// een koude start). Een foreground-service is er juist op gebouwd om door te
+  /// draaien, dus dan blijft "Berichten laden" eeuwig staan — precies het
+  /// gemeten gedrag. Deze watchdog is het vangnet: na [watchdogTimeout] gaat de
+  /// service uit, wat er ook gebeurd is.
+  static const watchdogTimeout = Duration(seconds: 120);
+  static Timer? _watchdog;
+
   static bool get platformSupported => PlatformInfos.isMobile;
+
+  /// Ruimt een achtergebleven service op wanneer de app zélf naar de
+  /// voorgrond komt.
+  ///
+  /// WAAROM DIT NODIG IS. De koude-start-service wordt gestart vóór de client-
+  /// initialisatie en normaal gestopt door pushHelper. Hangt die initialisatie
+  /// (traag netwerk) of komt de UP-boodschap nooit, dan blijft de service staan
+  /// en toont Android eeuwig "Plusly / Berichten laden". Er is dan geen enkele
+  /// andere gebeurtenis die hem opruimt: een foreground-service is juist
+  /// ontworpen om te blijven draaien.
+  ///
+  /// Een bezoek aan de voorgrond is het betrouwbare opruimmoment: de gebruiker
+  /// kijkt naar de app, dus een laadmelding van een oude push is per definitie
+  /// verouderd.
+  ///
+  /// Alleen [backgroundPushService] wordt gestopt. Dat is bewust smal: een
+  /// `send_files`-service hoort bij een upload die nog kan lopen, en die mag
+  /// hier nooit worden afgebroken. De push-service daarentegen is puur
+  /// technisch (hij beschermt het koude-start-venster) en kan geen legitieme
+  /// langdurige taak zijn.
+  static Future<void> reconcileOnForegroundStart() async {
+    try {
+      if (!platformSupported) return;
+      if (!await FlutterForegroundTask.isRunningService) return;
+      final prefs = await SharedPreferences.getInstance();
+      final owner = prefs.getString(_ownerKey);
+      if (owner != backgroundPushService) return;
+      Logs().w(
+        '[ForegroundServices] stale $owner service on foreground start, stopping',
+      );
+      await prefs.remove(_ownerKey);
+      _runningServices.remove(owner);
+      _watchdog?.cancel();
+      _watchdog = null;
+      await FlutterForegroundTask.stopService();
+    } catch (e) {
+      Logs().e('[ForegroundServices] reconcile failed', e);
+    }
+  }
 
   static Future<void> startService(String name) async {
     try {
@@ -95,10 +149,31 @@ abstract class ForegroundServices {
       // en zonder dit staat de volgende processtart hem buiten onze scope.
       final ownerPrefs = await SharedPreferences.getInstance();
       await ownerPrefs.setString(_ownerKey, name);
+      // Vangnet: als de afronding (pushHelper finally / whenComplete) nooit
+      // loopt, ruimt de watchdog de service alsnog op.
+      _armWatchdog(name);
       Logs().d('[ForegroundServices] start $name: $result');
     } catch (e) {
       Logs().e('[ForegroundServices] start failed', e);
     }
+  }
+
+  /// (Her)start de watchdog voor [name]. Idempotent: een tweede start binnen
+  /// dezelfde levenscyclus zet de klok opnieuw, zodat een lange upload niet
+  /// halverwege wordt afgekapt.
+  ///
+  /// Alleen voor [backgroundPushService]: die is gebonden aan de pushpijplijn
+  /// (30s-timeout in pushHelper) en hoort dus nooit minuten te blijven staan.
+  /// `send_files` is een upload — video-compressie en verzenden duren legitiem
+  /// langer, dus die mag de watchdog niet afkappen.
+  static void _armWatchdog(String name) {
+    _watchdog?.cancel();
+    _watchdog = null;
+    if (name != backgroundPushService) return;
+    _watchdog = Timer(watchdogTimeout, () async {
+      Logs().w('[ForegroundServices] watchdog fired for $name, stopping');
+      await stopService(name);
+    });
   }
 
   static Future<void> stopService(String name) async {
@@ -115,6 +190,8 @@ abstract class ForegroundServices {
       final owner = stopPrefs.getString(_ownerKey);
       final isOurs = owner == name || _runningServices.contains(name);
       if (!isOurs) return;
+      _watchdog?.cancel();
+      _watchdog = null;
       // Markeren verwijderen: een volgende start mag deze service
       // niet meer als 'ons' beschouwen als hij inmiddels is
       // opgeruimd door iets anders.
