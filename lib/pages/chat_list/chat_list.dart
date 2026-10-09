@@ -116,6 +116,7 @@ class ChatListController extends State<ChatList>
   ActiveFilter activeFilter = AppSettings.separateChatTypes.value
       ? ActiveFilter.messages
       : ActiveFilter.allChats;
+  final ScrollController tabScrollController = ScrollController();
 
   String? _activeSpaceId;
   String? get activeSpaceId => _activeSpaceId;
@@ -973,6 +974,7 @@ class ChatListController extends State<ChatList>
     _clientStream.close();
     searchController.dispose();
     searchFocusNode.dispose();
+    tabScrollController.dispose();
     _coolDown?.cancel();
     scrolledToTop.dispose();
     super.dispose();
@@ -1384,6 +1386,32 @@ class ChatListController extends State<ChatList>
     setState(() {
       activeFilter = filter;
       resetPagination(); // Reset pagination bij filter wijziging
+    });
+    // Scroll de tab-balk zodat het nieuwe filter zichtbaar is, maar alleen
+    // bij een echte wissel. De header-rebuilds door sync/tijd mogen de balk
+    // niet telkens terugspringen naar links.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!tabScrollController.hasClients) return;
+      final filters = [
+        ActiveFilter.allChats,
+        ActiveFilter.unread,
+        ActiveFilter.groups,
+        ActiveFilter.pinned,
+        ActiveFilter.favorites,
+      ];
+      final activeIndex = filters.indexOf(filter);
+      if (activeIndex < 0) return;
+      const tabWidth = 104.0;
+      final viewport = tabScrollController.position.viewportDimension;
+      final target = (activeIndex * tabWidth - viewport / 2 + tabWidth / 2)
+          .clamp(0.0, tabScrollController.position.maxScrollExtent);
+      if ((tabScrollController.offset - target).abs() > 16) {
+        tabScrollController.animateTo(
+          target,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
