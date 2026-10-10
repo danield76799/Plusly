@@ -101,7 +101,6 @@ void main() {
 
     test('main.dart roept het opruimen aan vóór zware initialisatie', () {
       final main = _code('lib/main.dart');
-      final initIdx = main.indexOf('isBackgroundFetch') + 'isBackgroundFetch'.length;
       final getClientsIdx = main.indexOf('ClientManager.getClients');
       final reconcileIdx = main.indexOf('reconcileOnForegroundStart()');
       expect(
