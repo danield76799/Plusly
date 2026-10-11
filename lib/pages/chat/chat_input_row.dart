@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
+import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/recording_input_row.dart';
 import 'package:Pulsly/pages/chat/recording_view_model.dart';
@@ -132,11 +133,11 @@ class ChatInputRow extends StatelessWidget {
                       ),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surface,
+                          color: theme.inputBarColor,
                           borderRadius: BorderRadius.circular(24.0),
                           border: Border.all(
                             color: controller.sendController.text.isNotEmpty
-                                ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                                ? theme.inputBarAccent.withValues(alpha: 0.4)
                                 : theme.colorScheme.outline.withValues(alpha: 0.2),
                             width: 1.5,
                           ),
@@ -298,11 +299,11 @@ class ChatInputRow extends StatelessWidget {
                       width: height,
                       child: Material(
                         color: controller.sendController.text.isNotEmpty
-                            ? theme.colorScheme.primary
+                            ? theme.inputBarAccent
                             : theme.colorScheme.surface,
                         shape: const CircleBorder(),
                         elevation: controller.sendController.text.isNotEmpty ? 2 : 0,
-                        shadowColor: theme.colorScheme.primary.withValues(alpha: 0.3),
+                        shadowColor: theme.inputBarAccent.withValues(alpha: 0.3),
                         child: InkWell(
                           customBorder: const CircleBorder(),
                           onTap: PlatformInfos.platformCanRecord &&

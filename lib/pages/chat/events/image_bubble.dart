@@ -9,6 +9,7 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/events/html_message.dart';
 import 'package:Pulsly/pages/image_viewer/image_viewer.dart';
+import 'package:Pulsly/utils/date_time_extension.dart';
 import 'package:Pulsly/utils/size_string.dart';
 import 'package:Pulsly/utils/url_launcher.dart';
 import 'package:Pulsly/widgets/mxc_image.dart';
@@ -212,6 +213,31 @@ class ImageBubble extends StatelessWidget {
                     ),
                   ),
                 ),
+                // Semi-transparante timestamp overlay rechtsonder op
+                // mediabubbels (geen stickers), zodat het tijdstip altijd
+                // leesbaar is op de afbeelding zelf.
+                if (event.messageType != MessageTypes.Sticker)
+                  Positioned(
+                    right: 6,
+                    bottom: 6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.55),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        event.originServerTs.localizedMessageTime(context),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

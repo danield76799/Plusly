@@ -11,7 +11,6 @@ import 'package:Pulsly/utils/date_time_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/sync_status_localization.dart';
 import 'package:Pulsly/widgets/avatar.dart';
-import 'package:Pulsly/widgets/overflow_marquee.dart';
 import 'package:Pulsly/widgets/presence_builder.dart';
 
 class ChatAppBarTitle extends StatelessWidget {
@@ -112,27 +111,25 @@ class ChatAppBarTitle extends StatelessWidget {
                                   context,
                                 ).textTheme.bodySmall?.copyWith(fontSize: 11);
                                 if (presence?.currentlyActive == true) {
-                                  return OverflowMarquee(
-                                    text:
-                                        "${L10n.of(context).currentlyActive}${presence?.statusMsg != null ? " | ${presence?.statusMsg}" : ""}",
-                                    style: style!,
-                                    velocity: 20.0,
-                                    height: (style.fontSize ?? 11) + 2,
+                                  return Text(
+                                    "${L10n.of(context).currentlyActive}${presence?.statusMsg != null ? " | ${presence?.statusMsg}" : ""}",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: style,
                                   );
                                 }
                                 if (lastActiveTimestamp != null) {
-                                  return OverflowMarquee(
-                                    text:
-                                        L10n.of(context).lastActiveAgo(
-                                          lastActiveTimestamp
-                                              .localizedTimeShort(context),
-                                        ) +
-                                        (presence?.statusMsg != null
-                                            ? " | ${presence?.statusMsg}"
-                                            : ""),
-                                    style: style!,
-                                    velocity: 20.0,
-                                    height: (style.fontSize ?? 11) + 2,
+                                  return Text(
+                                    L10n.of(context).lastActiveAgo(
+                                      lastActiveTimestamp
+                                          .localizedTimeShort(context),
+                                    ) +
+                                    (presence?.statusMsg != null
+                                        ? " | ${presence?.statusMsg}"
+                                        : ""),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: style,
                                   );
                                 }
                                 return const SizedBox.shrink();
@@ -232,29 +229,27 @@ class ChatAppBarTitle extends StatelessWidget {
                                         context,
                                       ).textTheme.bodySmall;
                                       if (presence?.currentlyActive == true) {
-                                        return OverflowMarquee(
-                                          text:
-                                              "${L10n.of(context).currentlyActive}${presence?.statusMsg != null ? " | ${presence?.statusMsg}" : ""}",
-                                          style: style!,
-                                          velocity: 20.0,
-                                          height: (style.fontSize ?? 12) + 2,
+                                        return Text(
+                                          "${L10n.of(context).currentlyActive}${presence?.statusMsg != null ? " | ${presence?.statusMsg}" : ""}",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: style,
                                         );
                                       }
                                       if (lastActiveTimestamp != null) {
-                                        return OverflowMarquee(
-                                          text:
-                                              L10n.of(context).lastActiveAgo(
-                                                lastActiveTimestamp
-                                                    .localizedTimeShort(
-                                                      context,
-                                                    ),
-                                              ) +
-                                              (presence?.statusMsg != null
-                                                  ? " | ${presence?.statusMsg}"
-                                                  : ""),
-                                          style: style!,
-                                          velocity: 20.0,
-                                          height: (style.fontSize ?? 12) + 2,
+                                        return Text(
+                                          L10n.of(context).lastActiveAgo(
+                                            lastActiveTimestamp
+                                                .localizedTimeShort(
+                                                  context,
+                                                ),
+                                          ) +
+                                          (presence?.statusMsg != null
+                                              ? " | ${presence?.statusMsg}"
+                                              : ""),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: style,
                                         );
                                       }
                                       return const SizedBox.shrink();

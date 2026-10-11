@@ -570,6 +570,17 @@ class ChatView extends StatelessWidget {
                           ),
                         ),
                       ),
+                    // Leesbaarheids-dim: een vaste 60% zwarte overlay boven de
+                    // wallpaper zodat zowel lichte als donkere bubbels hoog
+                    // contrast houden, óók op een drukke afbeelding. Alleen
+                    // actief wanneer er daadwerkelijk een wallpaper is — een
+                    // effen scaffold-achtergrond interfereert niet.
+                    if (wallpaperPath.isNotEmpty)
+                      Positioned.fill(
+                        child: ColoredBox(
+                          color: Colors.black.withValues(alpha: 0.60),
+                        ),
+                      ),
                     // Messages — full screen under AppBar and InputBar
                     Positioned.fill(
                       child: GestureDetector(

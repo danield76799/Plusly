@@ -170,28 +170,24 @@ extension on Brightness {
 }
 
 extension BubbleColorTheme on ThemeData {
-  /// Outgoing bubble: primary softened with 20% surface blend (light) so it
-  /// is a lighter, lower-strain petrol instead of a solid dark block, or
-  /// primaryContainer at 85% opacity (dark) so it doesn't glow on AMOLED.
+  /// Uitgaande bubbel. Licht thema: primair verzacht met 20% surface (een
+  /// lichter, rustiger petrol). Donker thema: het vaste WhatsApp-teal
+  /// (#005C53) uit de opgefriste 1-op-1 look.
   Color get bubbleColor => brightness == Brightness.light
       ? Color.lerp(colorScheme.primary, colorScheme.surface, 0.20)!
-      // Dark: blend primaryContainer with surface so the bubble is a softer,
-      // lower-strain petrol instead of an opaque block against the dark
-      // scaffold background.
-      : Color.lerp(
-          colorScheme.primaryContainer,
-          colorScheme.surface,
-          0.18,
-        )!;
+      : const Color(0xFF005C53);
 
+  /// Tekst op de uitgaande bubbel. In donker thema is de bubbel nu donker
+  /// teal, dus wit; licht thema houdt onPrimary.
   Color get onBubbleColor => brightness == Brightness.light
       ? colorScheme.onPrimary
-      : colorScheme.onPrimaryContainer;
+      : Colors.white;
 
-  /// Incoming bubble: one step above surface for clear hierarchy.
+  /// Inkomende bubbel. Licht thema: één stap boven surface. Donker thema:
+  /// het vaste WhatsApp-grijs (#1E2225).
   Color get incomingBubbleColor => brightness == Brightness.light
       ? colorScheme.surfaceContainerHighest
-      : colorScheme.surfaceContainerHigh;
+      : const Color(0xFF1E2225);
 
   /// WhatsApp-style read-receipt blue for the double tick on own messages.
   ///
@@ -224,4 +220,16 @@ extension BubbleColorTheme on ThemeData {
         ? colorScheme.tertiary
         : colorScheme.tertiaryContainer,
   ).withSaturation(0.5).toColor();
+
+  /// Achtergrond van de invoerbalk-capsule. Donker: vaste WhatsApp-grijs
+  /// (#1E2225); licht: surface.
+  Color get inputBarColor => brightness == Brightness.light
+      ? colorScheme.surface
+      : const Color(0xFF1E2225);
+
+  /// Accentkleur van de ronde microfoon/verzendknop. Donker: WhatsApp-teal
+  /// (#005C53); licht: primair.
+  Color get inputBarAccent => brightness == Brightness.light
+      ? colorScheme.primary
+      : const Color(0xFF005C53);
 }
