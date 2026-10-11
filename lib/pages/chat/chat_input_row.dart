@@ -295,15 +295,15 @@ class ChatInputRow extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(4),
                     child: SizedBox(
-                      height: height,
-                      width: height,
+                      height: 48,
+                      width: 48,
                       child: Material(
                         color: controller.sendController.text.isNotEmpty
-                            ? theme.inputBarAccent
+                            ? theme.sendButtonColor
                             : theme.colorScheme.surface,
                         shape: const CircleBorder(),
                         elevation: controller.sendController.text.isNotEmpty ? 2 : 0,
-                        shadowColor: theme.inputBarAccent.withValues(alpha: 0.3),
+                        shadowColor: theme.sendButtonColor.withValues(alpha: 0.3),
                         child: InkWell(
                           customBorder: const CircleBorder(),
                           onTap: PlatformInfos.platformCanRecord &&
@@ -338,13 +338,13 @@ class ChatInputRow extends StatelessWidget {
                                 : const Duration(milliseconds: 200),
                             child: Icon(
                               controller.sendController.text.isNotEmpty
-                                  ? Icons.send
+                                  ? Icons.send_rounded
                                   : recordingViewModel.recordingMode == RecordingMode.video
                                       ? Icons.videocam_outlined
                                       : Icons.mic_none_outlined,
                               key: ValueKey(controller.sendController.text.isNotEmpty),
                               color: controller.sendController.text.isNotEmpty
-                                  ? theme.colorScheme.onPrimary
+                                  ? theme.sendButtonIconColor
                                   : theme.colorScheme.primary,
                               size: 22,
                             ),

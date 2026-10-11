@@ -227,9 +227,17 @@ extension BubbleColorTheme on ThemeData {
       ? colorScheme.surface
       : const Color(0xFF1E2225);
 
-  /// Accentkleur van de ronde microfoon/verzendknop. Donker: WhatsApp-teal
-  /// (#005C53); licht: primair.
+  /// Accentkleur voor de invoerbalk (border-highlight bij tekst). Donker:
+  /// WhatsApp-teal (#005C53); licht: primair.
   Color get inputBarAccent => brightness == Brightness.light
       ? colorScheme.primary
       : const Color(0xFF005C53);
+
+  /// Achtergrond van de ronde verstuurknop. Een gedempte zeegroene tint
+  /// (#1B6E64) in ton-sur-ton stijl, zoals het referentiescreenshot.
+  Color get sendButtonColor => const Color(0xFF1B6E64);
+
+  /// Icoonkleur van de verstuurknop: een donkerdere groentint (#0F3D37) voor
+  /// een subtiele ton-sur-ton stijl op [sendButtonColor].
+  Color get sendButtonIconColor => const Color(0xFF0F3D37);
 }
