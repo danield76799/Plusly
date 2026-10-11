@@ -618,6 +618,11 @@ class PushHelper {
       subText: client.clientName,
       category: AndroidNotificationCategory.message,
       shortcutId: event.room.id,
+      // Scherm aanzetten + heads-up/fullscreen bij een lockscreen-push.
+      // Zonder dit blijft het scherm uit bij een push; met USE_FULL_SCREEN_INTENT
+      // in de manifest en een goedgekeurde permissie (Android 14+) licht het
+      // scherm op en verschijnt de notificatie fullscreen.
+      fullScreenIntent: true,
       styleInformation:
           messagingStyleInformation ??
           MessagingStyleInformation(

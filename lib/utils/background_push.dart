@@ -65,10 +65,22 @@ class BackgroundPush {
 
   Future<void> initialiseLocalNotifications() async {
     if (PlatformInfos.isAndroid) {
-      _flutterLocalNotificationsPlugin
+      final androidImpl = _flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-          ?.requestNotificationsPermission();
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      androidImpl?.requestNotificationsPermission();
+      // Android 14+ (API 34): scherm-aan bij een push vereist een expliciet
+      // goedgekeurde USE_FULL_SCREEN_INTENT-permissie. Vraag ze eenmalig bij
+      // de initialisatie; Android opent het systeem-scherm voor de app als de
+      // gebruiker ze nog niet heeft gegeven.
+      unawaited(
+        androidImpl?.requestFullScreenIntentPermission().then((granted) {
+          Logs().i(
+            '[Push] fullScreenIntent permission granted: ${granted ?? 'unknown'}',
+          );
+        }),
+      );
     }
 
     await _flutterLocalNotificationsPlugin.initialize(
