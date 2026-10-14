@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,7 +11,7 @@ class _FakeRoom implements Room {
   @override
   int notificationCount;
   @override
-  int highlightCount;
+  int highlightCount = 0;
   @override
   Event? lastEvent;
   @override
@@ -21,7 +20,6 @@ class _FakeRoom implements Room {
   _FakeRoom({
     required this.id,
     this.notificationCount = 0,
-    this.highlightCount = 0,
     this.lastEvent,
     this.markedUnread = false,
   });

@@ -410,7 +410,7 @@ class _MessageBubbleState extends State<MessageBubble> {
             color: event.status == EventStatus.sending || event.status == EventStatus.error
                 ? statusColor
                 : hasBeenRead
-                    ? Colors.green
+                    ? Theme.of(context).readReceiptBlue
                     : Colors.orange,
             size: 14,
           ),

@@ -357,7 +357,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                     size: 13,
                   )
                 : Icon(
-                    event.status == .sending
+                    event.status == EventStatus.sending
                         ? Icons.watch_later_outlined
                         : event.status == EventStatus.error
                         ? Icons.error_outline
@@ -365,10 +365,10 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                         ? Icons.done_all
                         : Icons.check,
                     // Twee vinkjes = groen (gelezen), één vinkje = oranje (verzonden)
-                    color: event.status == .sending || event.status == .error
+                    color: event.status == .sending || event.status == EventStatus.error
                         ? color
                         : hasBeenRead
-                            ? Colors.green
+                            ? Theme.of(context).readReceiptBlue
                             : Colors.orange,
                     size: 13,
                   ),

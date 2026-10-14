@@ -130,8 +130,7 @@ class NewPrivateChatView extends StatelessWidget {
                       (room) =>
                           room.name.toLowerCase().contains(
                             controller.controller.text.toLowerCase(),
-                          ) ??
-                          false,
+                          ),
                     )
                     .map(
                       (room) => ListTile(

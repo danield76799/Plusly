@@ -269,7 +269,7 @@ class _MessageModernState extends State<MessageModern> {
                     color: event.status == EventStatus.sending || event.status == EventStatus.error
                         ? color
                         : hasBeenRead
-                            ? Colors.green
+                            ? Theme.of(context).readReceiptBlue
                             : Colors.orange,
                     size: 13,
                   ),

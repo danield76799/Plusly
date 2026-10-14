@@ -62,7 +62,7 @@ class TimelineCache {
     // Eagerly await the top 5 most recent rooms so chat opens instantly
     final priorityRooms = limited.take(5).toList();
     final priorityResults = await Future.wait(
-      priorityRooms.map((room) => room.getTimeline().then(
+      priorityRooms.map((room) => room.getTimeline().then<MapEntry<String, Timeline>?>(
             (t) => MapEntry(room.id, t),
             onError: (_) => null,
           )),
@@ -82,7 +82,7 @@ class TimelineCache {
     for (var i = 0; i < remaining.length; i += batchSize) {
       final batch = remaining.skip(i).take(batchSize);
       final results = await Future.wait(
-        batch.map((room) => room.getTimeline().then(
+        batch.map((room) => room.getTimeline().then<MapEntry<String, Timeline>?>(
               (t) => MapEntry(room.id, t),
               onError: (_) => null,
             )),

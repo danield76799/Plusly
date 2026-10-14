@@ -15,7 +15,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/utils/app_text_scale.dart';
 
 /// De hoogte die [tekst] werkelijk inneemt, inclusief de MediaQuery-schaal.
