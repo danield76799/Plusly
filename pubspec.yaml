@@ -196,3 +196,4 @@ dependency_overrides:
   record_linux: 1.3.0
   dynamic_color: 1.8.0
   material_color_utilities: 0.13.0
+  receive_sharing_intent: 1.8.1
