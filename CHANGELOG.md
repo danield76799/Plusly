@@ -1,3 +1,106 @@
+# Plusly v1.4.17+23497
+
+## Dependencies
+- **Upgraded Flutter to 3.47.7 (Dart 3.13.5).** The previous version was
+  3.41.9 / Dart 3.11.5. This unlocks newer package versions that require
+  Dart 3.12+ and brings the latest engine, tooling and platform fixes.
+- **Major dependency upgrades across the board.** 189 packages updated via
+  `flutter pub upgrade`, including:
+  - `flutter_foreground_task` 10.0.0 → 11.0.3 — adds Kotlin Gradle Plugin
+    (KGP) migration and Swift Package Manager support; resolves long-standing
+    foreground-service reliability issues on Android.
+  - `flutter_new_badger` 1.1.1 → 2.0.0 — app-icon badge support refreshed.
+  - `record` 6.2.1 → 7.1.2 — audio recording API updated (required
+    `record_linux` override bump to ^2.1.3 for compatibility).
+  - `flutter_secure_storage` 10.0.0 → 11.2.0 — improved platform backends.
+  - `flutter_webrtc` 1.4.1 → 1.6.2 — WebRTC stability and feature updates.
+  - `go_router` 17.1.0 → 18.1.0 — routing fixes and improvements.
+  - `permission_handler` 12.0.1 → 13.0.2 — Android 14/15 permission handling.
+  - `share_plus` 12.0.1 → 14.x — share sheet updates.
+  - `image` 4.8.0 → 4.12.0 — image processing improvements.
+  - `wakelock_plus` 1.4.0 → 1.8.1 — wake-lock reliability.
+- **API breaking changes resolved** (20 compile errors fixed):
+  - `PowerLevel` is now an extension type wrapping `int`. All comparisons
+    now use `.level` (e.g. `powerLevel.level >= 100`). Affected: chat
+    member lists, participant items, member action menus, and chat
+    forwarding dialogs.
+  - `reportEvent()` no longer accepts a `score` parameter in the Matrix
+    SDK. The offensiveness-level prompt was removed from the report flow;
+    reports now send only the reason text.
+  - `joinRoom()` parameter renamed `serverName` → `via` (3 call sites in
+    URL launcher updated).
+  - `MatrixLocals.unknownEvent()` now takes `(senderName, typeKey)` instead
+    of just `(typeKey)` — localized unknown-event messages now show the
+    actual sender name.
+
+## Notifications
+- **Fixed missing `notificationDismissed` case** in the notification tap
+  handler. `flutter_local_notifications` v22 added this enum value; the
+  switch is now exhaustive.
+- **Screen wakes on push notifications.** `fullScreenIntent: true` is set
+  on message notifications, and `requestFullScreenIntentPermission()` is
+  called at initialisation — Android 14+ requires explicit user approval
+  for full-screen intents, without which the screen stays off.
+- **Eliminated the persistent "Berichten laden" (Loading messages)
+  notification.** Root cause was a foreground service started before
+  client initialisation that was only stopped in a `finally` block — if
+  initialisation hung or the process was killed, the service (and its
+  notification) stayed forever. Two safety nets now prevent this:
+  - A 30-second watchdog timer that force-stops the service if the push
+    pipeline doesn't complete in time.
+  - `reconcileOnForegroundStart()` — called immediately on foreground
+    entry, before heavy initialisation — detects and stops any stale
+    service left over from a previous lifecycle.
+
+## Chat
+- **Blue read receipts (WhatsApp-style).** Read messages now show a blue
+  double-tick (`readReceiptBlue` from the theme) instead of hardcoded
+  green. Sending (clock) and error (warning) states keep their own icons
+  and colors. Applies to all three message bubble layouts (modern,
+  default, legacy).
+- **Refreshed chat UI contrast and typography.** 60% black dim-overlay
+  over the wallpaper for readability; status line truncates with ellipsis
+  instead of marquee; fixed WhatsApp-style dark-theme bubble colors
+  (`#005C53` outgoing, `#1E2225` incoming); capsule-shaped input field
+  with `#005C53` accent send button; semi-transparent timestamp overlay
+  on image bubbles.
+- **Send button redesigned** to a ton-sur-ton circular style: teal
+  background (`#1B6E64`-ish) with darker teal icon (`#0F3D37`-ish),
+  `Icons.send_rounded`, circular splash feedback.
+
+## Chat List
+- **Fixed tab bar jumping to the left.** The scrollable tab bar
+  (`All`, `Unread`, `Groups`, `Pinned`, `Favorites`) rebuilt and
+  re-animated on every state change, causing it to snap back to the
+  start. The tab controller is now reused, unnecessary rebuilds are
+  reduced, and a `PageStorageKey` preserves the tab index across
+  rebuilds.
+
+## Code Quality
+- **All tests green: 183/183 pass.** Previously 2 tests failed in
+  `read_receipt_blue_test.dart` due to hardcoded colors — now fixed.
+- **Reduced `flutter analyze` warnings from 59 to 50.** Removed unused
+  imports, dead code, unnecessary null-checks, and unused variables in:
+  `sync_debugger.dart`, `llm_service.dart`, `timeline_cache.dart`,
+  `new_private_chat_view.dart`, `notifications_view.dart`,
+  `bridge_utils.dart`, `favorites_page.dart`, and test files.
+- **Removed duplicate CI workflow** (`.github/workflows/build-release.yml`
+  was a duplicate of `main_deploy.yml`).
+
+## Matrix SDK
+- **Evaluated the ExteraApp matrix-dart-sdk fork** (v8.1.0 + 50 commits
+  ahead of upstream). The fork adds security-incident tracking, SSSS
+  wipe, and key-rotation detection not yet in upstream v14. Migration to
+  upstream v14 is planned as a separate project (requires API migration
+  and sqlite3 v2→v3 upgrade). The fork remains active for now.
+
+## Infrastructure
+- **CI/CD pipeline verified.** GitHub Actions builds and publishes
+  releases automatically on push to `main`. Latest release:
+  v1.4.17+23497.
+
+---
+
 # Plusly v1.4.17+23437
 
 ## Notifications
