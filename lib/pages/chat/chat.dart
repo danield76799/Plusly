@@ -1520,21 +1520,6 @@ class ChatController extends State<ChatPageWithRoom>
 
   void reportEventAction({Event? event}) async {
     event ??= selectedEvents.single;
-    final score = await showModalActionPopup<int>(
-      context: context,
-      title: L10n.of(context).reportMessage,
-      message: L10n.of(context).howOffensiveIsThisContent,
-      cancelLabel: L10n.of(context).cancel,
-      actions: [
-        AdaptiveModalAction(
-          value: -100,
-          label: L10n.of(context).extremeOffensive,
-        ),
-        AdaptiveModalAction(value: -50, label: L10n.of(context).offensive),
-        AdaptiveModalAction(value: 0, label: L10n.of(context).inoffensive),
-      ],
-    );
-    if (score == null) return;
     final reason = await showTextInputDialog(
       context: context,
       title: L10n.of(context).whyDoYouWantToReportThis,
@@ -1549,7 +1534,6 @@ class ChatController extends State<ChatPageWithRoom>
         event!.roomId!,
         event.eventId,
         reason: reason,
-        score: score,
       ),
     );
     if (result.error != null) return;
@@ -2010,7 +1994,7 @@ class ChatController extends State<ChatPageWithRoom>
           true,
           false,
         );
-        users.sort((a, b) => a.powerLevel.compareTo(b.powerLevel));
+        users.sort((a, b) => a.powerLevel.level.compareTo(b.powerLevel.level));
         final via = users
             .map((user) => user.id.domain)
             .whereType<String>()

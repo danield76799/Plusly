@@ -263,8 +263,8 @@ class MatrixLocals extends MatrixLocalizations {
   String get unknownEncryptionAlgorithm => l10n.unknownEncryptionAlgorithm;
 
   @override
-  String unknownEvent(String typeKey) {
-    return l10n.userSentUnknownEvent('User', typeKey);
+  String unknownEvent(String senderName, String typeKey) {
+    return l10n.userSentUnknownEvent(senderName, typeKey);
   }
 
   @override

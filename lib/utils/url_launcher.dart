@@ -277,7 +277,7 @@ class UrlLauncher {
               context: context,
               future: () => matrix.client.joinRoom(
                 joinId,
-                serverName: servers.isNotEmpty ? servers.toList() : null,
+                via: servers.isNotEmpty ? servers.toList() : null,
               ),
             );
             if (response.error != null) return;
@@ -319,7 +319,7 @@ class UrlLauncher {
                 context: context,
                 future: () => matrix.client.joinRoom(
                   roomIdOrAlias,
-                  serverName: servers.isNotEmpty ? servers.toList() : null,
+                  via: servers.isNotEmpty ? servers.toList() : null,
                 ),
               );
               if (response.error != null) return;
@@ -436,7 +436,7 @@ class UrlLauncher {
             context: context,
             future: () => matrix.client.joinRoom(
               roomIdOrAlias,
-              serverName: servers.isNotEmpty ? servers.toList() : null,
+              via: servers.isNotEmpty ? servers.toList() : null,
             ),
           );
           if (response.error != null) return;
