@@ -292,6 +292,9 @@ Future<void> notificationTap(
             displayPendingEvent: false,
           );
       }
+    case NotificationResponseType.notificationDismissed:
+      // Notificatie weggeveegd zonder actie — niets te doen.
+      Logs().d('Notification dismissed by user');
   }
 }
 
