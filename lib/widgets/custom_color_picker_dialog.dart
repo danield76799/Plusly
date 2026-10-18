@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:Pulsly/generated/l10n/l10n.dart';
+
 /// Een vrije kleurenkiezer (hue/saturation/value + hex-veld) waarmee de
 /// gebruiker élke accentkleur kan kiezen, niet alleen de vaste Material-
 /// kleuren. Retourneert de gekozen [Color] via [onColorSelected], of sluit
@@ -60,9 +62,10 @@ class _CustomColorPickerDialogState extends State<CustomColorPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = L10n.of(context);
     final color = _hsv.toColor();
     return AlertDialog(
-      title: const Text('Aangepaste kleur'),
+      title: Text(l10n.customColor),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -77,7 +80,7 @@ class _CustomColorPickerDialogState extends State<CustomColorPickerDialog> {
           ),
           const SizedBox(height: 16),
           _labeledSlider(
-            label: 'Kleur',
+            label: l10n.hue,
             slider: Slider(
               value: _hsv.hue,
               min: 0,
@@ -87,7 +90,7 @@ class _CustomColorPickerDialogState extends State<CustomColorPickerDialog> {
             ),
           ),
           _labeledSlider(
-            label: 'Verzadiging',
+            label: l10n.saturation,
             slider: Slider(
               value: _hsv.saturation,
               min: 0,
@@ -97,7 +100,7 @@ class _CustomColorPickerDialogState extends State<CustomColorPickerDialog> {
             ),
           ),
           _labeledSlider(
-            label: 'Helderheid',
+            label: l10n.brightness,
             slider: Slider(
               value: _hsv.value,
               min: 0,
@@ -109,7 +112,7 @@ class _CustomColorPickerDialogState extends State<CustomColorPickerDialog> {
           TextField(
             keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              labelText: 'Hex-code',
+              labelText: l10n.hexCode,
               hintText: 'RRGGBB',
               border: const OutlineInputBorder(),
             ),
@@ -130,11 +133,11 @@ class _CustomColorPickerDialogState extends State<CustomColorPickerDialog> {
       actions: [
         TextButton(
           onPressed: widget.onCancel,
-          child: const Text('Annuleren'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () => widget.onColorSelected(color),
-          child: const Text('Toepassen'),
+          child: Text(l10n.apply),
         ),
       ],
     );

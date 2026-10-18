@@ -187,8 +187,8 @@ class SettingsStyleView extends StatelessWidget {
                     const ListDivider(),
                     ListTile(
                       leading: const Icon(Icons.colorize),
-                      title: const Text('Aangepaste kleur'),
-                      subtitle: const Text('Kies elke kleur via een kleurenkiezer'),
+                      title: Text(L10n.of(context).customColor),
+                      subtitle: Text(L10n.of(context).customColorDescription),
                       onTap: () => controller.openCustomColorPicker(),
                     ),
                     const ListDivider(),
