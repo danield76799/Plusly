@@ -13,6 +13,7 @@ import 'package:Pulsly/utils/app_text_scale.dart';
 import 'package:Pulsly/utils/file_selector.dart';
 import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import 'package:Pulsly/widgets/theme_builder.dart';
+import 'package:Pulsly/widgets/custom_color_picker_dialog.dart';
 import 'settings_style_view.dart';
 
 class SettingsStyle extends StatefulWidget {
@@ -26,6 +27,22 @@ class SettingsStyleController extends State<SettingsStyle> {
   void setChatColor(Color? color) async {
     // AppConfig.colorSchemeSeed = color;
     ThemeController.of(context).setPrimaryColor(color);
+  }
+
+  /// Opent de vrije kleurenkiezer. De gekozen kleur wordt net als een vaste
+  /// kleur doorgegeven aan [setChatColor].
+  void openCustomColorPicker() {
+    final current = currentColor ?? AppConfig.primaryColor;
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => CustomColorPickerDialog(
+        initialColor: current,
+        onColorSelected: (color) {
+          setChatColor(color);
+        },
+        onCancel: () => Navigator.of(dialogContext).pop(),
+      ),
+    );
   }
 
   String? _wallpaperPath;
