@@ -296,6 +296,11 @@ class PushHelper {
     }
 
     helper.event = event;
+    if (event.senderId == client.userID) {
+      Logs().i('Push helper: eigen bericht — geen notificatie');
+      PushEventLog().add('push_own_message', {'room': notification.roomId ?? ''});
+      return null;
+    }
     PushEventLog().add('push_event', {
       'room': notification.roomId ?? '',
       'type': event.type,
