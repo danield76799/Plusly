@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  app_links_linux
   audioplayers_linux
   desktop_drop
   desktop_webview_window
@@ -10,7 +11,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_linux
   flutter_secure_storage_linux
   flutter_webrtc
-  gtk
   handy_window
   hotkey_manager_linux
   open_file_linux
@@ -19,13 +19,13 @@ list(APPEND FLUTTER_PLUGIN_LIST
   screen_retriever_linux
   sqlcipher_flutter_libs
   url_launcher_linux
-  webcrypto
   window_manager
   window_to_front
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   flutter_vodozemac
+  jni
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

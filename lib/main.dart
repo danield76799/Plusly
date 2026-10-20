@@ -9,6 +9,9 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/matrix.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:Pulsly/utils/scheduled_message_manager.dart';
+import 'package:Pulsly/utils/scheduled_message_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
@@ -107,6 +110,21 @@ Future<void> _initializeApp() async {
       AppConfig.mainIsolatePortName,
     );
     await waitForPushIsolateDone();
+
+    // WorkManager voor geplande berichten.
+    try {
+      Workmanager().initialize(
+        scheduledMessageBackgroundDispatcher,
+      );
+      // Flush eventuele overdue taken bij app-start.
+      final store = await SharedPreferences.getInstance();
+      final clients = await ClientManager.getClients(store: store);
+      await ScheduledMessageManager.flush(
+        clients: {for (final c in clients) c.clientName: c},
+      );
+    } catch (e, s) {
+      Logs().e('ScheduledMessage WorkManager init failed', e, s);
+    }
   }
 
   // Our background push shared isolate accesses flutter-internal things very early in the startup proccess

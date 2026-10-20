@@ -43,6 +43,8 @@ import 'package:Pulsly/utils/other_party_can_receive.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
+import 'package:Pulsly/utils/scheduled_message_background.dart';
+import 'package:Pulsly/utils/scheduled_message_manager.dart';
 import 'package:Pulsly/utils/privacy_options.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
 import 'package:Pulsly/utils/show_scaffold_dialog.dart';
@@ -971,7 +973,47 @@ class ChatController extends State<ChatPageWithRoom>
     final text = sendController.text;
     if (text.trim().isEmpty) return;
 
-    // --- Debounce ---
+    // --- Geplande berichten: /schedule <delay> <boodschap> ---
+    // delay: 5m, 2h, 1d, etc. Verwerkt hier, NICHT door sdk.
+    final parsed = ScheduledMessageManager.parseSchedule(text);
+    if (parsed != null) {
+      // copy required values before clearing
+      final confirmed = await showOkCancelAlertDialog(
+        context: context,
+        title: 'Bericht inplannen',
+        message: 'Versturen over ${parsed.delayHuman}:\n\n${parsed.message}',
+        okLabel: 'Inplannen',
+        cancelLabel: 'Annuleren',
+      );
+      if (confirmed == OkCancelResult.ok) {
+        try {
+          await ScheduledMessageManager.schedule(
+            roomId: room.id,
+            clientName: Matrix.of(context).client.clientName,
+            content: parsed.message,
+            when: parsed.when,
+          );
+          await registerScheduledMessageTask(parsed.when);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Gepland voor ${parsed.when}')),
+            );
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Inplannen mislukt: $e')),
+            );
+          }
+        }
+      }
+      sendController.clear();
+      _clearComposer();
+      if (mounted) setState(() {});
+      return; // don't send now
+    }
+    // ---
+
     // The send-knop, the keyboard "Send" action (onSubmitted), and the
     // hardware-keyboard Enter handler all route through this method. If the
     // user accidentally triggers two of them in the same frame, both calls
