@@ -108,7 +108,6 @@ dependencies:
   video_player: ^2.11.1
   vodozemac: ^0.5.0
   wakelock_plus: ^1.4.0
-  workmanager: ^0.10.10
   webrtc_interface: ^1.4.0
   webview_flutter: ^4.10.0
   app_settings: ^5.2.0

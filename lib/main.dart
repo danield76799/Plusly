@@ -9,9 +9,7 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/matrix.dart';
-import 'package:workmanager/workmanager.dart';
 import 'package:Pulsly/utils/scheduled_message_manager.dart';
-import 'package:Pulsly/utils/scheduled_message_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
@@ -110,15 +108,6 @@ Future<void> _initializeApp() async {
       AppConfig.mainIsolatePortName,
     );
     await waitForPushIsolateDone();
-
-    // WorkManager voor geplande berichten.
-    try {
-      Workmanager().initialize(
-        scheduledMessageBackgroundDispatcher,
-      );
-    } catch (e, s) {
-      Logs().e('ScheduledMessage WorkManager init failed', e, s);
-    }
   }
 
   // Our background push shared isolate accesses flutter-internal things very early in the startup proccess
@@ -224,6 +213,20 @@ Future<void> _initializeApp() async {
       );
     } catch (_) {
       // UI not affected.
+    }
+  });
+
+  // Foreground-timer: controleer elke 30s op due geplande berichten en
+  // verstuur ze met de al-open clients (geen achtergrond-isolate, dus geen
+  // SQLite lock-conflict). Stopt nooit expliciet — de timer is gebonden aan
+  // het proces en wordt met de app weggegooid.
+  Timer.periodic(const Duration(seconds: 30), (_) async {
+    try {
+      await ScheduledMessageManager.flush(
+        clients: {for (final c in clients) c.clientName: c},
+      );
+    } catch (_) {
+      // best-effort
     }
   });
 

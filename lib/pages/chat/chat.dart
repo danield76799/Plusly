@@ -43,7 +43,6 @@ import 'package:Pulsly/utils/other_party_can_receive.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_event_log.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
-import 'package:Pulsly/utils/scheduled_message_background.dart';
 import 'package:Pulsly/utils/scheduled_message_manager.dart';
 import 'package:Pulsly/utils/privacy_options.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
@@ -993,7 +992,6 @@ class ChatController extends State<ChatPageWithRoom>
             content: parsed.message,
             when: parsed.when,
           );
-          await registerScheduledMessageTask(parsed.when);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Gepland voor ${parsed.when}')),
@@ -2250,7 +2248,6 @@ class ChatController extends State<ChatPageWithRoom>
         content: text.trim(),
         when: when,
       );
-      await registerScheduledMessageTask(when);
       sendController.clear();
       _clearComposer();
       await AppSettings.store.remove('draft_$roomId');
