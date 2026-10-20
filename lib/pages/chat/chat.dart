@@ -2253,6 +2253,7 @@ class ChatController extends State<ChatPageWithRoom>
       await registerScheduledMessageTask(when);
       sendController.clear();
       _clearComposer();
+      await AppSettings.store.remove('draft_$roomId');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gepland voor ${when.day}-${when.month} ${when.hour}:${when.minute.toString().padLeft(2, '0')}')),
