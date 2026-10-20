@@ -15,6 +15,7 @@ import 'package:Pulsly/utils/scheduled_message_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
+import 'package:Pulsly/utils/scheduled_message_manager.dart';
 import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
@@ -116,12 +117,6 @@ Future<void> _initializeApp() async {
       Workmanager().initialize(
         scheduledMessageBackgroundDispatcher,
       );
-      // Flush eventuele overdue taken bij app-start.
-      final store = await SharedPreferences.getInstance();
-      final clients = await ClientManager.getClients(store: store);
-      await ScheduledMessageManager.flush(
-        clients: {for (final c in clients) c.clientName: c},
-      );
     } catch (e, s) {
       Logs().e('ScheduledMessage WorkManager init failed', e, s);
     }
@@ -221,6 +216,17 @@ Future<void> _initializeApp() async {
   }
 
   final clients = await ClientManager.getClients(store: store);
+
+  // Flush eventuele overdue geplande berichten, best-effort en zonder UI-blokkering.
+  Future.microtask(() async {
+    try {
+      await ScheduledMessageManager.flush(
+        clients: {for (final c in clients) c.clientName: c},
+      );
+    } catch (_) {
+      // UI not affected.
+    }
+  });
 
   for (final client in clients) {
     client.syncPresence = PresenceType.values.firstWhere(
