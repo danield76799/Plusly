@@ -254,10 +254,25 @@ class PushHelper {
       return null;
     }
 
-    // Upstream r177-182: client-side push-rule evaluatie. Niet crash-veilig
-    // verpakt — een crash belandt in de buitenste catch met de localized
-    // fallback, precies zoals upstream.
-    if (!client.pushruleEvaluator.match(event).notify) {
+    // Upstream r177-182: client-side push-rule evaluatie. Eerder crashte
+    // het bij een null in event/pushRules en belandde de crash in de
+    // buitenste catch, waardoor elke push als \"💬 Nieuw bericht in Plusly\"
+    // fallback-notificatie werd getoond. Dat veroorzaakte de stapel
+    // dubbele meldingen bij elke sync/push-burst. Nu veilig wrappen: bij
+    // een crash nemen we de Matrix-default (notify=true) aan zodat de
+    // echte room-notificatie wel wordt getoond.
+    var notify = true;
+    try {
+      notify = client.pushruleEvaluator.match(event).notify;
+    } catch (e, s) {
+      Logs().w('Push helper: push-rule evaluatie gecrasht, neem notify=true aan', e, s);
+      PushEventLog().add('push_rule_crash', {
+        'room': notification.roomId ?? '',
+        'type': event.type,
+        'error': '$e',
+      });
+    }
+    if (!notify) {
       Logs().i('Push helper: filtered by client-side push rules.');
       PushEventLog().add('push_rule_filtered', {
         'room': notification.roomId ?? '',
