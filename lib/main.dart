@@ -15,7 +15,6 @@ import 'package:Pulsly/utils/scheduled_message_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:Pulsly/config/app_config.dart';
-import 'package:Pulsly/utils/scheduled_message_manager.dart';
 import 'package:Pulsly/utils/client_manager.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/notification_background_handler.dart';
