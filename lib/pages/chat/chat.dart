@@ -2156,6 +2156,63 @@ class ChatController extends State<ChatPageWithRoom>
     send();
   }
 
+  Future<void> openScheduledMessages() async {
+    final messages = (await ScheduledMessageManager.loadAll())
+        .where((m) => m.roomId == room.id && !m.sent)
+        .toList();
+    if (!mounted) return;
+    await showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Geplande berichten (${messages.length})',
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+            ),
+            if (messages.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'Geen geplande berichten voor deze chat.',
+                  style: Theme.of(ctx).textTheme.bodyMedium,
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: messages.length,
+                  itemBuilder: (ctx, i) {
+                    final m = messages[i];
+                    return ListTile(
+                      leading: const Icon(Icons.schedule_outlined),
+                      title: Text(m.content, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      subtitle: Text(m.scheduledAt.toLocal().toString().substring(0, 16)),
+                      trailing: IconButton(
+                        tooltip: 'Annuleren',
+                        icon: const Icon(Icons.cancel_outlined),
+                        onPressed: () async {
+                          await ScheduledMessageManager.cancel(m.id);
+                          if (ctx.mounted) Navigator.pop(ctx);
+                          if (mounted) setState(() {});
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<void> scheduleMessageAction() async {
     final text = sendController.text;
     if (text.trim().isEmpty) {

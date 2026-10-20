@@ -272,9 +272,26 @@ class ChatInputRow extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            // Emoji knop IN de input bar (rechts) — altijd zichtbaar
+                            // Geplande berichten knop IN de input bar (links van emoji) — altijd zichtbaar
                             Semantics(
-                              label: 'Open emoji picker',
+                              label: 'Geplande berichten',
+                              button: true,
+                              child: Container(
+                                height: height,
+                                width: height,
+                                alignment: Alignment.center,
+                                child: IconButton(
+                                  tooltip: 'Geplande berichten',
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                  icon: const Icon(Icons.schedule_outlined),
+                                  onPressed: () => controller.openScheduledMessages(),
+                                ),
+                              ),
+                            ),
+
+                            // Emoji knop IN de input bar — altijd zichtbaar
+                            Semantics(
+                              label: L10n.of(context).emojis,
                               button: true,
                               child: Container(
                                 height: height,
