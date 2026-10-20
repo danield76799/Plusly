@@ -2156,7 +2156,62 @@ class ChatController extends State<ChatPageWithRoom>
     send();
   }
 
-  void onAddPopupMenuButtonSelected(String choice) {
+  Future<void> scheduleMessageAction() async {
+    final text = sendController.text;
+    if (text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Typ eerst een bericht in de composer.')),
+      );
+      return;
+    }
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+    );
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(now.add(const Duration(minutes: 5))),
+    );
+    if (time == null || !mounted) return;
+    final when = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    if (when.isBefore(DateTime.now())) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Kies een toekomstig tijdstip.')),
+        );
+      }
+      return;
+    }
+    try {
+      await ScheduledMessageManager.schedule(
+        roomId: room.id,
+        clientName: Matrix.of(context).client.clientName,
+        content: text.trim(),
+        when: when,
+      );
+      await registerScheduledMessageTask(when);
+      sendController.clear();
+      _clearComposer();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gepland voor ${when.day}-${when.month} ${when.hour}:${when.minute.toString().padLeft(2, '0')}')),
+        );
+        if (mounted) setState(() {});
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Inplannen mislukt: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> onAddPopupMenuButtonSelected(String choice) async {
     if (choice == 'emoji') {
       emojiPickerAction();
     }
@@ -2183,6 +2238,9 @@ class ChatController extends State<ChatPageWithRoom>
     }
     if (choice == 'location') {
       sendLocationAction();
+    }
+    if (choice == 'schedule') {
+      await scheduleMessageAction();
     }
     if (choice == 'emoji') {
       emojiPickerAction();

@@ -253,6 +253,13 @@ class ChatInputRow extends StatelessWidget {
                                               title: Text(L10n.of(context).startPoll),
                                             ),
                                           ),
+                                          PopupMenuItem(
+                                            value: 'schedule',
+                                            child: ListTile(
+                                              leading: const Icon(Icons.schedule_outlined),
+                                              title: Text('Bericht inplannen'),
+                                            ),
+                                          ),
                                         ],
                                         child: Icon(
                                           Icons.attach_file,
