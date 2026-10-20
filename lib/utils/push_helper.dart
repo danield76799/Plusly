@@ -309,6 +309,14 @@ class PushHelper {
     // een methode op de helper; in upstream zit dezelfde code inline na de
     // return van _tryPushHelper. Roep hem hier aan zodat de 30s-timeout in
     // pushHelper de hele pipeline afdekt.
+    if (event.room == null) {
+      Logs().w('Push helper: event heeft geen room context, overslaan.');
+      PushEventLog().add('push_event_no_room', {
+        'room': notification.roomId ?? '',
+        'type': event.type,
+      });
+      return null;
+    }
     await helper._showNotification();
     return null;
   }
