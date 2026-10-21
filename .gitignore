@@ -371,3 +371,4 @@ docs/package.json
 docs/package-lock.json
 
 lib/generatedandroid/app/google-services.json
+.worktrees/

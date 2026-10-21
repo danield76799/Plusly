@@ -605,7 +605,19 @@ class PushHelper {
         ? await AndroidFlutterLocalNotificationsPlugin()
               .getActiveNotificationMessagingStyle(id: notificationId)
         : null;
-    messagingStyleInformation?.messages?.add(newMessage);
+
+    if (messagingStyleInformation?.messages != null) {
+      final messages = messagingStyleInformation!.messages!;
+      final isDuplicate = messages.isNotEmpty &&
+          messages.last.text == body &&
+          messages.last.person.name == senderName;
+
+      if (!isDuplicate) {
+        messages.add(newMessage);
+      } else {
+        Logs().i('Push helper: duplicate message detected in MessagingStyle, skipping add');
+      }
+    }
 
     if (PlatformInfos.isAndroid && messagingStyleInformation == null) {
       await _setShortcut(notificationTitle, roomAvatarFile);
