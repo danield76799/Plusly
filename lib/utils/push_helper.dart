@@ -460,39 +460,13 @@ class PushHelper {
       Logs().e('Push helper: show() threw', e, s);
     }
 
-    // Fallback: als show() een exceptie gooide (Android weigerde de notificatie),
-    // probeer nog een keer zonder MessagingStyle. Sommige Android-13-builds
-    // weigeren notificaties met een zware style-info (bijv. Person met grote
-    // avatar-bitmap); een kale variant passeren isoleert dat.
-    final fallbackTried = shownError != null && PlatformInfos.isAndroid;
-    if (fallbackTried) {
-      try {
-        await flutterLocalNotificationsPlugin.show(
-          id: notificationId,
-          notificationDetails: NotificationDetails(
-            android: AndroidNotificationDetails(
-              AppConfig.pushNotificationsChannelId,
-              l10n!.incomingMessages,
-              importance: Importance.max,
-              priority: Priority.max,
-              category: AndroidNotificationCategory.message,
-              groupKey: client.clientName,
-              number: notification.counts?.unread,
-              subText: client.clientName,
-            ),
-          ),
-          payload: payload,
-        );
-      } catch (e, s) {
-        Logs().e('Push helper: fallback show() threw', e, s);
-      }
-    }
-
+    // Fallback: removed to prevent duplicate notifications on some Android versions
+    // where show() triggers the OS notification but still throws a PlatformException.
     PushEventLog().add('push_show_result', {
       'room': notification.roomId ?? '',
       'id': '$notificationId',
       'result': shownError == null ? 'ok' : 'threw',
-      'fallback': fallbackTried ? 'tried' : 'no',
+      'fallback': 'disabled',
     });
 
     // BESLISSENDE METING. `show()` geeft op Android geen terugkoppeling: de
