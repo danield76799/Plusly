@@ -262,15 +262,19 @@ class PushHelper {
     // een crash nemen we de Matrix-default (notify=true) aan zodat de
     // echte room-notificatie wel wordt getoond.
     var notify = true;
-    try {
-      notify = client.pushruleEvaluator.match(event).notify;
-    } catch (e, s) {
-      Logs().w('Push helper: push-rule evaluatie gecrasht, neem notify=true aan', e, s);
-      PushEventLog().add('push_rule_crash', {
-        'room': notification.roomId ?? '',
-        'type': event.type,
-        'error': '$e',
-      });
+    if (client.userID == null) {
+      Logs().w('Push helper: userID null, skip pushrule check');
+    } else {
+      try {
+        notify = client.pushruleEvaluator.match(event).notify;
+      } catch (e, s) {
+        Logs().w('Push helper: push-rule evaluatie gecrasht, neem notify=true aan', e, s);
+        PushEventLog().add('push_rule_crash', {
+          'room': notification.roomId ?? '',
+          'type': event.type,
+          'error': '$e',
+        });
+      }
     }
     if (!notify) {
       Logs().i('Push helper: filtered by client-side push rules.');
