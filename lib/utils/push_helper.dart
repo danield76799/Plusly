@@ -609,8 +609,8 @@ class PushHelper {
     if (messagingStyleInformation?.messages != null) {
       final messages = messagingStyleInformation!.messages!;
       final isDuplicate = messages.isNotEmpty &&
-          messages.last.text == body &&
-          messages.last.person.name == senderName;
+          messages.last.text == notificationBody &&
+          messages.last.person?.name == senderName;
 
       if (!isDuplicate) {
         messages.add(newMessage);
