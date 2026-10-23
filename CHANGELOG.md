@@ -1,3 +1,27 @@
+# Plusly v1.4.17+23515
+
+## Push-notificaties
+- **Stabiele notificaties bij pushes** — 6 kleine afwijkingen hersteld: volgorde foreground-check / push-rule filter / badge, titel/body die de conversation view overschreven, MessagingStyle-eigenaar (nu lokale gebruiker), actieknoppen alleen bij bericht-types, mute semantic action en `client_name` schrijven/vergelijken.
+- **Geen dubbele meldingen meer** — fallback-notificatie (`openAppToReadMessages`) verwijderd waar die dubbelde met MessagingStyle, en duplicate-check in `MessagingStyle` gefixt (`notificationBody`-scope en null-safety).
+- **Geen crash op koude start** — `PushruleEvaluator.match` crasht bij `userID == null` (Null check operator); nu gewrapt met `if (userID == null) skip` + try/catch met fallback `notify=true` en logging.
+- **Filtering correct** — eigen Matrix-berichten en events zonder room-context worden stil onderdrukt i.p.v. als fallback te tonen.
+- **Foreground-service stabiel** — rollback `flutter_foreground_task` 11.x → 10.x tegen regressie van de “Berichten laden”-placeholder; watchdog en `reconcileOnForegroundStart` blijven actief.
+
+## Geplande berichten
+- **Nieuw:** `/schedule` en “Gepland verzenden” via attach-menu met datum/tijd-picker, emoji-veilige input, WorkManager/storage en lijst met annuleren.
+- Meerdere fixes: clear persisted draft na plannen, aggressive init flush verwijderd (voorkwam onterechte logout), WorkManager-isolate gedropt i.v.m. SQLite-lock, fallback non-blocking bij foreground.
+
+## Theming
+- **Custom accent color picker** (HSV + hex + L10n) in appearance settings.
+
+## Dependencies & Build
+- Flutter 3.47.7 behouden; `dynamic_color` 1.8.1→2.1.0 (Kotlin 2.x compat), daarna pins voor Dart 3.10 compat; `receive_sharing_intent` 1.8.1; `unifiedpush` 6.1.0 / `unifiedpush_android` 3.1.1; Gradle 8.14, AGP 8.11.1, Kotlin 2.2.20 voor CI.
+
+## Store-teksten
+- Play Store en-US/nl-NL: “100 seats interne test”-framing verwijderd; korte omschrijvingen nu met keywords *Matrix, WhatsApp & Telegram bridges, multi-account, scheduling*.
+
+---
+
 # Plusly v1.4.17+23497
 
 ## Dependencies
