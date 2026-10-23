@@ -1359,7 +1359,9 @@ class ChatController extends State<ChatPageWithRoom>
     // Zonder dit kan de video-note enorm groot worden en de server weigeren.
     final clientConfig = await room.client.getConfig();
     final maxUploadSize = clientConfig.mUploadSize ?? 100 * 1000 * 1000;
-    final file = await videoFile.resizeVideo(maxBytes: maxUploadSize);
+    // Cap op 30MB voor video: houdt ruimte voor encryptie-overhead en blijft kijkbaar.
+    final effectiveMax = (maxUploadSize > 30 * 1000 * 1000 ? 30 * 1000 * 1000 : maxUploadSize);
+    file = await xfile.resizeVideo(maxBytes: effectiveMax);
 
     MatrixImageFile? thumbnail;
     try {

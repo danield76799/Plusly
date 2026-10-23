@@ -73,6 +73,7 @@ class SendFileDialogState extends State<SendFileDialog> {
       scaffoldMessenger.showLoadingSnackBar(l10n.prepareSendingAttachment);
       final clientConfig = await widget.room.client.getConfig();
       final maxUploadSize = clientConfig.mUploadSize ?? 100 * 1000 * 1000;
+    // Cap op 30MB voor video: houdt ruimte voor encryptie-overhead en blijft kijkbaar.
 
       // Vroege duidelijke melding: oncomprimeerbare bestanden die sowieso
       // te groot zijn, afvangen VÓÓR de upload. Voorheen leek het alsof
@@ -133,7 +134,8 @@ class SendFileDialogState extends State<SendFileDialog> {
             length > minSizeToCompress &&
             compress) {
           scaffoldMessenger.showLoadingSnackBar(l10n.compressVideo);
-          file = await xfile.resizeVideo(maxBytes: maxUploadSize);
+          final effectiveMax = (maxUploadSize > 30 * 1000 * 1000 ? 30 * 1000 * 1000 : maxUploadSize);
+    file = await xfile.resizeVideo(maxBytes: effectiveMax);
         } else if (mimeType != null &&
             mimeType.startsWith('image') &&
             length > minSizeToCompress &&

@@ -158,7 +158,7 @@ abstract class ForegroundServices {
       _externGestart = false;
       _serviceStartedAt = DateTime.now();
       final result = await FlutterForegroundTask.startService(
-        serviceTypes: [ForegroundServiceTypes.shortService],
+        serviceTypes: [ForegroundServiceTypes.dataSync],
         notificationTitle: AppConfig.applicationName,
         notificationText: l10n.loadingMessages,
       );
