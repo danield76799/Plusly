@@ -1361,7 +1361,7 @@ class ChatController extends State<ChatPageWithRoom>
     final maxUploadSize = clientConfig.mUploadSize ?? 100 * 1000 * 1000;
     // Cap op 30MB voor video: houdt ruimte voor encryptie-overhead en blijft kijkbaar.
     final effectiveMax = (maxUploadSize > 30 * 1000 * 1000 ? 30 * 1000 * 1000 : maxUploadSize);
-    file = await xfile.resizeVideo(maxBytes: effectiveMax);
+    final file = await videoFile.resizeVideo(maxBytes: effectiveMax);
 
     MatrixImageFile? thumbnail;
     try {
