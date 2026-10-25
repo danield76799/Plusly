@@ -37,6 +37,8 @@ String getBridgeTypeLabel(String? type) {
       return 'Slack';
     case 'matrix':
       return 'Matrix';
+    case 'linkedin':
+      return 'LinkedIn';
     default:
       return 'Other';
   }
@@ -62,6 +64,23 @@ IconData getBridgeTypeIcon(String? type) {
   }
 }
 
+/// Gets the brand SVG asset path for a bridge type, or null if there is no
+/// dedicated brand icon (fall back to [getBridgeTypeIcon] in that case).
+String? getBridgeTypeSvg(String? type) {
+  switch (type) {
+    case 'whatsapp':
+    case 'telegram':
+    case 'signal':
+    case 'discord':
+    case 'slack':
+    case 'matrix':
+    case 'linkedin':
+      return 'assets/bridge_icons/$type.svg';
+    default:
+      return null;
+  }
+}
+
 /// Gets a color for a bridge type
 Color getBridgeTypeColor(String? type) {
   switch (type) {
@@ -77,6 +96,8 @@ Color getBridgeTypeColor(String? type) {
       return const Color(0xFF4A154B);
     case 'matrix':
       return const Color(0xFF0DBD8B);
+    case 'linkedin':
+      return const Color(0xFF0A66C2);
     default:
       return const Color(0xFF9E9E9E); // Medium grey — visible in both light and dark
   }
@@ -288,6 +309,7 @@ String? getBridgeType(Room room) {
         if (name.contains('signal')) return 'signal';
         if (name.contains('discord')) return 'discord';
         if (name.contains('slack')) return 'slack';
+        if (name.contains('linkedin')) return 'linkedin';
         return name;
       }
       return 'bridge';
@@ -339,6 +361,13 @@ String? getBridgeType(Room room) {
       userId.contains('slack_')) {
     return 'slack';
   }
+  // LinkedIn patterns
+  if (userId.contains('linkedin-bot') ||
+      userId.contains('bot.linkedin') ||
+      userId.contains('linkedin_') ||
+      userId.contains('linkedinbot')) {
+    return 'linkedin';
+  }
 
   // 3. Check room name/topic
   if (roomName.contains('whatsapp_') || roomTopic.contains('whatsapp_') ||
@@ -365,6 +394,10 @@ String? getBridgeType(Room room) {
   if (roomName.contains('discord_') || roomTopic.contains('discord_')) {
     return 'discord';
   }
+  if (roomName.contains('linkedin_') || roomTopic.contains('linkedin_') ||
+      roomName.contains('linkedin') || roomTopic.contains('linkedin')) {
+    return 'linkedin';
+  }
 
   // 4. Check canonical alias
   final canonicalAlias = room.canonicalAlias.toLowerCase();
@@ -373,6 +406,7 @@ String? getBridgeType(Room room) {
   if (canonicalAlias.contains('signal')) return 'signal';
   if (canonicalAlias.contains('discord')) return 'discord';
   if (canonicalAlias.contains('slack')) return 'slack';
+  if (canonicalAlias.contains('linkedin')) return 'linkedin';
 
   // 5. Check room creator
   final createEvent = room.getState(EventTypes.RoomCreate);
@@ -400,6 +434,7 @@ String? getBridgeType(Room room) {
       if (memberId.contains('signal') || displayName.contains('signal')) return 'signal';
       if (memberId.contains('discord') || displayName.contains('discord')) return 'discord';
       if (memberId.contains('slack') || displayName.contains('slack')) return 'slack';
+      if (memberId.contains('linkedin') || displayName.contains('linkedin')) return 'linkedin';
     }
   }
 

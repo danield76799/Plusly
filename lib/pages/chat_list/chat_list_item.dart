@@ -47,12 +47,17 @@ class ChatListItem extends StatelessWidget {
 
   Widget _buildBridgeIcon(BuildContext context, Room room) {
     final type = getBridgeType(room);
-    if (type == 'whatsapp') {
+    final svg = getBridgeTypeSvg(type);
+    if (svg != null) {
       return SvgPicture.asset(
-        'assets/bridge_icons/whatsapp.svg',
+        svg,
         width: 16,
         height: 16,
         fit: BoxFit.contain,
+        colorFilter: ColorFilter.mode(
+          getBridgeTypeColor(type),
+          BlendMode.srcIn,
+        ),
       );
     }
     return Icon(

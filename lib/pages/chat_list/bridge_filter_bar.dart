@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/bridge_utils.dart';
@@ -66,16 +67,29 @@ class BridgeFilterBar extends StatelessWidget {
           final isSelected = visibleBridgeTypes.contains(type);
           final color = getBridgeTypeColor(type);
           final unreadCount = unreadCounts[type] ?? 0;
+          final svg = getBridgeTypeSvg(type);
 
           return FilterChip(
             avatar: Stack(
               clipBehavior: Clip.none,
               children: [
-                Icon(
-                  getBridgeTypeIcon(type),
-                  size: 16,
-                  color: isSelected ? color : theme.colorScheme.onSurface,
-                ),
+                if (svg != null)
+                  SvgPicture.asset(
+                    svg,
+                    width: 16,
+                    height: 16,
+                    fit: BoxFit.contain,
+                    colorFilter: ColorFilter.mode(
+                      isSelected ? color : theme.colorScheme.onSurface,
+                      BlendMode.srcIn,
+                    ),
+                  )
+                else
+                  Icon(
+                    getBridgeTypeIcon(type),
+                    size: 16,
+                    color: isSelected ? color : theme.colorScheme.onSurface,
+                  ),
                 // Badge voor ongelezen
                 if (unreadCount > 0)
                   Positioned(
