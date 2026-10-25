@@ -160,9 +160,15 @@ const _bridgePatterns = [
 
 /// Known bridge state event types
 const _bridgeStateEventTypes = [
+  // mautrix (v1 t/m v3)
+  'im.vector.modular.bridge',
+  'im.vector.modular.bridge.v2',
+  'im.vector.modular.bridge.v3',
+  // Beeper
+  'com.beeper.bridge',
+  // Element / oudere MSC2776-achtige bruggen
   'io.element.bridge',
   'uk.half-shot.msc2776.bridge',
-  'com.beeper.bridge',
 ];
 
 /// Checks if a user ID matches known bridge bot patterns
@@ -209,242 +215,202 @@ bool isBridgeBot(String userId, Room room) {
   return false;
 }
 
-/// Checks if a room is a bridge room (has bridge-related state or direct chat with bridge bot)
-bool isBridgeRoom(Room room) {
-  // Check by room state events FIRST (most reliable)
-  if (isBridgeRoomByState(room)) {
-    return true;
-  }
-
-  // Check direct chat matrix ID
-  final directChatMatrixId = room.directChatMatrixID;
-  if (directChatMatrixId != null && isBridgeBotByUserId(directChatMatrixId)) {
-    return true;
-  }
-
-  // Check room name and topic for bridge bot patterns
-  final roomName = room.name.toLowerCase();
-  final roomTopic = room.topic.toLowerCase();
-  final bridgeNamePatterns = [
-    'whatsapp',
-    'telegram',
-    'signal',
-    'discord',
-    'slack',
-    'beeper',
-    'mautrix',
-  ];
-  if (bridgeNamePatterns.any(
-    (pattern) => roomName.contains(pattern) || roomTopic.contains(pattern),
-  )) {
-    return true;
-  }
-
-  // Check for phone numbers in room name (WhatsApp bridge indicator)
-  // Phone number formats: +316..., +31 6..., 06..., etc.
-  final name = room.name;
-  if (name.isNotEmpty) {
-    // Simple phone number check: starts with + and has 10+ digits, or starts with 0 and has 10+ chars
-    final cleaned = name.replaceAll(RegExp(r'\s'), '');
-    if ((cleaned.startsWith('+') && cleaned.length >= 10 && cleaned.substring(1).split('').every((c) => RegExp(r'\d').hasMatch(c))) ||
-        (cleaned.startsWith('0') && cleaned.length >= 10 && cleaned.split('').every((c) => RegExp(r'\d').hasMatch(c)))) {
-      return true;
-    }
-  }
-
-  // Check canonical alias
-  final canonicalAlias = room.canonicalAlias.toLowerCase();
-  final aliasPatterns = [
-    'telegram_',
-    'discord_',
+/// Netwerkpatronen per brugnetwerk, gekoppeld aan de user-id's van de
+/// bridge-bots. De patronen zijn bewust streng: ze moeten een brug
+/// identificeren en niet per ongeluk een gewone Matrix-account treffen.
+const _bridgeNetworkUserPatterns = <String, List<String>>{
+  'whatsapp': [
     'whatsapp_',
-    'signal_',
-    'mautrix_',
-    'bridge_',
-    'puppet_',
-    'beeper_',
-  ];
-  if (aliasPatterns.any((pattern) => canonicalAlias.contains(pattern))) {
-    return true;
-  }
+    'whatsappbot',
+    'whatsapp-bot',
+    'whatsapp.bot',
+    'bot.whatsapp',
+    'botwhatsapp',
+    'whappbot',
+    'wa-bot',
+  ],
+  'telegram': [
+    'telegram_',
+    'telegram-bot',
+    'telegrambot',
+    'telegram.bot',
+    'bot.telegram',
+    'mautrix-telegram',
+    'tgbot',
+    'tg-bot',
+    '@tg:',
+    '@tg_',
+  ],
+  'signal': ['signal_', 'signal-bot', 'signalbot', 'signal.bot', 'bot.signal'],
+  'discord': ['discord_', 'discord-bot', 'discordbot', 'discord.bot', 'bot.discord'],
+  'slack': ['slack_', 'slack-bot', 'slackbot', 'slack.bot', 'bot.slack'],
+  'linkedin': ['linkedin_', 'linkedin-bot', 'linkedinbot', 'bot.linkedin'],
+};
 
-  // Check room members for bridge bot participation
-  // Check ALL members, not just first 20, and also check display names
-  final memberStates = room.states[EventTypes.RoomMember];
-  if (memberStates != null) {
-    for (final entry in memberStates.entries) {
-      final userId = entry.key;
-      if (isBridgeBotByUserId(userId)) {
-        return true;
-      }
-      // Also check display name in the member event
-      final event = entry.value;
-      final displayName = event.content['displayname']?.toString().toLowerCase() ?? '';
-      if (displayName.contains('(wa)') || displayName.contains('whatsapp')) {
-        return true;
-      }
-    }
-  }
+/// Aliassen van brugkamers bevatten altijd een netwerkspecifiek voorvoegsel.
+const _bridgeAliasPrefixes = <String, List<String>>{
+  'whatsapp': ['whatsapp_', 'wa_'],
+  'telegram': ['telegram_', 'tg_'],
+  'signal': ['signal_'],
+  'discord': ['discord_'],
+  'slack': ['slack_'],
+  'linkedin': ['linkedin_'],
+};
 
-  // FIX #12: Removed false-positive fallback that classified ALL group chats
-  // with 2-200 members as WhatsApp bridges. Only use concrete evidence
-  // (state events, bridge bot user IDs, name patterns) for detection.
-  return false;
+/// Herkent een netwerk op basis van vrije tekst (bv. de bridge_name of het
+/// netwerk-veld van een state-event). Wordt alleen gebruikt voor waarden
+/// die door de brug zelf zijn gezet — nooit voor kamer- of gebruikersnamen.
+String? bridgeNetworkFromString(String? value) {
+  if (value == null) return null;
+  final v = value.toLowerCase();
+  if (v.contains('whatsapp')) return 'whatsapp';
+  if (v.contains('telegram')) return 'telegram';
+  if (v.contains('signal')) return 'signal';
+  if (v.contains('discord')) return 'discord';
+  if (v.contains('slack')) return 'slack';
+  if (v.contains('linkedin')) return 'linkedin';
+  return null;
 }
 
-/// Gets the bridge type from a room (e.g., 'whatsapp', 'telegram')
-/// Returns null if not a bridge room
+/// Korte brugcodes waarmee een bridge-bot zichzelf aanduidt. De localpart
+/// moet volledig uit de code bestaan, eventueel gevolgd door een
+/// scheidingsteken en cijfers (bv. @wa, @wa_31612345678, @telegram).
+const _shortCodeNetworks = <String, String>{
+  'wa': 'whatsapp',
+  'whatsapp': 'whatsapp',
+  'tg': 'telegram',
+  'telegram': 'telegram',
+  'signal': 'signal',
+  'discord': 'discord',
+  'slack': 'slack',
+  'linkedin': 'linkedin',
+};
+
+final _shortCodePattern = RegExp(
+  r'^@(wa|whatsapp|tg|telegram|signal|discord|slack|linkedin)([_\-]\d*)?$',
+);
+
+/// Herkent het netwerk op basis van een bridge-bot user-id.
+String? bridgeNetworkFromUserId(String? userId) {
+  if (userId == null || userId.isEmpty) return null;
+  final id = userId.toLowerCase();
+  final localpart = id.split(':').first;
+  final shortCode = _shortCodePattern.firstMatch(localpart);
+  if (shortCode != null) {
+    return _shortCodeNetworks[shortCode.group(1)!];
+  }
+  for (final entry in _bridgeNetworkUserPatterns.entries) {
+    if (entry.value.any(id.contains)) return entry.key;
+  }
+  return null;
+}
+
+/// Herkent het netwerk op basis van de alias van de kamer.
+String? bridgeNetworkFromAlias(String? alias) {
+  if (alias == null || alias.isEmpty) return null;
+  final a = alias.toLowerCase();
+  for (final entry in _bridgeAliasPrefixes.entries) {
+    if (entry.value.any(a.contains)) return entry.key;
+  }
+  return null;
+}
+
+/// Bepaalt het netwerk van een brugkamer, of null als de kamer géén
+/// brugkamer is.
+///
+/// Alleen harde signalen worden gebruikt:
+///  - bridge state-events (mautrix, Beeper, Element)
+///  - bridge-bot user-ids
+///  - bridge-aliases
+///
+/// Vrije tekst uit kamer- of gebruikersnamen wordt bewust NIET gebruikt.
+/// Daarmee werden gewone Matrix-chats ten onrechte als WhatsApp of
+/// Telegram aangemerkt: een contact "Ritsa wa", een groep met een lid
+/// "Signal", of een kamer die op een telefoonnummer begint.
 String? getBridgeType(Room room) {
-  // 1. Check bridge state events FIRST (most reliable)
+  // 1. Bridge state-events: het meest betrouwbare signaal.
   for (final eventType in _bridgeStateEventTypes) {
     final stateEvent = room.getState(eventType);
-    if (stateEvent != null) {
-      final content = stateEvent.content;
-      final bridgeName =
-          content['bridge_name'] ?? content['name'] ?? content['service'] ?? content['type'];
-      if (bridgeName != null) {
-        final name = bridgeName.toString().toLowerCase();
-        if (name.contains('whatsapp')) return 'whatsapp';
-        if (name.contains('telegram')) return 'telegram';
-        if (name.contains('signal')) return 'signal';
-        if (name.contains('discord')) return 'discord';
-        if (name.contains('slack')) return 'slack';
-        if (name.contains('linkedin')) return 'linkedin';
-        return name;
-      }
-      return 'bridge';
+    if (stateEvent == null) continue;
+    final content = stateEvent.content;
+    for (final key in const ['bridge_name', 'network', 'name', 'service', 'type']) {
+      final network = bridgeNetworkFromString(content[key]?.toString());
+      if (network != null) return network;
     }
+    // Er staat een brug-state-event, maar het netwerk is niet te herkennen.
+    return 'other';
   }
 
-  // 2. Check directChatMatrixID
-  final userId = room.directChatMatrixID?.toLowerCase() ?? '';
-  final roomName = room.name.toLowerCase();
-  final roomTopic = room.topic.toLowerCase();
+  // 2. De directe chat loopt via een bridge-bot.
+  final byDirect = bridgeNetworkFromUserId(room.directChatMatrixID);
+  if (byDirect != null) return byDirect;
 
-  // WhatsApp patterns
-  if (userId.contains('wa-bot') ||
-      userId.contains('whappbot') ||
-      userId.contains('whatsappbot') ||
-      userId.contains('botwhatsapp') ||
-      userId.contains('whatsapp_') ||
-      userId.contains('whatsapp.bot') ||
-      userId.contains('bot.whatsapp') ||
-      userId.contains('@whatsapp') ||
-      userId.contains('@botwhatsapp') ||
-      userId.contains('@bot.whatsapp') ||
-      userId.contains('@whatsappbot')) {
-    return 'whatsapp';
-  }
-  // Telegram patterns
-  if (userId.contains('telegram-bot') ||
-      userId.contains('mautrix-telegram') ||
-      userId.contains('tgbot') ||
-      userId.contains('bot.telegram') ||
-      userId.contains('telegram_')) {
-    return 'telegram';
-  }
-  // Signal patterns
-  if (userId.contains('signal-bot') ||
-      userId.contains('bot.signal') ||
-      userId.contains('signal_')) {
-    return 'signal';
-  }
-  // Discord patterns
-  if (userId.contains('discord-bot') ||
-      userId.contains('bot.discord') ||
-      userId.contains('discord_')) {
-    return 'discord';
-  }
-  // Slack patterns
-  if (userId.contains('slack-bot') ||
-      userId.contains('bot.slack') ||
-      userId.contains('slack_')) {
-    return 'slack';
-  }
-  // LinkedIn patterns
-  if (userId.contains('linkedin-bot') ||
-      userId.contains('bot.linkedin') ||
-      userId.contains('linkedin_') ||
-      userId.contains('linkedinbot')) {
-    return 'linkedin';
-  }
+  // 3. De alias van de kamer verwijst naar een brug.
+  final byAlias = bridgeNetworkFromAlias(room.canonicalAlias);
+  if (byAlias != null) return byAlias;
 
-  // 3. Check room name/topic
-  if (roomName.contains('whatsapp_') || roomTopic.contains('whatsapp_') ||
-      roomName.contains('wa ') || roomTopic.contains('wa ')) {
-    return 'whatsapp';
-  }
-  
-  // Check for phone numbers (WhatsApp bridge indicator)
-  final name = room.name;
-  if (name.isNotEmpty) {
-    final cleaned = name.replaceAll(RegExp(r'\s'), '');
-    if ((cleaned.startsWith('+') && cleaned.length >= 10 && cleaned.substring(1).split('').every((c) => RegExp(r'\d').hasMatch(c))) ||
-        (cleaned.startsWith('0') && cleaned.length >= 10 && cleaned.split('').every((c) => RegExp(r'\d').hasMatch(c)))) {
-      return 'whatsapp';
-    }
-  }
-  
-  if (roomName.contains('telegram_') || roomTopic.contains('telegram_')) {
-    return 'telegram';
-  }
-  if (roomName.contains('signal_') || roomTopic.contains('signal_')) {
-    return 'signal';
-  }
-  if (roomName.contains('discord_') || roomTopic.contains('discord_')) {
-    return 'discord';
-  }
-  if (roomName.contains('linkedin_') || roomTopic.contains('linkedin_') ||
-      roomName.contains('linkedin') || roomTopic.contains('linkedin')) {
-    return 'linkedin';
-  }
-
-  // 4. Check canonical alias
-  final canonicalAlias = room.canonicalAlias.toLowerCase();
-  if (canonicalAlias.contains('whatsapp')) return 'whatsapp';
-  if (canonicalAlias.contains('telegram')) return 'telegram';
-  if (canonicalAlias.contains('signal')) return 'signal';
-  if (canonicalAlias.contains('discord')) return 'discord';
-  if (canonicalAlias.contains('slack')) return 'slack';
-  if (canonicalAlias.contains('linkedin')) return 'linkedin';
-
-  // 5. Check room creator
-  final createEvent = room.getState(EventTypes.RoomCreate);
-  if (createEvent != null) {
-    final creator =
-        createEvent.content['creator']?.toString().toLowerCase() ?? '';
-    if (creator.contains('whatsapp')) return 'whatsapp';
-    if (creator.contains('telegram')) return 'telegram';
-    if (creator.contains('signal')) return 'signal';
-    if (creator.contains('discord')) return 'discord';
-    if (creator.contains('slack')) return 'slack';
-  }
-
-  // 6. Check room members for bridge bot
-  // Check ALL members and their display names
+  // 4. Een lid van de kamer is een bridge-bot.
   final memberStates = room.states[EventTypes.RoomMember];
   if (memberStates != null) {
-    for (final entry in memberStates.entries) {
-      final memberId = entry.key.toLowerCase();
-      final event = entry.value;
-      final displayName = event.content['displayname']?.toString().toLowerCase() ?? '';
-      
-      if (memberId.contains('whatsapp') || displayName.contains('whatsapp') || displayName.contains('(wa)')) return 'whatsapp';
-      if (memberId.contains('telegram') || displayName.contains('telegram')) return 'telegram';
-      if (memberId.contains('signal') || displayName.contains('signal')) return 'signal';
-      if (memberId.contains('discord') || displayName.contains('discord')) return 'discord';
-      if (memberId.contains('slack') || displayName.contains('slack')) return 'slack';
-      if (memberId.contains('linkedin') || displayName.contains('linkedin')) return 'linkedin';
+    for (final memberId in memberStates.keys) {
+      final byMember = bridgeNetworkFromUserId(memberId);
+      if (byMember != null) return byMember;
     }
   }
 
-  // FIX #12: Removed false-positive fallback that returned 'whatsapp' for
-  // all group chats with 2-200 members. Only use concrete evidence.
-
-  // If isBridgeRoom is true but we can't determine type, it's a generic bridge
-  if (isBridgeRoom(room)) {
-    return 'other';
+  // 5. De kamer is aangemaakt door een bridge-bot.
+  final createEvent = room.getState(EventTypes.RoomCreate);
+  if (createEvent != null) {
+    final byCreator = bridgeNetworkFromUserId(
+      createEvent.content['creator']?.toString(),
+    );
+    if (byCreator != null) return byCreator;
   }
 
   return null;
 }
+
+/// Beschrijft welk signaal een kamer als brugkamer aanmerkt, in
+/// leesbare vorm. Handig om te controleren waarom een chat wél of juist
+/// niet als brugkamer wordt herkend. Geeft null terug als er geen signaal is.
+String? bridgeDetectionSignal(Room room) {
+  for (final eventType in _bridgeStateEventTypes) {
+    final stateEvent = room.getState(eventType);
+    if (stateEvent == null) continue;
+    final content = stateEvent.content;
+    for (final key in const ['bridge_name', 'network', 'name', 'service', 'type']) {
+      final network = bridgeNetworkFromString(content[key]?.toString());
+      if (network != null) {
+        return 'state-event $eventType · $key = $network';
+      }
+    }
+    return 'state-event $eventType · netwerk onbekend';
+  }
+  final direct = room.directChatMatrixID;
+  if (bridgeNetworkFromUserId(direct) != null) {
+    return 'bridge-bot $direct';
+  }
+  final alias = room.canonicalAlias;
+  if (bridgeNetworkFromAlias(alias) != null) {
+    return 'alias $alias';
+  }
+  final memberStates = room.states[EventTypes.RoomMember];
+  if (memberStates != null) {
+    for (final memberId in memberStates.keys) {
+      if (bridgeNetworkFromUserId(memberId) != null) {
+        return 'bridge-bot $memberId';
+      }
+    }
+  }
+  final createEvent = room.getState(EventTypes.RoomCreate);
+  if (createEvent != null) {
+    final creator = createEvent.content['creator']?.toString();
+    if (bridgeNetworkFromUserId(creator) != null) {
+      return 'maker $creator';
+    }
+  }
+  return null;
+}
+
+/// Checks if a room is a bridge room (has bridge-related state or direct chat with bridge bot)
+bool isBridgeRoom(Room room) => getBridgeType(room) != null;

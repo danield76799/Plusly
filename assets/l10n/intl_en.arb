@@ -4140,5 +4140,40 @@
     "placeholders": {}
   },
   "pushDiagnose": "Push diagnostics",
-  "pushDebugSubtitle": "UP distributor, endpoint, registered?"
+  "pushDebugSubtitle": "UP distributor, endpoint, registered?",
+  "bridgeDiagnoseTitle": "Network diagnostics",
+  "@bridgeDiagnoseTitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseSubtitle": "This is how chats from different networks are recognised.",
+  "@bridgeDiagnoseSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseUnrecognized": "Not recognised (yet)",
+  "@bridgeDiagnoseUnrecognized": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseUnrecognizedHelp": "These chats contain a network word but have no state event, bridge bot or bridge alias. They therefore stay under Matrix.",
+  "@bridgeDiagnoseUnrecognizedHelp": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseNoNetworks": "No bridge networks found.",
+  "@bridgeDiagnoseNoNetworks": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseSignals": "different signals",
+  "@bridgeDiagnoseSignals": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseTooltip": "Network diagnostics",
+  "@bridgeDiagnoseTooltip": {
+    "type": "String",
+    "placeholders": {}
+  }
 }

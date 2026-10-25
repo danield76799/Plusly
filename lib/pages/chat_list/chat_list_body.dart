@@ -11,6 +11,7 @@ import 'package:Pulsly/pages/chat_list/cached_chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_legacy_header.dart';
 import 'package:Pulsly/pages/chat_list/bridge_filter_bar.dart';
+import 'package:Pulsly/pages/chat_list/bridge_network_diagnose_sheet.dart';
 import 'package:Pulsly/pages/chat_list/dummy_chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/search_title.dart';
 import 'package:Pulsly/pages/chat_list/space_view.dart';
@@ -130,6 +131,13 @@ class ChatListViewBody extends StatelessWidget {
                       visibleBridgeTypes: controller.visibleBridgeTypes,
                       unreadCounts: controller.unreadBridgeCounts,
                       onChanged: controller.setVisibleBridgeTypes,
+                      onDiagnose: () => showModalBottomSheet<void>(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) =>
+                            const BridgeNetworkDiagnoseSheet(),
+                      ),
                     ),
                   ),
                 SliverList(

@@ -4139,5 +4139,40 @@
     "placeholders": {}
   },
   "pushDiagnose": "Push diagnose",
-  "pushDebugSubtitle": "UP-distributor, endpoint, geregistreerd?"
+  "pushDebugSubtitle": "UP-distributor, endpoint, geregistreerd?",
+  "bridgeDiagnoseTitle": "Netwerkdiagnose",
+  "@bridgeDiagnoseTitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseSubtitle": "Zo worden de chats uit verschillende netwerken herkend.",
+  "@bridgeDiagnoseSubtitle": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseUnrecognized": "Nog niet herkend",
+  "@bridgeDiagnoseUnrecognized": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseUnrecognizedHelp": "Deze chats bevatten een netwerkwoord, maar hebben geen state-event, bridge-bot of bridge-alias. Ze blijven daarom onder Matrix staan.",
+  "@bridgeDiagnoseUnrecognizedHelp": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseNoNetworks": "Er zijn geen brugnetwerken gevonden.",
+  "@bridgeDiagnoseNoNetworks": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseSignals": "verschillende signalen",
+  "@bridgeDiagnoseSignals": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "bridgeDiagnoseTooltip": "Netwerkdiagnose",
+  "@bridgeDiagnoseTooltip": {
+    "type": "String",
+    "placeholders": {}
+  }
 }

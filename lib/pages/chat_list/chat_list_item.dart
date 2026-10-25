@@ -45,8 +45,11 @@ class ChatListItem extends StatelessWidget {
     super.key,
   });
 
-  Widget _buildBridgeIcon(BuildContext context, Room room) {
-    final type = getBridgeType(room);
+  /// Bouwt het netwerk-icoontje van een brugkamer. Geeft null terug voor
+  /// gewone Matrix-chats: die krijgen geen badge, zodat het icoontje echt
+  /// betekent "dit komt van een ander netwerk".
+  Widget? _buildBridgeIcon(BuildContext context, String? type) {
+    if (type == null) return null;
     final svg = getBridgeTypeSvg(type);
     if (svg != null) {
       return SvgPicture.asset(
@@ -80,6 +83,8 @@ class ChatListItem extends StatelessWidget {
     final effectiveCount = room.effectiveNotificationCountSync;
     final directChatMatrixId = room.directChatMatrixID;
     final isDirectChat = directChatMatrixId != null;
+    // Het netwerk waar deze chat vandaan komt (null = gewone Matrix-chat).
+    final bridgeType = getBridgeType(room);
     final backgroundColor = activeChat
         ? theme.colorScheme.secondaryContainer
         : Colors.transparent;
@@ -128,18 +133,27 @@ class ChatListItem extends StatelessWidget {
                         presenceBackgroundColor: backgroundColor,
                         onTap: () => onLongPress?.call(context),
                       ),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surface,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: theme.colorScheme.surface, width: 1.5),
+                      if (bridgeType != null)
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surface,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: theme.colorScheme.surface,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Tooltip(
+                              message:
+                                  'Netwerk: ${getBridgeTypeLabel(bridgeType)}\n'
+                                  '${bridgeDetectionSignal(room) ?? 'onbekend signaal'}',
+                              child: _buildBridgeIcon(context, bridgeType),
+                            ),
                           ),
-                          child: _buildBridgeIcon(context, room),
                         ),
-                      ),
                     ],
                   ),
                 ),

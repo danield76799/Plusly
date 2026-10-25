@@ -10,12 +10,14 @@ class BridgeFilterBar extends StatelessWidget {
   final void Function(Set<String>) onChanged;
   final Map<String, int>
   unreadCounts; // Nieuw: ongelezen counts per bridge type
+  final VoidCallback? onDiagnose;
 
   const BridgeFilterBar({
     required this.allBridgeTypes,
     required this.visibleBridgeTypes,
     required this.onChanged,
     this.unreadCounts = const {}, // Default leeg
+    this.onDiagnose,
     super.key,
   });
 
@@ -53,7 +55,7 @@ class BridgeFilterBar extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: sortedTypes.length + 1,
+        itemCount: sortedTypes.length + 1 + (onDiagnose != null ? 1 : 0),
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           // Eerste chip: "Alles" — reset de netwerkfilter in één tik.
@@ -80,6 +82,17 @@ class BridgeFilterBar extends StatelessWidget {
                 fontWeight: allVisible ? FontWeight.w600 : FontWeight.normal,
               ),
               side: BorderSide.none,
+            );
+          }
+          // Laatste knop: netwerkdiagnose (welk signaal herkent welke chat?).
+          if (onDiagnose != null && i == sortedTypes.length + 1) {
+            return Center(
+              child: IconButton(
+                icon: const Icon(Icons.info_outline, size: 18),
+                tooltip: L10n.of(context).bridgeDiagnoseTooltip,
+                visualDensity: VisualDensity.compact,
+                onPressed: onDiagnose,
+              ),
             );
           }
           final type = sortedTypes[i - 1];
