@@ -10,6 +10,7 @@ import 'package:Pulsly/pages/chat_list/chat_list.dart';
 import 'package:Pulsly/pages/chat_list/cached_chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_legacy_header.dart';
+import 'package:Pulsly/pages/chat_list/bridge_filter_bar.dart';
 import 'package:Pulsly/pages/chat_list/dummy_chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/search_title.dart';
 import 'package:Pulsly/pages/chat_list/space_view.dart';
@@ -118,6 +119,19 @@ class ChatListViewBody extends StatelessWidget {
                   ChatListLegacyHeader(controller: controller)
                 else
                   ChatListHeader(controller: controller),
+                // Netwerkfilter: toon per bridge-netwerk (WhatsApp, Telegram,
+                // Signal, Discord, Slack, Matrix) welke netwerken zichtbaar
+                // zijn, inclusief ongelezen-tellers.
+                if (!controller.isSearchMode &&
+                    controller.allBridgeTypes.isNotEmpty)
+                  SliverToBoxAdapter(
+                    child: BridgeFilterBar(
+                      allBridgeTypes: controller.allBridgeTypes,
+                      visibleBridgeTypes: controller.visibleBridgeTypes,
+                      unreadCounts: controller.unreadBridgeCounts,
+                      onChanged: controller.setVisibleBridgeTypes,
+                    ),
+                  ),
                 SliverList(
                   delegate: SliverChildListDelegate([
                     if (controller.isSearchMode) ...[

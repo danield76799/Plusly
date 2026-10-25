@@ -40,6 +40,12 @@ import '../../widgets/matrix.dart';
 
 enum PopupMenuAction { settings, invite, newGroup, newSpace, archive, syncDebug }
 
+/// Vergelijkt twee sets op inhoud (ongeordend).
+bool _setEquals(Set<String> a, Set<String> b) {
+  if (a.length != b.length) return false;
+  return a.every(b.contains);
+}
+
 enum ActiveFilter { allChats, messages, unread, groups, favorites, pinned, people }
 
 enum SearchScope { local, public }
@@ -187,6 +193,50 @@ class ChatListController extends State<ChatList>
   Set<String> allBridgeTypes = {};
   Set<String> visibleBridgeTypes = {};
 
+  /// Detecteert welke bridge-netwerken er actief zijn en houdt de zichtbare
+  /// set bij. Geeft true terug als er iets veranderd is, zodat de UI kan
+  /// rebuilden. Let op: roept géén setState aan, zodat dit veilig vanuit
+  /// een build-cyclus kan.
+  bool syncBridgeTypes() {
+    // Cache for 5 seconds to avoid recomputation
+    if (DateTime.now().difference(_lastBridgeSync) < Duration(seconds: 5)) {
+      return false;
+    }
+
+    final client = Matrix.of(context).client;
+    final hasMatrixRooms = client.rooms.any((room) => !isBridgeRoom(room));
+    final detectedTypes = client.rooms
+        .where((room) => isBridgeRoom(room))
+        .map((room) => getBridgeType(room) ?? 'other')
+        .toSet();
+    if (hasMatrixRooms) {
+      detectedTypes.add('matrix');
+    }
+    // Only auto-add types that were not previously known.
+    // If a user manually removed a type, do not re-add it.
+    final newVisible = {
+      ...visibleBridgeTypes,
+      ...detectedTypes.where((t) => !allBridgeTypes.contains(t)),
+    };
+    final changed =
+        !_setEquals(allBridgeTypes, detectedTypes) ||
+        !_setEquals(visibleBridgeTypes, newVisible);
+    visibleBridgeTypes = newVisible;
+    allBridgeTypes = detectedTypes;
+    _lastBridgeSync = DateTime.now();
+    return changed;
+  }
+
+  /// Zet welke bridge-netwerken zichtbaar zijn. Een lege selectie wordt
+  /// genegeerd: dan blijven alle netwerken zichtbaar (nooit een lege lijst).
+  void setVisibleBridgeTypes(Set<String> types) {
+    final next = types.isEmpty ? Set<String>.from(allBridgeTypes) : types;
+    if (_setEquals(next, visibleBridgeTypes)) return;
+    setState(() {
+      visibleBridgeTypes = next;
+    });
+  }
+
   // Cached getter voor ongelezen counts - 500ms cache
   Map<String, int> get unreadBridgeCounts {
     final now = DateTime.now();
@@ -210,51 +260,24 @@ class ChatListController extends State<ChatList>
     return counts;
   }
 
-  void syncBridgeTypes() {
-    // Cache for 5 seconds to avoid recomputation
-    if (DateTime.now().difference(_lastBridgeSync) < Duration(seconds: 5)) {
-      return;
-    }
-
-    final client = Matrix.of(context).client;
-    final hasMatrixRooms = client.rooms.any((room) => !isBridgeRoom(room));
-    final detectedTypes = client.rooms
-        .where((room) => isBridgeRoom(room))
-        .map((room) => getBridgeType(room) ?? 'other')
-        .toSet();
-    if (hasMatrixRooms) {
-      detectedTypes.add('matrix');
-    }
-    // Only auto-add types that were not previously known.
-    // If a user manually removed a type, do not re-add it.
-    visibleBridgeTypes = {
-      ...visibleBridgeTypes,
-      ...detectedTypes.where((t) => !allBridgeTypes.contains(t)),
-    };
-    allBridgeTypes = detectedTypes;
-    _lastBridgeSync = DateTime.now();
-  }
-
   bool Function(Room) getRoomFilterByActiveFilter(ActiveFilter activeFilter) {
     switch (activeFilter) {
       case .allChats:
         return (room) =>
             !room.isSpace &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
-                room.spaceParents.isEmpty) &&
-            _isBridgeTypeVisible(room);
+                room.spaceParents.isEmpty);
       case .messages:
         return (room) =>
             !room.isSpace &&
             room.isDirectChat &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
-                room.spaceParents.isEmpty) &&
-            _isBridgeTypeVisible(room);
+                room.spaceParents.isEmpty);
       case .groups:
         return (room) =>
             room.isSpace;
       case .unread:
-        return (room) => room.isEffectivelyUnreadSync && _isBridgeTypeVisible(room);
+        return (room) => room.isEffectivelyUnreadSync;
       case .favorites:
         return (room) => true; // Show all rooms for saved messages search
       case .pinned:
@@ -273,8 +296,13 @@ class ChatListController extends State<ChatList>
   }
 
   bool _isBridgeTypeVisible(Room room) {
-    // Bridge filtering disabled - show all rooms
-    return true;
+    // Spaces zijn nooit bridge-ruimtes: de netwerkfilter geldt alleen voor
+    // gewone chats.
+    if (room.isSpace) return true;
+    // Geen netwerken gedetecteerd of geen selectie → alles zichtbaar.
+    if (visibleBridgeTypes.isEmpty) return true;
+    final type = isBridgeRoom(room) ? (getBridgeType(room) ?? 'other') : 'matrix';
+    return visibleBridgeTypes.contains(type);
   }
 
   // FluffyChat-style: no cache. The SDK sorts client.rooms in place after
@@ -881,6 +909,12 @@ class ChatListController extends State<ChatList>
           context,
         ).backgroundPush?.setupPush(Matrix.of(context).widget.clients);
         UpdateNotifier.showUpdateSnackBar(context);
+      }
+
+      // Detecteer de aanwezige bridge-netwerken meteen, zodat de
+      // netwerkfilter beschikbaar is zodra de lijst te zien is.
+      if (mounted && syncBridgeTypes()) {
+        setState(() {});
       }
 
       // Workaround for system UI overlay style not applied on app start

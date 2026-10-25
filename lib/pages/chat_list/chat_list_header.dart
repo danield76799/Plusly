@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
@@ -114,24 +116,30 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                       ],
                     ),
                     const Spacer(),
-                    // Tijd weergave
-                    StreamBuilder(
-                      stream: Stream.periodic(const Duration(seconds: 1)),
+                    // Verbindingsstatus. Vervangt de oude liveklok, die de
+                    // header elke seconde opnieuw opbouwde zonder iets te
+                    // tonen wat de gebruiker daadwerkelijk nodig heeft.
+                    StreamBuilder<SyncStatusUpdate>(
+                      stream: client.onSyncStatus.stream,
                       builder: (context, snapshot) {
-                        final now = DateTime.now();
-                        final timeString =
-                            '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-                        return Text(
-                          timeString,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
-                          ),
+                        final status =
+                            snapshot.data ??
+                            client.onSyncStatus.value ??
+                            const SyncStatusUpdate(
+                              SyncStatus.waitingForResponse,
+                            );
+                        return _SyncStatusIndicator(
+                          status: status,
+                          onTap: () {
+                            unawaited(client.oneShotSync().catchError((e) {
+                              Logs().w('Manual sync failed', e);
+                              return null;
+                            }));
+                          },
                         );
                       },
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 8),
                     if (progress == 0.0 && !controller.isSearchMode)
                       IconButton(
                         onPressed: () {
@@ -413,6 +421,49 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+/// Compacte indicator voor de verbindingsstatus. Tikken forceert een
+/// synchronisatie, zodat de gebruiker niet hoeft te wachten op de
+/// automatische sync.
+class _SyncStatusIndicator extends StatelessWidget {
+  final SyncStatusUpdate status;
+  final VoidCallback onTap;
+
+  const _SyncStatusIndicator({required this.status, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final (Color color, IconData icon) = switch (status.status) {
+      SyncStatus.error => (theme.colorScheme.error, Icons.cloud_off_outlined),
+      SyncStatus.finished => (
+        theme.colorScheme.primary,
+        Icons.cloud_done_outlined,
+      ),
+      SyncStatus.processing ||
+      SyncStatus.cleaningUp => (
+        theme.colorScheme.onSurface,
+        Icons.cloud_sync_outlined,
+      ),
+      SyncStatus.waitingForResponse => (
+        theme.colorScheme.onSurface.withValues(alpha: 0.6),
+        Icons.cloud_queue_outlined,
+      ),
+    };
+
+    return Tooltip(
+      message: status.calcLocalizedString(context),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Icon(icon, size: 20, color: color),
         ),
       ),
     );

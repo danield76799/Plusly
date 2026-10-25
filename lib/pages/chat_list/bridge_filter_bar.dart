@@ -28,13 +28,14 @@ class BridgeFilterBar extends StatelessWidget {
     final sortedTypes = allBridgeTypes.toList()
       ..sort((a, b) {
         const order = [
+          'matrix',
           'whatsapp',
           'telegram',
           'signal',
           'discord',
           'slack',
+          'linkedin',
           'irc',
-          'matrix',
         ];
         final ia = order.indexOf(a);
         final ib = order.indexOf(b);
@@ -44,26 +45,44 @@ class BridgeFilterBar extends StatelessWidget {
         return a.compareTo(b);
       });
 
-    final hasActiveFilters = visibleBridgeTypes.length < allBridgeTypes.length;
+    // "Alles" is geselecteerd zodra elk netwerk zichtbaar is.
+    final allVisible = allBridgeTypes.every(visibleBridgeTypes.contains);
 
     return SizedBox(
       height: 48,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: sortedTypes.length + (hasActiveFilters ? 1 : 0),
+        itemCount: sortedTypes.length + 1,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
-          if (hasActiveFilters && i == sortedTypes.length) {
-            return ActionChip(
-              label: Text(L10n.of(context).clear),
-              avatar: const Icon(Icons.close, size: 18),
-              onPressed: () => onChanged(Set<String>.from(allBridgeTypes)),
-              backgroundColor: theme.colorScheme.errorContainer,
+          // Eerste chip: "Alles" — reset de netwerkfilter in één tik.
+          if (i == 0) {
+            return FilterChip(
+              showCheckmark: false,
+              avatar: Icon(
+                Icons.public,
+                size: 16,
+                color: allVisible
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+              label: Text(L10n.of(context).all),
+              selected: allVisible,
+              onSelected: (_) => onChanged(Set<String>.from(allBridgeTypes)),
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              selectedColor: theme.colorScheme.primaryContainer,
+              checkmarkColor: theme.colorScheme.primary,
+              labelStyle: TextStyle(
+                color: allVisible
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                fontWeight: allVisible ? FontWeight.w600 : FontWeight.normal,
+              ),
               side: BorderSide.none,
             );
           }
-          final type = sortedTypes[i];
+          final type = sortedTypes[i - 1];
           final isSelected = visibleBridgeTypes.contains(type);
           final color = getBridgeTypeColor(type);
           final unreadCount = unreadCounts[type] ?? 0;
