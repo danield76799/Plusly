@@ -4180,7 +4180,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "showBridgeFilterDescription": "Filter de chatlijst per netwerk (WhatsApp, Telegram, ...). Uitgeschakeld worden alle chats getoond.",
+  "showBridgeFilterDescription": "Standaard uit. Zet aan om de chatlijst per netwerk (WhatsApp, Telegram, ...) te filteren.",
   "@showBridgeFilterDescription": {
     "type": "String",
     "placeholders": {}

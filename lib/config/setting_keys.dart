@@ -68,9 +68,9 @@ enum AppSettings<T> {
   //     'chat.fluffy.hideUnimportantStateEvents', true),
   separateChatTypes<bool>('chat.fluffy.separateChatTypes', false),
   /// Toont de netwerkfilterbalk (WhatsApp, Telegram, Signal, ...) boven de
-  /// chatlijst. Uitschakelen verbergt de balk; de chats zelf blijven gewoon
-  /// zichtbaar.
-  showBridgeFilter<bool>('chat.fluffy.showBridgeFilter', true),
+  /// chatlijst. Standaard uit: de gebruiker zet hem zelf aan als hij de
+  /// chatlijst per netwerk wil filteren.
+  showBridgeFilter<bool>('chat.fluffy.showBridgeFilter', false),
   autoplayImages<bool>('chat.fluffy.autoplay_images', true),
   sendTypingNotifications<bool>('chat.fluffy.send_typing_notifications', true),
   sendPublicReadReceipts<bool>('chat.fluffy.send_public_read_receipts', true),

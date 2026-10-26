@@ -4181,7 +4181,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "showBridgeFilterDescription": "Filter the chat list by network (WhatsApp, Telegram, ...). When off, all chats are shown.",
+  "showBridgeFilterDescription": "Off by default. Turn on to filter the chat list by network (WhatsApp, Telegram, ...).",
   "@showBridgeFilterDescription": {
     "type": "String",
     "placeholders": {}
