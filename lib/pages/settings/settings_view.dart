@@ -543,24 +543,6 @@ class SettingsView extends StatelessWidget {
                                 : (_) => controller.firstRunBootstrapAction(),
                           ),
 
-                          // Uitgebreide crypto-opzet (uit Extera Next):
-                          // wachtwoordzin instellen in plaats van een
-                          // herstelsleutel, of herstellen vanaf een ander
-                          // apparaat.
-                          ListTile(
-                            leading: const Icon(Icons.key_outlined),
-                            title: Text(
-                              L10n.of(context).setUpCryptoIdentity,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(
-                              L10n.of(context).newPassphraseDescription,
-                            ),
-                            onTap: () => context.push('/bootstrap'),
-                          ),
-
                           StatefulBuilder(
                             builder: (context, setInnerState) {
                               return SwitchListTile.adaptive(
