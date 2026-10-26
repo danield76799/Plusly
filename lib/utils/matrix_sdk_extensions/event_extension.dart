@@ -12,6 +12,48 @@ import 'package:Pulsly/utils/size_string.dart';
 import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import 'matrix_file_extension.dart';
 
+/// Berichttype van een MSC4274-galerij: één bericht met meerdere media.
+///
+/// Dit is een specificatievoorstel; clients die het niet kennen tonen het
+/// bericht als één onbekend bestand.
+const String galleryMessageType = 'dm.filament.gallery';
+
+/// De media-items van een galerijbericht.
+List<Map<String, dynamic>> galleryItems(Event event) {
+  final itemtypes = event.content['itemtypes'];
+  if (itemtypes is! List) return const [];
+  return itemtypes
+      .whereType<Map>()
+      .map((item) => Map<String, dynamic>.from(item))
+      .toList();
+}
+
+/// Zet een galerij-itemtype om naar het bijbehorende media-type.
+String galleryItemtypeToMsgtype(String itemtype) => switch (itemtype) {
+  'm.image' => MessageTypes.Image,
+  'm.video' => MessageTypes.Video,
+  'm.audio' => MessageTypes.Audio,
+  'm.file' => MessageTypes.File,
+  _ => MessageTypes.File,
+};
+
+/// Maakt een pseudo-[Event] van één MSC4274-galerijitem, zodat de gewone
+/// media-widgets hergebruikt kunnen worden.
+Event galleryItemEvent(Event parent, Map<String, dynamic> item, int index) =>
+    Event(
+      content: {
+        ...item,
+        'msgtype': galleryItemtypeToMsgtype(
+          item.tryGet<String>('itemtype') ?? 'm.file',
+        ),
+      },
+      type: EventTypes.Message,
+      eventId: '${parent.eventId}:gallery:$index',
+      senderId: parent.senderId,
+      originServerTs: parent.originServerTs,
+      room: parent.room,
+    );
+
 extension LocalizedBody on Event {
   Future<async.Result<MatrixFile?>> _getFile(BuildContext context) =>
       showFutureLoadingDialog(

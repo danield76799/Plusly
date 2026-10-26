@@ -4193,5 +4193,15 @@
   "@networksMoreChats": {
     "type": "String",
     "placeholders": {}
+  },
+  "sendAsGallery": "Send as gallery",
+  "@sendAsGallery": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "sendAsGalleryDescription": "Send multiple files as one message. Other apps may show this as a single unknown file.",
+  "@sendAsGalleryDescription": {
+    "type": "String",
+    "placeholders": {}
   }
 }

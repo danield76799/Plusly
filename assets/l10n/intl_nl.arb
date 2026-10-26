@@ -4192,5 +4192,15 @@
   "@networksMoreChats": {
     "type": "String",
     "placeholders": {}
+  },
+  "sendAsGallery": "Verstuur als galerij",
+  "@sendAsGallery": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "sendAsGalleryDescription": "Verstuur meerdere bestanden als één bericht. Andere apps tonen dit mogelijk als één onbekend bestand.",
+  "@sendAsGalleryDescription": {
+    "type": "String",
+    "placeholders": {}
   }
 }

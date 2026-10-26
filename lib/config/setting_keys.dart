@@ -71,6 +71,10 @@ enum AppSettings<T> {
   /// chatlijst. Standaard uit: de gebruiker zet hem zelf aan als hij de
   /// chatlijst per netwerk wil filteren.
   showBridgeFilter<bool>('chat.fluffy.showBridgeFilter', false),
+  /// Verstuurt meerdere bestanden als één MSC4274-galerijbericht
+  /// (`dm.filament.gallery`) in plaats van losse berichten. Experimenteel:
+  /// clients die het niet kennen tonen het als één onbekend bestand.
+  useGalleries<bool>('chat.fluffy.useGalleries', false),
   autoplayImages<bool>('chat.fluffy.autoplay_images', true),
   sendTypingNotifications<bool>('chat.fluffy.send_typing_notifications', true),
   sendPublicReadReceipts<bool>('chat.fluffy.send_public_read_receipts', true),

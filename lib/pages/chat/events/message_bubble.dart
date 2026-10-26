@@ -13,9 +13,11 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/pages/chat/events/gallery_content.dart';
 import 'package:Pulsly/pages/chat/events/message_status_row.dart';
 import 'package:Pulsly/pages/chat/events/room_creation_state_event.dart';
 import 'package:Pulsly/utils/date_time_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/poll_events.dart';
 import 'package:Pulsly/utils/privacy_options.dart';
@@ -548,6 +550,30 @@ class _MessageBubbleState extends State<MessageBubble> {
                                   widget.onSelect(event, _tapPosition);
                                 },
                           child: () {
+                            // Voor een galerij is de bubbel precies zo breed als
+                            // het raster, niet de tekstbreedte.
+                            final galleryBubbleWidth =
+                                displayEvent.messageType == galleryMessageType &&
+                                    !displayEvent.redacted
+                                ? GalleryContent.gridWidth(
+                                        GalleryContent.gridColumnCount(
+                                          galleryItems(displayEvent).where(
+                                            (item) => {
+                                              MessageTypes.Image,
+                                              MessageTypes.Video,
+                                            }.contains(
+                                              galleryItemtypeToMsgtype(
+                                                item.tryGet<String>(
+                                                      'itemtype',
+                                                ) ??
+                                                    'm.file',
+                                              ),
+                                            ),
+                                          ).length,
+                                        ),
+                                      ) +
+                                    4
+                                : null;
                             final bubbleInner = Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(
@@ -556,6 +582,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                                 ),
                                 constraints: BoxConstraints(
                                   maxWidth:
+                                      galleryBubbleWidth ??
                                       (hasReply
                                           ? _calculateMediaWidth(displayEvent)
                                           : null) ??

@@ -12,6 +12,7 @@ import 'package:mime/mime.dart';
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:Pulsly/utils/clean_exif.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/loading_snackbar_extension.dart';
@@ -61,6 +62,214 @@ class SendFileDialogState extends State<SendFileDialog> {
   static const int minSizeToCompress = 20 * 1000;
 
   final TextEditingController _labelTextController = TextEditingController();
+
+  /// Verstuurt alle bestanden als één MSC4274-galerijbericht
+  /// (`dm.filament.gallery`): één bericht met meerdere media.
+  Future<void> _sendGallery(
+    ScaffoldMessengerState scaffoldMessenger,
+    L10n l10n,
+    int maxUploadSize,
+  ) async {
+    final items = <Map<String, dynamic>>[];
+    for (final xfile in widget.files) {
+      items.add(
+        await _prepareGalleryItem(
+          scaffoldMessenger: scaffoldMessenger,
+          l10n: l10n,
+          maxUploadSize: maxUploadSize,
+          xfile: xfile,
+        ),
+      );
+    }
+
+    final label = _labelTextController.text.trim();
+    final content = <String, dynamic>{
+      'msgtype': galleryMessageType,
+      'body': label,
+      'itemtypes': items,
+      if (label.isNotEmpty) ..._extraGalleryContent(label),
+    };
+
+    widget.onClearReply?.call();
+
+    await widget.room.sendEvent(
+      content,
+      threadLastEventId:
+          widget.thread?.lastEvent?.eventId ?? widget.thread?.rootEvent.eventId,
+      threadRootEventId: widget.thread?.rootEvent.eventId,
+    );
+    widget.onSent?.call();
+  }
+
+  /// Bouwt het bijschrift/format/content-warning/reply-gedeelte van het
+  /// galerijbericht, net als bij losse bestanden.
+  Map<String, dynamic> _extraGalleryContent(String label) {
+    final extraContent = <String, dynamic>{};
+    final html = markdown(
+      label,
+      getEmotePacks: () =>
+          widget.room.getImagePacksFlat(ImagePackUsage.emoticon),
+      getMention: widget.room.getMention,
+      convertLinebreaks: Matrix.of(
+        context,
+      ).client.convertLinebreaksInFormatting,
+    );
+    // Als de HTML hetzelfde is als de tekst is er geen opmaak nodig.
+    if (HtmlUnescape().convert(
+          html.replaceAll(RegExp(r'<br />\n?'), '\n'),
+        ) !=
+        label) {
+      extraContent['format'] = 'org.matrix.custom.html';
+      extraContent['formatted_body'] = html;
+    }
+    if (widget.replyEvent != null) {
+      extraContent['m.relates_to'] = {
+        'm.in_reply_to': {'event_id': widget.replyEvent!.eventId},
+      };
+    }
+    return extraContent;
+  }
+
+  /// Bereidt één galerijitem voor: bestand comprimeren, thumbnail maken,
+  /// encrypten en uploaden. Geeft de item-map terug die in het galerijbericht
+  /// komt.
+  Future<Map<String, dynamic>> _prepareGalleryItem({
+    required ScaffoldMessengerState scaffoldMessenger,
+    required L10n l10n,
+    required int maxUploadSize,
+    required XFile xfile,
+  }) async {
+    final length = await xfile.length();
+    final path = xfile.path;
+    final mimeType = xfile.mimeType ?? lookupMimeType(path);
+    final name = xfile.name.isNotEmpty
+        ? xfile.name
+        : "file.${mimeType?.split('/').last ?? 'bin'}";
+
+    MatrixFile file;
+    MatrixImageFile? thumbnail;
+
+    if (mimeType != null &&
+        mimeType.startsWith('image') &&
+        length > minSizeToCompress &&
+        compress) {
+      scaffoldMessenger.showLoadingSnackBar(l10n.compress);
+      final resizedImage = await ImageResizer.resizeImage(xfile);
+      file = resizedImage ??
+          MatrixFile(
+            bytes: await xfile.readAsBytes(),
+            name: name,
+            mimeType: mimeType,
+          ).detectFileType;
+    } else {
+      if (length > maxUploadSize) {
+        throw FileTooBigMatrixException(length, maxUploadSize);
+      }
+      file = MatrixFile(
+        bytes: await xfile.readAsBytes(),
+        name: name,
+        mimeType: mimeType,
+      ).detectFileType;
+    }
+
+    if (file.bytes.length > maxUploadSize) {
+      throw FileTooBigMatrixException(length, maxUploadSize);
+    }
+
+    if (PlatformInfos.isMobile &&
+        mimeType != null &&
+        mimeType.startsWith('video')) {
+      try {
+        scaffoldMessenger.showLoadingSnackBar(
+          l10n.generatingVideoThumbnail,
+        );
+        thumbnail = await xfile.getVideoThumbnail();
+      } catch (e) {
+        Logs().e("Failed to generate video thumbnail", e);
+      }
+    }
+
+    if (widget.files.length > 1) {
+      scaffoldMessenger.showLoadingSnackBar(
+        l10n.sendingAttachmentCountOfCount(
+          widget.files.indexOf(xfile) + 1,
+          widget.files.length,
+        ),
+      );
+    }
+
+    final client = widget.room.client;
+
+    // Encrypten zoals Room.sendFileEvent dat doet.
+    MatrixFile? uploadFile;
+    MatrixFile? uploadThumbnail = thumbnail;
+    EncryptedFile? encryptedFile;
+    EncryptedFile? encryptedThumbnail;
+    if (widget.room.encrypted && client.fileEncryptionEnabled) {
+      encryptedFile = await file.encrypt();
+      uploadFile = encryptedFile.toMatrixFile();
+      if (thumbnail != null) {
+        encryptedThumbnail = await thumbnail.encrypt();
+        uploadThumbnail = encryptedThumbnail.toMatrixFile();
+      }
+    }
+
+    final uploadResp = await client.uploadContent(
+      (uploadFile ?? file).bytes,
+      filename: (uploadFile ?? file).name,
+      contentType: (uploadFile ?? file).mimeType,
+    );
+    final thumbnailUploadResp = uploadThumbnail != null
+        ? await client.uploadContent(
+            uploadThumbnail.bytes,
+            filename: uploadThumbnail.name,
+            contentType: uploadThumbnail.mimeType,
+          )
+        : null;
+
+    return {
+      'itemtype': MatrixFile.msgTypeFromMime(file.mimeType),
+      'body': file.name,
+      'filename': file.name,
+      if (encryptedFile == null) 'url': uploadResp.toString(),
+      if (encryptedFile != null)
+        'file': {
+          'url': uploadResp.toString(),
+          'mimetype': file.mimeType,
+          'v': 'v2',
+          'key': {
+            'alg': 'A256CTR',
+            'ext': true,
+            'k': encryptedFile.k,
+            'key_ops': ['encrypt', 'decrypt'],
+            'kty': 'oct',
+          },
+          'iv': encryptedFile.iv,
+          'hashes': {'sha256': encryptedFile.sha256},
+        },
+      'info': {
+        ...file.info,
+        if (thumbnail != null && encryptedThumbnail == null)
+          'thumbnail_url': thumbnailUploadResp.toString(),
+        if (thumbnail != null && encryptedThumbnail != null)
+          'thumbnail_file': {
+            'url': thumbnailUploadResp.toString(),
+            'mimetype': thumbnail.mimeType,
+            'v': 'v2',
+            'key': {
+              'alg': 'A256CTR',
+              'ext': true,
+              'k': encryptedThumbnail.k,
+              'key_ops': ['encrypt', 'decrypt'],
+              'kty': 'oct',
+            },
+            'iv': encryptedThumbnail.iv,
+            'hashes': {'sha256': encryptedThumbnail.sha256},
+          },
+        if (thumbnail != null) 'thumbnail_info': thumbnail.info,
+      },
+    };
+  }
 
   Future<void> _send() async {
     final scaffoldMessenger = ScaffoldMessenger.of(widget.outerContext);
@@ -115,6 +324,13 @@ class SendFileDialogState extends State<SendFileDialog> {
       // Upload overleeft wegdrukken: foreground-service aan vóór compressie
       // (video-compressie duurt lang) en uit in finally — ook bij falen.
       await ForegroundServices.startService('send_files');
+
+      // Galerij: alle bestanden in één MSC4274-bericht.
+      if (AppSettings.useGalleries.value && widget.files.length > 1) {
+        await _sendGallery(scaffoldMessenger, l10n, maxUploadSize);
+        scaffoldMessenger.clearSnackBars();
+        return;
+      }
 
       for (final xfile in widget.files) {
         MatrixFile file;
@@ -592,6 +808,42 @@ class SendFileDialogState extends State<SendFileDialog> {
                                     style: theme.textTheme.titleMedium,
                                     textAlign: TextAlign.left,
                                   ),
+
+                  // Galerij: meerdere bestanden als één bericht. Experimenteel
+                  // — clients die MSC4274 niet kennen tonen het als één
+                  // onbekend bestand.
+                  if (widget.files.length > 1)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Switch.adaptive(
+                          value: AppSettings.useGalleries.value,
+                          onChanged: (v) async {
+                            await AppSettings.useGalleries.setItem(v);
+                            if (!mounted) return;
+                            setState(() {});
+                          },
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                L10n.of(context).sendAsGallery,
+                                style: theme.textTheme.titleMedium,
+                                textAlign: TextAlign.left,
+                              ),
+                              Text(
+                                L10n.of(context).sendAsGalleryDescription,
+                                style: theme.textTheme.labelSmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                                 ],
                               ),
                               if (!compress)

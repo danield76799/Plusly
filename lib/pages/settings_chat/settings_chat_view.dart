@@ -151,6 +151,12 @@ class SettingsChatView extends StatelessWidget {
                         title: L10n.of(context).swipeRightToLeftToReply,
                         setting: AppSettings.swipeRightToLeftToReply,
                       ),
+                      const ListDivider(),
+                      SettingsSwitchListTile.adaptive(
+                        title: L10n.of(context).sendAsGallery,
+                        subtitle: L10n.of(context).sendAsGalleryDescription,
+                        setting: AppSettings.useGalleries,
+                      ),
                     ],
                   ),
                 ),

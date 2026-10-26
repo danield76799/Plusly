@@ -9,11 +9,13 @@ import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/events/gallery_content.dart';
 import 'package:Pulsly/pages/chat/events/poll_content.dart';
 import 'package:Pulsly/pages/chat/events/redacted_content.dart';
 import 'package:Pulsly/pages/chat/events/video_player.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
 import 'package:Pulsly/utils/date_time_extension.dart';
+import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/poll_events.dart';
 import 'package:Pulsly/widgets/avatar.dart';
@@ -118,6 +120,17 @@ class MessageContent extends StatelessWidget {
       case PollEvents.pollStart:
         // temporary solution
         switch (event.messageType) {
+          case galleryMessageType:
+            if (event.redacted) continue textmessage;
+            return GalleryContent(
+              event,
+              timeline: timeline,
+              textColor: textColor,
+              linkColor: linkColor,
+              selectable: selectable,
+              loadMedia: loadMedia,
+              onLoadMedia: onLoadMedia,
+            );
           case MessageTypes.Poll:
             if (event.redacted) continue textmessage;
             return PollWidget(
