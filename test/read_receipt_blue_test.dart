@@ -82,22 +82,35 @@ void main() {
         'lib/pages/chat/events/message_bubble_legacy.dart',
       ]) {
         final code = _code(pad);
-        expect(code.contains('readReceiptBlue'), isTrue, reason: pad);
         expect(code.contains('hasBeenRead'), isTrue, reason: pad);
+        // De Plusly-bubbel deelt zijn voettekst met MessageStatusRow; daar
+        // staat de blauwe kleur.
+        expect(
+          code.contains('readReceiptBlue') || code.contains('MessageStatusRow'),
+          isTrue,
+          reason: pad,
+        );
       }
+      // Het gedeelde stuk haalt de blauwe kleur uit het thema.
+      final gedeeld = _code('lib/pages/chat/events/message_status_row.dart');
+      expect(gedeeld.contains('readReceiptBlue'), isTrue);
     });
 
     test('versturen en fout blijven hun eigen icoon houden', () {
       // Blauw mag nooit een klokje of fout-icoon overschilderen.
       for (final pad in [
-        'lib/pages/chat/events/message_bubble.dart',
         'lib/pages/chat/events/message_modern.dart',
         'lib/pages/chat/events/message_bubble_legacy.dart',
+        'lib/pages/chat/events/message_status_row.dart',
       ]) {
         final code = _code(pad);
         expect(code.contains('EventStatus.sending'), isTrue, reason: pad);
         expect(code.contains('EventStatus.error'), isTrue, reason: pad);
       }
+      // De Plusly-bubbel regelt dat via de gedeelde voettekst.
+      final plusly = _code('lib/pages/chat/events/message_bubble.dart');
+      expect(plusly.contains('MessageStatusRow'), isTrue);
+      expect(plusly.contains('status: event.status'), isTrue);
     });
   });
 }

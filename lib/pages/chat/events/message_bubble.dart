@@ -13,6 +13,7 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/pages/chat/events/message_status_row.dart';
 import 'package:Pulsly/pages/chat/events/room_creation_state_event.dart';
 import 'package:Pulsly/utils/date_time_extension.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
@@ -385,36 +386,17 @@ class _MessageBubbleState extends State<MessageBubble> {
       RelationshipTypes.reaction,
     );
 
-    final messageStatusRow = Wrap(
-      alignment: WrapAlignment.end,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      spacing: 4,
-      runSpacing: 2,
-      children: [
-        Text(
-          event.originServerTs.localizedMessageTime(context),
-          style: TextStyle(color: statusColor, fontSize: 12),
-        ),
-        if (event.hasAggregatedEvents(timeline, RelationshipTypes.edit))
-          Icon(Icons.edit_outlined, color: statusColor, size: 14),
-        if (ownMessage)
-          Icon(
-            event.status == EventStatus.sending
-                ? Icons.watch_later_outlined
-                : event.status == EventStatus.error
-                ? Icons.error_outline
-                : hasBeenRead
-                ? Icons.done_all
-                : Icons.check,
-            // Twee vinkjes = groen (gelezen), één vinkje = oranje (verzonden)
-            color: event.status == EventStatus.sending || event.status == EventStatus.error
-                ? statusColor
-                : hasBeenRead
-                    ? Theme.of(context).readReceiptBlue
-                    : Colors.orange,
-            size: 14,
-          ),
-      ],
+    // Let op: geen `spacing` op een Wrap gebruiken — RenderWrap rekent die
+    // niet mee in zijn intrinsic width, waardoor de bubbel te smal wordt en
+    // de tijd links uit de bubbel loopt (afgekapte "14:00"). Zie
+    // MessageStatusRow.
+    final messageStatusRow = MessageStatusRow(
+      timestamp: event.originServerTs,
+      edited: event.hasAggregatedEvents(timeline, RelationshipTypes.edit),
+      ownMessage: ownMessage,
+      hasBeenRead: hasBeenRead,
+      status: event.status,
+      color: statusColor,
     );
 
     final row = FutureBuilder<User?>(
