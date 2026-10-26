@@ -46,16 +46,7 @@ bool _setEquals(Set<String> a, Set<String> b) {
   return a.every(b.contains);
 }
 
-enum ActiveFilter {
-  allChats,
-  messages,
-  unread,
-  groups,
-  favorites,
-  pinned,
-  people,
-  networks,
-}
+enum ActiveFilter { allChats, messages, unread, groups, favorites, pinned, people }
 
 enum SearchScope { local, public }
 
@@ -76,8 +67,6 @@ extension LocalizedActiveFilter on ActiveFilter {
         return L10n.of(context).pinned;
       case ActiveFilter.people:
         return L10n.of(context).people;
-      case ActiveFilter.networks:
-        return L10n.of(context).networks;
     }
   }
 
@@ -98,8 +87,6 @@ extension LocalizedActiveFilter on ActiveFilter {
         return Icons.push_pin_outlined;
       case ActiveFilter.people:
         return Icons.person_outline;
-      case ActiveFilter.networks:
-        return Icons.hub_outlined;
     }
   }
 }
@@ -303,8 +290,6 @@ class ChatListController extends State<ChatList>
             room.isDirectChat &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
                 room.spaceParents.isEmpty);
-      case .networks:
-        return (room) => false; // eigen weergave, geen kamers
     }
   }
 
@@ -316,8 +301,7 @@ class ChatListController extends State<ChatList>
     if (room.isSpace) return true;
     // Geen netwerken gedetecteerd of geen selectie → alles zichtbaar.
     if (visibleBridgeTypes.isEmpty) return true;
-    // null = gewone Matrix-chat.
-    final type = getBridgeType(room) ?? 'matrix';
+    final type = isBridgeRoom(room) ? (getBridgeType(room) ?? 'other') : 'matrix';
     return visibleBridgeTypes.contains(type);
   }
 
@@ -414,8 +398,6 @@ class ChatListController extends State<ChatList>
             room.isDirectChat &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
                 room.spaceParents.isEmpty);
-      case .networks:
-        return false; // eigen weergave, geen kamers
     }
   }).toList();
 
@@ -1463,7 +1445,6 @@ class ChatListController extends State<ChatList>
         ActiveFilter.groups,
         ActiveFilter.pinned,
         ActiveFilter.favorites,
-        ActiveFilter.networks,
       ];
       final activeIndex = filters.indexOf(filter);
       if (activeIndex < 0) return;
@@ -1483,7 +1464,6 @@ class ChatListController extends State<ChatList>
 
   void setActiveClient(Client client) {
     context.go('/rooms');
-    clearBridgeTypeCache();
     setState(() {
       activeFilter = ActiveFilter.allChats;
       _activeSpaceId = null;

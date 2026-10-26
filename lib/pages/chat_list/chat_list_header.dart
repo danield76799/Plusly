@@ -333,7 +333,6 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
       ActiveFilter.groups,
       ActiveFilter.pinned,
       ActiveFilter.favorites,
-      ActiveFilter.networks,
     ];
     return Container(
       decoration: BoxDecoration(

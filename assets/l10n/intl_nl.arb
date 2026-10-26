@@ -4185,17 +4185,10 @@
     "type": "String",
     "placeholders": {}
   },
-  "networks": "Netwerken",
-  "@networks": {
-    "type": "String",
-    "placeholders": {}
-  },
-  "networksNone": "Geen brugnetwerken gevonden. Verbind een netwerk om de chats hier te zien.",
   "@networksNone": {
     "type": "String",
     "placeholders": {}
   },
-  "networksMoreChats": "nog {count}",
   "@networksMoreChats": {
     "type": "String",
     "placeholders": {}
