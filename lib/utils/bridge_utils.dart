@@ -7,8 +7,13 @@ extension MessagePreviewCleaner on String {
   String sanitizePreview() {
     if (isEmpty) return this;
 
-    // 1. Remove known bridge prefixes (e.g., "WhatsApp (WA): ", "bridge bot: ")
-    final prefixRegex = RegExp(r'^(\.?\s*([a-zA-Z]+)?\s*\(WA\):?|bridge bot:?)\s*', caseSensitive: false);
+    // 1. Remove known bridge prefixes. De brug zet de afzender vóór de
+    //    berichttekst, dus de naam mag uit één of meer woorden bestaan:
+    //    "Jeroen IJntema (WA): Ja, ..." -> "Ja, ...".
+    final prefixRegex = RegExp(
+      r'^(\.?\s*(?:[^\s()]+\s+)*\(WA\):|bridge bot:?)\s*',
+      caseSensitive: false,
+    );
     var cleaned = replaceFirst(prefixRegex, '');
 
     // 2. Remove leading punctuation/whitespace that might remain (e.g., ". Hello")

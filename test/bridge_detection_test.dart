@@ -123,4 +123,22 @@ void main() {
       }
     });
   });
+
+  group('sanitizePreview', () {
+    test('haalt de brugmarkering uit de preview', () {
+      expect('Jeroen IJntema (WA): Ja, met fruit sapjes'.sanitizePreview(),
+          'Ja, met fruit sapjes');
+      expect('Fenna (WA): Ooooooke'.sanitizePreview(), 'Ooooooke');
+      expect('(WA): hallo'.sanitizePreview(), 'hallo');
+      expect('. (WA): hallo'.sanitizePreview(), 'hallo');
+      expect('WhatsApp (WA): hallo'.sanitizePreview(), 'hallo');
+      expect('bridge bot: hallo'.sanitizePreview(), 'hallo');
+    });
+
+    test('laat gewone berichten ongemoeid', () {
+      expect('Hallo, hoe gaat het?'.sanitizePreview(), 'Hallo, hoe gaat het?');
+      expect('(WA) is een afkorting'.sanitizePreview(), '(WA) is een afkorting');
+      expect(''.sanitizePreview(), '');
+    });
+  });
 }
