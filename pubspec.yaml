@@ -98,7 +98,6 @@ dependencies:
   slugify: ^2.0.0
   sqflite_common_ffi: ^2.3.7+1
   sqlcipher_flutter_libs: ^0.6.8
-  swipe_to_action: ^0.3.0
   unifiedpush: ^6.1.0
   unifiedpush_ui: ^0.2.0
   universal_html: ^2.3.0

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:swipe_to_action/swipe_to_action.dart';
+import 'package:Pulsly/pages/chat/swipe_to_reply.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
@@ -672,16 +672,10 @@ class _MessageModernState extends State<MessageModern> {
     return _AnimateIn(
       animateIn: widget.animateIn,
       halfOpacity: event.status == EventStatus.sending ? true : false,
-      child: Swipeable(
+      child: SwipeToReply(
         key: ValueKey(event.eventId),
-        background: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: Center(child: Icon(Icons.reply_outlined)),
-        ),
-        direction: AppSettings.swipeRightToLeftToReply.value
-            ? SwipeDirection.endToStart
-            : SwipeDirection.startToEnd,
-        onSwipe: (_) => widget.onSwipe(event),
+        rightToLeft: AppSettings.swipeRightToLeftToReply.value,
+        onReply: () => widget.onSwipe(event),
         child: Center(
           child: Container(
             constraints: const BoxConstraints(
