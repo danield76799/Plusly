@@ -116,9 +116,13 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                       ],
                     ),
                     const Spacer(),
-                    // Verbindingsstatus. Vervangt de oude liveklok, die de
-                    // header elke seconde opnieuw opbouwde zonder iets te
-                    // tonen wat de gebruiker daadwerkelijk nodig heeft.
+                    // Klok: alleen zichtbaar als er ruimte is naast de
+                    // verbindingsstatus. De eigen widget bouwt alleen zichzelf
+                    // op als de minuut verandert (niet elke seconde de hele
+                    // header).
+                    const _ClockText(),
+                    const SizedBox(width: 10),
+                    // Verbindingsstatus: tikken forceret een sync.
                     StreamBuilder<SyncStatusUpdate>(
                       stream: client.onSyncStatus.stream,
                       builder: (context, snapshot) {
@@ -422,6 +426,58 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+/// Klok in de kop van de chatlijst.
+///
+/// Werkt met een eigen timer en bouwt alleen zichzelf op als de weergegeven
+/// minuut verandert — de rest van de header blijft onaangeroerd.
+class _ClockText extends StatefulWidget {
+  const _ClockText();
+
+  @override
+  State<_ClockText> createState() => _ClockTextState();
+}
+
+class _ClockTextState extends State<_ClockText> {
+  Timer? _timer;
+  String _text = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _update();
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _update());
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _update() {
+    final now = DateTime.now();
+    final text =
+        '${now.hour.toString().padLeft(2, '0')}:'
+        '${now.minute.toString().padLeft(2, '0')}';
+    if (text == _text) return;
+    if (!mounted) return;
+    setState(() => _text = text);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(
+      _text,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: theme.colorScheme.onSurface,
       ),
     );
   }
