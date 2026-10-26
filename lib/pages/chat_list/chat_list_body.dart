@@ -12,6 +12,7 @@ import 'package:Pulsly/pages/chat_list/chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/chat_list_legacy_header.dart';
 import 'package:Pulsly/pages/chat_list/bridge_filter_bar.dart';
 import 'package:Pulsly/pages/chat_list/bridge_network_diagnose_sheet.dart';
+import 'package:Pulsly/pages/chat_list/networks_view.dart';
 import 'package:Pulsly/pages/chat_list/dummy_chat_list_item.dart';
 import 'package:Pulsly/pages/chat_list/search_title.dart';
 import 'package:Pulsly/pages/chat_list/space_view.dart';
@@ -141,8 +142,16 @@ class ChatListViewBody extends StatelessWidget {
                       ),
                     ),
                   ),
-                SliverList(
-                  delegate: SliverChildListDelegate([
+                if (controller.activeFilter == ActiveFilter.networks &&
+                    !controller.isSearchMode)
+                  SliverToBoxAdapter(
+                    child: NetworksView(
+                      onChatTap: (room) => controller.onChatTap(room),
+                    ),
+                  )
+                else
+                  SliverList(
+                    delegate: SliverChildListDelegate([
                     if (controller.isSearchMode) ...[
                       Padding(
                         padding: const .all(8),

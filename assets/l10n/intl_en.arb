@@ -4185,5 +4185,20 @@
   "@showBridgeFilterDescription": {
     "type": "String",
     "placeholders": {}
+  },
+  "networks": "Networks",
+  "@networks": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "networksNone": "No bridge networks found. Connect a network to see its chats here.",
+  "@networksNone": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "networksMoreChats": "{count} more",
+  "@networksMoreChats": {
+    "type": "String",
+    "placeholders": {}
   }
 }

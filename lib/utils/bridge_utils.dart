@@ -315,6 +315,26 @@ String? bridgeNetworkFromAlias(String? alias) {
   return null;
 }
 
+/// Cache voor de brugdetectie. De detectie is afhankelijk van de state van
+/// een kamer en wordt per rebuild meerdere keren per kamer aangeroepen
+/// (lijst, ongelezen-tellers, badges). Zonder cache zou dat bij honderden
+/// kamers veel onnodig werk zijn.
+class _BridgeTypeCacheEntry {
+  _BridgeTypeCacheEntry(this.type, this.stamp);
+
+  final String? type;
+  final DateTime stamp;
+}
+
+final Map<String, _BridgeTypeCacheEntry> _bridgeTypeCache = {};
+
+/// Geldigheidsduur van de cache. De netwerkinformatie van een kamer
+/// verandert zelden, dus 30 seconden is ruim voldoende.
+const _bridgeTypeCacheTtl = Duration(seconds: 30);
+
+/// Leeg de cache (bijvoorbeeld na het wisselen van client).
+void clearBridgeTypeCache() => _bridgeTypeCache.clear();
+
 /// Bepaalt het netwerk van een brugkamer, of null als de kamer géén
 /// brugkamer is.
 ///
@@ -328,6 +348,19 @@ String? bridgeNetworkFromAlias(String? alias) {
 /// Telegram aangemerkt: een contact "Ritsa wa", een groep met een lid
 /// "Signal", of een kamer die op een telefoonnummer begint.
 String? getBridgeType(Room room) {
+  final now = DateTime.now();
+  final cached = _bridgeTypeCache[room.id];
+  if (cached != null && now.difference(cached.stamp) < _bridgeTypeCacheTtl) {
+    return cached.type;
+  }
+  final type = _detectBridgeType(room);
+  // Onbeperkte groei voorkomen.
+  if (_bridgeTypeCache.length > 2000) _bridgeTypeCache.clear();
+  _bridgeTypeCache[room.id] = _BridgeTypeCacheEntry(type, now);
+  return type;
+}
+
+String? _detectBridgeType(Room room) {
   // 1. Bridge state-events: het meest betrouwbare signaal.
   for (final eventType in _bridgeStateEventTypes) {
     final stateEvent = room.getState(eventType);

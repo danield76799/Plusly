@@ -46,7 +46,16 @@ bool _setEquals(Set<String> a, Set<String> b) {
   return a.every(b.contains);
 }
 
-enum ActiveFilter { allChats, messages, unread, groups, favorites, pinned, people }
+enum ActiveFilter {
+  allChats,
+  messages,
+  unread,
+  groups,
+  favorites,
+  pinned,
+  people,
+  networks,
+}
 
 enum SearchScope { local, public }
 
@@ -67,6 +76,8 @@ extension LocalizedActiveFilter on ActiveFilter {
         return L10n.of(context).pinned;
       case ActiveFilter.people:
         return L10n.of(context).people;
+      case ActiveFilter.networks:
+        return L10n.of(context).networks;
     }
   }
 
@@ -87,6 +98,8 @@ extension LocalizedActiveFilter on ActiveFilter {
         return Icons.push_pin_outlined;
       case ActiveFilter.people:
         return Icons.person_outline;
+      case ActiveFilter.networks:
+        return Icons.hub_outlined;
     }
   }
 }
@@ -204,10 +217,10 @@ class ChatListController extends State<ChatList>
     }
 
     final client = Matrix.of(context).client;
-    final hasMatrixRooms = client.rooms.any((room) => !isBridgeRoom(room));
+    final hasMatrixRooms = client.rooms.any((room) => getBridgeType(room) == null);
     final detectedTypes = client.rooms
-        .where((room) => isBridgeRoom(room))
-        .map((room) => getBridgeType(room) ?? 'other')
+        .map((room) => getBridgeType(room))
+        .whereType<String>()
         .toSet();
     if (hasMatrixRooms) {
       detectedTypes.add('matrix');
@@ -248,9 +261,7 @@ class ChatListController extends State<ChatList>
     final counts = <String, int>{};
     for (final room in client.rooms) {
       if (!room.isSpace && room.isEffectivelyUnreadSync) {
-        final bridgeType = isBridgeRoom(room)
-            ? (getBridgeType(room) ?? 'other')
-            : 'matrix';
+        final bridgeType = getBridgeType(room) ?? 'matrix';
         counts[bridgeType] = (counts[bridgeType] ?? 0) + 1;
       }
     }
@@ -292,6 +303,8 @@ class ChatListController extends State<ChatList>
             room.isDirectChat &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
                 room.spaceParents.isEmpty);
+      case .networks:
+        return (room) => false; // eigen weergave, geen kamers
     }
   }
 
@@ -303,7 +316,8 @@ class ChatListController extends State<ChatList>
     if (room.isSpace) return true;
     // Geen netwerken gedetecteerd of geen selectie → alles zichtbaar.
     if (visibleBridgeTypes.isEmpty) return true;
-    final type = isBridgeRoom(room) ? (getBridgeType(room) ?? 'other') : 'matrix';
+    // null = gewone Matrix-chat.
+    final type = getBridgeType(room) ?? 'matrix';
     return visibleBridgeTypes.contains(type);
   }
 
@@ -400,6 +414,8 @@ class ChatListController extends State<ChatList>
             room.isDirectChat &&
             (AppSettings.showSpaceRoomsInGlobalList.value ||
                 room.spaceParents.isEmpty);
+      case .networks:
+        return false; // eigen weergave, geen kamers
     }
   }).toList();
 
@@ -1447,6 +1463,7 @@ class ChatListController extends State<ChatList>
         ActiveFilter.groups,
         ActiveFilter.pinned,
         ActiveFilter.favorites,
+        ActiveFilter.networks,
       ];
       final activeIndex = filters.indexOf(filter);
       if (activeIndex < 0) return;
@@ -1466,6 +1483,7 @@ class ChatListController extends State<ChatList>
 
   void setActiveClient(Client client) {
     context.go('/rooms');
+    clearBridgeTypeCache();
     setState(() {
       activeFilter = ActiveFilter.allChats;
       _activeSpaceId = null;

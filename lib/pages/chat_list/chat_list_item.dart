@@ -161,6 +161,10 @@ class ChatListItem extends StatelessWidget {
               title: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
+                  if (bridgeType != null &&
+                      bridgeType != 'other' &&
+                      bridgeType != 'matrix')
+                    _NetworkPill(type: bridgeType),
                   Expanded(
                     child: Row(
                       children: <Widget>[
@@ -413,6 +417,36 @@ class ChatListItem extends StatelessWidget {
                     ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Kleine pil met de netwerknaam. Zo is direct zichtbaar van welk netwerk
+/// een chat komt, zonder dat het de hele lijst overheerst.
+class _NetworkPill extends StatelessWidget {
+  final String type;
+
+  const _NetworkPill({required this.type});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = getBridgeTypeColor(type);
+    return Container(
+      margin: const EdgeInsets.only(right: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        getBridgeTypeLabel(type),
+        style: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.2,
+          color: color,
         ),
       ),
     );
