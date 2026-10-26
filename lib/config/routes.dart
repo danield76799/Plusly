@@ -8,6 +8,7 @@ import 'package:matrix/matrix.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/pages/archive/archive.dart';
 import 'package:Pulsly/pages/bootstrap/bootstrap_dialog.dart';
+import 'package:Pulsly/pages/bootstrap/bootstrap_page.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
 import 'package:Pulsly/pages/chat_access_settings/chat_access_settings_controller.dart';
 import 'package:Pulsly/pages/chat_details/chat_details.dart';
@@ -130,6 +131,14 @@ abstract class AppRoutes {
         state,
         BootstrapDialog(wipe: state.uri.queryParameters['wipe'] == 'true'),
       ),
+    ),
+    GoRoute(
+      // Uitgebreide crypto-opzet: wachtwoordzin instellen in plaats van een
+      // herstelsleutel, of herstellen vanaf een ander apparaat.
+      path: '/bootstrap',
+      redirect: loggedOutRedirect,
+      pageBuilder: (context, state) =>
+          defaultPageBuilder(context, state, const BootstrapPage()),
     ),
     GoRoute(
       path: '/addaccount',
