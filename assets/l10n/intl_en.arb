@@ -4175,5 +4175,15 @@
   "@bridgeDiagnoseTooltip": {
     "type": "String",
     "placeholders": {}
+  },
+  "showBridgeFilter": "Show network filter",
+  "@showBridgeFilter": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "showBridgeFilterDescription": "Filter the chat list by network (WhatsApp, Telegram, ...). When off, all chats are shown.",
+  "@showBridgeFilterDescription": {
+    "type": "String",
+    "placeholders": {}
   }
 }

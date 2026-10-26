@@ -4174,5 +4174,15 @@
   "@bridgeDiagnoseTooltip": {
     "type": "String",
     "placeholders": {}
+  },
+  "showBridgeFilter": "Netwerkfilter tonen",
+  "@showBridgeFilter": {
+    "type": "String",
+    "placeholders": {}
+  },
+  "showBridgeFilterDescription": "Filter de chatlijst per netwerk (WhatsApp, Telegram, ...). Uitgeschakeld worden alle chats getoond.",
+  "@showBridgeFilterDescription": {
+    "type": "String",
+    "placeholders": {}
   }
 }

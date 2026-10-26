@@ -605,6 +605,12 @@ class SettingsStyleView extends StatelessWidget {
                     ),
                     const ListDivider(),
                     SettingsSwitchListTile.adaptive(
+                      title: L10n.of(context).showBridgeFilter,
+                      subtitle: L10n.of(context).showBridgeFilterDescription,
+                      setting: AppSettings.showBridgeFilter,
+                    ),
+                    const ListDivider(),
+                    SettingsSwitchListTile.adaptive(
                       title: L10n.of(context).showSpaceRoomsInGlobalList,
                       setting: AppSettings.showSpaceRoomsInGlobalList,
                     ),

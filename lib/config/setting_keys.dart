@@ -67,6 +67,10 @@ enum AppSettings<T> {
   // hideUnimportantStateEvents<bool>(
   //     'chat.fluffy.hideUnimportantStateEvents', true),
   separateChatTypes<bool>('chat.fluffy.separateChatTypes', false),
+  /// Toont de netwerkfilterbalk (WhatsApp, Telegram, Signal, ...) boven de
+  /// chatlijst. Uitschakelen verbergt de balk; de chats zelf blijven gewoon
+  /// zichtbaar.
+  showBridgeFilter<bool>('chat.fluffy.showBridgeFilter', true),
   autoplayImages<bool>('chat.fluffy.autoplay_images', true),
   sendTypingNotifications<bool>('chat.fluffy.send_typing_notifications', true),
   sendPublicReadReceipts<bool>('chat.fluffy.send_public_read_receipts', true),
@@ -203,6 +207,22 @@ enum AppSettings<T> {
   }
 }
 
+/// Waarschuwt luisteraars wanneer een instelling verandert, zodat schermen
+/// die de instelling gebruiken zichzelf meteen kunnen verversen (zonder te
+/// wachten op een sync of app-herstart).
+class AppSettingsNotifier {
+  static final Map<String, ValueNotifier<int>> _notifiers = {};
+
+  /// Notifier voor een instelling; de waarde verandert bij elke wijziging.
+  static ValueNotifier<int> of(String key) =>
+      _notifiers.putIfAbsent(key, () => ValueNotifier<int>(0));
+
+  /// Meldt dat een instelling is gewijzigd.
+  static void notify(String key) {
+    of(key).value++;
+  }
+}
+
 extension AppSettingsBoolExtension on AppSettings<bool> {
   bool get value {
     final value = Result(() => AppSettings.store.getBool(key));
@@ -217,7 +237,10 @@ extension AppSettingsBoolExtension on AppSettings<bool> {
     return value.asValue?.value ?? defaultValue;
   }
 
-  Future<void> setItem(bool value) => AppSettings.store.setBool(key, value);
+  Future<void> setItem(bool value) async {
+    await AppSettings.store.setBool(key, value);
+    AppSettingsNotifier.notify(key);
+  }
 }
 
 extension AppSettingsStringExtension on AppSettings<String> {

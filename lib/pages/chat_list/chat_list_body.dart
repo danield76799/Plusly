@@ -123,7 +123,8 @@ class ChatListViewBody extends StatelessWidget {
                 // Netwerkfilter: toon per bridge-netwerk (WhatsApp, Telegram,
                 // Signal, Discord, Slack, Matrix) welke netwerken zichtbaar
                 // zijn, inclusief ongelezen-tellers.
-                if (!controller.isSearchMode &&
+                if (AppSettings.showBridgeFilter.value &&
+                    !controller.isSearchMode &&
                     controller.allBridgeTypes.isNotEmpty)
                   SliverToBoxAdapter(
                     child: BridgeFilterBar(

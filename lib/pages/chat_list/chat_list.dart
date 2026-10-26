@@ -296,6 +296,8 @@ class ChatListController extends State<ChatList>
   }
 
   bool _isBridgeTypeVisible(Room room) {
+    // Netwerkfilter uitgeschakeld in de instellingen: alles zichtbaar.
+    if (!AppSettings.showBridgeFilter.value) return true;
     // Spaces zijn nooit bridge-ruimtes: de netwerkfilter geldt alleen voor
     // gewone chats.
     if (room.isSpace) return true;
@@ -303,6 +305,13 @@ class ChatListController extends State<ChatList>
     if (visibleBridgeTypes.isEmpty) return true;
     final type = isBridgeRoom(room) ? (getBridgeType(room) ?? 'other') : 'matrix';
     return visibleBridgeTypes.contains(type);
+  }
+
+  /// De gebruiker zet de netwerkfilter aan of uit: de lijst moet meteen
+  /// opnieuw opgebouwd worden.
+  void _onBridgeFilterSettingChanged() {
+    if (!mounted) return;
+    setState(() {});
   }
 
   // FluffyChat-style: no cache. The SDK sorts client.rooms in place after
@@ -897,6 +906,9 @@ class ChatListController extends State<ChatList>
     _initReceiveSharingIntent();
 
     scrollController.addListener(_onScroll);
+    AppSettingsNotifier.of(
+      AppSettings.showBridgeFilter.key,
+    ).addListener(_onBridgeFilterSettingChanged);
     _waitForFirstSync();
     _hackyWebRTCFixForWeb();
     _preloadChats();
@@ -1005,6 +1017,9 @@ class ChatListController extends State<ChatList>
     _intentFileStreamSubscription?.cancel();
     _intentUriStreamSubscription?.cancel();
     scrollController.removeListener(_onScroll);
+    AppSettingsNotifier.of(
+      AppSettings.showBridgeFilter.key,
+    ).removeListener(_onBridgeFilterSettingChanged);
     _clientStream.close();
     searchController.dispose();
     searchFocusNode.dispose();
