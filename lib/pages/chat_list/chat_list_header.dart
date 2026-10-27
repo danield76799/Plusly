@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
@@ -12,6 +10,7 @@ import 'package:Pulsly/pages/chat_list/chat_list.dart';
 import 'package:Pulsly/pages/chat_list/client_chooser_button.dart';
 
 import 'package:Pulsly/utils/sync_status_localization.dart';
+import 'package:Pulsly/widgets/clock_text.dart';
 import '../../widgets/matrix.dart';
 
 class ChatListHeader extends StatelessWidget {
@@ -120,7 +119,7 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
                     // verbindingsstatus. De eigen widget bouwt alleen zichzelf
                     // op als de minuut verandert (niet elke seconde de hele
                     // header).
-                    const _ClockText(),
+                    const ClockText(),
                     const SizedBox(width: 8),
                     if (progress == 0.0 && !controller.isSearchMode)
                       IconButton(
@@ -413,50 +412,4 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
 ///
 /// Werkt met een eigen timer en bouwt alleen zichzelf op als de weergegeven
 /// minuut verandert — de rest van de header blijft onaangeroerd.
-class _ClockText extends StatefulWidget {
-  const _ClockText();
 
-  @override
-  State<_ClockText> createState() => _ClockTextState();
-}
-
-class _ClockTextState extends State<_ClockText> {
-  Timer? _timer;
-  String _text = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _update();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _update());
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _update() {
-    final now = DateTime.now();
-    final text =
-        '${now.hour.toString().padLeft(2, '0')}:'
-        '${now.minute.toString().padLeft(2, '0')}';
-    if (text == _text) return;
-    if (!mounted) return;
-    setState(() => _text = text);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Text(
-      _text,
-      style: TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: theme.colorScheme.onSurface,
-      ),
-    );
-  }
-}
