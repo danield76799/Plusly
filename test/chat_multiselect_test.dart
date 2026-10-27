@@ -102,5 +102,18 @@ void main() {
         reason: 'de oude route (contextmenu) blijft ook bestaan',
       );
     });
+
+    test('het kopiëren zet geen afzendernaam voor de tekst', () {
+      // "Jij: " of "Katja: " voor elk bericht maakt de gekopieerde tekst
+      // onbruikbaar om elders te plakken. De kopieeractie van één bericht
+      // in het contextmenu zet die naam ook niet.
+      final chat = _code('lib/pages/chat/chat.dart');
+      expect(
+        chat.contains('withSenderNamePrefix: true'),
+        isFalse,
+        reason: 'de gekozen berichten worden gekopieerd als pure tekst, zonder '
+            '"Jij: " of de afzendernaam ervoor',
+      );
+    });
   });
 }

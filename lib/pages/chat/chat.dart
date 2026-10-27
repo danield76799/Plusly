@@ -1435,12 +1435,12 @@ class ChatController extends State<ChatPageWithRoom>
     }
     for (final event in selectedEvents) {
       if (copyString.isNotEmpty) copyString += '\n\n';
+      // Zonder afzendernaam: de kopieeractie van één bericht in het
+      // contextmenu doet dat ook, en "Jij: " / "Katja: " voor elk bericht
+      // maakt de tekst onbruikbaar om ergens anders te plakken.
       copyString += event
           .getDisplayEvent(timeline!)
-          .calcLocalizedBodyFallback(
-            MatrixLocals(L10n.of(context)),
-            withSenderNamePrefix: true,
-          );
+          .calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)));
     }
     return copyString;
   }
