@@ -4202,5 +4202,10 @@
   "@sendAsGalleryDescription": {
     "type": "String",
     "placeholders": {}
+  },
+  "sendAsGalleryUnsupported": "Brugkamer: galerijen worden niet ondersteund. De bestanden worden los verstuurd.",
+  "@sendAsGalleryUnsupported": {
+    "type": "String",
+    "placeholders": {}
   }
 }

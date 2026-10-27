@@ -4203,5 +4203,10 @@
   "@sendAsGalleryDescription": {
     "type": "String",
     "placeholders": {}
+  },
+  "sendAsGalleryUnsupported": "Bridged room: galleries are not supported. The files are sent separately.",
+  "@sendAsGalleryUnsupported": {
+    "type": "String",
+    "placeholders": {}
   }
 }

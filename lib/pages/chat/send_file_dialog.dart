@@ -818,17 +818,20 @@ class SendFileDialogState extends State<SendFileDialog> {
                   // Galerij: meerdere bestanden als één bericht. Experimenteel
                   // — clients die MSC4274 niet kennen tonen het als één
                   // onbekend bestand.
-                  if (widget.files.length > 1 && !isBridgeRoom(widget.room))
+                  if (widget.files.length > 1)
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Switch.adaptive(
-                          value: AppSettings.useGalleries.value,
-                          onChanged: (v) async {
-                            await AppSettings.useGalleries.setItem(v);
-                            if (!mounted) return;
-                            setState(() {});
-                          },
+                          value: AppSettings.useGalleries.value &&
+                              !isBridgeRoom(widget.room),
+                          onChanged: isBridgeRoom(widget.room)
+                              ? null
+                              : (v) async {
+                                  await AppSettings.useGalleries.setItem(v);
+                                  if (!mounted) return;
+                                  setState(() {});
+                                },
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -842,7 +845,9 @@ class SendFileDialogState extends State<SendFileDialog> {
                                 textAlign: TextAlign.left,
                               ),
                               Text(
-                                L10n.of(context).sendAsGalleryDescription,
+                                isBridgeRoom(widget.room)
+                                    ? L10n.of(context).sendAsGalleryUnsupported
+                                    : L10n.of(context).sendAsGalleryDescription,
                                 style: theme.textTheme.labelSmall,
                               ),
                             ],
