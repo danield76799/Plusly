@@ -12,6 +12,7 @@ import 'package:mime/mime.dart';
 import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/bridge_utils.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:Pulsly/utils/clean_exif.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
@@ -325,8 +326,13 @@ class SendFileDialogState extends State<SendFileDialog> {
       // (video-compressie duurt lang) en uit in finally — ook bij falen.
       await ForegroundServices.startService('send_files');
 
-      // Galerij: alle bestanden in één MSC4274-bericht.
-      if (AppSettings.useGalleries.value && widget.files.length > 1) {
+      // Galerij: alle bestanden in één MSC4274-bericht. In overbrugde
+      // kamers (Telegram, WhatsApp, Signal...) kan de brug dit berichttype
+      // niet converteren en komt het er nooit aan — daar dus losse
+      // berichten.
+      if (AppSettings.useGalleries.value &&
+          widget.files.length > 1 &&
+          !isBridgeRoom(widget.room)) {
         await _sendGallery(scaffoldMessenger, l10n, maxUploadSize);
         scaffoldMessenger.clearSnackBars();
         return;
@@ -812,7 +818,7 @@ class SendFileDialogState extends State<SendFileDialog> {
                   // Galerij: meerdere bestanden als één bericht. Experimenteel
                   // — clients die MSC4274 niet kennen tonen het als één
                   // onbekend bestand.
-                  if (widget.files.length > 1)
+                  if (widget.files.length > 1 && !isBridgeRoom(widget.room))
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
