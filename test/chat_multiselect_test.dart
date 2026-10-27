@@ -103,16 +103,22 @@ void main() {
       );
     });
 
-    test('het kopiëren zet geen afzendernaam voor de tekst', () {
-      // "Jij: " of "Katja: " voor elk bericht maakt de gekopieerde tekst
-      // onbruikbaar om elders te plakken. De kopieeractie van één bericht
-      // in het contextmenu zet die naam ook niet.
+    test('het kopiëren zet geen "Jij:" voor eigen berichten', () {
+      // "Jij: " voor elk eigen bericht is overbodig: je weet zelf van wie
+      // het is. Berichten van anderen MOETEN hun naam houden, anders is de
+      // gekopieerde tekst niet meer te lezen.
       final chat = _code('lib/pages/chat/chat.dart');
       expect(
-        chat.contains('withSenderNamePrefix: true'),
-        isFalse,
-        reason: 'de gekozen berichten worden gekopieerd als pure tekst, zonder '
-            '"Jij: " of de afzendernaam ervoor',
+        chat.contains('myUserIds.contains(event.senderId)'),
+        isTrue,
+        reason: 'de afzendernaam wordt alleen toegevoegd als het bericht niet '
+            'van jezelf is',
+      );
+      expect(
+        chat.contains('withSenderNamePrefix: !myUserIds.contains'),
+        isTrue,
+        reason: 'eigen berichten krijgen geen "Jij: ", berichten van anderen '
+            'wel hun naam',
       );
     });
   });

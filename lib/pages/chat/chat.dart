@@ -1433,14 +1433,22 @@ class ChatController extends State<ChatPageWithRoom>
           .getDisplayEvent(timeline!)
           .calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)));
     }
+    final myUserIds = Matrix.of(context)
+        .currentBundle
+        ?.map((client) => client!.userID)
+        .whereType<String>()
+        .toSet() ??
+        <String>{};
     for (final event in selectedEvents) {
       if (copyString.isNotEmpty) copyString += '\n\n';
-      // Zonder afzendernaam: de kopieeractie van één bericht in het
-      // contextmenu doet dat ook, en "Jij: " / "Katja: " voor elk bericht
-      // maakt de tekst onbruikbaar om ergens anders te plakken.
-      copyString += event
-          .getDisplayEvent(timeline!)
-          .calcLocalizedBodyFallback(MatrixLocals(L10n.of(context)));
+      final displayEvent = event.getDisplayEvent(timeline!);
+      // Eigen berichten zonder "Jij: " — daar is de afzendernaam toch al
+      // duidelijk. Berichten van anderen houden hun naam, zodat de
+      // gekopieerde tekst leesbaar blijft wie wat zei.
+      copyString += displayEvent.calcLocalizedBodyFallback(
+        MatrixLocals(L10n.of(context)),
+        withSenderNamePrefix: !myUserIds.contains(event.senderId),
+      );
     }
     return copyString;
   }
