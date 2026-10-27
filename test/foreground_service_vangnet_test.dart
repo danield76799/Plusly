@@ -126,5 +126,57 @@ void main() {
         reason: 'de letterlijke string hoort niet meer in main.dart te staan',
       );
     });
+
+    test('een upload-service van een vorig proces wordt ook opgeruimd', () {
+      // HET GAT. Wordt de app gekild tijdens een upload, dan blijft de
+      // native service draaien en staat 'send_files' in SharedPreferences.
+      // `reconcileOnForegroundStart` stopte alleen de push-service, dus de
+      // melding "Plusly / Berichten laden" bleef staan tot er bijgevolg een
+      // nieuwe upload werd gestart. Een brugkamer-conversie maakt uploads
+      // groter en dus dit gat vaker.
+      expect(
+        services.contains('sendFilesService'),
+        isTrue,
+        reason: 'de upload-service moet een eigen naam hebben, anders kan '
+            'het opruimen hem niet van de push-service onderscheiden',
+      );
+      expect(
+        services.contains('leftoverUpload'),
+        isTrue,
+        reason: 'een service die een vorig proces achterliet moet bij de '
+            'voorgrondkomst worden gestopt',
+      );
+      // Een lopende upload in dit proces zelf mag nooit worden gekilld.
+      expect(
+        services.contains('!_runningServices.contains(owner)'),
+        isTrue,
+        reason: 'een actieve upload in deze levenscyclus mag niet worden '
+            'gestopt, alleen een achtergeblevene',
+      );
+    });
+
+    test('een stop tijdens het starten gaat niet verloren', () {
+      // DE RACE. De plak-route start de service fire-and-forget en stopt
+      // hem in een whenComplete. Is de upload klaar vóórdat de service
+      // klaar is met starten, dan stopt de stop een service die nog niet
+      // bestaat — en de service komt daarna alsnog omhoog en blijft
+      // draaien. Precies het gemeten "Plusly / Berichten laden".
+      expect(
+        services.contains('_startingServices'),
+        isTrue,
+        reason: 'er moet bijgehouden worden welke service aan het starten is',
+      );
+      expect(
+        services.contains('_stopRequested'),
+        isTrue,
+        reason: 'een stop tijdens het starten moet worden vastgelegd',
+      );
+      expect(
+        services.contains('if (_stopRequested.remove(name))'),
+        isTrue,
+        reason: 'de vastgelegde stop moet daadwerkelijk nog uitgevoerd '
+            'worden zodra het starten klaar is',
+      );
+    });
   });
 }

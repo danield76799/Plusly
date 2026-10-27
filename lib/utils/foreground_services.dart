@@ -27,6 +27,21 @@ abstract class ForegroundServices {
   static final List<String> _runningServices = [];
   static bool _externGestart = false;
 
+  /// Services die op dit moment aan het starten zijn.
+  ///
+  /// WAAROM DIT NODIG IS. `stopService` en `startService` kunnen elkaar
+  /// inlopen: het verzendvenster start de service en stopt hem in een
+  /// `finally`, terwijl de plak-route de service fire-and-forget start.
+  /// Stopt de service terwijl hij nog aan het starten is, dan is er op dat
+  /// moment nog niets om te stoppen — de native service komt daarna
+  /// alsnog omhoog en blijft draaien. Precies het gemeten "Plusly /
+  /// Berichten laden" dat nooit meer weg gaat.
+  ///
+  /// Dus: een stop die tijdens het starten binnenkomt wordt vastgelegd en
+  /// uitgevoerd zodra het starten klaar is.
+  static final Set<String> _startingServices = {};
+  static final Set<String> _stopRequested = {};
+
   /// Persistent merkteken van wie de service startte in deze LEEFCYCLUS.
   ///
   /// WAAROM DIT NODIG IS. `_runningServices` is een in-memory map: bij een
@@ -44,6 +59,9 @@ abstract class ForegroundServices {
 
   /// Naam waarmee main.dart de koude-start-service start.
   static const backgroundPushService = 'background_push';
+
+  /// Naam waarmee het verzendvenster de upload-service start.
+  static const sendFilesService = 'send_files';
 
   /// Bovengrens op hoe lang de koude-start-service mag blijven staan.
   ///
@@ -92,7 +110,15 @@ abstract class ForegroundServices {
       final owner = prefs.getString(_ownerKey);
       final runningTooLong = _serviceStartedAt != null &&
           DateTime.now().difference(_serviceStartedAt!) > watchdogTimeout;
+      // Een service die een VORIG proces heeft achtergelaten (app-kill
+      // tijdens een upload) staat nog in SharedPreferences, maar draait in
+      // dit proces niet meer: `_runningServices` bevat hem dan niet. Die
+      // ruimen we op, anders blijft "Berichten laden" staan tot er
+      // bijgevolg een nieuwe upload gestart wordt.
+      final leftoverUpload =
+          owner == sendFilesService && !_runningServices.contains(owner);
       final shouldStop = owner == backgroundPushService ||
+          leftoverUpload ||
           (owner == null && runningTooLong) ||
           (owner == null &&
               _runningServices.isEmpty &&
@@ -113,8 +139,9 @@ abstract class ForegroundServices {
   }
 
   static Future<void> startService(String name) async {
+    if (!platformSupported) return;
+    _startingServices.add(name);
     try {
-      if (!platformSupported) return;
       if (!_runningServices.contains(name)) {
         _runningServices.add(name);
       }
@@ -171,6 +198,16 @@ abstract class ForegroundServices {
       Logs().d('[ForegroundServices] start $name: $result');
     } catch (e) {
       Logs().e('[ForegroundServices] start failed', e);
+    } finally {
+      _startingServices.remove(name);
+    }
+    // Een stop die tijdens het starten binnenkwam (de service bestond toen
+    // nog niet) mag niet verloren gaan: nu de service draait, stoppen we hem.
+    if (_stopRequested.remove(name)) {
+      Logs().d(
+        '[ForegroundServices] stop requested during start of $name, stopping now',
+      );
+      await stopService(name);
     }
   }
 
@@ -195,6 +232,17 @@ abstract class ForegroundServices {
   static Future<void> stopService(String name) async {
     try {
       if (!platformSupported) return;
+      // De service is nog aan het starten: er is nu niets om te stoppen, en
+      // een stop nu zou de start overleven (de service komt dan alsnog
+      // omhoog en blijft draaien). Vastleggen en uitvoeren zodra het
+      // starten klaar is.
+      if (_startingServices.contains(name)) {
+        _stopRequested.add(name);
+        Logs().d(
+          '[ForegroundServices] stop of $name deferred: still starting',
+        );
+        return;
+      }
       // Op een koude start is _runningServices leeg, maar de
       // owner-markering in SharedPreferences is wél aanwezig als
       // deze service door ons in een eerdere levenscyclus is
