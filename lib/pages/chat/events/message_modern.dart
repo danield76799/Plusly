@@ -697,6 +697,12 @@ class _MessageModernState extends State<MessageModern> {
           _quickReactionsOverlay?.remove();
           _quickReactionsOverlay = null;
         },
+        // "Selecteren" in de overlay start de multiselectie: daarna tik je
+        // de andere berichten aan. Dit is de vindbare route — de andere
+        // (contextmenu via tikken) ziet niemand.
+        onSelect: widget.chatController == null
+            ? null
+            : () => widget.chatController!.onMultiSelect(event),
       ),
     );
     Overlay.of(context).insert(_quickReactionsOverlay!);

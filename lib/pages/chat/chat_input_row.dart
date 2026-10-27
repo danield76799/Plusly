@@ -19,13 +19,46 @@ class ChatInputRow extends StatelessWidget {
 
   const ChatInputRow(this.controller, {super.key});
 
+  /// Eén actie in de selectiebalk.
+  ///
+  /// [destructive] kleurt de knop in de foutkleur: verwijderen mag niet
+  /// verward worden met kopiëren of doorsturen.
+  static Widget _selectButton(
+    BuildContext context,
+    ThemeData theme, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    bool destructive = false,
+  }) {
+    return SizedBox(
+      height: height,
+      child: Semantics(
+        label: label,
+        button: true,
+        child: TextButton(
+          style: TextButton.styleFrom(
+            foregroundColor: destructive
+                ? theme.colorScheme.error
+                : theme.colorScheme.onSurface,
+          ),
+          onPressed: onPressed,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(icon, size: 18),
+              const SizedBox(width: 4),
+              Text(label),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    final selectedTextButtonStyle = TextButton.styleFrom(
-      foregroundColor: theme.colorScheme.onSurface,
-    );
 
     return RecordingViewModel(
       builder: (context, recordingViewModel) {
@@ -41,87 +74,75 @@ class ChatInputRow extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: controller.selectMode
               ? <Widget>[
-                  if (controller.selectedEvents.every(
-                    (event) => event.status == EventStatus.error,
-                  ))
-                    SizedBox(
-                      height: height,
-                      child: Semantics(
-                        label: L10n.of(context).delete,
-                        button: true,
-                        child: TextButton(
-                          style: TextButton.styleFrom(
-                            foregroundColor: theme.colorScheme.error,
+                  // Selectiebalk: acties op de gekozen berichten.
+                  //
+                  // Scrollbaar, want op een smalle telefoon past niet alles
+                  // op één rij. Kopiëren en Link kopiëren staan vooraan:
+                  // het kopiëren van meerdere berichten tegelijk is de
+                  // reden dat je meerdere berichten selecteert.
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Row(
+                        children: [
+                          _selectButton(
+                            context,
+                            theme,
+                            icon: Icons.copy_outlined,
+                            label: L10n.of(context).copy,
+                            onPressed: controller.copyEventsAction,
                           ),
-                          onPressed: controller.deleteErrorEventsAction,
-                          child: Row(
-                            children: <Widget>[
-                              const Icon(Icons.delete_forever_outlined),
-                              Text(L10n.of(context).delete),
-                            ],
+                          _selectButton(
+                            context,
+                            theme,
+                            icon: Icons.link,
+                            label: L10n.of(context).copyLink,
+                            onPressed: controller.copyLinkAction,
                           ),
-                        ),
-                      ),
-                    )
-                  else
-                    SizedBox(
-                      height: height,
-                      child: Semantics(
-                        label: L10n.of(context).forward,
-                        button: true,
-                        child: TextButton(
-                          style: selectedTextButtonStyle,
-                          onPressed: controller.forwardEventsAction,
-                          child: Row(
-                            children: <Widget>[
-                              const Icon(Icons.keyboard_arrow_left_outlined),
-                              Text(L10n.of(context).forward),
-                            ],
+                          _selectButton(
+                            context,
+                            theme,
+                            icon: Icons.keyboard_arrow_left_outlined,
+                            label: L10n.of(context).forward,
+                            onPressed: controller.forwardEventsAction,
                           ),
-                        ),
+                          if (controller.selectedEvents.length == 1 &&
+                              controller.selectedEvents.first
+                                  .getDisplayEvent(controller.timeline!)
+                                  .status
+                                  .isSent)
+                            _selectButton(
+                              context,
+                              theme,
+                              icon: Icons.keyboard_arrow_right,
+                              label: L10n.of(context).reply,
+                              onPressed: controller.replyAction,
+                            ),
+                          if (controller.selectedEvents.every(
+                            (event) => event.status == EventStatus.error,
+                          ))
+                            _selectButton(
+                              context,
+                              theme,
+                              icon: Icons.delete_forever_outlined,
+                              label: L10n.of(context).delete,
+                              destructive: true,
+                              onPressed: controller.deleteErrorEventsAction,
+                            )
+                          else
+                            _selectButton(
+                              context,
+                              theme,
+                              icon: Icons.delete_outline,
+                              label: L10n.of(context).delete,
+                              destructive: true,
+                              onPressed: controller.redactEventsAction,
+                            ),
+                        ],
                       ),
                     ),
-                  controller.selectedEvents.length == 1
-                      ? controller.selectedEvents.first
-                                .getDisplayEvent(controller.timeline!)
-                                .status
-                                .isSent
-                            ? SizedBox(
-                                height: height,
-                                child: Semantics(
-                                  label: L10n.of(context).reply,
-                                  button: true,
-                                  child: TextButton(
-                                    style: selectedTextButtonStyle,
-                                    onPressed: controller.replyAction,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Text(L10n.of(context).reply),
-                                        const Icon(Icons.keyboard_arrow_right),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              )
-                            : SizedBox(
-                                height: height,
-                                child: Semantics(
-                                  label: L10n.of(context).tryToSendAgain,
-                                  button: true,
-                                  child: TextButton(
-                                    style: selectedTextButtonStyle,
-                                    onPressed: controller.sendAgainAction,
-                                    child: Row(
-                                      children: <Widget>[
-                                        Text(L10n.of(context).tryToSendAgain),
-                                        const SizedBox(width: 4),
-                                        const Icon(Icons.send_outlined, size: 16),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              )
-                      : const SizedBox.shrink(),
+                  ),
                 ]
               : <Widget>[
                   // Input bar met bijlage-icoon en emoji-knop erin (WhatsApp stijl)

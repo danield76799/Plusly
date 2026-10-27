@@ -1451,6 +1451,10 @@ class ChatController extends State<ChatPageWithRoom>
       showEmojiPicker = false;
       selectedEvents.clear();
     });
+    // Bevestiging: zonder snackbar weet je niet of het kopiëren lukte.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(L10n.of(context).copiedToClipboard)),
+    );
   }
 
   void copyLinkAction({Event? event}) {
