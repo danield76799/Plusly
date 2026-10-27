@@ -4207,5 +4207,10 @@
   "@sendAsGalleryUnsupported": {
     "type": "String",
     "placeholders": {}
+  },
+  "pushServiceNotification": "Meldingen ophalen",
+  "@pushServiceNotification": {
+    "type": "String",
+    "placeholders": {}
   }
 }

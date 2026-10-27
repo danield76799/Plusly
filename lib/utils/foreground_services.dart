@@ -76,7 +76,9 @@ abstract class ForegroundServices {
   /// service draait. 30s is ruim genoeg voor de push-pipeline (pushHelper timeout
   /// = 30s) en zorgt dat een achtergebleven melding snel verdwijnt.
   static const watchdogTimeout = Duration(seconds: 30);
-  static Timer? _watchdog;
+  /// Watchdog per service: elke service heeft zijn eigen bovengrens, zodat
+  /// het starten van de ene de andere niet van zijn vangnet berooft.
+  static final Map<String, Timer> _watchdogs = {};
   static DateTime? _serviceStartedAt;
 
   static bool get platformSupported => PlatformInfos.isMobile;
@@ -129,8 +131,10 @@ abstract class ForegroundServices {
       );
       await prefs.remove(_ownerKey);
       _runningServices.remove(owner);
-      _watchdog?.cancel();
-      _watchdog = null;
+      for (final timer in _watchdogs.values) {
+        timer.cancel();
+      }
+      _watchdogs.clear();
       _serviceStartedAt = null;
       await FlutterForegroundTask.stopService();
     } catch (e) {
@@ -184,10 +188,19 @@ abstract class ForegroundServices {
       }
       _externGestart = false;
       _serviceStartedAt = DateTime.now();
+      // De push-service verwerkt een aankomend bericht op de achtergrond:
+      // "Meldingen ophalen" is daar waarheid. "Berichten laden" zou
+      // suggereren dat de app vastloopt — de gebruiker zag de melding
+      // willekeurig opduiken bij het ontvangen van een bericht en dacht
+      // dat er iets mis was. Voor een upload blijft "Berichten laden"
+      // staan: daar is de app daadwerkelijk nog bezig.
+      final isPushService = name == backgroundPushService;
       final result = await FlutterForegroundTask.startService(
         serviceTypes: [ForegroundServiceTypes.dataSync],
         notificationTitle: AppConfig.applicationName,
-        notificationText: l10n.loadingMessages,
+        notificationText: isPushService
+            ? l10n.pushServiceNotification
+            : l10n.loadingMessages,
       );
       // Markeren wie 'm startte: een app-kill laat de native service draaien,
       // en zonder dit staat de volgende processtart hem buiten onze scope.
@@ -219,11 +232,17 @@ abstract class ForegroundServices {
   /// (30s-timeout in pushHelper) en hoort dus nooit minuten te blijven staan.
   /// `send_files` is een upload — video-compressie en verzenden duren legitiem
   /// langer, dus die mag de watchdog niet afkappen.
+  ///
+  /// PER SERVICE, niet globaal. Vóór deze wijziging was er één timer voor
+  /// alle services: het starten van een upload Annuleerde de watchdog van
+  /// de push-service, terwijl de push-pijplijn op dat moment nog bezig kon
+  /// zijn. De push-service verloor dan zijn bovengrens en kon blijven
+  /// staan — de melding "Plusly / Berichten laden" bleef dan wél hangen.
   static void _armWatchdog(String name) {
-    _watchdog?.cancel();
-    _watchdog = null;
+    _watchdogs[name]?.cancel();
+    _watchdogs.remove(name);
     if (name != backgroundPushService) return;
-    _watchdog = Timer(watchdogTimeout, () async {
+    _watchdogs[name] = Timer(watchdogTimeout, () async {
       Logs().w('[ForegroundServices] watchdog fired for $name, stopping');
       await stopService(name);
     });
@@ -254,8 +273,8 @@ abstract class ForegroundServices {
       final owner = stopPrefs.getString(_ownerKey);
       final isOurs = owner == name || _runningServices.contains(name);
       if (!isOurs) return;
-      _watchdog?.cancel();
-      _watchdog = null;
+      _watchdogs[name]?.cancel();
+      _watchdogs.remove(name);
       _serviceStartedAt = null;
       // Markeren verwijderen: een volgende start mag deze service
       // niet meer als 'ons' beschouwen als hij inmiddels is

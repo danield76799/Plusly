@@ -75,9 +75,40 @@ void main() {
         services.indexOf('Future<void> stopService'),
       );
       expect(
-        stopBlok.contains('_watchdog?.cancel()'),
+        stopBlok.contains('_watchdogs[name]?.cancel()'),
         isTrue,
         reason: 'een afgeronde service mag de timer niet laten doorlopen',
+      );
+    });
+
+    test('elke service heeft zijn eigen watchdog', () {
+      // Eén globale timer betekende dat het starten van een upload de
+      // watchdog van de push-service Annuleerde. De push-service verloor
+      // dan zijn bovengrens terwijl de push-pijplijn nog bezig kon zijn —
+      // en de melding bleef wél hangen.
+      expect(
+        services.contains('Map<String, Timer> _watchdogs'),
+        isTrue,
+        reason: 'een timer per service, zodat de ene de andere niet van '
+            'zijn vangnet berooft',
+      );
+      expect(
+        services.contains('_watchdogs[name]?.cancel()'),
+        isTrue,
+        reason: 'het herstarten van de watchdog van één service mag de '
+            'watchdog van een andere service niet raken',
+      );
+    });
+
+    test('de push-service meldt dat hij meldingen ophaalt', () {
+      // "Berichten laden" bij het ontvangen van een bericht suggereerde
+      // dat de app vastloopt. Voor de push-service is "Meldingen ophalen"
+      // waarheid.
+      expect(
+        services.contains('pushServiceNotification'),
+        isTrue,
+        reason: 'de push-service hoort een eigen, waarheidsgetrouwe tekst te '
+            'tonen',
       );
     });
 

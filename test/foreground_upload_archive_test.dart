@@ -39,7 +39,13 @@ void main() {
           reason: 'refcount: meerdere sends delen één service');
       expect(code.contains('_externGestart'), isTrue,
           reason: 'lopende service (gesprek) bij stop met rust laten');
-      expect(code.contains('ForegroundServiceTypes.shortService'), isTrue);
+      // Het type moet lang werk aankunnen: een upload van 30MB (video)
+      // groeide uit shortService, daarom is het dataSync geworden
+      // (commit f2ccdb03e). De assertie op shortService was daarna
+      // verouderd.
+      expect(code.contains('ForegroundServiceTypes.dataSync'), isTrue,
+          reason: 'een upload van 30MB mag niet door shortService worden '
+              'afgekapt');
       expect(code.contains('PlatformInfos.isMobile'), isTrue,
           reason: 'alleen mobiel');
     });

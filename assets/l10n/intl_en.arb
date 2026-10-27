@@ -4208,5 +4208,10 @@
   "@sendAsGalleryUnsupported": {
     "type": "String",
     "placeholders": {}
+  },
+  "pushServiceNotification": "Fetching notifications",
+  "@pushServiceNotification": {
+    "type": "String",
+    "placeholders": {}
   }
 }
