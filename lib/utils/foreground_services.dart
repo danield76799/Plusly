@@ -153,9 +153,20 @@ abstract class ForegroundServices {
       final prefs = await SharedPreferences.getInstance();
       FlutterForegroundTask.init(
         androidNotificationOptions: AndroidNotificationOptions(
-          channelId: 'notification_channel_id',
+          // Eigen kanaal, met de laagst mogelijke importantie. Android
+          // eist nu eenmaal een zichtbare melding zodra de app op de
+          // achtergrond wakker wordt om een bericht op te halen; met
+          // importance MIN blijft die melding ingeklapt in de schaduw en
+          // komt er geen icoon in de statusbalk. Het oude kanaal
+          // ('notification_channel_id') blijft bestaan voor de
+          // gespreksnotificaties.
+          channelId: 'plusly_foreground_service',
           channelName: 'Foreground Notification',
           channelDescription: l10n.foregroundServiceRunning,
+          channelImportance: NotificationChannelImportance.MIN,
+          priority: NotificationPriority.MIN,
+          enableVibration: false,
+          playSound: false,
           onlyAlertOnce: true,
         ),
         iosNotificationOptions: const IOSNotificationOptions(
