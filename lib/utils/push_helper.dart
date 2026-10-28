@@ -92,6 +92,14 @@ class PushHelper {
       ).timeout(const Duration(seconds: 30));
     } catch (e, s) {
       Logs().e('Push Helper has crashed!', e, s);
+      // De fout ook in de push-diagnose zetten. Anders is er geen spoor:
+      // de gebruiker ziet alleen de generieke "Nieuw bericht in Plusly"-
+      // melding en weet niet wát er misging.
+      PushEventLog().add('push_handler_crash', {
+        'room': notification.roomId ?? '',
+        'error': e.toString().split('\n').first,
+        'type': e.runtimeType.toString(),
+      });
       // FC-pariteit (r55-63): crash-rapport weggeschreven zodat de
       // Meldingen-instellingen het kunnen tonen. Timeout/IO/ClientException
       // zijn verwachtbaar (netwerk), geen code-bugs — die niet rapporteren.
@@ -356,16 +364,32 @@ class PushHelper {
 
     // Upstream r201-210: body-berekening — een nog-versleuteld event toont
     // de generieke tekst; geen retry/ontsleutelings-jacht.
-    final body = event.type == EventTypes.Encrypted
-        ? l10n!.newMessageInFluffyChat
-        : await event.calcLocalizedBody(
-            matrixLocals,
-            plaintextBody: true,
-            withSenderNamePrefix: false,
-            hideReply: true,
-            hideEdit: true,
-            removeMarkdown: true,
-          );
+    //
+    // Het mislukken van deze ene berekening mag de hele melding niet
+    // klappen: anders belandt de gebruiker bij de generieke "Nieuw bericht
+    // in Plusly"-fallback in plaats van bij de echte melding met de
+    // kamernaam.
+    String body;
+    try {
+      body = event.type == EventTypes.Encrypted
+          ? l10n!.newMessageInFluffyChat
+          : await event.calcLocalizedBody(
+              matrixLocals,
+              plaintextBody: true,
+              withSenderNamePrefix: false,
+              hideReply: true,
+              hideEdit: true,
+              removeMarkdown: true,
+            );
+    } catch (e, s) {
+      Logs().w('Push helper: body berekenen mislukt, val terug op generiek', e, s);
+      PushEventLog().add('push_body_failed', {
+        'room': notification.roomId ?? '',
+        'error': e.toString().split('\n').first,
+        'type': e.runtimeType.toString(),
+      });
+      body = l10n!.newMessageInFluffyChat;
+    }
 
     final title = event.room.getLocalizedDisplayname(matrixLocals);
     final roomName = event.room.getLocalizedDisplayname(matrixLocals);
