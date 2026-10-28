@@ -164,6 +164,8 @@ class PushHelper {
               ),
               importance: Importance.high,
               priority: Priority.max,
+              // Ook hier: één heads-up per kamer, niet per mislukte push.
+              onlyAlertOnce: true,
               shortcutId: notification.roomId,
               category: AndroidNotificationCategory.message,
               groupKey: notification.clientName,
@@ -729,6 +731,12 @@ class PushHelper {
       ),
       importance: Importance.high,
       priority: Priority.max,
+      // Eén heads-up per bericht, niet per push. Bij een push-burst
+      // (twintig pushes binnen twee seconden) wordt dezelfde melding
+      // steeds opnieuw geplaatst; zonder onlyAlertOnce geeft elke
+      // herplaatsing opnieuw een heads-up, waardoor de kaart blijft
+      // hangen en blijft piepen.
+      onlyAlertOnce: true,
       // Upstream r310: groepeer per account.
       groupKey: client.clientName,
       // Upstream r311-341: acties ALLEEN op bericht-types, via een switch.
