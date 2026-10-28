@@ -381,6 +381,13 @@ class _MessageModernState extends State<MessageModern> {
                             GestureDetector(
                               onTapDown: (details) =>
                                   _tapPosition = details.globalPosition,
+                              // In selectiemodus moet een tik een bericht
+                              // toevoegen of weghalen; de InkWell onder de
+                              // inhoud krijgt de tik niet (een Text in een
+                              // Stack slokt de tik op).
+                              onTap: widget.longPressSelect
+                                  ? () => widget.onSelect(event, _tapPosition)
+                                  : null,
                               onDoubleTap: AppSettings.doubleTapToReact.value &&
                                       event.room.canSendDefaultMessages &&
                                       !widget.longPressSelect

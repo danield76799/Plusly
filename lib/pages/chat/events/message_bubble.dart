@@ -512,6 +512,16 @@ class _MessageBubbleState extends State<MessageBubble> {
                         child: GestureDetector(
                           onTapDown: (details) =>
                               _tapPosition = details.globalPosition,
+                          // In selectiemodus moet een tik een bericht
+                          // toevoügen of weghalen. Zonder deze onTap komt
+                          // de tik nooit aan: de InkWell onder de inhoud
+                          // ligt onder de tekst, en een Text in een Stack
+                          // slokt de tik op. Buiten selectiemodus blijft
+                          // een tik niets doen (lang-druk opent het menu),
+                          // zoals WhatsApp en Signal.
+                          onTap: widget.longPressSelect
+                              ? () => widget.onSelect(event, _tapPosition)
+                              : null,
                           onDoubleTap: AppSettings.doubleTapToReact.value &&
                                   event.room.canSendDefaultMessages &&
                                   !widget.longPressSelect
