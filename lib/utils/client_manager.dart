@@ -24,6 +24,28 @@ import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 abstract class ClientManager {
   static const String clientNamespace = 'com.danield.plusly.store.clients';
 
+  /// Clients per accountnaam, plus de lopende creaties.
+  ///
+  /// WAAROM DIT NODIG IS. Elke `createClient` opent de database van dat
+  /// account. Opent de database twee keer tegelijk (of terwijl de vorige
+  /// nog open is), dan geeft SQLite `SQLITE_MISUSE` op `BEGIN IMMEDIATE`
+  /// (code 21). Bij een push-burst — twintig pushes binnen twee seconden
+  /// — gebeurde dat precies: de eerste open slaagde, de rest crashte op
+  /// het database-openen, waarna de push-verwerking in de catch belande en
+  /// de generieke "Nieuw bericht in Plusly"-melding liet verschijnen. Eén
+  /// burst leverde zo tientallen van die meldingen.
+  ///
+  /// Dus: één client per naam, gedeeld door alle aanroepers, en een
+  /// lopende creatie wordt hergebruikt in plaats van een tweede te starten.
+  static final Map<String, Client> _clients = {};
+  static final Map<String, Future<Client>> _creatingClients = {};
+
+  /// Verwijdert de gecachte client van een account (bij uitloggen of
+  /// verwijderen), zodat een volgende creatie een verse database opent.
+  static void forgetClient(String clientName) {
+    _clients.remove(clientName);
+  }
+
   static Future<List<Client>> getClients({
     bool initialize = true,
     required SharedPreferences store,
@@ -104,6 +126,37 @@ abstract class ClientManager {
         );
 
   static Future<Client> createClient(
+    String clientName,
+    SharedPreferences store,
+  ) {
+    // Zie de uitleg bij [_clients]: één client per account, en een lopende
+    // creatie wordt gedeeld. Anders opent elke push de database opnieuw.
+    final bestaand = _clients[clientName];
+    if (bestaand != null) return Future.value(bestaand);
+    final lopend = _creatingClients[clientName];
+    if (lopend != null) return lopend;
+    final future = _createClient(clientName, store);
+    _creatingClients[clientName] = future;
+    future
+        .then((client) {
+          if (identical(_creatingClients[clientName], future)) {
+            _creatingClients.remove(clientName);
+            _clients[clientName] = client;
+          }
+        })
+        .catchError((e, s) {
+          if (identical(_creatingClients[clientName], future)) {
+            _creatingClients.remove(clientName);
+          }
+          Logs().e('Unable to create client $clientName', e, s);
+          // De fout gaat door naar de aanroeper; de push-verwerking vangt
+          // hem op.
+          throw e;
+        });
+    return future;
+  }
+
+  static Future<Client> _createClient(
     String clientName,
     SharedPreferences store,
   ) async {

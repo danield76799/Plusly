@@ -296,6 +296,10 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
         _cancelSubs(c.clientName);
         widget.clients.remove(c);
         ClientManager.removeClientNameFromStore(c.clientName, store);
+        // De gecachte client weggooien: anders blijft de oude (niet meer
+        // ingelogde) client in beeld en opent een volgende push dezelfde
+        // database opnieuw.
+        ClientManager.forgetClient(c.clientName);
         InitWithRestoreExtension.deleteSessionBackup(name);
       }
       if (loggedInWithMultipleClients && state != LoginState.loggedIn) {

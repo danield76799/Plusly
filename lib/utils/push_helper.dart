@@ -60,6 +60,43 @@ class PushHelper {
   late Event event;
   L10n? l10n;
 
+  /// Laatste tijd waarop de generieke fallbackmelding voor een kamer is
+  /// getoond.
+  ///
+  /// WAAROM DIT NODIG IS. Bij een push-burst (twintig pushes binnen twee
+  /// seconden, zoals de ntfy-distributeur na een lange offline-tijd afgeeft)
+  /// crashte elke push-verwerking op het database-openen, en elke catch
+  /// zette zijn eigen "Nieuw bericht in Plusly"-melding neer. De gebruiker
+  /// kreeg er twintig. Eén melding per kamer per minuut is genoeg: het is
+  /// een vangnet, geen bericht.
+  static final Map<String, DateTime> _fallbackMeldingTijdstip = {};
+  static const _fallbackMeldingSperre = Duration(minutes: 1);
+
+  /// Mag de generieke fallbackmelding voor [roomId] getoond worden?
+  static bool _magFallbackMeldingTonen(String roomId) {
+    final now = DateTime.now();
+    final vorige = _fallbackMeldingTijdstip[roomId];
+    if (vorige != null && now.difference(vorige) < _fallbackMeldingSperre) {
+      return false;
+    }
+    _fallbackMeldingTijdstip[roomId] = now;
+    // Onbeperkte groei voorkomen.
+    if (_fallbackMeldingTijdstip.length > 500) {
+      _fallbackMeldingTijdstip.removeWhere(
+        (_, tid) => now.difference(tid) > _fallbackMeldingSperre,
+      );
+    }
+    return true;
+  }
+
+  /// Is de fout "dit account is niet ingelogd"?
+  ///
+  /// Dan is er niets te tonen: de melding zou alleen de gebruiker
+  /// misleiden met "open de app om de berichten te lezen" terwijl er
+  /// geen berichten zijn.
+  static bool _isNotLoggedIn(Object e) =>
+      e.toString().contains('Client is not logged in');
+
   PushHelper._(
     this.notification,
     this.flutterLocalNotificationsPlugin,
@@ -106,7 +143,9 @@ class PushHelper {
       if (e is! TimeoutException && e is! IOException) {
         await PushHelperInstrumentation.schrijfCrashRapport(e, s);
       }
-      if (notification.roomId != null) {
+      if (notification.roomId != null &&
+          !_isNotLoggedIn(e) &&
+          _magFallbackMeldingTonen(notification.roomId!)) {
         await flutterLocalNotificationsPlugin.show(
           id: notificationIdFor(notification.clientName, notification.roomId),
           title: l10n.newMessageInFluffyChat,
