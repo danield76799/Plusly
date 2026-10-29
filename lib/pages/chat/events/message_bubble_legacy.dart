@@ -738,9 +738,26 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                                     : true,
                                                                                               ),
                                             ),
-                                            // reserve vertical space for bottomrowstatus
+                                            // De voettekst staat in de flow van de
+                                            // bubbel en NIET als Positioned: een
+                                            // Positioned bepaalt de breedte van de
+                                            // Stack niet, dus bij een kort bericht
+                                            // ("Hi") was de bubbel smaller dan
+                                            // "20:04 + vinkjes" en liep de tijd naar
+                                            // buiten — afgeknipt tot "0:04". In de
+                                            // flow groeit de bubbel mee.
                                             if (useBottomRowStatus)
-                                              const SizedBox(height: 22),
+                                              Align(
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: Padding(
+                                                  padding: const EdgeInsets.only(
+                                                    top: 4,
+                                                    right: 12,
+                                                  ),
+                                                  child: messageStatusRow,
+                                                ),
+                                              ),
                                             if (useBottomChipStatus)
                                               Padding(
                                                 padding: const .only(
@@ -759,12 +776,6 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                           Positioned(
                                             bottom: 10,
                                             right: 16,
-                                            child: messageStatusRow,
-                                          ),
-                                        if (useBottomRowStatus)
-                                          Positioned(
-                                            bottom: 6,
-                                            right: 12,
                                             child: messageStatusRow,
                                           ),
                                         if (useChipStatus)
