@@ -149,7 +149,7 @@ class ChatInputRow extends StatelessWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 10.0,
+                        horizontal: 6.0,
                         vertical: 8.0,
                       ),
                       child: Container(
@@ -218,7 +218,7 @@ class ChatInputRow extends StatelessWidget {
                                       // paperclip so it lines up visually with
                                       // the emoji button on the right edge.
                                       prefixIconConstraints: const BoxConstraints(
-                                        minWidth: 44,
+                                        minWidth: 38,
                                         minHeight: 44,
                                       ),
                                       prefixIcon: PopupMenuButton<String>(
@@ -281,6 +281,20 @@ class ChatInputRow extends StatelessWidget {
                                               title: Text('Bericht inplannen'),
                                             ),
                                           ),
+                                          // De lijst met geplande berichten
+                                          // stond als aparte knop in de
+                                          // invoerbalk. Die nam 56dp van de
+                                          // breedte en daardoor was de
+                                          // hinttekst ("Schrijf een berich...")
+                                          // afgekapst. De knop is nu een item
+                                          // in dit menu.
+                                          PopupMenuItem(
+                                            value: 'scheduled',
+                                            child: ListTile(
+                                              leading: const Icon(Icons.schedule_outlined),
+                                              title: Text('Geplande berichten'),
+                                            ),
+                                          ),
                                         ],
                                         child: Icon(
                                           Icons.attach_file,
@@ -293,34 +307,29 @@ class ChatInputRow extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            // Geplande berichten knop IN de input bar (links van emoji) — altijd zichtbaar
-                            Semantics(
-                              label: 'Geplande berichten',
-                              button: true,
-                              child: Container(
-                                height: height,
-                                width: height,
-                                alignment: Alignment.center,
-                                child: IconButton(
-                                  tooltip: 'Geplande berichten',
-                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                                  icon: const Icon(Icons.schedule_outlined),
-                                  onPressed: () => controller.openScheduledMessages(),
-                                ),
-                              ),
-                            ),
+                            // Geplande berichten is verplaatst naar het
+                            // bijlage-menu hierboven: als losse knop kostte
+                            // hij 56dp en was de hinttekst afgekapst.
 
-                            // Emoji knop IN de input bar — altijd zichtbaar
+                            // Emoji knop IN de input bar — altijd zichtbaar.
+                            // Smaller dan de overige knoppen: 56dp was
+                            // kostbare breedte in de invoerbalk.
                             Semantics(
                               label: L10n.of(context).emojis,
                               button: true,
                               child: Container(
-                                height: height,
-                                width: height,
+                                height: 44,
+                                width: 44,
                                 alignment: Alignment.center,
                                 child: IconButton(
                                   tooltip: L10n.of(context).emojis,
                                   color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                                  iconSize: 22,
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(
+                                    minWidth: 44,
+                                    minHeight: 44,
+                                  ),
                                   icon: Icon(
                                     controller.showEmojiPicker
                                         ? Icons.emoji_emotions

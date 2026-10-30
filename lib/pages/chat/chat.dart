@@ -2311,6 +2311,9 @@ class ChatController extends State<ChatPageWithRoom>
     if (choice == 'schedule') {
       await scheduleMessageAction();
     }
+    if (choice == 'scheduled') {
+      await openScheduledMessages();
+    }
     if (choice == 'emoji') {
       emojiPickerAction();
     }
