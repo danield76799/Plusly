@@ -172,18 +172,51 @@ Future<void> _initializeApp() async {
   }
 
   if (isBackgroundFetch) {
-    // FluffyChat-pariteit (upstream main.dart r86): start de korte
-    // foreground-service VÓÓR ClientManager.getClients(). Upstream's volgorde
-    // is AppSettings.init() → startService → getClients; een service die pas
-    // ná de zware init start, laat het hele koude-start-venster (Hive +
-    // client-setup, seconden lang) onbeschermd, waarna Android het proces
-    // wegvaagt vóór de notificatie getoond is. Gestopt in push_helper.dart
-    // (finally), net als upstream push_helper.dart r93-94.
-    await ForegroundServices.startService(
-      ForegroundServices.backgroundPushService,
-    );
+    // De foreground-service is er om het proces te beschermen: Android kan
+    // een achtergrond-proces wegvagen terwijl de client nog initialiseert,
+    // en dan verschijnt de berichtmelding nooit. MAAR: hij toont ook een
+    // melding ("Meldingen ophalen") die de gebruiker bij elke push ziet.
+    //
+    // Daarom starten we de service pas als de initialisatie ONTREEKELIJK
+    // lang duurt. Op een normale koude start is Hive + de client in een
+    // paar seconden klaar en is de service helemaal niet nodig — en dus
+    // ook geen melding. Duurt het wél lang (trage telefoon, grote
+    // database, zwak netwerk), dan start de service alsnog en beschermt
+    // hij het proces.
+    //
+    // Gestopt wordt de service in push_helper.dart (finally), net als
+    // upstream push_helper.dart r93-94.
+    final initStart = DateTime.now();
+    var initKlaar = false;
+    final initFuture = ClientManager.getClients(store: store);
 
-    final clients = await ClientManager.getClients(store: store);
+    final serviceTimer = Timer(const Duration(seconds: 5), () async {
+      if (initKlaar) return;
+      Logs().i(
+        '[Main] Init duurt langer dan 5s: foreground-service start',
+      );
+      await ForegroundServices.startService(
+        ForegroundServices.backgroundPushService,
+      );
+      // De init was inmiddels klaar: dan is de service niet meer nodig
+      // en stoppen we hem meteen (anders blijft de melding tot de
+      // watchdog hem opkapt).
+      if (initKlaar) {
+        await ForegroundServices.stopService(
+          ForegroundServices.backgroundPushService,
+        );
+      }
+    });
+
+    final clients = await initFuture;
+    initKlaar = true;
+    serviceTimer.cancel();
+    try {
+      PushEventLog().add('init_done', {
+        'ms': '${DateTime.now().difference(initStart).inMilliseconds}',
+        'service': 'lazy',
+      });
+    } catch (_) {}
 
     // Do not send online presences when app is in background fetch mode.
     for (final client in clients) {

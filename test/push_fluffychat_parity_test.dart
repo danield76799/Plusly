@@ -38,7 +38,7 @@ int _codeLineIndex(String bron, String fragment) {
 
 void main() {
   group('Push-procedure = FluffyChat (structuur)', () {
-    test('foreground-service start VÓÓR de zware client-init', () {
+    test('de foreground-service start PAS als de init lang duurt', () {
       final main = _code('lib/main.dart');
       // De servicenaam komt uit één constante: een losse string hier kan
       // buiten de watchdog-vergelijking lopen en dan is het vangnet stil.
@@ -47,19 +47,33 @@ void main() {
         'startService(',
       );
       final clientsIdx = _codeLineIndex(main, 'ClientManager.getClients(');
+      final timerIdx = _codeLineIndex(main, 'Timer(const Duration(seconds: 5)');
 
       expect(startIdx, greaterThan(-1),
           reason: 'main.dart moet de push-foreground-service starten');
       expect(clientsIdx, greaterThan(-1),
           reason: 'main.dart moet de clients laden');
+      expect(timerIdx, greaterThan(-1),
+          reason: 'de service mag pas starten nadat vaststaat dat de init '
+              'lang duurt');
+
+      // Bewuste afwijking van FluffyChat (upstream main.dart:86 zet de
+      // service VÓÓR getClients). Die volgorde beschermt het hele
+      // koude-start-venster, maar toont bij elke push de melding
+      // "Meldingen ophalen". De service start nu pas als de init na 5
+      // seconden nog niet klaar is: op een normale start is er dan geen
+      // melding, en op een trage start beschermt de service het proces
+      // alsnog.
       expect(
-        startIdx,
-        lessThan(clientsIdx),
-        reason: 'Upstream-volgorde (main.dart:86): AppSettings.init -> '
-            'startService -> getClients. Staat de service ná getClients, dan '
-            'blijft het hele koude-start-venster onbeschermd en vaagt Android '
-            'het proces weg vóór de notificatie — de "present-but-late"-variant '
-            'die een aanwezigheidscheck niet ziet.',
+        timerIdx,
+        lessThan(startIdx),
+        reason: 'de service moet pas ná de timer starten',
+      );
+      expect(
+        clientsIdx,
+        lessThan(startIdx),
+        reason: 'de initialisatie mag niet geblokkeerd worden door het '
+            'starten van de service',
       );
     });
 
