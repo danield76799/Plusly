@@ -159,7 +159,9 @@ class ContactBubble extends StatelessWidget {
         ),
       );
     }
-    for (final telefoon in contact.phones) {
+    // Het eerste nummer staat al onder de naam (zoals in WhatsApp),
+    // dus hier alleen de eventuele extra nummers.
+    for (final telefoon in contact.phones.skip(1)) {
       regels.add(
         _regel(
           context,
@@ -177,6 +179,7 @@ class ContactBubble extends StatelessWidget {
         ),
       );
     }
+
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 320),
@@ -224,6 +227,15 @@ class ContactBubble extends StatelessWidget {
                     if (contact.primaryPhone != null)
                       Text(
                         contact.primaryPhone!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      )
+                    else if (contact.primaryEmail != null)
+                      Text(
+                        contact.primaryEmail!,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
