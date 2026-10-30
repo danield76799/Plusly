@@ -20,6 +20,10 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Alleen lezen: nodig om een contact uit het telefoonboek te delen. -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- Een gedeeld contact in je eigen telefoonboek zetten. -->
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />

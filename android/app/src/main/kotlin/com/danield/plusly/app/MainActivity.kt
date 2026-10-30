@@ -65,6 +65,10 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+        // Telefoonboek: alleen lezen, zodat een contact gedeeld kan worden.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ContactsChannel.CHANNEL).setMethodCallHandler(
+            ContactsChannel(this)
+        )
         // Plan de eerste keepalive-alarm bij elke app-start. Elk volgende
         // alarm plant zichzelf opnieuw (zie PushKeepAliveReceiver).
         com.danield.plusly.app.PushKeepAliveReceiver.planVolgende(this)

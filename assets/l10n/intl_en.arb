@@ -4222,5 +4222,9 @@
   "contactNameRequired": "Enter a name",
   "contactSent": "Contact shared",
   "contactStartChat": "Start a chat",
-  "contactDetails": "Contact details"
+  "contactDetails": "Contact details",
+  "contactsEmpty": "No contacts found. Allow the app to read your phone book.",
+  "contactSave": "Save to contacts",
+  "contactSaved": "Contact saved to your phone book",
+  "contactSaveFailed": "Could not save the contact"
 }

@@ -48,6 +48,7 @@ import 'package:Pulsly/utils/privacy_options.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
 import 'package:Pulsly/utils/show_scaffold_dialog.dart';
 import 'package:Pulsly/utils/translator.dart';
+import 'package:Pulsly/utils/contacts_service.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_text_input_dialog.dart';
@@ -61,6 +62,7 @@ import '../../utils/localized_exception_extension.dart';
 import '../../utils/resize_video.dart';
 import '../../utils/room_unread_extension.dart';
 import 'send_file_dialog.dart';
+import 'contact_picker_screen.dart';
 import 'send_contact_dialog.dart';
 import 'send_location_dialog.dart';
 
@@ -1428,11 +1430,23 @@ class ChatController extends State<ChatPageWithRoom>
   }
 
   /// Deelt een contact (naam, Matrix-ID, telefoon of e-mail).
+  ///
+  /// Net als WhatsApp: eerst kiezen uit je eigen telefoonboek, daarna
+  /// komt de bevestiging met de gegevens uit het telefoonboek erin.
   void sendContactAction() async {
+    final contact = await Navigator.of(context, rootNavigator: true).push(
+      MaterialPageRoute<DeviceContact>(builder: (_) => const ContactPickerScreen()),
+    );
+    if (contact == null || !mounted) return;
     await showAdaptiveDialog(
       context: context,
       useRootNavigator: false,
-      builder: (c) => SendContactDialog(room: room),
+      builder: (c) => SendContactDialog(
+        room: room,
+        initialName: contact.name,
+        initialPhone: contact.primaryPhone,
+        initialEmail: contact.primaryEmail,
+      ),
     );
   }
 

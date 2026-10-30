@@ -20,27 +20,44 @@ class ContactDetails {
   /// Het Matrix-ID, als bekend (`@gebruiker:server`).
   final String? matrixId;
 
-  /// Het telefoonnummer, als bekend.
-  final String? phone;
+  /// De telefoonnummers, als bekend.
+  final List<String> phones;
 
-  /// Het e-mailadres, als bekend.
-  final String? email;
+  /// De e-mailadressen, als bekend.
+  final List<String> emails;
 
   /// De avatar (mxc://-URI), als bekend.
   final String? avatarUrl;
 
+  /// De URL van het bijgevoegde vCard-bestand (mxc://-URI), als bekend.
+  ///
+  /// Wordt meegestuurd door de WhatsApp-brug, zodat een contact dat je
+  /// niet kunt lezen alsnog op te slaan blijft.
+  final String? vcardUrl;
+
+  /// De bestandsnaam van het vCard-bestand.
+  final String? vcardName;
+
   const ContactDetails({
     required this.displayName,
     this.matrixId,
-    this.phone,
-    this.email,
+    this.phones = const [],
+    this.emails = const [],
     this.avatarUrl,
+    this.vcardUrl,
+    this.vcardName,
   });
+
+  /// Het eerste telefoonnummer, of null als er geen bekend is.
+  String? get primaryPhone => phones.isEmpty ? null : phones.first;
+
+  /// Het eerste e-mailadres, of null als er geen bekend is.
+  String? get primaryEmail => emails.isEmpty ? null : emails.first;
 
   bool get hasDetails =>
       (matrixId != null && matrixId!.isNotEmpty) ||
-      (phone != null && phone!.isNotEmpty) ||
-      (email != null && email!.isNotEmpty);
+      phones.isNotEmpty ||
+      emails.isNotEmpty;
 
   /// Leest de contactgegevens uit een Matrix-event.
   ///
@@ -73,12 +90,33 @@ class ContactDetails {
       return getrimd.isEmpty ? null : getrimd;
     }
 
+    // Sommige clients (en de WhatsApp-brug) sturen een lijst met
+    // meerdere telefoonnummers of e-mailadressen.
+    List<String> leesLijst(List<String> sleutels) {
+      for (final sleutel in sleutels) {
+        final waarde = contact?[sleutel];
+        if (waarde is List) {
+          final uit = waarde
+              .map((e) => e.toString().trim())
+              .where((e) => e.isNotEmpty)
+              .toList();
+          if (uit.isNotEmpty) return uit;
+        } else if (waarde != null) {
+          final getrimd = waarde.toString().trim();
+          if (getrimd.isNotEmpty) return [getrimd];
+        }
+      }
+      return const [];
+    }
+
     return ContactDetails(
       displayName: displayName,
       matrixId: lees('matrix_id') ?? lees('matrixId') ?? lees('user_id'),
-      phone: lees('phone') ?? lees('phone_number'),
-      email: lees('email') ?? lees('email_address'),
+      phones: leesLijst(const ['phone', 'phone_number']),
+      emails: leesLijst(const ['email', 'email_address']),
       avatarUrl: lees('avatar_url'),
+      vcardUrl: lees('vcard_url'),
+      vcardName: lees('vcard_name'),
     );
   }
 }
@@ -94,7 +132,16 @@ class ContactBubble extends StatelessWidget {
   /// beginnen (alleen als er een Matrix-ID bekend is).
   final void Function(String matrixId)? onStartChat;
 
-  const ContactBubble({required this.contact, this.onStartChat, super.key});
+  /// Wordt aangeroepen als de gebruiker het contact in het eigen
+  /// telefoonboek wil opslaan.
+  final void Function(ContactDetails contact)? onSaveContact;
+
+  const ContactBubble({
+    required this.contact,
+    this.onStartChat,
+    this.onSaveContact,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -112,21 +159,21 @@ class ContactBubble extends StatelessWidget {
         ),
       );
     }
-    if (contact.phone != null) {
+    for (final telefoon in contact.phones) {
       regels.add(
         _regel(
           context,
           icon: Icons.phone_outlined,
-          tekst: contact.phone!,
+          tekst: telefoon,
         ),
       );
     }
-    if (contact.email != null) {
+    for (final email in contact.emails) {
       regels.add(
         _regel(
           context,
           icon: Icons.mail_outline,
-          tekst: contact.email!,
+          tekst: email,
         ),
       );
     }
@@ -147,27 +194,70 @@ class ContactBubble extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(
-                Icons.person_outline,
-                size: 18,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: theme.colorScheme.primaryContainer,
                 child: Text(
-                  contact.displayName,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(
+                  contact.displayName.isNotEmpty
+                      ? contact.displayName.characters.first.toUpperCase()
+                      : '?',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.w700,
                   ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      contact.displayName,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (contact.primaryPhone != null)
+                      Text(
+                        contact.primaryPhone!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
           ),
           if (regels.isNotEmpty) ...[
             const SizedBox(height: 10),
+            Divider(
+              height: 1,
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
+            ),
+            const SizedBox(height: 8),
             ...regels,
+          ],
+          if (onSaveContact != null && contact.hasDetails) ...[
+            const SizedBox(height: 6),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                onPressed: () => onSaveContact!(contact),
+                icon: const Icon(Icons.person_add_alt, size: 18),
+                label: Text(l10n.contactSave),
+                style: TextButton.styleFrom(
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                ),
+              ),
+            ),
           ],
           if (contact.matrixId != null && onStartChat != null) ...[
             const SizedBox(height: 10),

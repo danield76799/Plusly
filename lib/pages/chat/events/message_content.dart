@@ -15,6 +15,7 @@ import 'package:Pulsly/pages/chat/events/poll_content.dart';
 import 'package:Pulsly/pages/chat/events/redacted_content.dart';
 import 'package:Pulsly/pages/chat/events/video_player.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
+import 'package:Pulsly/utils/contacts_service.dart';
 import 'package:Pulsly/utils/date_time_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -54,6 +55,27 @@ class MessageContent extends StatelessWidget {
     this.loadMedia = false,
     this.onLoadMedia,
   });
+
+  /// Bewaart het gedeelde contact in het telefoonboek van het toestel.
+  Future<void> _saveContact(
+    BuildContext context,
+    ContactDetails contact,
+  ) async {
+    final l10n = L10n.of(context);
+    final opgeslagen = await ContactsService.saveContact(
+      displayName: contact.displayName,
+      phones: contact.phones,
+      emails: contact.emails,
+    );
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          opgeslagen ? l10n.contactSaved : l10n.contactSaveFailed,
+        ),
+      ),
+    );
+  }
 
   /// Start een een-op-een-chat met het contact (als er een Matrix-ID
   /// bekend is).
@@ -304,6 +326,7 @@ class MessageContent extends StatelessWidget {
             return ContactBubble(
               contact: contact,
               onStartChat: (matrixId) => _startChatWith(context, matrixId),
+              onSaveContact: (contact) => _saveContact(context, contact),
             );
           case MessageTypes.Location:
             final geoUri = Uri.tryParse(

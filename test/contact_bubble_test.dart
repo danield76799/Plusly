@@ -54,8 +54,10 @@ void main() {
       expect(contact, isNotNull);
       expect(contact!.displayName, 'Jan de Vries');
       expect(contact.matrixId, '@jan:example.org');
-      expect(contact.phone, '+31612345678');
-      expect(contact.email, 'jan@example.org');
+      expect(contact.phones, ['+31612345678']);
+      expect(contact.emails, ['jan@example.org']);
+      expect(contact.primaryPhone, '+31612345678');
+      expect(contact.primaryEmail, 'jan@example.org');
       expect(contact.hasDetails, isTrue);
     });
 
@@ -91,6 +93,40 @@ void main() {
         'body': 'gewoon tekst',
       });
       expect(ContactDetails.fromEvent(event), isNull);
+    });
+  });
+
+  group('lijsten met meerdere contactgegevens', () {
+    test('de WhatsApp-brug stuurt telefoons als lijst', () {
+      final event = _contactEvent({
+        'msgtype': 'm.contact',
+        'body': 'Jan',
+        'm.contact': {
+          'display_name': 'Jan',
+          'phone': ['+31611111111', '+31622222222'],
+          'email': ['jan@example.org', 'jan@werk.nl'],
+        },
+      });
+      final contact = ContactDetails.fromEvent(event);
+      expect(contact, isNotNull);
+      expect(contact!.phones, ['+31611111111', '+31622222222']);
+      expect(contact.emails, ['jan@example.org', 'jan@werk.nl']);
+      expect(contact.primaryPhone, '+31611111111');
+    });
+
+    test('de vcard van de brug blijft bewaard', () {
+      final event = _contactEvent({
+        'msgtype': 'm.contact',
+        'body': 'Jan',
+        'm.contact': {
+          'display_name': 'Jan',
+          'vcard_url': 'mxc://example.org/janvcf',
+          'vcard_name': 'Jan.vcf',
+        },
+      });
+      final contact = ContactDetails.fromEvent(event);
+      expect(contact!.vcardUrl, 'mxc://example.org/janvcf');
+      expect(contact.vcardName, 'Jan.vcf');
     });
   });
 

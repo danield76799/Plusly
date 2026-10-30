@@ -4221,5 +4221,9 @@
   "contactNameRequired": "Vul een naam in",
   "contactSent": "Contact gedeeld",
   "contactStartChat": "Start een chat",
-  "contactDetails": "Contactgegevens"
+  "contactDetails": "Contactgegevens",
+  "contactsEmpty": "Geen contacten gevonden. Sta de app toe je telefoonboek te lezen.",
+  "contactSave": "Opslaan in telefoonboek",
+  "contactSaved": "Contact opgeslagen in je telefoonboek",
+  "contactSaveFailed": "Opslaan mislukt"
 }

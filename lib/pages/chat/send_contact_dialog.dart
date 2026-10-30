@@ -16,7 +16,21 @@ import 'package:Pulsly/widgets/future_loading_dialog.dart';
 class SendContactDialog extends StatefulWidget {
   final Room room;
 
-  const SendContactDialog({required this.room, super.key});
+  /// Waarden waarmee de dialoog voorgevuld wordt (bij het kiezen uit
+  /// het telefoonboek).
+  final String? initialName;
+  final String? initialPhone;
+  final String? initialEmail;
+  final String? initialMatrixId;
+
+  const SendContactDialog({
+    required this.room,
+    this.initialName,
+    this.initialPhone,
+    this.initialEmail,
+    this.initialMatrixId,
+    super.key,
+  });
 
   @override
   SendContactDialogState createState() => SendContactDialogState();
@@ -34,6 +48,18 @@ class SendContactDialogState extends State<SendContactDialog> {
   @override
   void initState() {
     super.initState();
+    if (widget.initialName != null) {
+      _naamController.text = widget.initialName!;
+    }
+    if (widget.initialPhone != null) {
+      _telefoonController.text = widget.initialPhone!;
+    }
+    if (widget.initialEmail != null) {
+      _emailController.text = widget.initialEmail!;
+    }
+    if (widget.initialMatrixId != null) {
+      _matrixIdController.text = widget.initialMatrixId!;
+    }
     // De naam is het enige verplichte veld.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _naamFocus.requestFocus();
