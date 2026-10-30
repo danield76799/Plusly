@@ -261,6 +261,13 @@ class ChatInputRow extends StatelessWidget {
                                             ),
                                           ),
                                           PopupMenuItem(
+                                            value: 'contact',
+                                            child: ListTile(
+                                              leading: const Icon(Icons.person_outline),
+                                              title: Text(L10n.of(context).sendContact),
+                                            ),
+                                          ),
+                                          PopupMenuItem(
                                             value: 'file',
                                             child: ListTile(
                                               leading: const Icon(Icons.attachment_outlined),

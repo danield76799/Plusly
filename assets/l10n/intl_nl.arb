@@ -4212,5 +4212,14 @@
   "@pushServiceNotification": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "sendContact": "Contact versturen",
+  "contactName": "Naam",
+  "contactMatrixId": "Matrix-ID",
+  "contactPhone": "Telefoon",
+  "contactEmail": "E-mail",
+  "contactNameRequired": "Vul een naam in",
+  "contactSent": "Contact gedeeld",
+  "contactStartChat": "Start een chat",
+  "contactDetails": "Contactgegevens"
 }

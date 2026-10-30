@@ -4213,5 +4213,14 @@
   "@pushServiceNotification": {
     "type": "String",
     "placeholders": {}
-  }
+  },
+  "sendContact": "Send contact",
+  "contactName": "Name",
+  "contactMatrixId": "Matrix ID",
+  "contactPhone": "Phone",
+  "contactEmail": "Email",
+  "contactNameRequired": "Enter a name",
+  "contactSent": "Contact shared",
+  "contactStartChat": "Start a chat",
+  "contactDetails": "Contact details"
 }

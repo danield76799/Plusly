@@ -61,6 +61,7 @@ import '../../utils/localized_exception_extension.dart';
 import '../../utils/resize_video.dart';
 import '../../utils/room_unread_extension.dart';
 import 'send_file_dialog.dart';
+import 'send_contact_dialog.dart';
 import 'send_location_dialog.dart';
 
 class ChatPage extends StatelessWidget {
@@ -1426,6 +1427,15 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
+  /// Deelt een contact (naam, Matrix-ID, telefoon of e-mail).
+  void sendContactAction() async {
+    await showAdaptiveDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => SendContactDialog(room: room),
+    );
+  }
+
   String _getSelectedEventString() {
     var copyString = '';
     if (selectedEvents.length == 1) {
@@ -2307,6 +2317,9 @@ class ChatController extends State<ChatPageWithRoom>
     }
     if (choice == 'location') {
       sendLocationAction();
+    }
+    if (choice == 'contact') {
+      sendContactAction();
     }
     if (choice == 'schedule') {
       await scheduleMessageAction();

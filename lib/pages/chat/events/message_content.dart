@@ -9,6 +9,7 @@ import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/pages/chat/events/contact_bubble.dart';
 import 'package:Pulsly/pages/chat/events/gallery_content.dart';
 import 'package:Pulsly/pages/chat/events/poll_content.dart';
 import 'package:Pulsly/pages/chat/events/redacted_content.dart';
@@ -53,6 +54,24 @@ class MessageContent extends StatelessWidget {
     this.loadMedia = false,
     this.onLoadMedia,
   });
+
+  /// Start een een-op-een-chat met het contact (als er een Matrix-ID
+  /// bekend is).
+  Future<void> _startChatWith(BuildContext context, String matrixId) async {
+    try {
+      final client = Matrix.of(context).client;
+      final roomId = await client.startDirectChat(matrixId);
+      if (roomId == null || !context.mounted) return;
+      await Navigator.of(context).maybePop();
+      if (!context.mounted) return;
+      GoRouter.of(context).go('/rooms/$roomId');
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$e')),
+      );
+    }
+  }
 
   void _verifyOrRequestKey(BuildContext context) async {
     final l10n = L10n.of(context);
@@ -278,6 +297,13 @@ class MessageContent extends StatelessWidget {
               icon: '🔒',
               label: L10n.of(context).encrypted,
               fontSize: fontSize,
+            );
+          case contactMessageType:
+            final contact = ContactDetails.fromEvent(event);
+            if (contact == null) continue textmessage;
+            return ContactBubble(
+              contact: contact,
+              onStartChat: (matrixId) => _startChatWith(context, matrixId),
             );
           case MessageTypes.Location:
             final geoUri = Uri.tryParse(
