@@ -632,7 +632,19 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                   children: <Widget>[
                                     Stack(
                                       children: [
-                                        Column(
+                                        // Minimaal breed genoeg voor de
+                                        // voettekst ("20:04" + vinkjes) plus
+                                        // de marge rechts. Zonder dit was de
+                                        // bubbel bij een kort bericht smaller
+                                        // dan de voettekst en moest die
+                                        // verschalen (of liet ze afgeknipt
+                                        // zien).
+                                        ConstrainedBox(
+                                          constraints:
+                                              const BoxConstraints(
+                                                minWidth: 64,
+                                              ),
+                                          child: Column(
                                           mainAxisSize: .min,
                                           crossAxisAlignment:
                                               ownMessage && noBubble
@@ -738,26 +750,10 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                                     : true,
                                                                                               ),
                                             ),
-                                            // De voettekst staat in de flow van de
-                                            // bubbel en NIET als Positioned: een
-                                            // Positioned bepaalt de breedte van de
-                                            // Stack niet, dus bij een kort bericht
-                                            // ("Hi") was de bubbel smaller dan
-                                            // "20:04 + vinkjes" en liep de tijd naar
-                                            // buiten — afgeknipt tot "0:04". In de
-                                            // flow groeit de bubbel mee.
+                                            // Ruimte voor de voettekst (die als
+                                            // Positioned onderaan rechts staat).
                                             if (useBottomRowStatus)
-                                              Align(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: Padding(
-                                                  padding: const EdgeInsets.only(
-                                                    top: 4,
-                                                    right: 12,
-                                                  ),
-                                                  child: messageStatusRow,
-                                                ),
-                                              ),
+                                              const SizedBox(height: 22),
                                             if (useBottomChipStatus)
                                               Padding(
                                                 padding: const .only(
@@ -772,11 +768,42 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                               ),
                                           ],
                                         ),
+                                        ),
                                         if (useInlineStatus)
                                           Positioned(
                                             bottom: 10,
                                             right: 16,
                                             child: messageStatusRow,
+                                          ),
+                                        if (useBottomRowStatus)
+                                          Positioned(
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 6,
+                                            // De voettekst mag nooit uit de
+                                            // bubbel lopen: een Positioned met
+                                            // alleen 'right' krijgt de
+                                            // LOOSE constraints van de Stack
+                                            // (dus de hele schermbreedte) en
+                                            // niet de breedte van de bubbel.
+                                            // Met left+right krijgt hij een
+                                            // vaste breedte en schaalt de
+                                            // FittedBox de rij terug binnen de
+                                            // bubbel. Zonder dit liep de tijd
+                                            // bij een kort bericht ("Hi") naar
+                                            // buiten en werd ze afgeknipt tot
+                                            // "0:04".
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                right: 12,
+                                              ),
+                                              child: FittedBox(
+                                                fit: BoxFit.scaleDown,
+                                                alignment:
+                                                    Alignment.centerRight,
+                                                child: messageStatusRow,
+                                              ),
+                                            ),
                                           ),
                                         if (useChipStatus)
                                           Positioned(
