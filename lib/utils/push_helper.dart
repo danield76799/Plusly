@@ -209,16 +209,52 @@ class PushHelper {
     // bekende client. De UnifiedPush-instance-string wordt hier niet gebruikt.
     final store = await AppSettings.init();
     final clientName = notification.clientName;
-    final client = clientName == null
-        ? (clients?.first ??
-              (await ClientManager.getClients(
-                initialize: false,
-                store: store,
-              )).first)
-        : (clients?.firstWhereOrNull(
-              (client) => client.clientName == clientName,
-            ) ??
-              await ClientManager.createClient(clientName, store));
+    // Een account dat niet opent mag de push-verwerking niet doden. Vóór
+    // deze afscherming crashte de hele handler op een kapotte database
+    // (SQLite code 21 op BEGIN IMMEDIATE) en verdwenen daarna ook de
+    // meldingen van de gezonde accounts.
+    Client client;
+    try {
+      Future<Client> openClient() async {
+        return clientName == null
+            ? (clients?.first ??
+                  (await ClientManager.getClients(
+                    initialize: false,
+                    store: store,
+                  )).first)
+            : (clients?.firstWhereOrNull(
+                  (client) => client.clientName == clientName,
+                ) ??
+                await ClientManager.createClient(clientName, store));
+      }
+
+      try {
+        client = await openClient();
+      } catch (e) {
+        // De database van dit account kan even op slot staan: de
+        // push-isolate opent dezelfde file als de hoofd-isolate, en SQLite
+        // geeft dan SQLITE_MISUSE (21) op BEGIN IMMEDIATE. Eén keer
+        // proberen na een korte pauze lost dat meestal op.
+        Logs().w(
+          'Push helper: client openen mislukte, probeer het nogmaals',
+          e,
+        );
+        await Future.delayed(const Duration(seconds: 2));
+        client = await openClient();
+      }
+    } catch (e, s) {
+      Logs().e(
+        'Push helper: geen client beschikbaar voor deze push, sla over',
+        e,
+        s,
+      );
+      PushEventLog().add('push_client_failed', {
+        'room': notification.roomId ?? '',
+        'client': clientName ?? '',
+        'error': e.toString().split('\n').first,
+      });
+      return null;
+    }
     helper.client = client;
     // FC-pariteit (r125): tijdstempel van de laatst ontvangen push bewaren.
     await PushHelperInstrumentation.markeerLaatstePush(client.clientName);

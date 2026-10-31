@@ -19,6 +19,7 @@ import 'package:Pulsly/utils/custom_image_resizer.dart';
 import 'package:Pulsly/utils/init_with_restore.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/poll_events.dart';
+import 'package:Pulsly/utils/push_event_log.dart';
 import 'matrix_sdk_extensions/flutter_matrix_dart_sdk_database/builder.dart';
 
 abstract class ClientManager {
@@ -46,6 +47,46 @@ abstract class ClientManager {
     _clients.remove(clientName);
   }
 
+  /// Open de clients van meerdere accounts, zonder dat één kapot account de
+  /// rest meeneemt.
+  ///
+  /// Geeft de clients terug die openslaagden, plus de namen van de accounts
+  /// die niet openden.
+  ///
+  /// LET OP: een account dat niet opent wordt NIET uit de store verwijderd.
+  /// De database kan tijdelijk op slot staan (migratie, een tweede isolate
+  /// die dezelfde file opent) en dan zou de gebruiker stilletjes uit een
+  /// werkend account worden gezet. Het account wordt alleen overgeslagen en
+  /// gelogd; opruimen doet de gebruiker zelf.
+  @visibleForTesting
+  static Future<({List<T> clients, List<String> kapot})> openAccounts<T>(
+    Iterable<String> names,
+    Future<T> Function(String name) open, {
+    Duration herhaalPoging = Duration.zero,
+  }) async {
+    final clients = <T>[];
+    final kapot = <String>[];
+    for (final name in names) {
+      try {
+        clients.add(await open(name));
+      } catch (e, s) {
+        if (herhaalPoging > Duration.zero) {
+          try {
+            await Future.delayed(herhaalPoging);
+            clients.add(await open(name));
+            Logs().w('Client $name opende pas bij de tweede poging');
+            continue;
+          } catch (e2, s2) {
+            Logs().e('Client $name faalde ook bij de tweede poging', e2, s2);
+          }
+        }
+        kapot.add(name);
+        Logs().e('Client $name kon niet worden geopend, overgeslagen', e, s);
+      }
+    }
+    return (clients: clients, kapot: kapot);
+  }
+
   static Future<List<Client>> getClients({
     bool initialize = true,
     required SharedPreferences store,
@@ -62,9 +103,41 @@ abstract class ClientManager {
       clientNames.add(PlatformInfos.clientName);
       await store.setStringList(clientNamespace, clientNames.toList());
     }
-    final clients = await Future.wait(
-      clientNames.map((name) => createClient(name, store)),
+    // EEN KAPOTTE ACCOUNT MAG DE REST NIET MEENEMEN.
+    //
+    // `Future.wait` faalt op de eerste fout. Als één account zijn database
+    // niet kan openen (bijvoorbeeld een uitgelogd account, of een database
+    // die even op slot staat doordat de push-isolate dezelfde file opende),
+    // dan gooit deze hele lijst weg — inclusief de accounts die prima zijn.
+    // Dat was de oorzaak van het doodgaan van het pushkanaal: bij elke
+    // start crashte het ophalen van de clients, waardoor de pushers bij de
+    // homeserver nooit werden hersteld en er geen enkele push binnenkwam.
+    //
+    // Dus: per account apart, fouten isoleren. Het account wordt alleen
+    // overgeslagen, niet uit de store gehaald (zie openAccounts).
+    final geopend = await openAccounts(
+      clientNames,
+      (name) => createClient(name, store),
     );
+    final clients = geopend.clients;
+    final kapotteAccounts = geopend.kapot;
+    if (kapotteAccounts.isNotEmpty) {
+      Logs().w(
+        'Accounts overgeslagen omdat hun database niet opent: '
+        '${kapotteAccounts.join(', ')}',
+      );
+      // Zichtbaar maken in de push-diagnose: anders valt het weg zonder
+      // dat iemand merkt waarom een account geen meldingen meer krijgt.
+      PushEventLog().add('client_skipped', {
+        'accounts': kapotteAccounts.join(', '),
+      });
+    }
+    if (clients.isEmpty) {
+      throw StateError(
+        'Geen enkel account kon worden geopend '
+        '(kapot: ${kapotteAccounts.join(', ')})',
+      );
+    }
     if (initialize) {
       await Future.wait(
         clients.map(
