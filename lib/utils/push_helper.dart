@@ -164,6 +164,8 @@ class PushHelper {
               ),
               importance: Importance.high,
               priority: Priority.max,
+              // Inhoud zichtbaar op het vergrendelde scherm.
+              visibility: NotificationVisibility.public,
               // Ook hier: één heads-up per kamer, niet per mislukte push.
               onlyAlertOnce: true,
               shortcutId: notification.roomId,
@@ -706,6 +708,9 @@ class PushHelper {
       // in de manifest en een goedgekeurde permissie (Android 14+) licht het
       // scherm op en verschijnt de notificatie fullscreen.
       fullScreenIntent: true,
+      // De inhoud moet op het vergrendelde scherm zichtbaar zijn; anders
+      // staat er alleen 'Meldingen ophalen' in plaats van het bericht.
+      visibility: NotificationVisibility.public,
       styleInformation:
           messagingStyleInformation ??
           MessagingStyleInformation(
