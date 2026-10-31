@@ -128,6 +128,95 @@ void main() {
     });
   });
 
+  group('tijd in de bubbel', () {
+    // De tijd (12px) is kleine tekst: WCAG AA vraagt 4.5:1.
+    Future<double> contrastOpEigenBubbel(
+      WidgetTester tester,
+      Color seed,
+      Brightness brightness,
+    ) async {
+      late ThemeData theme;
+      await tester.pumpWidget(
+        Builder(
+          builder: (context) {
+            theme = FluffyThemes.buildTheme(context, brightness, seed);
+            return const SizedBox.shrink();
+          },
+        ),
+      );
+      late Color bubbel;
+      late Color tekst;
+      late Color tijd;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Builder(
+            builder: (context) {
+              final t = Theme.of(context);
+              bubbel = t.bubbleColor;
+              tekst = t.onBubbleColor;
+              // Zoals de klassieke bubbelstijl het doet.
+              tijd = t.onBubbleColor.withValues(alpha: 0.85);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      return contrast(_metAlpha(tijd, 0.85, bubbel), bubbel);
+    }
+
+    for (final seed in [
+      const Color(0xFF49AFC2),
+      const Color(0xFF9B7BD4),
+      const Color(0xFF3B82F6),
+    ]) {
+      testWidgets(
+        'de tijd is leesbaar op de eigen bubbel (licht, seed ${seed.toARGB32().toRadixString(16)})',
+        (tester) async {
+          final c = await contrastOpEigenBubbel(
+            tester,
+            seed,
+            Brightness.light,
+          );
+          expect(
+            c,
+            greaterThanOrEqualTo(4.5),
+            reason: 'de tijd in de bubbel moet leesbaar zijn (AA voor 12px)',
+          );
+        },
+      );
+
+      testWidgets(
+        'de tijd is leesbaar op de eigen bubbel (donker, seed ${seed.toARGB32().toRadixString(16)})',
+        (tester) async {
+          final c = await contrastOpEigenBubbel(
+            tester,
+            seed,
+            Brightness.dark,
+          );
+          expect(c, greaterThanOrEqualTo(4.5));
+        },
+      );
+    }
+
+    test('de klassieke bubbelstijl gebruikt geen tertiaryContainer meer', () {
+      final code = _bronZonderCommentaar(
+        'lib/pages/chat/events/message_bubble_legacy.dart',
+      );
+      expect(
+        code.contains('theme.colorScheme.tertiaryContainer'),
+        isFalse,
+        reason:
+            'tertiaryContainer is een bleke containerkleur en daarmee '
+            'onleesbaar op de bleke eigen bubbel',
+      );
+      expect(
+        code.contains('theme.onBubbleColor.withValues(alpha: 0.85)'),
+        isTrue,
+      );
+    });
+  });
+
   group('kleuren', () {
     /// Bouwt een thema met de gegeven seed en leest de bubbelkleuren uit.
     Future<({Color bubble, Color incoming, Color onBubble})> kleurenMetSeed(

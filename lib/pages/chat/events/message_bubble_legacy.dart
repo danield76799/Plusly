@@ -314,6 +314,12 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
         ? (noBubble ? theme.colorScheme.onSurface : theme.onBubbleColor)
         : theme.colorScheme.onSurface;
 
+    // De tijd in de bubbel moet leesbaar zijn op de bubbel zelf.
+    //
+    // Vóór deze wijziging stond hier in lichte modus `tertiaryContainer`
+    // voor eigen berichten: een bleke containerkleur op de bleke eigen
+    // bubbel, dus de tijd was amper te lezen. De kleur volgt nu de tekstkleur
+    // van de bubbel zelf, net als in de standaard bubbelstijl.
     final statusColor = theme.brightness == Brightness.dark
         ? (noBubble
               ? theme.colorScheme.onSurface
@@ -321,8 +327,8 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                     ? theme.colorScheme.onPrimaryContainer
                     : theme.colorScheme.onSecondaryContainer))
         : ownMessage
-        ? theme.colorScheme.tertiaryContainer
-        : theme.colorScheme.tertiary;
+        ? theme.onBubbleColor.withValues(alpha: 0.85)
+        : theme.colorScheme.onSurface.withValues(alpha: 0.7);
 
     final linkColor = ownMessage
         ? theme.brightness == Brightness.light
@@ -380,10 +386,14 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
 
     // A "chip" version with translucent backdrop, used over media/HTML where
     // we cannot inline the placeholder into the text flow.
+    //
+    // De achtergrond moet donker genoeg zijn: met 35% zwart was het chipje
+    // op een lichte afbeelding nog maar #A6A6A6, en witte tekst daarop haalt
+    // 2.4:1. Bij 60% zwart haalt wit 5.7:1, ook op het lichtste beeld.
     final messageStatusChip = Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.35),
+        color: Colors.black.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(10),
       ),
       child: buildStatusRow(color: Colors.white),
