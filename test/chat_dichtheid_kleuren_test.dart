@@ -3,9 +3,10 @@
 // Drie dingen die vastliggen:
 //
 // 1. Dichtheid: de berichttekst had 16dp marge BINNEN de bubbel, terwijl de
-//    bubbel er zelf al 10dp bij deed. Daardoor stond de tekst 26dp van de
-//    rand: korte berichten zaten er "lost" in en er ging breedte verloren.
-//    De tekstmarge is weg; de bubbel bepaalt de marge.
+//    bubbel er zelf al 10dp bij deed: 26dp per kant. Korte berichten zaten
+//    er "lost" in. Zonder extra marge (10dp totaal) stond de tekst
+//    echter te krap tegen de rand. De marge is nu per bubbelvariant:
+//    overal 16dp tussen tekst en rand.
 //
 // 2. Leesbaarheid: een bericht MET opmaak (HTML) erfde de thema-
 //    regelafstand (1.5), terwijl een plat bericht expliciet 1.2 had.
@@ -64,10 +65,44 @@ void main() {
       final code = _bronZonderCommentaar(
         'lib/pages/chat/events/message_content.dart',
       );
+      // De marge is nu per bubbelvariant: de standaardvariant heeft zelf
+      // 10dp en vraagt 6dp extra (16 totaal); de legacy- en moderne
+      // variant hebben geen eigen marge en houden 16dp.
+      expect(
+        code.contains('final double textPadding;'),
+        isTrue,
+        reason: 'de marge moet per bubbelvariant kunnen verschillen',
+      );
+      expect(
+        code.contains('this.textPadding = 16'),
+        isTrue,
+        reason: 'de legacy- en moderne variant houden 16dp',
+      );
       expect(
         code.contains('padding: const .symmetric(horizontal: 16'),
         isFalse,
         reason: 'de bubbel geeft al 10dp; 16dp erbij was 26dp per kant',
+      );
+
+      // De som: bubbelmarge + tekstmarge = 16dp. Bij 26dp voelde een kort
+      // bericht "lost"; bij 10dp stond de tekst te krap tegen de rand.
+      final bubbel = _bronZonderCommentaar(
+        'lib/pages/chat/events/message_bubble.dart',
+      );
+      expect(
+        bubbel.contains('vertical: 6.0,'),
+        isTrue,
+        reason: 'de standaardbubbel houdt 10dp marge',
+      );
+      expect(
+        bubbel.contains('horizontal: 10.0,'),
+        isTrue,
+        reason: 'de standaardbubbel houdt 10dp marge',
+      );
+      expect(
+        bubbel.contains('textPadding: 6'),
+        isTrue,
+        reason: '10dp van de bubbel plus 6dp van de tekst is 16dp',
       );
     });
   });

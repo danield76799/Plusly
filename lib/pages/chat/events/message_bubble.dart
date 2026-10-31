@@ -698,6 +698,10 @@ class _MessageBubbleState extends State<MessageBubble> {
                                         displayEvent,
                                         textColor: textColor,
                                         linkColor: linkColor,
+                                        // De bubbel geeft zelf 10dp; met
+                                        // 6dp extra staat de tekst 16dp
+                                        // van de rand.
+                                        textPadding: 6,
                                         onInfoTab: widget.onInfoTab,
                                         borderRadius: borderRadius,
                                         timeline: timeline,

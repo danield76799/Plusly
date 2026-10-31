@@ -43,6 +43,15 @@ class MessageContent extends StatelessWidget {
   final bool loadMedia;
   final void Function()? onLoadMedia;
 
+  /// Horizontale marge van de berichttekst, los van de bubbel.
+  ///
+  /// De bubbelvarianten hebben een eigen marge (de standaardvariant 10dp,
+  /// de legacy- en moderne variant geen), dus de tekstmarge verschilt per
+  /// variant. Het doel is altijd 16dp tussen tekst en bubbelrand: 26dp
+  /// (16 extra) liet korte berichten lost lijken, 10dp (0 extra) stond de
+  /// tekst te krap tegen de rand.
+  final double textPadding;
+
   const MessageContent(
     this.event, {
     this.onInfoTab,
@@ -54,6 +63,7 @@ class MessageContent extends StatelessWidget {
     this.selectable = false,
     this.loadMedia = false,
     this.onLoadMedia,
+    this.textPadding = 16,
   });
 
   /// Bewaart het gedeelde contact in het telefoonboek van het toestel.
@@ -282,10 +292,10 @@ class MessageContent extends StatelessWidget {
                 html = '* $html';
               }
               return Padding(
-                // Geen horizontale marge: de bubbel zelf geeft al 10dp.
-                // Met 16dp extra stond de tekst 26dp van de rand, wat
-                // korte berichten lost deed lijken en breedte kostte.
-                padding: const .symmetric(vertical: 2),
+                padding: EdgeInsets.symmetric(
+                  horizontal: textPadding,
+                  vertical: 2,
+                ),
                 child: HtmlMessage(
                   html: html,
                   textColor: textColor,
@@ -387,8 +397,7 @@ class MessageContent extends StatelessWidget {
               decorationColor: linkColor,
             );
             return Padding(
-              // Zelfde als bij de HTML-tak: de bubbel regelt de marge.
-              padding: const .symmetric(vertical: 0),
+              padding: EdgeInsets.symmetric(horizontal: textPadding),
               child: selectable
                   ? SelectableLinkify(
                       text: messageText,
