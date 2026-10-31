@@ -370,12 +370,14 @@ class _MessageBubbleState extends State<MessageBubble> {
         ? (noBubble ? theme.colorScheme.onSurface : theme.onBubbleColor)
         : theme.colorScheme.onSurface;
 
-    // Timestamp/status color: for outgoing bubbles use a semi-transparent
-    // white that reads clearly on the softened petrol; for incoming use a
-    // muted version of the text color.
+    // Timestamp/status color: for outgoing bubbles a semi-transparent
+    // version of the BUBBLE's own text colour. Vóór deze ronde stond hier
+    // hardcoded wit, wat op de bleke lichte bubbel (primaryContainer met
+    // donkere tekst) onzichtbaar werd. Voor inkomende berichten een
+    // gedempte versie van de tekstkleur.
     final statusColor = ownMessage && !noBubble
-        ? Colors.white.withValues(alpha: 0.75)
-        : textColor.withValues(alpha: 0.55);
+        ? theme.onBubbleColor.withValues(alpha: 0.85)
+        : textColor.withValues(alpha: 0.7);
 
     final linkColor = ownMessage
         ? theme.brightness == Brightness.light

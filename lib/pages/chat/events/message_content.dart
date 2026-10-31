@@ -282,7 +282,10 @@ class MessageContent extends StatelessWidget {
                 html = '* $html';
               }
               return Padding(
-                padding: const .symmetric(horizontal: 16, vertical: 2),
+                // Geen horizontale marge: de bubbel zelf geeft al 10dp.
+                // Met 16dp extra stond de tekst 26dp van de rand, wat
+                // korte berichten lost deed lijken en breedte kostte.
+                padding: const .symmetric(vertical: 2),
                 child: HtmlMessage(
                   html: html,
                   textColor: textColor,
@@ -384,7 +387,8 @@ class MessageContent extends StatelessWidget {
               decorationColor: linkColor,
             );
             return Padding(
-              padding: const .symmetric(horizontal: 16, vertical: 0),
+              // Zelfde als bij de HTML-tak: de bubbel regelt de marge.
+              padding: const .symmetric(vertical: 0),
               child: selectable
                   ? SelectableLinkify(
                       text: messageText,

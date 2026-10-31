@@ -41,11 +41,13 @@ String _code(String pad) {
 
 void main() {
   group('Blauwe vinkjes', () {
-    test('blauw is WhatsApp-blauw (dark) en ijsblauw (light)', () {
+    test('blauw is WhatsApp-blauw (dark) en de donkere tint daarvan (light)', () {
       final light = ThemeData.light().copyWith();
       final dark = ThemeData.dark().copyWith();
       expect(dark.readReceiptBlue, const Color(0xFF53BDEB));
-      expect(light.readReceiptBlue, const Color(0xFFB9E7FA));
+      // Het lichte ijsblauw haalde 1.0:1 op de bleke lichte bubbel; nu is
+      // het dezelfde blauw in de donkere tint.
+      expect(light.readReceiptBlue, const Color(0xFF1F6FEB));
     });
 
     testWidgets('blauw haalt ≥3.0 op de echte bubbelkleur (light + dark)',

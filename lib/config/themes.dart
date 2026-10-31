@@ -170,33 +170,39 @@ extension on Brightness {
 }
 
 extension BubbleColorTheme on ThemeData {
-  /// Uitgaande bubbel. Licht thema: primair verzacht met 20% surface (een
-  /// lichter, rustiger petrol). Donker thema: het vaste WhatsApp-teal
-  /// (#005C53) uit de opgefriste 1-op-1 look.
-  Color get bubbleColor => brightness == Brightness.light
-      ? Color.lerp(colorScheme.primary, colorScheme.surface, 0.20)!
-      : const Color(0xFF005C53);
+  /// Uitgaande bubbel: de containerkleur van het thema.
+  ///
+  /// Waarom niet een eigen kleur: het thema garandeert voor het paar
+  /// (primaryContainer, onPrimaryContainer) minstens 4.5:1. Met de oude
+  /// eigen teal (primary gemengd met surface) haalde de berichttekst in
+  /// light mode nog maar 4.29:1 — net onder de AA-norm voor kleine tekst.
+  /// De containerkleur is bovendien WhatsApp-achtig: een bleke eigen
+  /// bubbel op een neutrale achtergrond.
+  Color get bubbleColor => colorScheme.primaryContainer;
 
-  /// Tekst op de uitgaande bubbel. In donker thema is de bubbel nu donker
-  /// teal, dus wit; licht thema houdt onPrimary.
-  Color get onBubbleColor => brightness == Brightness.light
-      ? colorScheme.onPrimary
-      : Colors.white;
+  /// Tekst op de uitgaande bubbel: het bijbehorende "on"-color van het
+  /// thema, dus altijd met de juiste contrastwaarde.
+  Color get onBubbleColor => colorScheme.onPrimaryContainer;
 
   /// Inkomende bubbel. Licht thema: één stap boven surface. Donker thema:
-  /// het vaste WhatsApp-grijs (#1E2225).
+  /// hetzelfde vlak, één stap hoger dan de pagina.
+  ///
+  /// Was hardcoded WhatsApp-grijs (#1E2225); met surfaceContainerHigh
+  /// volgt de bubbel het thema én blijft hij neutraal, zodat de eigen
+  /// bubbel de kleur draagt.
   Color get incomingBubbleColor => brightness == Brightness.light
       ? colorScheme.surfaceContainerHighest
-      : const Color(0xFF1E2225);
+      : colorScheme.surfaceContainerHigh;
 
   /// WhatsApp-style read-receipt blue for the double tick on own messages.
   ///
-  /// Helder blauw in dark mode (#53BDEB, zoals WhatsApp), ijsblauw in light
-  /// mode (#B9E7FA) — het petrol van de lichte bubbel slikt helder blauw
-  /// (contrast 2.0). Beide halen ≥3.0 op hun bubbel, bewaakt in
-  /// test/read_receipt_blue_test.dart met de echte themakleuren.
+  /// Helder blauw in dark mode (#53BDEB, zoals WhatsApp) en de donkere
+  /// tint van dezelfde blauw in light mode (#1F6FEB). Het lichte ijsblauw
+  /// (#B9E7FA) dat hier eerst stond, haalde nog 1.0:1 op de bleke lichte
+  /// bubbel en was daarmee onzichtbaar. Beide halen ≥3.0 op hun bubbel,
+  /// bewaakt in test/read_receipt_blue_test.dart met de echte themakleuren.
   Color get readReceiptBlue => brightness == Brightness.light
-      ? const Color(0xFFB9E7FA)
+      ? const Color(0xFF1F6FEB)
       : const Color(0xFF53BDEB);
 
   /// Subtle border for incoming bubbles in light mode so they don't

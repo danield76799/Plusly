@@ -565,7 +565,14 @@ class _HtmlMessageState extends State<HtmlMessage> {
       parser.parse(html).body ?? dom.Element.html(''),
       context,
     );
-    final textStyle = TextStyle(fontSize: fontSize, color: textColor);
+    // Zelfde regelafstand als de platte tekst (1.2, WhatsApp-stijl).
+    // Zonder dit erfde een bericht MET opmaak de thema-regelafstand (1.5)
+    // en oogde het dus luchtiger dan hetzelfde bericht zonder opmaak.
+    final textStyle = TextStyle(
+      fontSize: fontSize,
+      color: textColor,
+      height: 1.2,
+    );
 
     if (widget.selectable) {
       return SelectionArea(child: Text.rich(textSpan, style: textStyle));
