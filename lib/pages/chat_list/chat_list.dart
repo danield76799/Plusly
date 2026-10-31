@@ -21,6 +21,7 @@ import 'package:Pulsly/services/chat_list_cache_service.dart';
 import 'package:Pulsly/services/timeline_cache.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
+import 'package:Pulsly/utils/screen_wake_permission.dart';
 import 'package:Pulsly/utils/show_scaffold_dialog.dart';
 import 'package:Pulsly/utils/show_update_snackbar.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_modal_action_popup.dart';
@@ -919,6 +920,7 @@ class ChatListController extends State<ChatList>
           context,
         ).backgroundPush?.setupPush(Matrix.of(context).widget.clients);
         UpdateNotifier.showUpdateSnackBar(context);
+        _maybeAskForScreenWake();
       }
 
       // Detecteer de aanwezige bridge-netwerken meteen, zodat de
@@ -936,6 +938,43 @@ class ChatListController extends State<ChatList>
     // checkForUpdates disabled
 
     super.initState();
+  }
+
+  /// Vraagt één keer of het scherm mag oplichten bij een melding.
+  ///
+  /// Op Android 14 en nieuwer staat de toestemming voor een full-screen
+  /// intent standaard uit. Zonder die toestemming blijft het scherm donker
+  /// als er een melding binnenkomt. We vragen het één keer en verwijzen
+  /// daarna naar Instellingen -> Meldingen.
+  Future<void> _maybeAskForScreenWake() async {
+    if (!PlatformInfos.isAndroid) return;
+    if (AppSettings.askedForScreenWake.value) return;
+    final allowed = await ScreenWakePermission.canWakeScreen();
+    if (!mounted) return;
+    // Vraag het maar één keer, ook als de gebruiker 'Later' kiest.
+    await AppSettings.askedForScreenWake.setItem(true);
+    if (allowed) return;
+    final l10n = L10n.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.wakeScreenTitle),
+        content: Text(l10n.wakeScreenBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.wakeScreenLater),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              ScreenWakePermission.openSettings();
+            },
+            child: Text(l10n.wakeScreenOpenSettings),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

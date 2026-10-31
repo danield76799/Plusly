@@ -4226,5 +4226,12 @@
   "contactsEmpty": "No contacts found. Allow the app to read your phone book.",
   "contactSave": "Save to contacts",
   "contactSaved": "Contact saved to your phone book",
-  "contactSaveFailed": "Could not save the contact"
+  "contactSaveFailed": "Could not save the contact",
+  "wakeScreenOnNotification": "Turn screen on for notifications",
+  "wakeScreenOnNotificationEnabled": "On. The screen lights up and shows the notification, even when your phone is locked.",
+  "wakeScreenOnNotificationDisabled": "Off. On Android 14 and newer this permission is off by default. Tap to turn it on.",
+  "wakeScreenOpenSettings": "Open settings",
+  "wakeScreenTitle": "Screen on",
+  "wakeScreenBody": "Want the screen to light up when a notification arrives, even when your phone is locked? On Android 14 and newer this permission is off by default.",
+  "wakeScreenLater": "Later"
 }

@@ -75,6 +75,10 @@ enum AppSettings<T> {
   /// (`dm.filament.gallery`) in plaats van losse berichten. Experimenteel:
   /// clients die het niet kennen tonen het als één onbekend bestand.
   useGalleries<bool>('chat.fluffy.useGalleries', false),
+  /// Of de gebruiker al is gevraagd het scherm te mogen aanzetten bij een
+  /// melding (full-screen intent). Vraagt dit maar een keer, bij de eerste
+  /// app-start na de update.
+  askedForScreenWake<bool>('chat.fluffy.askedForScreenWake', false),
   autoplayImages<bool>('chat.fluffy.autoplay_images', true),
   sendTypingNotifications<bool>('chat.fluffy.send_typing_notifications', true),
   sendPublicReadReceipts<bool>('chat.fluffy.send_public_read_receipts', true),

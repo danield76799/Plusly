@@ -8,6 +8,7 @@ import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/settings_notifications/push_rule_extensions.dart';
 import 'package:Pulsly/utils/first_launch_setup.dart';
+import 'package:Pulsly/utils/screen_wake_permission.dart';
 import 'package:Pulsly/widgets/layouts/max_width_body.dart';
 import 'package:Pulsly/widgets/list_divider.dart';
 import '../../utils/localized_exception_extension.dart';
@@ -145,6 +146,24 @@ class SettingsNotificationsView extends StatelessWidget {
                           ),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () => showFirstLaunchSetup(context),
+                        ),
+                        const ListDivider(),
+                        ListTile(
+                          leading: const Icon(Icons.brightness_5_outlined),
+                          title: Text(L10n.of(context).wakeScreenOnNotification),
+                          subtitle: FutureBuilder<bool>(
+                            future: ScreenWakePermission.canWakeScreen(),
+                            builder: (context, snapshot) {
+                              final allowed = snapshot.data ?? true;
+                              return Text(
+                                allowed
+                                    ? L10n.of(context).wakeScreenOnNotificationEnabled
+                                    : L10n.of(context).wakeScreenOnNotificationDisabled,
+                              );
+                            },
+                          ),
+                          trailing: const Icon(Icons.chevron_right),
+                          onTap: () => ScreenWakePermission.openSettings(),
                         ),
                         const ListDivider(),
                         ListTile(

@@ -31,6 +31,7 @@ import 'package:unifiedpush/unifiedpush.dart';
 import 'package:unifiedpush_ui/unifiedpush_ui.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
+import 'package:Pulsly/utils/screen_wake_permission.dart';
 import 'package:Pulsly/main.dart';
 
 import 'package:Pulsly/utils/notification_background_handler.dart';
@@ -71,14 +72,17 @@ class BackgroundPush {
           >();
       androidImpl?.requestNotificationsPermission();
       // Android 14+ (API 34): scherm-aan bij een push vereist een expliciet
-      // goedgekeurde USE_FULL_SCREEN_INTENT-permissie. Vraag ze eenmalig bij
-      // de initialisatie; Android opent het systeem-scherm voor de app als de
-      // gebruiker ze nog niet heeft gegeven.
+      // goedgekeurde USE_FULL_SCREEN_INTENT-toestemming. Voor bericht-apps is
+      // die standaard uit; de gebruiker moet hem aanzetten in de
+      // app-instellingen.
+      //
+      // We vragen hier niet meer blind aan: dat opende bij elke app-start
+      // de systeeminstellingen, zonder uitleg. We checken alleen en loggen
+      // de stand; de gebruiker wordt in de app zelf gewezen (zie
+      // ScreenWakePermission en Instellingen -> Meldingen).
       unawaited(
-        androidImpl?.requestFullScreenIntentPermission().then((granted) {
-          Logs().i(
-            '[Push] fullScreenIntent permission granted: ${granted ?? 'unknown'}',
-          );
+        ScreenWakePermission.canWakeScreen().then((allowed) {
+          Logs().i('[Push] scherm-aan bij melding toegestaan: $allowed');
         }),
       );
     }

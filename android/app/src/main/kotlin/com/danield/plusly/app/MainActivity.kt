@@ -69,6 +69,12 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ContactsChannel.CHANNEL).setMethodCallHandler(
             ContactsChannel(this)
         )
+        // Kan het scherm oplichten bij een melding? Vanaf Android 14 is die
+        // toestemming voor bericht-apps standaard uit.
+        NotificationPermissionChannel.register(
+            flutterEngine.dartExecutor.binaryMessenger,
+            applicationContext
+        )
         // Plan de eerste keepalive-alarm bij elke app-start. Elk volgende
         // alarm plant zichzelf opnieuw (zie PushKeepAliveReceiver).
         com.danield.plusly.app.PushKeepAliveReceiver.planVolgende(this)

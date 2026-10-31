@@ -4225,5 +4225,12 @@
   "contactsEmpty": "Geen contacten gevonden. Sta de app toe je telefoonboek te lezen.",
   "contactSave": "Opslaan in telefoonboek",
   "contactSaved": "Contact opgeslagen in je telefoonboek",
-  "contactSaveFailed": "Opslaan mislukt"
+  "contactSaveFailed": "Opslaan mislukt",
+  "wakeScreenOnNotification": "Scherm aanzetten bij een melding",
+  "wakeScreenOnNotificationEnabled": "Aan. Het scherm licht op en toont de melding, ook als je telefoon op slot ligt.",
+  "wakeScreenOnNotificationDisabled": "Uit. Op Android 14 en nieuwer staat deze toestemming standaard uit. Tik om hem aan te zetten.",
+  "wakeScreenOpenSettings": "Instellingen openen",
+  "wakeScreenTitle": "Scherm aan",
+  "wakeScreenBody": "Wil je dat het scherm oplicht als er een melding binnenkomt, ook als je telefoon op slot ligt? Op Android 14 en nieuwer staat die toestemming standaard uit.",
+  "wakeScreenLater": "Later"
 }
