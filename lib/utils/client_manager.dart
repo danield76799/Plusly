@@ -42,9 +42,22 @@ abstract class ClientManager {
   static final Map<String, Future<Client>> _creatingClients = {};
 
   /// Verwijdert de gecachte client van een account (bij uitloggen of
-  /// verwijderen), zodat een volgende creatie een verse database opent.
-  static void forgetClient(String clientName) {
-    _clients.remove(clientName);
+  /// verwijderen) en SLUIT diens database.
+  ///
+  /// Het sluiten is het wezenlijke deel: vóór deze wijziging liet het
+  /// uitloggen de database open achter. Een volgende push opende datzelfde
+  /// bestand opnieuw en kreeg SQLITE_MISUSE (code 21) op BEGIN IMMEDIATE —
+  /// dat was de oorzaak van het uitvallen van de pushnotificaties.
+  static Future<void> forgetClient(String clientName) async {
+    final client = _clients.remove(clientName);
+    if (client == null) return;
+    try {
+      await client.dispose(closeDatabase: true);
+    } catch (e, s) {
+      // Sluiten mag nooit een uitlog blokkeren; een eventueel achterblijvende
+      // open verbinding is beter dan een vastgelopen uitlog.
+      Logs().w('Client $clientName kon niet worden gesloten', e, s);
+    }
   }
 
   /// Open de clients van meerdere accounts, zonder dat één kapot account de
