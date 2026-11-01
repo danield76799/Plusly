@@ -4232,5 +4232,6 @@
   "wakeScreenOpenSettings": "Instellingen openen",
   "wakeScreenTitle": "Scherm aan",
   "wakeScreenBody": "Wil je dat het scherm oplicht als er een melding binnenkomt, ook als je telefoon op slot ligt? Op Android 14 en nieuwer staat die toestemming standaard uit.",
-  "wakeScreenLater": "Later"
+  "wakeScreenLater": "Later",
+  "links": "Koppelingen"
 }

@@ -170,6 +170,7 @@ class BodyWithHighlight extends StatelessWidget {
     required this.text,
     required this.query,
     this.maxLines,
+    super.key,
   });
 
   final String text;

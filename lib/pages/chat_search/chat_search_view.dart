@@ -4,6 +4,7 @@ import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat_search/chat_search_files_tab.dart';
 import 'package:Pulsly/pages/chat_search/chat_search_images_tab.dart';
+import 'package:Pulsly/pages/chat_search/chat_search_links_tab.dart';
 import 'package:Pulsly/pages/chat_search/chat_search_message_tab.dart';
 import 'package:Pulsly/pages/chat_search/chat_search_page.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
@@ -139,6 +140,7 @@ class ChatSearchView extends StatelessWidget {
               tabs: [
                 Tab(child: Text(L10n.of(context).messages)),
                 Tab(child: Text(L10n.of(context).gallery)),
+                Tab(child: Text(L10n.of(context).links)),
                 Tab(child: Text(L10n.of(context).files)),
               ],
             ),
@@ -161,6 +163,14 @@ class ChatSearchView extends StatelessWidget {
                     endReached: controller.imagesEndReached,
                     isLoading: controller.isLoading,
                     searchedUntil: controller.searchedUntil,
+                  ),
+                  ChatSearchLinksTab(
+                    searchQuery: controller.searchController.text,
+                    room: room,
+                    events: controller.links,
+                    onStartSearch: controller.startSearch,
+                    endReached: controller.linksEndReached,
+                    isLoading: controller.isLoading,
                   ),
                   ChatSearchFilesTab(
                     room: room,

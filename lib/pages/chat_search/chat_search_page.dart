@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
+import 'package:Pulsly/pages/chat_search/chat_search_links_tab.dart';
 import 'package:Pulsly/pages/chat_search/chat_search_view.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 
@@ -22,14 +23,17 @@ class ChatSearchController extends State<ChatSearchPage>
 
   final List<Event> messages = [];
   final List<Event> images = [];
+  final List<Event> links = [];
   final List<Event> files = [];
 
   String? messagesNextBatch;
   String? imagesNextBatch;
+  String? linksNextBatch;
   String? filesNextBatch;
 
   bool messagesEndReached = false;
   bool imagesEndReached = false;
+  bool linksEndReached = false;
   bool filesEndReached = false;
 
   bool isLoading = false;
@@ -70,9 +74,13 @@ class ChatSearchController extends State<ChatSearchPage>
     setState(() {
       messages.clear();
       images.clear();
+      links.clear();
       files.clear();
-      messagesNextBatch = imagesNextBatch = filesNextBatch = null;
-      messagesEndReached = imagesEndReached = filesEndReached = false;
+      messagesNextBatch = imagesNextBatch = filesNextBatch = linksNextBatch =
+          null;
+      messagesEndReached =
+          imagesEndReached =
+              linksEndReached = filesEndReached = false;
       searchedUntil = null;
     });
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -141,6 +149,37 @@ class ChatSearchController extends State<ChatSearchPage>
         setState(() {
           isLoading = true;
         });
+        // Alleen berichten met een webadres. De URL-check zit in de
+        // searchFunc zelf, zodat de server niet alles hoeft te trekken wat
+        // toch niet in deze tab thuishoort.
+        final result = await room.searchEvents(
+          searchFunc: (event) => bevatLink(event.body),
+          nextBatch: linksNextBatch,
+        );
+        var linksEvents = result.events;
+        if (searchController.text.isNotEmpty) {
+          linksEvents = _applyTextFilter(
+            linksEvents,
+            searchController.text,
+          );
+        }
+        linksEvents = _applyFilters(linksEvents);
+        final bestaandeLinks = links.map((e) => e.eventId).toSet();
+        linksEvents = linksEvents
+            .where((e) => !bestaandeLinks.contains(e.eventId))
+            .toList();
+        setState(() {
+          isLoading = false;
+          links.addAll(linksEvents);
+          linksNextBatch = result.nextBatch;
+          linksEndReached = result.nextBatch == null;
+          searchedUntil = result.searchedUntil;
+        });
+        return;
+      case 3:
+        setState(() {
+          isLoading = true;
+        });
         final result = await room.searchEvents(
           searchFunc: (event) =>
               event.messageType == MessageTypes.File ||
@@ -186,7 +225,7 @@ class ChatSearchController extends State<ChatSearchPage>
   @override
   void initState() {
     super.initState();
-    tabController = TabController(initialIndex: 0, length: 3, vsync: this);
+    tabController = TabController(initialIndex: 0, length: 4, vsync: this);
     tabController.addListener(_onTabChanged);
   }
 
