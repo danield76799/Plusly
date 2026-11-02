@@ -1429,6 +1429,14 @@ class ChatController extends State<ChatPageWithRoom>
     );
   }
 
+  void sendLiveLocationAction() async {
+    await showAdaptiveDialog(
+      context: context,
+      useRootNavigator: false,
+      builder: (c) => LiveLocationDialog(room: room),
+    );
+  }
+
   /// Deelt een contact (naam, Matrix-ID, telefoon of e-mail).
   ///
   /// Net als WhatsApp: eerst kiezen uit je eigen telefoonboek, daarna
@@ -2331,6 +2339,9 @@ class ChatController extends State<ChatPageWithRoom>
     }
     if (choice == 'location') {
       sendLocationAction();
+    }
+    if (choice == 'live-location') {
+      sendLiveLocationAction();
     }
     if (choice == 'contact') {
       sendContactAction();

@@ -199,8 +199,6 @@ class _MessageBubbleState extends State<MessageBubble> {
     final theme = Theme.of(context);
 
     // Once this frame is painted, log how big the Message actually became.
-    // If size is zero/empty the widget rendered but is invisible (off-clip,
-    // overlay, or a constraint that pushed it to nothing).
     final capturedEventId = event.eventId;
     final capturedTxid = event.transactionId;
     final capturedType = event.type;
@@ -247,10 +245,6 @@ class _MessageBubbleState extends State<MessageBubble> {
     final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;
     final hasBeenRead = widget.hasBeenRead;
 
-    // Een gesprek telt als 1-op-1 wanneer de room als direct-chat is
-    // gemarkeerd (echte 1-op-1) OF maximaal 4 deelnemers heeft.
-    // Bridge-chats (WA/TG) missen vaak de isDirect-flag maar hebben wel
-    // extra members (bot/puppet), dus <=4 vangt die ook op.
     final isOneOnOne =
         event.room.isDirectChat || event.room.getParticipants().length <= 4;
 
@@ -287,11 +281,6 @@ class _MessageBubbleState extends State<MessageBubble> {
         ? MainAxisAlignment.end
         : MainAxisAlignment.start;
 
-    // Show the timestamp on the last message of a consecutive block.
-    // Because the list is reversed (newest first), the message visually
-    // below this one is events[i - 1] (previousEvent). We show the timestamp
-    // when there is no previous message, the previous message is from someone
-    // else, or it is in a different minute.
     final previousEventDifferentMinute = widget.previousEvent != null &&
         widget.previousEvent!.originServerTs
             .difference(event.originServerTs)
@@ -303,13 +292,6 @@ class _MessageBubbleState extends State<MessageBubble> {
 
     final displayEvent = event.getDisplayEvent(timeline);
 
-    // Reply target lookup via FutureBuilder so the quote bar shows up
-    // even when the target isn't in the loaded timeline yet (e.g. DMs
-    // where the reply target hasn't been requested). When the target is
-    // missing we fall back to a placeholder event. This restores the
-    // FluffyChat flow removed in f1991eeaa; it can cause the quote bar
-    // to "pop in" once the target resolves, which may shift the bubble
-    // slightly on rebuild.
     final inReplyTo = event.inReplyToEventId(includingFallback: false);
     final hasReply = inReplyTo != null;
     final replyEvent = hasReply
@@ -319,31 +301,14 @@ class _MessageBubbleState extends State<MessageBubble> {
     const hardCorner = Radius.circular(4);
     const roundedCorner = Radius.circular(AppConfig.borderRadius);
 
-    // Modern grouping: the "tail" (hard corner) sits on the OWNER side of the
-    // bubble (bottom-right for outgoing, bottom-left for incoming). Inner
-    // cluster bubbles get tight corners on their connecting side so the
-    // block reads as one continuous surface.
-    //
-    // In reverse:true the list is newest→oldest, so `nextEvent` is visually
-    // ABOVE this message and `previousEvent` is visually BELOW. A bubble is
-    // POSSIBLY clustered above when `nextEventSameSender` is true, and
-    // POSSIBLY clustered below when `previousEventSameSender` is true.
-    //
-    // Mirror FluffyChat's chat/events/message.dart borderRadius:
-    //   - topLeft     : hard iff INCOMING (incoming bubbles put the pointer
-    //                   corner on the top-left)
-    //   - topRight    : hard iff OWN && there's a newer same-sender above
-    //                   (cluster-connection on top)
-    //   - bottomLeft  : hard iff INCOMING && there's an older same-sender
-    //                   below (cluster-connection on bottom)
-    //   - bottomRight : hard iff OWN (outgoing tail corner)
+    // WhatsApp-style tails
     final borderRadius = BorderRadius.only(
-      topLeft: !ownMessage ? hardCorner : roundedCorner,
-      topRight: (ownMessage && nextEventSameSender) ? hardCorner : roundedCorner,
-      bottomLeft:
-          (!ownMessage && previousEventSameSender) ? hardCorner : roundedCorner,
-      bottomRight: ownMessage ? hardCorner : roundedCorner,
+      topLeft: (!ownMessage && !previousEventSameSender) ? Radius.zero : roundedCorner,
+      topRight: roundedCorner,
+      bottomLeft: roundedCorner,
+      bottomRight: (ownMessage && !previousEventSameSender) ? Radius.zero : roundedCorner,
     );
+
     final noBubble =
         ({
               MessageTypes.Video,
@@ -358,8 +323,6 @@ class _MessageBubbleState extends State<MessageBubble> {
             event.numberEmotes > 0 &&
             event.numberEmotes <= 3);
 
-    // Media bubbles keep the plain rounded shape (edge-to-edge image); the
-    // grouping/tail geometry applies uniformly to all bubbles now.
     if (ownMessage) {
       color = displayEvent.status.isError
           ? theme.colorScheme.error
@@ -370,11 +333,6 @@ class _MessageBubbleState extends State<MessageBubble> {
         ? (noBubble ? theme.colorScheme.onSurface : theme.onBubbleColor)
         : theme.colorScheme.onSurface;
 
-    // Timestamp/status color: for outgoing bubbles a semi-transparent
-    // version of the BUBBLE's own text colour. Vóór deze ronde stond hier
-    // hardcoded wit, wat op de bleke lichte bubbel (primaryContainer met
-    // donkere tekst) onzichtbaar werd. Voor inkomende berichten een
-    // gedempte versie van de tekstkleur.
     final statusColor = ownMessage && !noBubble
         ? theme.onBubbleColor.withValues(alpha: 0.85)
         : textColor.withValues(alpha: 0.7);
@@ -390,10 +348,6 @@ class _MessageBubbleState extends State<MessageBubble> {
       RelationshipTypes.reaction,
     );
 
-    // Let op: geen `spacing` op een Wrap gebruiken — RenderWrap rekent die
-    // niet mee in zijn intrinsic width, waardoor de bubbel te smal wordt en
-    // de tijd links uit de bubbel loopt (afgekapte "14:00"). Zie
-    // MessageStatusRow.
     final messageStatusRow = MessageStatusRow(
       timestamp: event.originServerTs,
       edited: event.hasAggregatedEvents(timeline, RelationshipTypes.edit),
@@ -406,7 +360,6 @@ class _MessageBubbleState extends State<MessageBubble> {
     final row = FutureBuilder<User?>(
       future: _senderUserFuture,
       builder: (context, snapshot) {
-        // Cache the user to avoid rebuilding
         if (snapshot.hasData && _cachedSenderUser == null) {
           _cachedSenderUser = snapshot.data;
         }
@@ -431,7 +384,8 @@ class _MessageBubbleState extends State<MessageBubble> {
                     _showQuickReactionsOverlay(event);
                   }
                 },
-                onSecondaryTap: () => widget.onSelect(event, _tapPosition),
+                onSecondaryTap: () => widget.onSelect(event, _// laat lichte fix voor lappen
+_tapPosition),
                 borderRadius: BorderRadius.circular(AppConfig.borderRadius / 2),
                 child: Material(
                   borderRadius: BorderRadius.circular(
@@ -458,11 +412,8 @@ class _MessageBubbleState extends State<MessageBubble> {
                     ),
                   )
                 else if (!ownMessage && previousEventSameSender)
-                  // Grouped incoming message: keep the avatar-column width for
-                  // alignment, but show no avatar here — it lives on the first
-                  // message of the block.
                   SizedBox(width: Avatar.defaultSize)
-                else if (!ownMessage)
+                else if (!ownMessage && !isOneOnOne)
                   Avatar(
                     mxContent: user.avatarUrl,
                     name: user.calcDisplayname(),
@@ -476,13 +427,12 @@ class _MessageBubbleState extends State<MessageBubble> {
                         ? Colors.transparent
                         : null,
                   ),
-                // Own (outgoing) messages: no avatar and no avatar gutter.
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (!previousEventSameSender && !ownMessage && !isOneOnOne)
+                      if (!previousSendeSameSender && !ownMessage && !isOneOnOne)
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0, bottom: 4),
                           child: Text(
@@ -514,47 +464,40 @@ class _MessageBubbleState extends State<MessageBubble> {
                         child: GestureDetector(
                           onTapDown: (details) =>
                               _tapPosition = details.globalPosition,
-                          // In selectiemodus moet een tik een bericht
-                          // toevoügen of weghalen. Zonder deze onTap komt
-                          // de tik nooit aan: de InkWell onder de inhoud
-                          // ligt onder de tekst, en een Text in een Stack
-                          // slokt de tik op. Buiten selectiemodus blijft
-                          // een tik niets doen (lang-druk opent het menu),
-                          // zoals WhatsApp en Signal.
                           onTap: widget.longPressSelect
                               ? () => widget.onSelect(event, _tapPosition)
                               : null,
                           onDoubleTap: AppSettings.doubleTapToReact.value &&
-                                  event.room.canSendDefaultMessages &&
-                                  !widget.longPressSelect
-                              ? () {
-                                  HapticFeedback.lightImpact();
-                                  final emoji =
-                                      AppSettings.doubleTapReaction.value;
-                                  final existingReaction = event
-                                      .aggregatedEvents(
-                                        timeline,
-                                        RelationshipTypes.reaction,
-                                      )
-                                      .firstWhereOrNull(
-                                        (e) =>
-                                            e.senderId == event.room.client.userID &&
-                                            e.content
-                                                    .tryGetMap<String, Object?>(
-                                                      'm.relates_to',
-                                                    )
-                                                    ?.tryGet<String>('key') ==
-                                                emoji);
-                                  if (existingReaction != null) {
-                                    existingReaction.redactEvent();
-                                  } else {
-                                    event.room.sendReaction(
-                                      event.eventId,
-                                      emoji,
-                                    );
-                                  }
-                                }
-                              : null,
+                              event.room.canSendDefaultMessages &&
+                              !widget.longPressSelect
+                          ? () {
+                              HapticFeedback.lightImpact();
+                              final emoji = AppSettings.doubleTapReaction.value;
+                              final existingReaction = event
+                                  .aggregatedEvents(
+                                    timeline,
+                                    RelationshipTypes.reaction,
+                                  )
+                                  .firstWhereOrNull(
+                                    (e) =>
+                                        e.senderId == event.room.client.userID &&
+                                        e.content
+                                            .tryGetMap<String, Object?>(
+                                              'm.relates_to',
+                                            )
+                                            ?.tryGet<String>('key') ==
+                                    emoji,
+                                  );
+                              if (existingReaction != null) {
+                                existingReaction.redactEvent();
+                              } else {
+                                event.room.sendReaction(
+                                  event.eventId,
+                                  emoji,
+                                );
+                              }
+                            }
+                          : null,
                           onLongPress: widget.longPressSelect
                               ? null
                               : () {
@@ -562,46 +505,44 @@ class _MessageBubbleState extends State<MessageBubble> {
                                   widget.onSelect(event, _tapPosition);
                                 },
                           child: () {
-                            // Voor een galerij is de bubbel precies zo breed als
-                            // het raster, niet de tekstbreedte.
                             final galleryBubbleWidth =
                                 displayEvent.messageType == galleryMessageType &&
                                     !displayEvent.redacted
                                 ? GalleryContent.gridWidth(
-                                        GalleryContent.gridColumnCount(
-                                          galleryItems(displayEvent).where(
-                                            (item) => {
-                                              MessageTypes.Image,
-                                              MessageTypes.Video,
-                                            }.contains(
-                                              galleryItemtypeToMsgtype(
-                                                item.tryGet<String>(
-                                                      'itemtype',
-                                                ) ??
-                                                    'm.file',
-                                              ),
-                                            ),
-                                          ).length,
+                                    GalleryContent.gridColumnCount(
+                                      galleryItems(displayEvent).where(
+                                        (item) => {
+                                          MessageTypes.Image,
+                                          MessageTypes.Video,
+                                        }.contains(
+                                          galleryItemtypeToMsgtype(
+                                            item.tryGet<String>(
+                                              'itemtype',
+                                            ) ??
+                                                'm.file',
+                                          ),
                                         ),
-                                      ) +
+                                      ).length,
+                                    ),
+                                  ) +
                                     4
                                 : null;
                             final bubbleInner = Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(
-                                    AppConfig.borderRadius,
-                                  ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  AppConfig.borderRadius,
                                 ),
-                                constraints: BoxConstraints(
-                                  maxWidth:
-                                      galleryBubbleWidth ??
-                                      (hasReply
-                                          ? _calculateMediaWidth(displayEvent)
-                                          : null) ??
-                                      MediaQuery.sizeOf(context).width * 0.75,
-                                ),
-                                child: IntrinsicWidth(
-                                  child: Column(
+                              ),
+                              constraints: BoxConstraints(
+                                maxWidth:
+                                    galleryBubbleWidth ??
+                                    (hasReply
+                                        ? _calculateMediaWidth(displayEvent)
+                                        : null) ??
+                                    MediaQuery.sizeOf(context).width * 0.75,
+                              ),
+                              child: IntrinsicWidth(
+                                child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
@@ -610,8 +551,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                                         future: replyEvent != null
                                             ? Future.value(replyEvent)
                                             : event.getReplyEvent(timeline),
-                                        builder:
-                                            (BuildContext context, snapshot) {
+                                        builder: (BuildContext context, snapshot) {
                                           final displayReplyEvent =
                                               snapshot.data ??
                                               Event(
@@ -643,8 +583,8 @@ class _MessageBubbleState extends State<MessageBubble> {
                                                     ReplyContent.borderRadius,
                                                 onTap: () => widget
                                                     .scrollToEventId(
-                                                  displayReplyEvent.eventId,
-                                                ),
+                                                      displayReplyEvent.eventId,
+                                                    ),
                                                 child: AbsorbPointer(
                                                   child: ReplyContent(
                                                     displayReplyEvent,
@@ -658,327 +598,142 @@ class _MessageBubbleState extends State<MessageBubble> {
                                           );
                                         },
                                       ),
-                                    // Forward-label bovenaan de bubble
-                                    if (event.content
-                                        .tryGetMap<String, Object?>('m.forwarded')
-                                        ?.tryGet<String>('user_id') !=
-                                        null)
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          left: 16,
-                                          right: 16,
-                                          top: 8,
-                                          bottom: 4,
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.forward_outlined,
-                                              size: 14,
-                                              color: textColor.withValues(alpha: 0.7),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              L10n.of(context).forward,
-                                              style: TextStyle(
-                                                fontSize: 12,
+                                      if (event.content
+                                          .tryGetMap<String, Object?>('m.forwarded')
+                                          ?.tryGet<String>('user_id') !=
+                                          null)
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            left: 16,
+                                            right: 16,
+                                            top: 8,
+                                            bottom: 4,
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.forward_outlined,
+                                                size: 14,
                                                 color: textColor.withValues(alpha: 0.7),
-                                                fontWeight: FontWeight.w500,
                                               ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                L10n.of(context).forward,
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: textColor.withValues(alpha: 0.7),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 0,
+                                          ),
+                                          child: MessageContent(
+                                            displayEvent,
+                                            textColor: textColor,
+                                            linkColor: linkColor,
+                                            textPadding: 6,
+                                            onInfoTab: widget.onInfoTab,
+                                            borderRadius: borderRadius,
+                                            timeline: timeline,
+                                            loadMedia: loadMedia,
+                                            onLoadMedia: () {
+                                              setState(() {
+                                                loadMedia = true;
+                                              });
+                                            },
+                                            selectable: PlatformInfos.isMobile
+                                                ? widget.longPressSelect
+                                                : true,
+                                          ),
+                                        ),
+                                        if (showTimestamp)
+                                          Padding(
+                                            padding: EdgeInsets.only(
+                                              top: 4,
+                                              right: ownMessage ? 8 : 4,
+                                              left: ownMessage ? 4 : 8,
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 0,
-                                      ),
-                                      child: MessageContent(
-                                        displayEvent,
-                                        textColor: textColor,
-                                        linkColor: linkColor,
-                                        // De bubbel geeft zelf 10dp; met
-                                        // 6dp extra staat de tekst 16dp
-                                        // van de rand.
-                                        textPadding: 6,
-                                        onInfoTab: widget.onInfoTab,
-                                        borderRadius: borderRadius,
-                                        timeline: timeline,
-                                        loadMedia: loadMedia,
-                                        onLoadMedia: () {
-                                          setState(() {
-                                            loadMedia = true;
-                                          });
-                                        },
-                                        selectable: PlatformInfos.isMobile
-                                            ? widget.longPressSelect
-                                            : true,
-                                      ),
+                                            child: Align(
+                                              alignment: Alignment.centerRight,
+                                              child: messageStatusRow,
+                                            ),
+                                          ),
+                                      ],
                                     ),
-                                    if (showTimestamp)
-                                      // Footer row inside the bubble Column,
-                                      // right-aligned, sits above the tail.
-                                      // Reserve right padding so the timestamp
-                                      // never overlaps the last word of the
-                                      // message text.
-                                      Padding(
-                                        padding: EdgeInsets.only(
-                                          top: 4,
-                                          right: ownMessage ? 8 : 4,
-                                          left: ownMessage ? 4 : 8,
-                                        ),
-                                        child: Align(
-                                          alignment: Alignment.centerRight,
-                                          child: messageStatusRow,
-                                        ),
-                                      ),
-                                  ],
-                              ),
-                              ),
-                            );
-                            final bubbleColor = AppSettings
-                                    .enableChatFrostedGlass.value &&
-                                AppSettings.wallpaperPath.value.isNotEmpty
-                            ? color.withValues(alpha: 0.7)
-                            : color;
-                              // Directional speech tail on the bottom-most
-                              // message of a consecutive cluster.
-                              // Modern messaging style: a sharp corner on the OWNER-side and full
-                              // rounding on the other side gives a clean
-                              // "speech-pointer" silhouette without the
-                              // visible triangle flap that a custom clipper
-                              // produced. The asymmetric borderRadius (built
-                              // above with hardCorner vs roundedCorner) is
-                              // the actual "tail" — a `ClipRRect` here is
-                              // enough to render it correctly.
-                              final bubble = ClipRRect(
-                                borderRadius: borderRadius,
-                                child: Material(
-                                  color: noBubble
-                                      ? Colors.transparent
-                                      : bubbleColor,
-                                  borderRadius: borderRadius,
-                                  clipBehavior: Clip.antiAlias,
-                                  child: BubbleBackground(
-                                  colors: widget.colors,
-                                  ignore: noBubble ||
-                                      !ownMessage ||
-                                      !widget.gradient ||
-                                      MediaQuery.highContrastOf(context),
-                                  scrollController: widget.scrollController,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 6.0,
-                                      horizontal: 10.0,
-                                    ),
-                                    child: bubbleInner,
                                   ),
                                 ),
-                              ),
-                            );
-                              return bubble;
-                            }(),
-                        ),
-                      ),
-                      if (widget.thread != null)
-                        Align(
-                          alignment: ownMessage
-                              ? Alignment.bottomRight
-                              : Alignment.bottomLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: InkWell(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    (widget.thread?.hasNewMessages ?? false)
-                                        ? Icons.mark_chat_unread_outlined
-                                        : Icons.chat_bubble_outline,
-                                    color: Colors.grey[200],
-                                    size: 20,
+                                final bubbleColor = AppSettings
+                                    .enableChatFrostedGlass.value &&
+                                    AppSettings.wallpaperPath.value.isNotEmpty
+                                ? color.withValues(alpha: 0.7)
+                                : color;
+                                final bubble = ClipRRect(
+                                  borderRadius: borderRadius,
+                                  child: Material(
+                                    color: noBubble
+                                        ? Colors.transparent
+                                        : bubbleColor,
+                                    borderRadius: borderRadius,
+                                    clipBehavior: Clip.antiAlias,
+                                    child: BubbleBackground(
+                                      colors: widget.colors,
+                                      ignore: noBubble ||
+                                          !ownMessage ||
+                                          !widget.gradient ||
+                                          MediaQuery.highContrastOf(context),
+                                      scrollController: widget.scrollController,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 6.0,
+                                          horizontal: 10.0,
+                                        ),
+                                        child: bubbleInner,
+                                      ),
+                                    ),
                                   ),
-                                  const SizedBox(width: 16),
-                                  if (_threadSenderFuture != null)
-                                    FutureBuilder<User?>(
-                                      future: _threadSenderFuture,
-                                      builder: (context, snapshot) {
-                                        final threadUser =
-                                            snapshot.data ??
-                                            event.senderFromMemoryOrFallback;
-                                        return Avatar(
-                                          mxContent: threadUser.avatarUrl,
-                                          name: threadUser.calcDisplayname(),
-                                          size: 24,
-                                        );
-                                      },
-                                    )
-                                  else
-                                    const SizedBox.shrink(),
-                                  const SizedBox(width: 6),
-                                  widget.thread!.lastEvent != null
-                                      ? Text(
-                                          widget
-                                                      .thread!
-                                                      .lastEvent!
-                                                      .text
-                                                      .length >
-                                                  32
-                                              ? "${widget.thread!.lastEvent!.text.substring(0, 32)}..."
-                                              : widget.thread!.lastEvent!.text,
-                                        )
-                                      : Text(L10n.of(context).thread),
-                                ],
-                              ),
-                              onTap: () => context.push(
-                                '/rooms/${event.roomId}/threads/${event.eventId}',
-                              ),
+                                );
+                                return bubble;
+                              }(),
                             ),
                           ),
                         ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
           ],
-        );
-      },
-    );
-
-    Widget container;
-    if (showReactionsRow ||
-        displayTime ||
-        widget.selected ||
-        widget.displayReadMarker) {
-      container = Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: ownMessage
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
-        children: <Widget>[
-          if (displayTime || widget.selected)
-            Padding(
-              padding: displayTime
-                  ? const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4.0)
-                  : EdgeInsets.zero,
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
-                  child: Material(
-                    borderRadius: BorderRadius.circular(
-                      AppConfig.borderRadius * 2,
-                    ),
-                    color: theme.colorScheme.surface.withAlpha(128),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0,
-                        vertical: 4.0,
-                      ),
-                      child: Text(
-                        event.originServerTs.localizedTime(context),
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: theme.colorScheme.onSurface
-                              .withValues(alpha: 0.6),
-                        ),
-                      ),
-                    ),
+        ),
+        // Reaction Pill Overlay
+        if (showReactionsRow)
+          Positioned(
+            bottom: -8,
+            right: ownMessage ? 8 : null,
+            left: ownMessage ? null : 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 2,
                   ),
-                ),
-              ),
-            ),
-          row,
-          if (showReactionsRow)
-            Padding(
-              padding: EdgeInsets.only(
-                top: 4.0,
-                left: (ownMessage ? 0 : Avatar.defaultSize) + 12.0,
-                right: ownMessage ? 0 : 12.0,
+                ],
               ),
               child: MessageReactions(event, timeline),
             ),
-          if (widget.displayReadMarker)
-            Row(
-              children: [
-                Expanded(
-                  child: Divider(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 16.0,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      AppConfig.borderRadius / 3,
-                    ),
-                    color: theme.colorScheme.surface.withAlpha(128),
-                  ),
-                  child: Text(
-                    L10n.of(context).newMessages,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.1,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Divider(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                  ),
-                ),
-              ],
-            ),
-        ],
-      );
-    } else {
-      container = row;
-    }
-
-    return _AnimateIn(
-      animateIn: widget.animateIn,
-      halfOpacity: event.status == .sending ? true : false,
-      child: Center(
-        child: SwipeToReply(
-          key: ValueKey(event.eventId),
-          rightToLeft: AppSettings.swipeRightToLeftToReply.value,
-          onReply: () => widget.onSwipe(event),
-          child: Container(
-            constraints: const BoxConstraints(
-              maxWidth: FluffyThemes.columnWidth * 2.5,
-            ),
-            padding: EdgeInsets.only(
-              left: 6.0,
-              right: 6.0,
-              // WhatsApp-style compact grouping: same sender -> 2px, new
-              // sender -> 8px break. Keeps the chat visually dense so
-              // nothing floats in dead space.
-              top: nextEventSameSender ? 2.0 : 8.0,
-              bottom: previousEventSameSender ? 2.0 : 8.0,
-            ),
-            // Outgoing: no avatar gutter — let the bubble use its full width
-            // with a small left inset so it doesn't hug the screen edge.
-            // Incoming: reserve right space for the (bottom-aligned) avatar
-            // shown on the final message of a group.
-            margin: ownMessage
-                ? const EdgeInsets.only(left: 8.0)
-                : (isOneOnOne
-                    ? EdgeInsets.zero
-                    : const EdgeInsets.only(right: 48.0)),
-            child: container,
           ),
-        ),
-      ),
+      ],
     );
   }
 
@@ -991,9 +746,6 @@ class _MessageBubbleState extends State<MessageBubble> {
           _quickReactionsOverlay?.remove();
           _quickReactionsOverlay = null;
         },
-        // "Selecteren" in de overlay start de multiselectie: daarna tik je
-        // de andere berichten aan. Dit is de vindbare route — de andere
-        // (contextmenu via tikken) ziet niemand.
         onSelect: widget.chatController == null
             ? null
             : () => widget.chatController!.onMultiSelect(event),
@@ -1122,4 +874,3 @@ class __AnimateInState extends State<_AnimateIn> {
     );
   }
 }
-

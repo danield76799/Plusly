@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:matrix/matrix.dart';
+import 'package:Pulsly/services/live_location_manager.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/adaptive_dialog_action.dart';
@@ -26,7 +27,6 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
 
   static const int _defaultTimeoutMinutes = 30;
   int _selectedMinutes = _defaultTimeoutMinutes;
-  Timer? _locationUpdateTimer;
 
   @override
   void initState() {
@@ -36,7 +36,6 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
 
   @override
   void dispose() {
-    _locationUpdateTimer?.cancel();
     super.dispose();
   }
 
@@ -88,29 +87,15 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
     setState(() => _isStarting = true);
 
     try {
-      // Send location as regular m.location message
-      final body = 'https://www.openstreetmap.org/?mlat=${_position!.latitude}&mlon=${_position!.longitude}#map=16/${_position!.latitude}/${_position!.longitude}';
-      final uri = 'geo:${_position!.latitude},${_position!.longitude};u=${_position!.accuracy}';
-
-      await widget.room.sendEvent(
-        {
-          'msgtype': 'm.location',
-          'body': body,
-          'geo_uri': uri,
-        },
-        type: EventTypes.Message,
+      await LiveLocationManager().startSharing(
+        widget.room,
+        minutes: _selectedMinutes,
       );
 
-      // Send info message
+      // Send info message to the room
       final endTime = DateTime.now().add(Duration(minutes: _selectedMinutes));
       await widget.room.sendTextEvent(
         '📍 Live locatie actief voor $_selectedMinutes minuten (tot ${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')})',
-      );
-
-      // Start periodic updates
-      _locationUpdateTimer = Timer.periodic(
-        const Duration(seconds: 30),
-        (_) => _sendLocationUpdate(),
       );
 
       if (!mounted) return;
@@ -120,31 +105,6 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
         _error = e;
         _isStarting = false;
       });
-    }
-  }
-
-  Future<void> _sendLocationUpdate() async {
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.best,
-          timeLimit: Duration(seconds: 15),
-        ),
-      );
-
-      final body = 'https://www.openstreetmap.org/?mlat=${position.latitude}&mlon=${position.longitude}#map=16/${position.latitude}/${position.longitude}';
-      final uri = 'geo:${position.latitude},${position.longitude};u=${position.accuracy}';
-
-      await widget.room.sendEvent(
-        {
-          'msgtype': 'm.location',
-          'body': body,
-          'geo_uri': uri,
-        },
-        type: EventTypes.Message,
-      );
-    } catch (e) {
-      // Silently fail for updates
     }
   }
 
@@ -251,7 +211,6 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
       actions: [
         AdaptiveDialogAction(
           onPressed: () {
-            _locationUpdateTimer?.cancel();
             Navigator.of(context, rootNavigator: false).pop();
           },
           child: Text(L10n.of(context).cancel),
@@ -265,10 +224,5 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
           ),
       ],
     );
-  }
-
-  String _getEndTime() {
-    final endTime = DateTime.now().add(Duration(minutes: _selectedMinutes));
-    return '${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}';
   }
 }
