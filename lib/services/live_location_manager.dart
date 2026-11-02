@@ -61,6 +61,7 @@ class LiveLocationManager {
           'msgtype': 'm.location',
           'body': body,
           'geo_uri': uri,
+          'live_location': true,
         },
         type: EventTypes.Message,
       );
