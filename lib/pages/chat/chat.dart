@@ -65,6 +65,7 @@ import 'send_file_dialog.dart';
 import 'contact_picker_screen.dart';
 import 'send_contact_dialog.dart';
 import 'send_location_dialog.dart';
+import 'live_location_dialog.dart';
 
 class ChatPage extends StatelessWidget {
   final String roomId;

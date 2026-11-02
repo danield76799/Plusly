@@ -108,6 +108,11 @@ class LiveLocationDialogState extends State<LiveLocationDialog> {
     }
   }
 
+  String _getEndTime() {
+    final endTime = DateTime.now().add(Duration(minutes: _selectedMinutes));
+    return '${endTime.hour}:${endTime.minute.toString().padLeft(2, '0')}';
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget contentWidget;
