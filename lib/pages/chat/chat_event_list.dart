@@ -172,53 +172,55 @@ class ChatEventList extends StatelessWidget {
                   key: ValueKey(event.transactionId ?? event.eventId),
                   index: i,
                   controller: controller.scrollController,
-                  child: Message(
-                    event,
-                    animateIn: animateIn,
-                    thread: thread,
-                    singleSelected:
-                        controller.selectedEvents.length == 1 &&
-                        controller.selectedEvents.first.eventId ==
-                            event.eventId,
-                    onSwipe: (Event e) => controller.replyAction(replyTo: e),
-                    hasBeenRead:
-                        latestReadEventIndex != -1 &&
-                        latestReadEventIndex <= i,
-                    readReceipts: event.receipts.toList(),
-                    onInfoTab: controller.showEventInfo,
-                    onMention: () => controller.sendController.text +=
-                        '${event.senderFromMemoryOrFallback.mention} ',
-                    highlightMarker:
-                        controller.scrollToEventIdMarker == event.eventId,
-                    onSelect: controller.onSelectMessage,
-                    scrollToEventId: (String eventId) =>
-                        controller.scrollToEventId(
-                          eventId,
-                          position: AutoScrollPosition.end,
-                        ),
-                    longPressSelect: controller.selectedEvents.isNotEmpty,
-                    selected: controller.selectedEvents.any(
-                      (e) => e.eventId == event.eventId,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      bottom: (i > 0 && events[i - 1].senderId == event.senderId)
+                          ? 2.0
+                          : 12.0,
                     ),
-                    timeline: timeline,
-                    // De marker hoort bij de LAATST GELEZEN positie van de
-                    // GEBRUIKER zelf (room.fullyRead), niet bij de gelezen-status
-                    // van een bericht. `i > 0` voorkomt dat de marker op het
-                    // nieuwste bericht belandt: in een omgekeerde lijst staat
-                    // die aan de onderrand, pal tegen de invoerbalk.
-                    displayReadMarker:
-                        i > 0 && controller.readMarkerEventId == event.eventId,
-                    nextEvent: i + 1 < events.length ? events[i + 1] : null,
-                    previousEvent: i > 0 ? events[i - 1] : null,
-                    wallpaperMode: hasWallpaper,
-                    colors: colors,
-                    gradient: AppSettings.enableGradient.value,
-                    chatController: controller,
-                    layout: switch (AppSettings.messageStyle.value) {
-                      'bubbles_legacy' => MessageLayout.bubblesLegacy,
-                      'modern' => MessageLayout.modern,
-                      _ => MessageLayout.bubbles,
-                    },
+                    child: Message(
+                      event,
+                      animateIn: animateIn,
+                      thread: thread,
+                      singleSelected:
+                          controller.selectedEvents.length == 1 &&
+                          controller.selectedEvents.first.eventId ==
+                              event.eventId,
+                      onSwipe: (Event e) => controller.replyAction(replyTo: e),
+                      hasBeenRead:
+                          latestReadEventIndex != -1 &&
+                          latestReadEventIndex <= i,
+                      readReceipts: event.receipts.toList(),
+                      onInfoTab: controller.showEventInfo,
+                      onMention: () => controller.sendController.text +=
+                          '${event.senderFromMemoryOrFallback.mention} ',
+                      highlightMarker:
+                          controller.scrollToEventIdMarker == event.eventId,
+                      onSelect: controller.onSelectMessage,
+                      scrollToEventId: (String eventId) =>
+                          controller.scrollToEventId(
+                            eventId,
+                            position: AutoScrollPosition.end,
+                          ),
+                      longPressSelect: controller.selectedEvents.isNotEmpty,
+                      selected: controller.selectedEvents.any(
+                        (e) => e.eventId == event.eventId,
+                      ),
+                      timeline: timeline,
+                      displayReadMarker:
+                          i > 0 && controller.readMarkerEventId == event.eventId,
+                      nextEvent: i + 1 < events.length ? events[i + 1] : null,
+                      previousEvent: i > 0 ? events[i - 1] : null,
+                      wallpaperMode: hasWallpaper,
+                      colors: colors,
+                      gradient: AppSettings.enableGradient.value,
+                      chatController: controller,
+                      layout: switch (AppSettings.messageStyle.value) {
+                        'bubbles_legacy' => MessageLayout.bubblesLegacy,
+                        'modern' => MessageLayout.modern,
+                        _ => MessageLayout.bubbles,
+                      },
+                    ),
                   ),
                 );
 
