@@ -151,7 +151,7 @@ class _MessageBubbleState extends State<MessageBubble> {
   Widget _buildBubble(BuildContext context, Event event, Timeline timeline, ThemeData theme,
       Color color, Color textColor, Color linkColor, BorderRadius borderRadius,
       bool noBubble, bool ownMessage, bool hasReply, Event? replyEvent,
-      bool showTimestamp, Widget messageStatusRow) {
+      String? inReplyTo, bool showTimestamp, Widget messageStatusRow) {
     
     final displayEvent = event.getDisplayEvent(timeline);
     final galleryBubbleWidth = displayEvent.messageType == galleryMessageType && !displayEvent.redacted
@@ -172,7 +172,7 @@ class _MessageBubbleState extends State<MessageBubble> {
               FutureBuilder<Event?>(
                 future: replyEvent != null ? Future.value(replyEvent) : event.getReplyEvent(timeline),
                 builder: (context, snapshot) {
-                  final displayReplyEvent = snapshot.data ?? Event(eventId: event.inReplyToEventId(includingFallback: false), content: {'msgtype': 'm.text', 'body': '...'}, senderId: event.senderId, type: 'm.room.message', room: event.room, status: EventStatus.sent, originServerTs: DateTime.now());
+                  final displayReplyEvent = snapshot.data ?? Event(eventId: inReplyTo!, content: {'msgtype': 'm.text', 'body': '...'}, senderId: event.senderId, type: 'm.room.message', room: event.room, status: EventStatus.sent, originServerTs: DateTime.now());
                   return Padding(
                     padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 8),
                     child: Material(
@@ -393,7 +393,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                             HapticFeedback.heavyImpact();
                             widget.onSelect(event, _tapPosition);
                           },
-                          child: _buildBubble(context, event, timeline, theme, color, textColor, linkColor, borderRadius, noBubble, ownMessage, hasReply, replyEvent, showTimestamp, messageStatusRow),
+                          child: _buildBubble(context, event, timeline, theme, color, textColor, linkColor, borderRadius, noBubble, ownMessage, hasReply, replyEvent, inReplyTo, showTimestamp, messageStatusRow),
                         ),
                       ),
                     ],
