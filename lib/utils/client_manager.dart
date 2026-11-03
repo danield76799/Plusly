@@ -9,6 +9,7 @@ import 'package:flutter_vodozemac/flutter_vodozemac.dart' as vod;
 import 'package:matrix/encryption/utils/key_verification.dart';
 import 'package:matrix/matrix.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:universal_html/html.dart' as html;
 
 import 'package:Pulsly/config/app_config.dart';
@@ -40,6 +41,7 @@ abstract class ClientManager {
   /// lopende creatie wordt hergebruikt in plaats van een tweede te starten.
   static final Map<String, Client> _clients = {};
   static final Map<String, Future<Client>> _creatingClients = {};
+  static final Map<String, Lock> _locks = {};
 
   /// Verwijdert de gecachte client van een account (bij uitloggen of
   /// verwijderen) en SLUIT diens database.
@@ -48,6 +50,10 @@ abstract class ClientManager {
   /// uitloggen de database open achter. Een volgende push opende datzelfde
   /// bestand opnieuw en kreeg SQLITE_MISUSE (code 21) op BEGIN IMMEDIATE —
   /// dat was de oorzaak van het uitvallen van de pushnotificaties.
+  static Lock getLock(String clientName) {
+    return _locks.putIfAbsent(clientName, () => Lock());
+  }
+
   static Future<void> forgetClient(String clientName) async {
     final client = _clients.remove(clientName);
     if (client == null) return;

@@ -229,7 +229,9 @@ class PushHelper {
       }
 
       try {
-        client = await openClient();
+        client = await ClientManager.getLock(clientName ?? '').synchronized(() async {
+          return await openClient();
+        });
       } catch (e) {
         // De database van dit account kan even op slot staan: de
         // push-isolate opent dezelfde file als de hoofd-isolate, en SQLite
@@ -240,7 +242,9 @@ class PushHelper {
           e,
         );
         await Future.delayed(const Duration(seconds: 2));
-        client = await openClient();
+        client = await ClientManager.getLock(clientName ?? '').synchronized(() async {
+          return await openClient();
+        });
       }
     } catch (e, s) {
       Logs().e(
@@ -268,10 +272,12 @@ class PushHelper {
     Logs().v('Load event...');
     Event? event;
     try {
-      event = await client.getEventByPushNotification(
-        notification,
-        storeInDatabase: false,
-      );
+      event = await ClientManager.getLock(client.clientName).synchronized(() async {
+        return await client.getEventByPushNotification(
+          notification,
+          storeInDatabase: false,
+        );
+      });
     } catch (e, s) {
       // De Extera-fork van de SDK gooit hier een Exception als het event niet
       // te vinden is; upstream returned null voor clearing-pushes. Behandel
@@ -303,11 +309,13 @@ class PushHelper {
       } else {
         // Make sure client is fully loaded and synced before dismiss
         // notifications:
-        await client.roomsLoading;
-        await client
-            .oneShotSync()
-            .timeout(const Duration(seconds: 8))
-            .catchError((_) => null);
+        await ClientManager.getLock(client.clientName).synchronized(() async {
+          await client.roomsLoading;
+          await client
+              .oneShotSync()
+              .timeout(const Duration(seconds: 8))
+              .catchError((_) => null);
+        });
 
         final activeNotifications = await flutterLocalNotificationsPlugin
             .getActiveNotifications();
