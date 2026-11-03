@@ -740,6 +740,20 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                                     : true,
                                               ),
                                             ),
+                                            if (useBottomRowStatus)
+                                              const SizedBox(height: 22),
+                                            if (useBottomChipStatus)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 4,
+                                                  left: 4,
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [messageStatusChip],
+                                                ),
+                                              ),
                                           ],
                                         )),
                                         if (useBottomRowStatus)
