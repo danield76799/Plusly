@@ -93,9 +93,8 @@ class MessageContent extends StatelessWidget {
     try {
       final client = Matrix.of(context).client;
       final roomId = await client.startDirectChat(matrixId);
-      if (roomId == null || !context.mounted) return;
-      await Navigator.of(context).maybePop();
       if (!context.mounted) return;
+      await Navigator.of(context).maybePop();
       GoRouter.of(context).go('/rooms/$roomId');
     } catch (e) {
       if (!context.mounted) return;

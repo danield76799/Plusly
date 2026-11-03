@@ -414,6 +414,12 @@ class ChatListController extends State<ChatList>
   SearchScope searchScope = SearchScope.local;
   static const String _serverStoreNamespace = 'com.danield.plusly.search.server';
 
+  void setSearchScope(SearchScope scope) {
+    setState(() {
+      searchScope = scope;
+    });
+  }
+
   void triggerSearch() => _search();
 
   void setServer() async {
@@ -462,7 +468,7 @@ class ChatListController extends State<ChatList>
           limit: 20,
         );
 
-        if (searchQuery.isValidMatrixId &&
+        if (searchQuery.isValidMatrixIdStrict() &&
             searchQuery.sigil == '#' &&
             roomSearchResult.chunk.any(
                   (room) => room.canonicalAlias == searchQuery,
@@ -663,13 +669,12 @@ class ChatListController extends State<ChatList>
     (_, gezien) => nu.difference(gezien) > shareDedupeVenster,
     );
     final uniqueFiles = files.where((file) {
-    // ignore: unnecessary_null_comparison
-    final p = file.path;
-    if (p == null || p.isEmpty) return false;
-    final normalized = p.replaceFirst('file://', '');
-    if (_processedSharedPathsTijd.containsKey(normalized)) return false;
-    _processedSharedPathsTijd[normalized] = nu;
-    return true;
+      final p = file.path;
+      if (p.isEmpty) return false;
+      final normalized = p.replaceFirst('file://', '');
+      if (_processedSharedPathsTijd.containsKey(normalized)) return false;
+      _processedSharedPathsTijd[normalized] = nu;
+      return true;
     }).toList();
 
     if (uniqueFiles.isEmpty) {
@@ -679,9 +684,7 @@ class ChatListController extends State<ChatList>
 
     uniqueFiles.removeWhere(
       (file) {
-        // ignore: unnecessary_null_comparison
         final p = file.path;
-        if (p == null) return true;
         return p.startsWith(AppConfig.deepLinkPrefix) ||
             p.startsWith(AppConfig.appSsoUrlScheme);
       },
@@ -696,11 +699,11 @@ class ChatListController extends State<ChatList>
     // content:// URIs moeten WEL doorgaan: Standaard Foto's/Google Foto's
     // deelt screenshots op Android 10+ bijna altijd als content://. Die
     // filterden we eerder weg, waardoor delen vanuit de foto-app stil doodliep.
-    final leeg = uniqueFiles.where((file) => file.path == null || file.path.isEmpty).toList();
+    final leeg = uniqueFiles.where((file) => file.path.isEmpty).toList();
     if (leeg.isNotEmpty) {
       ShareEventLog().add('share_leeg-pad', {'aantal': leeg.length});
     }
-    uniqueFiles.removeWhere((file) => file.path == null || file.path.isEmpty);
+    uniqueFiles.removeWhere((file) => file.path.isEmpty);
 
     if (uniqueFiles.isEmpty) {
       Logs().w('All shared files had empty paths');
@@ -754,26 +757,18 @@ class ChatListController extends State<ChatList>
         try {
           if ({SharedMediaType.text, SharedMediaType.url}.contains(file.type)) {
             final p = file.path;
-            if (p != null && p.isNotEmpty) {
+            if (p.isNotEmpty) {
               items.add(TextShareItem(p));
             }
             continue;
           }
           final p = file.path;
-          if (p == null || p.isEmpty) continue;
+          if (p.isEmpty) continue;
 
           // content:// → lokaal bestand in cache
-          String finalPath = p;
-          if (p.startsWith('content://')) {
-            // De plugin kan bytes lezen; schrijf naar cache voor verdere verwerking
-            // Dit gebeurt async, maar we zijn al in postFrameCallback.
-            // Voor nu: pas path aan naar cache-locatie (plugin doet dit intern).
-            // receive_sharing_intent 1.8.1 levert al een cache-bestand voor content://
-            // maar we guarden defensief.
-            finalPath = p.replaceFirst('file://', '');
-          } else {
-            finalPath = p.replaceFirst('file://', '');
-          }
+          final finalPath = p.startsWith('content://')
+              ? p.replaceFirst('file://', '')
+              : p.replaceFirst('file://', '');
 
           items.add(FileShareItem(
             XFile(
@@ -782,13 +777,16 @@ class ChatListController extends State<ChatList>
             ),
           ));
         } catch (e, s) {
-          ShareEventLog().add('share_item-fout', {'fout': '$e', 'pad': file.path ?? 'null'});
+          ShareEventLog().add('share_item-fout', {'fout': '$e', 'pad': file.path});
           Logs().e('Share item verwerken mislukt', e, s);
         }
       }
 
       if (items.isEmpty) {
-        ShareEventLog().add('share_afgebroken', {'reden': 'geen-geldige-items-na-verwerking'});
+        ShareEventLog().add(
+          'share_afgebroken',
+          {'reden': 'geen-geldige-items-na-verwerking'},
+        );
         return;
       }
 

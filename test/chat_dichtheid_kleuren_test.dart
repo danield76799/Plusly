@@ -145,7 +145,6 @@ void main() {
         ),
       );
       late Color bubbel;
-      late Color tekst;
       late Color tijd;
       await tester.pumpWidget(
         MaterialApp(
@@ -154,7 +153,6 @@ void main() {
             builder: (context) {
               final t = Theme.of(context);
               bubbel = t.bubbleColor;
-              tekst = t.onBubbleColor;
               // Zoals de klassieke bubbelstijl het doet.
               tijd = t.onBubbleColor.withValues(alpha: 0.85);
               return const SizedBox.shrink();

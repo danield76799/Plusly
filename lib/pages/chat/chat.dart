@@ -664,7 +664,7 @@ class ChatController extends State<ChatPageWithRoom>
     Matrix.of(context).client.roomsLoading;
     Matrix.of(context).client.accountDataLoading;
     if (eventContextId != null &&
-        (!eventContextId.isValidMatrixId || eventContextId.sigil != '\$')) {
+        (!eventContextId.isValidMatrixIdStrict() || eventContextId.sigil != '\$')) {
       eventContextId = null;
     }
     if (thread == null) {

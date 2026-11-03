@@ -5,9 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
-import 'package:Pulsly/pages/chat/swipe_to_reply.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
@@ -26,7 +24,6 @@ import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/member_actions_popup_menu_button.dart';
 import '../../../config/app_config.dart';
-import '../quick_reactions_overlay.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
 import 'reply_content.dart';
@@ -90,7 +87,6 @@ class MessageBubble extends StatefulWidget {
 
 class _MessageBubbleState extends State<MessageBubble> {
   Offset _tapPosition = Offset.zero;
-  OverlayEntry? _quickReactionsOverlay;
   late Future<User?> _senderUserFuture;
   User? _cachedSenderUser;
   bool loadMedia = false;
@@ -268,11 +264,6 @@ class _MessageBubbleState extends State<MessageBubble> {
     final isOneOnOne = event.room.isDirectChat || event.room.getParticipants().length <= 4;
 
     var color = theme.incomingBubbleColor;
-    final displayTime = widget.nextEvent == null || !event.originServerTs.sameEnvironment(widget.nextEvent!.originServerTs);
-    final nextEventSameSender = widget.nextEvent != null &&
-        {EventTypes.Message, EventTypes.Sticker, EventTypes.Encrypted, PollEvents.pollStart}.contains(widget.nextEvent!.type) &&
-        widget.nextEvent!.senderId == event.senderId &&
-        !displayTime;
 
     final previousEventSameSender = widget.previousEvent != null &&
         {EventTypes.Message, EventTypes.Sticker, EventTypes.Encrypted, PollEvents.pollStart}.contains(widget.previousEvent!.type) &&
@@ -423,24 +414,8 @@ class _MessageBubbleState extends State<MessageBubble> {
     );
   }
 
-  void _showQuickReactionsOverlay(Event event) {
-    if (_quickReactionsOverlay != null) return;
-    _quickReactionsOverlay = OverlayEntry(
-      builder: (context) => QuickReactionsOverlay(
-        event: event,
-        onDismiss: () {
-          _quickReactionsOverlay?.remove();
-          _quickReactionsOverlay = null;
-        },
-        onSelect: widget.chatController == null ? null : () => widget.chatController!.onMultiSelect(event),
-      ),
-    );
-    Overlay.of(context).insert(_quickReactionsOverlay!);
-  }
-
   @override
   void dispose() {
-    _quickReactionsOverlay?.remove();
     super.dispose();
   }
 }

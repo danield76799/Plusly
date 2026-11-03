@@ -78,7 +78,7 @@ extension ResizeImage on XFile {
       final bytes = await VideoCompress.getByteThumbnail(path);
       if (bytes == null) return null;
 
-      return MatrixImageFile.create(
+      return await MatrixImageFile.create(
         bytes: bytes,
         name: name,
         nativeImplementations: ClientManager.nativeImplementations,

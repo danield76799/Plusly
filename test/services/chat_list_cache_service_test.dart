@@ -130,12 +130,12 @@ class _MockRoom implements Room {
     required this.id,
     this.name = '',
     this.isDirect = false,
-    bool isSpace = false,
+    this._isSpace = false,
     this.unread = false,
     this.notifCount = 0,
     this.isFav = false,
     this.isMuted = false,
-  }) : _isSpace = isSpace;
+  });
 
   @override
   String get displayname => name;

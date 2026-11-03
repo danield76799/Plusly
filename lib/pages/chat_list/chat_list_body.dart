@@ -163,9 +163,7 @@ class ChatListViewBody extends StatelessWidget {
                             selected: {controller.searchScope},
                             onSelectionChanged:
                                 (Set<SearchScope> newSelection) {
-                                  controller.setState(() {
-                                    controller.searchScope = newSelection.first;
-                                  });
+                                  controller.setSearchScope(newSelection.first);
                                   controller.triggerSearch();
                                 },
                           ),

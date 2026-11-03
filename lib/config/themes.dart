@@ -53,8 +53,6 @@ abstract class FluffyThemes {
             'surfaceContainerLowest': const Color.fromARGB(255, 8, 8, 8),
             'surfaceDim': const Color.fromARGB(255, 0, 0, 0),
             'surfaceTint': const Color.fromARGB(255, 11, 11, 11),
-            'surfaceVariant': const Color.fromARGB(255, 0, 0, 0),
-            'background': const Color.fromARGB(255, 0, 0, 0),
           }
         : {};
 
@@ -66,12 +64,7 @@ abstract class FluffyThemes {
       surfaceContainer: extraDarkColors['surfaceContainer'],
       surfaceContainerHigh: extraDarkColors['surfaceContainerHigh'],
       surfaceContainerHighest: extraDarkColors['surfaceContainerHighest'],
-      surfaceContainerLow: extraDarkColors['surfaceContainerLow'],
-      surfaceContainerLowest: extraDarkColors['surfaceContainerLowest'],
-      surfaceDim: extraDarkColors['surfaceDim'],
       surfaceTint: extraDarkColors['surfaceTint'],
-      surfaceVariant: extraDarkColors['surfaceVariant'],
-      background: extraDarkColors['background'],
       dynamicSchemeVariant: variant ?? DynamicSchemeVariant.tonalSpot,
     );
     final isColumnMode = FluffyThemes.isColumnMode(context);

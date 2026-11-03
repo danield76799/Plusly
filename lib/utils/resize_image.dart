@@ -64,7 +64,7 @@ class ImageResizer {
       final resizedBytes = img.encodeJpg(resized, quality: quality);
 
       try {
-        return MatrixImageFile.create(
+        return await MatrixImageFile.create(
           bytes: Uint8List.fromList(resizedBytes),
           name: xfile.name,
           mimeType: 'image/jpeg', // Always output as JPEG for size

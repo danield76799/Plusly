@@ -23,7 +23,7 @@ String _code(String pad) => File(pad)
 void main() {
   final bron = _code('lib/pages/chat/events/map_bubble.dart');
 
-  num _default(String naam) {
+  num getDefault(String naam) {
     final m = RegExp('this\\.$naam\\s*=\\s*([0-9.]+)').firstMatch(bron);
     expect(m, isNotNull, reason: 'default $naam niet gevonden');
     return num.parse(m!.group(1)!);
@@ -34,8 +34,8 @@ void main() {
       // Dit is de kern van het symptoom. 400x200 zonder AspectRatio gaf een
       // strook; 400x400 mét geeft de normale kaart.
       expect(
-        _default('width'),
-        _default('height'),
+        getDefault('width'),
+        getDefault('height'),
         reason: 'width en height moeten gelijk zijn (upstream: 400x400) — '
             'een ongelijke verhouding zonder AspectRatio geeft een strook',
       );
@@ -57,7 +57,7 @@ void main() {
 
     test('zoom staat op het upstream-niveau (14.0, niet 15.0)', () {
       expect(
-        _default('zoom'),
+        getDefault('zoom'),
         14.0,
         reason: 'd73690fcc verhoogde dit naar 15.0; upstream gebruikt 14.0',
       );

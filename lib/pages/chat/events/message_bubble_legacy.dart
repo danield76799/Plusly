@@ -197,7 +197,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
   }
 
   void _scrollToEvent(Event event, Event? scrolledFrom) {
-    if (event.status == .error) return; // didn't load yet
+    if (event.status == EventStatus.error) return; // didn't load yet
     widget.scrollToEventId(event.eventId);
   }
 
@@ -371,7 +371,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                         ? Icons.done_all
                         : Icons.check,
                     // Twee vinkjes = groen (gelezen), één vinkje = oranje (verzonden)
-                    color: event.status == .sending || event.status == EventStatus.error
+                    color: event.status == EventStatus.sending || event.status == EventStatus.error
                         ? color
                         : hasBeenRead
                             ? Theme.of(context).readReceiptBlue
@@ -408,35 +408,15 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
     //   big emotes) we float a translucent pill on top of the content.
     // - bottom row: for HTML, captions, redacted, audio/file/poll we render
     //   the status as a real bottom-right row below the content. No overlap.
-    final isTextLike = {
-      MessageTypes.Text,
-      MessageTypes.Notice,
-      MessageTypes.Emote,
-      MessageTypes.None,
-    }.contains(event.messageType);
     final isBigEmote =
         noBubble &&
         event.messageType == MessageTypes.Text &&
         event.relationshipType == null &&
         event.onlyEmotes;
 
-    final useInlineStatus = false; // Plusly: inline status overlapt tekst in legacy stijl
-
     final useChipStatus = noBubble && !isBigEmote;
     final useBottomChipStatus = isBigEmote;
-    final useBottomRowStatus =
-        !useInlineStatus && !useChipStatus && !useBottomChipStatus;
-
-    final inlineStatusPlaceholder = WidgetSpan(
-      alignment: PlaceholderAlignment.middle,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 8, right: 2),
-        child: Opacity(
-          opacity: 0,
-          child: IgnorePointer(child: messageStatusRow),
-        ),
-      ),
-    );
+    final useBottomRowStatus = !useChipStatus && !useBottomChipStatus;
 
     final row = FutureBuilder<User?>(
       future: _senderUserFuture,
@@ -637,8 +617,8 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                       FluffyThemes.columnWidth * 1.5,
                                 ),
                                 child: Column(
-                                  mainAxisSize: .min,
-                                  crossAxisAlignment: .start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Stack(
                                       children: [
@@ -655,11 +635,11 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                                 minWidth: 64,
                                               ),
                                           child: Column(
-                                          mainAxisSize: .min,
+                                          mainAxisSize: MainAxisSize.min,
                                           crossAxisAlignment:
                                               ownMessage && noBubble
-                                              ? .end
-                                              : .start,
+                                              ? CrossAxisAlignment.end
+                                              : CrossAxisAlignment.start,
                                           children: [
                                             if (_replyEventFuture != null)
                                               FutureBuilder<Event?>(
@@ -682,12 +662,12 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                                           type:
                                                               'm.room.message',
                                                           room: event.room,
-                                                          status: .error,
+                                                          status: EventStatus.error,
                                                           originServerTs:
                                                               DateTime.now(),
                                                         );
                                                   return Padding(
-                                                    padding: .only(
+                                                    padding: EdgeInsets.only(
                                                       left: 16,
                                                       right: 16,
                                                       top: 8,
@@ -739,7 +719,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                                     )
                                                     ? 8
                                                     : 0,
-                                                bottom: useInlineStatus ? 8 : 0,
+                                                bottom: 0,
                                               ),
                                               child: MessageContent(
                                                 displayEvent,
@@ -754,37 +734,14 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                                     loadMedia = true;
                                                   });
                                                 },
-                                                                                                selectable:
+                                                selectable:
                                                     PlatformInfos.isMobile
                                                     ? widget.longPressSelect
                                                     : true,
-                                                                                              ),
-                                            ),
-                                            // Ruimte voor de voettekst (die als
-                                            // Positioned onderaan rechts staat).
-                                            if (useBottomRowStatus)
-                                              const SizedBox(height: 22),
-                                            if (useBottomChipStatus)
-                                              Padding(
-                                                padding: const .only(
-                                                  top: 4,
-                                                  left: 4,
-                                                ),
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [messageStatusChip],
-                                                ),
                                               ),
+                                            ),
                                           ],
-                                        ),
-                                        ),
-                                        if (useInlineStatus)
-                                          Positioned(
-                                            bottom: 10,
-                                            right: 16,
-                                            child: messageStatusRow,
-                                          ),
+                                        )),
                                         if (useBottomRowStatus)
                                           Positioned(
                                             left: 0,
