@@ -359,10 +359,6 @@ class MessageContent extends StatelessWidget {
                   latitude: latlong.first!,
                   longitude: latlong.last!,
                   geoUri: geoUri,
-                  isLive: event.content['live_location'] == true,
-                  expiresAt: event.content['expires_at'] != null 
-                      ? DateTime.tryParse(event.content['expires_at']) 
-                      : null,
                 );
               }
             }

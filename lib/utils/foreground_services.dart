@@ -57,9 +57,6 @@ abstract class ForegroundServices {
   /// beheert) wordt als echt extern beschouwd.
   static const _ownerKey = 'foreground_service_starter';
 
-  /// Naam waarmee de live locatie service draait.
-  static const liveLocationService = 'live_location';
-  
   /// Naam waarmee main.dart de koude-start-service start.
   static const backgroundPushService = 'background_push';
 
@@ -214,9 +211,7 @@ abstract class ForegroundServices {
         notificationTitle: AppConfig.applicationName,
         notificationText: isPushService
             ? l10n.pushServiceNotification
-            : (name == ForegroundServices.liveLocationService 
-                ? 'Deelt nu live locatie...' 
-                : l10n.loadingMessages),
+            : l10n.loadingMessages,
       );
       // Markeren wie 'm startte: een app-kill laat de native service draaien,
       // en zonder dit staat de volgende processtart hem buiten onze scope.
@@ -257,7 +252,7 @@ abstract class ForegroundServices {
   static void _armWatchdog(String name) {
     _watchdogs[name]?.cancel();
     _watchdogs.remove(name);
-    if (name != backgroundPushService && name != liveLocationService) return;
+    if (name != backgroundPushService) return;
     _watchdogs[name] = Timer(watchdogTimeout, () async {
       Logs().w('[ForegroundServices] watchdog fired for $name, stopping');
       await stopService(name);

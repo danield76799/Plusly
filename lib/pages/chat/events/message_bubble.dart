@@ -262,13 +262,6 @@ class _MessageBubbleState extends State<MessageBubble> {
       return StateMessage(event, selected: widget.selected, controller: widget.chatController);
     }
 
-    if (event.type == EventTypes.Message && event.messageType == MessageTypes.Location && event.content['live_location'] == true) {
-      final isOutdated = timeline.events.takeWhile((e) => e.originServerTs.isAfter(event.originServerTs)).any(
-        (e) => e.senderId == event.senderId && e.content['live_location'] == true
-      );
-      if (isOutdated) return const SizedBox.shrink();
-    }
-
     final client = Matrix.of(context).client;
     final ownMessage = event.senderId == client.userID;
     final alignment = ownMessage ? Alignment.topRight : Alignment.topLeft;

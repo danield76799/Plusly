@@ -261,13 +261,6 @@ class ChatInputRow extends StatelessWidget {
                                             ),
                                           ),
                                           PopupMenuItem(
-                                            value: 'live-location',
-                                            child: ListTile(
-                                              leading: const Icon(Icons.my_location),
-                                              title: Text('Live locatie delen'),
-                                            ),
-                                          ),
-                                          PopupMenuItem(
                                             value: 'contact',
                                             child: ListTile(
                                               leading: const Icon(Icons.person_outline),

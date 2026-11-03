@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -37,7 +36,7 @@ class _RenderMapIntrinsicBox extends RenderProxyBox {
   double computeMaxIntrinsicHeight(double width) => side;
 }
 
-class MapBubble extends StatefulWidget {
+class MapBubble extends StatelessWidget {
   final double latitude;
   final double longitude;
   final double zoom;
@@ -45,9 +44,6 @@ class MapBubble extends StatefulWidget {
   final double height;
   final double radius;
   final Uri? geoUri;
-  final bool isLive;
-  final DateTime? expiresAt;
-
   const MapBubble({
     required this.latitude,
     required this.longitude,
@@ -56,72 +52,32 @@ class MapBubble extends StatefulWidget {
     this.height = 400,
     this.radius = 10.0,
     this.geoUri,
-    this.isLive = false,
-    this.expiresAt,
     super.key,
   });
-
-  @override
-  State<MapBubble> createState() => _MapBubbleState();
-}
-
-class _MapBubbleState extends State<MapBubble> {
-  Timer? _timer;
-  Duration _remainingTime = Duration.zero;
-
-  @override
-  void initState() {
-    super.initState();
-    _updateRemainingTime();
-    if (widget.isLive && widget.expiresAt != null) {
-      _timer = Timer.periodic(const Duration(seconds: 1), (_) => _updateRemainingTime());
-    }
-  }
-
-  void _updateRemainingTime() {
-    if (widget.expiresAt == null) return;
-    final diff = widget.expiresAt!.difference(DateTime.now());
-    setState(() {
-      _remainingTime = diff.isNegative ? Duration.zero : diff;
-    });
-  }
-
-  String get _timeString {
-    if (_remainingTime == Duration.zero) return 'Verlopen';
-    final minutes = _remainingTime.inMinutes;
-    final seconds = _remainingTime.inSeconds % 60;
-    return 'Eindigt over ${minutes}m ${seconds}s';
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return GestureDetector(
-      onTap: widget.geoUri != null
-          ? () => UrlLauncher(context, widget.geoUri.toString()).launchUrl()
+      onTap: geoUri != null
+          ? () => UrlLauncher(context, geoUri.toString()).launchUrl()
           : null,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(widget.radius),
+        borderRadius: BorderRadius.circular(radius),
         child: _MapIntrinsicBox(
-          side: widget.width < widget.height ? widget.width : widget.height,
+          side: width < height ? width : height,
           child: Container(
-            constraints: BoxConstraints.loose(Size(widget.width, widget.height)),
+            constraints: BoxConstraints.loose(Size(width, height)),
             child: AspectRatio(
-              aspectRatio: widget.width / widget.height,
+              aspectRatio: width / height,
               child: Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
                   FlutterMap(
                     options: MapOptions(
-                      initialCenter: LatLng(widget.latitude, widget.longitude),
-                      initialZoom: widget.zoom,
+                      initialCenter: LatLng(latitude, longitude),
+                      initialZoom: zoom,
                       interactionOptions: const InteractionOptions(
                         flags: InteractiveFlag.none,
                       ),
@@ -137,7 +93,7 @@ class _MapBubbleState extends State<MapBubble> {
                         rotate: true,
                         markers: [
                           Marker(
-                            point: LatLng(widget.latitude, widget.longitude),
+                            point: LatLng(latitude, longitude),
                             width: 30,
                             height: 30,
                             child: Transform.translate(
@@ -178,11 +134,11 @@ class _MapBubbleState extends State<MapBubble> {
                       children: [
                         Expanded(
                           child: Text(
-                            '${widget.latitude.toStringAsFixed(5)}, ${widget.longitude.toStringAsFixed(5)}',
+                            '${latitude.toStringAsFixed(5)}, ${longitude.toStringAsFixed(5)}',
                             style: const TextStyle(color: Colors.white70, fontSize: 11),
                           ),
                         ),
-                        if (widget.geoUri != null)
+                        if (geoUri != null)
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
@@ -208,56 +164,6 @@ class _MapBubbleState extends State<MapBubble> {
                       ],
                     ),
                   ),
-                  // LIVE Indicator
-                  if (widget.isLive)
-                    Positioned(
-                      top: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [BoxShadow(color: Colors.black.withAlpha(100), blurRadius: 4)],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.fiber_manual_record, color: Colors.white, size: 10),
-                            const SizedBox(width: 4),
-                            Text(
-                              'LIVE',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  // Countdown timer for live location
-                  if (widget.isLive && widget.expiresAt != null)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withAlpha(150),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          _timeString,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
                 ],
               ),
             ),
