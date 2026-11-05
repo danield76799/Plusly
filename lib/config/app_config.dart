@@ -68,7 +68,7 @@ abstract class AppConfig {
   /// Instellingen → Meldingen ze kan tonen (FC app_config.dart:65).
   static const String pushHelperCrashReportKey = 'push_helper_crash_report';
   static const String recentEmojisAccountDataKey = 'io.element.recent_emoji';
-  static const double borderRadius = 18.0;
+  static const double borderRadius = 20.0;
   static const double columnWidth = 360.0;
   static final Uri homeserverList = Uri(
     scheme: 'https',

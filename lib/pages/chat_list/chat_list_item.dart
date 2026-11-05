@@ -102,7 +102,7 @@ class ChatListItem extends StatelessWidget {
         ? false
         : room.getState(EventTypes.RoomMember, lastEvent.senderId) == null;
 
-    final borderRadius = BorderRadius.circular(12);
+    final borderRadius = BorderRadius.circular(AppConfig.borderRadius);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),

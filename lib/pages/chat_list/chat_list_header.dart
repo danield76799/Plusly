@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 
 import 'package:matrix/matrix.dart';
 
@@ -80,10 +81,13 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
         ? 1.0
         : (1.0 - (shrinkOffset / _searchBarHeight)).clamp(0.0, 1.0);
 
-    return Material(
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Material(
       elevation: shrinkOffset > 0 ? 4 : 0,
       surfaceTintColor: theme.colorScheme.surfaceTint,
-      color: theme.colorScheme.surface,
+      color: theme.colorScheme.surface.withValues(alpha: 0.72),
       child: Padding(
         padding: EdgeInsets.only(top: topPadding),
         child: Column(
@@ -304,12 +308,12 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildTabBar(BuildContext context, ThemeData theme) {
+Widget _buildTabBar(BuildContext context, ThemeData theme) {
     final filters = [
-      ActiveFilter.allChats,
       ActiveFilter.unread,
       ActiveFilter.groups,
       ActiveFilter.pinned,

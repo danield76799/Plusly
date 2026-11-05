@@ -5,7 +5,7 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'app_config.dart';
 
 abstract class FluffyThemes {
-  static const double columnWidth = 380.0;
+  static const double columnWidth = 400.0;
 
   static const double navRailWidth = 80.0;
 
