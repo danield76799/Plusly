@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
 import 'package:matrix/src/utils/markdown.dart';
 import 'package:mime/mime.dart';
 

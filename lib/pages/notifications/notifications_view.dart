@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
+// ignore: implementation_imports
 import 'package:matrix/src/models/timeline_chunk.dart' show TimelineChunk;
 
 import 'package:Pulsly/config/themes.dart';

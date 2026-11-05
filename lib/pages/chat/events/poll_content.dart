@@ -390,15 +390,17 @@ class PollWidgetState extends State<PollWidget> {
                                       // Selection indicator
                                       if (canVote) ...[
                                         if (maxSelections == 1)
-                                          Radio<bool>(
-                                            value: true,
+                                          RadioGroup<bool>(
                                             groupValue: isSelected,
                                             onChanged: (_) => _onAnswerSelected(
                                               answerId,
                                               !isSelected,
                                             ),
-                                            visualDensity:
-                                                VisualDensity.compact,
+                                            child: Radio<bool>(
+                                              value: true,
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                            ),
                                           )
                                         else
                                           Checkbox(
