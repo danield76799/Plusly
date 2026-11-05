@@ -309,11 +309,13 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
         ),
       ),
     ),
-  );
+  ),
+);
 }
 
 Widget _buildTabBar(BuildContext context, ThemeData theme) {
     final filters = [
+      ActiveFilter.allChats,
       ActiveFilter.unread,
       ActiveFilter.groups,
       ActiveFilter.pinned,

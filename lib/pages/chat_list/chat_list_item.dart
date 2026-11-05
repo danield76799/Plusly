@@ -11,6 +11,7 @@ import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import 'package:Pulsly/widgets/hover_builder.dart';
 import 'package:Pulsly/utils/bridge_utils.dart';
 import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import '../../utils/date_time_extension.dart';
 import '../../widgets/avatar.dart';
