@@ -260,6 +260,16 @@ class PushHelper {
       return null;
     }
     helper.client = client;
+    if (!client.isLogged()) {
+      Logs().w(
+        'Push helper: client ${client.clientName} is niet ingelogd, push genegeerd',
+      );
+      PushEventLog().add('push_client_not_logged_in', {
+        'client': client.clientName,
+        'room': notification.roomId ?? '',
+      });
+      return null;
+    }
     // FC-pariteit (r125): tijdstempel van de laatst ontvangen push bewaren.
     await PushHelperInstrumentation.markeerLaatstePush(client.clientName);
 
