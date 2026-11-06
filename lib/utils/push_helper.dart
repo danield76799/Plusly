@@ -295,7 +295,11 @@ class PushHelper {
     }
 
     // Upstream r135: badge bijwerken.
-    updateAppBadge(notification.counts?.unread ?? 0);
+    try {
+      updateAppBadge(notification.counts?.unread ?? 0);
+    } catch (e, s) {
+      Logs().w('Push helper: badge update failed', e, s);
+    }
 
     if (event == null) {
       // Upstream r137-174: clearing-indicator.
@@ -653,11 +657,15 @@ class PushHelper {
         (n) => n.id == notificationId,
       );
       if (hasSameRoomActive) {
-        await updateSummaryNotification(
-          clientName: client.clientName,
-          l10n: l10n!,
-          flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
-        );
+        try {
+          await updateSummaryNotification(
+            clientName: client.clientName,
+            l10n: l10n!,
+            flutterLocalNotificationsPlugin: flutterLocalNotificationsPlugin,
+          );
+        } catch (e, s) {
+          Logs().w('Push helper: summary notification update failed', e, s);
+        }
       }
     }
 
@@ -708,10 +716,15 @@ class PushHelper {
       ),
     );
 
-    final messagingStyleInformation = PlatformInfos.isAndroid
-        ? await AndroidFlutterLocalNotificationsPlugin()
-              .getActiveNotificationMessagingStyle(id: notificationId)
-        : null;
+    MessagingStyleInformation? messagingStyleInformation;
+    if (PlatformInfos.isAndroid) {
+      try {
+        messagingStyleInformation = await AndroidFlutterLocalNotificationsPlugin()
+            .getActiveNotificationMessagingStyle(id: notificationId);
+      } catch (e, s) {
+        Logs().w('Push helper: MessagingStyle ophalen mislukt', e, s);
+      }
+    }
 
     if (messagingStyleInformation?.messages != null) {
       final messages = messagingStyleInformation!.messages!;
@@ -727,7 +740,11 @@ class PushHelper {
     }
 
     if (PlatformInfos.isAndroid && messagingStyleInformation == null) {
-      await _setShortcut(notificationTitle, roomAvatarFile);
+      try {
+        await _setShortcut(notificationTitle, roomAvatarFile);
+      } catch (e, s) {
+        Logs().w('Push helper: shortcut zetten mislukt', e, s);
+      }
     }
 
     final matrixLocals = MatrixLocals(l10n!);
@@ -762,14 +779,7 @@ class PushHelper {
             groupConversation: !event.room.isDirectChat,
             messages: [newMessage],
           ),
-      ticker: event.calcLocalizedBodyFallback(
-        matrixLocals,
-        plaintextBody: true,
-        withSenderNamePrefix: !event.room.isDirectChat,
-        hideReply: true,
-        hideEdit: true,
-        removeMarkdown: true,
-      ),
+      ticker: _safeTicker(event, matrixLocals),
       importance: Importance.high,
       priority: Priority.max,
       // Eén heads-up per bericht, niet per push. Bij een push-burst
@@ -813,6 +823,24 @@ class PushHelper {
       android: androidPlatformChannelSpecifics,
       iOS: iOSPlatformChannelSpecifics,
     );
+  }
+
+  /// Veilige ticker: een fout in de tekstberekening mag de melding niet
+  /// laten vallen.
+  static String? _safeTicker(Event event, MatrixLocals matrixLocals) {
+    try {
+      return event.calcLocalizedBodyFallback(
+        matrixLocals,
+        plaintextBody: true,
+        withSenderNamePrefix: !event.room.isDirectChat,
+        hideReply: true,
+        hideEdit: true,
+        removeMarkdown: true,
+      );
+    } catch (e, s) {
+      Logs().w('Push helper: ticker berekenen mislukt', e, s);
+      return null;
+    }
   }
 
   /// Creates a shortcut for Android platform but does not block displaying the
