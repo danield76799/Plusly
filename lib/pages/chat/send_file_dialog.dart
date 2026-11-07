@@ -326,18 +326,14 @@ class SendFileDialogState extends State<SendFileDialog> {
       // (video-compressie duurt lang) en uit in finally — ook bij falen.
       await ForegroundServices.startService('send_files');
 
-      // Galerij: alle bestanden in één MSC4274-bericht. In overbrugde
-      // kamers (Telegram, WhatsApp, Signal...) kan de brug dit berichttype
-      // niet converteren en komt het er nooit aan — daar dus losse
-      // berichten.
-      if (AppSettings.useGalleries.value &&
-          widget.files.length > 1 &&
-          !isBridgeRoom(widget.room)) {
-        await _sendGallery(scaffoldMessenger, l10n, maxUploadSize);
-        scaffoldMessenger.clearSnackBars();
-        return;
-      }
-
+      // Galerie-verzending is actief uitgezet: `dm.filament.gallery`-events
+      // werden door brugrooms (WhatsApp, Telegram, Signal, ...) afgewezen met
+      // "failed to convert message: unsupported message type dm.filament.
+      // gallery", ook als Plusly dacht dat de kamer geen brugkamer was.
+      // Per bestand versturen werkt in Matrix, brug- en groepschats.
+      // (Het `_sendGallery`-pad blijft beschikbaar voor dedicated Matrix-rooms
+      // wanneer bridge-detectie 100% betrouwbaar kan worden.)
+      // `_sendGallery` stays defined for future use.
       for (final xfile in widget.files) {
         MatrixFile file;
         MatrixImageFile? thumbnail;
