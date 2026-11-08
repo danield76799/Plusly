@@ -3,9 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/generated/l10n/l10n.dart';
-import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_locals.dart';
+import 'package:Pulsly/utils/redacted_body_cache.dart';
 
-
+/// Toont een verwijderd bericht.
+///
+/// Standaard zie je alleen "Verwijderd door X". Tik je erop, dan klapt de
+/// originele tekst open.
+///
+/// De originele tekst komt uit [RedactedBodyCache]: bij een redaction
+/// verwijdert de Matrix-SDK de content van het event, dus de tekst is dan
+/// alleen terug te vinden als die vooraf bewaard is.
 class EventRedactedContent extends StatefulWidget {
   final Event event;
   final Color textColor;
@@ -40,8 +47,13 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
             ? L10n.of(context).redactedBy(redactedBy)
             : L10n.of(context).redactedByBecause(redactedBy, reason);
 
-        final body = widget.event.body;
-
+        // Originele tekst uit de cache. Zonder deze cache levert de
+        // Event.body de letterlijke string 'Redacted' op: de SDK strip't de
+        // content van een bericht zodra het wordt verwijderd.
+        final cached = RedactedBodyCache.instance.lookup(
+          redactedCacheKey(widget.event.room.id, widget.event.eventId),
+        );
+        final body = cached ?? widget.event.text;
 
         return GestureDetector(
           onTap: () => setState(() => _showContent = !_showContent),
@@ -52,7 +64,7 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Original content (clicked to hide):',
+                      L10n.of(context).redactedOriginalContent,
                       style: TextStyle(
                         color: widget.textColor.withAlpha(100),
                         fontSize: widget.fontSize * 0.8,
@@ -61,7 +73,9 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      body.isEmpty ? 'No text content available' : body,
+                      body.isEmpty
+                          ? L10n.of(context).redactedContentUnavailable
+                          : body,
                       style: TextStyle(
                         color: widget.textColor,
                         fontSize: widget.fontSize,
@@ -69,7 +83,7 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Tap to hide 🗑️',
+                      L10n.of(context).redactedTapToHide,
                       style: TextStyle(
                         color: widget.textColor.withAlpha(128),
                         fontSize: widget.fontSize * 0.8,
@@ -78,7 +92,7 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
                   ],
                 )
               : Text(
-                  '🗑️  $label (tap to show)',
+                  '🗑️  $label (${L10n.of(context).redactedTapToShow})',
                   style: TextStyle(
                     color: widget.textColor.withAlpha(128),
                     fontSize: widget.fontSize,

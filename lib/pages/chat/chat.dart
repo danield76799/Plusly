@@ -42,6 +42,7 @@ import 'package:Pulsly/utils/matrix_sdk_extensions/synapse_admin_extension.dart'
 import 'package:Pulsly/utils/other_party_can_receive.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_event_log.dart';
+import 'package:Pulsly/utils/redacted_body_cache.dart';
 import 'package:Pulsly/utils/foreground_services.dart';
 import 'package:Pulsly/utils/scheduled_message_manager.dart';
 import 'package:Pulsly/utils/privacy_options.dart';
@@ -823,6 +824,12 @@ class ChatController extends State<ChatPageWithRoom>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      // De cache van verwijderde berichten wegschrijven voordat de app
+      // naar de achtergrond gaat, anders verliezen we de laatste seconden.
+      unawaited(RedactedBodyCache.instance.flush());
+    }
     if (state != AppLifecycleState.resumed) {
       return;
     }

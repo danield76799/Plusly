@@ -4235,5 +4235,9 @@
   "wakeScreenLater": "Later",
   "links": "Koppelingen",
   "today": "Vandaag",
-  "yesterday": "Gisteren"
+  "yesterday": "Gisteren",
+  "redactedTapToShow": "tik om te tonen",
+  "redactedTapToHide": "Tik om te verbergen 🗑️",
+  "redactedOriginalContent": "Originele inhoud (tik om te verbergen):",
+  "redactedContentUnavailable": "De originele inhoud is niet meer beschikbaar."
 }
