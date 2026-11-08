@@ -38,6 +38,10 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
             ? L10n.of(context).redactedBy(redactedBy)
             : L10n.of(context).redactedByBecause(redactedBy, reason);
 
+        final body = widget.event.calcLocalizedBodyFallback(
+          MatrixLocals(L10n.of(context)),
+        );
+
         return GestureDetector(
           onTap: () => setState(() => _showContent = !_showContent),
           child: Padding(
@@ -56,7 +60,7 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      widget.event.content.tryGet<String>('body') ?? 'No text content available',
+                      body.isEmpty ? 'No text content available' : body,
                       style: TextStyle(
                         color: widget.textColor,
                         fontSize: widget.fontSize,
