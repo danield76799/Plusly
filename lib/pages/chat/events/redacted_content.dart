@@ -40,9 +40,8 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
             ? L10n.of(context).redactedBy(redactedBy)
             : L10n.of(context).redactedByBecause(redactedBy, reason);
 
-        final body = widget.event.calcLocalizedBodyFallback(
-          MatrixLocals(L10n.of(context)),
-        );
+        final body = widget.event.body;
+
 
         return GestureDetector(
           onTap: () => setState(() => _showContent = !_showContent),
