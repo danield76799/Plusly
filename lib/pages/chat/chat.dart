@@ -245,6 +245,13 @@ class ChatController extends State<ChatPageWithRoom>
 
   ValueNotifier<bool> get scrolledUpNotifier => _scrolledUp;
 
+  /// Drijvende datum-chip: toont de dag van de oudste berichten die je
+  /// tijdens het scrollen ziet. `null` = de nieuwste berichten zijn in beeld
+  /// (of er is geen scrollpositie) en de chip verdwijnt.
+  final ValueNotifier<DateTime?> floatingDateNotifier =
+      ValueNotifier<DateTime?>(null);
+  int? _floatingDateEventIndex;
+
   bool get selectMode => selectedEvents.isNotEmpty;
 
   final int _loadHistoryCount = 200;
@@ -380,6 +387,97 @@ class ChatController extends State<ChatPageWithRoom>
     } else if (scrollController.position.pixels <= 0 && _scrolledUp.value) {
       _scrolledUp.value = false;
       setReadMarker();
+    }
+    _updateFloatingDateIndicator();
+  }
+
+  /// Bereken de dag voor de drijvende datum-chip.
+  ///
+  /// Werkt op de GEFILTERDE lijst (dus hetzelfde beeld als de SliverList) en
+  /// hergebruikt de AutoScrollTag-caches zodat we geen item-extents hoeven te
+  /// raden: voor elke zichtbare event kunnen we de gerenderde RenderBox
+  /// bevragen en checken of hij met de viewport-snede overlap heeft.
+  void _updateFloatingDateIndicator() {
+    final tl = timeline;
+    if (tl == null || !mounted) return;
+    if (!scrollController.hasClients) return;
+    final position = scrollController.position;
+    if (!position.hasPixels) {
+      _clearFloatingDateIndicator();
+      return;
+    }
+
+    // Bovenaan (nieuwste berichten) is er niets te indiceren.
+    if (position.pixels <= position.minScrollExtent) {
+      _clearFloatingDateIndicator();
+      return;
+    }
+
+    final events = showThreadRoots == true
+        ? tl.events.filterThreadRoots().filterByVisibleInGui()
+        : tl.events
+            .filterByThreaded(thread != null)
+            .filterByVisibleInGui();
+    if (events.length < 2) {
+      _clearFloatingDateIndicator();
+      return;
+    }
+
+    final eventsKeyMap = <String, int>{};
+    for (var i = 0; i < events.length; i++) {
+      eventsKeyMap[events[i].eventId] = i;
+    }
+
+    // Snel pad: de vorige index werkt nog, dus bewaar die.
+    final cachedIndex = _floatingDateEventIndex;
+    if (cachedIndex != null &&
+        cachedIndex < events.length &&
+        _isEventVisibleInScroll(events[cachedIndex].eventId, eventsKeyMap)) {
+      _applyFloatingDate(events[cachedIndex].originServerTs);
+      return;
+    }
+
+    for (var i = 0; i < events.length; i++) {
+      if (!_isEventVisibleInScroll(events[i].eventId, eventsKeyMap)) continue;
+      _floatingDateEventIndex = i;
+      _applyFloatingDate(events[i].originServerTs);
+      return;
+    }
+    _clearFloatingDateIndicator();
+  }
+
+  bool _isEventVisibleInScroll(String eventId, Map<String, int> eventsKeyMap) {
+    final eventIndex = eventsKeyMap[eventId];
+    if (eventIndex == null) return false;
+    // AutoScrollTag index == eventIndex (vóór findChildIndexCallback de +1
+    // voor de "typen"-regel toepast). Zie comment daar.
+    final tagState = scrollController.tagMap[eventIndex];
+    final tagContext = tagState?.context;
+    if (tagContext == null) return false;
+    final renderBox = tagContext.findRenderObject() as RenderBox?; // ignore: avoid_as
+    if (renderBox == null || !renderBox.attached) return false;
+    final scrollRenderBox =
+        scrollController.position.context.storageContext.findRenderObject()
+            as RenderBox?; // ignore: avoid_as
+    if (scrollRenderBox == null) return false;
+    final viewportTop = scrollRenderBox.localToGlobal(Offset.zero).dy;
+    final viewportBottom =
+        viewportTop + scrollController.position.viewportDimension;
+    final widgetTop = renderBox.localToGlobal(Offset.zero).dy;
+    final widgetBottom = widgetTop + renderBox.size.height;
+    return widgetBottom > viewportTop && widgetTop < viewportBottom;
+  }
+
+  void _applyFloatingDate(DateTime date) {
+    if (floatingDateNotifier.value != date) {
+      floatingDateNotifier.value = date;
+    }
+  }
+
+  void _clearFloatingDateIndicator() {
+    _floatingDateEventIndex = null;
+    if (floatingDateNotifier.value != null) {
+      floatingDateNotifier.value = null;
     }
   }
 
@@ -928,6 +1026,8 @@ class ChatController extends State<ChatPageWithRoom>
     scrollController.removeListener(_updateScrollController);
     scrollController.dispose();
     _scrolledUp.dispose();
+    _clearFloatingDateIndicator();
+    floatingDateNotifier.dispose();
     timeline?.cancelSubscriptions();
     timeline = null;
     inputFocus.removeListener(_inputFocusListener);

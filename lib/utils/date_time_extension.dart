@@ -47,6 +47,41 @@ extension DateTimeExtension on DateTime {
       ? DateFormat('HH:mm:ss', L10n.of(context).localeName).format(this)
       : DateFormat('h:mm:ss a', L10n.of(context).localeName).format(this);
 
+  /// Vergelijkt twee datums op dagniveau (geen tijdsverschil, geen
+  /// zomertijd-drift): gebruikt bij de drijvende datum-chip.
+  bool isSameDay(DateTime other) =>
+      year == other.year && month == other.month && day == other.day;
+
+  /// Dag/mnd-label voor de drijvende datum-chip: "Vandaag", "Gisteren",
+  /// de weekdag (laatste 7 dagen), anders "8 november" (of met jaar).
+  String localizedMonthDay(BuildContext context) {
+    final now = DateTime.now();
+
+    if (isSameDay(now)) {
+      return L10n.of(context).today;
+    }
+    if (isSameDay(now.subtract(const Duration(days: 1)))) {
+      return L10n.of(context).yesterday;
+    }
+
+    final sameYear = now.year == year;
+
+    if (sameYear &&
+        now.millisecondsSinceEpoch - millisecondsSinceEpoch <
+            1000 * 60 * 60 * 24 * 7) {
+      return DateFormat.EEEE(
+        Localizations.localeOf(context).languageCode,
+      ).format(this);
+    } else if (sameYear) {
+      return DateFormat.MMMMd(
+        Localizations.localeOf(context).languageCode,
+      ).format(this);
+    }
+    return DateFormat.yMMMMd(
+      Localizations.localeOf(context).languageCode,
+    ).format(this);
+  }
+
   /// Returns [localizedTimeOfDay()] if the ChatTime is today, the name of the week
   /// day if the ChatTime is this week and a date string else.
   String localizedTimeShort(BuildContext context) {

@@ -4234,5 +4234,7 @@
   "wakeScreenTitle": "Screen on",
   "wakeScreenBody": "Want the screen to light up when a notification arrives, even when your phone is locked? On Android 14 and newer this permission is off by default.",
   "wakeScreenLater": "Later",
-  "links": "Links"
+  "links": "Links",
+  "today": "Today",
+  "yesterday": "Yesterday"
 }

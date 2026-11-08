@@ -11,11 +11,13 @@ import 'package:go_router/go_router.dart';
 import 'package:matrix/matrix.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
+import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
 import 'package:Pulsly/pages/chat/chat_app_bar_list_tile.dart';
+import 'package:Pulsly/utils/date_time_extension.dart';
 import 'package:Pulsly/pages/chat/chat_app_bar_title.dart';
 import 'package:Pulsly/pages/chat/chat_event_list.dart';
 import 'package:Pulsly/pages/chat/encryption_button.dart';
@@ -433,6 +435,14 @@ class ChatView extends StatelessWidget {
             if (controller.room.pinnedEventIds.isNotEmpty) {
               appbarBottomHeight += ChatAppBarListTile.fixedHeight;
             }
+            // Drijvende datum-chip. Met frosted-glass start de body óók
+            // achter de AppBar, dan telt de balk-hoogte mee; zonder begint de
+            // body onder de balk en is de Appbar al "gebruikt".
+            final chipTop = (AppSettings.enableChatFrostedGlass.value
+                    ? MediaQuery.of(context).padding.top + kToolbarHeight
+                    : 0.0) +
+                appbarBottomHeight +
+                8;
             return Scaffold(
               extendBodyBehindAppBar: AppSettings.enableChatFrostedGlass.value,
               appBar: AppBar(
@@ -589,6 +599,49 @@ class ChatView extends StatelessWidget {
                           key: const ValueKey('chat-event-list'),
                           controller: controller,
                           showThreadRoots: controller.showThreadRoots,
+                        ),
+                      ),
+                    ),
+
+                    // Drijvende datum-chip: toont de dag van de oudste
+                    // berichten zodra je in de historie scrolt (extera 26.5.5).
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      top: chipTop,
+                      child: IgnorePointer(
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: ValueListenableBuilder<DateTime?>(
+                            valueListenable: controller.floatingDateNotifier,
+                            builder: (context, date, _) => AnimatedSwitcher(
+                              duration: FluffyThemes.animationDuration,
+                              transitionBuilder: (child, animation) =>
+                                  FadeTransition(
+                                opacity: animation,
+                                child: SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(0, -0.5),
+                                    end: Offset.zero,
+                                  ).animate(
+                                    CurvedAnimation(
+                                      parent: animation,
+                                      curve: Curves.easeOutCubic,
+                                    ),
+                                  ),
+                                  child: child,
+                                ),
+                              ),
+                              child: date == null
+                                  ? const SizedBox.shrink()
+                                  : _FloatingDateChip(
+                                      key: ValueKey(
+                                        date.localizedMonthDay(context),
+                                      ),
+                                      date: date,
+                                    ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -825,6 +878,31 @@ class ChatView extends StatelessWidget {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _FloatingDateChip extends StatelessWidget {
+  final DateTime date;
+  const _FloatingDateChip({super.key, required this.date});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+      borderRadius: BorderRadius.circular(AppConfig.borderRadius * 2),
+      color: theme.colorScheme.surface.withAlpha(180),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+        child: Text(
+          date.localizedMonthDay(context),
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.secondary,
+          ),
         ),
       ),
     );
