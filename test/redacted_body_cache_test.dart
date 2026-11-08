@@ -14,6 +14,7 @@
 // wordt, en levert die terug wanneer het bericht later verwijderd blijkt.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -63,6 +64,37 @@ void main() {
         redactedCacheKey('!abc:example.org', '\$event1'),
         '!abc:example.org:\$event1',
       );
+    });
+
+    test('de cache wordt gevuld vanuit de Message-wrapper', () {
+      // De opslag moet in de wrapper rond ALLE bericht-layouts staan
+      // (bubbles, bubblesLegacy, modern). In een van de bubbel-widgets
+      // zou de cache bij een andere layout leeg blijven.
+      final wrapper = File(
+        'lib/pages/chat/events/message.dart',
+      ).readAsStringSync();
+      expect(
+        wrapper,
+        contains('RedactedBodyCache.instance.store('),
+        reason:
+            'De Message-wrapper moet de originele tekst bewaren, zodat het '
+            'werkt onafhankelijk van de gekozen bericht-layout',
+      );
+
+      for (final bubbel in [
+        'lib/pages/chat/events/message_bubble.dart',
+        'lib/pages/chat/events/message_bubble_legacy.dart',
+        'lib/pages/chat/events/message_modern.dart',
+      ]) {
+        final inhoud = File(bubbel).readAsStringSync();
+        expect(
+          inhoud,
+          isNot(contains('RedactedBodyCache.instance.store(')),
+          reason:
+              '$bubbel slaat de body op; dat hoort in de Message-wrapper, '
+              'anders blijft de cache leeg bij een andere layout',
+        );
+      }
     });
 
     test('de cache overleeft een herstart (SharedPreferences)', () async {

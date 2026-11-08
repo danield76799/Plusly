@@ -19,7 +19,6 @@ import 'package:Pulsly/utils/matrix_sdk_extensions/event_extension.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/poll_events.dart';
 import 'package:Pulsly/utils/privacy_options.dart';
-import 'package:Pulsly/utils/redacted_body_cache.dart';
 import 'package:Pulsly/utils/string_color.dart';
 import 'package:Pulsly/widgets/avatar.dart';
 import 'package:Pulsly/widgets/matrix.dart';
@@ -248,19 +247,6 @@ class _MessageBubbleState extends State<MessageBubble> {
     final event = widget.event;
     final timeline = widget.timeline;
     final theme = Theme.of(context);
-
-    // Bewaar de originele tekst ZODRA we het bericht zien. Bij een redaction
-    // strip't de SDK de content weg, waarna de tekst nergens meer te vinden
-    // is. Met deze cache blijft een verwijderd bericht leesbaar.
-    if (!event.redacted) {
-      final body = event.text;
-      if (body.isNotEmpty) {
-        RedactedBodyCache.instance.store(
-          redactedCacheKey(event.room.id, event.eventId),
-          body,
-        );
-      }
-    }
 
     if (!{EventTypes.Message, EventTypes.Sticker, EventTypes.Encrypted, EventTypes.CallInvite, PollEvents.pollStart}.contains(event.type)) {
       if (event.type.startsWith('m.call.')) return const SizedBox.shrink();

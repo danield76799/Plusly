@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/utils/redacted_body_cache.dart';
 import 'message_bubble.dart';
 import 'message_bubble_legacy.dart';
 import 'message_modern.dart';
@@ -70,6 +71,15 @@ class Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Bewaar de originele tekst ZODRA we het bericht zien. Bij een redaction
+    // strip't de SDK de content weg, waarna de tekst nergens meer te vinden
+    // is. Met deze cache blijft een verwijderd bericht leesbaar.
+    //
+    // Dit staat HIER, in de wrapper om alle drie de layouts heen (bubbles,
+    // bubblesLegacy, modern): in een van de bubbel-widgets zou de cache bij
+    // een andere layout leeg blijven.
+    _cacheBody();
+
     final Widget message = switch (layout) {
       MessageLayout.bubbles => MessageBubble(
         event,
@@ -150,5 +160,39 @@ class Message extends StatelessWidget {
     };
 
     return message;
+  }
+
+  /// Bewaart de originele tekst van dit bericht in [RedactedBodyCache].
+  ///
+  /// Bij een Matrix-redaction verwijdert de SDK de content van het event
+  /// (`Event.setRedactionEvent` zet `prevContent` op null en leegt de
+  /// content-whitelist). Daarna levert `Event.body` de letterlijke string
+  /// `'Redacted'` op en is de tekst nergens meer terug te vinden uit het
+  /// event zelf.
+  ///
+  /// Het bericht wordt onder twee id's bewaard:
+  /// - het id van het originele event (dat gebruikt de weergave bij een
+  ///   redaction, want `getDisplayEvent` geeft dan `this` terug);
+  /// - het id van het weergegeven event, want bij een bewerking geeft
+  ///   `getDisplayEvent` de edit-event terug en die heeft een ander id.
+  void _cacheBody() {
+    if (event.redacted) return;
+    final body = event.text;
+    if (body.isEmpty) return;
+
+    final roomId = event.room.id;
+    RedactedBodyCache.instance.store(redactedCacheKey(roomId, event.eventId), body);
+
+    try {
+      final displayEvent = event.getDisplayEvent(timeline);
+      if (displayEvent.eventId != event.eventId) {
+        RedactedBodyCache.instance.store(
+          redactedCacheKey(roomId, displayEvent.eventId),
+          body,
+        );
+      }
+    } catch (_) {
+      // Alleen een extra sleutel; het originele id is al bewaard.
+    }
   }
 }
