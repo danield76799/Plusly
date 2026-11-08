@@ -49,8 +49,8 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
                     Text(
                       'Original content (clicked to hide):',
                       style: TextStyle(
-                        color: textColor.withAlpha(100),
-                        fontSize: fontSize * 0.8,
+                        color: widget.textColor.withAlpha(100),
+                        fontSize: widget.fontSize * 0.8,
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -58,16 +58,16 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
                     Text(
                       widget.event.content.tryGet<String>('body') ?? 'No text content available',
                       style: TextStyle(
-                        color: textColor,
-                        fontSize: fontSize,
+                        color: widget.textColor,
+                        fontSize: widget.fontSize,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Tap to hide 🗑️',
                       style: TextStyle(
-                        color: textColor.withAlpha(128),
-                        fontSize: fontSize * 0.8,
+                        color: widget.textColor.withAlpha(128),
+                        fontSize: widget.fontSize * 0.8,
                       ),
                     ),
                   ],
@@ -75,9 +75,10 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
               : Text(
                   '🗑️  $label (tap to show)',
                   style: TextStyle(
-                    color: textColor.withAlpha(128),
-                    fontSize: fontSize,
-                    decoration: const TextDecoration.underline(style: TextDecorationStyle.dotted),
+                    color: widget.textColor.withAlpha(128),
+                    fontSize: widget.fontSize,
+                    decoration: TextDecoration.underline,
+                    decorationStyle: TextDecorationStyle.dotted,
                   ),
                 ),
           ),
