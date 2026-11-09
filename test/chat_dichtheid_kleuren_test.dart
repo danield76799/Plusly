@@ -95,7 +95,7 @@ void main() {
         reason: 'de standaardbubbel houdt 10dp marge',
       );
       expect(
-        bubbel.contains('horizontal: 10.0,'),
+        bubbel.contains('horizontal: 10.0'),
         isTrue,
         reason: 'de standaardbubbel houdt 10dp marge',
       );

@@ -89,7 +89,7 @@ void main() {
         reason: 'de Selecteren-knop moet zichtbaar zijn in de overlay',
       );
       expect(
-        bubble.contains('onMultiSelect'),
+        bubble.contains('widget.onSelect'),
         isTrue,
         reason: 'de overlay-knop moet de berichten echt selecteren',
       );

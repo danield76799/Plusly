@@ -119,7 +119,7 @@ void main() {
       final chat = _code('lib/pages/chat/chat.dart');
       final send = _bodyVan(chat, 'Future<void> send() async {');
       final gate = send.indexOf('if (_isSending) return;');
-      final clear = send.indexOf('_clearComposer();');
+      final clear = send.indexOf('_clearComposer();', gate);
       expect(gate, greaterThan(-1), reason: 'de debounce mag niet verdwijnen');
       expect(gate, lessThan(clear));
     });

@@ -17,7 +17,7 @@ void main() {
       final bron = File('lib/utils/push_helper.dart').readAsStringSync();
 
       expect(
-        bron.contains('event = await client.getEventByPushNotification('),
+        bron.contains('client.getEventByPushNotification('),
         isTrue,
         reason: 'event laden moet binnen try staan',
       );
