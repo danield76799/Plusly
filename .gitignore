@@ -372,3 +372,6 @@ docs/package-lock.json
 
 lib/generatedandroid/app/google-services.json
 .worktrees/
+
+# Lokaal build-log
+build_log.txt
