@@ -12,6 +12,7 @@
 
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:Pulsly/utils/check_updates.dart';
@@ -22,6 +23,14 @@ void main() {
       // Zonder de dart-define is dit de github-build, die wél zelf APK's
       // mag installeren.
       expect(isPlayStoreBuild, isFalse);
+    });
+
+    test('een debug-build mag nooit in-app updaten', () {
+      // In een test-run is kDebugMode true. Een debug-APK is met de
+      // debug-sleutel getekend en de release-APK met de release-sleutel:
+      // Android weigert die over elkaar te installeren.
+      expect(kDebugMode, isTrue);
+      expect(canInstallUpdateInApp, isFalse);
     });
 
     test('de playstore-flavor haalt REQUEST_INSTALL_PACKAGES weg', () {

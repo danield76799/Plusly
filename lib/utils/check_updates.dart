@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -27,6 +28,26 @@ import 'package:Pulsly/utils/platform_infos.dart';
 /// update. De CI zet `--dart-define=PLUSLY_PLAYSTORE=true` bij het bouwen
 /// van de Play Store-AAB.
 const bool isPlayStoreBuild = bool.fromEnvironment('PLUSLY_PLAYSTORE');
+
+/// Kan deze build zichzelf in de app updaten?
+///
+/// Drie dingen kunnen een in-app install blokkeren:
+/// 1. Een **debug-build** is met de debug-sleutel getekend
+///    (`CN=Android Debug`), terwijl de release-APK op GitHub met de
+///    release-sleutel is getekend (`CN=Plusly`). Android weigert die over
+///    elkaar te installeren: *"existing package signatures do not match"*.
+///    De update werd wél gedownload, maar de install werd geweigerd.
+/// 2. Een **Play Store-build** mist `REQUEST_INSTALL_PACKAGES` in het
+///    manifest — Google Play verbiedt dat een Play-app zelf APK's
+///    installeert.
+/// 3. In een debug-build geldt sowieso dat de release-APK overslaan
+///    zinvol is: je moet de debug-versie eerst verwijderen, en dan ben je
+///    je sessie kwijt.
+///
+/// Alleen de github-release-build kan zichzelf dus updaten. In alle andere
+/// gevallen bieden we de browser aan: de gebruiker installeert dan zelf,
+/// wat altijd mag.
+bool get canInstallUpdateInApp => !kDebugMode && !isPlayStoreBuild;
 
 /// GitHub Releases API response for a release.
 class GitHubRelease {
@@ -781,31 +802,41 @@ Future<void> checkForUpdates(BuildContext context) async {
               if (safeRelease.downloadUrl.isNotEmpty)
                 ListTile(
                   leading: Icon(
-                    safeRelease.hasApk && !isPlayStoreBuild
+                    canInstallUpdateInApp
                         ? Icons.android
                         : Icons.warning,
                   ),
                   title: Text(
-                    safeRelease.hasApk && !isPlayStoreBuild
+                    canInstallUpdateInApp
                         ? 'Download & installeer APK'
                         : 'Open releasepagina',
                   ),
                   subtitle: Text(
-                    safeRelease.hasApk && !isPlayStoreBuild
+                    canInstallUpdateInApp
                         ? 'Directe installatie'
-                        : isPlayStoreBuild
-                            // Google Play verbiedt dat een Play-app zelf
-                            // APK's installeert (REQUEST_INSTALL_PACKAGES
-                            // is niet in het manifest). De browser-route
-                            // werkt wel: de gebruiker installeert zelf.
-                            ? 'Deze build komt uit de Play Store en mag zelf '
-                                'geen APK installeren — open de pagina in de '
-                                'browser'
-                            : 'Alleen AAB beschikbaar - gebruik browser',
+                        : kDebugMode
+                            // Een debug-build is met de debug-sleutel
+                            // getekend. De release-APK heeft een andere
+                            // sleutel en kan er dus niet overheen: Android
+                            // weigert de installatie. Je moet de debug-versie
+                            // eerst verwijderen.
+                            ? 'Dit is een debug-build — Android weigert de '
+                                'release-APK omdat die een andere ondertekening '
+                                'heeft. Verwijder deze versie en installeer de '
+                                'release-APK opnieuw (je logt opnieuw in).'
+                            : isPlayStoreBuild
+                                // Google Play verbiedt dat een Play-app zelf
+                                // APK's installeert (REQUEST_INSTALL_PACKAGES
+                                // is niet in het manifest). De browser-route
+                                // werkt wel: de gebruiker installeert zelf.
+                                ? 'Deze build komt uit de Play Store en mag zelf '
+                                    'geen APK installeren — open de pagina in de '
+                                    'browser'
+                                : 'Alleen AAB beschikbaar - gebruik browser',
                   ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    if (safeRelease.hasApk && !isPlayStoreBuild) {
+                    if (canInstallUpdateInApp) {
                       Navigator.of(ctx).pop();
                       try {
                         final apkUrl = await _pickBestApkUrl(safeRelease);
