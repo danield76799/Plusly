@@ -18,6 +18,16 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/utils/adaptive_bottom_sheet.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 
+/// Is dit de Play Store-build?
+///
+/// De playstore-flavor haalt `REQUEST_INSTALL_PACKAGES` uit het manifest:
+/// Google Play verbiedt dat een Play-app zelf APK's installeert. Zonder dit
+/// te weten vroeg de updater om die permission en kreeg je de doodlopende
+/// melding "Plusly mag geen APK's installeren" in plaats van een werkende
+/// update. De CI zet `--dart-define=PLUSLY_PLAYSTORE=true` bij het bouwen
+/// van de Play Store-AAB.
+const bool isPlayStoreBuild = bool.fromEnvironment('PLUSLY_PLAYSTORE');
+
 /// GitHub Releases API response for a release.
 class GitHubRelease {
   final String tagName;
@@ -458,12 +468,12 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
 
     if (PlatformInfos.isAndroid) {
       try {
-        final status = await Permission.requestInstallPackages.status;
+        var status = await Permission.requestInstallPackages.status;
         if (!status.isGranted) {
           final result = await Permission.requestInstallPackages.request();
           if (result.isDenied || result.isPermanentlyDenied) {
             if (context.mounted) {
-              scaffold.showSnackBar(
+              ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: const Text(
                     "Plusly mag geen APK's installeren. Zet dit aan in de "
@@ -481,7 +491,9 @@ Future<void> downloadAndInstallApk(BuildContext context, String url) async {
             }
             return;
           }
+          status = result;
         }
+        Logs().v('Install-packages permission: ${status.name}');
       } on Exception catch (e) {
         Logs().w('requestInstallPackages failed', e);
       }
@@ -768,12 +780,32 @@ Future<void> checkForUpdates(BuildContext context) async {
               const Divider(),
               if (safeRelease.downloadUrl.isNotEmpty)
                 ListTile(
-                  leading: Icon(safeRelease.hasApk ? Icons.android : Icons.warning),
-                  title: Text(safeRelease.hasApk ? 'Download & installeer APK' : 'Download beschikbaar (geen APK)'),
-                  subtitle: Text(safeRelease.hasApk ? 'Directe installatie' : 'Alleen AAB beschikbaar - gebruik browser'),
+                  leading: Icon(
+                    safeRelease.hasApk && !isPlayStoreBuild
+                        ? Icons.android
+                        : Icons.warning,
+                  ),
+                  title: Text(
+                    safeRelease.hasApk && !isPlayStoreBuild
+                        ? 'Download & installeer APK'
+                        : 'Open releasepagina',
+                  ),
+                  subtitle: Text(
+                    safeRelease.hasApk && !isPlayStoreBuild
+                        ? 'Directe installatie'
+                        : isPlayStoreBuild
+                            // Google Play verbiedt dat een Play-app zelf
+                            // APK's installeert (REQUEST_INSTALL_PACKAGES
+                            // is niet in het manifest). De browser-route
+                            // werkt wel: de gebruiker installeert zelf.
+                            ? 'Deze build komt uit de Play Store en mag zelf '
+                                'geen APK installeren — open de pagina in de '
+                                'browser'
+                            : 'Alleen AAB beschikbaar - gebruik browser',
+                  ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    if (safeRelease.hasApk) {
+                    if (safeRelease.hasApk && !isPlayStoreBuild) {
                       Navigator.of(ctx).pop();
                       try {
                         final apkUrl = await _pickBestApkUrl(safeRelease);
@@ -800,13 +832,11 @@ Future<void> checkForUpdates(BuildContext context) async {
                         }
                       }
                     } else {
-                      // No APK available, show message
+                      // Geen in-app install mogelijk (Play Store-build of
+                      // alleen een AAB): stuur de gebruiker naar de browser.
                       Navigator.of(ctx).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.noApkAvailableBrowser),
-                          duration: Duration(seconds: 5),
-                        ),
+                      launchUrlString(
+                        'https://github.com/danield76799/Plusly/releases',
                       );
                     }
                   },
