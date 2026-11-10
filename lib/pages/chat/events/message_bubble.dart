@@ -11,6 +11,7 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/pages/chat/events/bubble_tail.dart';
 import 'package:Pulsly/pages/chat/events/gallery_content.dart';
 import 'package:Pulsly/pages/chat/events/message_status_row.dart';
 import 'package:Pulsly/pages/chat/events/room_creation_state_event.dart';
@@ -223,7 +224,11 @@ class _MessageBubbleState extends State<MessageBubble> {
     );
 
     final bubbleColor = AppSettings.enableChatFrostedGlass.value && AppSettings.wallpaperPath.value.isNotEmpty ? color.withValues(alpha: 0.7) : color;
-    return ClipRRect(
+
+    // WhatsApp-vorm: een klein staartje onder de buitenste hoek van de
+    // bubbel. De staart zit ACHTER de bubbel, zodat de bubbel zijn hoek
+    // erover tekent; alleen het stukje onder de bubbel blijft zichtbaar.
+    final bubble = ClipRRect(
       borderRadius: borderRadius,
       child: Material(
         color: noBubble ? Colors.transparent : bubbleColor,
@@ -239,6 +244,21 @@ class _MessageBubbleState extends State<MessageBubble> {
           ),
         ),
       ),
+    );
+
+    if (noBubble) return bubble;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          bottom: -3,
+          left: ownMessage ? null : -2,
+          right: ownMessage ? -2 : null,
+          child: BubbleTail(color: bubbleColor, ownMessage: ownMessage),
+        ),
+        bubble,
+      ],
     );
   }
 

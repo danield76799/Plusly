@@ -7,9 +7,11 @@ import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
+import 'package:Pulsly/pages/chat/events/date_separator.dart';
 import 'package:Pulsly/pages/chat/events/message.dart';
 import 'package:Pulsly/pages/chat/seen_by_row.dart';
 import 'package:Pulsly/pages/chat/typing_indicators.dart';
+import 'package:Pulsly/utils/date_time_extension.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
@@ -178,7 +180,14 @@ class ChatEventList extends StatelessWidget {
                           ? 2.0
                           : 12.0,
                     ),
-                    child: Message(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // WhatsApp-achtige datum-scheiding: een pil met
+                        // "Vandaag"/"Gisteren"/datum tussen twee dagen.
+                        if (_needsDateSeparator(events, i))
+                          DateSeparator(timestamp: event.originServerTs),
+                        Message(
                       event,
                       animateIn: animateIn,
                       thread: thread,
@@ -188,8 +197,7 @@ class ChatEventList extends StatelessWidget {
                               event.eventId,
                       onSwipe: (Event e) => controller.replyAction(replyTo: e),
                       hasBeenRead:
-                          latestReadEventIndex != -1 &&
-                          latestReadEventIndex <= i,
+                          latestReadEventIndex != -1 && latestReadEventIndex <= i,
                       readReceipts: event.receipts.toList(),
                       onInfoTab: controller.showEventInfo,
                       onMention: () => controller.sendController.text +=
@@ -221,6 +229,8 @@ class ChatEventList extends StatelessWidget {
                         _ => MessageLayout.bubbles,
                       },
                     ),
+                      ],
+                    ),
                   ),
                 );
 
@@ -234,5 +244,17 @@ class ChatEventList extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Moet er een datum-scheiding voor dit bericht?
+  ///
+  /// Ja, als het bericht op een andere dag valt dan het vorige bericht.
+  /// Het allereerste bericht krijgt er ook één: dat geeft meteen houvast
+  /// over hoe oud het gesprek is.
+  static bool _needsDateSeparator(List<Event> events, int index) {
+    if (index <= 0) return true;
+    final previous = events[index - 1];
+    final current = events[index];
+    return !previous.originServerTs.isSameDay(current.originServerTs);
   }
 }
