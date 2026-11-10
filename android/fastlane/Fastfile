@@ -3,15 +3,34 @@ default_platform(:android)
 platform :android do
   desc "Deploy to Play Store Internal Testing"
   lane :deploy_internal_test do
+    # __dir__ is android/fastlane. De CI zet de sleutel in android/keys.json
+    # en kopieert de AAB naar <repo>/output/plusly-release.aab. Met absolute
+    # paden is het duidelijk dat het om de gepatchte + opnieuw ondertekende
+    # AAB gaat (16KB-alignment), niet om de kale build-output.
     upload_to_play_store(
       track: "internal",
-      aab: "../build/app/outputs/bundle/release/app-release.aab",
-      json_key: "keys.json",
+      aab: File.expand_path("../../output/plusly-release.aab", __dir__),
+      json_key: File.expand_path("../keys.json", __dir__),
       package_name: "com.danield.plusly.app",
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
       skip_upload_changelogs: false,
+    )
+  end
+
+  desc "Deploy to Play Store Production"
+  lane :deploy_production do
+    upload_to_play_store(
+      track: "production",
+      aab: File.expand_path("../../output/plusly-release.aab", __dir__),
+      json_key: File.expand_path("../keys.json", __dir__),
+      package_name: "com.danield.plusly.app",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: false,
+      release_status: "draft",
     )
   end
 end

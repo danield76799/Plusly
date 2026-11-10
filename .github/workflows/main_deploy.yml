@@ -260,6 +260,11 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
+          # Verplicht: setup-ruby zoekt de Gemfile in deze map. Zonder dit
+          # vond hij geen Gemfile, sloeg `bundle install` over ("Could not
+          # determine gemfile path") en eindigde de deploy-stap met
+          # "bundler: command not found: fastlane" (exit 127).
+          working-directory: android
 
       - name: Deploy to Play Store
         if: steps.playstore.outputs.has_key == 'true'
