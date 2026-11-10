@@ -253,6 +253,22 @@ class ChatController extends State<ChatPageWithRoom>
       ValueNotifier<DateTime?>(null);
   int? _floatingDateEventIndex;
 
+  /// Het event-id waarop de ongelezen-scheiding staat: het eerste bericht
+  /// dat je bij het openen nog niet gezien had.
+  ///
+  /// Dit is een *snapshot* van het leespunt op het moment van openen. Dat
+  /// moet een snapshot zijn en niet het live leespunt, want het gesprek
+  /// wordt bij het openen meteen als gelezen gemarkeerd — met het live
+  /// leespunt zou de scheiding dus binnen een seconde verdwijnen. WhatsApp
+  /// laat de lijn staan zolang je in het gesprek bent, en dat is wat mensen
+  /// verwachten: je wilt zien waar je gebleven was.
+  String? unreadDividerEventId;
+
+  /// Aantal berichten onder de ongelezen-scheiding — hetzelfde getal als in
+  /// het label van de scheiding, maar dan als badge op de
+  /// scroll-naar-onder-knop.
+  final ValueNotifier<int> unreadCountNotifier = ValueNotifier<int>(0);
+
   bool get selectMode => selectedEvents.isNotEmpty;
 
   final int _loadHistoryCount = 200;
@@ -612,6 +628,10 @@ class ChatController extends State<ChatPageWithRoom>
 
       if (readMarkerEventIndex >= 0) {
         Logs().v('Scroll to read marker', readMarkerEventId);
+        // Bewaar het leespunt als scheiding tussen gelezen en ongelezen.
+        // Dit moet vóór setReadMarker() gebeuren: die schuift het leespunt
+        // naar het nieuwste bericht, en dan is de grens kwijt.
+        unreadDividerEventId = readMarkerEventId;
         // Scroll the unread marker to the bottom of the screen so the newest
         // messages (which sit below it in a reversed list) are visible when
         // you open the chat — matching what users expect from WhatsApp.

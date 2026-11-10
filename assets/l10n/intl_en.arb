@@ -4240,5 +4240,15 @@
   "redactedTapToShow": "tap to show",
   "redactedTapToHide": "Tap to hide 🗑️",
   "redactedOriginalContent": "Original content (tap to hide):",
-  "redactedContentUnavailable": "This text was deleted before Plusly could save it. The Matrix server no longer stores the original text either — so it cannot be recovered from anywhere."
+  "redactedContentUnavailable": "This text was deleted before Plusly could save it. The Matrix server no longer stores the original text either — so it cannot be recovered from anywhere.",
+  "unreadMessages": "{count, plural, =1{1 unread message} other{{count} unread messages}}",
+  "@unreadMessages": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  }
 }

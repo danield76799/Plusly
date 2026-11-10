@@ -9,6 +9,7 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
 import 'package:Pulsly/pages/chat/events/date_separator.dart';
 import 'package:Pulsly/pages/chat/events/message.dart';
+import 'package:Pulsly/pages/chat/events/unread_separator.dart';
 import 'package:Pulsly/pages/chat/seen_by_row.dart';
 import 'package:Pulsly/pages/chat/typing_indicators.dart';
 import 'package:Pulsly/utils/date_time_extension.dart';
@@ -66,6 +67,22 @@ class ChatEventList extends StatelessWidget {
     final latestReadEventIndex = latestReadEvent != null
         ? events.indexWhere((event) => event.eventId == latestReadEvent)
         : -1;
+
+    // Waar de ongelezen-scheiding hoort: boven het eerste bericht dat je bij
+    // het openen nog niet gezien had. Dat is het bericht ná het leespunt, en
+    // in een nieuwste-eerst lijst is dat één index lager.
+    final dividerEventId = controller.unreadDividerEventId;
+    final dividerIndex = dividerEventId == null
+        ? -1
+        : events.indexWhere((event) => event.eventId == dividerEventId);
+    final unreadCount = dividerIndex > 0 ? dividerIndex : 0;
+    // Niet tijdens build(): de badge op de scroll-knop luistert naar deze
+    // notifier en zou dan een setState tijdens de build uitlokken.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (controller.mounted && controller.unreadCountNotifier.value != unreadCount) {
+        controller.unreadCountNotifier.value = unreadCount;
+      }
+    });
 
     return CustomScrollView(
       controller: controller.scrollController,
@@ -187,6 +204,11 @@ class ChatEventList extends StatelessWidget {
                         // "Vandaag"/"Gisteren"/datum tussen twee dagen.
                         if (_needsDateSeparator(events, i))
                           DateSeparator(timestamp: event.originServerTs),
+                        // Scheiding tussen gelezen en ongelezen berichten:
+                        // "N ongelezen berichten". Staat boven het eerste
+                        // bericht dat je bij het openen nog niet had gezien.
+                        if (dividerIndex > 0 && i == dividerIndex - 1)
+                          UnreadSeparator(count: unreadCount),
                         Message(
                       event,
                       animateIn: animateIn,

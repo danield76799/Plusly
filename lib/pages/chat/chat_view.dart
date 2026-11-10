@@ -530,20 +530,64 @@ class ChatView extends StatelessWidget {
                       padding: EdgeInsets.only(
                         bottom: inputBarHeight + safeBottom + 8.0,
                       ),
-                      child: FloatingActionButton(
-                        onPressed: controller.scrollDown,
-                        heroTag: null,
-                        mini: true,
-                        elevation: 6,
-                        backgroundColor: theme.colorScheme.surface,
-                        foregroundColor: theme.colorScheme.onSurface,
-                        shape: CircleBorder(
-                          side: BorderSide(
-                            color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                            width: 0.5,
-                          ),
+                      child: ValueListenableBuilder<int>(
+                        valueListenable: controller.unreadCountNotifier,
+                        builder: (context, unreadCount, _) => Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            FloatingActionButton(
+                              onPressed: controller.scrollDown,
+                              heroTag: null,
+                              mini: true,
+                              elevation: 6,
+                              backgroundColor: theme.colorScheme.surface,
+                              foregroundColor: theme.colorScheme.onSurface,
+                              shape: CircleBorder(
+                                side: BorderSide(
+                                  color: theme.colorScheme.outline
+                                      .withValues(alpha: 0.3),
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: const Icon(Icons.arrow_downward_outlined),
+                            ),
+                            // Badge met het aantal ongelezen berichten —
+                            // hetzelfde getal als in de ongelezen-scheiding.
+                            if (unreadCount > 0)
+                              Positioned(
+                                top: -4,
+                                right: -4,
+                                child: Container(
+                                  constraints: const BoxConstraints(
+                                    minWidth: 18,
+                                    minHeight: 18,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.error,
+                                    borderRadius: BorderRadius.circular(9),
+                                    border: Border.all(
+                                      color: theme.colorScheme.surface,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    unreadCount > 99
+                                        ? '99+'
+                                        : '$unreadCount',
+                                    style: theme.textTheme.labelSmall?.copyWith(
+                                      color: theme.colorScheme.onError,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
-                        child: const Icon(Icons.arrow_downward_outlined),
                       ),
                     );
                   },

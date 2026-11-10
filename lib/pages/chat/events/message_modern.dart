@@ -7,7 +7,6 @@ import 'package:Pulsly/pages/chat/swipe_to_reply.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
-import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
 import 'package:Pulsly/pages/chat/events/file_sending_indicator.dart';
 import 'package:Pulsly/pages/chat/events/room_creation_state_event.dart';
@@ -633,43 +632,10 @@ class _MessageModernState extends State<MessageModern> {
                 chatController: widget.chatController,
               ),
             ),
-          if (widget.displayReadMarker)
-            Row(
-              children: [
-                Expanded(
-                  child: Divider(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 16.0,
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      AppConfig.borderRadius / 3,
-                    ),
-                    color: theme.colorScheme.surface.withAlpha(128),
-                  ),
-                  child: Text(
-                    L10n.of(context).newMessages,
-                    style: TextStyle(
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Divider(
-                    color: theme.colorScheme.surfaceContainerHighest,
-                  ),
-                ),
-              ],
-            ),
+          // De ongelezen-scheiding stond hier als eigen divider. Die is
+          // verplaatst naar chat_event_list.dart, zodat alle bericht-layouts
+          // (bubbles, bubblesLegacy, modern) dezelfde WhatsApp-achtige
+          // scheiding tonen — en er maar één verschijnt.
         ],
       );
     } else {

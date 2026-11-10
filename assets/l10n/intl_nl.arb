@@ -4239,5 +4239,15 @@
   "redactedTapToShow": "tik om te tonen",
   "redactedTapToHide": "Tik om te verbergen 🗑️",
   "redactedOriginalContent": "Originele inhoud (tik om te verbergen):",
-  "redactedContentUnavailable": "Deze tekst was verwijderd voordat Plusly hem kon bewaren. De Matrix-server bewaart de originele tekst ook niet meer — die is dus nergens meer terug te halen."
+  "redactedContentUnavailable": "Deze tekst was verwijderd voordat Plusly hem kon bewaren. De Matrix-server bewaart de originele tekst ook niet meer — die is dus nergens meer terug te halen.",
+  "unreadMessages": "{count, plural, =1{1 ongelezen bericht} other{{count} ongelezen berichten}}",
+  "@unreadMessages": {
+    "type": "text",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  }
 }

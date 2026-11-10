@@ -72,12 +72,29 @@ void main() {
     });
 
     test('de marker-widget is aanwezig (de fix haalt niets weg)', () {
+      // De marker is verhuisd: hij wordt nu één keer getekend door
+      // chat_event_list.dart (als UnreadSeparator), zodat alle bericht-
+      // layouts hem tonen — en er nooit twee tegelijk verschijnen. De
+      // eigenschap die deze test bewaakt blijft dus gelden: de marker mag
+      // niet verdwijnen en mag niet van de receipts afhangen.
       final lijst = _bron('lib/pages/chat/chat_event_list.dart');
       expect(lijst.contains('displayReadMarker:'), isTrue);
-      final bubble = _bron('lib/pages/chat/events/message_modern.dart');
-      expect(bubble.contains('widget.displayReadMarker'), isTrue);
-      expect(bubble.contains('newMessages'), isTrue,
-          reason: 'de "nieuwe berichten"-tekst hoort nog gerenderd te worden');
+      expect(
+        lijst.contains('UnreadSeparator'),
+        isTrue,
+        reason: 'de ongelezen-scheiding hoort in de tijdlijn getekend te worden',
+      );
+
+      // De oude, per-layout getekende divider is bewust weg: die kwam bovenop
+      // de nieuwe scheiding te staan. Alleen het argument mag nog overblijven.
+      final modern = _bron('lib/pages/chat/events/message_modern.dart');
+      expect(
+        modern.contains('newMessages'),
+        isFalse,
+        reason:
+            'de oude "nieuwe berichten"-divider is vervangen door de '
+            'gedeelde UnreadSeparator; anders staan er twee op het scherm',
+      );
     });
   });
 
