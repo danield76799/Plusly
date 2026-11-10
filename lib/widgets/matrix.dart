@@ -22,6 +22,7 @@ import 'package:Pulsly/utils/init_with_restore.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/matrix_file_extension.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/push_event_log.dart';
+import 'package:Pulsly/utils/redacted_body_cache.dart';
 import 'package:Pulsly/utils/uia_request_manager.dart';
 import 'package:Pulsly/utils/voip_plugin.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
@@ -210,11 +211,49 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
       : null;
   final Map<String, int> linuxNotificationIds = {};
 
+  final List<StreamSubscription<Event>> _bodyCacheSubs = [];
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     initMatrix();
+    _startBodyCacheSubscriptions();
+  }
+
+  /// Bewaart de tekst van elk binnenkomend bericht in de
+  /// [RedactedBodyCache].
+  ///
+  /// Waarom hier en niet alleen bij het tekenen van de bubbel: een bericht
+  /// kan verwijderd worden terwijl je niet in die kamer bent, of terwijl de
+  /// app uitgeschakeld stond. De Matrix-server bewaart de originele tekst
+  /// dan niet meer. Door bij *binnenkomst* te cachen, is de tekst er
+  /// alsnog als de app op dat moment draaide.
+  ///
+  /// `onTimelineEvent` vuurt voor alle kamers van de account, niet alleen
+  /// voor de geopende kamer.
+  void _startBodyCacheSubscriptions() {
+    for (final c in widget.clients) {
+      _bodyCacheSubs.add(
+        c.onTimelineEvent.stream.listen(_cacheIncomingBody),
+      );
+    }
+  }
+
+  void _cacheIncomingBody(Event event) {
+    try {
+      if (event.redacted) return;
+      if (event.type != EventTypes.Message) return;
+      final body = event.text;
+      if (body.isEmpty) return;
+      RedactedBodyCache.instance.store(
+        redactedCacheKey(event.room.id, event.eventId),
+        body,
+      );
+    } catch (e) {
+      // Caching is een extraatje; een fout mag nergens op storen.
+      Logs().w('Body cache failed', e);
+    }
   }
 
   Future<void> initConfig() async {
@@ -388,6 +427,13 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     try {
       PushEventLog().add('lifecycle', {'state': state.name});
     } catch (_) {}
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      // Bij het naar de achtergrond gaan moet de cache van de originele
+      // berichtteksten meteen naar schijf, anders gaat hij verloren als het
+      // proces wordt beëindigd.
+      unawaited(RedactedBodyCache.instance.flush());
+    }
     final foreground =
         state != AppLifecycleState.inactive &&
         state != AppLifecycleState.paused;
@@ -445,6 +491,12 @@ class MatrixState extends State<Matrix> with WidgetsBindingObserver {
     for (final s in onNotification.values) {
       s.cancel();
     }
+    for (final s in _bodyCacheSubs) {
+      s.cancel();
+    }
+    // De cache moet op schijf staan voordat het proces weg is, anders is de
+    // originele tekst van een verwijderd bericht verloren.
+    unawaited(RedactedBodyCache.instance.flush());
     client.httpClient.close();
 
     linuxNotifications?.close();

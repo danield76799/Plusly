@@ -113,5 +113,43 @@ void main() {
       expect(decoded, contains(key));
       expect(decoded[key]['body'], 'blijft bewaard');
     });
+
+    test('de cache wordt bij binnenkomst gevuld, niet alleen bij tonen', () {
+      // Bug: de body werd alleen bewaard als de bubbel daadwerkelijk
+      // getekend werd. Was je niet in die kamer (of stond de app uit) toen
+      // het bericht binnenkwam, dan was de tekst er niet.
+      final matrix = File('lib/widgets/matrix.dart').readAsStringSync();
+
+      expect(
+        matrix,
+        contains('onTimelineEvent.stream.listen'),
+        reason:
+            'De cache moet bij binnenkomst van een bericht gevuld worden, '
+            'onafhankelijk van welke kamer openstaat',
+      );
+      expect(
+        matrix,
+        contains('RedactedBodyCache.instance.store'),
+        reason: 'De body van een binnenkomend bericht moet bewaard worden',
+      );
+      expect(
+        matrix,
+        contains('RedactedBodyCache.instance.flush'),
+        reason:
+            'Bij het naar de achtergrond gaan moet de cache naar schijf, '
+            'anders is de tekst verloren als het proces beëindigd wordt',
+      );
+    });
+
+    test('de cache bewaart meer dan 500 berichten', () {
+      // Omdat er nu elk binnenkomend bericht wordt bewaard (niet alleen
+      // de zichtbare), is 500 te krap voor een actieve account.
+      final bron = File(
+        'lib/utils/redacted_body_cache.dart',
+      ).readAsStringSync();
+
+      expect(bron, contains('_maxEntries = 2000'));
+      expect(bron, contains('_maxAgeDays = 14'));
+    });
   });
 }

@@ -4240,5 +4240,5 @@
   "redactedTapToShow": "tap to show",
   "redactedTapToHide": "Tap to hide 🗑️",
   "redactedOriginalContent": "Original content (tap to hide):",
-  "redactedContentUnavailable": "The original content is no longer available."
+  "redactedContentUnavailable": "This text was deleted before Plusly could save it. The Matrix server no longer stores the original text either — so it cannot be recovered from anywhere."
 }

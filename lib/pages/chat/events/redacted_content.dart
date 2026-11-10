@@ -53,7 +53,10 @@ class _EventRedactedContentState extends State<EventRedactedContent> {
         final cached = RedactedBodyCache.instance.lookup(
           redactedCacheKey(widget.event.room.id, widget.event.eventId),
         );
-        final body = cached ?? widget.event.text;
+        var body = cached ?? widget.event.text;
+        // 'Redacted' is geen echte tekst: de SDK levert die placeholder
+        // wanneer de content is gestript.
+        if (body.trim().toLowerCase() == 'redacted') body = '';
 
         return GestureDetector(
           onTap: () => setState(() => _showContent = !_showContent),

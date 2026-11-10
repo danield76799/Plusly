@@ -38,7 +38,10 @@ class RedactedBodyCache {
 
   /// Maximaal aantal bewaarde berichten. Bij overschrijding verdwijnt het
   /// oudste (insertion order), zodat het geheugengebruik begrensd blijft.
-  static const int _maxEntries = 500;
+  ///
+  /// Omdat de cache nu bij *binnenkomst* van elk bericht wordt gevuld (niet
+  /// alleen als de bubbel getekend wordt), is dit ruim 500.
+  static const int _maxEntries = 2000;
 
   /// Een bericht blijft maximaal dit aantal dagen terugvindbaar.
   static const int _maxAgeDays = 14;
