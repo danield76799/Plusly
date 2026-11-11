@@ -107,7 +107,7 @@ void main() {
       // read-receipts. Daardoor wees hij nog naar een bericht dat allang
       // gelezen was en stond er "4 ongelezen" terwijl er 0 ongelezen waren.
       // De grens moet daarom uit je eigen read-receipts komen.
-      final bron = File('lib/pages/chat/chat.dart').readAsStringSync();
+      final bron = File('lib/pages/chat/chat_read_marker.dart').readAsStringSync();
 
       expect(bron, contains('lastOwnReadEventId'));
       expect(

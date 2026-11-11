@@ -30,7 +30,7 @@ String _bron(String pad) {
 void main() {
   group('de marker komt uit de LEZER se eigen positie', () {
     test('de leespositie is room.fullyRead, niet de receipts', () {
-      final chat = _bron('lib/pages/chat/chat.dart');
+      final chat = _bron('lib/pages/chat/chat_read_marker.dart');
       expect(
         chat.contains('room.hasNewMessages ? room.fullyRead'),
         isTrue,
