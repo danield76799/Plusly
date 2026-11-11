@@ -4,6 +4,9 @@
 *.pyc
 *.swp
 *.snap
+*.bak
+*.mdmp
+hs_err_pid*.log
 .DS_Store
 .local/
 .atom/
