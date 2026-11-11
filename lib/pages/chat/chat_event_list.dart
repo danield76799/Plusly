@@ -75,7 +75,18 @@ class ChatEventList extends StatelessWidget {
     final dividerIndex = dividerEventId == null
         ? -1
         : events.indexWhere((event) => event.eventId == dividerEventId);
-    final unreadCount = dividerIndex > 0 ? dividerIndex : 0;
+    // Tel alleen berichten die écht ongelezen zijn: berichten van anderen,
+    // niet je eigen verzonden berichten en niet de state-events die door de
+    // zichtbaarheidsfilter heen zijn gekomen.
+    final ownUserId = controller.room.client.userID;
+    final unreadCount = dividerIndex > 0
+        ? events
+              .take(dividerIndex)
+              .where((event) =>
+                  event.senderId != ownUserId &&
+                  event.type == EventTypes.Message)
+              .length
+        : 0;
     // Niet tijdens build(): de badge op de scroll-knop luistert naar deze
     // notifier en zou dan een setState tijdens de build uitlokken.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -207,7 +218,7 @@ class ChatEventList extends StatelessWidget {
                         // Scheiding tussen gelezen en ongelezen berichten:
                         // "N ongelezen berichten". Staat boven het eerste
                         // bericht dat je bij het openen nog niet had gezien.
-                        if (dividerIndex > 0 && i == dividerIndex - 1)
+                        if (unreadCount > 0 && i == dividerIndex - 1)
                           UnreadSeparator(count: unreadCount),
                         Message(
                       event,

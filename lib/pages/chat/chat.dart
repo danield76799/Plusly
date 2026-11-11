@@ -163,6 +163,28 @@ class ChatController extends State<ChatPageWithRoom>
 
   String get readMarkerEventId => room.hasNewMessages ? room.fullyRead : '';
 
+  /// Het event-id van het nieuwste bericht dat je zélf gelezen hebt,
+  /// afgeleid uit je eigen read-receipts.
+  ///
+  /// Dit is betrouwbaarder dan [readMarkerEventId] voor de ongelezen-
+  /// scheiding. `room.fullyRead` is de `m.fully_read`-marker en die loopt
+  /// achter op de read-receipts: hij kan nog naar een bericht wijzen dat je
+  /// al lang gelezen hebt. Dan stond er "4 ongelezen berichten" terwijl er
+  /// in werkelijkheid 0 ongelezen waren. De eigen read-receipts zijn wél
+  /// bijgewerkt zodra je een bericht leest.
+  String? get lastOwnReadEventId {
+    final tl = timeline;
+    if (tl == null) return null;
+    for (final event in tl.events) {
+      // timeline.events is nieuwste-eerst; de eerste met een eigen receipt
+      // is dus het laatst gelezen bericht.
+      if (event.receipts.any((r) => r.user.senderId == sendingClient.userID)) {
+        return event.eventId;
+      }
+    }
+    return null;
+  }
+
   String get roomId => widget.room.id;
   String? get threadRootEventId => widget.thread?.rootEvent.eventId;
 
@@ -612,6 +634,15 @@ class ChatController extends State<ChatPageWithRoom>
       await loadTimelineFuture;
       if (initialEventId != null) scrollToEventId(initialEventId);
 
+      // Snapshot van de ongelezen-grens vóór we het gesprek als gelezen
+      // markeren. De grens komt uit je eigen read-receipts (betrouwbaar),
+      // met fullyRead als terugval. De m.fully_read-marker loopt achter op
+      // de receipts en wees nog naar een bericht dat je al lang gelezen had
+      // — daardoor stond er "4 ongelezen" terwijl er 0 ongelezen waren.
+      final ownRead = lastOwnReadEventId;
+      unreadDividerEventId =
+          ownRead ?? (readMarkerEventId.isNotEmpty ? readMarkerEventId : null);
+
       var readMarkerEventIndex = -1;
       if (readMarkerEventId.isNotEmpty && timeline != null) {
         readMarkerEventIndex = timeline!.events
@@ -628,10 +659,6 @@ class ChatController extends State<ChatPageWithRoom>
 
       if (readMarkerEventIndex >= 0) {
         Logs().v('Scroll to read marker', readMarkerEventId);
-        // Bewaar het leespunt als scheiding tussen gelezen en ongelezen.
-        // Dit moet vóór setReadMarker() gebeuren: die schuift het leespunt
-        // naar het nieuwste bericht, en dan is de grens kwijt.
-        unreadDividerEventId = readMarkerEventId;
         // Scroll the unread marker to the bottom of the screen so the newest
         // messages (which sit below it in a reversed list) are visible when
         // you open the chat — matching what users expect from WhatsApp.
