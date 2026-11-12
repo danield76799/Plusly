@@ -304,14 +304,22 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
             event.numberEmotes > 0 &&
             event.numberEmotes <= 3);
 
+    final useWhatsAppGreen =
+        ownMessage && AppSettings.whatsAppGreenOwnBubble.value;
+    final onBubbleColor = useWhatsAppGreen
+        ? theme.whatsAppOnBubbleColor
+        : theme.onBubbleColor;
+
     if (ownMessage) {
       color = displayEvent.status.isError
           ? Colors.redAccent
+          : useWhatsAppGreen
+          ? theme.whatsAppBubbleColor
           : theme.bubbleColor;
     }
 
     final textColor = ownMessage
-        ? (noBubble ? theme.colorScheme.onSurface : theme.onBubbleColor)
+        ? (noBubble ? theme.colorScheme.onSurface : onBubbleColor)
         : theme.colorScheme.onSurface;
 
     // De tijd in de bubbel moet leesbaar zijn op de bubbel zelf.
@@ -324,10 +332,10 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
         ? (noBubble
               ? theme.colorScheme.onSurface
               : (ownMessage
-                    ? theme.colorScheme.onPrimaryContainer
+                    ? onBubbleColor
                     : theme.colorScheme.onSecondaryContainer))
         : ownMessage
-        ? theme.onBubbleColor.withValues(alpha: 0.85)
+        ? onBubbleColor.withValues(alpha: 0.85)
         : theme.colorScheme.onSurface.withValues(alpha: 0.7);
 
     final linkColor = ownMessage

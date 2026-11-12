@@ -148,7 +148,7 @@ class _MessageBubbleState extends State<MessageBubble> {
   Widget _buildBubble(BuildContext context, Event event, Timeline timeline, ThemeData theme,
       Color color, Color textColor, Color linkColor, BorderRadius borderRadius,
       bool noBubble, bool ownMessage, bool hasReply, Event? replyEvent,
-      String? inReplyTo, bool showTimestamp, Widget messageStatusRow) {
+      String? inReplyTo, bool showTimestamp, Widget messageStatusRow, bool showTail) {
     
     final displayEvent = event.getDisplayEvent(timeline);
     final galleryBubbleWidth = displayEvent.messageType == galleryMessageType && !displayEvent.redacted
@@ -248,15 +248,18 @@ class _MessageBubbleState extends State<MessageBubble> {
 
     if (noBubble) return bubble;
 
+    // Alleen het onderste bericht van een blok krijgt een staartje; de
+    // berichten erboven lopen naadloos in het blok over.
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        Positioned(
-          bottom: -3,
-          left: ownMessage ? null : -2,
-          right: ownMessage ? -2 : null,
-          child: BubbleTail(color: bubbleColor, ownMessage: ownMessage),
-        ),
+        if (showTail)
+          Positioned(
+            bottom: -3,
+            left: ownMessage ? null : -2,
+            right: ownMessage ? -2 : null,
+            child: BubbleTail(color: bubbleColor, ownMessage: ownMessage),
+          ),
         bubble,
       ],
     );
@@ -285,10 +288,22 @@ class _MessageBubbleState extends State<MessageBubble> {
 
     var color = theme.incomingBubbleColor;
 
+    // WhatsApp-groepering: opeenvolgende berichten van dezelfde afzender
+    // vormen één aaneengesloten blok. De hoeken die aan het blok grenzen
+    // worden vierkant, en alleen het onderste bericht van het blok krijgt
+    // een staartje.
+    //
+    // In de omgekeerde lijst is `previousEvent` het bericht erONDER (nieuwer)
+    // en `nextEvent` het bericht erBOVEN (ouder).
     final previousEventSameSender = widget.previousEvent != null &&
         {EventTypes.Message, EventTypes.Sticker, EventTypes.Encrypted, PollEvents.pollStart}.contains(widget.previousEvent!.type) &&
         widget.previousEvent!.senderId == event.senderId &&
         widget.previousEvent!.originServerTs.sameEnvironment(event.originServerTs);
+
+    final nextEventSameSender = widget.nextEvent != null &&
+        {EventTypes.Message, EventTypes.Sticker, EventTypes.Encrypted, PollEvents.pollStart}.contains(widget.nextEvent!.type) &&
+        widget.nextEvent!.senderId == event.senderId &&
+        widget.nextEvent!.originServerTs.sameEnvironment(event.originServerTs);
 
     final rowMainAxisAlignment = ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
     final showTimestamp = widget.previousEvent == null || !previousEventSameSender ||
@@ -300,10 +315,10 @@ class _MessageBubbleState extends State<MessageBubble> {
     
     const roundedCorner = Radius.circular(AppConfig.bubbleRadius);
     final borderRadius = BorderRadius.only(
-      topLeft: (!ownMessage && !previousEventSameSender) ? Radius.zero : roundedCorner,
-      topRight: roundedCorner,
-      bottomLeft: roundedCorner,
-      bottomRight: (ownMessage && !previousEventSameSender) ? Radius.zero : roundedCorner,
+      topLeft: nextEventSameSender ? Radius.zero : roundedCorner,
+      topRight: nextEventSameSender ? Radius.zero : roundedCorner,
+      bottomLeft: previousEventSameSender ? Radius.zero : roundedCorner,
+      bottomRight: previousEventSameSender ? Radius.zero : roundedCorner,
     );
 
     final noBubble = ({MessageTypes.Video, MessageTypes.Image, MessageTypes.Sticker}.contains(event.messageType) &&
@@ -418,7 +433,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                             HapticFeedback.heavyImpact();
                             widget.onSelect(event, _tapPosition);
                           },
-                          child: _buildBubble(context, event, timeline, theme, color, textColor, linkColor, borderRadius, noBubble, ownMessage, hasReply, replyEvent, inReplyTo, showTimestamp, messageStatusRow),
+                          child: _buildBubble(context, event, timeline, theme, color, textColor, linkColor, borderRadius, noBubble, ownMessage, hasReply, replyEvent, inReplyTo, showTimestamp, messageStatusRow, !previousEventSameSender),
                         ),
                       ),
                     ],
