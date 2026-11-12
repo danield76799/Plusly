@@ -69,6 +69,15 @@ abstract class AppConfig {
   static const String pushHelperCrashReportKey = 'push_helper_crash_report';
   static const String recentEmojisAccountDataKey = 'io.element.recent_emoji';
   static const double borderRadius = 20.0;
+
+  /// Hoekradius van de berichtbubbels, los van [borderRadius].
+  ///
+  /// WhatsApp gebruikt een vrij scherpe hoek (~7,5-10 dp), terwijl de rest van
+  /// de app (kaarten, dialogen) juist rond is (20 dp). Door de bubbelradius
+  /// apart te houden kan de bubbel strakker worden zonder dat de hele app
+  /// meeverandert.
+  static const double bubbleRadius = 10.0;
+
   static const double columnWidth = 360.0;
   static final Uri homeserverList = Uri(
     scheme: 'https',

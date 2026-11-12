@@ -177,6 +177,26 @@ extension BubbleColorTheme on ThemeData {
   /// thema, dus altijd met de juiste contrastwaarde.
   Color get onBubbleColor => colorScheme.onPrimaryContainer;
 
+  /// WhatsApp-groene eigen bubbel (als de instelling aan staat).
+  ///
+  /// WhatsApp gebruikt een herkenbaar bleek groen (#D9FDD3) in light mode en
+  /// een donker teal-groen (#005C4B) in dark mode. Dit staat los van het
+  /// Material-You-thema, want het is een bewuste WhatsApp-keuze.
+  Color get whatsAppBubbleColor => brightness == Brightness.light
+      ? const Color(0xFFD9FDD3)
+      : const Color(0xFF005C4B);
+
+  /// Tekst op de WhatsApp-groene bubbel. Op het bleke groen is donkere tekst
+  /// leesbaar; op het donkere teal is lichte tekst nodig.
+  Color get whatsAppOnBubbleColor => brightness == Brightness.light
+      ? const Color(0xFF111B21)
+      : const Color(0xFFE9EDEF);
+
+  /// WhatsApp-groen voor de ongelezen-badge in de chatlijst.
+  Color get whatsAppBadgeColor => brightness == Brightness.light
+      ? const Color(0xFF25D366)
+      : const Color(0xFF00A884);
+
   /// Inkomende bubbel. Licht thema: één stap boven surface. Donker thema:
   /// hetzelfde vlak, één stap hoger dan de pagina.
   ///

@@ -209,7 +209,7 @@ void main() {
             'onleesbaar op de bleke eigen bubbel',
       );
       expect(
-        code.contains('theme.onBubbleColor.withValues(alpha: 0.85)'),
+        code.contains('onBubbleColor.withValues(alpha: 0.85)'),
         isTrue,
       );
     });
@@ -300,7 +300,7 @@ void main() {
         reason: 'wit is onzichtbaar op de bleke lichte bubbel',
       );
       expect(
-        code.contains('theme.onBubbleColor.withValues(alpha: 0.85)'),
+        code.contains('onBubbleColor.withValues(alpha: 0.85)'),
         isTrue,
       );
     });

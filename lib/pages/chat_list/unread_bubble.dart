@@ -31,12 +31,12 @@ class UnreadBubble extends StatelessWidget {
                 9,
       decoration: BoxDecoration(
         color: room.highlightCount > 0
-            ? const Color(0xFFFF4444) // Red for highlights
+            ? const Color(0xFFFF4444) // Red for highlights (mentions)
             : hasNotifications || room.markedUnread
-            ? const Color(0xFFFF6B6B) // Coral red for notifications
-            : const Color(
-                0xFFFF6B6B,
-              ).withValues(alpha: 0.5), // Light coral for unread
+            ? Theme.of(context).whatsAppBadgeColor // WhatsApp-groen
+            : Theme.of(
+                context,
+              ).whatsAppBadgeColor.withValues(alpha: 0.5), // Licht groen
         borderRadius: BorderRadius.circular(7),
       ),
       child: hasNotifications

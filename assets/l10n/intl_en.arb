@@ -4250,5 +4250,7 @@
         "example": "3"
       }
     }
-  }
+  },
+  "whatsAppGreenBubble": "WhatsApp green bubble",
+  "whatsAppGreenBubbleDescription": "Use WhatsApp green for your own messages"
 }

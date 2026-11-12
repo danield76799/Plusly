@@ -255,6 +255,12 @@ class SettingsStyleView extends StatelessWidget {
                         ),
                       ),
                     ),
+                    const ListDivider(),
+                    SettingsSwitchListTile.adaptive(
+                      title: L10n.of(context).whatsAppGreenBubble,
+                      subtitle: L10n.of(context).whatsAppGreenBubbleDescription,
+                      setting: AppSettings.whatsAppGreenOwnBubble,
+                    ),
                     const SizedBox(height: 8),
                     Column(
                       mainAxisSize: MainAxisSize.min,

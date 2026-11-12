@@ -119,6 +119,7 @@ enum AppSettings<T> {
   enableSoftLogout<bool>('enableSoftLogout', false),
   enableGradient<bool>('enableGradient', true),
   messageStyle<String>('xyz.plusly.messageStyle', 'bubbles'),
+  whatsAppGreenOwnBubble<bool>('xyz.plusly.whatsAppGreenOwnBubble', false),
   showSeconds<bool>('xyz.plusly.showSeconds', false),
   doubleTapToReact<bool>('chat.fluffy.double_tap_to_react', false),
   doubleTapReaction<String>('chat.fluffy.double_tap_reaction', '❤️'),

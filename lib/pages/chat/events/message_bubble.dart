@@ -298,7 +298,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     final hasReply = inReplyTo != null;
     final replyEvent = hasReply ? timeline.events.firstWhereOrNull((e) => e.eventId == inReplyTo) : null;
     
-    const roundedCorner = Radius.circular(AppConfig.borderRadius);
+    const roundedCorner = Radius.circular(AppConfig.bubbleRadius);
     final borderRadius = BorderRadius.only(
       topLeft: (!ownMessage && !previousEventSameSender) ? Radius.zero : roundedCorner,
       topRight: roundedCorner,
@@ -311,9 +311,23 @@ class _MessageBubbleState extends State<MessageBubble> {
         (event.messageType == MessageTypes.Text && event.relationshipType == null &&
             event.onlyEmotes && event.numberEmotes > 0 && event.numberEmotes <= 3);
 
-    if (ownMessage) color = event.getDisplayEvent(timeline).status.isError ? theme.colorScheme.error : theme.bubbleColor;
-    final textColor = ownMessage ? (noBubble ? theme.colorScheme.onSurface : theme.onBubbleColor) : theme.colorScheme.onSurface;
-    final statusColor = ownMessage && !noBubble ? theme.onBubbleColor.withValues(alpha: 0.85) : textColor.withValues(alpha: 0.7);
+    // Eigen bubbel: WhatsApp-groen als de gebruiker dat aanzet, anders de
+    // Material-You-containerkleur.
+    final useWhatsAppGreen =
+        ownMessage && AppSettings.whatsAppGreenOwnBubble.value;
+    final onBubbleColor = useWhatsAppGreen
+        ? theme.whatsAppOnBubbleColor
+        : theme.onBubbleColor;
+
+    if (ownMessage) {
+      color = event.getDisplayEvent(timeline).status.isError
+          ? theme.colorScheme.error
+          : useWhatsAppGreen
+          ? theme.whatsAppBubbleColor
+          : theme.bubbleColor;
+    }
+    final textColor = ownMessage ? (noBubble ? theme.colorScheme.onSurface : onBubbleColor) : theme.colorScheme.onSurface;
+    final statusColor = ownMessage && !noBubble ? onBubbleColor.withValues(alpha: 0.85) : textColor.withValues(alpha: 0.7);
     final linkColor = ownMessage ? (theme.brightness == Brightness.light ? theme.colorScheme.primaryFixed : theme.colorScheme.onTertiaryContainer) : theme.colorScheme.primary;
 
     final showReactionsRow = event.hasAggregatedEvents(timeline, RelationshipTypes.reaction);
