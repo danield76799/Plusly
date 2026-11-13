@@ -118,38 +118,67 @@ void main() {
     });
 
     test('eigen berichten tellen niet mee als ongelezen', () {
-      final bron = File(
-        'lib/pages/chat/chat_event_list.dart',
-      ).readAsStringSync();
+      // Het aantal wordt nu bij het openen berekend (chat.dart), niet live
+      // in de lijst. De filter zelf is hetzelfde gebleven.
+      final bron = File('lib/pages/chat/chat.dart').readAsStringSync();
 
       expect(
         bron,
-        contains('event.senderId != ownUserId'),
+        contains('senderId != ownId'),
         reason:
             'Je eigen verzonden berichten zijn geen ongelezen berichten',
       );
       expect(
         bron,
-        contains('event.type == EventTypes.Message'),
+        contains('type == EventTypes.Message'),
         reason: 'State-events tellen niet mee als ongelezen berichten',
       );
     });
 
     test('de badge gebruikt hetzelfde getal als de scheiding', () {
+      final chat = File('lib/pages/chat/chat.dart').readAsStringSync();
       final eventList = File(
         'lib/pages/chat/chat_event_list.dart',
       ).readAsStringSync();
       final chatView = File('lib/pages/chat/chat_view.dart').readAsStringSync();
 
       expect(
+        chat,
+        contains('unreadCountNotifier.value ='),
+        reason: 'Het getal moet bij het openen op de notifier belanden',
+      );
+      expect(
         eventList,
-        contains('unreadCountNotifier.value = unreadCount'),
-        reason: 'Het getal moet vanuit de timeline op de badge belanden',
+        contains('controller.unreadCountNotifier.value'),
+        reason: 'De scheiding leest hetzelfde getal als de badge',
       );
       expect(
         chatView,
         contains('unreadCountNotifier'),
         reason: 'De scroll-knop moet de badge met dat getal tonen',
+      );
+    });
+
+    test('het aantal is een snapshot en groeit niet mee met nieuwe berichten', () {
+      // De teller werd live herberekend terwijl je in het gesprek zat: een
+      // nieuw bericht dat binnenkwam (en dat je al las) verhoogde de teller
+      // naar "1 ongelezen bericht". Dat is de bug die deze test vastlegt.
+      final eventList = File(
+        'lib/pages/chat/chat_event_list.dart',
+      ).readAsStringSync();
+      final chat = File('lib/pages/chat/chat.dart').readAsStringSync();
+
+      expect(
+        eventList,
+        isNot(contains('unreadCountNotifier.value = unreadCount')),
+        reason:
+            'De teller mag niet live herberekend worden in de lijst',
+      );
+      expect(
+        chat,
+        contains('unreadCountNotifier.value = idx > 0'),
+        reason:
+            'Het aantal moet als snapshot bij het openen bewaard worden',
       );
     });
   });

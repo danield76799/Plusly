@@ -612,6 +612,26 @@ class ChatController extends State<ChatPageWithRoom>
       unreadDividerEventId =
           ownRead ?? (readMarkerEventId.isNotEmpty ? readMarkerEventId : null);
 
+      // Snapshot het AANTAL ongelezen berichten op dit moment. Het aantal moet
+      // vaststaan zodra je de chat opent: berichten die daarna binnenkomen
+      // (en die je al leest) mogen de teller niet meer ophogen. Anders zie je
+      // "1 ongelezen bericht" verschijnen terwijl je dat bericht al leest.
+      if (unreadDividerEventId != null && timeline != null) {
+        final ownId = sendingClient.userID;
+        final zichtbaar = timeline!.events.filterByVisibleInGui();
+        final idx = zichtbaar.indexWhere(
+          (e) => e.eventId == unreadDividerEventId,
+        );
+        unreadCountNotifier.value = idx > 0
+            ? zichtbaar
+                  .take(idx)
+                  .where(
+                    (e) => e.senderId != ownId && e.type == EventTypes.Message,
+                  )
+                  .length
+            : 0;
+      }
+
       var readMarkerEventIndex = -1;
       if (readMarkerEventId.isNotEmpty && timeline != null) {
         readMarkerEventIndex = timeline!.events

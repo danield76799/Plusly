@@ -75,25 +75,11 @@ class ChatEventList extends StatelessWidget {
     final dividerIndex = dividerEventId == null
         ? -1
         : events.indexWhere((event) => event.eventId == dividerEventId);
-    // Tel alleen berichten die écht ongelezen zijn: berichten van anderen,
-    // niet je eigen verzonden berichten en niet de state-events die door de
-    // zichtbaarheidsfilter heen zijn gekomen.
-    final ownUserId = controller.room.client.userID;
-    final unreadCount = dividerIndex > 0
-        ? events
-              .take(dividerIndex)
-              .where((event) =>
-                  event.senderId != ownUserId &&
-                  event.type == EventTypes.Message)
-              .length
-        : 0;
-    // Niet tijdens build(): de badge op de scroll-knop luistert naar deze
-    // notifier en zou dan een setState tijdens de build uitlokken.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (controller.mounted && controller.unreadCountNotifier.value != unreadCount) {
-        controller.unreadCountNotifier.value = unreadCount;
-      }
-    });
+    // Het AANTAL is een snapshot (zie _tryLoadTimeline): het staat vast zodra
+    // je de chat opent. Nieuwe berichten die binnenkomen terwijl je in de chat
+    // zit verhogen de teller niet meer — anders verscheen er "1 ongelezen
+    // bericht" terwijl je dat bericht al las.
+    final unreadCount = controller.unreadCountNotifier.value;
 
     return CustomScrollView(
       controller: controller.scrollController,
