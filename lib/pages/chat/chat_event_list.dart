@@ -204,9 +204,14 @@ class ChatEventList extends StatelessWidget {
                   controller: controller.scrollController,
                   child: Padding(
                     padding: EdgeInsets.only(
+                      // WhatsApp-groepering: berichten van dezelfde afzender
+                      // staan vrijwel tegen elkaar (1 px), zodat het blok als
+                      // één geheel leest. Tussen verschillende afzenders zit
+                      // een iets ruimere, maar nog altijd compacte 8 px — dat
+                      // is wat WhatsApp gebruikt.
                       bottom: (i > 0 && events[i - 1].senderId == event.senderId)
-                          ? 2.0
-                          : 12.0,
+                          ? 1.0
+                          : 8.0,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -17,7 +17,7 @@ void main() {
     // Repliceert de hoeklogica uit MessageBubble: vierkante hoeken aan de
     // zijden die aan het blok grenzen.
     Widget bubble(String text, {required bool sameAbove, required bool sameBelow, required bool tail}) {
-      const r = Radius.circular(10.0);
+      const r = Radius.circular(AppConfig.bubbleRadius);
       final radius = BorderRadius.only(
         topLeft: sameAbove ? Radius.zero : r,
         topRight: sameAbove ? Radius.zero : r,
