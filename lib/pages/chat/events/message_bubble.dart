@@ -445,7 +445,15 @@ class _MessageBubbleState extends State<MessageBubble> {
               Positioned(
                 bottom: -8,
                 right: ownMessage ? 8 : null,
-                left: ownMessage ? null : 8,
+                // Voor inkomende berichten staat er links een avatar (of een
+                // spacer van dezelfde breedte). De reacties mogen daarom niet
+                // op `left: 8` staan — dan vallen ze óver de avatar. Ze moeten
+                // rechts van de avatar/spacer beginnen.
+                left: ownMessage
+                    ? null
+                    : (previousEventSameSender || !isOneOnOne)
+                        ? Avatar.defaultSize + 8
+                        : 8,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
