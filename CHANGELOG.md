@@ -1,3 +1,49 @@
+# Plusly v1.4.17+25595 (2026-11-14)
+
+_Verzameling van alles wat sinds v1.4.17+23515 is uitgebracht (t/m 25592–25595).
+Uitgekomen als: 25592 (dynamic_color-fix), 25593 (batch 1 deps, Play Store), 25595 (batch 2 + fixes)._
+
+## Chat & WhatsApp-look
+- **Bubbel-staartjes** — alleen op het onderste bericht van een reeks van dezelfde afzender; aangrenzende bubbels krijgen strakkere hoeken.
+- **Groepering** — opeenvolgende berichten van dezelfde afzender vormen nu één visueel blok.
+- **Compactere berichtafstand** — 1 px binnen een blok, 8 px tussen blokken (was 2/12); datum-pil strakker en subtieler.
+- **Datumscheiding** boven dagblokken in de chat.
+- **WhatsApp-groene eigen bubbel** als *optie* (instelling, standaard uit; Material You blijft de standaard). Groene ongelezen-badge op de chatlijst.
+- **Ongelezen-scheiding** — scheidslijn + teller bij het eerste ongelezen bericht, met badge op de scroll-knop. De teller gebruikt nu je eigen **read-receipts** in plaats van `m.fully_read` (die liep achter: "4 ongelezen" bij 0), en is een **snapshot bij openen** — binnenkomende berichten die je al leest verhogen de teller niet meer.
+- **Emoji-reacties vallen niet meer over de avatar** — ze staan nu rechts van de avatar/spacer.
+- **Verwijderde berichten blijven leesbaar** — originele tekst wordt lokaal gecachet (max 2000 berichten / 14 dagen) vóór redact, zodat "Verwijderd bericht" de originele inhoud nog toont.
+- **Multi-select & kopiëren** — tik op een bericht voegt het toe aan de selectie; kopieer-acties in de selectiebalk en zetten geen afzendernaam meer vóór de tekst. "Jij:"-prefix alleen nog bij berichten van anderen.
+- **Tik-om-te-selecteren** en multiselectie beter vindbaar.
+- Kleinere UI-polish: tijd niet meer afgekapt in de bubbel, meer tekstruimte in de invoerbalk, klok in de gesprekskop, consistente WhatsApp-dichtheid.
+
+## Bridges & media
+- **MSC4274-galerijen** — meerdere media in één bericht; bridge-galerijen zijn uitgeschakeld omdat bridges daarmee stuklopen.
+- Bridge-detectie met diagnostiek + netwerkfilter-toggle in instellingen; LinkedIn-bridge met eigen icoon; (WA)-markering uit berichtpreviews.
+- **Video-upload gecapt op 30 MB** en met `dataSync` foreground service.
+- **Contacten delen zoals WhatsApp** — uit je eigen telefoonboek, of als Matrix-contact.
+- Live-location-delen verwijderd (werkte onbetrouwbaar).
+- Drijvende datum-chip bij scrollen; Extera Next-swipe-to-reply (touch-only, met haptiek).
+
+## Notificaties & push
+- Eén heads-up per bericht i.p.v. per push; geen vloedgolf bij push-bursts meer.
+- Berichtinhoud zichtbaar op vergrendelscherm; push-fouten worden in de diagnose getoond i.p.v. stil gefaald.
+- Lege/storende foreground-service-melding verdwenen; melding alleen bij een trage koude start; push-service blijft zijn eigen watchdog volgen.
+- Geen dubbele meldingen bij push met berichtinhoud meer (zie ook vorige release).
+
+## Dependencies & build
+- `dynamic_color` 1.8.0 (teruggetrokken) → 2.1.0; **dependency_override verwijderd**.
+- Grote batch-upgrades: go_router 18.1.x, flutter_foreground_task **10.x** (11.x bewust niet: vereist Flutter/Kotlin-migratie), file_picker 13, `flutter_local_notifications` 22.3.3 (23.x vereist AGP 9 — bewust niet), emojis 3.2, pro_image_editor 14, native_imaging 2, chewie, share_plus, device_info_plus, package_info_plus, badges 4, app_settings 9, latlong2, enz. (128 pakketten).
+- **Build-breaking fixes:** emojis-3-skin-tone-logica overgezet op `modifiable`/`newSkin()`; pro_image_editor-v14-API; file_picker-13-API (`pickFile`/`pickFiles`, nieuwe `saveFile`).
+- `receive_sharing_intent` gepind op 1.8.1 (1.9.0 vereist `compileSdk` 37; CI-SDK is 36).
+- Analyzer schoon; **338 tests groen**; debug-APK bouwt lokaal; release via CI.
+- **CI/release hersteld** — Play Store-deploy werkte weer (fastlane Gem-pad); release-job faalde tijdelijk op GitHub-HTTP-500; v25593 handmatig gereleased vanaf de CI-artifacts.
+
+## Interne refactor
+- Lees-marker/ongelezen-logica verhuisd uit `chat.dart` naar een eigen `ChatReadMarker`-mixin (chat.dart ~220 regels lichter).
+- `build_log.txt` en andere rommel uit de repo; `.gitignore` opgeruimd.
+
+---
+
 # Plusly v1.4.17+23515
 
 ## Push-notificaties
