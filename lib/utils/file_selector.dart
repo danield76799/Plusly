@@ -15,12 +15,21 @@ Future<List<XFile>> selectFiles(
   final result = await AppLock.of(context).pauseWhile(
     showFutureLoadingDialog(
       context: context,
-      future: () => FilePicker.platform.pickFiles(
-        compressionQuality: 0,
-        allowMultiple: allowMultiple,
-        type: type,
-      ),
+      future: () async {
+        if (allowMultiple) {
+          return FilePicker.pickFiles(
+            compressionQuality: 0,
+            type: type,
+          );
+        }
+        final single = await FilePicker.pickFile(
+          compressionQuality: 0,
+          type: type,
+        );
+        return single == null ? <PlatformFile>[] : [single];
+      },
     ),
   );
-  return result.result?.xFiles ?? [];
+  final picked = result.asValue?.value;
+  return picked?.map((f) => f.xFile).toList() ?? <XFile>[];
 }

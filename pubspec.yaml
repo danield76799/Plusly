@@ -10,25 +10,25 @@ environment:
 dependencies:
   action_slider: ^0.7.0
   app_links: ^7.0.0
-  app_settings: ^5.2.0
+  app_settings: ^9.0.1
   archive: ^4.0.9
   async: ^2.13.0
   audioplayers: ^6.5.1
-  badges: ^3.1.2
+  badges: ^4.0.1
   blurhash_dart: ^1.2.1
   camera: ^0.12.0+1
-  chewie: ^1.13.0
+  chewie: ^1.17.4
   collection: ^1.18.0
   cross_file: ^0.3.5+2
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
   desktop_drop: ^0.7.0
   desktop_notifications: ^0.6.3
   desktop_webview_window: ^0.2.3
-  device_info_plus: ^12.3.0
+  device_info_plus: ^13.3.0
   dio: ^5.9.2
   dynamic_color: ^2.1.0
   emojis: ^0.9.9
-  file_picker: ^10.3.10
+  file_picker: ^13.3.3
   file_selector: ^1.1.0
   flutter:
     sdk: flutter
@@ -66,7 +66,7 @@ dependencies:
   image_picker: ^1.2.1
   intl: ^0.20.2
   latext: ^0.5.1
-  latlong2: ^0.9.1
+  latlong2: ^0.10.1
   linkify: ^5.0.0
   marquee: ^2.3.0
   matrix:
@@ -76,12 +76,12 @@ dependencies:
       ref: main
   mime: ^2.0.0
   native_imaging: ^0.4.0
-  open_file: ^3.5.11
+  open_file: ^4.0.0
   # flutter_pdfview: ^1.4.0  # DISABLED - build conflicts with flutter_openssl_crypto
   opus_caf_converter_dart: ^1.0.1
-  package_info_plus: ^9.0.0
+  package_info_plus: ^10.2.2
   particles_network: ^1.9.3
-  pasteboard: ^0.5.0
+  pasteboard: ^0.6.0
   path: ^1.9.0
   path_provider: ^2.1.2
   permission_handler: ^12.0.1
@@ -94,7 +94,7 @@ dependencies:
   receive_sharing_intent: ^1.8.1
   record: ^7.1.2
   scroll_to_index: ^3.0.1
-  share_plus: ^12.0.1
+  share_plus: ^13.3.1
   shared_preferences: ^2.2.0 # Pinned because https://github.com/flutter/flutter/issues/118401
   slugify: ^2.0.0
   sqflite_common_ffi: ^2.3.7+1
@@ -108,7 +108,7 @@ dependencies:
   video_compress: ^3.1.4
   video_player: ^2.11.1
   vodozemac: ^0.5.0
-  wakelock_plus: ^1.4.0
+  wakelock_plus: ^1.5.2
   webrtc_interface: ^1.4.0
   webview_flutter: ^4.10.0
 

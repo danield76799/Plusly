@@ -68,14 +68,12 @@ class SettingsBackup {
   }
 
   static Future<Map<String, dynamic>?> pickAndRead() async {
-    final result = await FilePicker.platform.pickFiles(
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['json'],
-      withData: true,
     );
-    if (result == null || result.files.isEmpty) return null;
-    final bytes = result.files.first.bytes;
-    if (bytes == null) return null;
+    if (files.isEmpty) return null;
+    final bytes = await files.first.readAsBytes();
     final jsonString = utf8.decode(bytes);
     return jsonDecode(jsonString) as Map<String, dynamic>;
   }

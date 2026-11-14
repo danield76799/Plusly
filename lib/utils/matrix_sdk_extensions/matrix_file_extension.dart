@@ -20,30 +20,41 @@ extension MatrixFileExtension on MatrixFile {
       return;
     }
 
-    final downloadPath = !PlatformInfos.isMobile
-        ? (await getSaveLocation(
-            suggestedName: name,
-            confirmButtonText: L10n.of(context).saveFile,
-          ))?.path
-        : await FilePicker.platform.saveFile(
-            dialogTitle: L10n.of(context).saveFile,
-            fileName: name,
-            type: filePickerFileType,
-            bytes: bytes,
-          );
-    if (downloadPath == null) return;
+    if (!PlatformInfos.isMobile) {
+      final downloadPath = (await getSaveLocation(
+        suggestedName: name,
+        confirmButtonText: L10n.of(context).saveFile,
+      ))?.path;
+      if (downloadPath == null) return;
 
-    if (PlatformInfos.isDesktop) {
-      final result = await showFutureLoadingDialog(
-        context: context,
-        future: () => File(downloadPath).writeAsBytes(bytes),
+      if (PlatformInfos.isDesktop) {
+        final result = await showFutureLoadingDialog(
+          context: context,
+          future: () => File(downloadPath).writeAsBytes(bytes),
+        );
+        if (result.error != null) return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(L10n.of(context).fileHasBeenSavedAt(downloadPath)),
+        ),
       );
-      if (result.error != null) return;
+      return;
     }
+
+    // Mobiel: file_picker schrijft de bytes zelf weg en geeft een Uri terug.
+    final uri = await FilePicker.saveFile(
+      dialogTitle: L10n.of(context).saveFile,
+      fileName: name,
+      bytes: bytes,
+      mimeType: mimeType,
+    );
+    if (uri == null) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(L10n.of(context).fileHasBeenSavedAt(downloadPath)),
+        content: Text(L10n.of(context).fileHasBeenSavedAt(uri.toString())),
       ),
     );
   }
