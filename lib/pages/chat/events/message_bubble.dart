@@ -27,6 +27,7 @@ import 'package:Pulsly/widgets/member_actions_popup_menu_button.dart';
 import '../../../config/app_config.dart';
 import 'message_content.dart';
 import 'message_reactions.dart';
+import '../../chat/swipe_to_reply.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
 
@@ -355,9 +356,13 @@ class _MessageBubbleState extends State<MessageBubble> {
       color: statusColor,
     );
 
-    return FutureBuilder<User?>(
-      future: _senderUserFuture,
-      builder: (context, snapshot) {
+    return SwipeToReply(
+      key: ValueKey(event.eventId),
+      rightToLeft: AppSettings.swipeRightToLeftToReply.value,
+      onReply: () => widget.onSwipe(event),
+      child: FutureBuilder<User?>(
+        future: _senderUserFuture,
+        builder: (context, snapshot) {
         if (snapshot.hasData && _cachedSenderUser == null) _cachedSenderUser = snapshot.data;
         final user = _cachedSenderUser ?? event.senderFromMemoryOrFallback;
         final displayname = user.calcDisplayname();
@@ -467,6 +472,7 @@ class _MessageBubbleState extends State<MessageBubble> {
           ],
         );
       },
+      ),
     );
   }
 
