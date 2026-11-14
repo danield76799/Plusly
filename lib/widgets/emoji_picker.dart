@@ -230,23 +230,24 @@ class MatrixEmojiPickerState extends State<MatrixEmojiPicker>
     final tempVariations = <String, List<PickerEmoji>>{};
 
     // 1. Load Standard
+    // Sinds emojis 3.x zitten skin-tonevarianten niet meer als losse
+    // entries in de lijst; ze worden on-the-fly met newSkin() aangemaakt
+    // voor elke emoji met modifiable == true.
     final rawStandard = Emoji.all();
     for (final emoji in rawStandard) {
-      if (emoji.name.contains(':') && emoji.name.contains('skin tone')) {
-        final baseName = emoji.name.split(':')[0].trim();
-        if (!tempVariations.containsKey(baseName)) {
-          tempVariations[baseName] = [];
-        }
-        tempVariations[baseName]!.add(PickerEmoji.standard(emoji));
+      if (emoji.modifiable) {
+        tempVariations[emoji.name] = [
+          for (final tone in [
+            fitzpatrick.light,
+            fitzpatrick.mediumLight,
+            fitzpatrick.medium,
+            fitzpatrick.mediumDark,
+            fitzpatrick.dark,
+          ])
+            PickerEmoji.standard(emoji.newSkin(tone)),
+        ];
       }
-    }
-
-    for (final emoji in rawStandard) {
-      final pEmoji = PickerEmoji.standard(emoji);
-      if (tempVariations.containsKey(emoji.name)) {
-        tempVariations[emoji.name]!.insert(0, pEmoji);
-      }
-      loadedList.add(pEmoji);
+      loadedList.add(PickerEmoji.standard(emoji));
     }
 
     // 2. Load Custom
@@ -299,10 +300,7 @@ class MatrixEmojiPickerState extends State<MatrixEmojiPicker>
           final matchesCategory = currentTab.category.groups.contains(
             e.standardEmoji!.emojiGroup,
           );
-          final isVariation =
-              e.displayName.contains(':') &&
-              e.displayName.contains('skin tone');
-          return matchesCategory && !isVariation;
+          return matchesCategory;
         }).toList();
       } else if (currentTab is _CustomTab) {
         _displayedEmojis = _allEmojis.where((e) {
@@ -344,11 +342,7 @@ class MatrixEmojiPickerState extends State<MatrixEmojiPicker>
     Offset globalPosition,
   ) {
     if (baseEmoji.type != PickerEmojiType.standard) return;
-    var lookupName = baseEmoji.standardEmoji!.name;
-    if (lookupName.contains(':')) {
-      lookupName = lookupName.split(':')[0].trim();
-    }
-    final variations = _variationsMap[lookupName];
+    final variations = _variationsMap[baseEmoji.standardEmoji!.name];
     if (variations == null || variations.isEmpty) return;
 
     // ... Menu showing logic same as before ...

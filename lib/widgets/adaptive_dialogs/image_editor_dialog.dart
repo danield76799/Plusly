@@ -35,9 +35,10 @@ class _MaterialYouEditorState extends State<MaterialYouEditor> {
           callbacks: ProImageEditorCallbacks(
             onImageEditingComplete: widget.onImageEditingComplete,
           ),
+          // Let op: v14 verwacht een ThemeData uit het losse `material_ui`
+          // pakket; de app gebruikt Flutters ThemeData. Weglaten = standaardthema.
           configs: ProImageEditorConfigs(
             designMode: ImageEditorDesignMode.material,
-            theme: Theme.of(context),
             paintEditor: PaintEditorConfigs(
               style: const PaintEditorStyle(initialStrokeWidth: 5),
             ),

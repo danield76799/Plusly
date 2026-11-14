@@ -19,6 +19,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   screen_retriever_linux
   sqlcipher_flutter_libs
   url_launcher_linux
+  webcrypto
   window_manager
   window_to_front
 )
