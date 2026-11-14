@@ -1,46 +1,44 @@
 # Plusly v1.4.17+25595 (2026-11-14)
 
-_Verzameling van alles wat sinds v1.4.17+23515 is uitgebracht (t/m 25592–25595).
-Uitgekomen als: 25592 (dynamic_color-fix), 25593 (batch 1 deps, Play Store), 25595 (batch 2 + fixes)._
+_Everything released since v1.4.17+23515 (25592–25595). 25592 fixed `dynamic_color`; 25593 shipped the batch-1 dependency upgrades (Play Store); 25595 shipped batch 2 plus fixes._
 
-## Chat & WhatsApp-look
-- **Bubbel-staartjes** — alleen op het onderste bericht van een reeks van dezelfde afzender; aangrenzende bubbels krijgen strakkere hoeken.
-- **Groepering** — opeenvolgende berichten van dezelfde afzender vormen nu één visueel blok.
-- **Compactere berichtafstand** — 1 px binnen een blok, 8 px tussen blokken (was 2/12); datum-pil strakker en subtieler.
-- **Datumscheiding** boven dagblokken in de chat.
-- **WhatsApp-groene eigen bubbel** als *optie* (instelling, standaard uit; Material You blijft de standaard). Groene ongelezen-badge op de chatlijst.
-- **Ongelezen-scheiding** — scheidslijn + teller bij het eerste ongelezen bericht, met badge op de scroll-knop. De teller gebruikt nu je eigen **read-receipts** in plaats van `m.fully_read` (die liep achter: "4 ongelezen" bij 0), en is een **snapshot bij openen** — binnenkomende berichten die je al leest verhogen de teller niet meer.
-- **Emoji-reacties vallen niet meer over de avatar** — ze staan nu rechts van de avatar/spacer.
-- **Verwijderde berichten blijven leesbaar** — originele tekst wordt lokaal gecachet (max 2000 berichten / 14 dagen) vóór redact, zodat "Verwijderd bericht" de originele inhoud nog toont.
-- **Multi-select & kopiëren** — tik op een bericht voegt het toe aan de selectie; kopieer-acties in de selectiebalk en zetten geen afzendernaam meer vóór de tekst. "Jij:"-prefix alleen nog bij berichten van anderen.
-- **Tik-om-te-selecteren** en multiselectie beter vindbaar.
-- Kleinere UI-polish: tijd niet meer afgekapt in de bubbel, meer tekstruimte in de invoerbalk, klok in de gesprekskop, consistente WhatsApp-dichtheid.
+## Chat & WhatsApp look
+- **Bubble tails** — shown only on the last bubble of a same-sender run; adjacent bubbles now get flush corners on the tail side.
+- **Grouping** — consecutive messages from the same sender render as one visual block.
+- **Denser spacing** — 1 px within a run, 8 px between runs (was 2/12); the day pill (“Vandaag”) is slimmer and more subtle.
+- **Day separators** above each day's messages.
+- **WhatsApp-green own bubble** as an opt-in setting (`whatsAppGreenOwnBubble`, off by default; Material You stays the default). Green unread badge on the chat list.
+- **Unread separator** — divider line + counter above the first unread message, with a badge on the scroll-to-bottom button. The counter now derives from your own **read receipts** instead of `m.fully_read` (which lagged behind — "4 unread" with 0 actual), and it is a **snapshot taken when the chat opens**, so messages that arrive while you are reading no longer bump the counter.
+- **Emoji reactions no longer overlap the avatar** — they sit right of the avatar/spacer.
+- **Deleted messages stay readable** — the original text is cached locally (max 2000 messages / 14 days) before redaction, so a redacted message still shows what was written.
+- **Multi-select & copy** — tapping a message adds it to the selection; copy actions in the selection bar no longer prepend the sender name. "Jij:" prefix only on other senders' messages.
+- **Selection UX** — tap-to-select, multi-select entry points.
+- Smaller UI polish: timestamp no longer clipped in the bubble, more text room in the input field, clock in the chat header, consistent WhatsApp-like density.
 
 ## Bridges & media
-- **MSC4274-galerijen** — meerdere media in één bericht; bridge-galerijen zijn uitgeschakeld omdat bridges daarmee stuklopen.
-- Bridge-detectie met diagnostiek + netwerkfilter-toggle in instellingen; LinkedIn-bridge met eigen icoon; (WA)-markering uit berichtpreviews.
-- **Video-upload gecapt op 30 MB** en met `dataSync` foreground service.
-- **Contacten delen zoals WhatsApp** — uit je eigen telefoonboek, of als Matrix-contact.
-- Live-location-delen verwijderd (werkte onbetrouwbaar).
-- Drijvende datum-chip bij scrollen; Extera Next-swipe-to-reply (touch-only, met haptiek).
+- **MSC4274 galleries** — multiple media files in one message; galleries disabled for bridges (they break on them).
+- Bridge detection with diagnostics + a network-filter toggle in settings; LinkedIn bridge with its own icon; (WA) marker removed from message previews.
+- **Video uploads capped at 30 MB**, sent via the `dataSync` foreground service.
+- **Contact sharing like WhatsApp** — share a contact from your own phonebook, or as a Matrix contact.
+- Live location sharing removed (unreliable).
+- Floating date chip while scrolling; Extera Next swipe-to-reply (touch only, with haptics).
 
-## Notificaties & push
-- Eén heads-up per bericht i.p.v. per push; geen vloedgolf bij push-bursts meer.
-- Berichtinhoud zichtbaar op vergrendelscherm; push-fouten worden in de diagnose getoond i.p.v. stil gefaald.
-- Lege/storende foreground-service-melding verdwenen; melding alleen bij een trage koude start; push-service blijft zijn eigen watchdog volgen.
-- Geen dubbele meldingen bij push met berichtinhoud meer (zie ook vorige release).
+## Notifications & push
+- One heads-up per message instead of one per push; no more notification floods on push bursts.
+- Message content visible on the lock screen; push failures are surfaced in diagnostics instead of failing silently.
+- The stray foreground-service notification is gone; it only appears on a slow cold start; the push service keeps its own watchdog.
 
 ## Dependencies & build
-- `dynamic_color` 1.8.0 (teruggetrokken) → 2.1.0; **dependency_override verwijderd**.
-- Grote batch-upgrades: go_router 18.1.x, flutter_foreground_task **10.x** (11.x bewust niet: vereist Flutter/Kotlin-migratie), file_picker 13, `flutter_local_notifications` 22.3.3 (23.x vereist AGP 9 — bewust niet), emojis 3.2, pro_image_editor 14, native_imaging 2, chewie, share_plus, device_info_plus, package_info_plus, badges 4, app_settings 9, latlong2, enz. (128 pakketten).
-- **Build-breaking fixes:** emojis-3-skin-tone-logica overgezet op `modifiable`/`newSkin()`; pro_image_editor-v14-API; file_picker-13-API (`pickFile`/`pickFiles`, nieuwe `saveFile`).
-- `receive_sharing_intent` gepind op 1.8.1 (1.9.0 vereist `compileSdk` 37; CI-SDK is 36).
-- Analyzer schoon; **338 tests groen**; debug-APK bouwt lokaal; release via CI.
-- **CI/release hersteld** — Play Store-deploy werkte weer (fastlane Gem-pad); release-job faalde tijdelijk op GitHub-HTTP-500; v25593 handmatig gereleased vanaf de CI-artifacts.
+- `dynamic_color` 1.8.0 (yanked) → 2.1.0; the `dependency_overrides` entry is gone.
+- Massive upgrade batch: go_router 18.1.x, flutter_foreground_task **kept at 10.x** (11 requires a Kotlin/toolchain migration — deliberately not taken), file_picker 13, flutter_local_notifications 22.3.3 (23 requires AGP 9), emojis 3.2, pro_image_editor 14, native_imaging 2, chewie, share_plus, device_info_plus, package_info_plus, badges 4, app_settings 9, latlong2 — ~128 packages in batch 1 alone.
+- **Build-breaking migrations done:** emojis 3 skin-tone handling moved to `modifiable` + `newSkin()`; pro_image_editor v14 API; file_picker 13 API (`pickFile`/`pickFiles`, new `saveFile`).
+- `receive_sharing_intent` pinned to 1.8.1 (1.9.0 demands `compileSdk` 37; CI SDK is 36).
+- Analyzer clean; **338 tests green**; debug APK builds locally; release via CI.
+- **CI/release restored** — Play Store deploy works again (fastlane Gemfile path); the release job failed transiently on GitHub HTTP 500; v25593 was re-released manually from CI artifacts.
 
-## Interne refactor
-- Lees-marker/ongelezen-logica verhuisd uit `chat.dart` naar een eigen `ChatReadMarker`-mixin (chat.dart ~220 regels lichter).
-- `build_log.txt` en andere rommel uit de repo; `.gitignore` opgeruimd.
+## Internal refactor
+- Read-marker / unread-count logic extracted from `chat.dart` into a `ChatReadMarker` mixin (chat.dart ~220 lines lighter).
+- `build_log.txt` and other junk removed from the repo; `.gitignore` tidied.
 
 ---
 
