@@ -362,8 +362,9 @@ class _MessageBubbleState extends State<MessageBubble> {
         final user = _cachedSenderUser ?? event.senderFromMemoryOrFallback;
         final displayname = user.calcDisplayname();
 
-        return Stack(
-          clipBehavior: Clip.none,
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -442,27 +443,25 @@ class _MessageBubbleState extends State<MessageBubble> {
               ],
             ),
             if (showReactionsRow)
-              Positioned(
-                bottom: -8,
-                right: ownMessage ? 8 : null,
-                // Voor inkomende berichten staat er links een avatar (of een
-                // spacer van dezelfde breedte). De reacties mogen daarom niet
-                // op `left: 8` staan — dan vallen ze óver de avatar. Ze moeten
-                // rechts van de avatar/spacer beginnen.
-                left: ownMessage
-                    ? null
-                    : (previousEventSameSender || !isOneOnOne)
-                        ? Avatar.defaultSize + 8
-                        : 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: theme.colorScheme.outlineVariant),
-                    boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 2)],
-                  ),
-                  child: MessageReactions(event, timeline),
+              Padding(
+                // Reactie-rij ónder de bubbel, net als in de andere layouts,
+                // zodat de pil nooit op de tekst van de bubbel valt. Links
+                // ingesprongen op avatarbreedte bij inkomende berichten,
+                // uitgelijnd rechts bij eigen berichten.
+                padding: EdgeInsets.only(
+                  top: 4.0,
+                  left: ownMessage
+                      ? 0.0
+                      : ((previousEventSameSender || !isOneOnOne)
+                                ? Avatar.defaultSize
+                                : 0.0) +
+                          12.0,
+                  right: ownMessage ? 0.0 : 12.0,
+                ),
+                child: MessageReactions(
+                  event,
+                  timeline,
+                  chatController: widget.chatController,
                 ),
               ),
           ],
