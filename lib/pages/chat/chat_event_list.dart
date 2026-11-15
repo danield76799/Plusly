@@ -13,6 +13,7 @@ import 'package:Pulsly/pages/chat/events/unread_separator.dart';
 import 'package:Pulsly/pages/chat/seen_by_row.dart';
 import 'package:Pulsly/pages/chat/typing_indicators.dart';
 import 'package:Pulsly/utils/date_time_extension.dart';
+import 'package:Pulsly/widgets/chat_background.dart';
 import 'package:Pulsly/utils/matrix_sdk_extensions/filtered_timeline_extension.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/utils/room_status_extension.dart';
@@ -62,7 +63,7 @@ class ChatEventList extends StatelessWidget {
       thisEventsKeyMap[events[i].eventId] = i;
     }
 
-    final hasWallpaper = AppSettings.wallpaperPath.value.isNotEmpty;
+    final hasWallpaper = hasChatBackground();
 
     final latestReadEventIndex = latestReadEvent != null
         ? events.indexWhere((event) => event.eventId == latestReadEvent)

@@ -29,6 +29,7 @@ import '../quick_reactions_overlay.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
 import 'package:collection/collection.dart';
+import '../../../widgets/chat_background.dart';
 
 class MessageBubbleLegacy extends StatefulWidget {
   final Event event;
@@ -598,7 +599,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                             color: noBubble
                                 ? Colors.transparent
                                 : AppSettings.enableChatFrostedGlass.value &&
-                                      AppSettings.wallpaperPath.value.isNotEmpty
+                                      hasChatBackground()
                                 ? color.withValues(alpha: 0.7)
                                 : color,
                             borderRadius: borderRadius,

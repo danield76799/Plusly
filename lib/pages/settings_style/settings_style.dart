@@ -81,11 +81,24 @@ class SettingsStyleController extends State<SettingsStyle> {
         final file = File(fullPath);
         await file.writeAsBytes(bytes);
         await AppSettings.wallpaperPath.setItem(fullPath);
+        await AppSettings.chatBackground.setItem('none');
         setState(() {
           _wallpaperPath = fullPath;
         });
       },
     );
+  }
+
+  String get chatBackground => AppSettings.chatBackground.value;
+
+  /// Kies een ingebouwde achtergrond (of 'none'). Eigen foto gaat daardoor weg.
+  Future<void> setChatBackground(String id) async {
+    await AppSettings.chatBackground.setItem(id);
+    if (AppSettings.wallpaperPath.value.isNotEmpty) {
+      await AppSettings.wallpaperPath.setItem('');
+      _wallpaperPath = null;
+    }
+    setState(() {});
   }
 
   double get wallpaperOpacity => _wallpaperOpacity ?? 0.5;

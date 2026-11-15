@@ -30,6 +30,7 @@ import 'message_reactions.dart';
 import '../../chat/swipe_to_reply.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
+import '../../../widgets/chat_background.dart';
 
 class MessageBubble extends StatefulWidget {
   final Event event;
@@ -224,7 +225,7 @@ class _MessageBubbleState extends State<MessageBubble> {
       ),
     );
 
-    final bubbleColor = AppSettings.enableChatFrostedGlass.value && AppSettings.wallpaperPath.value.isNotEmpty ? color.withValues(alpha: 0.7) : color;
+    final bubbleColor = AppSettings.enableChatFrostedGlass.value && hasChatBackground() ? color.withValues(alpha: 0.7) : color;
 
     // WhatsApp-vorm: een klein staartje onder de buitenste hoek van de
     // bubbel. De staart zit ACHTER de bubbel, zodat de bubbel zijn hoek

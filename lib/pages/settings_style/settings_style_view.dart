@@ -13,6 +13,7 @@ import 'package:Pulsly/pages/chat/events/state_message.dart';
 import 'package:Pulsly/utils/color_value.dart';
 import 'package:Pulsly/utils/platform_infos.dart';
 import 'package:Pulsly/widgets/avatar.dart';
+import 'package:Pulsly/widgets/chat_background.dart';
 import 'package:Pulsly/widgets/layouts/max_width_body.dart';
 import 'package:Pulsly/widgets/list_divider.dart';
 import 'package:Pulsly/widgets/matrix.dart';
@@ -47,6 +48,10 @@ class SettingsStyleView extends StatelessWidget {
     };
 
     final hasWallpaper = controller.wallpaperPath != null;
+    final previewBackground = (!hasWallpaper &&
+            controller.chatBackground != 'none')
+        ? controller.chatBackground
+        : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -273,6 +278,10 @@ class SettingsStyleView extends StatelessWidget {
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
+                              if (previewBackground != null)
+                                Positioned.fill(
+                                  child: ChatBackground(background: previewBackground),
+                                ),
                               if (hasWallpaper)
                                 Positioned.fill(
                                   child: ClipRect(
@@ -493,6 +502,8 @@ class SettingsStyleView extends StatelessWidget {
                           ),
                         ],
                         const SizedBox(height: 8),
+                        _ChatBackgroundPicker(controller: controller),
+                        const SizedBox(height: 8),
                         ListTile(
                           title: TextButton.icon(
                             style: TextButton.styleFrom(
@@ -641,6 +652,195 @@ class SettingsStyleView extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+/// Kiezer voor ingebouwde chatachtergronden + "eigen foto".
+class _ChatBackgroundPicker extends StatelessWidget {
+  final SettingsStyleController controller;
+
+  const _ChatBackgroundPicker({required this.controller});
+
+  static const _backgrounds = <MapEntry<String, String>>[
+    MapEntry('none', 'Geen'),
+    MapEntry('dusk', 'Schemering'),
+    MapEntry('forest', 'Bos'),
+    MapEntry('ocean', 'Oceaan'),
+    MapEntry('dots', 'Stippen'),
+    MapEntry('waves', 'Golven'),
+    MapEntry('stars', 'Sterren'),
+    MapEntry('lattice', 'Ruitjes'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: Row(
+            children: [
+              Icon(Icons.wallpaper_outlined,
+                  size: 18, color: theme.colorScheme.onSurfaceVariant),
+              const SizedBox(width: 8),
+              Text(
+                'Chatachtergrond',
+                style: theme.textTheme.titleSmall
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 116,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            children: [
+              for (final entry in _backgrounds)
+                _BackgroundTile(
+                  id: entry.key,
+                  label: entry.value,
+                  selected: controller.chatBackground == entry.key &&
+                      controller.wallpaperPath == null,
+                  onTap: () => controller.setChatBackground(entry.key),
+                ),
+              _CustomPhotoTile(controller: controller),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BackgroundTile extends StatelessWidget {
+  final String id;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _BackgroundTile({
+    required this.id,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: 64,
+                height: 84,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: selected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outlineVariant,
+                    width: selected ? 2.5 : 1,
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: id == 'none'
+                    ? ColoredBox(
+                        color: theme.colorScheme.surfaceContainerHighest,
+                        child: Center(
+                          child: Icon(
+                            Icons.block,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      )
+                    : ChatBackground(background: id),
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: selected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CustomPhotoTile extends StatelessWidget {
+  final SettingsStyleController controller;
+
+  const _CustomPhotoTile({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final selected = controller.wallpaperPath != null;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Column(
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: controller.setWallpaper,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                width: 64,
+                height: 84,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: selected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.outlineVariant,
+                    width: selected ? 2.5 : 1,
+                  ),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_photo_alternate_outlined,
+                      color: selected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Eigen foto',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: selected
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

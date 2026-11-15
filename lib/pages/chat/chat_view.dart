@@ -32,6 +32,7 @@ import 'package:Pulsly/widgets/matrix.dart';
 import 'package:Pulsly/widgets/mini_audio_player.dart';
 import 'package:Pulsly/widgets/unread_rooms_badge.dart';
 import '../../utils/stream_extension.dart';
+import 'package:Pulsly/widgets/chat_background.dart';
 import 'chat_emoji_picker.dart';
 import 'chat_input_row.dart';
 
@@ -409,6 +410,11 @@ class ChatView extends StatelessWidget {
     final scrollUpBannerEventId = controller.scrollUpBannerEventId;
 
     final wallpaperPath = AppSettings.wallpaperPath.value;
+    final builtinBackground = wallpaperPath.isNotEmpty
+        ? null
+        : (AppSettings.chatBackground.value == 'none'
+            ? null
+            : AppSettings.chatBackground.value);
 
     final view = View.of(context);
     final screenWidth = view.physicalSize.width / view.devicePixelRatio;
@@ -623,6 +629,10 @@ class ChatView extends StatelessWidget {
                             ),
                           ),
                         ),
+                      ),
+                    if (builtinBackground != null)
+                      Positioned.fill(
+                        child: ChatBackground(background: builtinBackground),
                       ),
                     // Leesbaarheids-dim: een vaste 60% zwarte overlay boven de
                     // wallpaper zodat zowel lichte als donkere bubbels hoog

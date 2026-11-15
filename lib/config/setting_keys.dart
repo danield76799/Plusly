@@ -20,6 +20,7 @@ enum AppSettings<T> {
   wallpaperPath<String>('xyz.plusly.wallpaper_path', ''),
   wallpaperOpacity<double>('xyz.plusly.wallpaper_opacity', 0.5),
   wallpaperBlur<double>('xyz.plusly.wallpaper_blur', 0.0),
+  chatBackground<String>('xyz.plusly.chat_background', 'none'),
   experimentalJitsi<bool>('xyz.plusly.jitsi', false),
   jitsiDomain<String>('xyz.plusly.jitsi_domain', 'meet.jit.si'),
   applicationName<String>('xyz.plusly.app_name', 'Plusly'),
