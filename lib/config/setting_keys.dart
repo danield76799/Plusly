@@ -270,7 +270,10 @@ extension AppSettingsStringExtension on AppSettings<String> {
     return value.asValue?.value ?? defaultValue;
   }
 
-  Future<void> setItem(String value) => AppSettings.store.setString(key, value);
+  Future<void> setItem(String value) async {
+    await AppSettings.store.setString(key, value);
+    AppSettingsNotifier.notify(key);
+  }
 }
 
 extension AppSettingsIntExtension on AppSettings<int> {

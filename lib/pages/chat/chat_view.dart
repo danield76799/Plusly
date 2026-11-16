@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -409,15 +408,6 @@ class ChatView extends StatelessWidget {
     final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 10.0;
     final scrollUpBannerEventId = controller.scrollUpBannerEventId;
 
-    final backgroundMode = chatBackgroundMode(controller.room.id);
-    final wallpaperPath = backgroundMode == 'wallpaper'
-        ? AppSettings.wallpaperPath.value
-        : '';
-    final builtinBackground =
-        (backgroundMode == 'wallpaper' || backgroundMode == 'none')
-            ? null
-            : backgroundMode;
-
     final view = View.of(context);
     final screenWidth = view.physicalSize.width / view.devicePixelRatio;
     final screenHeight = view.physicalSize.height / view.devicePixelRatio;
@@ -607,46 +597,11 @@ class ChatView extends StatelessWidget {
                 onDragExited: controller.onDragExited,
                 child: Stack(
                   children: <Widget>[
-                    if (wallpaperPath.isNotEmpty)
-                      Positioned.fill(
-                        child: ClipRect(
-                          child: OverflowBox(
-                            alignment: Alignment.topCenter,
-                            maxHeight: screenHeight,
-                            maxWidth: screenWidth,
-                            child: Opacity(
-                              opacity: AppSettings.wallpaperOpacity.value,
-                              child: ImageFiltered(
-                                imageFilter: ui.ImageFilter.blur(
-                                  sigmaX: AppSettings.wallpaperBlur.value,
-                                  sigmaY: AppSettings.wallpaperBlur.value,
-                                ),
-                                child: Image.file(
-                                  File(wallpaperPath),
-                                  fit: BoxFit.cover,
-                                  height: screenHeight,
-                                  width: screenWidth,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (builtinBackground != null)
-                      Positioned.fill(
-                        child: ChatBackground(background: builtinBackground),
-                      ),
-                    // Leesbaarheids-dim: een vaste 60% zwarte overlay boven de
-                    // wallpaper zodat zowel lichte als donkere bubbels hoog
-                    // contrast houden, óók op een drukke afbeelding. Alleen
-                    // actief wanneer er daadwerkelijk een wallpaper is — een
-                    // effen scaffold-achtergrond interfereert niet.
-                    if (wallpaperPath.isNotEmpty)
-                      Positioned.fill(
-                        child: ColoredBox(
-                          color: Colors.black.withValues(alpha: 0.60),
-                        ),
-                      ),
+                    ChatBackdrop(
+                      roomId: controller.room.id,
+                      width: screenWidth,
+                      height: screenHeight,
+                    ),
                     // Messages — full screen under AppBar and InputBar
                     Positioned.fill(
                       child: GestureDetector(

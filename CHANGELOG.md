@@ -38,6 +38,11 @@
   Keuze uit Standaard (globale instelling), Geen, of een van de ingebouwde
   achtergronden. Opgeslagen per roomId op het apparaat; een eigen foto
   blijft globaal en wordt door een per-chat keuze overruled.
+- Achtergronden zijn nu duidelijk zichtbaar (veel sterkere kleuren en
+  patronen dan voorheen — ze waren nauwelijks van elkaar te onderscheiden)
+  en een keuze wordt direct live toegepast in de chat, zonder dat je de
+  chat opnieuw hoeft te openen (de chat-achtergrond luistert nu naar de
+  instellingen).
 
 # Plusly v1.4.17+25595 (2026-11-14)
 

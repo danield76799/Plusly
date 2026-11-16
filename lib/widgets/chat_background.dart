@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
@@ -76,8 +78,8 @@ String chatBackgroundMode([String? roomId]) {
 /// een ingebouwde achtergrond, of een per-chat afwijking daarvan.
 bool hasChatBackground([String? roomId]) => chatBackgroundMode(roomId) != 'none';
 
-/// Ingebouwde chatachtergronden als CustomPainter: strak, subtiel en
-/// zonder schermafbeeldingen. Voor donkere én lichte modus.
+/// Ingebouwde chatachtergronden als CustomPainter: contrastrijk en duidelijk
+/// herkenbaar, in zowel lichte als donkere modus.
 class ChatBackground extends StatelessWidget {
   final String background;
 
@@ -112,68 +114,94 @@ class _BackgroundPainter extends CustomPainter {
           canvas,
           rect,
           isDark
-              ? const [Color(0xFF2B2440), Color(0xFF1B1729), Color(0xFF141B33)]
-              : const [Color(0xFFE9DDF0), Color(0xFFD8CDE3), Color(0xFFC9CDE4)],
+              ? const [Color(0xFF241A45), Color(0xFF4A2447), Color(0xFF8A4A3A)]
+              : const [Color(0xFFD8B9E8), Color(0xFFE3A8B4), Color(0xFFF2C18F)],
         );
         _radialGlow(canvas, rect,
-            center: Offset(size.width * 0.85, size.height * 0.95),
-            radius: size.width * 0.9,
-            color: const Color(0xFFE0885A).withValues(alpha: isDark ? 0.28 : 0.35));
+            center: Offset(size.width * 0.85, size.height * 0.98),
+            radius: size.width * 1.0,
+            color: const Color(0xFFF2834B).withValues(alpha: isDark ? 0.55 : 0.65));
         _radialGlow(canvas, rect,
-            center: Offset(size.width * 0.1, size.height * 0.08),
-            radius: size.width * 0.8,
-            color: const Color(0xFF6A5ACD).withValues(alpha: isDark ? 0.30 : 0.25));
+            center: Offset(size.width * 0.08, size.height * 0.02),
+            radius: size.width * 0.9,
+            color: const Color(0xFF6A4FD0).withValues(alpha: isDark ? 0.55 : 0.45));
+        break;
       case 'forest':
         _gradient(
           canvas,
           rect,
           isDark
-              ? const [Color(0xFF1E3325), Color(0xFF16241B), Color(0xFF0E1A13)]
-              : const [Color(0xFFE3EFE2), Color(0xFFCEE0D2), Color(0xFFBAD2C2)],
+              ? const [Color(0xFF0F2A1E), Color(0xFF16382A), Color(0xFF081E14)]
+              : const [Color(0xFFCFE8D2), Color(0xFF9CCFA9), Color(0xFFDFF0E0)],
         );
+        // Lichtstralen schuin door het bladerdak
+        _diagonalBeams(canvas, size,
+            color: const Color(0xFFB7F0C8),
+            alpha: isDark ? 0.16 : 0.30);
         _radialGlow(canvas, rect,
-            center: Offset(size.width * 0.85, size.height * 0.15),
-            radius: size.width * 0.8,
-            color: const Color(0xFF3F7D54).withValues(alpha: isDark ? 0.35 : 0.4));
+            center: Offset(size.width * 0.85, size.height * 0.12),
+            radius: size.width * 0.85,
+            color: const Color(0xFF3E9E63).withValues(alpha: isDark ? 0.45 : 0.5));
+        break;
       case 'ocean':
         _gradient(
           canvas,
           rect,
           isDark
-              ? const [Color(0xFF17384C), Color(0xFF102A3C), Color(0xFF0B1F2E)]
-              : const [Color(0xFFDFEDF5), Color(0xFFC4DDE9), Color(0xFFA9CCDE)],
+              ? const [Color(0xFF082A44), Color(0xFF0E3F5C), Color(0xFF041B2E)]
+              : const [Color(0xFFBCDCEF), Color(0xFF8FC4DE), Color(0xFFE4F2F8)],
         );
         _radialGlow(canvas, rect,
-            center: Offset(size.width * 0.15, size.height * 0.2),
-            radius: size.width * 0.85,
-            color: const Color(0xFF2F7A9E).withValues(alpha: isDark ? 0.35 : 0.3));
+            center: Offset(size.width * 0.15, size.height * 0.15),
+            radius: size.width * 0.9,
+            color: const Color(0xFF3EC6E8).withValues(alpha: isDark ? 0.5 : 0.55));
+        _radialGlow(canvas, rect,
+            center: Offset(size.width * 0.9, size.height * 0.85),
+            radius: size.width * 0.8,
+            color: const Color(0xFF1E6FA8).withValues(alpha: isDark ? 0.5 : 0.4));
+        _waves(canvas, size,
+            alpha: isDark ? 0.32 : 0.28, amplitude: 11, wavelength: 150);
+        break;
       case 'dots':
         canvas.drawRect(
           rect,
-          Paint()..color = isDark ? const Color(0xFF14181F) : const Color(0xFFF0F3F8),
+          Paint()..color = isDark ? const Color(0xFF1A1E28) : const Color(0xFFEDEFF5),
         );
         _dots(canvas, size);
+        break;
       case 'waves':
         canvas.drawRect(
           rect,
-          Paint()..color = isDark ? const Color(0xFF131A22) : const Color(0xFFEFF3F7),
+          Paint()..color = isDark ? const Color(0xFF121E2E) : const Color(0xFFE3EBF4),
         );
-        _waves(canvas, size);
+        _waves(canvas, size,
+            alpha: isDark ? 0.45 : 0.4, amplitude: 12, wavelength: 110);
+        break;
       case 'stars':
         _gradient(
           canvas,
           rect,
           isDark
-              ? const [Color(0xFF0A1026), Color(0xFF131A36), Color(0xFF090D1F)]
-              : const [Color(0xFFDFE6F5), Color(0xFFCBD6EC), Color(0xFFB4C3E0)],
+              ? const [Color(0xFF070B22), Color(0xFF141A3E), Color(0xFF05071A)]
+              : const [Color(0xFFC9D4F0), Color(0xFFAEBCE8), Color(0xFFE4E9F7)],
         );
+        _radialGlow(canvas, rect,
+            center: Offset(size.width * 0.75, size.height * 0.25),
+            radius: size.width * 0.75,
+            color: const Color(0xFF7A5CFF).withValues(alpha: isDark ? 0.4 : 0.3));
+        _radialGlow(canvas, rect,
+            center: Offset(size.width * 0.15, size.height * 0.75),
+            radius: size.width * 0.7,
+            color: const Color(0xFF2EA8A0).withValues(alpha: isDark ? 0.35 : 0.3));
         _stars(canvas, size);
+        break;
       case 'lattice':
         canvas.drawRect(
           rect,
-          Paint()..color = isDark ? const Color(0xFF161A1F) : const Color(0xFFF3F1EC),
+          Paint()..color = isDark ? const Color(0xFF1B1A17) : const Color(0xFFF5EFDF),
         );
         _lattice(canvas, size);
+        break;
       default:
         canvas.drawRect(
           rect,
@@ -207,26 +235,43 @@ class _BackgroundPainter extends CustomPainter {
     canvas.drawRect(rect, paint);
   }
 
-  Color get _patternColor => isDark ? Colors.white : const Color(0xFF1F2A44);
+  void _diagonalBeams(Canvas canvas, Size size,
+      {required Color color, required double alpha}) {
+    final paint = Paint()..color = color.withValues(alpha: alpha);
+    for (var i = -2; i < 8; i++) {
+      final x = size.width * (i / 6.0);
+      final path = Path()
+        ..moveTo(x, -40)
+        ..lineTo(x + size.width * 0.28, -40)
+        ..lineTo(x + size.width * 0.28 - size.height * 0.55, size.height + 40)
+        ..lineTo(x - size.height * 0.55, size.height + 40)
+        ..close();
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  Color get _patternColor =>
+      isDark ? Colors.white : const Color(0xFF141B2E);
 
   void _dots(Canvas canvas, Size size) {
-    final paint = Paint()..color = _patternColor.withValues(alpha: 0.14);
-    const spacing = 26.0;
+    final paint = Paint()..color = _patternColor.withValues(alpha: isDark ? 0.5 : 0.4);
+    const spacing = 22.0;
     for (var y = spacing / 2; y < size.height; y += spacing) {
       for (var x = spacing / 2; x < size.width; x += spacing) {
-        canvas.drawCircle(Offset(x, y), 1.7, paint);
+        canvas.drawCircle(Offset(x, y), 2.3, paint);
       }
     }
   }
 
-  void _waves(Canvas canvas, Size size) {
+  void _waves(Canvas canvas, Size size,
+      {required double alpha,
+      required double amplitude,
+      required double wavelength}) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4
-      ..color = _patternColor.withValues(alpha: 0.14);
-    const wavelength = 120.0;
-    const amplitude = 9.0;
-    const rowHeight = 44.0;
+      ..strokeWidth = 1.8
+      ..color = _patternColor.withValues(alpha: alpha);
+    const rowHeight = 42.0;
     for (var row = -1; row * rowHeight < size.height + rowHeight; row++) {
       final yBase = row * rowHeight + 24;
       final phase = row.isEven ? 0.0 : wavelength / 2;
@@ -244,22 +289,21 @@ class _BackgroundPainter extends CustomPainter {
   void _stars(Canvas canvas, Size size) {
     final rng = math.Random(1234);
     final starPaint = Paint();
-    for (var i = 0; i < 130; i++) {
+    for (var i = 0; i < 170; i++) {
       final x = rng.nextDouble() * size.width;
       final y = rng.nextDouble() * size.height;
-      final r = 0.4 + rng.nextDouble() * 1.5;
-      final alpha = 0.25 + rng.nextDouble() * 0.75;
-      starPaint.color = Colors.white.withValues(alpha: isDark ? alpha : alpha * 0.35);
+      final r = 0.5 + rng.nextDouble() * 1.7;
+      final alpha = 0.35 + rng.nextDouble() * 0.65;
+      starPaint.color = Colors.white.withValues(alpha: isDark ? alpha : alpha * 0.5);
       canvas.drawCircle(Offset(x, y), r, starPaint);
     }
-    // Een paar helderdere "vonkjes" (kruisjes)
     final sparkle = Paint()
-      ..color = Colors.white.withValues(alpha: isDark ? 0.8 : 0.3)
-      ..strokeWidth = 1.1;
-    for (var i = 0; i < 7; i++) {
+      ..color = Colors.white.withValues(alpha: isDark ? 0.9 : 0.4)
+      ..strokeWidth = 1.3;
+    for (var i = 0; i < 9; i++) {
       final x = rng.nextDouble() * size.width;
       final y = rng.nextDouble() * size.height;
-      final s = 2.5 + rng.nextDouble() * 2.5;
+      final s = 2.5 + rng.nextDouble() * 3.0;
       canvas.drawLine(Offset(x - s, y), Offset(x + s, y), sparkle);
       canvas.drawLine(Offset(x, y - s), Offset(x, y + s), sparkle);
     }
@@ -267,9 +311,9 @@ class _BackgroundPainter extends CustomPainter {
 
   void _lattice(Canvas canvas, Size size) {
     final paint = Paint()
-      ..strokeWidth = 1.1
-      ..color = _patternColor.withValues(alpha: 0.09);
-    const spacing = 30.0;
+      ..strokeWidth = 1.5
+      ..color = _patternColor.withValues(alpha: isDark ? 0.22 : 0.24);
+    const spacing = 28.0;
     final diag = size.width + size.height;
     for (var d = -diag; d < diag * 2; d += spacing) {
       canvas.drawLine(Offset(d, 0), Offset(d + size.height, size.height), paint);
@@ -284,7 +328,7 @@ class _BackgroundPainter extends CustomPainter {
         radius: 1.15,
         colors: [
           Colors.transparent,
-          Colors.black.withValues(alpha: isDark ? 0.28 : 0.10),
+          Colors.black.withValues(alpha: isDark ? 0.30 : 0.12),
         ],
         stops: const [0.55, 1.0],
       ).createShader(rect);
@@ -294,4 +338,76 @@ class _BackgroundPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _BackgroundPainter old) =>
       old.background != background || old.brightness != brightness;
+}
+
+
+/// Luistert naar alle chat-achtergrond-instellingen (globaal, per-chat,
+/// wallpaper-pad/opacity/blur) en rendert de juiste laag, zodat een keuze
+/// direct zichtbaar is zonder dat de chat opnieuw geopend hoeft te worden.
+class ChatBackdrop extends StatelessWidget {
+  final String? roomId;
+  final double width;
+  final double height;
+
+  const ChatBackdrop({
+    super.key,
+    required this.roomId,
+    required this.width,
+    required this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final listenable = Listenable.merge([
+      AppSettingsNotifier.of(AppSettings.chatBackground.key),
+      AppSettingsNotifier.of(AppSettings.chatBackgroundPerRoom.key),
+      AppSettingsNotifier.of(AppSettings.wallpaperPath.key),
+      AppSettingsNotifier.of(AppSettings.wallpaperOpacity.key),
+      AppSettingsNotifier.of(AppSettings.wallpaperBlur.key),
+    ]);
+    return AnimatedBuilder(
+      animation: listenable,
+      builder: (context, _) {
+        final mode = chatBackgroundMode(roomId);
+        if (mode == 'none') return const SizedBox.shrink();
+        if (mode == 'wallpaper') {
+          final path = AppSettings.wallpaperPath.value;
+          if (path.isEmpty) return const SizedBox.shrink();
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: ClipRect(
+                  child: OverflowBox(
+                    alignment: Alignment.topCenter,
+                    maxHeight: height,
+                    maxWidth: width,
+                    child: Opacity(
+                      opacity: AppSettings.wallpaperOpacity.value,
+                      child: ImageFiltered(
+                        imageFilter: ui.ImageFilter.blur(
+                          sigmaX: AppSettings.wallpaperBlur.value,
+                          sigmaY: AppSettings.wallpaperBlur.value,
+                        ),
+                        child: Image.file(
+                          File(path),
+                          fit: BoxFit.cover,
+                          height: height,
+                          width: width,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Leesbaarheids-dim over de wallpaper.
+              const Positioned.fill(
+                child: ColoredBox(color: Color(0x99000000)),
+              ),
+            ],
+          );
+        }
+        return Positioned.fill(child: ChatBackground(background: mode));
+      },
+    );
+  }
 }
