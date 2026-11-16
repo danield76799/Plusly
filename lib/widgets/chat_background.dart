@@ -458,9 +458,9 @@ class ChatBackdrop extends StatelessWidget {
                   ),
                 ),
               ),
-              // Leesbaarheids-dim over de wallpaper.
+              // Lichte leesbaarheids-dim over de wallpaper (15%).
               const Positioned.fill(
-                child: ColoredBox(color: Color(0x99000000)),
+                child: ColoredBox(color: Color(0x26000000)),
               ),
             ],
           );

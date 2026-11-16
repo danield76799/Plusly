@@ -18,7 +18,7 @@ enum AppSettings<T> {
   showCameraButton<bool>('xyz.plusly.cameraButton', true),
   stickerScale<double>('xyz.plusly.stickerScale', 2),
   wallpaperPath<String>('xyz.plusly.wallpaper_path', ''),
-  wallpaperOpacity<double>('xyz.plusly.wallpaper_opacity', 0.5),
+  wallpaperOpacity<double>('xyz.plusly.wallpaper_opacity', 0.9),
   wallpaperBlur<double>('xyz.plusly.wallpaper_blur', 0.0),
   chatBackground<String>('xyz.plusly.chat_background', 'none'),
   /// JSON-kaart van roomId -> achtergrond-override: 'default' (= globale
@@ -164,6 +164,14 @@ enum AppSettings<T> {
     if (AppSettings._store != null) return AppSettings.store;
 
     final store = AppSettings._store = await SharedPreferences.getInstance();
+
+    // De oude default van wallpaperOpacity was 0.5 (met daarbovenop een
+    // vaste 60% zwarte dim) — de eigen foto was daardoor bijna onzichtbaar.
+    // Wie exact de oude default had, krijgt de nieuwe default (0.9).
+    final oldOpacity = store.getDouble(AppSettings.wallpaperOpacity.key);
+    if (oldOpacity == 0.5) {
+      await store.setDouble(AppSettings.wallpaperOpacity.key, 0.9);
+    }
 
     // Migrate wrong datatype for fontSizeFactor
     final fontSizeFactorString = Result(

@@ -101,7 +101,7 @@ class SettingsStyleController extends State<SettingsStyle> {
     setState(() {});
   }
 
-  double get wallpaperOpacity => _wallpaperOpacity ?? 0.5;
+  double get wallpaperOpacity => _wallpaperOpacity ?? 0.9;
 
   double? _wallpaperOpacity;
 
@@ -204,11 +204,11 @@ class SettingsStyleController extends State<SettingsStyle> {
       } catch (_) {}
     }
     await AppSettings.wallpaperPath.setItem('');
-    await AppSettings.wallpaperOpacity.setItem(0.5);
+    await AppSettings.wallpaperOpacity.setItem(0.9);
     await AppSettings.wallpaperBlur.setItem(0.0);
     setState(() {
       _wallpaperPath = null;
-      _wallpaperOpacity = 0.5;
+      _wallpaperOpacity = 0.9;
       _wallpaperBlur = 0.0;
     });
   }
