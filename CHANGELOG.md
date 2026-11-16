@@ -47,10 +47,9 @@
   kies een afbeelding; die foto geldt alleen voor dat gesprek (de
   wereldwijde eigen foto blijft ongemoeid).
 - Eigen foto weer zichtbaar: de wallpaper-opacity stond op 0.5 met daarboven
-  nog eens 60% zwart, waardoor de foto vrijwel verdwenen was. Nieuwe
-  default 0.9 (bestaande 0.5-gebruikers worden eenmalig gemigreerd) en de
-  dim is verlaagd naar 15%. Blur en opacity blijven handmatig regelbaar in
-  Weergave.
+  nog eens 60% zwart, waardoor de foto vrijwel verdwenen was. Nu default op
+  0.9 (bestaande 0.5-gebruikers worden eenmalig gemigreerd) en de dim is
+  volledig weg. Blur en opacity blijven handmatig regelbaar in Weergave.
 
 # Plusly v1.4.17+25595 (2026-11-14)
 
