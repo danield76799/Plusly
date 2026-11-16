@@ -46,6 +46,10 @@
 - Eigen foto óók per gesprek: kies bij Chatachtergrond → "Eigen foto" en
   kies een afbeelding; die foto geldt alleen voor dat gesprek (de
   wereldwijde eigen foto blijft ongemoeid).
+- High-res foto's nu werkend als eigen foto: unieke bestandsnaam bij elke
+  wissel (anders serveerde de image-cache de oude foto) en decode op
+  ~1440px breed in plaats van volledig, zodat grote foto's niet meer
+  stuklopen/niet zichtbaar zijn.
 - Eigen foto weer zichtbaar: de wallpaper-opacity stond op 0.5 met daarboven
   nog eens 60% zwart, waardoor de foto vrijwel verdwenen was. Nu default op
   0.9 (bestaande 0.5-gebruikers worden eenmalig gemigreerd) en de dim is

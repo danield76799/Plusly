@@ -84,24 +84,36 @@ String? perRoomWallpaperPath(String? roomId) {
 /// Slaat de per-chat foto-opslag op: kopieert [file] naar de app-documenten-
 /// map en registreert het pad voor [roomId].
 Future<void> setWallpaperForRoom(String roomId, io.File file) async {
-  // Pad-import plaatselijk om dart:io niet het hele bestand te laten domineren.
-  // ignore: directives_ordering
+  // Unieke bestandsnaam per keer: zo serveert de image-cache nooit de vorige foto.
   final docs = await _documentsDirectory();
-  final target =
-      io.File('${docs.path}${io.Platform.pathSeparator}plusly_wallpaper_${roomId.hashCode.abs()}.jpg');
+  final target = io.File(
+    '${docs.path}${io.Platform.pathSeparator}plusly_wallpaper_${DateTime.now().millisecondsSinceEpoch}.jpg',
+  );
   await target.writeAsBytes(await file.readAsBytes());
+
+  String? previous;
   var map = <String, dynamic>{};
   final raw = AppSettings.chatWallpaperPerRoom.value;
   try {
     final decoded = jsonDecode(raw);
     if (decoded is Map) {
       map = decoded.map((k, v) => MapEntry(k.toString(), v));
+      final old = map[roomId];
+      if (old is String && old.isNotEmpty) previous = old;
     }
   } catch (_) {
     map = <String, dynamic>{};
   }
   map[roomId] = target.path;
   await AppSettings.chatWallpaperPerRoom.setItem(jsonEncode(map));
+
+  // Oude kopie opruimen.
+  if (previous != null && previous != target.path) {
+    try {
+      final oldFile = io.File(previous);
+      if (await oldFile.exists()) await oldFile.delete();
+    } catch (_) {}
+  }
 }
 
 Future<io.Directory> _documentsDirectory() async {
@@ -452,6 +464,10 @@ class ChatBackdrop extends StatelessWidget {
                           fit: BoxFit.cover,
                           height: height,
                           width: width,
+                          // Decodeer hooguit op ~1440px breed: genoeg voor
+                          // een achtergrond, maar betaalbaar qua geheugen.
+                          cacheWidth: 1440,
+                          filterQuality: FilterQuality.medium,
                         ),
                       ),
                     ),
