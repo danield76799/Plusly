@@ -60,6 +60,17 @@ void main() {
       expect(chatBackgroundMode('!a:x'), 'forest');
     });
 
+    test("per-chat 'wallpaper' valt terug op globale modus als er geen eigen foto is", () async {
+      await AppSettings.wallpaperPath.setItem('/tmp/globalfoto.jpg');
+      await setChatBackgroundForRoom('!wp:test', 'wallpaper');
+      // globale foto staat aan -> wallpaper
+      expect(chatBackgroundMode('!wp:test'), 'wallpaper');
+      // globale foto weg -> terugval op globale ingebouwde instelling ('forest')
+      await AppSettings.wallpaperPath.setItem('');
+      expect(chatBackgroundMode('!wp:test'), 'forest');
+      await setChatBackgroundForRoom('!wp:test', 'default');
+    });
+
     test('override via directe JSON-injectie wordt gelezen', () async {
       await AppSettings.chatBackgroundPerRoom
           .setItem(jsonEncode({'!z:y': 'lattice'}));

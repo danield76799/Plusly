@@ -43,6 +43,9 @@
   en een keuze wordt direct live toegepast in de chat, zonder dat je de
   chat opnieuw hoeft te openen (de chat-achtergrond luistert nu naar de
   instellingen).
+- Eigen foto óók per gesprek: kies bij Chatachtergrond → "Eigen foto" en
+  kies een afbeelding; die foto geldt alleen voor dat gesprek (de
+  wereldwijde eigen foto blijft ongemoeid).
 
 # Plusly v1.4.17+25595 (2026-11-14)
 

@@ -1,7 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' as io;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+
+import 'package:path_provider/path_provider.dart' as pp;
 
 import 'package:flutter/material.dart';
 
@@ -37,7 +39,7 @@ String? _perRoomOverride(String? roomId) {
   return null;
 }
 
-/// De ruwe override voor [roomId]: 'default' | 'none' | een ingebouwd id.
+/// De ruwe override voor [roomId]: 'default' | 'none' | 'wallpaper' | een ingebouwd id.
 String perRoomChatBackground(String roomId) =>
     _perRoomOverride(roomId) ?? 'default';
 
@@ -62,14 +64,69 @@ Future<void> setChatBackgroundForRoom(String roomId, String value) async {
   await AppSettings.chatBackgroundPerRoom.setItem(jsonEncode(map));
 }
 
+/// Het absolute pad naar de eigen foto van [roomId], of null als er geen is.
+String? perRoomWallpaperPath(String? roomId) {
+  if (roomId == null || roomId.isEmpty) return null;
+  final raw = AppSettings.chatWallpaperPerRoom.value;
+  if (raw.trim().isEmpty) return null;
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is Map) {
+      final v = decoded[roomId];
+      if (v is String && v.isNotEmpty) return v;
+    }
+  } catch (_) {
+    // Kapotte JSON: negeren.
+  }
+  return null;
+}
+
+/// Slaat de per-chat foto-opslag op: kopieert [file] naar de app-documenten-
+/// map en registreert het pad voor [roomId].
+Future<void> setWallpaperForRoom(String roomId, io.File file) async {
+  // Pad-import plaatselijk om dart:io niet het hele bestand te laten domineren.
+  // ignore: directives_ordering
+  final docs = await _documentsDirectory();
+  final target =
+      io.File('${docs.path}${io.Platform.pathSeparator}plusly_wallpaper_${roomId.hashCode.abs()}.jpg');
+  await target.writeAsBytes(await file.readAsBytes());
+  var map = <String, dynamic>{};
+  final raw = AppSettings.chatWallpaperPerRoom.value;
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is Map) {
+      map = decoded.map((k, v) => MapEntry(k.toString(), v));
+    }
+  } catch (_) {
+    map = <String, dynamic>{};
+  }
+  map[roomId] = target.path;
+  await AppSettings.chatWallpaperPerRoom.setItem(jsonEncode(map));
+}
+
+Future<io.Directory> _documentsDirectory() async {
+  return pp.getApplicationDocumentsDirectory();
+}
+
 /// Wat er uiteindelijk getekend moet worden voor [roomId]:
-/// 'wallpaper' (eigen foto), 'none', of een ingebouwd id uit [kChatBackgrounds].
-/// Eigen foto telt alleen mee als er geen per-chat override is.
+/// 'wallpaper' (eigen foto — per-chat of globaal), 'none', of een ingebouwd
+/// id uit [kChatBackgrounds]. Een override die nergens heen wijst (bijv. een
+/// eigen foto waarvan het bestand is verdwenen) valt terug op globaal.
 String chatBackgroundMode([String? roomId]) {
   final override = _perRoomOverride(roomId);
   if (override != null && override != 'default') {
+    if (override == 'wallpaper') {
+      final perRoom = perRoomWallpaperPath(roomId);
+      if (perRoom != null) return 'wallpaper';
+      if (AppSettings.wallpaperPath.value.isNotEmpty) return 'wallpaper';
+      return _globalBackgroundMode();
+    }
     return override; // 'none' of een ingebouwd id
   }
+  return _globalBackgroundMode();
+}
+
+String _globalBackgroundMode() {
   if (AppSettings.wallpaperPath.value.isNotEmpty) return 'wallpaper';
   return AppSettings.chatBackground.value; // 'none' of een ingebouwd id
 }
@@ -364,6 +421,7 @@ class ChatBackdrop extends StatelessWidget {
       AppSettingsNotifier.of(AppSettings.wallpaperPath.key),
       AppSettingsNotifier.of(AppSettings.wallpaperOpacity.key),
       AppSettingsNotifier.of(AppSettings.wallpaperBlur.key),
+      AppSettingsNotifier.of(AppSettings.chatWallpaperPerRoom.key),
     ]);
     return AnimatedBuilder(
       animation: listenable,
@@ -371,7 +429,8 @@ class ChatBackdrop extends StatelessWidget {
         final mode = chatBackgroundMode(roomId);
         if (mode == 'none') return const SizedBox.shrink();
         if (mode == 'wallpaper') {
-          final path = AppSettings.wallpaperPath.value;
+          final path = perRoomWallpaperPath(roomId) ??
+              AppSettings.wallpaperPath.value;
           if (path.isEmpty) return const SizedBox.shrink();
           return Stack(
             children: [
@@ -389,7 +448,7 @@ class ChatBackdrop extends StatelessWidget {
                           sigmaY: AppSettings.wallpaperBlur.value,
                         ),
                         child: Image.file(
-                          File(path),
+                          io.File(path),
                           fit: BoxFit.cover,
                           height: height,
                           width: width,

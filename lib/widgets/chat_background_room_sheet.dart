@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:matrix/matrix.dart';
+import 'package:file_picker/file_picker.dart';
+
+import 'package:Pulsly/utils/file_selector.dart';
 
 import 'chat_background.dart';
 
@@ -30,14 +35,33 @@ Future<void> showChatBackgroundRoomSheet(
   );
 }
 
-class _ChatBackgroundRoomSheet extends StatelessWidget {
+class _ChatBackgroundRoomSheet extends StatefulWidget {
   final Room room;
 
   const _ChatBackgroundRoomSheet({required this.room});
 
   @override
+  State<_ChatBackgroundRoomSheet> createState() =>
+      _ChatBackgroundRoomSheetState();
+}
+
+class _ChatBackgroundRoomSheetState extends State<_ChatBackgroundRoomSheet> {
+  // Foto specifiek voor dít gesprek; nooit de globale wallpaper overschrijven.
+  String? get _roomWallpaper => perRoomWallpaperPath(widget.room.id);
+
+  Future<void> pickCustomPhoto() async {
+    final picked = await selectFiles(context, type: FileType.image);
+    final pickedFile = picked.isEmpty ? null : picked.first;
+    if (pickedFile == null) return;
+    await setWallpaperForRoom(widget.room.id, File(pickedFile.path));
+    await setChatBackgroundForRoom(widget.room.id, 'wallpaper');
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final room = widget.room;
     final current = perRoomChatBackground(room.id);
 
     Future<void> pick(String value) async {
@@ -155,6 +179,31 @@ class _ChatBackgroundRoomSheet extends StatelessWidget {
                         ),
                       ),
                     ),
+                  ),
+                  tile(
+                    id: 'wallpaper',
+                    label: 'Eigen foto',
+                    selected: current == 'wallpaper',
+                    onTap: pickCustomPhoto,
+                    preview: _roomWallpaper != null
+                        ? Image.file(
+                            File(_roomWallpaper!),
+                            fit: BoxFit.cover,
+                            width: 64,
+                            height: 84,
+                            errorBuilder: (_, _, _) => const Center(
+                              child: Icon(Icons.broken_image_outlined),
+                            ),
+                          )
+                        : ColoredBox(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            child: Center(
+                              child: Icon(
+                                Icons.add_photo_alternate_outlined,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
                   ),
                   builtinTile('none', 'Geen'),
                   for (final entry in _kBackgroundLabels.entries)

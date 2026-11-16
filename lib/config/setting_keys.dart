@@ -24,6 +24,8 @@ enum AppSettings<T> {
   /// JSON-kaart van roomId -> achtergrond-override: 'default' (= globale
   /// instelling volgen), 'none' (bewust geen), of een ingebouwd id.
   chatBackgroundPerRoom<String>('xyz.plusly.chatBackgroundPerRoom', '{}'),
+  /// JSON-kaart van roomId -> absoluut pad naar een eigen foto voor die chat.
+  chatWallpaperPerRoom<String>('xyz.plusly.chatWallpaperPerRoom', '{}'),
   experimentalJitsi<bool>('xyz.plusly.jitsi', false),
   jitsiDomain<String>('xyz.plusly.jitsi_domain', 'meet.jit.si'),
   applicationName<String>('xyz.plusly.app_name', 'Plusly'),
