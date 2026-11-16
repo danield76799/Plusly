@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -17,11 +18,63 @@ const List<String> kChatBackgrounds = <String>[
   'lattice',
 ];
 
-/// True zodra er een achtergrond actief is: een eigen wallpaper (bestand)
-/// of een ingebouwde achtergrond.
-bool hasChatBackground() =>
-    AppSettings.wallpaperPath.value.isNotEmpty ||
-    AppSettings.chatBackground.value != 'none';
+/// De per-chat override uit de JSON-kaart, of null als die er niet/ongeldig is.
+/// Een override is 'default', 'none' of een id uit [kChatBackgrounds].
+String? _perRoomOverride(String? roomId) {
+  if (roomId == null || roomId.isEmpty) return null;
+  final raw = AppSettings.chatBackgroundPerRoom.value;
+  if (raw.trim().isEmpty) return null;
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is! Map) return null;
+    final v = decoded[roomId];
+    if (v is String && v.isNotEmpty) return v;
+  } catch (_) {
+    // Kapotte JSON: negeren en terugvallen op de globale instelling.
+  }
+  return null;
+}
+
+/// De ruwe override voor [roomId]: 'default' | 'none' | een ingebouwd id.
+String perRoomChatBackground(String roomId) =>
+    _perRoomOverride(roomId) ?? 'default';
+
+/// Zet (of wist) de per-chat override. 'default' verwijdert de override,
+/// zodat de chat weer de globale instelling volgt.
+Future<void> setChatBackgroundForRoom(String roomId, String value) async {
+  var map = <String, dynamic>{};
+  final raw = AppSettings.chatBackgroundPerRoom.value;
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is Map) {
+      map = decoded.map((k, v) => MapEntry(k.toString(), v));
+    }
+  } catch (_) {
+    map = <String, dynamic>{};
+  }
+  if (value == 'default') {
+    map.remove(roomId);
+  } else {
+    map[roomId] = value;
+  }
+  await AppSettings.chatBackgroundPerRoom.setItem(jsonEncode(map));
+}
+
+/// Wat er uiteindelijk getekend moet worden voor [roomId]:
+/// 'wallpaper' (eigen foto), 'none', of een ingebouwd id uit [kChatBackgrounds].
+/// Eigen foto telt alleen mee als er geen per-chat override is.
+String chatBackgroundMode([String? roomId]) {
+  final override = _perRoomOverride(roomId);
+  if (override != null && override != 'default') {
+    return override; // 'none' of een ingebouwd id
+  }
+  if (AppSettings.wallpaperPath.value.isNotEmpty) return 'wallpaper';
+  return AppSettings.chatBackground.value; // 'none' of een ingebouwd id
+}
+
+/// True zodra er een achtergrond actief is: een eigen wallpaper (bestand),
+/// een ingebouwde achtergrond, of een per-chat afwijking daarvan.
+bool hasChatBackground([String? roomId]) => chatBackgroundMode(roomId) != 'none';
 
 /// Ingebouwde chatachtergronden als CustomPainter: strak, subtiel en
 /// zonder schermafbeeldingen. Voor donkere én lichte modus.

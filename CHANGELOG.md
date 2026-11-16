@@ -1,3 +1,44 @@
+# Unreleased — Android toolchain-migratie (AGP 9 / Gradle 9)
+
+## Toolchain & dependencies
+- **AGP 8.11.1 → 9.1.1, Gradle 8.14 → 9.3.1** (Flutter 3.47.7-template-standaard).
+- **Kotlin blijft 2.2.20** in legacy KGP-modus (`android.builtInKotlin=false`):
+  meerdere plugins (o.a. flutter_web_auth_2) applyen nog zelf KGP, wat met
+  built-in Kotlin hard faalt. Volledige migratie kan zodra die plugins bij zijn.
+- `compileSdk` expliciet op **37** (API 37); Java/Kotlin target → 17.
+- **flutter_foreground_task** 10.0.0 → 11.0.3 (built-in Kotlin, Flutter 3.44+).
+- **flutter_local_notifications** 22.3.3 → 23.0.2 (vereist AGP 9.1.1 + compileSdk 37).
+- **receive_sharing_intent** 1.8.1 → 1.9.0 (migrated naar built-in Kotlin, compileSdk 37).
+- **desktop_drop** 0.7.0 → 0.8.4 (declareert zelf compileSdk; 0.9.x vereist cross_file 0.4).
+- **flutter_keyboard_visibility** gepind op ^7.0.1 (forced; flutter_typeahead wil ^6.0.0
+  die tegen android-31 is gebouwd en onder AGP 9 AAR-metadata eist >= 34).
+- **flutter_openssl_crypto** verwijderd (nergens meer gebruikt, leverde een
+  compileSdk-fout op onder AGP 9).
+- **flutter_vodozemac 0.5.0 (vendored, third_party/)**: cargokit las
+  `compileSdkVersion.substring(8)`, wat op de nieuwe SDK-naamgeving
+  `android-37.0` "37.0" oplevert i.p.v. "37" en de build liet crashen.
+  Gepatched met een regex; matrix-dart-sdk zit nog aan vodozemac ^0.5.0, dus
+  een echte upgrade kan pas als matrix meegaat.
+- **compileSdk van library-modules geforceerd naar 37** via root
+  `build.gradle.kts` (AGP 9 weigert anders: libraries die tegen <34/<33 gebouwd
+  zijn terwijl hun eigen dependencies >=34 eisen). Geforceerd in
+  `subprojects`, dus ook toekomstige achterblijvende plugins werken.
+- **Known issue: R8 is uitgeschakeld** (`minifyEnabled=false`). Onder AGP 9
+  draait R8 alleen nog in full mode en loopt op deze dependency-graph
+  consequent OOM (ook met 8 GB heap, `-dontoptimize`, `-dontobfuscate` en
+  resource shrinking uit). Oplossingen: de graph slanker maken of R8 met
+  beduidend meer heap draaien. Tot dan is de release APK/AAB niet gemified
+  (Play levert nog steeds per-ABI/density splits).
+- NDK bewust op r27 gelaten: plugins waarschuwen dat ze r28 willen, maar
+  r27 bouwt en draait (16KB page size) — geen reden om het geverifieerde pad te wijzigen.
+- CI: ongewijzigd (release draait daar met minify uit).
+
+## Per-chat achtergrond
+- Per gesprek een eigen chatachtergrond: chatmenu (⋯) → **Chatachtergrond**.
+  Keuze uit Standaard (globale instelling), Geen, of een van de ingebouwde
+  achtergronden. Opgeslagen per roomId op het apparaat; een eigen foto
+  blijft globaal en wordt door een per-chat keuze overruled.
+
 # Plusly v1.4.17+25595 (2026-11-14)
 
 _Everything released since v1.4.17+23515 (25592–25595). 25592 fixed `dynamic_color`; 25593 shipped the batch-1 dependency upgrades (Play Store); 25595 shipped batch 2 plus fixes._

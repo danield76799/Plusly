@@ -409,12 +409,14 @@ class ChatView extends StatelessWidget {
     final bottomSheetPadding = FluffyThemes.isColumnMode(context) ? 16.0 : 10.0;
     final scrollUpBannerEventId = controller.scrollUpBannerEventId;
 
-    final wallpaperPath = AppSettings.wallpaperPath.value;
-    final builtinBackground = wallpaperPath.isNotEmpty
-        ? null
-        : (AppSettings.chatBackground.value == 'none'
+    final backgroundMode = chatBackgroundMode(controller.room.id);
+    final wallpaperPath = backgroundMode == 'wallpaper'
+        ? AppSettings.wallpaperPath.value
+        : '';
+    final builtinBackground =
+        (backgroundMode == 'wallpaper' || backgroundMode == 'none')
             ? null
-            : AppSettings.chatBackground.value);
+            : backgroundMode;
 
     final view = View.of(context);
     final screenWidth = view.physicalSize.width / view.devicePixelRatio;

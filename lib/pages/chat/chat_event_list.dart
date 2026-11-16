@@ -63,7 +63,7 @@ class ChatEventList extends StatelessWidget {
       thisEventsKeyMap[events[i].eventId] = i;
     }
 
-    final hasWallpaper = hasChatBackground();
+    final hasWallpaper = hasChatBackground(controller.room.id);
 
     final latestReadEventIndex = latestReadEvent != null
         ? events.indexWhere((event) => event.eventId == latestReadEvent)

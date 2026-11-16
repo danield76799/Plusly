@@ -599,7 +599,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                             color: noBubble
                                 ? Colors.transparent
                                 : AppSettings.enableChatFrostedGlass.value &&
-                                      hasChatBackground()
+                                      hasChatBackground(widget.chatController?.room.id)
                                 ? color.withValues(alpha: 0.7)
                                 : color,
                             borderRadius: borderRadius,

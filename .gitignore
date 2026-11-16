@@ -78,3 +78,7 @@ docs/package-lock.json
 
 # Lokaal build-log
 build_log.txt
+
+# Gradle build output (AGP 9 schrijft hier build reports)
+/android/build/
+/android/.kotlin/

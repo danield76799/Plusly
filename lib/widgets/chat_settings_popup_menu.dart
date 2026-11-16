@@ -9,8 +9,9 @@ import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/widgets/adaptive_dialogs/show_ok_cancel_alert_dialog.dart';
 import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import 'matrix.dart';
+import 'chat_background_room_sheet.dart';
 
-enum ChatPopupMenuActions { details, mute, unmute, emote, leave, search }
+enum ChatPopupMenuActions { details, mute, unmute, emote, leave, search, background }
 
 class ChatSettingsPopupMenu extends StatefulWidget {
   final Room room;
@@ -93,6 +94,9 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
               case ChatPopupMenuActions.details:
                 _showChatDetails();
                 break;
+              case ChatPopupMenuActions.background:
+                await showChatBackgroundRoomSheet(context, widget.room);
+                break;
               case ChatPopupMenuActions.search:
                 context.go('/rooms/${widget.room.id}/search');
                 break;
@@ -132,6 +136,16 @@ class ChatSettingsPopupMenuState extends State<ChatSettingsPopupMenu> {
                   ],
                 ),
               ),
+            PopupMenuItem<ChatPopupMenuActions>(
+              value: ChatPopupMenuActions.background,
+              child: Row(
+                children: [
+                  const Icon(Icons.wallpaper_outlined),
+                  const SizedBox(width: 12),
+                  const Text('Chatachtergrond'),
+                ],
+              ),
+            ),
             PopupMenuItem<ChatPopupMenuActions>(
               value: ChatPopupMenuActions.search,
               child: Row(

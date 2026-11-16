@@ -34,17 +34,13 @@ dependencies {
 
 android {
     namespace = "com.danield.plusly.app"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = "27.0.12077973"  // NDK r27 — 16KB page size aligned
+    compileSdk = 37
+    ndkVersion = "27.0.12077973"  // NDK r27 — 16KB page size; wat CI ook gebruikt
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     val keystoreProperties = Properties()
@@ -79,8 +75,12 @@ android {
             if (signingConfigs.findByName("release") != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            isMinifyEnabled = true
-            isShrinkResources = true
+            // R8 (AGP 9, full mode) loopt hier op geheugen vol — de release
+            // faalt op deze dependency-graph met OutOfMemoryError, ook met
+            // 8 GB heap en -dontoptimize/-dontobfuscate. Daarom geen minify
+            // tot R8 hier beter mee omgaat of de graph slanker is.
+            isMinifyEnabled = false
+            isShrinkResources = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -120,6 +120,12 @@ android {
         abi {
             enableSplit = false
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
 

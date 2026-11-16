@@ -225,7 +225,7 @@ class _MessageBubbleState extends State<MessageBubble> {
       ),
     );
 
-    final bubbleColor = AppSettings.enableChatFrostedGlass.value && hasChatBackground() ? color.withValues(alpha: 0.7) : color;
+    final bubbleColor = AppSettings.enableChatFrostedGlass.value && hasChatBackground(widget.chatController?.room.id) ? color.withValues(alpha: 0.7) : color;
 
     // WhatsApp-vorm: een klein staartje onder de buitenste hoek van de
     // bubbel. De staart zit ACHTER de bubbel, zodat de bubbel zijn hoek
