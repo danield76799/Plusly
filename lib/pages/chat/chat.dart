@@ -527,7 +527,14 @@ class ChatController extends State<ChatPageWithRoom>
       if (item is TextShareItem) room.sendTextEvent(item.value);
       if (item is ContentShareItem) {
         final content = Map<String, Object?>.from(item.value);
-        content.remove('m.forwarded');
+        // WhatsApp-stijl: markeer doorgestuurde berichten zodat de ontvanger
+        // ziet dat het niet door de verzender zelf is getypt.
+        final me = room.client.userID;
+        if (me != null) {
+          content['m.forwarded'] = {'user_id': me};
+        }
+        // Een reply-relatie naar het originele bericht is hier ongeldig;
+        // die mag dus niet mee.
         content.remove('m.relates_to');
         room.sendEvent(content);
       }

@@ -1057,6 +1057,7 @@
   },
   "avatarBorderRadius": "Avatar border radius",
   "forward": "Forward",
+  "forwarded": "Forwarded",
   "@forward": {
     "type": "String",
     "placeholders": {}

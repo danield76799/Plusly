@@ -196,7 +196,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                   children: [
                     Icon(Icons.forward_outlined, size: 14, color: textColor.withValues(alpha: 0.7)),
                     const SizedBox(width: 4),
-                    Text(L10n.of(context).forward, style: TextStyle(fontSize: 12, color: textColor.withValues(alpha: 0.7), fontWeight: FontWeight.w500)),
+                    Text(L10n.of(context).forwarded, style: TextStyle(fontSize: 12, color: textColor.withValues(alpha: 0.7), fontWeight: FontWeight.w500)),
                   ],
                 ),
               ),

@@ -1056,6 +1056,7 @@
   },
   "avatarBorderRadius": "Avatar-hoekstraal",
   "forward": "Doorsturen",
+  "forwarded": "Doorgestuurd",
   "@forward": {
     "type": "String",
     "placeholders": {}
