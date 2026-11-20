@@ -25,6 +25,7 @@ import '../quick_reactions_overlay.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
 import 'package:collection/collection.dart';
+import 'forwarded_badge.dart';
 
 class MessageModern extends StatefulWidget {
   final Event event;
@@ -427,6 +428,7 @@ class _MessageModernState extends State<MessageModern> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
+                                  ForwardedBadge(event: event, textColor: theme.colorScheme.onSurface),
                                   if (_replyEventFuture != null)
                                     FutureBuilder<Event?>(
                                       future: _replyEventFuture,

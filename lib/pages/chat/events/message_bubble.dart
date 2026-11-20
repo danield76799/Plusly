@@ -9,7 +9,6 @@ import 'package:matrix/matrix.dart';
 
 import 'package:Pulsly/config/setting_keys.dart';
 import 'package:Pulsly/config/themes.dart';
-import 'package:Pulsly/generated/l10n/l10n.dart';
 import 'package:Pulsly/pages/chat/chat.dart';
 import 'package:Pulsly/pages/chat/events/bubble_tail.dart';
 import 'package:Pulsly/pages/chat/events/gallery_content.dart';
@@ -31,6 +30,7 @@ import '../../chat/swipe_to_reply.dart';
 import 'reply_content.dart';
 import 'state_message.dart';
 import '../../../widgets/chat_background.dart';
+import 'forwarded_badge.dart';
 
 class MessageBubble extends StatefulWidget {
   final Event event;
@@ -188,18 +188,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                   );
                 },
               ),
-            if (event.content.tryGetMap<String, Object?>('m.forwarded')?.tryGet<String>('user_id') != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 4),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.forward_outlined, size: 14, color: textColor.withValues(alpha: 0.7)),
-                    const SizedBox(width: 4),
-                    Text(L10n.of(context).forwarded, style: TextStyle(fontSize: 12, color: textColor.withValues(alpha: 0.7), fontWeight: FontWeight.w500)),
-                  ],
-                ),
-              ),
+            ForwardedBadge(event: event, textColor: textColor),
             Padding(
               padding: const EdgeInsets.only(top: 0),
               child: MessageContent(

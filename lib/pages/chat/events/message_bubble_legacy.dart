@@ -30,6 +30,7 @@ import 'reply_content.dart';
 import 'state_message.dart';
 import 'package:collection/collection.dart';
 import '../../../widgets/chat_background.dart';
+import 'forwarded_badge.dart';
 
 class MessageBubbleLegacy extends StatefulWidget {
   final Event event;
@@ -650,6 +651,7 @@ class _MessageBubbleLegacyState extends State<MessageBubbleLegacy> {
                                               ? CrossAxisAlignment.end
                                               : CrossAxisAlignment.start,
                                           children: [
+                                            ForwardedBadge(event: event, textColor: textColor),
                                             if (_replyEventFuture != null)
                                               FutureBuilder<Event?>(
                                                 future: _replyEventFuture,
