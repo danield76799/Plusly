@@ -160,7 +160,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     final bubbleInner = Container(
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppConfig.borderRadius)),
       constraints: BoxConstraints(
-        maxWidth: galleryBubbleWidth ?? (hasReply ? _calculateMediaWidth(displayEvent) : null) ?? MediaQuery.sizeOf(context).width * 0.75,
+        maxWidth: galleryBubbleWidth ?? (hasReply ? _calculateMediaWidth(displayEvent) : null) ?? MediaQuery.sizeOf(context).width * 0.78,
       ),
       child: IntrinsicWidth(
         child: Column(
@@ -286,30 +286,43 @@ class _MessageBubbleState extends State<MessageBubble> {
     //
     // In de omgekeerde lijst is `previousEvent` het bericht erONDER (nieuwer)
     // en `nextEvent` het bericht erBOVEN (ouder).
-    final previousEventSameSender = widget.previousEvent != null &&
-        {EventTypes.Message, EventTypes.Sticker, EventTypes.Encrypted, PollEvents.pollStart}.contains(widget.previousEvent!.type) &&
-        widget.previousEvent!.senderId == event.senderId &&
-        widget.previousEvent!.originServerTs.sameEnvironment(event.originServerTs);
+    // Een groep breekt bij een andere afzender, een andere dag of een gat
+    // van meer dan vijf minuten.
+    const groepVenster = Duration(minutes: 5);
+    bool zelfdeGroep(Event? ander) {
+      if (ander == null) return false;
+      if (!{EventTypes.Message, EventTypes.Sticker, EventTypes.Encrypted, PollEvents.pollStart}
+          .contains(ander.type)) {
+        return false;
+      }
+      if (ander.senderId != event.senderId) return false;
+      if (!ander.originServerTs.sameEnvironment(event.originServerTs)) {
+        return false;
+      }
+      return ander.originServerTs
+              .difference(event.originServerTs)
+              .abs() <
+          groepVenster;
+    }
 
-    final nextEventSameSender = widget.nextEvent != null &&
-        {EventTypes.Message, EventTypes.Sticker, EventTypes.Encrypted, PollEvents.pollStart}.contains(widget.nextEvent!.type) &&
-        widget.nextEvent!.senderId == event.senderId &&
-        widget.nextEvent!.originServerTs.sameEnvironment(event.originServerTs);
+    final previousEventSameSender = zelfdeGroep(widget.previousEvent);
+    final nextEventSameSender = zelfdeGroep(widget.nextEvent);
 
     final rowMainAxisAlignment = ownMessage ? MainAxisAlignment.end : MainAxisAlignment.start;
-    final showTimestamp = widget.previousEvent == null || !previousEventSameSender ||
-        widget.previousEvent!.originServerTs.difference(event.originServerTs).abs().inMinutes >= 1;
+    // Alleen het onderste bericht van een groep toont tijd en vinkjes.
+    final showTimestamp = widget.previousEvent == null || !previousEventSameSender;
 
     final inReplyTo = event.inReplyToEventId(includingFallback: false);
     final hasReply = inReplyTo != null;
     final replyEvent = hasReply ? timeline.events.firstWhereOrNull((e) => e.eventId == inReplyTo) : null;
     
     const roundedCorner = Radius.circular(AppConfig.bubbleRadius);
+    const innerCorner = Radius.circular(AppConfig.bubbleInnerRadius);
     final borderRadius = BorderRadius.only(
-      topLeft: nextEventSameSender ? Radius.zero : roundedCorner,
-      topRight: nextEventSameSender ? Radius.zero : roundedCorner,
-      bottomLeft: previousEventSameSender ? Radius.zero : roundedCorner,
-      bottomRight: previousEventSameSender ? Radius.zero : roundedCorner,
+      topLeft: nextEventSameSender ? innerCorner : roundedCorner,
+      topRight: nextEventSameSender ? innerCorner : roundedCorner,
+      bottomLeft: previousEventSameSender ? innerCorner : roundedCorner,
+      bottomRight: previousEventSameSender ? innerCorner : roundedCorner,
     );
 
     final noBubble = ({MessageTypes.Video, MessageTypes.Image, MessageTypes.Sticker}.contains(event.messageType) &&
@@ -390,7 +403,7 @@ class _MessageBubbleState extends State<MessageBubble> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (!previousEventSameSender && !ownMessage && !isOneOnOne)
+                      if (!nextEventSameSender && !ownMessage && !isOneOnOne)
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0, bottom: 4),
                           child: Text(

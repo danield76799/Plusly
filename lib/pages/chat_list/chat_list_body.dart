@@ -343,18 +343,41 @@ class ChatListViewBody extends StatelessWidget {
                       }
                       final room = rooms[i];
                       final space = spaceDelegateCandidates[room.id];
-                      return ChatListItem(
-                        room,
-                        space: space,
-                        key: Key('chat_list_item_${room.id}'),
-                        filter: filter,
-                        onTap: () => controller.onChatTap(room),
-                        onLongPress: (context) =>
-                            controller.chatContextAction(room, context, space),
-                        activeChat: controller.activeChat == room.id,
-                        firstElement: i == 0,
-                        lastElement: rooms.length - 1 == i,
-                        compactMode: AppSettings.chatListCompactMode.value,
+                      final compact =
+                          AppSettings.chatListCompactMode.value;
+                      // Vastgepinde chats staan bovenaan (sortering in de
+                      // controller). Toon één sectiekop per groep.
+                      final isPinned = room.isFavourite;
+                      final vorigeWasPinned =
+                          i > 0 && rooms[i - 1].isFavourite;
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!compact && isPinned && i == 0)
+                            _ChatListSectionHeader(
+                              label: L10n.of(context).pinned,
+                            ),
+                          if (!compact &&
+                              !isPinned &&
+                              (i == 0 || vorigeWasPinned))
+                            _ChatListSectionHeader(
+                              label: L10n.of(context).recent,
+                            ),
+                          ChatListItem(
+                            room,
+                            space: space,
+                            key: Key('chat_list_item_${room.id}'),
+                            filter: filter,
+                            onTap: () => controller.onChatTap(room),
+                            onLongPress: (context) => controller
+                                .chatContextAction(room, context, space),
+                            activeChat: controller.activeChat == room.id,
+                            firstElement: i == 0,
+                            lastElement: rooms.length - 1 == i,
+                            compactMode: compact,
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -449,4 +472,32 @@ class _SearchItem extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// Kleine sectiekop boven de vastgepinde en recente chats.
+class _ChatListSectionHeader extends StatelessWidget {
+  final String label;
+
+  const _ChatListSectionHeader({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 6),
+      child: Semantics(
+        header: true,
+        child: Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 11,
+            height: 1.2,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.1,
+            color: theme.colorScheme.outline,
+          ),
+        ),
+      ),
+    );
+  }
 }

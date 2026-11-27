@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
-import 'package:Pulsly/config/themes.dart';
+import 'package:Pulsly/generated/l10n/l10n.dart';
+
 
 class UnreadBubble extends StatelessWidget {
   final Room room;
@@ -12,44 +13,47 @@ class UnreadBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final unread = unreadOverride ?? room.isUnread;
-    final hasNotifications = (countOverride ?? room.notificationCount) > 0;
-    final unreadBubbleSize = unread || room.hasNewMessages
-        ? (countOverride ?? room.notificationCount) > 0
-              ? 20.0
-              : 14.0
-        : 0.0;
-    return AnimatedContainer(
-      duration: FluffyThemes.animationDuration,
-      curve: FluffyThemes.animationCurve,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 7),
-      height: unreadBubbleSize,
-      width: !hasNotifications && !unread && !room.hasNewMessages
-          ? 0
-          : (unreadBubbleSize - 9) * (countOverride ?? room.notificationCount).toString().length +
-                9,
-      decoration: BoxDecoration(
-        color: room.highlightCount > 0
-            ? const Color(0xFFFF4444) // Red for highlights (mentions)
-            : hasNotifications || room.markedUnread
-            ? Theme.of(context).whatsAppBadgeColor // WhatsApp-groen
-            : Theme.of(
-                context,
-              ).whatsAppBadgeColor.withValues(alpha: 0.5), // Licht groen
-        borderRadius: BorderRadius.circular(7),
+    final count = countOverride ?? room.notificationCount;
+    final heeftAantal = count > 0;
+    final actief = unread || room.hasNewMessages || room.markedUnread;
+    if (!actief) return const SizedBox.shrink();
+
+    final kleur = room.highlightCount > 0
+        ? theme.colorScheme.error
+        : theme.colorScheme.primary;
+    final tekst = count > 99 ? '99+' : '$count';
+
+    return Semantics(
+      label: heeftAantal
+          ? L10n.of(context).unreadMessages(count)
+          : L10n.of(context).unread,
+      child: Container(
+        height: 22,
+        constraints: const BoxConstraints(minWidth: 22),
+        padding: heeftAantal
+            ? const EdgeInsets.symmetric(horizontal: 7)
+            : EdgeInsets.zero,
+        width: heeftAantal ? null : 12,
+        decoration: BoxDecoration(
+          color: kleur,
+          borderRadius: BorderRadius.circular(11),
+        ),
+        alignment: Alignment.center,
+        child: heeftAantal
+            ? Text(
+                tekst,
+                style: TextStyle(
+                  color: theme.colorScheme.onPrimary,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  height: 1.0,
+                ),
+                textAlign: TextAlign.center,
+              )
+            : null,
       ),
-      child: hasNotifications
-          ? Text(
-              (countOverride ?? room.notificationCount).toString(),
-              style: TextStyle(
-                color: Colors.white, // Always white text on red badges
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-              textAlign: TextAlign.center,
-            )
-          : const SizedBox.shrink(),
     );
   }
 }

@@ -9,7 +9,7 @@ import 'chat.dart';
 import 'events/reply_content.dart';
 
 class ReplyDisplay extends StatelessWidget {
-  static const double height = 56.0;
+  static const double height = 48.0;
 
   final ChatController controller;
   const ReplyDisplay(this.controller, {super.key});

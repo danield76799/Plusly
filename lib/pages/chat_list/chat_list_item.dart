@@ -11,7 +11,6 @@ import 'package:Pulsly/widgets/future_loading_dialog.dart';
 import 'package:Pulsly/widgets/hover_builder.dart';
 import 'package:Pulsly/utils/bridge_utils.dart';
 import 'package:Pulsly/config/themes.dart';
-import 'package:Pulsly/config/app_config.dart';
 import 'package:Pulsly/widgets/matrix.dart';
 import '../../utils/date_time_extension.dart';
 import '../../widgets/avatar.dart';
@@ -86,9 +85,15 @@ class ChatListItem extends StatelessWidget {
     final isDirectChat = directChatMatrixId != null;
     // Het netwerk waar deze chat vandaan komt (null = gewone Matrix-chat).
     final bridgeType = getBridgeType(room);
+    final isUnread = unread || room.hasNewMessages;
+    // Hiërarchie: actief > ongelezen > gewoon. Gemute chats blijven bewust
+    // vlak; ze krijgen demping via tekstkleur en het bel-icoon.
+    final accent = theme.colorScheme.primary;
     final backgroundColor = activeChat
-        ? theme.colorScheme.secondaryContainer
-        : Colors.transparent;
+        ? accent.withValues(alpha: 0.16)
+        : isUnread
+            ? accent.withValues(alpha: 0.07)
+            : Colors.transparent;
     final displayname = room.getLocalizedDisplayname(
     MatrixLocals(L10n.of(context)),
   );
@@ -103,7 +108,7 @@ class ChatListItem extends StatelessWidget {
         ? false
         : room.getState(EventTypes.RoomMember, lastEvent.senderId) == null;
 
-    final borderRadius = BorderRadius.circular(AppConfig.borderRadius);
+    final borderRadius = BorderRadius.circular(14.0);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
@@ -111,12 +116,17 @@ class ChatListItem extends StatelessWidget {
         borderRadius: borderRadius,
         clipBehavior: Clip.hardEdge,
         color: noBackgroundColor ? null : backgroundColor,
-        child: FutureBuilder(
+        child: Stack(
+          children: [
+            FutureBuilder(
           future: room.name.isEmpty ? room.loadHeroUsers() : null,
           builder: (context, _) => HoverBuilder(
             builder: (context, listTileHovered) => ListTile(
-              visualDensity: VisualDensity(vertical: compactMode ? -2.0 : -0.5),
-              contentPadding: EdgeInsets.symmetric(horizontal: compactMode ? 3 : 8),
+              visualDensity: VisualDensity.standard,
+              minVerticalPadding: compactMode ? 4 : 10,
+              minLeadingWidth: compactMode ? 30 : 50,
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: compactMode ? 10 : 14),
               onLongPress: () => onLongPress?.call(context),
               leading: HoverBuilder(
                 builder: (context, hovered) => AnimatedScale(
@@ -128,7 +138,7 @@ class ChatListItem extends StatelessWidget {
                     children: [
                       Avatar(
                         mxContent: room.avatar,
-                        size: compactMode ? 28.0 : Avatar.defaultSize,
+                        size: compactMode ? 30.0 : 50.0,
                         name: cleanDisplayname,
                         presenceUserId: directChatMatrixId,
                         presenceBackgroundColor: backgroundColor,
@@ -172,9 +182,15 @@ class ChatListItem extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             softWrap: false,
                             style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: compactMode ? 13 : 14,
-                              color: theme.colorScheme.onSurface,
+                              fontWeight: isUnread
+                                  ? FontWeight.w700
+                                  : isMuted
+                                      ? FontWeight.w500
+                                      : FontWeight.w600,
+                              fontSize: compactMode ? 13 : 15.5,
+                              color: isMuted
+                                  ? theme.colorScheme.onSurfaceVariant
+                                  : theme.colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -236,10 +252,13 @@ class ChatListItem extends StatelessWidget {
                                 overflow: TextOverflow.clip,
                                 textWidthBasis: TextWidthBasis.parent,
                                 style: TextStyle(
-                                  fontSize: compactMode ? 11 : 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: theme.colorScheme.onSurface
-                                      .withValues(alpha: 0.6),
+                                  fontSize: compactMode ? 11 : 12,
+                                  fontWeight: isUnread
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
+                                  color: isUnread
+                                      ? theme.colorScheme.primary
+                                      : theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -367,9 +386,14 @@ class ChatListItem extends StatelessWidget {
                                           : 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
+                                        fontSize: compactMode ? 12.5 : 13.5,
                                         color: unread || room.hasNewMessages
                                             ? theme.colorScheme.onSurface
-                                            : theme.colorScheme.outline,
+                                                .withValues(alpha: 0.9)
+                                            : isMuted
+                                                ? theme.colorScheme.outline
+                                                : theme.colorScheme
+                                                    .onSurfaceVariant,
                                         decoration:
                                             room.lastEvent?.redacted == true
                                             ? TextDecoration.lineThrough
@@ -413,7 +437,24 @@ class ChatListItem extends StatelessWidget {
                       onPressed: onForget,
                     ),
             ),
-          ),
+            ),
+            ),
+            if (activeChat)
+              Positioned(
+                left: 0,
+                top: 12,
+                bottom: 12,
+                child: Container(
+                  width: 3,
+                  decoration: BoxDecoration(
+                    color: accent,
+                    borderRadius: const BorderRadius.horizontal(
+                      right: Radius.circular(3),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

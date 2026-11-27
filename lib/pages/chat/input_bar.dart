@@ -524,9 +524,9 @@ class _InputBarState extends State<InputBar> {
           spellCheckConfiguration: const SpellCheckConfiguration(),
           // Larger, readable input text that matches the chat bubble text
           // size so typing feels consistent with the conversation.
-          style: TextStyle(
-            fontSize: 15,
-            height: 1.2,
+          style: const TextStyle(
+            fontSize: 14.5,
+            height: 1.35,
           ),
           inputFormatters: [
             LengthLimitingTextInputFormatter((maxPDUSize / 3).floor()),

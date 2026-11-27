@@ -1664,7 +1664,7 @@
     "type": "String",
     "placeholders": {}
   },
-  "pinned": "Vastgemaakt",
+  "pinned": "Vastgepind",
   "@pinned": {
     "type": "String",
     "placeholders": {}
@@ -4252,5 +4252,6 @@
     }
   },
   "whatsAppGreenBubble": "WhatsApp-groene bubbel",
-  "whatsAppGreenBubbleDescription": "Gebruik WhatsApp-groen voor je eigen berichten"
+  "whatsAppGreenBubbleDescription": "Gebruik WhatsApp-groen voor je eigen berichten",
+  "recent": "Recent"
 }

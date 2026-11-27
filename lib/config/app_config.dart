@@ -76,7 +76,10 @@ abstract class AppConfig {
   /// de app (kaarten, dialogen) juist rond is (20 dp). Door de bubbelradius
   /// apart te houden kan de bubbel strakker worden zonder dat de hele app
   /// meeverandert.
-  static const double bubbleRadius = 10.0;
+  static const double bubbleRadius = 18.0;
+
+  /// Binnenhoek van twee bubbels in dezelfde groep.
+  static const double bubbleInnerRadius = 6.0;
 
   static const double columnWidth = 360.0;
   static final Uri homeserverList = Uri(

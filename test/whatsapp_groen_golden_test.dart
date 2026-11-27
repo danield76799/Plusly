@@ -1,5 +1,5 @@
 // Golden-test voor de WhatsApp-look van de eigen bubbel (groen) en de
-// strakkere hoekradius (10 i.p.v. 20).
+// hoekradius 18 (binnenhoek 6 bij groepering).
 //
 //   flutter test --update-goldens test/whatsapp_groen_golden_test.dart
 
@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:Pulsly/config/app_config.dart';
 
 void main() {
-  testWidgets('whatsapp-groen + radius 10', (tester) async {
+  testWidgets('whatsapp-groen + radius 18', (tester) async {
     const surface = Color(0xFF0B141A); // donker, zodat de bubbels afsteken
     const incoming = Color(0xFF202C33);
     const whatsAppGreen = Color(0xFF005C4B);

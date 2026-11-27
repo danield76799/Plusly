@@ -4253,5 +4253,6 @@
     }
   },
   "whatsAppGreenBubble": "WhatsApp green bubble",
-  "whatsAppGreenBubbleDescription": "Use WhatsApp green for your own messages"
+  "whatsAppGreenBubbleDescription": "Use WhatsApp green for your own messages",
+  "recent": "Recent"
 }

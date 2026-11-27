@@ -18,11 +18,12 @@ void main() {
     // zijden die aan het blok grenzen.
     Widget bubble(String text, {required bool sameAbove, required bool sameBelow, required bool tail}) {
       const r = Radius.circular(AppConfig.bubbleRadius);
+      const inner = Radius.circular(AppConfig.bubbleInnerRadius);
       final radius = BorderRadius.only(
-        topLeft: sameAbove ? Radius.zero : r,
-        topRight: sameAbove ? Radius.zero : r,
-        bottomLeft: sameBelow ? Radius.zero : r,
-        bottomRight: sameBelow ? Radius.zero : r,
+        topLeft: sameAbove ? inner : r,
+        topRight: sameAbove ? inner : r,
+        bottomLeft: sameBelow ? inner : r,
+        bottomRight: sameBelow ? inner : r,
       );
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 1),
