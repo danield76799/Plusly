@@ -80,13 +80,20 @@ class PluslyApp extends StatefulWidget {
   State<PluslyApp> createState() => _PluslyAppState();
 }
 
-class _PluslyAppState extends State<PluslyApp> {
+class _PluslyAppState extends State<PluslyApp> with WidgetsBindingObserver {
   // final _androidSystemFontPlugin = AndroidSystemFont(); // DISABLED
   Timer? _updateCheckTimer;
+  bool? _landschap;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    final eersteView = WidgetsBinding.instance.platformDispatcher.views.first;
+    if (!eersteView.physicalSize.isEmpty) {
+      _landschap =
+          eersteView.physicalSize.width > eersteView.physicalSize.height;
+    }
     initPlatformState();
     // First-launch setup: ask for notification + battery permissions.
     // Delay so the router/navigator context exists for showing dialogs.
@@ -119,7 +126,23 @@ class _PluslyAppState extends State<PluslyApp> {
   }
 
   @override
+  void didChangeMetrics() {
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    final size = view.physicalSize;
+    if (size.isEmpty) return;
+    final landschap = size.width > size.height;
+    if (_landschap != null && landschap != _landschap) {
+      // Sluit het toetsenbord bij rotatie. Anders kan Android een oude
+      // IME-inset houden, waardoor de Flutter-view tot een korte strook
+      // krimpt en de rest van het scherm zwart blijft.
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
+    _landschap = landschap;
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _updateCheckTimer?.cancel();
     super.dispose();
   }

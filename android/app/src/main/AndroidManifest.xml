@@ -74,6 +74,13 @@
             android:windowSoftInputMode="adjustResize"
             android:exported="true"
             android:taskAffinity="">
+            <!-- Zonder deze meta-data blijft de activity op LaunchTheme
+                 (windowFullscreen) staan. Op Android 15/16 levert dat na
+                 rotatie een verkeerd gemeten Flutter-view op: de UI krimpt
+                 tot een strook bovenin met zwart eronder. -->
+            <meta-data
+                android:name="io.flutter.embedding.android.NormalTheme"
+                android:resource="@style/NormalTheme" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
