@@ -218,6 +218,23 @@ class IntroPage extends StatelessWidget {
                                     L10n.of(context).loginWithMatrixId,
                                   ),
                                 ),
+                                const SizedBox(height: 8),
+                                OutlinedButton.icon(
+                                  onPressed: () => context.push('/demo'),
+                                  icon: const Icon(Icons.play_circle_outline),
+                                  label: Text(L10n.of(context).viewDemo),
+                                  style: OutlinedButton.styleFrom(
+                                    minimumSize: const Size(
+                                      double.infinity,
+                                      52,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        AppConfig.borderRadius,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),

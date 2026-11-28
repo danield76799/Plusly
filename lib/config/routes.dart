@@ -20,6 +20,7 @@ import 'package:Pulsly/pages/chat_search/chat_search_page.dart';
 import 'package:Pulsly/pages/chat_thread/thread.dart';
 import 'package:Pulsly/pages/chat_threads/chat_threads.dart';
 import 'package:Pulsly/pages/chat_widgets/chat_widgets.dart';
+import 'package:Pulsly/pages/demo/demo_page.dart';
 import 'package:Pulsly/pages/device_settings/device_settings.dart';
 import 'package:Pulsly/pages/explore_rooms/explore_rooms.dart';
 import 'package:Pulsly/pages/intro/intro_page.dart';
@@ -82,6 +83,11 @@ abstract class AppRoutes {
               Matrix.of(context).client.isLogged()
           ? '/rooms'
           : '/home',
+    ),
+    GoRoute(
+      path: '/demo',
+      pageBuilder: (context, state) =>
+          defaultPageBuilder(context, state, const DemoPage()),
     ),
     GoRoute(
       path: '/home',

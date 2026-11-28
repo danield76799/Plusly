@@ -4254,5 +4254,9 @@
   },
   "whatsAppGreenBubble": "WhatsApp green bubble",
   "whatsAppGreenBubbleDescription": "Use WhatsApp green for your own messages",
-  "recent": "Recent"
+  "recent": "Recent",
+  "viewDemo": "View demo",
+  "demoMode": "Plusly demo",
+  "demoNotice": "You are viewing a demo. Messages are not sent.",
+  "demoChatNotice": "Demo mode: messages stay on this device."
 }

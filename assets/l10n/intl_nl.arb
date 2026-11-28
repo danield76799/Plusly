@@ -4253,5 +4253,9 @@
   },
   "whatsAppGreenBubble": "WhatsApp-groene bubbel",
   "whatsAppGreenBubbleDescription": "Gebruik WhatsApp-groen voor je eigen berichten",
-  "recent": "Recent"
+  "recent": "Recent",
+  "viewDemo": "Bekijk demo",
+  "demoMode": "Plusly-demo",
+  "demoNotice": "Je bekijkt een demo. Berichten worden niet verzonden.",
+  "demoChatNotice": "Demo-modus: berichten blijven op dit toestel."
 }
