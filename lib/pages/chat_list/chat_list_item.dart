@@ -123,7 +123,7 @@ class ChatListItem extends StatelessWidget {
           builder: (context, _) => HoverBuilder(
             builder: (context, listTileHovered) => ListTile(
               visualDensity: VisualDensity.standard,
-              minVerticalPadding: compactMode ? 4 : 10,
+              minVerticalPadding: compactMode ? 4 : 9,
               minLeadingWidth: compactMode ? 30 : 50,
               contentPadding:
                   EdgeInsets.symmetric(horizontal: compactMode ? 10 : 14),
@@ -138,7 +138,7 @@ class ChatListItem extends StatelessWidget {
                     children: [
                       Avatar(
                         mxContent: room.avatar,
-                        size: compactMode ? 30.0 : 50.0,
+                        size: compactMode ? 30.0 : 49.0,
                         name: cleanDisplayname,
                         presenceUserId: directChatMatrixId,
                         presenceBackgroundColor: backgroundColor,

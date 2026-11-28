@@ -52,7 +52,7 @@ class ChatAppBarTitle extends StatelessWidget {
         return ClockText(
           fontSize: compact ? 11 : 13,
           fontWeight: FontWeight.w600,
-          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          color: Colors.white.withValues(alpha: 0.75),
         );
       },
     );
@@ -105,7 +105,7 @@ class ChatAppBarTitle extends StatelessWidget {
                               name: room.getLocalizedDisplayname(
                                 MatrixLocals(L10n.of(context)),
                               ),
-                              size: 28,
+                              size: 40,
                             )
                           : Icon(
                               Icons.chat_bubble_outline,
@@ -124,7 +124,7 @@ class ChatAppBarTitle extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
@@ -142,7 +142,7 @@ class ChatAppBarTitle extends StatelessWidget {
                           name: room.getLocalizedDisplayname(
                             MatrixLocals(L10n.of(context)),
                           ),
-                          size: 32,
+                          size: 40,
                         )
                       : Icon(
                           Icons.chat_bubble_outline,
@@ -163,7 +163,7 @@ class ChatAppBarTitle extends StatelessWidget {
                             : '${controller.thread!.rootEvent.senderFromMemoryOrFallback.displayName ?? controller.thread!.rootEvent.senderId}: ${controller.thread!.rootEvent.text}',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                       _buildStatusLine(context, compact: false),
                     ],

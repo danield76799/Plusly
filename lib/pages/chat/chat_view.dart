@@ -445,8 +445,9 @@ class ChatView extends StatelessWidget {
               extendBodyBehindAppBar: AppSettings.enableChatFrostedGlass.value,
               appBar: AppBar(
                 backgroundColor: AppSettings.enableChatFrostedGlass.value
-                    ? Colors.transparent
-                    : null,
+                    ? theme.chatHeaderColor.withValues(alpha: 0.85)
+                    : theme.chatHeaderColor,
+                foregroundColor: Colors.white,
                 elevation: AppSettings.enableChatFrostedGlass.value ? 0 : null,
                 scrolledUnderElevation: AppSettings.enableChatFrostedGlass.value
                     ? 0

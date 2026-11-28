@@ -78,18 +78,14 @@ class ChatListView extends StatelessWidget {
                       Positioned(
                         right: 16,
                         bottom: 16,
-                        child: FloatingActionButton.extended(
+                        child: FloatingActionButton(
                           onPressed: () =>
                               context.go('/rooms/newprivatechat'),
-                          icon: Icon(
-                            Icons.chat_outlined,
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
-                          label: Text(
-                            L10n.of(context).newChat,
-                            style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer),
-                          ),
-                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                          tooltip: L10n.of(context).newChat,
+                          backgroundColor:
+                              Theme.of(context).whatsAppBadgeColor,
+                          foregroundColor: const Color(0xFF0B141A),
+                          child: const Icon(Icons.edit_outlined),
                         ),
                       ),
                   ],

@@ -160,7 +160,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     final bubbleInner = Container(
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(AppConfig.borderRadius)),
       constraints: BoxConstraints(
-        maxWidth: galleryBubbleWidth ?? (hasReply ? _calculateMediaWidth(displayEvent) : null) ?? MediaQuery.sizeOf(context).width * 0.78,
+        maxWidth: galleryBubbleWidth ?? (hasReply ? _calculateMediaWidth(displayEvent) : null) ?? MediaQuery.sizeOf(context).width * 0.75,
       ),
       child: IntrinsicWidth(
         child: Column(

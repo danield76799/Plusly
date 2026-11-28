@@ -81,14 +81,33 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
         ? 1.0
         : (1.0 - (shrinkOffset / _searchBarHeight)).clamp(0.0, 1.0);
 
+    // WhatsApp-achtige kop: groen in licht, leigrijs in donker, met witte
+    // tekst en iconen. De rest van de app houdt het eigen thema.
+    final headerColor = theme.chatHeaderColor;
+    final headerTheme = theme.copyWith(
+      iconTheme: theme.iconTheme.copyWith(color: Colors.white),
+      textTheme: theme.textTheme.apply(
+        bodyColor: Colors.white,
+        displayColor: Colors.white,
+      ),
+      colorScheme: theme.colorScheme.copyWith(
+        onSurface: Colors.white,
+        onSurfaceVariant: Colors.white.withValues(alpha: 0.78),
+        primary: Colors.white,
+        primaryContainer: Colors.white.withValues(alpha: 0.18),
+        surface: headerColor,
+      ),
+    );
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Material(
       elevation: shrinkOffset > 0 ? 4 : 0,
-      surfaceTintColor: theme.colorScheme.surfaceTint,
-      color: theme.colorScheme.surface.withValues(alpha: 0.72),
-      child: Padding(
+      surfaceTintColor: Colors.transparent,
+      color: headerColor,
+      child: Theme(
+        data: headerTheme,
+        child: Padding(
         padding: EdgeInsets.only(top: topPadding),
         child: Column(
           children: [
@@ -308,9 +327,10 @@ class _ChatListHeaderDelegate extends SliverPersistentHeaderDelegate {
           ],
         ),
       ),
+        ),
+      ),
     ),
-  ),
-);
+  );
 }
 
 Widget _buildTabBar(BuildContext context, ThemeData theme) {

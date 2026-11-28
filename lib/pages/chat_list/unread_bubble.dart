@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:matrix/matrix.dart';
 
+import 'package:Pulsly/config/themes.dart';
 import 'package:Pulsly/generated/l10n/l10n.dart';
 
 
@@ -22,7 +23,7 @@ class UnreadBubble extends StatelessWidget {
 
     final kleur = room.highlightCount > 0
         ? theme.colorScheme.error
-        : theme.colorScheme.primary;
+        : theme.whatsAppBadgeColor;
     final tekst = count > 99 ? '99+' : '$count';
 
     return Semantics(
@@ -45,7 +46,7 @@ class UnreadBubble extends StatelessWidget {
             ? Text(
                 tekst,
                 style: TextStyle(
-                  color: theme.colorScheme.onPrimary,
+                  color: Colors.white,
                   fontSize: 11.5,
                   fontWeight: FontWeight.w700,
                   height: 1.0,

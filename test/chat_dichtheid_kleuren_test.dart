@@ -249,20 +249,16 @@ void main() {
       return (bubble: bubble, incoming: incoming, onBubble: onBubble);
     }
 
-    testWidgets('de donkere eigen bubbel volgt de seed-kleur', (tester) async {
+    testWidgets('de donkere eigen bubbel is WhatsApp-groen', (tester) async {
       final thee = await kleurenMetSeed(tester, const Color(0xFF49AFC2));
       final paars = await kleurenMetSeed(tester, const Color(0xFF9B7BD4));
 
+      // De eigen bubbel is bewust WhatsApp-groen en volgt de seed niet meer.
+      expect(thee.bubble, paars.bubble);
       expect(
-        thee.bubble != paars.bubble,
-        isTrue,
-        reason: 'de bubbel volgt de seed niet meer',
-      );
-      // De paarse bubbel moet paarsTint hebben, niet teal.
-      expect(
-        paars.bubble.b - paars.bubble.r,
-        greaterThan(0),
-        reason: 'de bubbel moet de tint van de seed dragen',
+        thee.bubble.g,
+        greaterThan(thee.bubble.r),
+        reason: 'de eigen bubbel moet groen zijn',
       );
     });
 

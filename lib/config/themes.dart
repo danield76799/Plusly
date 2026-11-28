@@ -171,7 +171,7 @@ extension BubbleColorTheme on ThemeData {
   /// light mode nog maar 4.29:1 — net onder de AA-norm voor kleine tekst.
   /// De containerkleur is bovendien WhatsApp-achtig: een bleke eigen
   /// bubbel op een neutrale achtergrond.
-  Color get bubbleColor => colorScheme.primaryContainer;
+  Color get bubbleColor => whatsAppBubbleColor;
 
   /// Tekst op de uitgaande bubbel: het bijbehorende "on"-color van het
   /// thema, dus altijd met de juiste contrastwaarde.
@@ -204,8 +204,13 @@ extension BubbleColorTheme on ThemeData {
   /// volgt de bubbel het thema én blijft hij neutraal, zodat de eigen
   /// bubbel de kleur draagt.
   Color get incomingBubbleColor => brightness == Brightness.light
-      ? colorScheme.surfaceContainerHighest
-      : colorScheme.surfaceContainerHigh;
+      ? const Color(0xFFFFFFFF)
+      : const Color(0xFF202C33);
+
+  /// WhatsApp-achtige kop: donkergroen in licht, leigrijs in donker.
+  Color get chatHeaderColor => brightness == Brightness.light
+      ? const Color(0xFF008069)
+      : const Color(0xFF1F2C34);
 
   /// WhatsApp-style read-receipt blue for the double tick on own messages.
   ///
